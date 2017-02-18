@@ -95,8 +95,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   assert(fourcc == 'MTEX');
 
   {
-    char* lCurPos = reinterpret_cast<char*>(theFile.getPointer());
-    char* lEnd = lCurPos + size;
+    char const* lCurPos = reinterpret_cast<char const*>(theFile.getPointer());
+    char const* lEnd = lCurPos + size;
 
     while (lCurPos < lEnd)
     {
@@ -116,8 +116,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
     assert(fourcc == 'MMDX');
 
     {
-      char* lCurPos = reinterpret_cast<char*>(theFile.getPointer());
-      char* lEnd = lCurPos + size;
+      char const* lCurPos = reinterpret_cast<char const*>(theFile.getPointer());
+      char const* lEnd = lCurPos + size;
 
       while (lCurPos < lEnd)
       {
@@ -135,8 +135,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
     assert(fourcc == 'MWMO');
 
     {
-      char* lCurPos = reinterpret_cast<char*>(theFile.getPointer());
-      char* lEnd = lCurPos + size;
+      char const* lCurPos = reinterpret_cast<char const*>(theFile.getPointer());
+      char const* lEnd = lCurPos + size;
 
       while (lCurPos < lEnd)
       {
@@ -153,7 +153,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
     assert(fourcc == 'MDDF');
 
-    ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(theFile.getPointer());
+    ENTRY_MDDF const* mddf_ptr = reinterpret_cast<ENTRY_MDDF const*>(theFile.getPointer());
     for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
     {
       lModelInstances.push_back(mddf_ptr[i]);
@@ -167,7 +167,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
     assert(fourcc == 'MODF');
 
-    ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(theFile.getPointer());
+    ENTRY_MODF const* modf_ptr = reinterpret_cast<ENTRY_MODF const*>(theFile.getPointer());
     for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
     {
       lWMOInstances.push_back(modf_ptr[i]);

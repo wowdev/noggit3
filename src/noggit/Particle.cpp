@@ -69,9 +69,9 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
   math::vector_3d colors2[3];
   memcpy(colors2, f.getBuffer() + mta.p.colors.ofsKeys, sizeof(math::vector_3d) * 3);
   for (size_t i = 0; i<3; ++i) {
-    float opacity = *reinterpret_cast<int16_t*>(f.getBuffer() + mta.p.opacity.ofsKeys + i * 2);
+    float opacity = *reinterpret_cast<int16_t const*>(f.getBuffer() + mta.p.opacity.ofsKeys + i * 2);
     colors[i] = math::vector_4d(colors2[i].x / 255.0f, colors2[i].y / 255.0f, colors2[i].z / 255.0f, opacity / 32767.0f);
-    sizes[i] = (*reinterpret_cast<float*>(f.getBuffer() + mta.p.sizes.ofsKeys + i * 4))*mta.p.scales[i];
+    sizes[i] = (*reinterpret_cast<float const*>(f.getBuffer() + mta.p.sizes.ofsKeys + i * 4))*mta.p.scales[i];
   }
 
   //transform = mta.flags & 1024;
@@ -824,7 +824,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   return p;
 }
 
-RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals)
+RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals)
   : model (model_)
   , color (mta.color, f, globals)
   , opacity (mta.opacity, f, globals)
@@ -832,7 +832,7 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
   , below (mta.below, f, globals)
   , parent (&model->bones[mta.bone])
    // just use the first texture for now; most models I've checked only had one
-  , _texture (model->_textures[*reinterpret_cast<uint32_t*> (f.getBuffer() + mta.ofsTextures)])
+  , _texture (model->_textures[*reinterpret_cast<uint32_t const*> (f.getBuffer() + mta.ofsTextures)])
   , tpos (fixCoordSystem(mta.pos))
   , pos (fixCoordSystem(mta.pos))
    //! \todo  figure out actual correct way to calculate length

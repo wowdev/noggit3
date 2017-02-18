@@ -73,9 +73,9 @@ void WMO::finishLoading ()
 
   float ff[3];
 
-  char *texbuf = nullptr;
-  char *ddnames = nullptr;
-  char *groupnames = nullptr;
+  char* texbuf = nullptr;
+  char const* ddnames = nullptr;
+  char const* groupnames = nullptr;
 
   // - MVER ----------------------------------------------
 
@@ -146,7 +146,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOGN');
 
-  groupnames = reinterpret_cast<char*> (f.getPointer ());
+  groupnames = reinterpret_cast<char const*> (f.getPointer ());
 
   f.seekRelative (size);
 
@@ -170,7 +170,7 @@ void WMO::finishLoading ()
 
   if (size > 4)
   {
-    std::string path = std::string (reinterpret_cast<char*>(f.getPointer ()));
+    std::string path = std::string (reinterpret_cast<char const*>(f.getPointer ()));
     if (path.length ())
     {
       LogDebug << "SKYBOX:" << std::endl;
@@ -269,7 +269,7 @@ void WMO::finishLoading ()
 
   if (size)
   {
-    ddnames = reinterpret_cast<char*> (f.getPointer ());
+    ddnames = reinterpret_cast<char const*> (f.getPointer ());
     f.seekRelative (size);
   }
 
@@ -532,7 +532,7 @@ void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d lcol)
 
 
 
-WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char *names)
+WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
   : wmo(_wmo)
   , num(_num)
 {
@@ -699,7 +699,7 @@ void WMOGroup::load()
   hascv = false;
 
   int nLR = 0;
-  uint16_t *useLights = nullptr;
+  uint16_t const* useLights = nullptr;
 
   // - MVER ----------------------------------------------
 
@@ -758,7 +758,7 @@ void WMOGroup::load()
   assert (fourcc == 'MOVT');
 
   // let's hope it's padded to 12 bytes, not 16...
-  ::math::vector_3d *vertices = reinterpret_cast< ::math::vector_3d*>(f.getPointer ());
+  ::math::vector_3d const* vertices = reinterpret_cast< ::math::vector_3d const*>(f.getPointer ());
 
   VertexBoxMin = ::math::vector_3d (9999999.0f, 9999999.0f, 9999999.0f);
   VertexBoxMax = ::math::vector_3d (-9999999.0f, -9999999.0f, -9999999.0f);
@@ -824,7 +824,7 @@ void WMOGroup::load()
     assert (fourcc == 'MOLR');
 
     nLR = size / 2;
-    useLights = reinterpret_cast<uint16_t*>(f.getPointer ());
+    useLights = reinterpret_cast<uint16_t const*>(f.getPointer ());
 
     f.seekRelative (size);
   }
@@ -910,7 +910,7 @@ void WMOGroup::load()
 
     hascv = true;
 
-    uint32_t* colors = reinterpret_cast<uint32_t*> (f.getPointer ());
+    uint32_t const* colors = reinterpret_cast<uint32_t const*> (f.getPointer ());
     _vertex_colors.resize (size / sizeof (uint32_t));
 
     for(size_t i (0); i < size / sizeof (uint32_t); ++i)

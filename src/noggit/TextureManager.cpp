@@ -55,14 +55,15 @@ struct BLPHeader
 #include <boost/thread.hpp>
 #include <noggit/MPQ.h>
 
-void blp_texture::loadFromUncompressedData(BLPHeader* lHeader, char* lData)
+void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const* lData)
 {
-  unsigned int * pal = reinterpret_cast<unsigned int*>(lData + sizeof(BLPHeader));
+  unsigned int const* pal = reinterpret_cast<unsigned int const*>(lData + sizeof(BLPHeader));
 
-  unsigned char *buf;
+  unsigned char const* buf;
   unsigned int *buf2 = new unsigned int[_width*_height];
   unsigned int *p;
-  unsigned char *c, *a;
+  unsigned char const* c;
+  unsigned char const* a;
 
   int alphabits = lHeader->attr_1_alphadepth;
   bool hasalpha = alphabits != 0;
@@ -74,7 +75,7 @@ void blp_texture::loadFromUncompressedData(BLPHeader* lHeader, char* lData)
 
     if (lHeader->offsets[i] && lHeader->sizes[i])
     {
-      buf = reinterpret_cast<unsigned char*>(&lData[lHeader->offsets[i]]);
+      buf = reinterpret_cast<unsigned char const*>(&lData[lHeader->offsets[i]]);
 
       int cnt = 0;
       p = buf2;
@@ -122,10 +123,9 @@ void blp_texture::loadFromUncompressedData(BLPHeader* lHeader, char* lData)
   }
 
   delete[] buf2;
-  delete[] buf;
 }
 
-void blp_texture::loadFromCompressedData(BLPHeader* lHeader, char* lData)
+void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* lData)
 {
   //                         0 (0000) & 3 == 0                1 (0001) & 3 == 1                    7 (0111) & 3 == 3
   const int alphatypes[] = { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT };
@@ -144,7 +144,7 @@ void blp_texture::loadFromCompressedData(BLPHeader* lHeader, char* lData)
 
     if (lHeader->offsets[i] && lHeader->sizes[i])
     {
-      gl.compressedTexImage2D(GL_TEXTURE_2D, i, format, _width, _height, 0, ((_width + 3) / 4) * ((_height + 3) / 4) * blocksize, reinterpret_cast<char*>(lData + lHeader->offsets[i]));
+      gl.compressedTexImage2D(GL_TEXTURE_2D, i, format, _width, _height, 0, ((_width + 3) / 4) * ((_height + 3) / 4) * blocksize, reinterpret_cast<char const*>(lData + lHeader->offsets[i]));
     }
     else
     {
@@ -175,8 +175,8 @@ blp_texture::blp_texture(const std::string& filenameArg)
     throw std::runtime_error ("bad filename");
   }
 
-  char* lData = f.getPointer();
-  BLPHeader* lHeader = reinterpret_cast<BLPHeader*>(lData);
+  char const* lData = f.getPointer();
+  BLPHeader const* lHeader = reinterpret_cast<BLPHeader const*>(lData);
   _width = lHeader->resx;
   _height = lHeader->resy;
 
