@@ -4,6 +4,7 @@
 
 #include <math/vector_3d.hpp>
 #include <math/vector_4d.hpp>
+#include <math/matrix_4x4.hpp>
 
 enum SIDES
 {
@@ -52,7 +53,7 @@ class Frustum
   } _planes[SIDES_MAX];
 
 public:
-  Frustum();
+  Frustum (::math::matrix_4x4 const& matrix);
 
   bool contains (const ::math::vector_3d& point) const;
   bool intersects ( const ::math::vector_3d& v1
