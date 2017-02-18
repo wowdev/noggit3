@@ -73,7 +73,6 @@ void WMO::finishLoading ()
 
   float ff[3];
 
-  char* texbuf = nullptr;
   char const* ddnames = nullptr;
   char const* groupnames = nullptr;
 
@@ -118,8 +117,8 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOTX');
 
-  texbuf = new char[size];
-  f.read (texbuf, size);
+  std::vector<char> texbuf (size);
+  f.read (texbuf.data(), texbuf.size());
 
   // - MOMT ----------------------------------------------
 
@@ -135,7 +134,7 @@ void WMO::finishLoading ()
   {
     f.read (&mat[i], 0x40);
 
-    std::string const texpath (texbuf + mat[i].nameStart);
+    std::string const texpath (texbuf.data() + mat[i].nameStart);
     textures.push_back (texpath);
   }
 
@@ -315,12 +314,6 @@ void WMO::finishLoading ()
 
   for (auto& group : groups)
     group.load();
-
-  if (texbuf)
-  {
-    delete[] texbuf;
-    texbuf = nullptr;
-  }
 
   finished = true;
 }
