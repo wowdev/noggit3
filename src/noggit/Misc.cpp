@@ -20,8 +20,7 @@ namespace misc
       tmp = tmp.substr(loc + exploder.length());
       num++;
     }
-    std::string *result;
-    result = new std::string[num];
+    std::vector<std::string> result (num);
     num = 0;
     tmp = original;
     while (tmp.find(exploder) != std::string::npos) {
