@@ -334,7 +334,6 @@ void Noggit::loadMPQs()
 void Noggit::mainLoop (SDL_Surface* primary)
 {
   Uint32 ticks(SDL_GetTicks());
-  AppState* activeAppState(nullptr);
   Uint32 time(0);
 
   SDL_EnableUNICODE(true);
@@ -348,8 +347,6 @@ void Noggit::mainLoop (SDL_Surface* primary)
     Uint32 tickDelta(ticks - lastTicks);
     time += tickDelta;
 
-    activeAppState = states[states.size() - 1];
-
     const Uint8 appState(SDL_GetAppState());
     const bool isActiveApplication((appState & SDL_APPACTIVE) != 0);
     const bool hasInputFocus((appState & SDL_APPINPUTFOCUS) != 0);
@@ -359,8 +356,8 @@ void Noggit::mainLoop (SDL_Surface* primary)
     {
       const float ftime(time / 1000.0f);
       const float ftickDelta(tickDelta / 1000.0f);
-      activeAppState->tick(ftime, ftickDelta);
-      activeAppState->display(ftime, ftickDelta);
+      states.back()->tick(ftime, ftickDelta);
+      states.back()->display(ftime, ftickDelta);
       SDL_GL_SwapBuffers();
     }
     else
@@ -376,37 +373,37 @@ void Noggit::mainLoop (SDL_Surface* primary)
         e.type = SDL_KEYDOWN;
         e.keysym.sym = SDLK_ESCAPE;
         e.keysym.mod = KMOD_NONE;
-        activeAppState->keyPressEvent (&e);
+        states.back()->keyPressEvent (&e);
       }
       else if (event.type == SDL_VIDEORESIZE)
       {
         primary = SDL_SetVideoMode (event.resize.w, event.resize.h, 0, primary->flags);
         video.resize (event.resize.w, event.resize.h);
-        activeAppState->resizewindow();
+        states.back()->resizewindow();
       }
       else if (hasInputFocus)
       {
         if (event.type == SDL_KEYDOWN)
         {
-          activeAppState->keyPressEvent (&event.key);
+          states.back()->keyPressEvent (&event.key);
         }
         else if (event.type == SDL_KEYUP)
         {
-          activeAppState->keyReleaseEvent (&event.key);
+          states.back()->keyReleaseEvent (&event.key);
         }
         else if (hasMouseFocus)
         {
           if (event.type == SDL_MOUSEMOTION)
           {
-            activeAppState->mousemove(&event.motion);
+            states.back()->mousemove(&event.motion);
           }
           else if (event.type == SDL_MOUSEBUTTONDOWN)
           {
-            activeAppState->mousePressEvent (&event.button);
+            states.back()->mousePressEvent (&event.button);
           }
           else if (event.type == SDL_MOUSEBUTTONUP)
           {
-            activeAppState->mouseReleaseEvent (&event.button);
+            states.back()->mouseReleaseEvent (&event.button);
           }
         }
       }
@@ -414,9 +411,8 @@ void Noggit::mainLoop (SDL_Surface* primary)
     if (pop)
     {
       pop = false;
+      delete states.back();
       states.pop_back();
-      delete activeAppState;
-      activeAppState = nullptr;
     }
 #ifdef _WIN32
     if (tabletActive)
