@@ -19,13 +19,13 @@
 class MPQFile;
 namespace math
 {
+  class frustum;
   struct vector_4d;
 }
 class Brush;
 class Alphamap;
 class ChunkWater;
 class sExtendableArray;
-class Frustum;
 
 using StripType = uint16_t;
 static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
@@ -83,11 +83,11 @@ public:
   math::vector_3d mVertices[mapbufsize];
 
   bool is_visible ( const float& cull_distance
-                  , const Frustum& frustum
+                  , const math::frustum& frustum
                   , const math::vector_3d& camera
                   ) const;
 
-  void draw ( Frustum const&
+  void draw ( math::frustum const&
             , bool highlightPaintableChunks
             , bool draw_contour
             , bool draw_paintability_overlay
@@ -103,7 +103,7 @@ public:
   void drawContour();
   void intersect (math::ray const&, selection_result*);
   void drawLines ( opengl::scoped::use_program&
-                 , Frustum const&
+                 , math::frustum const&
                  , bool draw_hole_lines
                  );
   void drawTextures();

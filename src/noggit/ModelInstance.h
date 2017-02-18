@@ -10,7 +10,7 @@
 #include <noggit/Selection.h>
 #include <noggit/tile_index.hpp>
 
-class Frustum;
+namespace math { class frustum; }
 class Model;
 
 class ModelInstance
@@ -66,14 +66,14 @@ public:
     return *this;
   }
 
-  void draw ( Frustum const&
+  void draw ( math::frustum const&
             , bool force_box
             , bool all_boxes
             );
   void drawMapTile();
   //  void drawHighlight();
   void intersect (math::ray const&, selection_result*);
-  void draw_wmo(const math::vector_3d& ofs, const math::degrees, Frustum const&);
+  void draw_wmo(const math::vector_3d& ofs, const math::degrees, math::frustum const&);
 
   void resetDirection();
 

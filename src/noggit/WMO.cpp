@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/frustum.hpp>
 #include <noggit/Environment.h>
-#include <noggit/Frustum.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/TextureManager.h> // TextureManager, Texture
@@ -345,7 +345,7 @@ void WMO::draw ( int doodadset
                , bool boundingbox
                , bool groupboxes
                , bool /*highlight*/
-               , Frustum const& frustum
+               , math::frustum const& frustum
                , bool draw_doodads
                )
 {
@@ -1011,7 +1011,7 @@ void WMOGroup::load()
   }
 }
 
-void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frustum const& frustum)
+void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, math::frustum const& frustum)
 {
   visible = false;
   // view frustum culling
@@ -1100,7 +1100,7 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 }
 
-void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const angle, Frustum const& frustum)
+void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const angle, math::frustum const& frustum)
 {
   if (!visible) return;
   if (ddr.empty()) return;

@@ -47,7 +47,7 @@ WMOInstance::WMOInstance(std::string const& filename)
 {
 }
 
-void WMOInstance::draw ( Frustum const& frustum
+void WMOInstance::draw ( math::frustum const& frustum
                        , bool force_box
                        , bool draw_doodads
                        )

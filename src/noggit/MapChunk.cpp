@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/frustum.hpp>
 #include <math/quaternion.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/Brush.h>
 #include <noggit/TileWater.hpp>
 #include <noggit/Environment.h>
-#include <noggit/Frustum.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
@@ -572,7 +572,7 @@ void MapChunk::clearHeight()
 }
 
 bool MapChunk::is_visible ( const float& cull_distance
-                          , const Frustum& frustum
+                          , const math::frustum& frustum
                           , const math::vector_3d& camera
                           ) const
 {
@@ -583,7 +583,7 @@ bool MapChunk::is_visible ( const float& cull_distance
 }
 
 void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
-                         , Frustum const& frustum
+                         , math::frustum const& frustum
                          , bool draw_hole_lines
                          )
 {
@@ -652,7 +652,7 @@ void MapChunk::drawContour()
   gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
 }
 
-void MapChunk::draw ( Frustum const& frustum
+void MapChunk::draw ( math::frustum const& frustum
                     , bool highlightPaintableChunks
                     , bool draw_contour
                     , bool draw_paintability_overlay

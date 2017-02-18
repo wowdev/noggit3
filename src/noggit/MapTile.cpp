@@ -313,7 +313,7 @@ void MapTile::convert_alphamap(bool to_big_alpha)
   }
 }
 
-void MapTile::draw ( Frustum const& frustum
+void MapTile::draw ( math::frustum const& frustum
                    , bool highlightPaintableChunks
                    , bool draw_contour
                    , bool draw_paintability_overlay
@@ -358,7 +358,7 @@ void MapTile::intersect (math::ray const& ray, selection_result* results) const
 }
 
 void MapTile::drawLines ( opengl::scoped::use_program& line_shader
-                        , Frustum const& frustum
+                        , math::frustum const& frustum
                         , bool draw_hole_lines
                         )
 {

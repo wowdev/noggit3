@@ -3,12 +3,12 @@
 
 #include <noggit/World.h>
 
+#include <math/frustum.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/ChunkWater.hpp>
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
-#include <noggit/Frustum.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
@@ -509,7 +509,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
 
-  Frustum const frustum
+  math::frustum const frustum
     (::opengl::matrix::model_view() * ::opengl::matrix::projection());
 
   bool hadSky = false;
