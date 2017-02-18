@@ -366,34 +366,9 @@ void World::initDisplay()
     gWorld->mWMOInstances.emplace(mWmoEntry.uniqueID, std::move(inst));
   }
 
-  skies = new Skies(mMapId);
+  skies = std::make_unique<Skies> (mMapId);
 
-  ol = new OutdoorLighting("World\\dnc.db");
-}
-
-World::~World()
-{
-  if (skies)
-  {
-    delete skies;
-    skies = nullptr;
-  }
-
-  if (ol)
-  {
-    delete ol;
-    ol = nullptr;
-  }
-
-  /*
-  if (mCurrentSelection)
-  {
-  delete mCurrentSelection;
-  mCurrentSelection = nullptr;
-  }
-  */
-
-  LogDebug << "Unloaded world \"" << basename << "\"." << std::endl;
+  ol = std::make_unique<OutdoorLighting> ("World\\dnc.db");
 }
 
 void World::outdoorLighting()
