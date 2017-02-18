@@ -509,7 +509,8 @@ void World::draw ( math::vector_3d const& cursor_pos
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
 
-  Frustum const frustum;
+  Frustum const frustum
+    (::opengl::matrix::model_view() * ::opengl::matrix::projection());
 
   bool hadSky = false;
   if (draw_wmo || mapIndex.hasAGlobalWMO())

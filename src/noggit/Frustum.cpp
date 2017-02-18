@@ -1,15 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <math/matrix_4x4.hpp>
 #include <noggit/Frustum.h>
-#include <opengl/matrix.hpp>
-#include <opengl/types.hpp>
 
-Frustum::Frustum()
+Frustum::Frustum (::math::matrix_4x4 const& matrix)
 {
-  const ::math::matrix_4x4 matrix
-    (::opengl::matrix::model_view() * ::opengl::matrix::projection());
-
   const ::math::vector_4d column_0 (matrix.column<0>());
   const ::math::vector_4d column_1 (matrix.column<1>());
   const ::math::vector_4d column_2 (matrix.column<2>());
