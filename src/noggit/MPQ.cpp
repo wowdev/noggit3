@@ -21,7 +21,7 @@
 #include <vector>
 #include <unordered_set>
 
-typedef std::pair<std::string, MPQArchive*> ArchiveEntry;
+typedef std::pair<std::string, std::unique_ptr<MPQArchive>> ArchiveEntry;
 typedef std::list<ArchiveEntry> ArchivesMap;
 ArchivesMap _openArchives;
 
@@ -32,8 +32,8 @@ std::string modmpqpath = "";//this will be the path to modders archive (with 'my
 
 void MPQArchive::loadMPQ(const std::string& filename, bool doListfile)
 {
-  _openArchives.push_back(ArchiveEntry(filename, new MPQArchive(filename, doListfile)));
-  app.loader()->addObject(_openArchives.back().second);
+  _openArchives.emplace_back (filename, std::make_unique<MPQArchive> (filename, doListfile));
+  app.loader()->addObject(_openArchives.back().second.get());
 }
 
 MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
@@ -128,10 +128,6 @@ void MPQArchive::allFinishLoading()
 
 void MPQArchive::unloadAllMPQs()
 {
-  for (ArchivesMap::iterator it = _openArchives.begin(); it != _openArchives.end(); ++it)
-  {
-    delete it->second;
-  }
   _openArchives.clear();
 }
 
@@ -146,7 +142,6 @@ void MPQArchive::unloadMPQ(const std::string& filename)
   {
     if (it->first == filename)
     {
-      delete it->second;
       _openArchives.erase(it);
     }
   }
@@ -162,9 +157,7 @@ bool MPQArchive::openFile(const std::string& filename, HANDLE* fileHandle) const
 */
 MPQFile::MPQFile(const std::string& pFilename)
   : eof(true)
-  , buffer(nullptr)
   , pointer(0)
-  , size(0)
   , External(false)
 {
   boost::mutex::scoped_lock lock(gMPQFileMutex);
@@ -183,11 +176,10 @@ MPQFile::MPQFile(const std::string& pFilename)
     eof = false;
 
     input.seekg(0, std::ios::end);
-    size = (size_t)input.tellg();
+    buffer.resize (input.tellg());
     input.seekg(0, std::ios::beg);
 
-    buffer = new char[size];
-    input.read(buffer, size);
+    input.read(buffer.data(), buffer.size());
 
     input.close();
     return;
@@ -202,11 +194,9 @@ MPQFile::MPQFile(const std::string& pFilename)
     if (!i->second->openFile(filename, &fileHandle))
       continue;
 
-    size = SFileGetFileSize(fileHandle, nullptr); //last nullptr for newer version of StormLib
-
     eof = false;
-    buffer = new char[size];
-    SFileReadFile(fileHandle, buffer, size, nullptr, nullptr); //last nullptrs for newer version of StormLib
+    buffer.resize (SFileGetFileSize(fileHandle, nullptr));
+    SFileReadFile(fileHandle, buffer.data(), buffer.size(), nullptr, nullptr); //last nullptrs for newer version of StormLib
     SFileCloseFile(fileHandle);
 
     return;
@@ -217,9 +207,7 @@ MPQFile::MPQFile(const std::string& pFilename)
 */
 MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSavePath)
   : eof(true)
-  , buffer(nullptr)
   , pointer(0)
-  , size(0)
   , External(false)
 {
   LogDebug << "MPGFILE 1 alternateSavePath: " << alternateSavePath << std::endl;
@@ -243,11 +231,10 @@ MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSaveP
     eof = false;
 
     input.seekg(0, std::ios::end);
-    size = (size_t)input.tellg();
+    buffer.resize (input.tellg());
     input.seekg(0, std::ios::beg);
 
-    buffer = new char[size];
-    input.read(buffer, size);
+    input.read(buffer.data(), buffer.size());
 
     input.close();
     return;
@@ -262,11 +249,9 @@ MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSaveP
     if (!i->second->openFile(filename, &fileHandle))
       continue;
 
-    size = SFileGetFileSize(fileHandle, nullptr); //last nullptr for newer version of StormLib
-
     eof = false;
-    buffer = new char[size];
-    SFileReadFile(fileHandle, buffer, size, nullptr, nullptr); //last nullptrs for newer version of StormLib
+    buffer.resize (SFileGetFileSize(fileHandle, nullptr));
+    SFileReadFile(fileHandle, buffer.data(), buffer.size(), nullptr, nullptr); //last nullptrs for newer version of StormLib
     SFileCloseFile(fileHandle);
 
     return;
@@ -349,9 +334,8 @@ bool MPQFile::existsInMPQ(const std::string &pFilename)
   return false;
 }
 
-void MPQFile::save(const char* filename)  //save to MPQ
+void MPQFile::save(std::string const& filename)  //save to MPQ
 {
-  //! \todo Use const std::string& as parameter.
   //! \todo Get MPQ to save to via dialog or use development.MPQ.
   //! \todo Create MPQ nicer, if not existing.
   //! \todo Use a pointer to the archive instead of searching it by filename.
@@ -381,7 +365,7 @@ void MPQFile::save(const char* filename)  //save to MPQ
     nameInMPQ.replace(found, 1, "\\");
     found = nameInMPQ.find("/");
   }
-  if (SFileAddFileEx(mpq_a, filename, nameInMPQ.c_str(), MPQ_FILE_COMPRESS | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, MPQ_COMPRESSION_ZLIB, 0)) //last nullptr for newer version of StormLib
+  if (SFileAddFileEx(mpq_a, filename.c_str(), nameInMPQ.c_str(), MPQ_FILE_COMPRESS | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, MPQ_COMPRESSION_ZLIB, 0)) //last nullptr for newer version of StormLib
   {
     LogDebug << "Added file " << fname.c_str() << " to archive \n";
   }
@@ -397,8 +381,8 @@ size_t MPQFile::read(void* dest, size_t bytes)
     return 0;
 
   size_t rpos = pointer + bytes;
-  if (rpos > size) {
-    bytes = size - pointer;
+  if (rpos > buffer.size()) {
+    bytes = buffer.size() - pointer;
     eof = true;
   }
 
@@ -417,26 +401,23 @@ bool MPQFile::isEof() const
 void MPQFile::seek(size_t offset)
 {
   pointer = offset;
-  eof = (pointer >= size);
+  eof = (pointer >= buffer.size());
 }
 
 void MPQFile::seekRelative(size_t offset)
 {
   pointer += offset;
-  eof = (pointer >= size);
+  eof = (pointer >= buffer.size());
 }
 
 void MPQFile::close()
 {
-  delete[] buffer;
-  buffer = nullptr;
-
   eof = true;
 }
 
 size_t MPQFile::getSize() const
 {
-  return size;
+  return buffer.size();
 }
 
 void FixFilePath(std::string& pFilename)
@@ -456,14 +437,14 @@ size_t MPQFile::getPos() const
   return pointer;
 }
 
-char* MPQFile::getBuffer() const
+char const* MPQFile::getBuffer() const
 {
-  return buffer;
+  return buffer.data();
 }
 
-char* MPQFile::getPointer() const
+char const* MPQFile::getPointer() const
 {
-  return buffer + pointer;
+  return buffer.data() + pointer;
 }
 
 void MPQFile::SaveFile()
@@ -492,7 +473,7 @@ void MPQFile::SaveFile()
   {
     Log << "Saving file \"" << lFilename << "\"." << std::endl;
 
-    output.write(buffer, size);
+    output.write(buffer.data(), buffer.size());
     output.close();
 
     External = true;
