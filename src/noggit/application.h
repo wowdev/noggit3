@@ -29,7 +29,6 @@ struct SDL_Surface;
 class Noggit
 {
 public:
-  float FPS;
 #ifdef _WIN32
   UINT pressure;
   HCTX hCtx;

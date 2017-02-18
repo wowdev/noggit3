@@ -217,13 +217,13 @@ void UIMapViewGUI::render() const
   std::stringstream timestrs;
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode) {
-    timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", FPS: " << (int)app.FPS << ", Pres: " << app.pressure;
+    timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", Pres: " << app.pressure;
     app.getArial16().shprint(video.xres() - 250.0f, 5.0f, timestrs.str());
   }
   else
 #endif
   {
-    timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", FPS: " << (int)app.FPS;
+    timestrs << "Time: " << (time / 120) << ":" << (time % 120);
     app.getArial16().shprint(video.xres() - 200.0f, 5.0f, timestrs.str());
   }
 
