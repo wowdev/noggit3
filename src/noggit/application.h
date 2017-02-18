@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <noggit/AsyncLoader.h>
 #include <noggit/DBC.h>
 #include <noggit/FreeType.h> // fonts.
 
@@ -11,7 +12,6 @@
 #include <vector>
 
 class AppState;
-class AsyncLoader;
 
 #ifdef _WIN32
 #include <external/wacom/MSGPACK.H>
@@ -43,7 +43,7 @@ public:
 
   inline AsyncLoader* loader()
   {
-    return asyncLoader;
+    return asyncLoader.get();
   }
 
   inline std::vector<AppState*>& getStates()
@@ -94,7 +94,7 @@ private:
   boost::filesystem::path wowpath;
 
   AreaDB areaDB;
-  AsyncLoader* asyncLoader;
+  std::unique_ptr<AsyncLoader> asyncLoader;
   std::vector<AppState*> states;
 
   bool fullscreen;
