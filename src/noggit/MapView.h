@@ -147,6 +147,7 @@ private:
   UIFrame* MapChunkWindow;
   UIToggleGroup * gFlagsToggleGroup;
 
+  void prompt_exit() const;
   void prompt_save_current() const;
 
 public:
@@ -166,7 +167,6 @@ public:
   virtual void mousePressEvent (SDL_MouseButtonEvent*) override;
   void resizewindow();
 
-  void quit();
   void inserObjectFromExtern(int model);
   void selectModel(selection_type entry);
 

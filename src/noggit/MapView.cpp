@@ -25,7 +25,6 @@
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
-#include <noggit/ui/ExitWarning.h>
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Gradient.h> // UIGradient
 #include <noggit/ui/HelperModels.h>
@@ -424,8 +423,8 @@ void MapView::createGUI()
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
   addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
-  mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [this] { mainGui->escWarning->show(); });
-  addHotkey (SDLK_ESCAPE, MOD_none, [this] { mainGui->escWarning->show(); });
+  mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [this] { prompt_exit(); });
+  addHotkey (SDLK_ESCAPE, MOD_none, [this] { prompt_exit(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
   mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", [this] { DeleteSelectedObject(); });
@@ -971,12 +970,6 @@ void MapView::createGUI()
   addHotkey (SDLK_7, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 7; }, [] { return gWorld->IsSelection(eEntry_WMO); });
   addHotkey (SDLK_8, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 8; }, [] { return gWorld->IsSelection(eEntry_WMO); });
   addHotkey (SDLK_9, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 9; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-
-
-  // ESC warning
-  mainGui->escWarning = new UIExitWarning(this);
-  mainGui->escWarning->hide();
-  mainGui->addChild(mainGui->escWarning);
 
   // CAPS warning
   mainGui->capsWarning = new UICapsWarning;
@@ -1794,11 +1787,6 @@ void MapView::display(float t, float dt)
   }
 }
 
-void MapView::quit()
-{
-  app.pop = true;
-}
-
 void MapView::resizewindow()
 {
   mainGui->resize();
@@ -2394,6 +2382,21 @@ void MapView::checkWaterSave()
   else
   {
     mainGui->waterSaveWarning->show();
+  }
+}
+
+void MapView::prompt_exit() const
+{
+  if ( QMessageBox::warning
+         ( nullptr
+         , "Return to menu"
+         , "Do you really want to exit?\nUnsaved changes will be lost!"
+         , QMessageBox::Close | QMessageBox::Cancel
+         , QMessageBox::Cancel
+         ) == QMessageBox::Close
+     )
+  {
+    app.pop = true;
   }
 }
 
