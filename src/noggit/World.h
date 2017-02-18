@@ -56,7 +56,7 @@ public:
   unsigned int mMapId;
 
   // The lighting used.
-  OutdoorLighting *ol;
+  std::unique_ptr<OutdoorLighting> ol;
 
   void initMinimap();
 
@@ -77,7 +77,7 @@ public:
   float fogdistance;
   float culldistance;
 
-  Skies *skies;
+  std::unique_ptr<Skies> skies;
 
   //! \todo  Get these managed? ._.
   std::map<int, ModelInstance> mModelInstances;
@@ -88,7 +88,6 @@ public:
   math::vector_3d camera;
 
   explicit World(const std::string& name);
-  ~World();
 
   void initDisplay();
 
