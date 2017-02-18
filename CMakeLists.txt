@@ -161,7 +161,6 @@ set ( noggit_root_sources
       src/noggit/Directory.cpp
       src/noggit/Environment.cpp
       src/noggit/FreeType.cpp
-      src/noggit/Frustum.cpp
       src/noggit/Log.cpp
       src/noggit/MPQ.cpp
       src/noggit/MapChunk.cpp
@@ -256,6 +255,7 @@ set ( noggit_ui_sources
     )
 
 set ( math_sources
+      src/math/frustum.cpp
       src/math/matrix_4x4.cpp
       src/math/ray.cpp
       src/math/vector_2d.cpp
@@ -286,7 +286,6 @@ set ( noggit_root_headers
       src/noggit/Directory.h
       src/noggit/Environment.h
       src/noggit/FreeType.h
-      src/noggit/Frustum.h
       src/noggit/Log.h
       src/noggit/MPQ.h
       src/noggit/MapChunk.h
@@ -381,6 +380,7 @@ set ( noggit_ui_headers
 
 set ( math_headers
       src/math/constants.hpp
+      src/math/frustum.hpp
       src/math/interpolation.hpp
       src/math/matrix_4x4.hpp
       src/math/projection.hpp

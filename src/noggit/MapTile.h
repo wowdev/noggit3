@@ -16,9 +16,9 @@
 #include <string>
 #include <vector>
 
-class Frustum;
 namespace math
 {
+  class frustum;
   struct vector_3d;
 }
 
@@ -57,7 +57,7 @@ public:
 
   int changed;
 
-  void draw ( Frustum const&
+  void draw ( math::frustum const&
             , bool highlightPaintableChunks
             , bool draw_contour
             , bool draw_paintability_overlay
@@ -70,7 +70,7 @@ public:
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines ( opengl::scoped::use_program& line_shader
-                 , Frustum const&
+                 , math::frustum const&
                  , bool draw_hole_lines
                  );
   void drawWater (opengl::scoped::use_program& water_shader);

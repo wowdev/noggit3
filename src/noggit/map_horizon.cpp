@@ -273,7 +273,7 @@ static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
 void map_horizon::draw( MapIndex *index
                       , const math::vector_3d& color
                       , const float& cull_distance
-                      , const Frustum& frustum
+                      , const math::frustum& frustum
                       , const math::vector_3d& camera)
 {
   std::vector<uint32_t> indices;

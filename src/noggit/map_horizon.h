@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <noggit/Frustum.h>
+#include <math/frustum.hpp>
 
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
@@ -43,7 +43,7 @@ public:
     void draw( MapIndex *index
              , const math::vector_3d& color
              , const float& cull_distance
-             , const Frustum& frustum
+             , const math::frustum& frustum
              , const math::vector_3d& camera );
 
     opengl::texture minimap;

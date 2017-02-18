@@ -49,9 +49,9 @@ public:
 
   void upload();
 
-  void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
+  void draw(const math::vector_3d& ofs, math::degrees const, math::frustum const&);
   void drawLiquid();
-  void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, Frustum const&);
+  void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, math::frustum const&);
 
   void setupFog();
 
@@ -144,7 +144,7 @@ public:
             , bool boundingbox
             , bool groupboxes
             , bool highlight
-            , Frustum const&
+            , math::frustum const&
             , bool draw_doodads
             );
   bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;

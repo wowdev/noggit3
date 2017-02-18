@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/Frustum.h>
+#include <math/frustum.hpp>
 #include <noggit/Log.h>
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
@@ -52,7 +52,7 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
   recalcExtents();
 }
 
-void ModelInstance::draw ( Frustum const& frustum
+void ModelInstance::draw ( math::frustum const& frustum
                          , bool force_box
                          , bool all_boxes
                          )
@@ -197,7 +197,7 @@ void ModelInstance::intersect (math::ray const& ray, selection_result* results)
 }
 
 
-void ModelInstance::draw_wmo(const math::vector_3d& ofs, const math::degrees rotation, Frustum const& frustum)
+void ModelInstance::draw_wmo(const math::vector_3d& ofs, const math::degrees rotation, math::frustum const& frustum)
 {
   math::vector_3d tpos(ofs + pos);
   math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);

@@ -2,8 +2,8 @@
 
 #pragma once
 
+#include <math/frustum.hpp>
 #include <math/trig.hpp>
-#include <noggit/Frustum.h> // Frustum
 #include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
