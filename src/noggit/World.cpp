@@ -971,7 +971,23 @@ void World::clearHeight(math::vector_3d const& pos)
 
 void World::clearAllModelsOnADT(math::vector_3d const& pos)
 {
-  for_tile_at(pos, [](MapTile* tile) { tile->clearAllModels(); });
+  tile_index const index (pos);
+
+  for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+  {
+    if (tile_index(it->second.pos) == index)
+    {
+      deleteWMOInstance(it->second.mUniqueID);
+    }
+  }
+
+  for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
+  {
+    if (tile_index(it->second.pos) == index)
+    {
+      deleteModelInstance(it->second.d1);
+    }
+  }
 }
 
 void World::CropWaterADT(math::vector_3d const& pos)

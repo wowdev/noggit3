@@ -83,7 +83,6 @@ public:
 	void CropWater();
 
   bool isTile(int pX, int pZ);
-  void clearAllModels();
 
   bool canWaterSave();
 
