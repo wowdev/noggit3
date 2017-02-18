@@ -47,6 +47,9 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <list>
 #include <vector>
 
+#include <QtCore/QTimer>
+#include <QtWidgets/QApplication>
+
 #include "revision.h"
 
 Noggit app;
@@ -333,14 +336,7 @@ void Noggit::loadMPQs()
 
 void Noggit::mainLoop (SDL_Surface* primary)
 {
-  Uint32 ticks(SDL_GetTicks());
-  Uint32 time(0);
-
-  SDL_EnableUNICODE(true);
-
-  SDL_Event event;
-
-  while (!states.empty())
+  if (!states.empty())
   {
     Uint32 lastTicks(ticks);
     ticks = SDL_GetTicks();
@@ -365,6 +361,7 @@ void Noggit::mainLoop (SDL_Surface* primary)
       boost::this_thread::sleep(boost::posix_time::milliseconds(200));
     }
 
+    SDL_Event event;
     while (SDL_PollEvent(&event))
     {
       if (event.type == SDL_QUIT)
@@ -424,6 +421,27 @@ void Noggit::mainLoop (SDL_Surface* primary)
       }
     }
 #endif
+
+    QTimer::singleShot (0, [primary, this] { mainLoop (primary); });
+  }
+  else
+  {
+    SDL_FreeSurface(primary);
+    SDL_Quit();
+
+    TextureManager::report();
+    ModelManager::report();
+    WMOManager::report();
+
+    asyncLoader->stop();
+    asyncLoader->join();
+
+    MPQArchive::unloadAllMPQs();
+    gListfile.clear();
+
+    LogDebug << "Exited" << std::endl;
+
+    QApplication::quit();
   }
 }
 
@@ -436,7 +454,7 @@ int Noggit::start(int argc, char *argv[])
 
   initEnv();
   parseArgs(argc, argv);
-  srand((unsigned int)time(nullptr));
+  srand(::time(nullptr));
   wowpath = getGamePath();
 
   if (wowpath == "")
@@ -489,6 +507,8 @@ int Noggit::start(int argc, char *argv[])
     SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, 4);
   }
 
+  SDL_EnableUNICODE (true);
+
   SDL_Surface* primary (SDL_SetVideoMode (xres, yres, 0, flags));
 
   if (!primary)
@@ -532,25 +552,10 @@ int Noggit::start(int argc, char *argv[])
   states.push_back(new Menu());
 
   LogDebug << "Entering Main Loop" << std::endl;
-  mainLoop (primary);
 
-  SDL_FreeSurface(primary);
-  SDL_Quit();
+  ticks = SDL_GetTicks();
 
-  TextureManager::report();
-  ModelManager::report();
-  WMOManager::report();
-
-  asyncLoader->stop();
-  asyncLoader->join();
-
-  MPQArchive::unloadAllMPQs();
-  gListfile.clear();
-
-  LogDebug << "Exited" << std::endl;
-
-
-  return 0;
+  QTimer::singleShot (0, [primary, this] { mainLoop (primary); });
 }
 
 #ifdef _WIN32
@@ -563,7 +568,12 @@ int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 int main(int argc, char *argv[])
 {
   RegisterErrorHandlers();
-  return app.start(argc, argv);
+
+  QApplication qapp (argc, argv);
+
+  app.start(argc, argv);
+
+  return qapp.exec();
 }
 
 
