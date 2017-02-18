@@ -6,6 +6,8 @@
 #include <math/vector_4d.hpp>
 #include <math/matrix_4x4.hpp>
 
+#include <array>
+
 namespace math
 {
   class frustum
@@ -52,7 +54,8 @@ namespace math
     private:
       vector_3d _normal;
       float _distance;
-    } _planes[SIDES_MAX];
+    };
+    std::array<plane, SIDES_MAX> _planes;
 
   public:
     frustum (matrix_4x4 const& matrix);

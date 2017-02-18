@@ -2,6 +2,8 @@
 
 #include <math/frustum.hpp>
 
+#include <vector>
+
 namespace math
 {
   frustum::frustum (matrix_4x4 const& matrix)
@@ -21,9 +23,9 @@ namespace math
 
   bool frustum::contains (const vector_3d& point) const
   {
-    for (size_t side (0); side < SIDES_MAX; ++side)
+    for (auto const& plane : _planes)
     {
-      if (_planes[side].normal() * point <= -_planes[side].distance())
+      if (plane.normal() * point <= -plane.distance())
       {
         return false;
       }
@@ -35,22 +37,21 @@ namespace math
                            , const vector_3d& v2
                            ) const
   {
-    vector_3d points[8];
-    points[0] = vector_3d (v1.x, v1.y, v1.z);
-    points[1] = vector_3d (v1.x, v1.y, v2.z);
-    points[2] = vector_3d (v1.x, v2.y, v1.z);
-    points[3] = vector_3d (v1.x, v2.y, v2.z);
-    points[4] = vector_3d (v2.x, v1.y, v1.z);
-    points[5] = vector_3d (v2.x, v1.y, v2.z);
-    points[6] = vector_3d (v2.x, v2.y, v1.z);
-    points[7] = vector_3d (v2.x, v2.y, v2.z);
+    std::vector<vector_3d> points;
+    points.emplace_back (v1.x, v1.y, v1.z);
+    points.emplace_back (v1.x, v1.y, v2.z);
+    points.emplace_back (v1.x, v2.y, v1.z);
+    points.emplace_back (v1.x, v2.y, v2.z);
+    points.emplace_back (v2.x, v1.y, v1.z);
+    points.emplace_back (v2.x, v1.y, v2.z);
+    points.emplace_back (v2.x, v2.y, v1.z);
+    points.emplace_back (v2.x, v2.y, v2.z);
 
-
-    for (size_t side (0); side < SIDES_MAX; ++side)
+    for (auto const& plane : _planes)
     {
-      for (size_t point (0); point < 8; ++point)
+      for (auto const& point : points)
       {
-        if (_planes[side].normal() * points[point] > -_planes[side].distance())
+        if (plane.normal() * point > -plane.distance())
         {
           //! \note C does not know how to continue out of two loops otherwise.
           goto intersects_next_side;
@@ -70,10 +71,10 @@ namespace math
                                  , const float& radius
                                  ) const
   {
-    for (size_t side (0); side < SIDES_MAX; ++side)
+    for (auto const& plane : _planes)
     {
-      const float distance ( _planes[side].normal() * position
-                           + _planes[side].distance()
+      const float distance ( plane.normal() * position
+                           + plane.distance()
                            );
       if (distance < -radius)
       {
