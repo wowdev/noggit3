@@ -26,7 +26,7 @@ Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFix
 void Alphamap::readCompressed(MPQFile *f)
 {
   // compressed
-  char* input = f->getPointer();
+  char const* input = f->getPointer();
 
   for (std::size_t offset_output(0); offset_output < 4096;)
   {
@@ -59,7 +59,7 @@ void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
 {
   // not compressed
   unsigned char *p;
-  char *abuf = f->getPointer();
+  char const* abuf = f->getPointer();
   p = amap;
 
   for (std::size_t x(0); x < 64; ++x)

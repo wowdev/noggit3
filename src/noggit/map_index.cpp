@@ -541,7 +541,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 
     assert(fourcc == 'MDDF');
 
-    ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(theFile.getPointer());
+    ENTRY_MDDF const* mddf_ptr = reinterpret_cast<ENTRY_MDDF const*>(theFile.getPointer());
     for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
     {
         highGUID = std::max(highGUID, mddf_ptr[i].uniqueID);
@@ -555,7 +555,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 
     assert(fourcc == 'MODF');
 
-    ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(theFile.getPointer());
+    ENTRY_MODF const* modf_ptr = reinterpret_cast<ENTRY_MODF const*>(theFile.getPointer());
     for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
     {
         highGUID = std::max(highGUID, modf_ptr[i].uniqueID);
@@ -596,7 +596,7 @@ uint32_t MapIndex::newGUID()
 #endif
 }
 
-inline bool floatEqual(float& a, float& b)
+inline bool floatEqual(float const& a, float const& b)
 {
   return std::abs(a - b) < 0.0001f;
 }
@@ -659,12 +659,12 @@ void MapIndex::fixUIDs()
       file.read(&size, 4);
       assert(fourcc == 'MDDF');
 
-      ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(file.getPointer());
+      ENTRY_MDDF const* mddf_ptr = reinterpret_cast<ENTRY_MDDF const*>(file.getPointer());
 
       for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
       {
         bool add = true;
-        ENTRY_MDDF& mddf = mddf_ptr[i];
+        ENTRY_MDDF const& mddf = mddf_ptr[i];
 
         if (!pointInside({ mddf.pos[0], 0, mddf.pos[2] }, tileExtents))
         {
@@ -701,12 +701,12 @@ void MapIndex::fixUIDs()
       file.read(&size, 4);
       assert(fourcc == 'MODF');
 
-      ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(file.getPointer());
+      ENTRY_MODF const* modf_ptr = reinterpret_cast<ENTRY_MODF const*>(file.getPointer());
 
       for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
       {
         bool add = true;
-        ENTRY_MODF& modf = modf_ptr[i];
+        ENTRY_MODF const& modf = modf_ptr[i];
 
         if (!pointInside({ modf.pos[0], 0, modf.pos[2] }, tileExtents))
         {
@@ -743,8 +743,8 @@ void MapIndex::fixUIDs()
       assert(fourcc == 'MMDX');
 
       {
-        char* lCurPos = reinterpret_cast<char*>(file.getPointer());
-        char* lEnd = lCurPos + size;
+        char const* lCurPos = reinterpret_cast<char const*>(file.getPointer());
+        char const* lEnd = lCurPos + size;
 
         while (lCurPos < lEnd)
         {
@@ -760,8 +760,8 @@ void MapIndex::fixUIDs()
       assert(fourcc == 'MWMO');
 
       {
-        char* lCurPos = reinterpret_cast<char*>(file.getPointer());
-        char* lEnd = lCurPos + size;
+        char const* lCurPos = reinterpret_cast<char const*>(file.getPointer());
+        char const* lEnd = lCurPos + size;
 
         while (lCurPos < lEnd)
         {

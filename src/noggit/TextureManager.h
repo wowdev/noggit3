@@ -15,8 +15,8 @@ struct blp_texture : public opengl::texture
 {
   blp_texture (std::string const& filename);
 
-  void loadFromUncompressedData(BLPHeader* lHeader, char* lData);
-  void loadFromCompressedData(BLPHeader* lHeader, char* lData);
+  void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
+  void loadFromCompressedData(BLPHeader const* lHeader, char const* lData);
 
   const std::string& filename();
 private:

@@ -43,7 +43,7 @@ struct wmo_batch
 
 class WMOGroup {
 public:
-  WMOGroup(WMO *wmo, MPQFile* f, int num, char *names);
+  WMOGroup(WMO *wmo, MPQFile* f, int num, char const* names);
 
   void load ();
 

@@ -126,7 +126,7 @@ class RibbonEmitter {
   std::list<RibbonSegment> segs;
 
 public:
-  RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals);
+  RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals);
   void setup(int anim, int time);
   void draw();
 };

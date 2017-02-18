@@ -54,8 +54,8 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
 
 int wmo_liquid::initGeometry(MPQFile* f)
 {
-  LiquidVertex *map = reinterpret_cast<LiquidVertex*>(f->getPointer());
-  unsigned char *flags = reinterpret_cast<unsigned char*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));
+  LiquidVertex const* map = reinterpret_cast<LiquidVertex const*>(f->getPointer());
+  unsigned char const* flags = reinterpret_cast<unsigned char const*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));
   int last_flag;
 
   // generate vertices
