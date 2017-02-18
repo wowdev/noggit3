@@ -490,29 +490,6 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 
 /// --- Only saving related below this line. --------------------------
 
-void MapTile::clearAllModels()
-{
-  Log << "Clear all models from ADT \"" << mFilename << "\"." << std::endl;
-
-  // Check which doodads and WMOs are on this ADT.
-
-  for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
-  {
-    if (tile_index(it->second.pos) == index)
-    {
-      gWorld->deleteWMOInstance(it->second.mUniqueID);
-    }
-  }
-
-  for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
-  {
-    if (tile_index(it->second.pos) == index)
-    {
-      gWorld->deleteModelInstance(it->second.d1);
-    }
-  }
-}
-
 void MapTile::saveTile(bool saveAllModels)
 {
 
