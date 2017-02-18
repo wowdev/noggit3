@@ -87,6 +87,9 @@ private:
 
   void parseArgs(int argc, char *argv[]);
   void loadMPQs();
+
+  unsigned int ticks;
+  unsigned int time = 0;
   void mainLoop (SDL_Surface* primary);
 
   boost::filesystem::path getGamePath();

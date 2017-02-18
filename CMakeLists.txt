@@ -101,6 +101,7 @@ FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
+find_package (Qt5 COMPONENTS Widgets)
 
 find_library(MYSQL_LIBRARY
   NAMES libmysql
@@ -469,6 +470,7 @@ TARGET_LINK_LIBRARIES (noggit
   Boost::filesystem
   Boost::system
   ${GLEW_LIBRARY}
+  Qt5::Widgets
 )
 
 if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
