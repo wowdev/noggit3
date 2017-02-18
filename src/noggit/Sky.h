@@ -86,7 +86,7 @@ public:
 
   void draw();
 
-  bool drawSky(const math::vector_3d &pos);
+  bool drawSky(const math::vector_3d &pos, float night_intensity);
   bool hasSkies() { return numSkies > 0; }
 };
 

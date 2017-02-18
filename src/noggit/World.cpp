@@ -536,7 +536,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   skies->initSky(camera_pos, daytime);
 
   if (!hadSky)
-    hadSky = skies->drawSky(camera_pos);
+    hadSky = skies->drawSky(camera_pos, outdoorLightStats.nightIntensity);
 
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox

@@ -274,7 +274,7 @@ void Skies::initSky(math::vector_3d pos, int t)
   }
 }
 
-bool Skies::drawSky(const math::vector_3d &pos)
+bool Skies::drawSky(const math::vector_3d &pos, float night_intensity)
 {
   if (numSkies == 0) return false;
 
@@ -285,12 +285,11 @@ bool Skies::drawSky(const math::vector_3d &pos)
   draw();
 
   // if it's night, draw the stars
-  float ni = gWorld->outdoorLightStats.nightIntensity;
-  if (ni > 0) {
+  if (night_intensity > 0) {
     const float sc = 0.1f;
     gl.scalef(sc, sc, sc);
     opengl::texture::enable_texture();
-    stars->trans = ni;
+    stars->trans = night_intensity;
     stars->draw();
   }
 
