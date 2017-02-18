@@ -20,9 +20,9 @@ class MPQArchive : public AsyncObject
 {
   HANDLE _archiveHandle;
 
+public:
   MPQArchive(const std::string& filename, bool doListfile);
 
-public:
   ~MPQArchive();
   std::string mpqname;
 
@@ -45,9 +45,8 @@ public:
 class MPQFile
 {
   bool eof;
-  char* buffer;
+  std::vector<char> buffer;
   size_t pointer;
-  size_t size;
 
   // disable copying
   MPQFile(const MPQFile& /*f*/) { }
@@ -64,13 +63,13 @@ public:
   size_t read(void* dest, size_t bytes);
   size_t getSize() const;
   size_t getPos() const;
-  char* getBuffer() const;
-  char* getPointer() const;
+  char const* getBuffer() const;
+  char const* getPointer() const;
   bool isEof() const;
   void seek(size_t offset);
   void seekRelative(size_t offset);
   void close();
-  void save(const char* filename);
+  void save(std::string const& filename);
   bool isExternal() const
   {
     return External;
@@ -79,29 +78,12 @@ public:
   template<typename T>
   const T* get(size_t offset) const
   {
-    return reinterpret_cast<T*>(buffer + offset);
+    return reinterpret_cast<T const*>(buffer.data() + offset);
   }
 
-  void setBuffer(char *Buf, size_t Size)
-  {
-    if (buffer)
-    {
-      delete buffer;
-      buffer = nullptr;
-    }
-    buffer = Buf;
-    size = Size;
-  }
   void setBuffer (std::vector<char> const& vec)
   {
-    if (buffer)
-    {
-      delete buffer;
-      buffer = nullptr;
-    }
-    size = vec.size();
-    buffer = new char[size];
-    memcpy (buffer, vec.data(), vec.size());
+    buffer = vec;
   }
 
   void SaveFile();
