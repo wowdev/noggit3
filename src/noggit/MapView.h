@@ -147,6 +147,8 @@ private:
   UIFrame* MapChunkWindow;
   UIToggleGroup * gFlagsToggleGroup;
 
+  void prompt_save_current() const;
+
 public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
   int cursor_type = 1;

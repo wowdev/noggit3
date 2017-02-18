@@ -17,7 +17,6 @@ class UIHelp;
 class UICursorSwitcher;
 class UIWindow;
 class UIExitWarning;
-class UISaveCurrentWarning;
 class UICapsWarning;
 class UIWaterSaveWarning;
 class UIHelperModels;
@@ -83,7 +82,6 @@ public:
   ui::texturing_tool* texturingTool;
 
   UIExitWarning *escWarning;
-  UISaveCurrentWarning *scWarning;
   UICapsWarning *capsWarning;
   UIWaterSaveWarning *waterSaveWarning;
   UIHelperModels *HelperModels;

@@ -22,7 +22,6 @@
 #include <noggit/map_index.hpp>
 #include <noggit/ui/AppInfo.h> // appInfo
 #include <noggit/ui/CapsWarning.h>
-#include <noggit/ui/scWarning.h>
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
@@ -57,6 +56,8 @@
 #include <opengl/scoped.hpp>
 
 #include <boost/filesystem.hpp>
+
+#include <QtWidgets/QMessageBox>
 
 #include <algorithm>
 #include <cmath>
@@ -413,10 +414,10 @@ void MapView::createGUI()
   mbar->AddMenu("Assist");
   mbar->AddMenu("Help");
 
-  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [this] { mainGui->scWarning->show(); });
+  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [this] { prompt_save_current(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex.saveChanged(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex.saveall(); });
-  addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { mainGui->scWarning->show(); });
+  addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { prompt_save_current(); });
   addHotkey(SDLK_a, MOD_ctrl + MOD_shift, [this] { gWorld->mapIndex.saveall(); });
   addHotkey (SDLK_s, MOD_ctrl, [this] { gWorld->mapIndex.saveChanged(); });
   addHotkey (SDLK_s, MOD_meta, [this] { gWorld->mapIndex.saveChanged(); });
@@ -981,11 +982,6 @@ void MapView::createGUI()
   mainGui->capsWarning = new UICapsWarning;
   mainGui->capsWarning->hide();
   mainGui->addChild(mainGui->capsWarning);
-
-  // Save current warning
-  mainGui->scWarning = new UISaveCurrentWarning (mainGui);
-  mainGui->scWarning->hide();
-  mainGui->addChild(mainGui->scWarning);
 
   // Water unable to save warning
   mainGui->waterSaveWarning = new UIWaterSaveWarning;
@@ -2398,5 +2394,22 @@ void MapView::checkWaterSave()
   else
   {
     mainGui->waterSaveWarning->show();
+  }
+}
+
+void MapView::prompt_save_current() const
+{
+  if ( QMessageBox::warning
+         ( nullptr
+         , "Save (only) current map tile"
+         , "This can cause a collision bug when placing objects between two ADT borders!\n\n"
+           "If you often use this function, we recommend you to use the 'Save all'"
+           "function as often as possible to get the collisions right."
+         , QMessageBox::Save | QMessageBox::Cancel
+         , QMessageBox::Cancel
+         ) == QMessageBox::Save
+     )
+  {
+    gWorld->mapIndex.savecurrent();
   }
 }
