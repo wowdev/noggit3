@@ -40,7 +40,7 @@ void Brush::GenerateTexture()
     }
     y += change;
   }
-  _texture.reset (new opengl::texture);
+  _texture = std::make_unique<opengl::texture>();
   _texture->bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 256, 256, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
