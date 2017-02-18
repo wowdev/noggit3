@@ -166,7 +166,7 @@ public:
   // ===============================
   // Toggles
   // ===============================
-  bool *showGeosets;
+  std::vector<bool> showGeosets;
 
   // ===============================
   // Texture data

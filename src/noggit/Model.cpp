@@ -21,8 +21,6 @@ Model::Model(const std::string& filename)
 {
   memset(&header, 0, sizeof(ModelHeader));
 
-  showGeosets = nullptr;
-
   finished = false;
 
   //! \note hack: we currently would never load them otherwise
@@ -76,9 +74,6 @@ Model::~Model()
 
   _textures.clear();
   _textureFilenames.clear();
-
-  if (showGeosets)
-    delete[] showGeosets;
 
   gl.deleteBuffers (1, &_vertices_buffer);
 }
@@ -279,7 +274,7 @@ void Model::initCommon(const MPQFile& f)
     uint16_t const* texanimlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexAnimLookup);
     int16_t const* texunitlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexUnitLookup);
 
-    showGeosets = new bool[view->nSub];
+    showGeosets.resize (view->nSub);
     for (size_t i = 0; i<view->nSub; ++i) {
       showGeosets[i] = true;
     }
