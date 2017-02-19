@@ -1,75 +1,53 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/HelperModels.h>
-#include <noggit/ui/Button.h>
 
-#include <algorithm>
-
-#include <noggit/application.h> // fonts
-#include <noggit/ui/Text.h>
-#include <noggit/ui/Texture.h>
-#include <noggit/Video.h> // video
-#include <noggit/MapView.h>
-
-#include <noggit/Log.h>
-
-void addModel(UIFrame *f, int model)
-{
-  (static_cast<UIHelperModels *>(f->parent()))->addModelNow(model);
-}
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
 
 UIHelperModels::UIHelperModels(MapView *mapview)
-  : UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "")
+  : QWidget (nullptr)
 {
-  /*
-  Cube 100", InsertObject, 4  );
-  Cube 250", InsertObject, 5  );
-  Cube 500", InsertObject, 6  );
-  Cube 1000", InsertObject, 7  );
-  Disc 50", InsertObject, 8  );
-  Disc 200", InsertObject, 9  );
-  Disc 777", InsertObject, 10  );
-  Sphere 50", InsertObject, 11  );
-  Sphere 200", InsertObject, 12  );
-  Sphere 777", InsertObject, 13  );
+  auto layout (new QVBoxLayout (this));
+  auto top_layout (new QHBoxLayout (nullptr));
+  layout->addLayout (top_layout);
+  auto bottom_layout (new QGridLayout (nullptr));
+  layout->addLayout (bottom_layout);
 
-  */
-  const float buttonWidth = 140.0f;
-  const float buttonheight = 30.0f;
-  float leftStart = 10.0f;
-  const float topStart = 53.0f;
-  float currentPos = topStart;
+  //! \todo make icon again
+  top_layout->addWidget (new QLabel ("interface/icons/inv_misc_enggizmos_swissarmy.blp", this));
+  top_layout->addWidget (new QLabel ("Select a model to add.\nYou should select a chunk first.", this));
 
+  auto add_button
+    ( [&] (char const* label, int id, int pos_x, int pos_y)
+      {
+        auto button (new QPushButton (label, this));
 
-  addChild(new UITexture(10.0f, 10.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Misc_EngGizmos_swissArmy.blp"));
-  addChild(new UIText(95.0f, 20.0f, "Select a model to add.", app.getArial14(), eJustifyLeft));
-  addChild(new UIText(95.0f, 40.0f, "You must select a chunk first!", app.getArial14(), eJustifyLeft));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Human scale", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 2));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Cube 50", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 3));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Cube 100", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 4));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Cube 250", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 5));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Cube 500", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 6));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Cube 1000", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 7));
+        connect ( button, &QPushButton::clicked
+                , [=]
+                  {
+                    mapview->inserObjectFromExtern (id);
+                  }
+                );
 
-  leftStart = 160.0f;
-  currentPos = topStart;
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Disc 50", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 8));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Disc 200", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 9));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Disc 777", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 10));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Sphere 50", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 11));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Sphere 200", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 12));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Sphere 777", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 13));
+        bottom_layout->addWidget (button, pos_y, pos_x);
+      }
+    );
 
+  add_button ("Human scale", 2, 0, 0);
+  add_button ("Cube 50", 3, 0, 1);
+  add_button ("Cube 100", 4, 0, 2);
+  add_button ("Cube 250", 5, 0, 3);
+  add_button ("Cube 500", 6, 0, 4);
+  add_button ("Cube 1000", 7, 0, 5);
 
-}
-
-void UIHelperModels::resize()
-{
-  x(std::max((video.xres() / 2.0f) - (winWidth / 2.0f), 0.0f));
-  y(std::max((video.yres() / 2.0f) - (winHeight / 2.0f), 0.0f));
-}
-
-void UIHelperModels::addModelNow(int model)
-{
-  this->_mapView->inserObjectFromExtern(model);
+  add_button ("Disc 50", 8, 1, 0);
+  add_button ("Disc 200", 9, 1, 1);
+  add_button ("Disc 777", 10, 1, 2);
+  add_button ("Sphere 50", 11, 1, 3);
+  add_button ("Sphere 200", 12, 1, 4);
+  add_button ("Sphere 777", 13, 1, 5);
 }

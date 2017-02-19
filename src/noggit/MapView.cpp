@@ -986,9 +986,6 @@ void MapView::createGUI()
 
   // helper models
   mainGui->HelperModels = new UIHelperModels(this);
-  mainGui->HelperModels->hide();
-  mainGui->HelperModels->movable(true);
-  mainGui->addChild(mainGui->HelperModels);
 }
 
 MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lookat)
