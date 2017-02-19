@@ -60,11 +60,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   objectEditor->hide();
   addChild(objectEditor);
 
-
-  rotationEditor = new UIRotationEditor((float)video.xres() - 520.0f, 30.0f);
-  rotationEditor->movable(true);
+  rotationEditor = new UIRotationEditor();
   rotationEditor->hide();
-  addChild(rotationEditor);
 
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode)
