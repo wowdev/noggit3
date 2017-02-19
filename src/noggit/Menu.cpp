@@ -55,8 +55,6 @@ Menu::Menu()
   mGUICreditsWindow = new UIAbout();
   mGUIFrame->addChild(mGUICreditsWindow);
   mGUISettingsWindow = new UISettings();
-  mGUISettingsWindow->hide();
-  mGUIFrame->addChild(mGUISettingsWindow);
   //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
   mGUIStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);
   mGUIFrame->addChild(mGUIStatusbar);
