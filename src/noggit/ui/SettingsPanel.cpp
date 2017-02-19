@@ -12,10 +12,11 @@
 #include <noggit/ui/TextBox.h>
 #include <noggit/ui/Texture.h>
 #include <noggit/ui/MinimizeButton.h>
-#include <noggit/Native.hpp>
 #include <noggit/Video.h> // video
 
 #include "revision.h"
+
+#include <QtWidgets/QFileDialog>
 
 void saveSettings(UIFrame* f, int i)
 {
@@ -31,37 +32,67 @@ void discardSettingsChanges(UIFrame* f, int i)
 
 void chooseGamePath(UIFrame* f, int i)
 {
-    std::string path = Native::showFileChooser();
-    Settings::getInstance()->gamePath = path;
-    ((UISettings*)f->parent())->gamePathField->value(path);
+  std::string path
+    ( QFileDialog::getExistingDirectory
+        ( nullptr
+        , "choose game path"
+        , QString::fromStdString (Settings::getInstance()->gamePath)
+        ).toStdString()
+    );
+  Settings::getInstance()->gamePath = path;
+  ((UISettings*)f->parent())->gamePathField->value(path);
 }
 
 void chooseProjectPath(UIFrame* f, int i)
 {
-    std::string path = Native::showFileChooser();
-    Settings::getInstance()->projectPath = path;
-    ((UISettings*)f->parent())->projectPathField->value(path);
+  std::string path
+    ( QFileDialog::getExistingDirectory
+        ( nullptr
+        , "choose project path"
+        , QString::fromStdString (Settings::getInstance()->projectPath)
+        ).toStdString()
+    );
+  Settings::getInstance()->projectPath = path;
+  ((UISettings*)f->parent())->projectPathField->value(path);
 }
 
 void chooseWoDPath(UIFrame* f, int i)
 {
-    std::string path = Native::showFileChooser();
-    Settings::getInstance()->wodSavePath = path;
-    ((UISettings*)f->parent())->wodPathField->value(path);
+  std::string path
+    ( QFileDialog::getExistingDirectory
+        ( nullptr
+        , "choose WoD save path"
+        , QString::fromStdString (Settings::getInstance()->wodSavePath)
+        ).toStdString()
+    );
+  Settings::getInstance()->wodSavePath = path;
+  ((UISettings*)f->parent())->wodPathField->value(path);
 }
 
 void chooseImportPath(UIFrame* f, int i)
 {
-    std::string path = Native::showFileChooser();
-    Settings::getInstance()->importFile = path;
-    ((UISettings*)f->parent())->importPathField->value(path);
+  std::string path
+    ( QFileDialog::getOpenFileName
+        ( nullptr
+        , "choose import file path"
+        , QString::fromStdString (Settings::getInstance()->importFile)
+        ).toStdString()
+    );
+  Settings::getInstance()->importFile = path;
+  ((UISettings*)f->parent())->importPathField->value(path);
 }
 
 void chooseWMVPath(UIFrame* f, int i)
 {
-    std::string path = Native::showFileChooser();
-    Settings::getInstance()->wmvLogFile = path;
-    ((UISettings*)f->parent())->wmvLogPathField->value(path);
+  std::string path
+    ( QFileDialog::getExistingDirectory
+        ( nullptr
+        , "choose WoWModelViewer log file path"
+        , QString::fromStdString (Settings::getInstance()->wmvLogFile)
+        ).toStdString()
+    );
+  Settings::getInstance()->wmvLogFile = path;
+  ((UISettings*)f->parent())->wmvLogPathField->value(path);
 }
 
 void adjustFarZ(UIFrame*f, int i)
