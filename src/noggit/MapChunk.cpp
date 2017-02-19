@@ -280,15 +280,17 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   math::vector_3d *ttv = mMinimap;
 
   // vertices
-  for (int j = 0; j<17; ++j) {
+  for (int j = 0; j < 17; ++j) {
     for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
       float xpos, zpos;
-      //f->read(&h,4);
+
       xpos = i * 0.125f;
       zpos = j * 0.5f * 0.125f;
+
       if (j % 2) {
-        xpos += 0.125f*0.5f;
+        xpos += 0.125f * 0.5f;
       }
+
       math::vector_3d v = math::vector_3d(xpos + px, zpos + py, -1);
       *ttv++ = v;
     }
@@ -316,14 +318,16 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
   {
-    //tm[j].z=tv[j].y;
     ShadowAmount = 1.0f - (-mNormals[j].x + mNormals[j].y - mNormals[j].z);
-    if (ShadowAmount<0)
+
+    if (ShadowAmount < 0)
       ShadowAmount = 0.0f;
-    if (ShadowAmount>1.0)
+
+    if (ShadowAmount > 1.0)
       ShadowAmount = 1.0f;
+
     ShadowAmount *= 0.5f;
-    //ShadowAmount=0.2;
+
     mFakeShadows[j].x = 0;
     mFakeShadows[j].y = 0;
     mFakeShadows[j].z = 0;
@@ -418,7 +422,7 @@ void MapChunk::drawTextures()
   gl.vertexPointer (minimap, 3, GL_FLOAT, 0, 0);
   gl.colorPointer (minishadows, 4, GL_FLOAT, 0, 0);
 
-  gl.drawElements(GL_TRIANGLE_STRIP, mapstrip2.size(), GL_UNSIGNED_SHORT, mapstrip2.data());
+  gl.drawElements(GL_TRIANGLES, strip_without_holes.size(), GL_UNSIGNED_SHORT, strip_without_holes.data());
 
   if (_texture_set.num() > 1U)
   {
@@ -441,34 +445,6 @@ int MapChunk::indexNoLoD(int x, int y)
 int indexMapBuf(int x, int y)
 {
   return ((y + 1) / 2) * 9 + (y / 2) * 8 + x;
-}
-
-const int stripsize2 = 16 * 18 + 7 * 2 + 8 * 2;
-template <class V>
-void stripify2(V *out)
-{
-  for (int row = 0; row<8; row++) {
-    std::size_t thisrow = indexMapBuf(0, row * 2);
-    std::size_t nextrow = indexMapBuf(0, row * 2 + 1);
-    std::size_t overrow = indexMapBuf(0, (row + 1) * 2);
-
-    if (row>0) *out++ = thisrow + 0;// jump end
-    for (int col = 0; col<8; col++) {
-      *out++ = thisrow + col;
-      *out++ = nextrow + col;
-    }
-    *out++ = thisrow + 8;
-    *out++ = overrow + 8;
-    *out++ = overrow + 8;// jump start
-    *out++ = thisrow + 0;// jump end
-    *out++ = thisrow + 0;
-    for (int col = 0; col<8; col++) {
-      *out++ = overrow + col;
-      *out++ = nextrow + col;
-    }
-    if (row<8) *out++ = overrow + 8;
-    if (row<7) *out++ = overrow + 8;// jump start
-  }
 }
 
 void MapChunk::initStrip()
@@ -513,9 +489,6 @@ void MapChunk::initStrip()
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
-
-  mapstrip2.resize (stripsize2);
-  stripify2<StripType> (mapstrip2.data());
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
