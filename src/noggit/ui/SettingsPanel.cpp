@@ -50,6 +50,20 @@ void chooseWoDPath(UIFrame* f, int i)
     ((UISettings*)f->parent())->wodPathField->value(path);
 }
 
+void chooseImportPath(UIFrame* f, int i)
+{
+    std::string path = Native::showFileChooser();
+    Settings::getInstance()->importFile = path;
+    ((UISettings*)f->parent())->importPathField->value(path);
+}
+
+void chooseWMVPath(UIFrame* f, int i)
+{
+    std::string path = Native::showFileChooser();
+    Settings::getInstance()->wmvLogFile = path;
+    ((UISettings*)f->parent())->wmvLogPathField->value(path);
+}
+
 void adjustFarZ(UIFrame*f, int i)
 {
     int farZ = Settings::getInstance()->FarZ;
@@ -87,11 +101,11 @@ UISettings::UISettings()
     
     addChild(new UIText(28, 118, "Import Path:", app.getArial12(), eJustifyLeft));
     addChild(importPathField = new UITextBox(99, 117, 286, 32, app.getArial12()));
-    addChild(new UIButton(390, 116, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
+    addChild(new UIButton(390, 116, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseImportPath, 0));
     
     addChild(new UIText(10, 148, "WMV Log Path:", app.getArial12(), eJustifyLeft));
     addChild(wmvLogPathField = new UITextBox(99, 147, 286, 32, app.getArial12()));
-    addChild(new UIButton(390, 146, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
+    addChild(new UIButton(390, 146, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWMVPath, 0));
     
     addChild(new UIText(13, 186, "View Distance:", app.getArial12(), eJustifyLeft));
     addChild(viewDistanceField = new UITextBox(99, 184, 128, 32, app.getArial12()));
