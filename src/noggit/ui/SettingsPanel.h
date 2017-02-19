@@ -2,36 +2,48 @@
 
 #pragma once
 
-class UITextBox;
-class UICheckBox;
-class UIFrame;
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QWidget>
 
-#include <noggit/ui/CloseWindow.h>
-
-class UISettings : public UIWindow
+namespace util
 {
-public:
-  UITextBox *gamePathField;
-  UITextBox *wodPathField;
-  UITextBox *projectPathField;
-  UITextBox *importPathField;
-  UITextBox *wmvLogPathField;
-  UITextBox *viewDistanceField;
-  UITextBox *farZField;
+  struct file_line_edit : public QWidget
+  {
+    enum mode
+    {
+      files,
+      directories,
+    };
+
+    file_line_edit (mode, QString browse_title, QWidget* parent);
+
+    QLineEdit* actual;
+  };
+}
+
+class UISettings : public QDialog
+{
 private:
-  static const int winWidth = 500;
-  static const int winHeight = 374;
-    
-  UICheckBox *tabletModeCheck;
-  UICheckBox *autoselectCheck;
-  UICheckBox *modelStatsCheck;
-  UICheckBox *modelsBoxCheck;
-  UICheckBox *randRotCheck;
-  UICheckBox *randSizeCheck;
-  UICheckBox *randTiltCheck;
-    
+  util::file_line_edit* gamePathField;
+  util::file_line_edit* wodPathField;
+  util::file_line_edit* projectPathField;
+  util::file_line_edit* importPathField;
+  util::file_line_edit* wmvLogPathField;
+  QDoubleSpinBox* viewDistanceField;
+  QDoubleSpinBox* farZField;
+
+  QCheckBox* tabletModeCheck;
+  QCheckBox* autoselectCheck;
+  QCheckBox* modelStatsCheck;
+  QCheckBox* modelsBoxCheck;
+  QCheckBox* randRotCheck;
+  QCheckBox* randSizeCheck;
+  QCheckBox* randTiltCheck;
+
 public:
   UISettings();
   void readInValues();
-  void resize();
 };
