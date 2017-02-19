@@ -123,8 +123,6 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   // Cursor Switcher
   CursorSwitcher = new UICursorSwitcher(theMapview->cursor_color, theMapview->cursor_type);
   CursorSwitcher->hide();
-  CursorSwitcher->movable(true);
-  addChild(CursorSwitcher);
 
   _help = new UIHelp();
   _help->hide();
@@ -153,7 +151,7 @@ void UIMapViewGUI::hideCursorSwitcher()
 
 void UIMapViewGUI::toggleCursorSwitcher()
 {
-  CursorSwitcher->toggleVisibility();
+  CursorSwitcher->setVisible (!CursorSwitcher->isVisible());
 }
 
 void UIMapViewGUI::showHelp()
