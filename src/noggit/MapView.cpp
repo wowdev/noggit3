@@ -2387,17 +2387,21 @@ void MapView::checkWaterSave()
 
 void MapView::prompt_exit() const
 {
-  if ( QMessageBox::warning
-         ( nullptr
-         , "Return to menu"
-         , "Do you really want to exit?\nUnsaved changes will be lost!"
-         , QMessageBox::Close | QMessageBox::Cancel
-         , QMessageBox::Cancel
-         ) == QMessageBox::Close
-     )
-  {
-    app.pop = true;
-  }
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setWindowTitle("Exit map editor and return to menu?");
+    msgBox.setText("Exit the map editor and return to menu?");
+    msgBox.setInformativeText("Any unsaved changes will be lost.");
+    msgBox.addButton("Return to Menu", QMessageBox::DestructiveRole);
+    QPushButton *continueButton = msgBox.addButton("Continue Editing", QMessageBox::RejectRole);
+    msgBox.setDefaultButton(continueButton);
+    msgBox.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    
+    msgBox.exec();
+    
+    if (msgBox.buttonRole(msgBox.clickedButton()) == QMessageBox::DestructiveRole) {
+        app.pop = true;
+    }
 }
 
 void MapView::prompt_save_current() const
