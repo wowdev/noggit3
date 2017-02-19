@@ -155,8 +155,7 @@ void MapView::set_editing_mode (editing_mode mode)
     mainGui->objectEditor->y(tool_settings_y);
     mainGui->objectEditor->show();
     mainGui->objectEditor->filename->show();
-    mainGui->rotationEditor->x(mainGui->objectEditor->getX() - mainGui->rotationEditor->getW() - 10.0f);
-    mainGui->rotationEditor->y(tool_settings_y);
+    mainGui->rotationEditor->move (mainGui->objectEditor->x() - mainGui->rotationEditor->width() - 10.0f, tool_settings_y);
   }
 
   terrainMode = mode;

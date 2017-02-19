@@ -16,172 +16,104 @@
 #include <noggit/Video.h> // video
 #include <noggit/WMOInstance.h>
 
-void updateRotationX(UITextBox::Ptr textBox, const std::string& value)
-{
-  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->hasSelection())
-  {
-    float v = std::min(180.0f, std::max(-180.0f, (float)std::atof(value.c_str())));
-    textBox->value(misc::floatToStr(v, 3));
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QLabel>
 
-    editor->rotationVect->x = v;
-
-    if (editor->isWmo())
-    {
-      editor->updateWMO();
-    }
-  }
-}
-
-void updateRotationZ(UITextBox::Ptr textBox, const std::string& value)
-{
-  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->hasSelection())
-  {
-    float v = std::min(180.0f, std::max(-180.0f, (float)std::atof(value.c_str())));
-    textBox->value(misc::floatToStr(v, 3));
-
-    editor->rotationVect->z = v;
-
-    if (editor->isWmo())
-    {
-      editor->updateWMO();
-    }
-  }
-}
-
-void updateRotationY(UITextBox::Ptr textBox, const std::string& value)
-{
-  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->hasSelection())
-  {
-    float v = std::min(360.0f, std::max(0.0f, (float)std::atof(value.c_str())));
-    textBox->value(misc::floatToStr(v, 3));
-
-    editor->rotationVect->y = v;
-
-    if (editor->isWmo())
-    {
-      editor->updateWMO();
-    }
-  }
-}
-
-void updatePosX(UITextBox::Ptr textBox, const std::string& value)
-{
-  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->hasSelection())
-  {
-    float v = std::atof(value.c_str());
-    textBox->value(misc::floatToStr(v, 5));
-
-    editor->posVect->x = v;
-
-    if (editor->isWmo())
-    {
-      editor->updateWMO();
-    }
-  }
-}
-
-void updatePosZ(UITextBox::Ptr textBox, const std::string& value)
-{
-  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->hasSelection())
-  {
-    float v = std::atof(value.c_str());
-    textBox->value(misc::floatToStr(v, 5));
-
-    editor->posVect->z = v;
-
-    if (editor->isWmo())
-    {
-      editor->updateWMO();
-    }
-  }
-}
-
-void updatePosY(UITextBox::Ptr textBox, const std::string& value)
-{
-  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->hasSelection())
-  {
-    float v = std::atof(value.c_str());
-    textBox->value(misc::floatToStr(v, 5));
-
-    editor->posVect->y = v;
-
-    if (editor->isWmo())
-    {
-      editor->updateWMO();
-    }
-  }
-}
-
-void updateScale(UITextBox::Ptr textBox, const std::string& value)
-{
-  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->hasSelection() && !editor->isWmo())
-  {
-    float v = std::max(0.01f, std::min(63.0f, (float)std::atof(value.c_str())));
-    textBox->value(misc::floatToStr(v, 2));
-
-    *editor->scale = v;
-  }
-}
-
-
-UIRotationEditor::UIRotationEditor(float x, float y)
-  : UIWindow(x, y, 120.0f, 270.0f)
+UIRotationEditor::UIRotationEditor()
+  : QWidget (nullptr)
   , rotationVect(nullptr)
   , posVect(nullptr)
   , scale(nullptr)
   , _selection(false)
-  , _wmo(false)
   , _wmoInstance(nullptr)
 {
-  _tbRotationX = new UITextBox(20.0f, 25.0f, 95.0f, 35.0f, app.getArial12(), updateRotationX);
-  _tbRotationZ = new UITextBox(20.0f, 55.0f, 95.0f, 35.0f, app.getArial12(), updateRotationZ);
-  _tbRotationY = new UITextBox(20.0f, 98.0f, 95.0f, 35.0f, app.getArial12(), updateRotationY);
+  auto layout (new QFormLayout (this));
 
-  _tbPosX = new UITextBox(20.0f, 145.0f, 95.0f, 35.0f, app.getArial12(), updatePosX);
-  _tbPosZ = new UITextBox(20.0f, 170.0f, 95.0f, 35.0f, app.getArial12(), updatePosZ);
-  _tbPosY = new UITextBox(20.0f, 195.0f, 95.0f, 35.0f, app.getArial12(), updatePosY);
+  layout->addRow (new QLabel ("Tilt", this));
+  layout->addRow ("X", _rotation_x = new QDoubleSpinBox (this));
+  layout->addRow ("Z", _rotation_z = new QDoubleSpinBox (this));
 
-  _tbScale = new UITextBox(20.0f, 245.0f, 95.0f, 35.0f, app.getArial12(), updateScale);
+  layout->addRow (new QLabel ("Rotation", this));
+  layout->addRow ("", _rotation_y = new QDoubleSpinBox (this));
 
-  addChild(new UIText(5.0f, 5.0f, "Tilt:", app.getArial12(), eJustifyLeft));
-  addChild(new UIText(5.0f, 27.0f, "X", app.getArial12(), eJustifyLeft));
-  addChild(new UIText(5.0f, 57.0f, "Z", app.getArial12(), eJustifyLeft));
-  addChild(new UIText(5.0f, 80.0f, "Rotation:", app.getArial12(), eJustifyLeft));
+  layout->addRow (new QLabel ("Position", this));
+  layout->addRow ("X", _position_x = new QDoubleSpinBox (this));
+  layout->addRow ("Z", _position_z = new QDoubleSpinBox (this));
+  layout->addRow ("H", _position_y = new QDoubleSpinBox (this));
 
-  addChild(new UIText(5.0f, 125.0f, "Pos:", app.getArial12(), eJustifyLeft));
-  addChild(new UIText(5.0f, 147.0f, "X", app.getArial12(), eJustifyLeft));
-  addChild(new UIText(5.0f, 172.0f, "Z", app.getArial12(), eJustifyLeft));
-  addChild(new UIText(5.0f, 197.0f, "H", app.getArial12(), eJustifyLeft));
+  layout->addRow (new QLabel ("Scale", this));
+  layout->addRow ("", _scale = new QDoubleSpinBox (this));
 
-  _textScale = new UIText(5.0f, 225.0f, "Scale:", app.getArial12(), eJustifyLeft);
-  addChild(_textScale);
 
-  addChild(_tbRotationX);
-  addChild(_tbRotationZ);
-  addChild(_tbRotationY);
-  addChild(_tbPosX);
-  addChild(_tbPosZ);
-  addChild(_tbPosY);
-  addChild(_tbScale);
-}
+  _rotation_x->setRange (-180.f, 180.f);
+  _rotation_x->setDecimals (3);
+  _rotation_z->setRange (-180.f, 180.f);
+  _rotation_z->setDecimals (3);
 
-void UIRotationEditor::toggle()
-{
-  if (_hidden)
-  {
-    show();
-  }
-  else
-  {
-    hide();
-  }
+  _rotation_y->setRange (0.f, 360.f);
+  _rotation_y->setDecimals (3);
+
+  _position_x->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
+  _position_x->setDecimals (5);
+  _position_z->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
+  _position_z->setDecimals (5);
+  _position_y->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
+  _position_y->setDecimals (5);
+
+  _scale->setRange (0.01f, 63.0f);
+  _scale->setDecimals (2);
+
+
+  connect ( _rotation_x, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+            {
+              rotationVect->x = v;
+              maybe_updateWMO();
+            }
+          );
+  connect ( _rotation_z, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+            {
+              rotationVect->z = v;
+              maybe_updateWMO();
+            }
+          );
+  connect ( _rotation_y, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+            {
+              rotationVect->y = v;
+              maybe_updateWMO();
+            }
+          );
+
+  connect ( _position_x, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+            {
+              posVect->x = v;
+              maybe_updateWMO();
+            }
+          );
+  connect ( _position_z, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+            {
+              posVect->z = v;
+              maybe_updateWMO();
+            }
+          );
+  connect ( _position_y, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+            {
+              posVect->y = v;
+              maybe_updateWMO();
+            }
+          );
+
+  connect ( _scale, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+            {
+              *scale = v;
+            }
+          );
 }
 
 void UIRotationEditor::select(selection_type entry)
@@ -191,23 +123,16 @@ void UIRotationEditor::select(selection_type entry)
     rotationVect = &(boost::get<selected_model_type> (entry)->dir);
     posVect = &(boost::get<selected_model_type> (entry)->pos);
     scale = &(boost::get<selected_model_type> (entry)->sc);
-    _wmo = false;
     _wmoInstance = nullptr;
-    _textScale->show();
-    _tbScale->show();
   }
   else if (entry.which() == eEntry_WMO)
   {
     _wmoInstance = boost::get<selected_wmo_type> (entry);
     rotationVect = &(_wmoInstance->dir);
     posVect = &(_wmoInstance->pos);
-    _wmo = true;
-    _textScale->hide();
-    _tbScale->hide();
   }
   else
   {
-    _wmo = false;
     _wmoInstance = nullptr;
     clearSelect();
     return;
@@ -221,17 +146,44 @@ void UIRotationEditor::updateValues()
 {
   if (_selection)
   {
-    _tbRotationX->value(misc::floatToStr(rotationVect->x, 3));
-    _tbRotationY->value(misc::floatToStr(rotationVect->y, 3));
-    _tbRotationZ->value(misc::floatToStr(rotationVect->z, 3));
-    _tbPosX->value(misc::floatToStr(posVect->x, 5));
-    _tbPosY->value(misc::floatToStr(posVect->y, 5));
-    _tbPosZ->value(misc::floatToStr(posVect->z, 5));
+    QSignalBlocker const block_rotation_x (_rotation_x);
+    QSignalBlocker const block_rotation_y (_rotation_y);
+    QSignalBlocker const block_rotation_z (_rotation_z);
+    QSignalBlocker const block_position_x (_position_x);
+    QSignalBlocker const block_position_y (_position_y);
+    QSignalBlocker const block_position_z (_position_z);
+    QSignalBlocker const block_scale (_scale);
 
-    if (!_wmo)
+    _rotation_x->setValue (rotationVect->x);
+    _rotation_y->setValue (rotationVect->y);
+    _rotation_z->setValue (rotationVect->z);
+    _position_x->setValue (posVect->x);
+    _position_y->setValue (posVect->y);
+    _position_z->setValue (posVect->z);
+
+    _rotation_x->setEnabled (true);
+    _rotation_y->setEnabled (true);
+    _rotation_z->setEnabled (true);
+    _position_x->setEnabled (true);
+    _position_y->setEnabled (true);
+    _position_z->setEnabled (true);
+
+    if (!_wmoInstance)
     {
-      _tbScale->value(misc::floatToStr(*scale));
+      _scale->setValue (*scale);
     }
+
+    _scale->setEnabled (!_wmoInstance);
+  }
+  else
+  {
+    _rotation_x->setEnabled (false);
+    _rotation_y->setEnabled (false);
+    _rotation_z->setEnabled (false);
+    _position_x->setEnabled (false);
+    _position_y->setEnabled (false);
+    _position_z->setEnabled (false);
+    _scale->setEnabled (false);
   }
 }
 
@@ -241,29 +193,12 @@ void UIRotationEditor::clearSelect()
   rotationVect = nullptr;
   posVect = nullptr;
   scale = nullptr;
-  _tbRotationX->value("");
-  _tbRotationY->value("");
-  _tbRotationZ->value("");
-  _tbPosX->value("");
-  _tbPosY->value("");
-  _tbPosZ->value("");
-  _tbScale->value("");
 }
 
-bool UIRotationEditor::hasFocus() const
+void UIRotationEditor::maybe_updateWMO()
 {
-  return !_hidden &&
-         ( _tbRotationX->focus() ||
-           _tbRotationY->focus() ||
-           _tbRotationZ->focus() ||
-           _tbPosX->focus() ||
-           _tbPosY->focus() ||
-           _tbPosZ->focus() ||
-           _tbScale->focus()
-         );
-}
-
-void UIRotationEditor::updateWMO()
-{
-  _wmoInstance->recalcExtents();
+  if (_wmoInstance)
+  {
+    _wmoInstance->recalcExtents();
+  }
 }

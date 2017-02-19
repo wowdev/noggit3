@@ -5,43 +5,39 @@
 #include <noggit/ui/Window.h>
 #include <noggit/Selection.h>
 
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QWidget>
+
 class UIText;
 class UITextBox;
 class WMOInstance;
 
-class UIRotationEditor : public UIWindow
+class UIRotationEditor : public QWidget
 {
 public:
-  UIRotationEditor(float x, float y);
+  UIRotationEditor();
 
   void select(selection_type entry);
   void clearSelect();
   void updateValues();
-  void toggle();
   bool hasSelection() const { return _selection; }
 
-  bool isWmo() const { return _wmo; }
-  void updateWMO();
+  bool hasFocus() const {return false;}
 
-  // check if any checkbox is focused
-  bool hasFocus() const;
-
+private:
+  void maybe_updateWMO();
   math::vector_3d* rotationVect;
   math::vector_3d* posVect;
   float* scale;
-private:
+
   bool _selection;
-  bool _wmo;
   WMOInstance* _wmoInstance;
 
-  UITextBox* _tbRotationX;
-  UITextBox* _tbRotationY;
-  UITextBox* _tbRotationZ;
-
-  UITextBox* _tbPosX;
-  UITextBox* _tbPosY;
-  UITextBox* _tbPosZ;
-
-  UITextBox* _tbScale;
-  UIText* _textScale;
+  QDoubleSpinBox* _rotation_x;
+  QDoubleSpinBox* _rotation_z;
+  QDoubleSpinBox* _rotation_y;
+  QDoubleSpinBox* _position_x;
+  QDoubleSpinBox* _position_z;
+  QDoubleSpinBox* _position_y;
+  QDoubleSpinBox* _scale;
 };

@@ -79,13 +79,14 @@ void updateMaxScale(UITextBox::Ptr textBox, const std::string& value)
 
 void toggleRotationEditor(UIFrame* f, int)
 {
-  (static_cast<UIMapViewGUI *>(f->parent()->parent()))->rotationEditor->toggle();
+  (static_cast<UIMapViewGUI *>(f->parent()->parent()))->rotationEditor->setVisible
+    (!(static_cast<UIMapViewGUI *>(f->parent()->parent()))->rotationEditor->isVisible());
 }
 
 
 void showImportModels(UIFrame* f, int)
 {
-  (static_cast<UIObjectEditor *>(f->parent())->modelImport->show());  
+  (static_cast<UIObjectEditor *>(f->parent())->modelImport->show());
 }
 
 void SaveObjecttoTXT(UIFrame* f, int)
