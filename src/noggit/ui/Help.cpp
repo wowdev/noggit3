@@ -2,17 +2,15 @@
 
 #include <noggit/ui/Help.h>
 
-#include <noggit/ui/Text.h> // UIText
-#include <noggit/application.h> // app.getArial14()
-#include <noggit/Video.h> // video
-
-const int winWidth = 810;
-const int winHeight = 920;
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 
 UIHelp::UIHelp()
-  : UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "Keybindings", true)
+  : QWidget (nullptr)
 {
-  addChild(new UIText(20.0f, 30.0f,
+  new QHBoxLayout (this);
+
+  layout()->addWidget (new QLabel (
     "Basic controls:\n"
     "  Left mouse dragged - Rotate camera\n"
     "  Left mouse click - Select chunk or object\n"
@@ -72,10 +70,9 @@ UIHelp::UIHelp()
     "Impassible Flags:\n"
     "  SHIFT + Left mouse - Paint flag\n"
     "  CTRL + Left mouse  - Clear flag\n"
-    , app.getArial14(), eJustifyLeft)
-    );
+    , this));
 
-  addChild(new UIText(380.0f, 30.0f,
+  layout()->addWidget (new QLabel (
     "Edit ground:\n"
     "  SHIFT + F1 - toggle ground edit mode\n"
     "  ALT + left mouse + mouse move - change brush size\n"
@@ -136,6 +133,5 @@ UIHelp::UIHelp()
     "      Click show sub-zones\n"
     "  CTRL + Left mouse  - Pick existing AreaID\n"
     "  SHIFT + Left mouse - Paint selected AreaID\n"
-    , app.getArial14(), eJustifyLeft)
-    );
+    , this));
 }

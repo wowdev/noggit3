@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include <noggit/ui/CloseWindow.h>
+#include <QtWidgets/QWidget>
 
-class UIHelp : public UICloseWindow
+class UIHelp : public QWidget
 {
 public:
   UIHelp();
