@@ -49,6 +49,7 @@ static LOGCONTEXT  glogContext = { 0 };
 
 #include <QtCore/QTimer>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QLabel>
 
 #include "revision.h"
 
@@ -545,6 +546,9 @@ int main(int argc, char *argv[])
   RegisterErrorHandlers();
 
   QApplication qapp (argc, argv);
+
+  QLabel widget_to_keep_qt_alive ("DO NOT CLOSE THIS WINDOW");
+  widget_to_keep_qt_alive.show();
 
   app.start(argc, argv);
 
