@@ -2,152 +2,74 @@
 
 #include <noggit/ui/ModelImport.h>
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
+#include <noggit/MapView.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/Selection.h>
+#include <noggit/Settings.h>
+#include <noggit/WMOInstance.h>
+
 #include <string>
 #include <fstream>
 
-#include <noggit/application.h> // fonts
-#include <noggit/Misc.h> // fonts
-#include <noggit/ui/Text.h>
-#include <noggit/ui/Texture.h>
-#include <noggit/Video.h> // video
-#include <noggit/MapView.h>
-#include <noggit/ui/ListView.h>
-#include <noggit/ui/Button.h>
-#include <noggit/Settings.h>
-#include <noggit/Selection.h>
-#include <noggit/ModelInstance.h>
-#include <noggit/WMOInstance.h>
+#include <QtWidgets/QFormLayout>
 
-#include <noggit/Log.h>
-
-void addTXTModelext(UIFrame *f, int id)
+UIModelImport::UIModelImport (MapView* mapview)
+  : QWidget (nullptr)
 {
-  (static_cast<UIModelImport *>(f->parent()->parent()))->addTXTModel(id);
+  auto layout (new QFormLayout (this));
+
+  layout->addRow ("Filter", _textBox = new QLineEdit (this));
+  connect ( _textBox, &QLineEdit::textChanged
+          , [this]
+            {
+              buildModelList();
+            }
+          );
+
+  layout->addWidget (_list = new QListWidget (this));
+
+  buildModelList();
+
+  connect ( _list, &QListWidget::itemDoubleClicked
+          , [mapview] (QListWidgetItem* item)
+            {
+              if (item->text().endsWith (".m2"))
+              {
+                auto mi (new ModelInstance (item->text().toStdString()));
+                mi->sc = 1.0f;
+                mapview->selectModel(mi);
+              }
+              else if (item->text().endsWith (".wmo"))
+              {
+                mapview->selectModel (new WMOInstance (item->text().toStdString()));
+              }
+            }
+          );
 }
 
-void updateModelList(UIFrame *f, int id)
+void UIModelImport::buildModelList()
 {
-  (static_cast<UIModelImport *>(f->parent())->builModelList());
-}
+  _list->clear();
 
-void UIModelImport__TextBoxEnter(UITextBox::Ptr textBox, const std::string& value)
-{
-  (static_cast<UIModelImport *>(textBox->parent())->builModelList());
-}
+  std::ifstream fileReader (Settings::getInstance()->importFile);
+  std::string const filter
+    (noggit::mpq::normalized_filename (_textBox->text().toStdString()));
 
-UIModelImport::UIModelImport(MapView *mapview)
-  : UICloseWindow((float)video.xres() - (float)winWidth - 5.0f, (float)video.yres() / 1.5f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "", true)
-{
-  _mapView = mapview;
-  addChild(new UIText(12.0f, 10.0f, "Select model", app.getArial14(), eJustifyLeft));
-  _textBox = new UITextBox(105.0f, 7.0f, 220.0f, 40.0f, UIModelImport__TextBoxEnter);
-  addChild(_textBox);
-  addChild(new UIButton(330.0f, 7.0f, 75.0f, 30.0f, "Filter", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", updateModelList, 0));
-
-  builModelList();
-
-}
-
-void UIModelImport::addTXTModel(int id)
-{
-  // do it
-  //_mapView->addModelFromTextSelection(id);
-
-  std::ifstream fileReader(Settings::getInstance()->importFile);
-  size_t n = 1;
-  std::string line, filepath = "";
-  id -= 99;
-
-  if (fileReader.is_open())
-  {
-    while (!fileReader.eof())
-    {
-      getline(fileReader, line);
-
-      if (line != "" && (line.find('.') != std::string::npos))
-      {
-        if (id == n++)
-        {
-          filepath = line;
-          break;
-        }
-      }
-    }
-  }
-
-  if (line != "")
-  {
-    std::transform(line.begin(), line.end(), line.begin(), ::tolower);
-    std::string m2Ext = ".m2", wmoExt = ".wmo";
-
-    if (std::equal(m2Ext.rbegin(), m2Ext.rend(), line.rbegin()))
-    {
-      ModelInstance* mi = new ModelInstance(line);
-      mi->sc = 1.0f;
-      _mapView->selectModel(mi);
-    }
-    else if (std::equal(wmoExt.rbegin(), wmoExt.rend(), line.rbegin()))
-    {
-      _mapView->selectModel(new WMOInstance(line));
-    }
-  }
-}
-
-void UIModelImport::builModelList()
-{
-  removeChild(MoldelList);
-  MoldelList = new UIListView(5, 37, width() - 8, height() - 38, 20);
-  MoldelList->clickable(true);
-  addChild(MoldelList);
-  //  Read out Area List.
   std::string line;
-  const std::string filter = _textBox->value();
-  int counter = 1;
-  bool filtered = filter != "";
-  std::ifstream fileReader(Settings::getInstance()->importFile);
-
-  if (fileReader.is_open())
+  while (std::getline (fileReader, line))
   {
-    while (!fileReader.eof())
+    if (line.empty())
     {
-      getline(fileReader, line);
-
-      if (line != "" && (line.find('.') != std::string::npos))
-      {
-        std::transform(line.begin(), line.end(), line.begin(), ::tolower);
-        std::string diveded = misc::explode(line, "\\");
-
-        if (filtered && diveded.find(filter, 0) == std::string::npos)
-        {
-          counter++;
-          continue;
-        }
-
-        std::stringstream ss;
-        ss << counter << ": " << diveded;
-        UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
-        UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(),
-                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
-                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
-                                            addTXTModelext,
-                                            counter+99
-                                           ); // first id from file = 100
-        tempButton->setLeft();
-        curFrame->addChild(tempButton);
-        MoldelList->addElement(curFrame);
-        counter++;
-      }
+      continue;
     }
+
+    std::string path (noggit::mpq::normalized_filename (line));
+
+    if (!filter.empty() && path.find (filter) == std::string::npos)
+    {
+      continue;
+    }
+
+    _list->addItem (QString::fromStdString (path));
   }
-  MoldelList->recalcElements(1);
-}
-
-
-void UIModelImport::resize()
-{
-  x(std::max((video.xres() / 2.0f) - (winWidth / 2.0f), 0.0f));
-  y(std::max((video.yres() / 2.0f) - (winHeight / 2.0f), 0.0f));
 }

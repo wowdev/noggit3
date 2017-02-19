@@ -981,8 +981,6 @@ void MapView::createGUI()
 
   // modelimport
   mainGui->objectEditor->modelImport = new UIModelImport(this);
-  mainGui->objectEditor->modelImport->hide();
-  mainGui->addChild(mainGui->objectEditor->modelImport);
 
   // helper models
   mainGui->HelperModels = new UIHelperModels(this);
