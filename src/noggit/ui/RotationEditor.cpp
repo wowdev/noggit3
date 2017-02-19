@@ -24,6 +24,8 @@ UIRotationEditor::UIRotationEditor()
   , _selection(false)
   , _wmoInstance(nullptr)
 {
+  setWindowFlags(Qt::Tool);
+
   auto layout (new QFormLayout (this));
 
   layout->addRow (new QLabel ("Tilt", this));

@@ -11,6 +11,7 @@
 UICursorSwitcher::UICursorSwitcher(math::vector_4d& color, int& cursor_type)
   : QWidget (nullptr)
 {
+  setWindowFlags(Qt::Tool);
   setWindowTitle ("Cursor options");
 
   new QVBoxLayout (this);
