@@ -20,7 +20,6 @@
 #include <noggit/World.h>
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include <noggit/map_index.hpp>
-#include <noggit/ui/AppInfo.h> // appInfo
 #include <noggit/ui/CapsWarning.h>
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
@@ -1073,11 +1072,6 @@ void MapView::tick(float t, float dt)
 
   update_cursor_pos();
 
-  // write some stuff into infos window for debuging
-  std::stringstream appinfoText;
-  appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
-  appinfoText << "Current cursor: " << cursor_type << std::endl;
-  mainGui->guiappInfo->setText(appinfoText.str());
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode)
   {

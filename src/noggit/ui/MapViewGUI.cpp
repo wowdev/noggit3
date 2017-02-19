@@ -12,7 +12,6 @@
 #include <noggit/MapView.h>
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include <noggit/Project.h>
-#include <noggit/ui/AppInfo.h> // UIAppInfo
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // UIDetailInfos
 #include <noggit/ui/FlattenTool.hpp>
@@ -115,15 +114,6 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   ZoneIDBrowser->movable(true);
   ZoneIDBrowser->hide();
   addChild(ZoneIDBrowser);
-
-  // AppInfosWindow
-  guiappInfo = new UIAppInfo(1.0f, video.yres() - 440.0f, 420.0f, 410.0f);
-  guiappInfo->movable(true);
-  guiappInfo->hide();
-  std::stringstream appinfoText;
-  appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
-  guiappInfo->setText(appinfoText.str());
-  addChild(guiappInfo);
 
   TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f, 490.0f, 170.0f);
   TexturePicker->hide();
