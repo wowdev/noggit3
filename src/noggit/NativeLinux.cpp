@@ -6,11 +6,6 @@
 #include <array>
 #include "Native.hpp"
 
-int Native::showAlertDialog(std::string title, std::string message)
-{
-    return 0;
-}
-
 std::string Native::getGamePath()
 {
     return "";
