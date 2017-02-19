@@ -5,7 +5,6 @@
 class UIToolbar;
 class UIStatusBar;
 class UIDetailInfos;
-class UIDoodadSpawner;
 class UIAppInfo;
 class UIMinimapWindow;
 class UIZoneIDBrowser;
@@ -47,7 +46,6 @@ private:
   bool _tilemode;
   UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
-  //  UIDoodadSpawner* _test;
 
 
 public:
