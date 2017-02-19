@@ -2,14 +2,11 @@
 
 #pragma once
 
-#include <noggit/ui/Window.h>
 #include <noggit/Selection.h>
 
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QWidget>
 
-class UIText;
-class UITextBox;
 class WMOInstance;
 
 class UIRotationEditor : public QWidget
