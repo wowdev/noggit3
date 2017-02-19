@@ -1,23 +1,20 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <sstream>
+#include <noggit/ui/RotationEditor.h>
 
 #include <noggit/Environment.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
-#include <noggit/application.h> // fonts
 #include <noggit/Selection.h>
-#include <noggit/ui/RotationEditor.h>
-#include <noggit/ui/TextBox.h>
-#include <noggit/ui/Text.h>
-#include <noggit/Video.h> // video
 #include <noggit/WMOInstance.h>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <sstream>
 
 UIRotationEditor::UIRotationEditor()
   : QWidget (nullptr)
