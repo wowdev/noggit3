@@ -13,18 +13,6 @@ const std::string kNotFoundMessage = "Click OK to select the location of your Wr
 const std::string kMismatchTitle = "WoW version mismatch";
 const std::string kMismatchMessage = "The WoW binary found by Noggit wasn't the expected version (3.3.5). Noggit may crash or behave strangely.";
 
-int Native::showAlertDialog(std::string title, std::string message)
-{
-    NSAlert *fileAlert = [[NSAlert alloc] init];
-    fileAlert.messageText = [NSString stringWithCString:title.c_str() encoding:NSUTF8StringEncoding];
-    fileAlert.informativeText = [NSString stringWithCString:message.c_str() encoding:NSUTF8StringEncoding];
-    
-    int result = [fileAlert runModal];
-    [fileAlert release];
-    
-    return result;
-}
-
 BOOL checkWoWVersionAtPath(NSString *filePath)
 {
     NSString *pathWithBundle = [filePath stringByAppendingPathComponent:@"World of Warcraft.app"];

@@ -17,18 +17,6 @@ const std::string kNotFoundTitle = "Unable to locate game";
 const std::string kNotFoundMessage = "Noggit was unable to locate World of Warcraft.\n"
                                      "Click OK to select the location of your Wrath of the Lich King (3.3.5) installation.";
 
-int Native::showAlertDialog(std::string title, std::string message)
-{
-	int alert = MessageBox(
-		NULL,
-		message.c_str(),
-		title.c_str(),
-		MB_ICONEXCLAMATION | MB_OK
-	);
-
-	return alert;
-}
-
 LONG readRegistryKey(const char* path, HKEY *key)
 {
 	return RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0, KEY_QUERY_VALUE, key);
