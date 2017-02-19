@@ -2,19 +2,12 @@
 
 #pragma once
 
-#include <noggit/ui/CloseWindow.h>
 #include <noggit/MapView.h>
 
-class UIHelperModels : public UICloseWindow
+#include <QtWidgets/QWidget>
+
+class UIHelperModels : public QWidget
 {
-private:
-  static const int winWidth = 310;
-  static const int winHeight = 230;
-
-
 public:
-  UIHelperModels(MapView *mapview);
-  void resize();
-  void addModelNow(int model);
-  MapView *_mapView;
+  UIHelperModels (MapView *mapview);
 };
