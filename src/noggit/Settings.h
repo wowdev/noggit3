@@ -18,6 +18,7 @@ public:
   bool copyModelStats;
 
   int FarZ;        // the far clipping value
+  float mapDrawDistance;
 
   bool AutoSelectingMode;  // true activates auto selection when you deselect a model. False not.
 

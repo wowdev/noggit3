@@ -28,7 +28,6 @@ class MapTile;
 
 static const float detail_size = 8.0f;
 static const float highresdistance = 384.0f;
-static const float mapdrawdistance = 998.0f;
 static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
 

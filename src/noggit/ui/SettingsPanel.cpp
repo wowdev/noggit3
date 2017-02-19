@@ -59,6 +59,15 @@ void adjustFarZ(UIFrame*f, int i)
     ((UISettings*)f->parent())->farZField->value(std::to_string(farZ));
 }
 
+void adjustDrawDistance(UIFrame*f, int i)
+{
+    float drawDistance = Settings::getInstance()->mapDrawDistance;
+    drawDistance += i;
+    drawDistance = std::max(drawDistance, 0.0f);
+    Settings::getInstance()->mapDrawDistance = drawDistance;
+    ((UISettings*)f->parent())->viewDistanceField->value(std::to_string(drawDistance));
+}
+
 UISettings::UISettings()
   : UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f  , (float)winWidth, (float)winHeight)
 {
@@ -77,17 +86,17 @@ UISettings::UISettings()
     addChild(new UIButton(390, 88, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
     
     addChild(new UIText(28, 118, "Import Path:", app.getArial12(), eJustifyLeft));
-    addChild(wodPathField = new UITextBox(99, 117, 286, 32, app.getArial12()));
+    addChild(importPathField = new UITextBox(99, 117, 286, 32, app.getArial12()));
     addChild(new UIButton(390, 116, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
     
     addChild(new UIText(10, 148, "WMV Log Path:", app.getArial12(), eJustifyLeft));
-    addChild(wodPathField = new UITextBox(99, 147, 286, 32, app.getArial12()));
+    addChild(wmvLogPathField = new UITextBox(99, 147, 286, 32, app.getArial12()));
     addChild(new UIButton(390, 146, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
     
     addChild(new UIText(13, 186, "View Distance:", app.getArial12(), eJustifyLeft));
     addChild(viewDistanceField = new UITextBox(99, 184, 128, 32, app.getArial12()));
-    addChild(new UIButton(195, 186, 16, 16, "", "Interface\\BUTTONS\\UI-MinusButton-Up.blp", "Interface\\BUTTONS\\UI-MinusButton-Down.blp", adjustFarZ, -256));
-    addChild(new UIButton(210, 186, 16, 16, "", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Up.blp", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Down.blp", adjustFarZ, 256));
+    addChild(new UIButton(195, 186, 16, 16, "", "Interface\\BUTTONS\\UI-MinusButton-Up.blp", "Interface\\BUTTONS\\UI-MinusButton-Down.blp", adjustDrawDistance, -256));
+    addChild(new UIButton(210, 186, 16, 16, "", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Up.blp", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Down.blp", adjustDrawDistance, 256));
     
     addChild(new UIText(329, 186, "FarZ:", app.getArial12(), eJustifyLeft));
     addChild(farZField = new UITextBox(362, 184, 128, 32, app.getArial12()));
@@ -97,7 +106,7 @@ UISettings::UISettings()
     addChild(new UIText(14, 220, "Editor Options:", app.getArial12(), eJustifyLeft));
     addChild(tabletModeCheck = new UICheckBox(95, 211, "Drawing tablet support", &Settings::getInstance()->tabletMode));
     addChild(autoselectCheck = new UICheckBox(95, 236, "Auto select mode", &Settings::getInstance()->AutoSelectingMode));
-    addChild(modelsBoxCheck = new UICheckBox(95, 261, "Render models with box", &Settings::getInstance()->renderModelsWithBox));
+//    addChild(modelsBoxCheck = new UICheckBox(95, 261, "Render models with box", &Settings::getInstance()->renderModelsWithBox));
     
     addChild(new UIText(293, 220, "Model Tool:", app.getArial12(), eJustifyLeft));
     addChild(randRotCheck = new UICheckBox(358, 211, "Random rotation", &Settings::getInstance()->random_rotation));
@@ -116,11 +125,15 @@ void UISettings::readInValues()
 {
     gamePathField->value(Settings::getInstance()->gamePath);
     projectPathField->value(Settings::getInstance()->projectPath);
+    wodPathField->value(Settings::getInstance()->wodSavePath);
+    importPathField->value(Settings::getInstance()->importFile);
+    wmvLogPathField->value(Settings::getInstance()->wmvLogFile);
+    viewDistanceField->value(std::to_string(Settings::getInstance()->mapDrawDistance));
     farZField->value(std::to_string(Settings::getInstance()->FarZ));
     tabletModeCheck->setState(Settings::getInstance()->tabletMode);
     autoselectCheck->setState(Settings::getInstance()->AutoSelectingMode);
     modelStatsCheck->setState(Settings::getInstance()->copyModelStats);
-    modelsBoxCheck->setState(Settings::getInstance()->renderModelsWithBox);
+//    modelsBoxCheck->setState(Settings::getInstance()->renderModelsWithBox);
     randRotCheck->setState(Settings::getInstance()->random_rotation);
     randSizeCheck->setState(Settings::getInstance()->random_size);
     randTiltCheck->setState(Settings::getInstance()->random_tilt);

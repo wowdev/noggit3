@@ -442,7 +442,7 @@ void World::setupFog()
   }
   else {
     gl.disable(GL_FOG);
-    culldistance = mapdrawdistance;
+    culldistance = Settings::getInstance()->mapDrawDistance;
   }
 }
 

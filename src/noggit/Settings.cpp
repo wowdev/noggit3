@@ -20,11 +20,11 @@ void Settings::readFromDisk()
     this->random_size = false;
     this->random_tilt = false;
     this->AutoSelectingMode = true;
+    this->mapDrawDistance = 998.0f;
     this->FarZ = 1024;
     this->_noAntiAliasing = false;
     this->copyModelStats = true;
     this->tabletMode = false;
-    this->renderModelsWithBox = false;
     this->importFile = "Import.txt";
     
     std::string configPath = Native::getConfigPath();
@@ -40,6 +40,7 @@ void Settings::readFromDisk()
         ConfigFile config(configPath);
         config.readInto(this->gamePath, "Path");
         config.readInto(this->projectPath, "ProjectPath");
+        config.readInto(this->mapDrawDistance, "mapDrawDistance");
         config.readInto(this->FarZ, "FarZ");
         config.readInto(_noAntiAliasing, "noAntiAliasing");
         config.readInto(this->wodSavePath, "wodSavePath");
@@ -49,7 +50,6 @@ void Settings::readFromDisk()
         config.readInto(this->random_tilt, "randomTilt");
         config.readInto(this->random_rotation, "randomRotation");
         config.readInto(this->random_size, "randomSize");
-        config.readInto(this->renderModelsWithBox, "renderModelsWithBox");
         
         {
             bool use (false);
@@ -103,11 +103,11 @@ bool Settings::saveToDisk()
     config.add("wodSavePath", this->wodSavePath);
     config.add("ImportFile", this->importFile);
     config.add("wmvLogFile", this->wmvLogFile);
+    config.add("mapDrawDistance", this->mapDrawDistance);
     config.add("FarZ", this->FarZ);
     config.add("randomRotation", this->random_rotation);
     config.add("randomTilt", this->random_tilt);
     config.add("randomSize", this->random_size);
-    config.add("renderModelsWithBox", this->renderModelsWithBox);
     config.add("autoSelectingMode", this->AutoSelectingMode);
     config.add("copyModelStats", this->copyModelStats);
     config.add("TabletMode", this->tabletMode);
