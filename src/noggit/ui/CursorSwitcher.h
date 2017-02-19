@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include <noggit/ui/CloseWindow.h>
-#include <noggit/ui/ToggleGroup.h>
+#include <math/vector_4d.hpp>
 
-class UICursorSwitcher : public UICloseWindow
+#include <QtWidgets/QWidget>
+
+class UICursorSwitcher : public QWidget
 {
 public:
   UICursorSwitcher(math::vector_4d& color, int& cursor_type);
