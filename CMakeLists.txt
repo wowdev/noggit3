@@ -126,6 +126,9 @@ if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
   source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
 endif()
 
+add_subdirectory (src/external/mbasaglia/Qt-Color-Widgets-f7fcad9)
+include_directories (src/external/mbasaglia/Qt-Color-Widgets-f7fcad9/include)
+
 # Hack as at least my FindSDL does not do this itself.
 MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
@@ -465,6 +468,7 @@ TARGET_LINK_LIBRARIES (noggit
   Boost::system
   ${GLEW_LIBRARY}
   Qt5::Widgets
+  ColorWidgets-qt5
 )
 
 if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
