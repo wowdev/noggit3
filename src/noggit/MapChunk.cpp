@@ -441,12 +441,6 @@ int MapChunk::indexNoLoD(int x, int y)
   return x * 8 + x * 9 + y;
 }
 
-
-int indexMapBuf(int x, int y)
-{
-  return ((y + 1) / 2) * 9 + (y / 2) * 8 + x;
-}
-
 void MapChunk::initStrip()
 {
   strip_with_holes.clear();
