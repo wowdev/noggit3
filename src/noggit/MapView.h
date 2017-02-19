@@ -11,6 +11,7 @@
 #include <boost/optional.hpp>
 
 #include <map>
+#include <unordered_set>
 
 class UIFrame;
 class World;
