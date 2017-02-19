@@ -15,7 +15,6 @@
 #include <noggit/ui/AppInfo.h> // UIAppInfo
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // UIDetailInfos
-#include <noggit/ui/DoodadSpawner.h>
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
 #include <noggit/ui/MinimapWindow.h>
@@ -153,10 +152,6 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   guiWaterTypeSelector->hide();
   guiWaterTypeSelector->movable(true);
   addChild(guiWaterTypeSelector);
-
-  //UIDoodadSpawner *_test = new UIDoodadSpawner();
-  //_test->show();
-  //addChild( _test );
 }
 
 void UIMapViewGUI::showCursorSwitcher()

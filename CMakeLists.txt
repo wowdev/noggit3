@@ -213,7 +213,6 @@ set ( noggit_ui_sources
       src/noggit/ui/CurrentTexture.cpp
       src/noggit/ui/CursorSwitcher.cpp
       src/noggit/ui/DetailInfos.cpp
-      src/noggit/ui/DoodadSpawner.cpp
       src/noggit/ui/FlattenTool.cpp
       src/noggit/ui/Frame.cpp
       src/noggit/ui/Gradient.cpp
@@ -336,7 +335,6 @@ set ( noggit_ui_headers
       src/noggit/ui/CurrentTexture.h
       src/noggit/ui/CursorSwitcher.h
       src/noggit/ui/DetailInfos.h
-      src/noggit/ui/DoodadSpawner.h
       src/noggit/ui/FlattenTool.hpp
       src/noggit/ui/Frame.h
       src/noggit/ui/Gradient.h
