@@ -60,7 +60,6 @@ public:
   void initMinimap();
 
   void outdoorLighting();
-  void outdoorLighting2();
 
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
