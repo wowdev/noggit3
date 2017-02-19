@@ -125,8 +125,6 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   CursorSwitcher->hide();
 
   _help = new UIHelp();
-  _help->hide();
-  addChild(_help);
 
   guiWater = new UIWater(this);
   guiWater->hide();
@@ -165,7 +163,7 @@ void UIMapViewGUI::hideHelp()
 }
 void UIMapViewGUI::toggleHelp()
 {
-  _help->toggleVisibility();
+  _help->setVisible (!_help->isVisible());
 }
 
 void UIMapViewGUI::showTest()
