@@ -108,7 +108,7 @@ void SaveObjecttoTXT(UIFrame* f, int)
   stream << path << std::endl;
   stream.close();
 
-  (static_cast<UIObjectEditor *>(f->parent())->modelImport->builModelList());
+  (static_cast<UIObjectEditor *>(f->parent())->modelImport->buildModelList());
 }
 
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
