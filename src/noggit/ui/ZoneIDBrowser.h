@@ -4,13 +4,14 @@
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QTreeWidget> 
+#include <QDockWidget>
 
 #include <functional>
 #include <string>
 
 namespace ui
 {
-  class zone_id_browser : public QWidget
+  class zone_id_browser : public QDockWidget
   {
   public:
     zone_id_browser();
