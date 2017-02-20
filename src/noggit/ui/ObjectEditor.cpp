@@ -30,6 +30,7 @@
 #include <QButtonGroup>
 #include <QLineEdit>
 #include <QLabel>
+#include <QPushButton>
 
 void updateMinRotation(UITextBox::Ptr textBox, const std::string& value)
 {
@@ -130,7 +131,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   
   setFloating(true);
   QWidget *content = new QWidget(nullptr);
-  new QGridLayout (content);
+  auto inspectorGrid = new QGridLayout (content);
 
 //  addChild(new UIText(120.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
 //  addChild(new UIText(195.0f, 22.0f, "Min  /  Max", app.getArial12(), eJustifyCenter));
@@ -143,7 +144,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
     QCheckBox *randRotCheck = new QCheckBox("Random rotation", content);
     QCheckBox *randTiltCheck = new QCheckBox("Random tilt", content);
     QCheckBox *randScaleCheck = new QCheckBox("Random scale", content);
-    QCheckBox *copyAttributesCheck = new QCheckBox("Copy attributes", content);
+    QCheckBox *copyAttributesCheck = new QCheckBox("Copy rotation, tilt, and scale", content);
     
     QLineEdit *rotRangeStart = new QLineEdit(content);
     QLineEdit *rotRangeEnd = new QLineEdit(content);
@@ -163,8 +164,8 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
     scaleRangeEnd->setMaximumWidth(64);
     
     copyBox->setTitle("Copy Options");
-    copyGrid->addWidget(minLabel, 0, 1, 1, 1);
-    copyGrid->addWidget(maxLabel, 0, 2, 1, 1);
+    copyGrid->addWidget(minLabel, 0, 1, 1, 1, Qt::AlignCenter);
+    copyGrid->addWidget(maxLabel, 0, 2, 1, 1, Qt::AlignCenter);
     
     copyGrid->addWidget(randRotCheck, 1, 0, 1, 1);
     copyGrid->addWidget(rotRangeStart, 1, 1, 1, 1);
@@ -175,7 +176,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
     copyGrid->addWidget(randScaleCheck, 4, 0, 1, 1);
     copyGrid->addWidget(scaleRangeStart, 4, 1, 1, 1);
     copyGrid->addWidget(scaleRangeEnd, 4, 2, 1, 1);
-    copyGrid->addWidget(copyAttributesCheck, 5, 0, 1, 1);
+    copyGrid->addWidget(copyAttributesCheck, 5, 0, 1, 3);
     
     QGroupBox *pasteBox = new QGroupBox(content);
     auto pasteGrid = new QGridLayout (pasteBox);
@@ -194,10 +195,27 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
     pasteGrid->addWidget(terrainButton);
     pasteGrid->addWidget(selectionButton, 0, 1, 1, 1);
     pasteGrid->addWidget(cameraButton, 0, 2, 1, 1);
-    pasteGrid->addWidget(cursorPosCheck, 1, 0, 1, 1);
+    pasteGrid->addWidget(cursorPosCheck, 1, 0, 1, 3);
     
-    content->layout()->addWidget(copyBox);
-    content->layout()->addWidget(pasteBox);
+    QPushButton *rotEditorButton = new QPushButton("Rotation Editor", content);
+    QPushButton *visToggleButton = new QPushButton("Toggle Visibility", content);
+    QPushButton *clearListButton = new QPushButton("Clear List", content);
+    
+    QGroupBox *importBox = new QGroupBox(content);
+    new QGridLayout (importBox);
+    importBox->setTitle("Import");
+    
+    QPushButton *toTxt = new QPushButton("To Text File", content);
+    QPushButton *fromTxt = new QPushButton("From Text File", content);
+    importBox->layout()->addWidget(toTxt);
+    importBox->layout()->addWidget(fromTxt);
+    
+    inspectorGrid->addWidget(copyBox, 0, 0, 1, 2);
+    inspectorGrid->addWidget(pasteBox, 1, 0, 1, 2);
+    inspectorGrid->addWidget(rotEditorButton, 2, 0, 1, 1);
+    inspectorGrid->addWidget(visToggleButton, 3, 0, 1, 1);
+    inspectorGrid->addWidget(clearListButton, 4, 0, 1, 1);
+    inspectorGrid->addWidget(importBox, 2, 1, 3, 1);
     
     setWidget(content);
   
