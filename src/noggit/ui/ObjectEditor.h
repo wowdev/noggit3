@@ -33,8 +33,12 @@ public:
   UIStatusBar *filename;
 private:
   UIToggleGroup *pasteModeGroup;
+  UIMapViewGUI* mainGui;
 
   boost::optional<selection_type> selected;
+  void toggleRotationEditor();
+  void showImportModels();
+  void SaveObjecttoTXT();
   void setModelName(const std::string &name);
   int pasteMode;
 };
