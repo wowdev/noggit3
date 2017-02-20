@@ -128,7 +128,7 @@ endif()
 
 add_subdirectory (src/external/mbasaglia/Qt-Color-Widgets-f7fcad9)
 include_directories (src/external/mbasaglia/Qt-Color-Widgets-f7fcad9/include)
-target_compile_definitions (ColorWidgets-qt5 PRIVATE QTCOLORWIDGETS_LIBRARY)
+target_compile_definitions (ColorWidgets-qt5 PUBLIC QTCOLORWIDGETS_LIBRARY)
 
 # Hack as at least my FindSDL does not do this itself.
 MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )

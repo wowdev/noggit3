@@ -12,7 +12,7 @@ public:
     static std::string showFileChooser();
 
   //! \todo inline to uses
-  static int showAlertDialog (std::string title, std::string message)
+  static void showAlertDialog (std::string title, std::string message)
   {
     QMessageBox::critical
       (nullptr, QString::fromStdString (title), QString::fromStdString (message));
