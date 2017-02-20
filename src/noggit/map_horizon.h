@@ -7,6 +7,8 @@
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
 
+#include <QtGui/QImage>
+
 #include <memory>
 
 class MapIndex;
@@ -47,6 +49,7 @@ public:
              , const math::vector_3d& camera );
 
     opengl::texture minimap;
+  QImage _qt_minimap;
 
     //! \todo make this private
     //! (create base class for all delayed ogl objects)
