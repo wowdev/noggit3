@@ -2,171 +2,114 @@
 
 #include <noggit/ui/ZoneIDBrowser.h>
 
+#include <noggit/application.h>
+#include <noggit/DBC.h>
+#include <noggit/Log.h>
+#include <noggit/Misc.h>
+#include <noggit/ui/MapViewGUI.h>
+
+#include <QtWidgets/QVBoxLayout>
+
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#include <noggit/DBC.h>
-#include <noggit/Log.h>
-#include <noggit/Misc.h>
-#include <noggit/application.h> // app.getArial14(), arialn13
-#include <noggit/ui/Button.h>
-#include <noggit/ui/ListView.h>
-#include <noggit/ui/MapViewGUI.h>
-#include <noggit/ui/ScrollBar.h>
-#include <noggit/ui/Text.h> // UIText
-#include <noggit/ui/CloseWindow.h> // UICloseWindow
 
-void theButtonMapPressed(UIFrame *f, int id)
+namespace ui
 {
-  (static_cast<UIZoneIDBrowser::Ptr>(f->parent()))->ButtonMapPressed(id);
-}
-
-void changeZoneValue(UIFrame *f, int id)
-{
-  //! \todo WAT?
-  (static_cast<UIZoneIDBrowser::Ptr>(f->parent()->parent()->parent()))->setZoneID(id);
-}
-
-UIZoneIDBrowser::UIZoneIDBrowser(int xPos, int yPos, int w, int h, UIMapViewGUI *setGui)
-  : UIWindow((float)xPos, (float)yPos, (float)w, (float)h)
-  , changeFunc(nullptr)
-  , mainGui(setGui)
-  , ZoneIdList(nullptr)
-  , mapID(-1)
-  , zoneID(-1)
-  , subZoneID(-1)
-  , MapName("")
-  , ZoneName("")
-  , SubZoneName("")
-  , backZone(new UIButton(381.0f, 4.0f, 26.0f, 26.0f, "", "Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Down.blp", theButtonMapPressed, 0))
-  , ZoneIDPath(new UIText(10.0f, 6.0f, "", app.getArial12(), eJustifyLeft))
-{
-  addChild(ZoneIDPath);
-  addChild(backZone);
-}
-
-void UIZoneIDBrowser::setMapID(int id)
-{
-  mapID = id;
-  zoneID = 0;
-  subZoneID = 0;
-  for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+  zone_id_browser::zone_id_browser()
+    : QWidget(nullptr)
+    , mapID(-1)
+    , _area_tree(new QTreeWidget())
   {
-    if (i->getInt(MapDB::MapID) == id)
-      MapName = i->getString(MapDB::InternalName);
-  }
-  buildAreaList();
-  refreshMapPath();
-}
+    //  resize(w, h);
+    setWindowTitle("Area picker");
+    new QVBoxLayout(this);
+    layout()->addWidget(_area_tree);
 
-void UIZoneIDBrowser::setZoneID(int id)
-{
-  for (DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i)
-  {
-    if (i->getInt(AreaDB::AreaID) == id)
+    connect(_area_tree, static_cast<void (QTreeWidget::*) (void)> (&QTreeWidget::itemSelectionChanged), [this]
     {
-      if (i->getUInt(AreaDB::Region) == 0)
+      auto& selected_items = _area_tree->selectedItems();
+      if (selected_items.size() && _func)
       {
-        ZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-        zoneID = id;
-        subZoneID = 0;
-        SubZoneName = "";;
-        if (changeFunc)
-          changeFunc (id);
+        _func(selected_items.back()->data(0, 1).toInt());
       }
-      else
+    });
+  }
+
+  void zone_id_browser::setMapID(int id)
+  {
+    mapID = id;
+
+    for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+    {
+      if (i->getInt(MapDB::MapID) == id)
       {
-        SubZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-        subZoneID = id;
-        if (changeFunc)
-          changeFunc (id);
+        std::stringstream ss;
+        ss << id << "-" << i->getString(MapDB::InternalName);
+        _area_tree->setHeaderLabel(ss.str().c_str());
       }
     }
-  }
-  buildAreaList();
-  refreshMapPath();
-}
 
-void UIZoneIDBrowser::ButtonMapPressed(int id)
-{
-  if (id == 0)
-  {
-    if (subZoneID)
-    {
-      // clear subzone
-      subZoneID = 0;
-      SubZoneName = "";
-      if (changeFunc)
-        changeFunc (zoneID);
-    }
-    else
-    {
-      // clear zone
-      zoneID = 0;
-      ZoneName = "";
-      if (changeFunc)
-        changeFunc (0);
-    }
-    refreshMapPath();
     buildAreaList();
   }
-}
 
-void UIZoneIDBrowser::buildAreaList()
-{
-  removeChild(ZoneIdList);
-  ZoneIdList = new UIListView(4, 24, width() - 8, height() - 28, 20);
-  ZoneIdList->clickable(true);
-  addChild(ZoneIdList);
-  //  Read out Area List.
-  for (DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i)
+  void zone_id_browser::setZoneID(int id)
   {
-    if (i->getInt(AreaDB::Continent) == mapID)
+    QSignalBlocker const block_area_tree(_area_tree);
+
+    if (_items.find(id) != _items.end())
     {
-      if (zoneID == 0)
+      _area_tree->selectionModel()->clear();
+      auto* item = _items.at(id);
+
+      item->setSelected(true);
+
+      while (item = item->parent())
       {
-        if (i->getUInt(AreaDB::Region) == 0)
-        {
-          UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
-          std::stringstream ss;
-          ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-          UIButton *tempButton = new UIButton(0.0f, 0.0f, 370.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID));
-          tempButton->setLeft();
-          curFrame->addChild(tempButton);
-          ZoneIdList->addElement(curFrame);
-        }
+        item->setExpanded(true);
       }
-      else if (zoneID > 0)
+    }
+  }
+
+  void zone_id_browser::buildAreaList()
+  {
+    QSignalBlocker const block_area_tree(_area_tree);
+    _area_tree->clear();
+    _area_tree->setColumnCount(1);
+    _items.clear();
+
+    //  Read out Area List.
+    for (DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i)
+    {
+      if (i->getInt(AreaDB::Continent) == mapID)
       {
-        if (i->getUInt(AreaDB::Region) == zoneID)
+        int area = i->getInt(AreaDB::AreaID);
+        int parent = i->getInt(AreaDB::Region);
+
+        std::stringstream ss;
+        ss << area << "-" << gAreaDB.getAreaName(area);
+        QTreeWidgetItem* item = (_items.find(area) != _items.end()) ? _items.at(area) : new QTreeWidgetItem();
+        item->setData(0, 1, QVariant(area));
+        item->setText(0, QString(ss.str().c_str()));
+        _items.emplace(area, item);
+
+        if (parent)
         {
-          UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
-          std::stringstream ss;
-          ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-          UIButton *tempButton = new UIButton(0.0f, 0.0f, 370.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID));
-          tempButton->setLeft();
-          curFrame->addChild(tempButton);
-          ZoneIdList->addElement(curFrame);
+          QTreeWidgetItem* parent_item(nullptr);
+          parent_item = (_items.find(parent) != _items.end()) ? _items.at(parent) : new QTreeWidgetItem();
+          parent_item->addChild(item);
+        }
+        else
+        {
+          _area_tree->addTopLevelItem(item);
         }
       }
     }
-
   }
-  ZoneIdList->recalcElements(1);
-}
 
-void UIZoneIDBrowser::refreshMapPath()
-{
-  std::stringstream AreaPath;
-  if (SubZoneName != "")
-    AreaPath << MapName << " < " << SubZoneName;
-  else
-    AreaPath << MapName << " < " << ZoneName;
-  ZoneIDPath->setText(AreaPath.str());
-}
-
-void UIZoneIDBrowser::setChangeFunc(std::function<void (int)> f)
-{
-  changeFunc = f;
+  void zone_id_browser::setChangeFunc(std::function<void(int)> f)
+  {
+    _func = f;
+  }
 }
