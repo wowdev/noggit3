@@ -29,7 +29,7 @@ namespace ui
 
     connect(_area_tree, static_cast<void (QTreeWidget::*) (void)> (&QTreeWidget::itemSelectionChanged), [this]
     {
-      auto& selected_items = _area_tree->selectedItems();
+      auto const& selected_items = _area_tree->selectedItems();
       if (selected_items.size() && _func)
       {
         _func(selected_items.back()->data(0, 1).toInt());
