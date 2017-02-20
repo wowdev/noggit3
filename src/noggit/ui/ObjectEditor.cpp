@@ -86,19 +86,12 @@ void updateMaxScale(UITextBox::Ptr textBox, const std::string& value)
   textBox->value(misc::floatToStr(v));
 }
 
-void toggleRotationEditor(UIFrame* f, int)
+void UIObjectEditor::toggleRotationEditor()
 {
-  (static_cast<UIMapViewGUI *>(f->parent()->parent()))->rotationEditor->setVisible
-    (!(static_cast<UIMapViewGUI *>(f->parent()->parent()))->rotationEditor->isVisible());
+  mainGui->rotationEditor->setVisible(!mainGui->rotationEditor->isVisible());
 }
 
-
-void showImportModels(UIFrame* f, int)
-{
-//  (static_cast<UIObjectEditor *>(f->parent())->modelImport->show());
-}
-
-void SaveObjecttoTXT(UIFrame* f, int)
+void UIObjectEditor::SaveObjecttoTXT()
 {
   if (!gWorld->HasSelection())
     return;
@@ -116,8 +109,8 @@ void SaveObjecttoTXT(UIFrame* f, int)
   std::ofstream stream(Settings::getInstance()->importFile, std::ios_base::app);
   stream << path << std::endl;
   stream.close();
-
-//  (static_cast<UIObjectEditor *>(f->parent())->modelImport->buildModelList());
+    
+  modelImport->buildModelList();
 }
 
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
@@ -127,17 +120,14 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 {
   filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
   filename->hide();
+  this->mainGui = mainGui;
   mainGui->addChild(filename);
   
   setFloating(true);
   QWidget *content = new QWidget(nullptr);
   auto inspectorGrid = new QGridLayout (content);
 
-//  addChild(new UIText(120.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
-//  addChild(new UIText(195.0f, 22.0f, "Min  /  Max", app.getArial12(), eJustifyCenter));
-
   Environment* env = Environment::getInstance();
-//  UITextBox* tb;
 
   QGroupBox *copyBox = new QGroupBox(content);
     auto copyGrid = new QGridLayout (copyBox);
@@ -146,22 +136,36 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
     QCheckBox *randScaleCheck = new QCheckBox("Random scale", content);
     QCheckBox *copyAttributesCheck = new QCheckBox("Copy rotation, tilt, and scale", content);
     
-    QLineEdit *rotRangeStart = new QLineEdit(content);
-    QLineEdit *rotRangeEnd = new QLineEdit(content);
-    QLineEdit *tiltRangeStart = new QLineEdit(content);
-    QLineEdit *tiltRangeEnd = new QLineEdit(content);
-    QLineEdit *scaleRangeStart = new QLineEdit(content);
-    QLineEdit *scaleRangeEnd = new QLineEdit(content);
+    QDoubleSpinBox *rotRangeStart = new QDoubleSpinBox(content);
+    QDoubleSpinBox *rotRangeEnd = new QDoubleSpinBox(content);
+    QDoubleSpinBox *tiltRangeStart = new QDoubleSpinBox(content);
+    QDoubleSpinBox *tiltRangeEnd = new QDoubleSpinBox(content);
+    QDoubleSpinBox *scaleRangeStart = new QDoubleSpinBox(content);
+    QDoubleSpinBox *scaleRangeEnd = new QDoubleSpinBox(content);
     
     QLabel *minLabel = new QLabel("Min", content);
     QLabel *maxLabel = new QLabel("Max", content);
     
-    rotRangeStart->setMaximumWidth(64);
-    rotRangeEnd->setMaximumWidth(64);
-    tiltRangeStart->setMaximumWidth(64);
-    tiltRangeEnd->setMaximumWidth(64);
-    scaleRangeStart->setMaximumWidth(64);
-    scaleRangeEnd->setMaximumWidth(64);
+    rotRangeStart->setMaximumWidth(85);
+    rotRangeEnd->setMaximumWidth(85);
+    tiltRangeStart->setMaximumWidth(85);
+    tiltRangeEnd->setMaximumWidth(85);
+    scaleRangeStart->setMaximumWidth(85);
+    scaleRangeEnd->setMaximumWidth(85);
+    
+    rotRangeStart->setDecimals(3);
+    rotRangeEnd->setDecimals(3);
+    tiltRangeStart->setDecimals(3);
+    tiltRangeEnd->setDecimals(3);
+    scaleRangeStart->setDecimals(3);
+    scaleRangeEnd->setDecimals(3);
+    
+    rotRangeStart->setRange (-180.f, 180.f);
+    rotRangeEnd->setRange (-180.f, 180.f);
+    tiltRangeStart->setRange (-180.f, 180.f);
+    tiltRangeEnd->setRange (-180.f, 180.f);
+    scaleRangeStart->setRange (-180.f, 180.f);
+    scaleRangeEnd->setRange (-180.f, 180.f);
     
     copyBox->setTitle("Copy Options");
     copyGrid->addWidget(minLabel, 0, 1, 1, 1, Qt::AlignCenter);
@@ -218,80 +222,113 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
     inspectorGrid->addWidget(importBox, 2, 1, 3, 1);
     
     setWidget(content);
-  
-//  tb = new UITextBox(130.0f, 40.0f, 60.0f, 35.0f, app.getArial12(), updateMinRotation);
-//  tb->value(misc::floatToStr(env->minRotation));
-//  addChild(tb);
-//  tb = new UITextBox(130.0f, 65.0f, 60.0f, 35.0f, app.getArial12(), updateMinTilt);
-//  tb->value(misc::floatToStr(env->minTilt));
-//  addChild(tb);
-//  tb = new UITextBox(130.0f, 90.0f, 60.0f, 35.0f, app.getArial12(), updateMinScale);
-//  tb->value(misc::floatToStr(env->minScale));
-//  addChild(tb);
-//  tb = new UITextBox(200.0f, 40.0f, 60.0f, 35.0f, app.getArial12(), updateMaxRotation);
-//  tb->value(misc::floatToStr(env->maxRotation));
-//  addChild(tb);
-//  tb = new UITextBox(200.0f, 65.0f, 60.0f, 35.0f, app.getArial12(), updateMaxTilt);
-//  tb->value(misc::floatToStr(env->maxTilt));
-//  addChild(tb);
-//  tb = new UITextBox(200.0f, 90.0f, 60.0f, 35.0f, app.getArial12(), updateMaxScale);
-//  tb->value(misc::floatToStr(env->maxScale));
-//  addChild(tb);
-//
-//  addChild(new UICheckBox(5.0f, 35.0f, "Random rotation", &Settings::getInstance()->random_rotation));
-//  addChild(new UICheckBox(5.0f, 60.0f, "Random tilt", &Settings::getInstance()->random_tilt));
-//  addChild(new UICheckBox(5.0f, 85.0f, "Random scale", &Settings::getInstance()->random_size));
-//
-//  UICheckBox* copyCB = new UICheckBox(5.0f, 110.0f, "Copy model rotation / scale / tilt", &Settings::getInstance()->copyModelStats);
-//  copyCB->setState(Settings::getInstance()->copyModelStats);
-//  addChild(copyCB);
-//
-//  addChild(new UIText(5.0f, 137.5f, "Paste Mode:", app.getArial14(), eJustifyLeft));
-//
-//  pasteModeGroup = new UIToggleGroup(&pasteMode);
-//
-//  addChild(new UICheckBox(5.0f, 155.0f, "Terrain", pasteModeGroup, PASTE_ON_TERRAIN));
-//  addChild(new UICheckBox(105.0f, 155.0f, "Selection", pasteModeGroup, PASTE_ON_SELECTION));
-//  addChild(new UICheckBox(105.0f, 180.0f, "Camera", pasteModeGroup, PASTE_ON_CAMERA));
-//
-//  pasteModeGroup->Activate(pasteMode);
-//
-//  addChild(new UICheckBox(5.0f, 215.0f, "Model movement mode: to cursor pos", &Environment::getInstance()->moveModelToCursorPos));
-//
-//  addChild(new UIText(190.0f, 250.0f, "Import:", app.getArial14(), eJustifyLeft));
-//  addChild(new UIButton(190.0f, 270.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
-//  addChild(new UIButton(190.0f, 295.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
-//
-//  addChild(new UIButton(5.0f, 245.0f, 150.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
-//
-//  addChild ( new UIButton ( 5.0f
-//                          , 270.0f
-//                          , 150.0f
-//                          , 30.0f
-//                          , "Toggle visibility"
-//                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
-//                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-//                          , [mainGui]
-//                            {
-//                              mainGui->theMapview->_draw_hidden_models
-//                                = !mainGui->theMapview->_draw_hidden_models;
-//                            }
-//                          )
-//           );
-//  addChild ( new UIButton ( 5.0f
-//                          , 295.0f
-//                          , 150.0f
-//                          , 30.0f
-//                          , "Clear list"
-//                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
-//                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-//                          , [mainGui]
-//                            {
-//                              mainGui->theMapview->_hidden_map_objects.clear();
-//                              mainGui->theMapview->_hidden_models.clear();
-//                            }
-//                          )
-//           );
+    
+    randRotCheck->setChecked(Settings::getInstance()->random_rotation);
+    connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
+             { Settings::getInstance()->random_rotation = s; });
+    
+    rotRangeStart->setValue(env->minRotation);
+    rotRangeEnd->setValue(env->maxRotation);
+    
+    tiltRangeStart->setValue(env->minTilt);
+    tiltRangeEnd->setValue(env->maxTilt);
+    
+    scaleRangeStart->setValue(env->minScale);
+    scaleRangeEnd->setValue(env->maxScale);
+    
+    connect ( rotRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+             , [&] (double v)
+             {
+                 env->minRotation = v;
+             }
+             );
+    
+    connect ( rotRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+             , [&] (double v)
+             {
+                 env->maxRotation = v;
+             }
+             );
+    
+    connect ( tiltRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+             , [&] (double v)
+             {
+                 env->minTilt = v;
+             }
+             );
+    
+    connect ( tiltRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+             , [&] (double v)
+             {
+                 env->maxTilt = v;
+             }
+             );
+    
+    connect ( scaleRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+             , [&] (double v)
+             {
+                 env->minScale = v;
+             }
+             );
+    
+    connect ( scaleRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+             , [&] (double v)
+             {
+                 env->maxScale = v;
+             }
+             );
+    
+    randTiltCheck->setChecked(Settings::getInstance()->random_tilt);
+    connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
+             { Settings::getInstance()->random_tilt = s; });
+    
+    randScaleCheck->setChecked(Settings::getInstance()->random_tilt);
+    connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
+             { Settings::getInstance()->random_size = s; });
+    
+    copyAttributesCheck->setChecked(Settings::getInstance()->copyModelStats);
+    connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
+             { Settings::getInstance()->copyModelStats = s; });
+    
+    pasteModeGroup->button(pasteMode)->setChecked(true);
+    
+    connect ( pasteModeGroup, static_cast<void (QButtonGroup::*) (int)> (&QButtonGroup::buttonClicked)
+             , [&] (int id)
+             {
+                 pasteMode = id;
+             }
+             );
+    
+    cursorPosCheck->setChecked(Environment::getInstance()->moveModelToCursorPos);
+    connect (copyAttributesCheck, &QCheckBox::stateChanged, [=] (int s)
+             { env->moveModelToCursorPos = s; });
+    
+    connect(rotEditorButton, &QPushButton::clicked, [=]() {
+        toggleRotationEditor();
+    });
+    
+    connect(visToggleButton, &QPushButton::clicked, [=]() {
+        mainGui->theMapview->_draw_hidden_models
+            = !mainGui->theMapview->_draw_hidden_models;
+    });
+    
+    connect(clearListButton, &QPushButton::clicked, [=]() {
+        mainGui->theMapview->_hidden_map_objects.clear();
+        mainGui->theMapview->_hidden_models.clear();
+    });
+    
+    connect(toTxt, &QPushButton::clicked, [=]() {
+        SaveObjecttoTXT();
+    });
+    
+    connect(fromTxt, &QPushButton::clicked, [=]() {
+        showImportModels();
+    });
+}
+
+void UIObjectEditor::showImportModels()
+{
+    modelImport->show();
 }
 
 void UIObjectEditor::pasteObject (math::vector_3d pos)
