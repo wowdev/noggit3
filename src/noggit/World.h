@@ -57,8 +57,6 @@ public:
   // The lighting used.
   std::unique_ptr<OutdoorLighting> ol;
 
-  void initMinimap();
-
   void outdoorLighting();
 
   unsigned int getMapID();
