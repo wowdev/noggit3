@@ -14,9 +14,11 @@
 #include <QtWidgets/QFormLayout>
 
 UIModelImport::UIModelImport (MapView* mapview)
-  : QWidget (nullptr)
+  : QDockWidget (nullptr)
 {
-  auto layout (new QFormLayout (this));
+  setFloating(true);
+  QWidget *content = new QWidget(nullptr);
+  auto layout (new QFormLayout (content));
 
   layout->addRow ("Filter", _textBox = new QLineEdit (this));
   connect ( _textBox, &QLineEdit::textChanged
@@ -45,6 +47,8 @@ UIModelImport::UIModelImport (MapView* mapview)
               }
             }
           );
+    
+  setWidget(content);
 }
 
 void UIModelImport::buildModelList()

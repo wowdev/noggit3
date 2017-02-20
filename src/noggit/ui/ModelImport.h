@@ -7,8 +7,9 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QWidget>
+#include <QDockWidget>
 
-class UIModelImport : public QWidget
+class UIModelImport : public QDockWidget
 {
 private:
   QListWidget* _list;
