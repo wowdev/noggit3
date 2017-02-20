@@ -9,24 +9,24 @@
 #include <QtWidgets/QVBoxLayout>
 
 UICursorSwitcher::UICursorSwitcher(math::vector_4d& color, int& cursor_type)
-  : QWidget (nullptr)
+  : QDockWidget ("Cursor Options", nullptr, nullptr)
 {
-  setWindowFlags(Qt::Tool);
-  setWindowTitle ("Cursor options");
+  setFloating(true);
 
-  new QVBoxLayout (this);
+  QWidget *content = new QWidget(nullptr);
+  new QVBoxLayout (content);
 
-  auto butt_disk (new QRadioButton ("Disk", this));
-  auto butt_sphere (new QRadioButton ("Sphere", this));
-  auto butt_triangle (new QRadioButton ("Triangle", this));
-  auto butt_none (new QRadioButton ("None", this));
+  auto butt_disk (new QRadioButton ("Disk", content));
+  auto butt_sphere (new QRadioButton ("Sphere", content));
+  auto butt_triangle (new QRadioButton ("Triangle", content));
+  auto butt_none (new QRadioButton ("None", content));
 
-  layout()->addWidget (butt_disk);
-  layout()->addWidget (butt_sphere);
-  layout()->addWidget (butt_triangle);
-  layout()->addWidget (butt_none);
+  content->layout()->addWidget (butt_disk);
+  content->layout()->addWidget (butt_sphere);
+  content->layout()->addWidget (butt_triangle);
+  content->layout()->addWidget (butt_none);
 
-  auto group (new QButtonGroup (this));
+  auto group (new QButtonGroup (content));
 
   group->addButton (butt_disk, 1);
   group->addButton (butt_sphere, 2);
@@ -43,7 +43,7 @@ UICursorSwitcher::UICursorSwitcher(math::vector_4d& color, int& cursor_type)
           );
 
 
-  auto color_picker (new color_widgets::ColorSelector (this));
+  auto color_picker (new color_widgets::ColorSelector (content));
 
   color_picker->setDisplayMode (color_widgets::ColorSelector::AllAlpha);
 
@@ -60,5 +60,6 @@ UICursorSwitcher::UICursorSwitcher(math::vector_4d& color, int& cursor_type)
           );
 
 
-  layout()->addWidget (color_picker);
+  content->layout()->addWidget (color_picker);
+    setWidget(content);
 }

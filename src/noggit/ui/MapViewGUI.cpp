@@ -55,9 +55,9 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(minimapWindow);
 
   objectEditor = new UIObjectEditor((float)video.xres() - 410.0f, 10.0f, this);
-  objectEditor->movable(true);
+//  objectEditor->movable(true);
   objectEditor->hide();
-  addChild(objectEditor);
+//  addChild(objectEditor);
 
   rotationEditor = new UIRotationEditor();
   rotationEditor->hide();

@@ -149,8 +149,8 @@ void MapView::set_editing_mode (editing_mode mode)
     mainGui->shaderTool->show();
     break;
   case editing_mode::object:
-    mainGui->objectEditor->x(tool_settings_x - 90.0f);
-    mainGui->objectEditor->y(tool_settings_y);
+//    mainGui->objectEditor->x(tool_settings_x - 90.0f);
+//    mainGui->objectEditor->y(tool_settings_y);
     mainGui->objectEditor->show();
     mainGui->objectEditor->filename->show();
     mainGui->rotationEditor->move (mainGui->objectEditor->x() - mainGui->rotationEditor->width() - 10.0f, tool_settings_y);

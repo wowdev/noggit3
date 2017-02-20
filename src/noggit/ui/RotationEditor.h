@@ -6,10 +6,11 @@
 
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QWidget>
+#include <QDockWidget>
 
 class WMOInstance;
 
-class UIRotationEditor : public QWidget
+class UIRotationEditor : public QDockWidget
 {
 public:
   UIRotationEditor();
