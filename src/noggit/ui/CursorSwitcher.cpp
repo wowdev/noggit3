@@ -2,7 +2,8 @@
 
 #include <noggit/ui/CursorSwitcher.h>
 
-#include <ColorSelector>
+#include <qt-color-widgets/color_selector.hpp>
+
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>

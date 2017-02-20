@@ -126,9 +126,7 @@ if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
   source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
 endif()
 
-add_subdirectory (src/external/mbasaglia/Qt-Color-Widgets-f7fcad9)
-include_directories (src/external/mbasaglia/Qt-Color-Widgets-f7fcad9/include)
-target_compile_definitions (ColorWidgets-qt5 PUBLIC QTCOLORWIDGETS_LIBRARY)
+add_subdirectory (src/external/qt-color-widgets)
 
 # Hack as at least my FindSDL does not do this itself.
 MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
