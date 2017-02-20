@@ -110,10 +110,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(guidetailInfos);
 
   // ZoneIDBrowser
-  ZoneIDBrowser = new UIZoneIDBrowser(200, 200, 410, 400, this);
-  ZoneIDBrowser->movable(true);
+  ZoneIDBrowser = new ui::zone_id_browser();
   ZoneIDBrowser->hide();
-  addChild(ZoneIDBrowser);
 
   TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f, 490.0f, 170.0f);
   TexturePicker->hide();

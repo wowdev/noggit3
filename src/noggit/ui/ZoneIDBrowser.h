@@ -2,43 +2,29 @@
 
 #pragma once
 
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QTreeWidget> 
+
+#include <functional>
 #include <string>
 
-#include <noggit/ui/Button.h>
-#include <noggit/ui/Window.h>
-#include <noggit/ui/CloseWindow.h>
-
-class UIMapViewGUI;
-class UIListView;
-
-class UIZoneIDBrowser : public UIWindow
+namespace ui
 {
-public:
-  typedef UIZoneIDBrowser* Ptr;
+  class zone_id_browser : public QWidget
+  {
+  public:
+    zone_id_browser();
+    void setMapID(int id);
+    void setZoneID(int id);
+    void setChangeFunc(std::function<void(int)> f);
 
-private:
-  std::function<void (int)> changeFunc;
-  UIMapViewGUI *mainGui;
-  UIListView* ZoneIdList;
-  int mapID;
-  unsigned int zoneID;
-  int subZoneID;
-  std::string MapName;
-  std::string ZoneName;
-  std::string SubZoneName;
-  UIButton* backZone;
-  UIButton* closeBrowser;
-  UIText* ZoneIDPath;
+  private:
+    std::function<void(int)> _func;
+    QTreeWidget* _area_tree;
+    std::map<int, QTreeWidgetItem*> _items;
+    int mapID;
 
-  void buildAreaList();
-  void expandList();
-  void collapseList();
+    void buildAreaList();
+  };
+}
 
-public:
-  UIZoneIDBrowser(int xPos, int yPos, int w, int h, UIMapViewGUI *setGui);
-  void setMapID(int id);
-  void setZoneID(int id);
-  void ButtonMapPressed(int id);
-  void refreshMapPath();
-  void setChangeFunc(std::function<void (int)>);
-};

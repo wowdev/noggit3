@@ -135,8 +135,7 @@ void MapView::set_editing_mode (editing_mode mode)
     mainGui->texturingTool->show();
     break;
   case editing_mode::areaid:
-    mainGui->ZoneIDBrowser->x(tool_settings_x - 230);
-    mainGui->ZoneIDBrowser->y(tool_settings_y);
+    mainGui->ZoneIDBrowser->move(mainGui->ZoneIDBrowser->x(), tool_settings_y);
     mainGui->ZoneIDBrowser->show();
     break;
   case editing_mode::water:

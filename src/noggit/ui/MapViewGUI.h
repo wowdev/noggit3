@@ -6,7 +6,6 @@ class UIToolbar;
 class UIStatusBar;
 class UIDetailInfos;
 class UIMinimapWindow;
-class UIZoneIDBrowser;
 class MapView;
 class UIFrame;
 class UITexturePicker;
@@ -29,6 +28,7 @@ namespace ui
   class shader_tool;
   class terrain_tool;
   class texturing_tool;
+  class zone_id_browser;
 }
 
 class UIModel;
@@ -65,7 +65,7 @@ public:
   UIToolbar* guiToolbar;
   UIStatusBar* guiStatusbar;
   UIDetailInfos* guidetailInfos;
-  UIZoneIDBrowser* ZoneIDBrowser;
+  ui::zone_id_browser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
   UIWater* guiWater;
   UIWaterTypeBrowser* guiWaterTypeSelector;
