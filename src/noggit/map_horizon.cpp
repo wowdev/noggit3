@@ -177,6 +177,30 @@ map_horizon::map_horizon(const std::string& basename)
   }
 
   wdl_file.close();
+
+  _qt_minimap = QImage (16 * 64, 16 * 64, QImage::Format_RGB32);
+  _qt_minimap.fill (Qt::transparent);
+
+  for (size_t y (0); y < 64; ++y)
+  {
+    for (size_t x (0); x < 64; ++x)
+    {
+      if (_tiles[y][x])
+      {
+        //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
+        //! \todo There also is MAHO giving holes into this heightmap.
+
+        for (size_t j (0); j < 16; ++j)
+        {
+          for (size_t i (0); i < 16; ++i)
+          {
+            //! \todo R and B are inverted here
+            _qt_minimap.setPixel (x * 16 + i, y * 16 + j, color_for_height (_tiles[y][x]->height_17[j][i]));
+          }
+        }
+      }
+    }
+  }
 }
 
 void map_horizon::upload()
