@@ -69,7 +69,6 @@ public:
 
 private:
   std::unique_ptr<UIFrame> mGUIFrame;
-  UIStatusBar* mGUIStatusbar;
   UIAbout* mGUICreditsWindow;
   UISettings* mGUISettingsWindow;
   UIMinimapWindow* mGUIMinimapWindow;
