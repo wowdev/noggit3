@@ -278,7 +278,7 @@ void MapIndex::unsetChanged(const tile_index& tile)
   }
 }
 
-int MapIndex::getChanged(const tile_index& tile)
+int MapIndex::getChanged(const tile_index& tile) const
 {
   // Changed 2 are adts around the changed one that have 1 in changed.
   // You must save them also IF you do any UID recalculation on changed 1 adts.
