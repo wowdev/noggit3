@@ -9,11 +9,15 @@ syntax: glob
 # Executables
 **/build/**  
 *.o
+cmake-build-*
 .depend
 
 # IDE (eclipse)
 .project
 .cproject
+
+#IDE (IntelliJ)
+*.idea
 
 # IDE (QtCreator)
 *.config

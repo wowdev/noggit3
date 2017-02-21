@@ -5,7 +5,7 @@
 #include <noggit/ui/Window.h>
 #include <noggit/Selection.h>
 #include <math/vector_3d.hpp>
-#include <QDockWidget>
+#include <QWidget>
 
 class UIModelImport;
 class UIStatusBar;
@@ -19,7 +19,7 @@ enum ModelPasteMode
   PASTE_MODE_COUNT
 };
 
-class UIObjectEditor : public QDockWidget
+class UIObjectEditor : public QWidget
 {
 public:
   UIObjectEditor(float x, float y, UIMapViewGUI* mainGui);

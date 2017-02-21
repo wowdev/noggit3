@@ -11,7 +11,7 @@
 
 namespace ui
 {
-  class zone_id_browser : public QDockWidget
+  class zone_id_browser : public QWidget
   {
   public:
     zone_id_browser();

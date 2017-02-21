@@ -7,7 +7,7 @@
 #include <QtWidgets/QWidget>
 #include <QDockWidget>
 
-class UICursorSwitcher : public QDockWidget
+class UICursorSwitcher : public QWidget
 {
 public:
   UICursorSwitcher(math::vector_4d& color, int& cursor_type);

@@ -18,16 +18,14 @@
 namespace ui
 {
   zone_id_browser::zone_id_browser()
-    : QDockWidget(nullptr)
+    : QWidget(nullptr)
     , mapID(-1)
     , _area_tree(new QTreeWidget())
   {
-    //  resize(w, h);
-    setFloating(true);
-    QWidget *content = new QWidget(nullptr);
+    setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
     setWindowTitle("Area picker");
-    new QVBoxLayout(content);
-    content->layout()->addWidget(_area_tree);
+    new QVBoxLayout(this);
+    this->layout()->addWidget(_area_tree);
 
     connect(_area_tree, static_cast<void (QTreeWidget::*) (void)> (&QTreeWidget::itemSelectionChanged), [this]
     {
@@ -37,8 +35,6 @@ namespace ui
         _func(selected_items.back()->data(0, 1).toInt());
       }
     });
-      
-    setWidget(content);
   }
 
   void zone_id_browser::setMapID(int id)
