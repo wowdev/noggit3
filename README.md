@@ -39,7 +39,7 @@ There is a bug tracker at http://modcraft.superparanoid.de/bugtracker/index.php 
 Following is  an example for file  src/noggit/ui/foo_ban.h. .cpp files
 are similar.
 
-    // foo_ban.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+    // This file is part of Noggit3, licensed under GNU General Public License (version 3).
     // First Lastname <MAIL@ADDRESS>
  
     //! \note Include guard shall be the full path except for src/.
