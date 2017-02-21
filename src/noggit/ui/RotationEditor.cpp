@@ -118,6 +118,8 @@ UIRotationEditor::UIRotationEditor()
 
 void UIRotationEditor::select(selection_type entry)
 {
+  _selection = true;
+
   if (entry.which() == eEntry_Model)
   {
     rotationVect = &(boost::get<selected_model_type> (entry)->dir);
@@ -134,11 +136,12 @@ void UIRotationEditor::select(selection_type entry)
   else
   {
     _wmoInstance = nullptr;
-    clearSelect();
-    return;
+    _selection = false;
+    rotationVect = nullptr;
+    posVect = nullptr;
+    scale = nullptr;
   }
 
-  _selection = true;
   updateValues();
 }
 
@@ -185,14 +188,6 @@ void UIRotationEditor::updateValues()
     _position_z->setEnabled (false);
     _scale->setEnabled (false);
   }
-}
-
-void UIRotationEditor::clearSelect()
-{
-  _selection = false;
-  rotationVect = nullptr;
-  posVect = nullptr;
-  scale = nullptr;
 }
 
 void UIRotationEditor::maybe_updateWMO()
