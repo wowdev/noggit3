@@ -17,7 +17,6 @@
 #include <noggit/World.h>
 #include <noggit/application.h> // fonts, APP_*
 #include <noggit/map_index.hpp>
-#include <noggit/map_index.hpp>
 #include <noggit/ui/About.h> // UIAbout
 #include <noggit/ui/SettingsPanel.h> //UISettings
 #include <noggit/ui/Frame.h> // UIFrame
