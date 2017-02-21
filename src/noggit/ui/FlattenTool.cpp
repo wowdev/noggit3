@@ -23,6 +23,7 @@ namespace ui
     , _flatten_mode(eFlattenMode_Both)
   {
     setWindowTitle("Flatten / Blur");
+    setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
 
     auto layout (new QFormLayout (this));
 
