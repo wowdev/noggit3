@@ -96,16 +96,8 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
       gWorld->mapIndex.loadMaxUID();
       mMenuLink->enterMapAt(pos);
     }
-    else if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
-    {
-      gWorld->mapIndex.loadMaxUID();
-      mMenuLink->enterMapAt(pos);
-    }
     else
-    {
-      mMenuLink->uidFixWindow->enterAt(pos);
-    }
-#else
+#endif
     if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
     {
       gWorld->mapIndex.loadMaxUID();
@@ -115,7 +107,6 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
     {
       mMenuLink->uidFixWindow->enterAt(pos);
     }
-#endif
   }
   else if (map)
   {
