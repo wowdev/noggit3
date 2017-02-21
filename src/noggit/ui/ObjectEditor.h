@@ -10,6 +10,7 @@
 class UIModelImport;
 class UIStatusBar;
 class UIMapViewGUI;
+class QButtonGroup;
 
 enum ModelPasteMode
 {
@@ -32,7 +33,7 @@ public:
   UIModelImport *modelImport;
   UIStatusBar *filename;
 private:
-  UIToggleGroup *pasteModeGroup;
+  QButtonGroup* pasteModeGroup;
   UIMapViewGUI* mainGui;
 
   boost::optional<selection_type> selected;
