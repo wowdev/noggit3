@@ -249,6 +249,7 @@ set ( noggit_ui_sources
       src/noggit/ui/WaterTypeBrowser.cpp
       src/noggit/ui/Window.cpp
       src/noggit/ui/ZoneIDBrowser.cpp
+      src/noggit/ui/minimap_widget.cpp
       src/noggit/ui/shader_tool.cpp
       src/noggit/ui/terrain_tool.cpp
       src/noggit/ui/uid_fix_window.cpp
@@ -370,6 +371,7 @@ set ( noggit_ui_headers
       src/noggit/ui/WaterTypeBrowser.h
       src/noggit/ui/Window.h
       src/noggit/ui/ZoneIDBrowser.h
+      src/noggit/ui/minimap_widget.hpp
       src/noggit/ui/shader_tool.hpp
       src/noggit/ui/terrain_tool.hpp
       src/noggit/ui/uid_fix_window.hpp
@@ -429,6 +431,10 @@ IF(APPLE)
 ENDIF(APPLE)
 
 
+list (APPEND headers_to_moc
+  src/noggit/ui/minimap_widget.hpp
+)
+qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
 
 source_group("noggit"  FILES ${noggit_root_sources} ${noggit_root_headers})
 source_group("noggit\\ui"  FILES ${noggit_ui_sources} ${noggit_ui_headers})
@@ -455,6 +461,7 @@ ADD_EXECUTABLE ( noggit
                   ${mysql_headers}
                   ${os_headers}
                   ${ResFiles}
+                  ${moced}
                 )
 
 TARGET_LINK_LIBRARIES (noggit
