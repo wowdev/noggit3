@@ -118,11 +118,6 @@ void UIFrame::getOffset(float* xOff, float* yOff)
   *yOff = ty + y();
 }
 
-bool UIFrame::key_down (SDLKey, uint16_t unicode)
-{
-  return false;
-}
-
 int UIFrame::getX()
 {
   return (int)this->_x;
