@@ -233,7 +233,6 @@ set ( noggit_ui_sources
       src/noggit/ui/Slider.cpp
       src/noggit/ui/StatusBar.cpp
       src/noggit/ui/Text.cpp
-      src/noggit/ui/TextBox.cpp
       src/noggit/ui/Texture.cpp
       src/noggit/ui/TexturePicker.cpp
       src/noggit/ui/TextureSwitcher.cpp
@@ -355,7 +354,6 @@ set ( noggit_ui_headers
       src/noggit/ui/Slider.h
       src/noggit/ui/StatusBar.h
       src/noggit/ui/Text.h
-      src/noggit/ui/TextBox.h
       src/noggit/ui/Texture.h
       src/noggit/ui/TexturePicker.h
       src/noggit/ui/TextureSwitcher.h

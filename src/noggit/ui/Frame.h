@@ -127,7 +127,6 @@ public:
   virtual bool processLeftDrag(float mx, float my, float xChange, float yChange);
   virtual void processUnclick() { }
   virtual bool processRightClick(float mx, float my);
-  virtual bool key_down (SDLKey, uint16_t unicode);
   virtual void resize()
   {
     for (Children::iterator it(_children.begin()), end(_children.end())
