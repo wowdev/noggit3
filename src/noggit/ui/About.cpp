@@ -2,31 +2,29 @@
 
 #include <noggit/ui/About.h>
 
-#include <algorithm>
-
-#include <noggit/application.h> // fonts
-#include <noggit/ui/Text.h>
-#include <noggit/ui/Texture.h>
-#include <noggit/Video.h> // video
-
 #include "revision.h"
 
-UIAbout::UIAbout()
-  : UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f  , (float)winWidth, (float)winHeight)
-{
-  addChild(new UITexture(20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp"));
-  addChild(new UIText(73.0f, 24.0f, "Noggit Studio", app.getSkurri32(), eJustifyLeft));
-  addChild(new UIText(155.0f, 57.0f, "a wow map editor for 3.3.5a", app.getFritz16(), eJustifyLeft));
-  addChild(new UIText(20.0f, 95.0f, "Ufoz [...],   Cryect,   Beket,   Schlumpf,   Tigurius", app.getFritz16(), eJustifyLeft));
-  addChild(new UIText(20.0f, 115.0f, "Steff,  Garthog,  Glararan,  Cromon,  Hanfer", app.getFritz16(), eJustifyLeft));
-  addChild(new UIText(20.0f, 135.0f, "Skarn,  AxelSheva,  Valium,  Kaev,  Adspartan", app.getFritz16(), eJustifyLeft));
-  addChild(new UIText(20.0f, 165.0f, "World of Warcraft is (C) Blizzard Entertainment", app.getFritz16(), eJustifyLeft));
-  addChild(new UIText(20.0f, 190.0f, STRPRODUCTVER, app.getFritz16(), eJustifyLeft));
-  addChild(new UIText(375.0f, 190.0f, __DATE__ ", " __TIME__, app.getFritz16(), eJustifyRight));
-}
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QVBoxLayout>
 
-void UIAbout::resize()
+UIAbout::UIAbout()
+  : QWidget (nullptr)
 {
-  x(std::max((video.xres() / 2.0f) - (winWidth / 2.0f), 0.0f));
-  y(std::max((video.yres() / 2.0f) - (winHeight / 2.0f), 0.0f));
+  //! \todo make nice looking again, I don't care currently
+  new QVBoxLayout (this);
+
+  //! \todo iconize
+  layout()->addWidget (new QLabel ("interface/icons/inv_potion_83.blp", this));
+  //! \todo was Skurri32
+  layout()->addWidget (new QLabel ("Noggit Studio", this));
+  layout()->addWidget (new QLabel ("a wow map editor for 3.3.5a", this));
+  layout()->addWidget ( new QLabel ( "Ufoz [...], Cryect, Beket, Schlumpf, "
+                                     "Tigurius, Steff, Garthog, Glararan, Cromon, "
+                                     "Hanfer, Skarn, AxelSheva, Valium, Kaev, "
+                                     "Adspartan", this
+                                   )
+                      );
+  layout()->addWidget (new QLabel ("World of Warcraft is (C) Blizzard Entertainment", this));
+  layout()->addWidget (new QLabel (STRPRODUCTVER, this));
+  layout()->addWidget (new QLabel (__DATE__ ", " __TIME__, this));
 }

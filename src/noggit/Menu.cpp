@@ -52,7 +52,7 @@ Menu::Menu()
   mGUIMinimapWindow->hide();
   mGUIFrame->addChild(mGUIMinimapWindow);
   mGUICreditsWindow = new UIAbout();
-  mGUIFrame->addChild(mGUICreditsWindow);
+  mGUICreditsWindow->show();
   mGUISettingsWindow = new UISettings();
 
   uidFixWindow = new ui::uid_fix_window(this);
