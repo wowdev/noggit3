@@ -2,15 +2,10 @@
 
 #pragma once
 
-#include <noggit/ui/CloseWindow.h>
+#include <QtWidgets/QWidget>
 
-class UIAbout : public UIWindow
+class UIAbout : public QWidget
 {
-private:
-  static const int winWidth = 400;
-  static const int winHeight = 230;
-
 public:
   UIAbout();
-  void resize();
 };
