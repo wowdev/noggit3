@@ -39,16 +39,15 @@ enum eFlattenType
   eFlattenType_Flat,
   eFlattenType_Linear,
   eFlattenType_Smooth,
+  eFlattenType_Origin,
   eFlattenType_Count,
-  eFlattenType_Origin
 };
 
 enum eFlattenMode
 {
-  eFlattenMode_Both,
-  eFlattenMode_Raise,
-  eFlattenMode_Lower,
-  eFlattenMode_Count
+  eFlattenMode_Raise = 0x1,
+  eFlattenMode_Lower = 0x2,
+  eFlattenMode_Both = eFlattenMode_Raise | eFlattenMode_Lower,
 };
 
 enum class editing_mode

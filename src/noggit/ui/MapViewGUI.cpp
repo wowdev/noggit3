@@ -72,9 +72,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   terrainTool->show();
   addChild(terrainTool);
 
-  flattenTool = new ui::FlattenTool((float)video.xres() - 210.0f, 30.0f);
+  flattenTool = new ui::FlattenTool();
   flattenTool->hide();
-  addChild(flattenTool);
 
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode)

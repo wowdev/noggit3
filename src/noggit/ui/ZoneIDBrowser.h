@@ -4,7 +4,6 @@
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QTreeWidget> 
-#include <QDockWidget>
 
 #include <functional>
 #include <string>
