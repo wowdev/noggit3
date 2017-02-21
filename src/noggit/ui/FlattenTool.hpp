@@ -3,21 +3,22 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
-#include <noggit/tool_enums.hpp>
-#include <noggit/ui/Window.h>
 
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDial>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QWidget>
 
-class UIToggleGroup;
-class UISlider;
-class UITextBox;
-class UICheckBox;
 
 namespace ui
 {
-  class FlattenTool : public UIWindow
+  class FlattenTool : public QWidget
   {  
   public:
-    FlattenTool(float x, float y);
+    FlattenTool();
 
     void flatten(math::vector_3d const& cursor_pos, float dt);
     void blur(math::vector_3d const& cursor_pos, float dt);
@@ -35,17 +36,16 @@ namespace ui
     void changeHeight(float change);
 
     void setRadius(float radius);
+    void setOrientation(float orientation);
 
     float brushRadius() const { return _radius; }
     float angle() const { return _angle; }
     float orientation() const { return _orientation; }
-    bool angled_mode() const { return _angled_mode; }
-    bool use_ref_pos() const { return _locked; }
+    bool angled_mode() const { return _angle_group->isChecked(); }
+    bool use_ref_pos() const  { return _lock_group->isChecked(); }
     math::vector_3d ref_pos() const { return _lock_pos; }
 
   private:
-    static const int winWidth = 180;
-    static const int winHeight = 400;
 
     float _radius;
     float _speed;
@@ -54,31 +54,29 @@ namespace ui
 
     math::vector_3d _lock_pos;
 
-    bool _locked;
-    bool _angled_mode;
-
     int _flatten_type;
     int _flatten_mode;
 
-    // UI stuff
-  public:
-    void updateLockCoord(UITextBox* cb, std::string const& str, float& value);
-
   private:
-    UIToggleGroup* _type_toggle;
-    UIToggleGroup* _mode_toggle;
+    QButtonGroup* _type_button_box;
+    QSlider* _radius_slider;
+    QSlider* _speed_slider;
+    QDoubleSpinBox* _radius_spin;
+    QDoubleSpinBox* _speed_spin;
 
-    UISlider* _radius_slider;
-    UISlider* _speed_slider;
-    UISlider* _angle_slider;
-    UISlider* _orientation_slider;
+    QGroupBox* _angle_group;
+    QSlider* _angle_slider;
+    QDial* _orientation_dial;
 
-    UITextBox* _lock_x;
-    UITextBox* _lock_z;
-    UITextBox* _lock_h;
+    QGroupBox* _lock_group;
+    QDoubleSpinBox* _lock_x;
+    QDoubleSpinBox* _lock_z;
+    QDoubleSpinBox* _lock_h;
 
-    UICheckBox* _angle_checkbox;
-    UICheckBox* _lock_checkbox;
+    QCheckBox* _angle_checkbox;
+    QCheckBox* _lock_checkbox;
+    QCheckBox* _lock_up_checkbox;
+    QCheckBox* _lock_down_checkbox;
   };
 }
 

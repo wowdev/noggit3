@@ -2,106 +2,242 @@
 
 #include <noggit/ui/FlattenTool.hpp>
 
-#include <noggit/application.h>
-#include <noggit/ui/Text.h>
-#include <noggit/ui/Slider.h>
-#include <noggit/ui/TextBox.h>
-#include <noggit/ui/CheckBox.h>
-#include <noggit/ui/ToggleGroup.h>
-#include <noggit/Misc.h>
-#include <noggit/Environment.h>
+#include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
 
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QRadioButton>
 
 
 namespace ui
 {
-  FlattenTool::FlattenTool(float x, float y)
-    : UIWindow(x, y, (float)winWidth, (float)winHeight)
+  FlattenTool::FlattenTool()
+    : QWidget(nullptr)
     , _radius(10.0f)
     , _speed(2.0f)
     , _angle(45.0f)
     , _orientation(0.0f)
-    , _locked(false)
-    , _angled_mode(false)
     , _flatten_type(eFlattenType_Linear)
     , _flatten_mode(eFlattenMode_Both)
   {
-    addChild(new UIText(78.5f, 2.0f, "Flatten / Blur", app.getArial14(), eJustifyCenter));
+    setWindowTitle("Flatten / Blur");
 
+    auto layout (new QFormLayout (this));
 
-    _type_toggle = new UIToggleGroup(&_flatten_type);
-    addChild(new UICheckBox(6.0f, 15.0f, "Flat", _type_toggle, eFlattenType_Flat));
-    addChild(new UICheckBox(80.0f, 15.0f, "Linear", _type_toggle, eFlattenType_Linear));
-    addChild(new UICheckBox(6.0f, 40.0f, "Smooth", _type_toggle, eFlattenType_Smooth));
-	addChild(new UICheckBox(80.0f, 40.0f, "Origin", _type_toggle, eFlattenType_Origin));
+    _type_button_box = new QButtonGroup (this);
+    QRadioButton* radio_flat = new QRadioButton ("Flat");
+    QRadioButton* radio_linear = new QRadioButton ("Linear");
+    QRadioButton* radio_smooth = new QRadioButton ("Smooth");
+    QRadioButton* radio_origin = new QRadioButton ("Origin");
 
-    _type_toggle->Activate(eFlattenType_Linear);
+    _type_button_box->addButton (radio_flat, (int)eFlattenType_Flat);
+    _type_button_box->addButton (radio_linear, (int)eFlattenType_Linear);
+    _type_button_box->addButton (radio_smooth, (int)eFlattenType_Smooth);
+    _type_button_box->addButton (radio_origin, (int)eFlattenType_Origin);
 
-    _radius_slider = new UISlider(6.0f, 85.0f, 167.0f, 1000.0f, 0.00001f);
-    _radius_slider->setFunc([&](float f) {_radius = f;});
-    _radius_slider->setValue(_radius / 1000);
-    _radius_slider->setText("Brush radius: ");
-    addChild(_radius_slider);
+    radio_linear->toggle();
 
-    _speed_slider = new UISlider(6.0f, 110.0f, 167.0f, 10.0f, 0.00001f);
-    _speed_slider->setFunc([&](float f) {_speed = f;});
-    _speed_slider->setValue(_speed / 10.0f);
-    _speed_slider->setText("Brush Speed: ");
-    addChild(_speed_slider);
+    QGridLayout* flatten_type_layout (new QGridLayout (this));
+    flatten_type_layout->addWidget (radio_flat, 0, 0);
+    flatten_type_layout->addWidget (radio_linear, 0, 1);
+    flatten_type_layout->addWidget (radio_smooth, 1, 0);
+    flatten_type_layout->addWidget (radio_origin, 1, 1);
 
+    QGroupBox* flatten_type_group (new QGroupBox ("Type"));
+    flatten_type_group->setLayout (flatten_type_layout);
+    layout->addRow (flatten_type_group);
 
-    addChild(new UIText(5.0f, 130.0f, "Flatten options:", app.getArial14(), eJustifyLeft));
+    _radius_spin = new QDoubleSpinBox (this);
+    _radius_spin->setRange (0.0f, 1000.0f);
+    _radius_spin->setDecimals (2);
+    _radius_spin->setValue (_radius);
 
-    addChild (_angle_checkbox = new UICheckBox(6.0f, 150.0f, "Flatten Angle", &_angled_mode));
+    layout->addRow ("Radius:", _radius_spin);
 
-    _angle_slider = new UISlider(6.0f, 190.0f, 167.0f, 89.0f, 0.00001f);
-    _angle_slider->setFunc( [&] (float f) { _angle = f; });
-    _angle_slider->setValue(_angle / 89.0f);
-    _angle_slider->setText("Angle: ");
-    addChild(_angle_slider);
+    _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+    _radius_slider->setRange (0, 1000);
+    _radius_slider->setSliderPosition (_radius);
+    
+    layout->addRow (_radius_slider);
 
-    _orientation_slider = new UISlider(6.0f, 220.0f, 167.0f, 360.0f, 0.00001f);
-    _orientation_slider->setFunc( [&] (float f) { _orientation = f; });
-    _orientation_slider->setValue(_orientation / 360.0f);
-    _orientation_slider->setText("Orientation: ");
-    addChild(_orientation_slider);
+    _speed_spin = new QDoubleSpinBox (this);
+    _speed_spin->setRange (0.0f, 10.0f);
+    _speed_spin->setDecimals (2);
+    _speed_spin->setValue (_speed);
 
+    layout->addRow ("Speed:", _speed_spin);
 
-    addChild (_lock_checkbox = new UICheckBox(5.0f, 235.0f, "flatten relative to:", &_locked));
+    _speed_slider = new QSlider (Qt::Orientation::Horizontal, this);
+    _speed_slider->setRange (0, 10 * 100);
+    _speed_slider->setSingleStep (50);
+    _speed_slider->setSliderPosition (_speed * 100);
 
-    addChild(new UIText(5.0f, 265.0f, "X:", app.getArial12(), eJustifyLeft));
-    _lock_x = new UITextBox(50.0f, 265.0f, 100.0f, 30.0f, app.getArial12(), [&] (UITextBox::Ptr ptr, const std::string str) 
-    {
-      updateLockCoord(ptr, str, _lock_pos.x);
-    });
-    _lock_x->value(misc::floatToStr(_lock_pos.x));
-    addChild(_lock_x);
+    layout->addRow(_speed_slider);
+    
+    layout->addRow(new QLabel("Flatten/Blur:"));
 
-    addChild(new UIText(5.0f, 285.0f, "Z:", app.getArial12(), eJustifyLeft));
-    _lock_z = new UITextBox(50.0f, 285.0f, 100.0f, 30.0f, app.getArial12(), [&](UITextBox::Ptr ptr, const std::string str)
-    {
-      updateLockCoord(ptr, str, _lock_pos.z);
-    });
-    _lock_z->value(misc::floatToStr(_lock_pos.z));
-    addChild(_lock_z);
+    QGridLayout* lock_checkbox_layout(new QGridLayout());
+    lock_checkbox_layout->addWidget(_lock_up_checkbox = new QCheckBox(this), 0, 0);
+    lock_checkbox_layout->addWidget(_lock_down_checkbox = new QCheckBox(this), 0, 1);
 
-    addChild(new UIText(5.0f, 305.0f, "Height:", app.getArial12(), eJustifyLeft));
-    _lock_h = new UITextBox(50.0f, 305.0f, 100.0f, 30.0f, app.getArial12(), [&](UITextBox::Ptr ptr, const std::string str)
-    {
-      updateLockCoord(ptr, str, _lock_pos.y);
-    });
-    _lock_h->value(misc::floatToStr(_lock_pos.y));
-    addChild(_lock_h);
+    _lock_up_checkbox->setChecked(true);
+    _lock_up_checkbox->setText("up");
+    _lock_up_checkbox->setToolTip("Raise the terrain when using the tool");
+    _lock_down_checkbox->setChecked(true);
+    _lock_down_checkbox->setText("down");
+    _lock_down_checkbox->setToolTip("Lower the terrain when using the tool");
 
+    layout->addRow(lock_checkbox_layout);
 
-    addChild(new UIText(5.0f, 330.0, "Lock:", app.getArial14(), eJustifyLeft));
+    layout->addRow(new QLabel("Flatten only:"));
 
-    _mode_toggle = new UIToggleGroup(&_flatten_mode);
-    addChild(new UICheckBox(5.0f, 345.0f, "Off", _mode_toggle, eFlattenMode_Both));
-    addChild(new UICheckBox(105.0f, 345.0f, "Up", _mode_toggle, eFlattenMode_Raise));
-    addChild(new UICheckBox(5.0f, 370.0f, "Down", _mode_toggle, eFlattenMode_Lower));
-    _mode_toggle->Activate(eFlattenMode_Both);
+    QGridLayout* angle_layout(new QGridLayout());
+
+    angle_layout->addWidget(_orientation_dial = new QDial(this), 0, 0);
+    _orientation_dial->setRange(0, 360);
+    _orientation_dial->setWrapping(true);
+    _orientation_dial->setSliderPosition(_orientation - 90); // to get ingame orientation
+    _orientation_dial->setToolTip("Orientation");
+    _orientation_dial->setSingleStep(10);    
+
+    _angle_slider = new QSlider(this);
+    _angle_slider->setRange(0, 89);
+    _angle_slider->setSliderPosition(_angle);
+    _angle_slider->setToolTip("Angle");
+    angle_layout->addWidget(_angle_slider, 0, 1);
+    
+    _angle_group = new QGroupBox("Angled mode");
+    _angle_group->setCheckable(true);
+    _angle_group->setChecked(false);
+    _angle_group->setLayout(angle_layout);
+    layout->addRow(_angle_group);
+
+    QFormLayout* lock_layout(new QFormLayout());
+    lock_layout->addRow("X:", _lock_x = new QDoubleSpinBox(this));
+    lock_layout->addRow("Z:", _lock_z = new QDoubleSpinBox(this));
+    lock_layout->addRow("H:", _lock_h = new QDoubleSpinBox(this));
+
+    _lock_group = new QGroupBox("Lock mode");
+    _lock_group->setCheckable(true);
+    _lock_group->setChecked(false);
+    _lock_group->setLayout(lock_layout); 
+
+    layout->addRow(_lock_group);    
+
+    _lock_x->setRange(0.0, 34133.0);
+    _lock_x->setDecimals(3);
+    _lock_z->setRange(0.0, 34133.0);
+    _lock_z->setDecimals(3);
+    _lock_h->setRange(0.0, 34133.0);
+    _lock_h->setMinimumWidth(30);
+
+    connect ( _type_button_box, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
+            , [&] (int id)
+              {
+                _flatten_type = id;
+              }
+            );
+
+    connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+            , [&] (double v)
+              {
+                _radius = v;
+                QSignalBlocker const blocker(_radius_slider);
+                _radius_slider->setSliderPosition ((int)std::round (v));
+               }
+            );
+
+    connect ( _radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+            , [&] (int v)
+              {
+                _radius = v;
+                 QSignalBlocker const blocker(_radius_spin);
+                 _radius_spin->setValue(v);
+              }
+            );
+
+    connect ( _speed_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+              , [&] (double v)
+                {
+                  _speed = v;
+                  QSignalBlocker const blocker(_speed_slider);
+                  _speed_slider->setSliderPosition ((int)std::round (v * 100.0f));
+                }
+              );
+
+    connect ( _speed_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+              , [&] (int v)
+                {
+                  _speed = v / 100.0f;
+                  QSignalBlocker const blocker(_speed_spin);
+                  _speed_spin->setValue (_speed);
+                }
+              );
+
+    connect( _lock_up_checkbox, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
+             , [&] (int state) 
+               {
+                 if (state)
+                 {
+                   _flatten_mode |= eFlattenMode_Raise;
+                 }
+                 else
+                 {
+                   _flatten_mode &= eFlattenMode_Lower;
+                 }
+               }
+           );
+
+    connect( _lock_down_checkbox, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
+             , [&] (int state) 
+               {
+                 if (state)
+                 {
+                   _flatten_mode |= eFlattenMode_Lower;
+                 }
+                 else
+                 {
+                   _flatten_mode &= eFlattenMode_Raise;
+                 }
+               }
+           );
+
+    connect ( _angle_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+              , [&] (int v)
+                {
+                  _angle = v;
+                }
+              );
+
+    connect ( _orientation_dial, static_cast<void (QDial::*) (int)> (&QDial::valueChanged)
+              , [this] (int v)
+                {
+                  setOrientation(v + 90.0f);
+                }
+              );
+
+    connect ( _lock_x, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+              , [&] (double v)
+                {
+                  _lock_pos.x = v;
+                }
+              );
+
+    connect ( _lock_h, static_cast<void ( QDoubleSpinBox::* ) ( double )> ( &QDoubleSpinBox::valueChanged )
+              , [&] (double v)
+                {
+                  _lock_pos.y = v;
+                }
+            );
+
+    connect ( _lock_z, static_cast<void ( QDoubleSpinBox::* ) ( double )> ( &QDoubleSpinBox::valueChanged )
+              , [&] (double v)
+                {
+                  _lock_pos.z = v;
+                }
+            );
   }
 
   void FlattenTool::flatten(math::vector_3d const& cursor_pos, float dt)
@@ -111,9 +247,9 @@ namespace ui
                            , _radius
                            , _flatten_type
                            , _flatten_mode
-                           , _locked ? _lock_pos : cursor_pos
-                           , math::degrees (_angled_mode ? _angle : 0.0f)
-                           , math::degrees (_angled_mode ? _orientation : 0.0f)
+                           , use_ref_pos() ? _lock_pos : cursor_pos
+                           , math::degrees (angled_mode() ? _angle : 0.0f)
+                           , math::degrees (angled_mode() ? _orientation : 0.0f)
                            );
   }
 
@@ -123,41 +259,43 @@ namespace ui
                         , 1.f - pow (0.5f, dt * _speed)
                         , _radius
                         , _flatten_type
-                       );
+                        );
   }
 
   void FlattenTool::nextFlattenType()
   {
-    _flatten_type = (++_flatten_type) % eFlattenType_Count;
-    _type_toggle->Activate(_flatten_type);
+    _flatten_type = ( ++_flatten_type ) % eFlattenType_Count;
+    _type_button_box->button (_flatten_type)->toggle();
   }
 
   void FlattenTool::nextFlattenMode()
   {
-    _flatten_mode = (++_flatten_mode) % eFlattenMode_Count;
-    _mode_toggle->Activate(_flatten_mode);
+    _flatten_mode = std::max((int)eFlattenMode_Raise, (++_flatten_mode) % 4);
+    
+    QSignalBlocker const up_lock(_lock_up_checkbox);
+    QSignalBlocker const down_lock(_lock_down_checkbox);
+    _lock_up_checkbox->setChecked(_flatten_mode & eFlattenMode_Raise);
+    _lock_down_checkbox->setChecked(_flatten_mode & eFlattenMode_Lower);
   }
 
   void FlattenTool::toggleFlattenAngle()
   {
-    _angled_mode = !_angled_mode;
-    _angle_checkbox->setState(_angled_mode);
+    _angle_group->setChecked(!angled_mode());
   }
 
   void FlattenTool::toggleFlattenLock()
   {
-    _locked = !_locked;
-    _lock_checkbox->setState(_locked);
+    _lock_group->setChecked(!use_ref_pos());
   }
 
   void FlattenTool::lockPos (math::vector_3d const& cursor_pos)
   {
     _lock_pos = cursor_pos;
-    _lock_x->value(misc::floatToStr(_lock_pos.x));
-    _lock_z->value(misc::floatToStr(_lock_pos.z));
-    _lock_h->value(misc::floatToStr(_lock_pos.y));
+    _lock_x->setValue (_lock_pos.x);
+    _lock_h->setValue (_lock_pos.y);
+    _lock_z->setValue (_lock_pos.z);    
 
-    if (!_locked)
+    if (!use_ref_pos())
     {
       toggleFlattenLock();
     }
@@ -165,62 +303,50 @@ namespace ui
 
   void FlattenTool::changeRadius(float change)
   {
-    _radius = std::max(0.0f, std::min(1000.0f, _radius + change));
-    _radius_slider->setValue(_radius / 1000.0f);
+    _radius_spin->setValue (_radius + change);
   }
 
   void FlattenTool::changeSpeed(float change)
   {
-    _speed = std::max(0.0f, std::min(10.0f, _speed + change));
-    _speed_slider->setValue(_speed / 10.0f);
+    _speed_spin->setValue(_speed + change);
   }
 
   void FlattenTool::changeOrientation(float change)
   {
-    _orientation += change;
-    
-    if (_orientation < 0.0f)
-    {
-      _orientation += 360.0f;
-    }
-    else if (_orientation > 360.0f)
+    setOrientation(_orientation + change);    
+  }
+
+  void FlattenTool::setOrientation (float orientation)
+  {
+    QSignalBlocker const blocker (_orientation_dial);
+
+    _orientation = orientation;
+    if (_orientation > 360.0f)
     {
       _orientation -= 360.0f;
     }
-
-    _orientation_slider->setValue(_orientation / 360.0f);
+    else if (_orientation < 0.0f)
+    {
+      _orientation += 360.0f;
+    }
+    _orientation_dial->setSliderPosition(_orientation - 90.0f);
   }
 
   void FlattenTool::changeAngle(float change)
   {
-    _angle = std::max(0.0f, std::min(89.0f, _angle + change));
-    _angle_slider->setValue(_angle / 90.0f);
+    _angle = std::min(89.0f, std::max(0.0f, _angle + change));
+    _angle_slider->setSliderPosition(_angle);
   }
 
   void FlattenTool::changeHeight(float change)
   {
-    _lock_pos.y += change;
-    _lock_h->value(misc::floatToStr(_lock_pos.y));
+    _lock_h->setValue(_lock_pos.y + change);
   }
 
   void FlattenTool::setRadius(float radius)
   {
-    _radius = std::max(0.0f, std::min(1000.0f, radius));
-    _radius_slider->setValue(_radius / 1000.0f);
-  }
-
-  void FlattenTool::updateLockCoord(UITextBox* cb, std::string const& str, float& value)
-  {
-    try
-    {
-      float val = std::atof(str.c_str());
-      value = val;
-      cb->value(misc::floatToStr(val));
-    }
-    catch (std::exception const & e)
-    {
-      cb->value(misc::floatToStr(value));
-    }
+    _radius_slider->setValue(radius);
   }
 }
+
 

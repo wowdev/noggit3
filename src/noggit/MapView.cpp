@@ -125,8 +125,7 @@ void MapView::set_editing_mode (editing_mode mode)
     mainGui->terrainTool->show();
     break;
   case editing_mode::flatten_blur:
-    mainGui->flattenTool->x(tool_settings_x);
-    mainGui->flattenTool->y(tool_settings_y);
+    mainGui->flattenTool->move(tool_settings_x, tool_settings_y);
     mainGui->flattenTool->show();
     break;
   case editing_mode::paint:
