@@ -10,7 +10,7 @@
 
 class WMOInstance;
 
-class UIRotationEditor : public QDockWidget
+class UIRotationEditor : public QWidget
 {
 public:
   UIRotationEditor();

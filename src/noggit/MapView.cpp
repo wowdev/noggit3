@@ -2379,14 +2379,14 @@ void MapView::prompt_exit() const
     msgBox.setWindowTitle("Exit map editor and return to menu?");
     msgBox.setText("Exit the map editor and return to menu?");
     msgBox.setInformativeText("Any unsaved changes will be lost.");
-    msgBox.addButton("Return to Menu", QMessageBox::DestructiveRole);
+    msgBox.addButton("Return to Menu", QMessageBox::AcceptRole);
     QPushButton *continueButton = msgBox.addButton("Continue Editing", QMessageBox::RejectRole);
     msgBox.setDefaultButton(continueButton);
     msgBox.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     
     msgBox.exec();
     
-    if (msgBox.buttonRole(msgBox.clickedButton()) == QMessageBox::DestructiveRole) {
+    if (msgBox.buttonRole(msgBox.clickedButton()) == QMessageBox::AcceptRole) {
         app.pop = true;
     }
 }

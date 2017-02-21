@@ -17,17 +17,17 @@
 #include <sstream>
 
 UIRotationEditor::UIRotationEditor()
-  : QDockWidget ("Rotation Editor", nullptr, nullptr)
+  : QWidget (nullptr)
   , rotationVect(nullptr)
   , posVect(nullptr)
   , scale(nullptr)
   , _selection(false)
   , _wmoInstance(nullptr)
 {
-  setFloating(true);
+  setWindowTitle("Rotation Editor");
+  setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
 
-  QWidget *content = new QWidget(nullptr);
-  auto layout (new QFormLayout (content));
+  auto layout (new QFormLayout (this));
 
   layout->addRow (new QLabel ("Tilt", this));
   layout->addRow ("X", _rotation_x = new QDoubleSpinBox (this));
@@ -114,8 +114,6 @@ UIRotationEditor::UIRotationEditor()
               *scale = v;
             }
           );
-    
-  setWidget(content);
 }
 
 void UIRotationEditor::select(selection_type entry)
