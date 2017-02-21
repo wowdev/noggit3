@@ -131,7 +131,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   QRadioButton *selectionButton = new QRadioButton("Selection");
   QRadioButton *cameraButton = new QRadioButton("Camera");
 
-  auto pasteModeGroup(new QButtonGroup(this));
+  pasteModeGroup = new QButtonGroup(this);
   pasteModeGroup->addButton(terrainButton, 0);
   pasteModeGroup->addButton(selectionButton, 1);
   pasteModeGroup->addButton(cameraButton, 2);
@@ -312,7 +312,7 @@ void UIObjectEditor::pasteObject (math::vector_3d pos)
 
 void UIObjectEditor::togglePasteMode()
 {
-  pasteModeGroup->Activate((pasteMode + 1) % PASTE_MODE_COUNT);
+  pasteModeGroup->button ((pasteMode + 1) % PASTE_MODE_COUNT)->setChecked (true);
 }
 
 bool UIObjectEditor::hasSelection() const
