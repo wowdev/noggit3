@@ -7,7 +7,6 @@
 #include <noggit/MapView.h>
 #include <noggit/Menu.h>
 #include <noggit/Misc.h>
-#include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Settings.h>
 #include <noggit/Settings.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
@@ -40,8 +39,6 @@ Menu::Menu()
     , mGUISettingsWindow(nullptr)
 	, mGUIMinimapWindow(nullptr)
 	, mGUImenuBar(nullptr)
-	, mBackgroundModel(boost::none)
-	, mLastBackgroundId(-1)
   , uidFixWindow(nullptr)
 {
   gWorld = nullptr;
@@ -62,7 +59,6 @@ Menu::Menu()
 	createMapList();
 	createBookmarkList();
 	buildMenuBar();
-	randBackground();
 
   addHotkey ( SDLK_ESCAPE
             , MOD_none
@@ -84,42 +80,11 @@ Menu::Menu()
             );
 }
 
-//! \todo Add TBC and WOTLK.
-//! \todo Use std::array / boost::array.
-//const std::string uiModels[] = { "BloodElf", "Deathknight", "Draenei", "Dwarf", "Human", "MainMenu", "NightElf", "Orc", "Scourge", "Tauren" };
-//Steff: Turn of the ugly once
-const std::string uiModels[] = { "Deathknight", "Draenei", "Dwarf", "MainMenu", "NightElf", "Orc" };
-
-
-std::string buildModelPath(size_t index)
-{
-  assert(index < sizeof(uiModels) / sizeof(const std::string));
-
-  return "Interface\\Glues\\Models\\UI_" + uiModels[index] + "\\UI_" + uiModels[index] + ".m2";
-}
-
 Menu::~Menu()
 {
   delete gWorld;
   gWorld = nullptr;
 }
-
-void Menu::randBackground()
-{
-  mBackgroundModel.reset();
-
-  int randnum;
-  do
-  {
-    randnum = misc::randint(0, sizeof(uiModels) / sizeof(const std::string) - 1);
-  } while (randnum == mLastBackgroundId);
-
-  mLastBackgroundId = randnum;
-
-  mBackgroundModel = scoped_model_reference (buildModelPath(randnum));
-  mBackgroundModel.get()->mPerInstanceAnimation = true;
-}
-
 
 void Menu::enterMapAt(math::vector_3d pos, float av, float ah)
 {
@@ -133,67 +98,14 @@ void Menu::enterMapAt(math::vector_3d pos, float av, float ah)
   app.getStates().push_back(new MapView(ah, av, math::vector_3d(pos.x, pos.y, pos.z - 1.0f))); // on gPop, MapView is deleted.
 
   mGUIMinimapWindow->hide();
-
-  mBackgroundModel.reset();
-}
-
-void Menu::tick(float t, float /*dt*/)
-{
-  globalTime = (int)(t * 1000.0f);
-
-  if (mBackgroundModel)
-  {
-    mBackgroundModel.get()->updateEmitters(t);
-  }
-  else
-  {
-    randBackground();
-  }
 }
 
 void Menu::display(float /*t*/, float /*dt*/)
 {
-  // 3D: Background.
+  video.set2D();
   gl.clearColor(0.0f, 0.0f, 0.0f, 0.0f);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  video.set3D();
-
-  gl.disable(GL_FOG);
-
-  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-  math::vector_4d la(0.1f, 0.1f, 0.1f, 1.0f);
-  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
-
-  gl.enable(GL_COLOR_MATERIAL);
-  gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-  for (opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
-  {
-    gl.lightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
-    gl.lightf(light, GL_LINEAR_ATTENUATION, 0.7f);
-    gl.lightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
-    gl.disable(light);
-  }
-
-  gl.enable(GL_CULL_FACE);
-  gl.enable(GL_DEPTH_TEST);
-  gl.depthFunc(GL_LEQUAL);
-  gl.enable(GL_LIGHTING);
-  opengl::texture::enable_texture();
-
-  mBackgroundModel.get()->cam->setup(globalTime);
-  mBackgroundModel.get()->draw();
-
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-  gl.disable(GL_DEPTH_TEST);
-  gl.disable(GL_CULL_FACE);
-
-  // 2D: UI.
-
-  video.set2D();
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
