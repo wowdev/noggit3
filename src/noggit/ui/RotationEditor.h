@@ -16,7 +16,6 @@ public:
   UIRotationEditor();
 
   void select(selection_type entry);
-  void clearSelect();
   void updateValues();
   bool hasSelection() const { return _selection; }
 
