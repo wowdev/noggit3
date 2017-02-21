@@ -280,8 +280,6 @@ void Menu::loadBookmark(int bookmarkID)
 
 void Menu::showSettings()
 {
-  mGUICreditsWindow->hide();
-    
   mGUISettingsWindow->readInValues();
   mGUISettingsWindow->show();
 }
