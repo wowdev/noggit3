@@ -148,7 +148,7 @@ public:
 
   void unsetChanged(const tile_index& tile);
   void setFlag(bool to, math::vector_3d const& pos, uint32_t flag);
-  int getChanged(const tile_index& tile);
+  int getChanged(const tile_index& tile) const;
 
   void saveTile(const tile_index& tile);
   void saveChanged();
