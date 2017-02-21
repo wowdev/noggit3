@@ -48,7 +48,6 @@ Menu::Menu()
   mGUIMinimapWindow->hide();
   mGUIFrame->addChild(mGUIMinimapWindow);
   mGUICreditsWindow = new UIAbout();
-  mGUICreditsWindow->show();
   mGUISettingsWindow = new UISettings();
 
   uidFixWindow = new ui::uid_fix_window(this);
@@ -199,6 +198,7 @@ void Menu::buildMenuBar()
   mGUImenuBar = new UIMenuBar();
   mGUImenuBar->AddMenu("File");
   mGUImenuBar->GetMenu("File")->AddMenuItemButton("Settings", [this] { showSettings(); });
+  mGUImenuBar->GetMenu("File")->AddMenuItemButton("About", [this] { mGUICreditsWindow->show(); });
   mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
   mGUIFrame->addChild(mGUImenuBar);
 
