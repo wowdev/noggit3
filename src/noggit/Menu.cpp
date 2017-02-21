@@ -52,9 +52,6 @@ Menu::Menu()
   mGUISettingsWindow = new UISettings();
 
   uidFixWindow = new ui::uid_fix_window(this);
-  uidFixWindow->hide();
-  mGUIFrame->addChild(uidFixWindow);
-
 
 	createMapList();
 	createBookmarkList();
