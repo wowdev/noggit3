@@ -4,10 +4,10 @@
 
 #include <math/vector_3d.hpp>
 #include <noggit/AppState.h>
-#include <noggit/ModelManager.h>
 
 #include <boost/optional.hpp>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -25,7 +25,6 @@ namespace ui
 
 
 class World;
-class Model;
 class MapView;
 
 struct MapEntry
@@ -50,7 +49,6 @@ public:
   Menu();
   ~Menu();
 
-  void tick(float t, float dt);
   void display(float t, float dt);
 
   virtual void mouseReleaseEvent (SDL_MouseButtonEvent*) override;
@@ -77,14 +75,10 @@ private:
   std::vector<MapEntry> mMaps;
   std::vector<BookmarkEntry> mBookmarks;
 
-  boost::optional<scoped_model_reference> mBackgroundModel;
-  int mLastBackgroundId;
-
   void createBookmarkList();
   void createMapList();
   void buildMenuBar();
   void showSettings();
-  void randBackground();
 
   void resizewindow();
 };
