@@ -4,15 +4,7 @@
 
 #include <algorithm>
 
-#include <noggit/application.h> // fonts
 #include <noggit/Settings.h>
-#include <noggit/ui/Button.h>
-#include <noggit/ui/CheckBox.h>
-#include <noggit/ui/Text.h>
-#include <noggit/ui/TextBox.h>
-#include <noggit/ui/Texture.h>
-#include <noggit/ui/MinimizeButton.h>
-#include <noggit/Video.h> // video
 
 #include "revision.h"
 

@@ -6,22 +6,19 @@
 #include <sstream>
 
 #include <noggit/Environment.h>
+#include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
-#include <noggit/application.h> // fonts
 #include <noggit/Settings.h>
-#include <noggit/ui/Button.h>
-#include <noggit/ui/CheckBox.h>
+#include <noggit/Video.h> // video
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
+#include <noggit/application.h> // fonts
 #include <noggit/ui/MapViewGUI.h>
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/StatusBar.h>
-#include <noggit/ui/TextBox.h>
-#include <noggit/ui/Text.h>
-#include <noggit/Video.h> // video
-#include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/World.h>
 
 #include <QGridLayout>
 #include <QGroupBox>
@@ -31,60 +28,6 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
-
-void updateMinRotation(UITextBox::Ptr textBox, const std::string& value)
-{
-  float v = std::max(0.0f, (float)std::atof(value.c_str()));
-  v = std::min(v, Environment::getInstance()->maxRotation);
-
-  Environment::getInstance()->minRotation = v;
-  textBox->value(misc::floatToStr(v));
-}
-
-void updateMaxRotation(UITextBox::Ptr textBox, const std::string& value)
-{
-  float v = std::min(360.0f, (float)std::atof(value.c_str()));
-  v = std::max(v, Environment::getInstance()->minRotation);
-
-  Environment::getInstance()->maxRotation = v;
-  textBox->value(misc::floatToStr(v));
-}
-
-void updateMinTilt(UITextBox::Ptr textBox, const std::string& value)
-{
-  float v = std::max(-180.0f, (float)std::atof(value.c_str()));
-  v = std::min(v, Environment::getInstance()->maxTilt);
-
-  Environment::getInstance()->minTilt = v;
-  textBox->value(misc::floatToStr(v));
-}
-
-void updateMaxTilt(UITextBox::Ptr textBox, const std::string& value)
-{
-  float v = std::min(180.0f, (float)std::atof(value.c_str()));
-  v = std::max(v, Environment::getInstance()->minTilt);
-
-  Environment::getInstance()->maxTilt = v;
-  textBox->value(misc::floatToStr(v));
-}
-
-void updateMinScale(UITextBox::Ptr textBox, const std::string& value)
-{
-  float v = std::max(0.01f, (float)std::atof(value.c_str()));
-  v = std::min(v, Environment::getInstance()->maxScale);
-
-  Environment::getInstance()->minScale = v;
-  textBox->value(misc::floatToStr(v));
-}
-
-void updateMaxScale(UITextBox::Ptr textBox, const std::string& value)
-{
-  float v = std::min(63.0f, (float)std::atof(value.c_str()));
-  v = std::max(v, Environment::getInstance()->minScale);
-
-  Environment::getInstance()->maxScale = v;
-  textBox->value(misc::floatToStr(v));
-}
 
 void UIObjectEditor::toggleRotationEditor()
 {
