@@ -260,11 +260,10 @@ void Menu::loadMap(int mapID)
 	{
 		if (it->getInt(MapDB::MapID) == mapID)
 		{
-			gWorld = new World(it->getString(MapDB::InternalName));
-			mGUICreditsWindow->hide();
-            mGUISettingsWindow->hide();
-			mGUIMinimapWindow->show();
-			return;
+      gWorld = new World(it->getString(MapDB::InternalName));
+      mGUICreditsWindow->hide();
+      mGUIMinimapWindow->show();
+      return;
 		}
 	}
 
