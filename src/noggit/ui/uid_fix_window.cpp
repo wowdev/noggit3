@@ -59,4 +59,3 @@ namespace ui
     _menuLink->enterMapAt(_pos);
   }
 }
-
