@@ -6,7 +6,7 @@
 
 namespace math
 {
-  class vector_3d;
+  struct vector_3d;
 }
 class World;
 

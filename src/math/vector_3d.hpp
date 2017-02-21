@@ -10,8 +10,6 @@
 
 namespace math
 {
-  struct vector_3d;
-
   template<typename T>
     struct vector_3d_base
   {
