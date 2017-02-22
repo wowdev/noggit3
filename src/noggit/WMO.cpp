@@ -448,7 +448,7 @@ bool WMO::drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vect
     gl.disable(GL_CULL_FACE);
     gl.disable(GL_DEPTH_TEST);
     opengl::scoped::matrix_pusher const matrix;
-    math::vector_3d o = gWorld->camera;
+    math::vector_3d o = pCamera;
     gl.translatef(o.x, o.y, o.z);
     const float sc = 2.0f;
     gl.scalef(sc, sc, sc);
