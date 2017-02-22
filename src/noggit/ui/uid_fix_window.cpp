@@ -3,7 +3,6 @@
 #include <noggit/ui/uid_fix_window.hpp>
 
 #include <noggit/map_index.hpp>
-#include <noggit/Menu.h>
 #include <noggit/World.h>
 
 #include <QtWidgets/QDialogButtonBox>
@@ -13,9 +12,8 @@
 
 namespace ui
 {
-  uid_fix_window::uid_fix_window(Menu* menu)
+  uid_fix_window::uid_fix_window (std::function<void()> after_fix)
     : QDialog (nullptr)
-    , _menuLink (menu)
   {
     new QVBoxLayout (this);
 
@@ -42,29 +40,25 @@ namespace ui
     auto get_max (buttons->addButton ("Get Max UID", QDialogButtonBox::YesRole));
 
     connect ( fix_all, &QPushButton::clicked
-            , [this]
+            , [this, after_fix]
               {
                 hide();
                 gWorld->mapIndex.fixUIDs();
-                _menuLink->enterMapAt (_pos);
+                after_fix();
+                deleteLater();
               }
             );
 
     connect ( get_max, &QPushButton::clicked
-            , [this]
+            , [this, after_fix]
               {
                 hide();
                 gWorld->mapIndex.searchMaxUID();
-                _menuLink->enterMapAt (_pos);
+                after_fix();
+                deleteLater();
               }
             );
 
     layout()->addWidget (buttons);
-  }
-
-  void uid_fix_window::enterAt(math::vector_3d const& pos)
-  {
-    _pos = pos;
-    show();
   }
 }

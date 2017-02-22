@@ -41,14 +41,12 @@ Menu::Menu()
 	: mGUICreditsWindow(nullptr)
     , mGUISettingsWindow(nullptr)
 	, mGUImenuBar(nullptr)
-  , uidFixWindow(nullptr)
 {
   gWorld = nullptr;
 
   mGUICreditsWindow = new UIAbout();
   mGUISettingsWindow = new UISettings();
 
-  uidFixWindow = new ui::uid_fix_window(this);
 
 	createMapList();
 	createBookmarkList();
@@ -60,7 +58,6 @@ Menu::Menu()
               {
                 if (gWorld)
                 {
-                  uidFixWindow->hide();
                   delete gWorld;
                   gWorld = nullptr;
                 }
@@ -154,8 +151,6 @@ void Menu::loadMap(int mapID)
   delete gWorld;
   gWorld = nullptr;
 
-  uidFixWindow->hide();
-
 	for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
 	{
 		if (it->getInt(MapDB::MapID) == mapID)
@@ -187,7 +182,8 @@ void Menu::loadMap(int mapID)
             }
             else
             {
-              uidFixWindow->enterAt (pos);
+              auto uidFixWindow (new ui::uid_fix_window ([this, pos] { enterMapAt (pos); }));
+              uidFixWindow->show();
             }
             mmw->deleteLater();
           }
