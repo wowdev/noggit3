@@ -15,12 +15,10 @@ private:
   float borderwidth;
   float tilesize;
   math::degrees lookAt;
-  Menu* mMenuLink;
   World* map;
   UIText::Ptr cursor_position;
 
 public:
-  explicit UIMinimapWindow(Menu* menuLink);
   explicit UIMinimapWindow(World* setMap);
   UIFrame* processLeftClick(float mx, float my);
   virtual void mouse_moved (float, float) override;

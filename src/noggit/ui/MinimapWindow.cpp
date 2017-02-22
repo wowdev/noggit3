@@ -22,25 +22,11 @@
 #include <sstream>
 #include <string>
 
-UIMinimapWindow::UIMinimapWindow(Menu* menuLink)
-  : UIWindow(0.0f, 0.0f, 0.0f, 0.0f)
-  , borderwidth(5.0f)
-  , tilesize(0.0f)
-  , lookAt(0.0f)
-  , mMenuLink(menuLink)
-  , map(nullptr)
-{
-  this->cursor_position = new UIText(10, height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft);
-  this->addChild(cursor_position);
-  resize();
-}
-
 UIMinimapWindow::UIMinimapWindow(World* setMap)
   : UIWindow(0.0f, 0.0f, 0.0f, 0.0f)
   , borderwidth(5.0f)
   , tilesize(0.0f)
   , lookAt(0.0f)
-  , mMenuLink(nullptr)
   , map(setMap)
 {
   this->cursor_position = new UIText(10, height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft);
@@ -86,29 +72,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
   if (!gWorld->mapIndex.hasTile(tile_index(pos)))
     return nullptr;
 
-  if (mMenuLink)
-  {
-#ifdef USE_MYSQL_UID_STORAGE 
-    if ( Settings::getInstance()->mysql
-      && mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, gWorld->mMapId)
-       )
-    {
-      gWorld->mapIndex.loadMaxUID();
-      mMenuLink->enterMapAt(pos);
-    }
-    else
-#endif
-    if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
-    {
-      gWorld->mapIndex.loadMaxUID();
-      mMenuLink->enterMapAt(pos);
-    }
-    else
-    {
-      mMenuLink->uidFixWindow->enterAt(pos);
-    }
-  }
-  else if (map)
+  if (map)
   {
 	  gWorld->GetVertex(pos.x, pos.z, &pos);
 	  pos.y += 50;
