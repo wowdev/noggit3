@@ -120,8 +120,7 @@ void MapView::set_editing_mode (editing_mode mode)
   switch (mode)
   {
   case editing_mode::ground:
-    mainGui->terrainTool->x(tool_settings_x);
-    mainGui->terrainTool->y(tool_settings_y);
+    mainGui->terrainTool->move (tool_settings_x, tool_settings_y);
     mainGui->terrainTool->show();
     break;
   case editing_mode::flatten_blur:
@@ -1071,7 +1070,7 @@ void MapView::tick(float t, float dt)
     switch (terrainMode)
     {
     case editing_mode::ground:
-      mainGui->terrainTool->setTabletControlValue((float)app.pressure);
+      mainGui->terrainTool->setRadius((float)app.pressure / 20.0f);
     case editing_mode::flatten_blur:
       mainGui->flattenTool->setRadius((float)app.pressure / 20.0f);
       break;

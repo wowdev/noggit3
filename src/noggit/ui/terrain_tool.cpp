@@ -2,84 +2,195 @@
 
 #include <noggit/ui/terrain_tool.hpp>
 
-#include <noggit/application.h>
 #include <noggit/Environment.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
-#include <noggit/ui/CheckBox.h>
-#include <noggit/ui/Slider.h>
-#include <noggit/ui/ToggleGroup.h>
-#include <noggit/ui/Text.h>
+
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QCheckBox>
 
 
 namespace ui
 {
-  terrain_tool::terrain_tool(float x, float y, bool tablet)
-    : UIWindow(x, y, winWidth, tablet ? 315.0f : 280.0f)
+  terrain_tool::terrain_tool()
+    : QWidget(nullptr)
     , _radius(15.0f)
     , _inner_radius(0.0f)
     , _speed(2.0f)
     , _vertex_angle (0.0f)
     , _vertex_orientation (0.0f)
-    , _tablet(tablet)
     , _edit_type(Environment::getInstance()->groundBrushType)
     , _vertex_mode(eVertexMode_Center)
-    , _tablet_control(eTabletControl_On)
-    , _tablet_active_group(eTerrainTabletActiveGroup_Speed)
   {
-    addChild(new UIText(78.5f, 2.0f, "Raise / Lower", app.getArial14(), eJustifyCenter));
+    setWindowTitle("Raise / Lower");
+    setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
 
-    _type_toggle = new UIToggleGroup(&_edit_type);
-    addChild(new UICheckBox(6.0f, 15.0f, "Flat", _type_toggle, eTerrainType_Flat));
-    addChild(new UICheckBox(85.0f, 15.0f, "Linear", _type_toggle, eTerrainType_Linear));
-    addChild(new UICheckBox(6.0f, 40.0f, "Smooth", _type_toggle, eTerrainType_Smooth));
-    addChild(new UICheckBox(85.0f, 40.0f, "Polynomial", _type_toggle, eTerrainType_Polynom));
-    addChild(new UICheckBox(6.0f, 65.0f, "Trigonom", _type_toggle, eTerrainType_Trigo));
-    addChild(new UICheckBox(85.0f, 65.0f, "Quadratic", _type_toggle, eTerrainType_Quadra));
-    addChild(new UICheckBox(6.0f, 90.0f, "Gaussian", _type_toggle, eTerrainType_Gaussian));
-    addChild(new UICheckBox(85.0f, 90.0f, "Vertex", _type_toggle, eTerrainType_Vertex));
-    _type_toggle->Activate(eTerrainType_Linear);
+    auto layout (new QFormLayout (this));
 
-    _radius_slider = new UISlider(6.0f, 140.0f, 167.0f, 1000.0f, 0.00001f);
-    _radius_slider->setFunc([&](float f) { _radius = f; });
-    _radius_slider->setValue(_radius / 1000);
-    _radius_slider->setText("Outer radius: ");
-    addChild(_radius_slider);
+    _type_button_group = new QButtonGroup (this);
+    QRadioButton* radio_flat = new QRadioButton ("Flat");
+    QRadioButton* radio_linear = new QRadioButton ("Linear");
+    QRadioButton* radio_smooth = new QRadioButton ("Smooth");
+    QRadioButton* radio_polynomial = new QRadioButton ("Polynomial");
+    QRadioButton* radio_trigo = new QRadioButton ("Trigonom");
+    QRadioButton* radio_quadra = new QRadioButton ("Quadratic");
+    QRadioButton* radio_gauss = new QRadioButton ("Gaussian");
+    QRadioButton* radio_vertex = new QRadioButton ("Vertex");
 
-    _inner_radius_slider = new UISlider(6.0f, 165.0f, 167.0f, 1.0f, 0.00001f);
-    _inner_radius_slider->setFunc([&](float f) { _inner_radius = f; });
-    _inner_radius_slider->setValue(_inner_radius / 1.0f);
-    _inner_radius_slider->setText("Inner radius: ");
-    addChild(_inner_radius_slider);
+    _type_button_group->addButton (radio_flat, (int)eTerrainType_Flat);
+    _type_button_group->addButton (radio_linear, (int)eTerrainType_Linear);
+    _type_button_group->addButton (radio_smooth, (int)eTerrainType_Smooth);
+    _type_button_group->addButton (radio_polynomial, (int)eTerrainType_Polynom);
+    _type_button_group->addButton (radio_trigo, (int)eTerrainType_Trigo);
+    _type_button_group->addButton (radio_quadra, (int)eTerrainType_Quadra);
+    _type_button_group->addButton (radio_gauss, (int)eTerrainType_Gaussian);
+    _type_button_group->addButton (radio_vertex, (int)eTerrainType_Vertex);
 
-    _speed_slider = new UISlider(6.0f, 190.0f, 167.0f, 10.0f, 0.00001f);
-    _speed_slider->setFunc([&](float f) { _speed = f; });
-    _speed_slider->setValue(_speed / 10.0f);
-    _speed_slider->setText("Brush Speed: ");
-    addChild(_speed_slider);
+    radio_linear->toggle();
 
-    addChild(new UIText(10.0f, 210.0f, "Vertex edit relative to:", app.getArial12(), eJustifyLeft));
+    QGridLayout* terrain_type_layout (new QGridLayout (this));
+    terrain_type_layout->addWidget (radio_flat, 0, 0);
+    terrain_type_layout->addWidget (radio_linear, 0, 1);
+    terrain_type_layout->addWidget (radio_smooth, 1, 0);
+    terrain_type_layout->addWidget (radio_polynomial, 1, 1);
+    terrain_type_layout->addWidget (radio_trigo, 2, 0);
+    terrain_type_layout->addWidget (radio_quadra, 2, 1);
+    terrain_type_layout->addWidget (radio_gauss, 3, 0);
+    terrain_type_layout->addWidget (radio_vertex, 3, 1);
 
-    _vertex_toggle = new UIToggleGroup(&_vertex_mode);
-    addChild(new UICheckBox(6.0f, 222.0f, "Mouse", _vertex_toggle, eVertexMode_Mouse));
-    addChild(new UICheckBox(85.0f, 222.0f, "Selection\ncenter", _vertex_toggle, eVertexMode_Center));
-    _vertex_toggle->Activate(eVertexMode_Center);
+    QGroupBox* terrain_type_group (new QGroupBox ("Type"));
+    terrain_type_group->setLayout (terrain_type_layout);
+    layout->addRow (terrain_type_group);
 
+    _radius_spin = new QDoubleSpinBox (this);
+    _radius_spin->setRange (0.0f, 1000.0f);
+    _radius_spin->setDecimals (2);
+    _radius_spin->setValue (_radius);
+
+
+    layout->addRow (new QLabel("Radius:"));
+    layout->addRow ("Outer:", _radius_spin);
+
+    _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+    _radius_slider->setRange (0, 1000);
+    _radius_slider->setSliderPosition ((int)std::round (_radius));
     
-    if (tablet)
-    {
-      addChild(new UIText(78.5f, 225.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
+    layout->addRow (_radius_slider);
 
-      _tablet_control_toggle = new UIToggleGroup(&_tablet_control);
-      addChild(new UICheckBox(6.0f, 235.0f, "Off", _tablet_control_toggle, eTabletControl_Off));
-      addChild(new UICheckBox(85.0f, 235.0f, "On", _tablet_control_toggle, eTabletControl_On));
-      _tablet_control_toggle->Activate(eTabletControl_On);
+    _inner_radius_spin = new QDoubleSpinBox (this);
+    _inner_radius_spin->setRange (0.0f, 1.0f);
+    _inner_radius_spin->setDecimals (2);
+    _inner_radius_spin->setValue (_inner_radius);
 
-      _tablet_active_group_toggle = new UIToggleGroup(&_tablet_active_group);
-      addChild(new UICheckBox(6.0f, 260.0f, "Radius", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Radius));
-      addChild(new UICheckBox(85.0f, 260.0f, "Speed", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Speed));
-      _tablet_active_group_toggle->Activate(eTerrainTabletActiveGroup_Speed);
-    }
+    layout->addRow ("Inner:", _inner_radius_spin);
+
+    _inner_radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+    _inner_radius_slider->setRange (0, 100);
+    _inner_radius_slider->setSliderPosition ((int)std::round (_inner_radius * 100));
+
+    layout->addRow (_inner_radius_slider);
+
+    _speed_spin = new QDoubleSpinBox (this);
+    _speed_spin->setRange (0.0f, 10.0f);
+    _speed_spin->setDecimals (2);
+    _speed_spin->setValue (_speed);
+
+    layout->addRow ("Speed:", _speed_spin);
+
+    _speed_slider = new QSlider (Qt::Orientation::Horizontal, this);
+    _speed_slider->setRange (0, 10 * 100);
+    _speed_slider->setSingleStep (50);
+    _speed_slider->setSliderPosition (_speed * 100);
+    
+    layout->addRow (_speed_slider);
+
+    _vertex_button_group = new QButtonGroup (this);
+    QRadioButton* radio_mouse = new QRadioButton ("Mouse");
+    QRadioButton* radio_center = new QRadioButton ("Selection center");
+
+    _vertex_button_group->addButton (radio_mouse, (int)eVertexMode_Mouse);
+    _vertex_button_group->addButton (radio_center, (int)eVertexMode_Center);
+
+    radio_mouse->toggle();
+    
+    QGridLayout* vertex_type_layout (new QGridLayout (this));
+    vertex_type_layout->addWidget (radio_mouse, 0, 0);
+    vertex_type_layout->addWidget (radio_center, 0, 1);
+
+    QGroupBox* vertex_type_group (new QGroupBox ("Vertex edit relative to"));
+    vertex_type_group->setLayout (vertex_type_layout);
+    layout->addRow (vertex_type_group);
+
+    connect ( _type_button_group, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
+            , [&] (int id)
+              {
+                _edit_type = id;
+              }
+            );
+
+    connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+            , [&] (double v)
+              {
+                _radius = v;
+                QSignalBlocker const blocker(_radius_slider);
+                _radius_slider->setSliderPosition ((int)std::round (v));
+               }
+            );
+
+    connect ( _radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+            , [&] (int v)
+              {
+                _radius = v;
+                 QSignalBlocker const blocker(_radius_spin);
+                 _radius_spin->setValue(v);
+              }
+            );
+
+    connect ( _inner_radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+            , [&] (double v)
+              {
+                _inner_radius = v;
+                QSignalBlocker const blocker(_inner_radius_slider);
+                _inner_radius_slider->setSliderPosition ((int)std::round (v * 100));
+               }
+            );
+
+    connect ( _inner_radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+            , [&] (int v)
+              {
+                _inner_radius = v / 100.0f;
+                 QSignalBlocker const blocker(_inner_radius_spin);
+                 _inner_radius_spin->setValue(_inner_radius);
+              }
+            );
+
+    connect ( _speed_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+              , [&] (double v)
+                {
+                  _speed = v;
+                  QSignalBlocker const blocker(_speed_slider);
+                  _speed_slider->setSliderPosition ((int)std::round (v * 100.0f));
+                }
+              );
+
+    connect ( _speed_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+              , [&] (int v)
+                {
+                  _speed = v / 100.0f;
+                  QSignalBlocker const blocker(_speed_spin);
+                  _speed_spin->setValue (_speed);
+                }
+              );
+
+    connect ( _vertex_button_group, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
+            , [&] (int id)
+              {
+                _vertex_mode = id;
+              }
+            );
   }
 
   void terrain_tool::changeTerrain(math::vector_3d const& pos, float dt)
@@ -123,26 +234,27 @@ namespace ui
   void terrain_tool::nextType()
   {
     _edit_type = (++_edit_type) % eTerrainType_Count;
-    _type_toggle->Activate(_edit_type);
+    _type_button_group->button (_edit_type)->toggle();
+  }
+
+  void terrain_tool::setRadius(float radius)
+  {
+    _radius_spin->setValue(radius);
   }
 
   void terrain_tool::changeRadius(float change)
   {
-    _radius = std::max(0.0f, std::min(1000.0f, _radius + change));
-    _radius_slider->setValue(_radius / 1000.0f);
+    setRadius (_radius + change);
   }
 
   void terrain_tool::changeInnerRadius(float change)
   {
-    _inner_radius = std::max(0.0f, std::min(1.0f, _inner_radius + change));
-    _inner_radius_slider->setValue(_inner_radius / 1.0f);
+    _inner_radius_spin->setValue(_inner_radius + change);
   }
-
 
   void terrain_tool::changeSpeed(float change)
   {
-    _speed = std::max(0.0f, std::min(10.0f, _speed + change));
-    _speed_slider->setValue(_speed / 10.0f);
+    _speed_spin->setValue(_speed + change);
   }
 
   void terrain_tool::changeOrientation(math::vector_3d const& pos, float change)
@@ -190,23 +302,6 @@ namespace ui
                            , _vertex_angle
                            , _vertex_orientation
                            );
-  }
-
-  void terrain_tool::setTabletControlValue(float pressure)
-  {
-    if (_tablet_control == eTabletControl_On)
-    {
-      if (_tablet_active_group == eTerrainTabletActiveGroup_Radius)
-      {
-        _radius = std::max(0.0f, std::min(1000.0f, pressure / 20.48f));
-        _radius_slider->value = _radius / 1000.0f;
-      }
-      else if (_tablet_active_group == eTerrainTabletActiveGroup_Speed)
-      {
-        _speed = std::max(0.0f, std::min(10.0f, pressure / 204.8f));
-        _speed_slider->value = _speed / 10.0f;
-      }
-    }
   }
 }
 

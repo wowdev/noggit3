@@ -4,15 +4,19 @@
 
 #include <noggit/ui/Window.h>
 
-class UIToggleGroup;
-class UISlider;
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QWidget>
+
 
 namespace ui
 {
-  class terrain_tool : public UIWindow
+  class terrain_tool : public QWidget
   {
   public:
-    terrain_tool(float x, float y, bool tablet);
+    terrain_tool();
 
     void changeTerrain(math::vector_3d const& pos, float dt);
 
@@ -20,19 +24,16 @@ namespace ui
     void changeRadius(float change);
     void changeInnerRadius(float change);
     void changeSpeed(float change);
+
+    void setRadius (float radius);
     
     // vertex edit only functions
     void moveVertices(float dt);
     void flattenVertices();
-    void resetVertex();
 
     void changeOrientation(math::vector_3d const& pos, float change);
     void changeAngle(math::vector_3d const& pos, float change);
     void setOrientRelativeTo(math::vector_3d const& pos);
-
-    // tablet
-    void setTabletControlValue(float pressure);
-
 
     float brushRadius() const { return _radius; }
     float innerRadius() const { return _inner_radius;  }
@@ -52,19 +53,18 @@ namespace ui
 
     int& _edit_type;
     int _vertex_mode;
-    int _tablet_control;
-    int _tablet_active_group;
   
     // UI stuff:
 
-    UIToggleGroup* _type_toggle;
-    UIToggleGroup* _vertex_toggle;
-    UIToggleGroup* _tablet_control_toggle = nullptr;
-    UIToggleGroup* _tablet_active_group_toggle = nullptr;
+    QButtonGroup* _type_button_group;
+    QButtonGroup* _vertex_button_group;
 
-    UISlider* _radius_slider;
-    UISlider* _inner_radius_slider;
-    UISlider* _speed_slider;
+    QSlider* _radius_slider;
+    QSlider* _inner_radius_slider;
+    QSlider* _speed_slider;
+    QDoubleSpinBox* _radius_spin;
+    QDoubleSpinBox* _inner_radius_spin;
+    QDoubleSpinBox* _speed_spin;
   };
 }
 

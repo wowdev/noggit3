@@ -55,22 +55,13 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(minimapWindow);
 
   objectEditor = new UIObjectEditor((float)video.xres() - 410.0f, 10.0f, this);
-//  objectEditor->movable(true);
   objectEditor->hide();
-//  addChild(objectEditor);
 
   rotationEditor = new UIRotationEditor();
   rotationEditor->hide();
 
-#ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
-    terrainTool = new ui::terrain_tool((float)video.xres() - 185.0f, 30.0f, true);
-  else
-#endif
-    terrainTool = new ui::terrain_tool((float)video.xres() - 185.0f, 30.0f, false);
-
+  terrainTool = new ui::terrain_tool();
   terrainTool->show();
-  addChild(terrainTool);
 
   flattenTool = new ui::FlattenTool();
   flattenTool->hide();
