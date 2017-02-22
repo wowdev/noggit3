@@ -2,23 +2,15 @@
 
 #pragma once
 
-#include <math/vector_3d.hpp>
-
 #include <QtWidgets/QDialog>
 
-class Menu;
+#include <functional>
 
 namespace ui
 {
   class uid_fix_window : public QDialog
   {
-  private:
-    Menu* _menuLink;
-    math::vector_3d _pos;
-
   public:
-    uid_fix_window(Menu* menu);
-
-    void enterAt(math::vector_3d const& pos);
+    uid_fix_window (std::function<void()> after_fix);
   };
 }
