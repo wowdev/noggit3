@@ -1523,17 +1523,19 @@ void MapView::tick(float t, float dt)
 
 selection_result MapView::intersect_result(bool terrain_only)
 {
+  // during rendering we multiply perspective * view 
+  // so we need the same order here and then invert.
   math::vector_3d const pos
-    ( ( ( math::look_at ( gWorld->camera
-                        , _camera_lookat
-                        , { 0.0f, 1.0f, 0.0f }
-                        ).transposed()
-        * math::perspective ( video.fov()
+    ( ( ( math::perspective ( video.fov()
                             , video.ratio()
                             , video.nearclip()
                             , video.farclip()
-                            ).transposed()
-        ).inverted().transposed()
+                            )
+        * math::look_at ( gWorld->camera
+                        , _camera_lookat
+                        , { 0.0f, 1.0f, 0.0f }
+                        )
+        ).inverted()
       * video.normalized_device_coords (MouseX, MouseY)
       ).xyz_normalized_by_w()
     );
