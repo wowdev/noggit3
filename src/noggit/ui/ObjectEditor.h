@@ -27,7 +27,7 @@ public:
 
   bool hasSelection() const;
   void copy(selection_type entry);
-  void pasteObject (math::vector_3d cursor_pos);
+  void pasteObject (math::vector_3d cursor_pos, math::vector_3d camera_pos);
   void togglePasteMode();
 
   UIModelImport *modelImport;
