@@ -16,7 +16,6 @@ class UIFrame;
 class UIStatusBar;
 class UIAbout;
 class UISettings;
-class UIMenuBar;
 namespace ui
 {
   class uid_fix_window;
@@ -50,9 +49,6 @@ public:
 
   void display(float t, float dt);
 
-  virtual void mouseReleaseEvent (SDL_MouseButtonEvent*) override;
-  virtual void mousePressEvent (SDL_MouseButtonEvent*) override;
-
   //! \todo Make private when new buttons are implemented.
   void loadMap(int mapID);
 
@@ -60,13 +56,9 @@ public:
   void enterMapAt(math::vector_3d pos, float av = -30.0f, float ah = -90.0f);
 
 private:
-  std::unique_ptr<UIMenuBar> mGUImenuBar;
-
   std::vector<MapEntry> mMaps;
   std::vector<BookmarkEntry> mBookmarks;
 
   void createBookmarkList();
   void buildMenuBar();
-
-  void resizewindow();
 };
