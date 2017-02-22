@@ -19,7 +19,6 @@
 #include <noggit/ui/About.h> // UIAbout
 #include <noggit/ui/SettingsPanel.h> //UISettings
 #include <noggit/ui/Frame.h> // UIFrame
-#include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/StatusBar.h> // UIStatusBar
 #include <noggit/ui/uid_fix_window.hpp>
@@ -29,7 +28,9 @@
 #endif
 
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QListWidget>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -43,7 +44,6 @@
 #include <vector>
 
 Menu::Menu()
-	: mGUImenuBar(nullptr)
 {
   gWorld = nullptr;
 
@@ -93,43 +93,6 @@ void Menu::display(float /*t*/, float /*dt*/)
 
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  if (mGUImenuBar)
-  {
-    mGUImenuBar->render();
-  }
-}
-
-UIFrame::Ptr LastClickedMenu = nullptr;
-
-void Menu::mouseReleaseEvent (SDL_MouseButtonEvent* e)
-{
-  if (e->button != SDL_BUTTON_LEFT)
-  {
-    return;
-  }
-
-  if (LastClickedMenu)
-  {
-    LastClickedMenu->processUnclick();
-  }
-
-  LastClickedMenu = nullptr;
-}
-
-void Menu::mousePressEvent (SDL_MouseButtonEvent* e)
-{
-  if (e->button != SDL_BUTTON_LEFT)
-  {
-    return;
-  }
-
-  LastClickedMenu = mGUImenuBar->processLeftClick(e->x, e->y);
-}
-
-void Menu::resizewindow()
-{
-  mGUImenuBar->resize();
 }
 
 void Menu::loadMap(int mapID)
@@ -208,16 +171,26 @@ void Menu::buildMenuBar()
                        mGUICreditsWindow->show();
                      }
                    );
-  widget->show();
 
-  mGUImenuBar.reset (new UIMenuBar());
+  QListWidget* continents_table (new QListWidget (nullptr));
+  QListWidget* dungeons_table (new QListWidget (nullptr));
+  QListWidget* raids_table (new QListWidget (nullptr));
+  QListWidget* battlegrounds_table (new QListWidget (nullptr));
+  QListWidget* arenas_table (new QListWidget (nullptr));
+  QListWidget* bookmarks_table (new QListWidget (nullptr));
 
-  static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };
+  QTabWidget* entry_points_tabs (new QTabWidget (nullptr));
+  entry_points_tabs->addTab (continents_table, "Continents");
+  entry_points_tabs->addTab (dungeons_table, "Dungeons");
+  entry_points_tabs->addTab (raids_table, "Raids");
+  entry_points_tabs->addTab (battlegrounds_table, "Battlegrounds");
+  entry_points_tabs->addTab (arenas_table, "Arenas");
+  entry_points_tabs->addTab (bookmarks_table, "Bookmarks");
 
-  for (int i = 0; i < (sizeof(typeToName) / sizeof(*typeToName)); ++i)
-  {
-    mGUImenuBar->AddMenu(typeToName[i]);
-  }
+  layout->addWidget (entry_points_tabs);
+
+  std::array<QListWidget*, 5> type_to_table
+    {continents_table, dungeons_table, raids_table, battlegrounds_table, arenas_table};
 
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
   {
@@ -230,27 +203,33 @@ void Menu::buildMenuBar()
     if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
       continue;
 
-    auto const map_id (e.mapID);
-
-    mGUImenuBar->GetMenu(typeToName[e.areaType])->AddMenuItemButton(e.name, [e, this] { loadMap (e.mapID); });
+    auto item (new QListWidgetItem (QString::fromUtf8 (e.name.c_str()), type_to_table[e.areaType]));
+    item->setData (Qt::UserRole, QVariant (e.mapID));
   }
 
-  if (mBookmarks.size())
-  {
-    mGUImenuBar->AddMenu("Bookmarks");
-  }
-
+  qulonglong bookmark_index (0);
   for (auto entry : mBookmarks)
   {
-    mGUImenuBar->GetMenu("Bookmarks")->AddMenuItemButton
-      ( entry.name
-      , [entry, this]
-        {
-          loadMap (entry.mapID);
-          enterMapAt (entry.pos, entry.av, entry.ah);
-        }
-      );
+    auto item (new QListWidgetItem (entry.name.c_str(), bookmarks_table));
+    item->setData (Qt::UserRole, QVariant (bookmark_index++));
   }
+
+  for (auto& table : type_to_table)
+  {
+    QObject::connect ( table, &QListWidget::itemClicked
+                     , [this] (QListWidgetItem* item) { loadMap (item->data (Qt::UserRole).toInt()); }
+                     );
+  }
+
+  QObject::connect ( bookmarks_table, &QListWidget::itemDoubleClicked
+                   , [this] (QListWidgetItem* item)
+                     {
+                       auto& entry (mBookmarks.at (item->data (Qt::UserRole).toInt()));
+                       enterMapAt (entry.pos, entry.av, entry.ah);
+                     }
+                   );
+
+  widget->show();
 }
 
 void Menu::createBookmarkList()
