@@ -28,6 +28,11 @@
   #include <mysql/mysql.h>
 #endif
 
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
+
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
@@ -178,26 +183,34 @@ void Menu::loadMap(int mapID)
 
 void Menu::buildMenuBar()
 {
+  auto widget (new QWidget);
+  auto layout (new QVBoxLayout (widget));
+  auto button_layout (new QHBoxLayout);
+  layout->addLayout (button_layout);
+
+  auto settings_button (new QPushButton ("Settings", widget));
+  button_layout->addWidget (settings_button);
+  QObject::connect ( settings_button, &QPushButton::clicked
+                   , []
+                     {
+                      auto mGUISettingsWindow (new UISettings());
+                      mGUISettingsWindow->readInValues();
+                      mGUISettingsWindow->show();
+                     }
+                   );
+
+  auto about_button (new QPushButton ("About", widget));
+  button_layout->addWidget (about_button);
+  QObject::connect ( about_button, &QPushButton::clicked
+                   , []
+                     {
+                       auto mGUICreditsWindow (new UIAbout());
+                       mGUICreditsWindow->show();
+                     }
+                   );
+  widget->show();
+
   mGUImenuBar.reset (new UIMenuBar());
-  mGUImenuBar->AddMenu("File");
-  mGUImenuBar->GetMenu("File")->AddMenuItemButton
-    ( "Settings"
-    , [this]
-      {
-        auto mGUISettingsWindow (new UISettings());
-        mGUISettingsWindow->readInValues();
-        mGUISettingsWindow->show();
-      }
-    );
-  mGUImenuBar->GetMenu("File")->AddMenuItemButton
-    ( "About"
-    , [this]
-      {
-        auto mGUICreditsWindow (new UIAbout());
-        mGUICreditsWindow->show();
-      }
-    );
-  mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
 
   static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };
 
