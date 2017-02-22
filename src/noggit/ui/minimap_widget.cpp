@@ -155,7 +155,7 @@ namespace noggit
 
       emit tile_clicked (tile);
 
-      if (!world()->mapIndex.hasTile (tile_index (tile.y(), tile.x())))
+      if (!world()->mapIndex.hasTile (tile_index (tile.x(), tile.y())))
       {
         event->ignore();
         return;
@@ -163,7 +163,9 @@ namespace noggit
 
       event->accept();
 
-      emit map_clicked (world(), ::math::vector_3d (tile.x() * TILESIZE, 0.0f, tile.y() * TILESIZE));
+      emit map_clicked ( const_cast<World*> (world())
+                       , ::math::vector_3d (tile.x() * TILESIZE, 0.0f, tile.y() * TILESIZE)
+                       );
     }
   }
 }
