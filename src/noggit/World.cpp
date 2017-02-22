@@ -529,7 +529,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   // Draw verylowres heightmap
   if (drawfog && draw_terrain) {
-    horizon.draw (&mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera);
+    horizon.draw (&mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
   }
 
   // Draw height map
