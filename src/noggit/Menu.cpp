@@ -38,15 +38,9 @@
 #include <vector>
 
 Menu::Menu()
-	: mGUICreditsWindow(nullptr)
-    , mGUISettingsWindow(nullptr)
-	, mGUImenuBar(nullptr)
+	: mGUImenuBar(nullptr)
 {
   gWorld = nullptr;
-
-  mGUICreditsWindow = new UIAbout();
-  mGUISettingsWindow = new UISettings();
-
 
 	createMapList();
 	createBookmarkList();
@@ -156,7 +150,6 @@ void Menu::loadMap(int mapID)
 		if (it->getInt(MapDB::MapID) == mapID)
 		{
       gWorld = new World(it->getString(MapDB::InternalName));
-      mGUICreditsWindow->hide();
       auto mmw (new noggit::ui::minimap_widget (nullptr));
       mmw->world (gWorld);
       mmw->draw_boundaries (true);
@@ -203,18 +196,27 @@ void Menu::loadBookmark(int bookmarkID)
   enterMapAt(e.pos, e.av, e.ah);
 }
 
-void Menu::showSettings()
-{
-  mGUISettingsWindow->readInValues();
-  mGUISettingsWindow->show();
-}
-
 void Menu::buildMenuBar()
 {
   mGUImenuBar.reset (new UIMenuBar());
   mGUImenuBar->AddMenu("File");
-  mGUImenuBar->GetMenu("File")->AddMenuItemButton("Settings", [this] { showSettings(); });
-  mGUImenuBar->GetMenu("File")->AddMenuItemButton("About", [this] { mGUICreditsWindow->show(); });
+  mGUImenuBar->GetMenu("File")->AddMenuItemButton
+    ( "Settings"
+    , [this]
+      {
+        auto mGUISettingsWindow (new UISettings());
+        mGUISettingsWindow->readInValues();
+        mGUISettingsWindow->show();
+      }
+    );
+  mGUImenuBar->GetMenu("File")->AddMenuItemButton
+    ( "About"
+    , [this]
+      {
+        auto mGUICreditsWindow (new UIAbout());
+        mGUICreditsWindow->show();
+      }
+    );
   mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
 
   static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };

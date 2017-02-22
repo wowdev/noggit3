@@ -63,8 +63,6 @@ public:
   void enterMapAt(math::vector_3d pos, float av = -30.0f, float ah = -90.0f);
 
 private:
-  UIAbout* mGUICreditsWindow;
-  UISettings* mGUISettingsWindow;
   std::unique_ptr<UIMenuBar> mGUImenuBar;
 
   std::vector<MapEntry> mMaps;
@@ -73,7 +71,6 @@ private:
   void createBookmarkList();
   void createMapList();
   void buildMenuBar();
-  void showSettings();
 
   void resizewindow();
 };
