@@ -123,18 +123,6 @@ void Menu::mousePressEvent (SDL_MouseButtonEvent* e)
   LastClickedMenu = mGUImenuBar->processLeftClick(e->x, e->y);
 }
 
-void Menu::mousemove(SDL_MouseMotionEvent *e)
-{
-  if (LastClickedMenu)
-  {
-    LastClickedMenu->processLeftDrag((float)(e->x - 4), (float)(e->y - 4), (float)(e->xrel), (float)(e->yrel));
-  }
-  else
-  {
-    mGUImenuBar->mouse_moved (e->x, e->y);
-  }
-}
-
 void Menu::resizewindow()
 {
   mGUImenuBar->resize();
