@@ -65,10 +65,9 @@ public:
   ui::uid_fix_window* uidFixWindow;
 
 private:
-  std::unique_ptr<UIFrame> mGUIFrame;
   UIAbout* mGUICreditsWindow;
   UISettings* mGUISettingsWindow;
-  UIMenuBar* mGUImenuBar;
+  std::unique_ptr<UIMenuBar> mGUImenuBar;
 
   std::vector<MapEntry> mMaps;
   std::vector<BookmarkEntry> mBookmarks;

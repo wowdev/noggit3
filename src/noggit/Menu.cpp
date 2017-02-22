@@ -38,15 +38,13 @@
 #include <vector>
 
 Menu::Menu()
-	: mGUIFrame(nullptr)
-	, mGUICreditsWindow(nullptr)
+	: mGUICreditsWindow(nullptr)
     , mGUISettingsWindow(nullptr)
 	, mGUImenuBar(nullptr)
   , uidFixWindow(nullptr)
 {
   gWorld = nullptr;
 
-  mGUIFrame = std::make_unique<UIFrame> (0.0f, 0.0f, (float)video.xres(), (float)video.yres());
   mGUICreditsWindow = new UIAbout();
   mGUISettingsWindow = new UISettings();
 
@@ -102,7 +100,10 @@ void Menu::display(float /*t*/, float /*dt*/)
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  mGUIFrame->render();
+  if (mGUImenuBar)
+  {
+    mGUImenuBar->render();
+  }
 }
 
 UIFrame::Ptr LastClickedMenu = nullptr;
@@ -129,7 +130,7 @@ void Menu::mousePressEvent (SDL_MouseButtonEvent* e)
     return;
   }
 
-  LastClickedMenu = mGUIFrame->processLeftClick(e->x, e->y);
+  LastClickedMenu = mGUImenuBar->processLeftClick(e->x, e->y);
 }
 
 void Menu::mousemove(SDL_MouseMotionEvent *e)
@@ -140,13 +141,13 @@ void Menu::mousemove(SDL_MouseMotionEvent *e)
   }
   else
   {
-    mGUIFrame->mouse_moved (e->x, e->y);
+    mGUImenuBar->mouse_moved (e->x, e->y);
   }
 }
 
 void Menu::resizewindow()
 {
-  mGUIFrame->resize();
+  mGUImenuBar->resize();
 }
 
 void Menu::loadMap(int mapID)
@@ -215,19 +216,11 @@ void Menu::showSettings()
 
 void Menu::buildMenuBar()
 {
-  if (mGUImenuBar)
-  {
-    mGUIFrame->removeChild(mGUImenuBar);
-    delete mGUImenuBar;
-    mGUImenuBar = nullptr;
-  }
-
-  mGUImenuBar = new UIMenuBar();
+  mGUImenuBar.reset (new UIMenuBar());
   mGUImenuBar->AddMenu("File");
   mGUImenuBar->GetMenu("File")->AddMenuItemButton("Settings", [this] { showSettings(); });
   mGUImenuBar->GetMenu("File")->AddMenuItemButton("About", [this] { mGUICreditsWindow->show(); });
   mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
-  mGUIFrame->addChild(mGUImenuBar);
 
   static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };
   static int nMapByType[] = { 0, 0, 0, 0, 0 };
