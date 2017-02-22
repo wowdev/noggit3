@@ -179,7 +179,7 @@ public:
     void for_chunk_at(math::vector_3d const& pos, Fun&&);
 
   template<typename Fun>
-    void for_tile_at(math::vector_3d const& pos, Fun&&);
+    void for_tile_at(const tile_index& pos, Fun&&);
 
   void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
   void changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
@@ -232,10 +232,10 @@ public:
                   , float opacity_factor
                   );
   bool canWaterSave(const tile_index& tile);
-  void CropWaterADT(math::vector_3d const& pos);
-  void setWaterType(math::vector_3d const& pos, int type);
+  void CropWaterADT(const tile_index& pos);
+  void setWaterType(const tile_index& pos, int type);
   int getWaterType(const tile_index& tile);
-  void autoGenWaterTrans(math::vector_3d const&, float factor);
+  void autoGenWaterTrans(const tile_index&, float factor);
 
 
   void fixAllGaps();

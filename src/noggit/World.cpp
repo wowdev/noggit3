@@ -967,7 +967,7 @@ void World::clearAllModelsOnADT(math::vector_3d const& pos)
   }
 }
 
-void World::CropWaterADT(math::vector_3d const& pos)
+void World::CropWaterADT(const tile_index& pos)
 {
   for_tile_at(pos, [](MapTile* tile) { tile->CropWater(); });
 }
@@ -1247,7 +1247,7 @@ template<typename Fun>
   }
 
 template<typename Fun>
-  void World::for_tile_at(math::vector_3d const& pos, Fun&& fun)
+  void World::for_tile_at(tile_index const& pos, Fun&& fun)
   {
     MapTile* tile(mapIndex.getTile(pos));
     if (tile)
@@ -1588,7 +1588,7 @@ bool World::canWaterSave(const tile_index& tile)
   return !!mt && mt->canWaterSave();
 }
 
-void World::setWaterType(math::vector_3d const& pos, int type)
+void World::setWaterType(const tile_index& pos, int type)
 {
   for_tile_at(pos, [&](MapTile* tile) { tile->Water.setType(type, Environment::getInstance()->currentWaterLayer);});
 }
@@ -1605,7 +1605,7 @@ int World::getWaterType(const tile_index& tile)
   }
 }
 
-void World::autoGenWaterTrans(math::vector_3d const& pos, float factor)
+void World::autoGenWaterTrans(const tile_index& pos, float factor)
 {
   for_tile_at(pos, [&](MapTile* tile) { tile->Water.autoGen(factor); });
 }
