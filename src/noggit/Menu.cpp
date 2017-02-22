@@ -42,7 +42,6 @@ Menu::Menu()
 {
   gWorld = nullptr;
 
-	createMapList();
 	createBookmarkList();
 	buildMenuBar();
 
@@ -177,13 +176,6 @@ void Menu::loadMap(int mapID)
   LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
 }
 
-void Menu::loadBookmark(int bookmarkID)
-{
-  BookmarkEntry e = mBookmarks.at(bookmarkID);
-  loadMap(e.mapID);
-  enterMapAt(e.pos, e.av, e.ah);
-}
-
 void Menu::buildMenuBar()
 {
   mGUImenuBar.reset (new UIMenuBar());
@@ -208,83 +200,12 @@ void Menu::buildMenuBar()
   mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
 
   static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };
-  static int nMapByType[] = { 0, 0, 0, 0, 0 };
-
-  for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
-  {
-    nMapByType[it->areaType]++;
-  }
-
-  static const size_t nBookmarksPerMenu = 20;
 
   for (int i = 0; i < (sizeof(typeToName) / sizeof(*typeToName)); ++i)
   {
     mGUImenuBar->AddMenu(typeToName[i]);
-    if (nMapByType[i] > nBookmarksPerMenu)
-    {
-      int nMenu = (nMapByType[i] / nBookmarksPerMenu) + 1;
-
-      for (int j = 2; j <= nMenu; j++)
-      {
-        std::stringstream name;
-        name << typeToName[i] << " (" << j << ")";
-        mGUImenuBar->AddMenu(name.str());
-      }
-    }
-
-    nMapByType[i] = 0;
   }
 
-
-  for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
-  {
-    auto const map_id (it->mapID);
-    if (nMapByType[it->areaType]++ < nBookmarksPerMenu)
-    {
-      mGUImenuBar->GetMenu(typeToName[it->areaType])->AddMenuItemButton(it->name, [map_id, this] { loadMap (map_id); });
-    }
-    else
-    {
-      std::stringstream name;
-      name << typeToName[it->areaType] << " (" << (nMapByType[it->areaType] / nBookmarksPerMenu + 1) << ")";
-      mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, [map_id, this] { loadMap (map_id); });
-    }
-  }
-
-  const size_t nBookmarkMenus = (mBookmarks.size() / nBookmarksPerMenu) + 1;
-
-  if (mBookmarks.size())
-  {
-    mGUImenuBar->AddMenu("Bookmarks");
-  }
-
-  for (size_t i = 1; i < nBookmarkMenus; ++i)
-  {
-    std::stringstream name;
-    name << "Bookmarks (" << (i + 1) << ")";
-    mGUImenuBar->AddMenu(name.str());
-  }
-
-  int n = -1;
-  for (std::vector<BookmarkEntry>::const_iterator it = mBookmarks.begin(); it != mBookmarks.end(); ++it)
-  {
-    std::stringstream name;
-    const int page = (++n / nBookmarksPerMenu);
-    if (page)
-    {
-      name << "Bookmarks (" << (page + 1) << ")";
-    }
-    else
-    {
-      name << "Bookmarks";
-    }
-
-    mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, [n, this] { loadBookmark (n); });
-  }
-}
-
-void Menu::createMapList()
-{
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
   {
     MapEntry e;
@@ -296,7 +217,26 @@ void Menu::createMapList()
     if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
       continue;
 
-    mMaps.push_back(e);
+    auto const map_id (e.mapID);
+
+    mGUImenuBar->GetMenu(typeToName[e.areaType])->AddMenuItemButton(e.name, [e, this] { loadMap (e.mapID); });
+  }
+
+  if (mBookmarks.size())
+  {
+    mGUImenuBar->AddMenu("Bookmarks");
+  }
+
+  for (auto entry : mBookmarks)
+  {
+    mGUImenuBar->GetMenu("Bookmarks")->AddMenuItemButton
+      ( entry.name
+      , [entry, this]
+        {
+          loadMap (entry.mapID);
+          enterMapAt (entry.pos, entry.av, entry.ah);
+        }
+      );
   }
 }
 

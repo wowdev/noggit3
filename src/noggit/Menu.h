@@ -55,7 +55,6 @@ public:
 
   //! \todo Make private when new buttons are implemented.
   void loadMap(int mapID);
-  void loadBookmark(int bookmarkID);
 
   //! \brief Enter the the map on the given location.
   void enterMapAt(math::vector_3d pos, float av = -30.0f, float ah = -90.0f);
@@ -67,7 +66,6 @@ private:
   std::vector<BookmarkEntry> mBookmarks;
 
   void createBookmarkList();
-  void createMapList();
   void buildMenuBar();
 
   void resizewindow();
