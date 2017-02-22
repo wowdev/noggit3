@@ -21,8 +21,13 @@
 #include <noggit/ui/Frame.h> // UIFrame
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
+#include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/StatusBar.h> // UIStatusBar
 #include <noggit/ui/uid_fix_window.hpp>
+#include <noggit/uid_storage.hpp>
+#ifdef USE_MYSQL_UID_STORAGE
+  #include <mysql/mysql.h>
+#endif
 
 #include <cstdlib>
 #include <ctime>
@@ -166,6 +171,37 @@ void Menu::loadMap(int mapID)
       gWorld = new World(it->getString(MapDB::InternalName));
       mGUICreditsWindow->hide();
       mGUIMinimapWindow->show();
+      auto mmw (new noggit::ui::minimap_widget (nullptr));
+      mmw->world (gWorld);
+      mmw->draw_boundaries (true);
+      mmw->show();
+      QObject::connect
+        ( mmw,  &noggit::ui::minimap_widget::map_clicked
+        , [this, mmw] (World* world, ::math::vector_3d const& pos)
+          {
+#ifdef USE_MYSQL_UID_STORAGE
+            if ( Settings::getInstance()->mysql
+               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, world->mMapId)
+               )
+            {
+              world->mapIndex.loadMaxUID();
+              enterMapAt (pos);
+            }
+            else
+#endif
+            if (uid_storage::getInstance()->hasMaxUIDStored(world->mMapId))
+            {
+              world->mapIndex.loadMaxUID();
+              enterMapAt (pos);
+            }
+            else
+            {
+              uidFixWindow->enterAt (pos);
+            }
+            mmw->deleteLater();
+          }
+        );
+
       return;
 		}
 	}
