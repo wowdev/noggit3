@@ -16,7 +16,6 @@ class UIFrame;
 class UIStatusBar;
 class UIAbout;
 class UISettings;
-class UIMinimapWindow;
 class UIMenuBar;
 namespace ui
 {
@@ -69,7 +68,6 @@ private:
   std::unique_ptr<UIFrame> mGUIFrame;
   UIAbout* mGUICreditsWindow;
   UISettings* mGUISettingsWindow;
-  UIMinimapWindow* mGUIMinimapWindow;
   UIMenuBar* mGUImenuBar;
 
   std::vector<MapEntry> mMaps;

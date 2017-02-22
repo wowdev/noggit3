@@ -20,7 +20,6 @@
 #include <noggit/ui/SettingsPanel.h> //UISettings
 #include <noggit/ui/Frame.h> // UIFrame
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
-#include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/StatusBar.h> // UIStatusBar
 #include <noggit/ui/uid_fix_window.hpp>
@@ -42,16 +41,12 @@ Menu::Menu()
 	: mGUIFrame(nullptr)
 	, mGUICreditsWindow(nullptr)
     , mGUISettingsWindow(nullptr)
-	, mGUIMinimapWindow(nullptr)
 	, mGUImenuBar(nullptr)
   , uidFixWindow(nullptr)
 {
   gWorld = nullptr;
 
   mGUIFrame = std::make_unique<UIFrame> (0.0f, 0.0f, (float)video.xres(), (float)video.yres());
-  mGUIMinimapWindow = new UIMinimapWindow(this);
-  mGUIMinimapWindow->hide();
-  mGUIFrame->addChild(mGUIMinimapWindow);
   mGUICreditsWindow = new UIAbout();
   mGUISettingsWindow = new UISettings();
 
@@ -67,7 +62,6 @@ Menu::Menu()
               {
                 if (gWorld)
                 {
-                  mGUIMinimapWindow->hide();
                   uidFixWindow->hide();
                   mGUICreditsWindow->show();
                   delete gWorld;
@@ -97,8 +91,6 @@ void Menu::enterMapAt(math::vector_3d pos, float av, float ah)
   gWorld->mapIndex.enterTile(tile_index(pos));
 
   app.getStates().push_back(new MapView(ah, av, math::vector_3d(pos.x, pos.y, pos.z - 1.0f))); // on gPop, MapView is deleted.
-
-  mGUIMinimapWindow->hide();
 }
 
 void Menu::display(float /*t*/, float /*dt*/)
@@ -170,7 +162,6 @@ void Menu::loadMap(int mapID)
 		{
       gWorld = new World(it->getString(MapDB::InternalName));
       mGUICreditsWindow->hide();
-      mGUIMinimapWindow->show();
       auto mmw (new noggit::ui::minimap_widget (nullptr));
       mmw->world (gWorld);
       mmw->draw_boundaries (true);
