@@ -623,10 +623,10 @@ void MapView::createGUI()
             , [this] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos); });
+  addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos, gWorld->camera); });
   addHotkey ( SDLK_v
             , MOD_none
-            , [this] { mainGui->objectEditor->pasteObject (_cursor_pos); }
+            , [this] { mainGui->objectEditor->pasteObject (_cursor_pos, gWorld->camera); }
             , [this] { return terrainMode == editing_mode::object; }
             );
 

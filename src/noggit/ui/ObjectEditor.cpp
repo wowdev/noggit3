@@ -274,12 +274,14 @@ void UIObjectEditor::showImportModels()
   modelImport->show();
 }
 
-void UIObjectEditor::pasteObject (math::vector_3d pos)
+void UIObjectEditor::pasteObject (math::vector_3d cursor_pos, math::vector_3d camera_pos)
 {
   if (!hasSelection() || selected->which() == eEntry_MapChunk)
   {
     return;
   }
+
+  math::vector_3d pos = cursor_pos;
 
   switch (pasteMode)
   {
@@ -298,13 +300,13 @@ void UIObjectEditor::pasteObject (math::vector_3d pos)
           pos = boost::get<selected_wmo_type> (selection)->pos;
         }
       } // else: use cursor pos
-          break;
+      break;
     case PASTE_ON_CAMERA:
-      pos = gWorld->camera;
-          break;
+      pos = camera_pos;
+      break;
     default:
       LogDebug << "UIObjectEditor::pasteObject: Unknown pasteMode " << pasteMode << std::endl;
-          break;
+      break;
   }
 
   gWorld->addModel(selected.get(), pos, true);
