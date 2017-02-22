@@ -86,7 +86,9 @@ public:
                   , const math::vector_3d& camera
                   ) const;
 
-  void draw ( math::frustum const&
+  void draw ( math::frustum const& frustum
+            , const float& cull_distance
+            , const math::vector_3d& camera
             , bool highlightPaintableChunks
             , bool draw_contour
             , bool draw_paintability_overlay
@@ -102,7 +104,9 @@ public:
   void drawContour();
   void intersect (math::ray const&, selection_result*);
   void drawLines ( opengl::scoped::use_program&
-                 , math::frustum const&
+                 , math::frustum const& frustum
+                 , const float& cull_distance
+                 , const math::vector_3d& camera
                  , bool draw_hole_lines
                  );
   void drawTextures();
