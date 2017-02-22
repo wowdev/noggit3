@@ -17,7 +17,7 @@ namespace ui
   class texturing_tool : public UIWindow
   {
   public:
-    texturing_tool(float x, float y);
+    texturing_tool(float x, float y, const math::vector_3d* camera_pos);
 
     float brush_radius() { return _texture_brush.getRadius(); }
     float hardness() const { return _hardness; }
@@ -71,5 +71,7 @@ namespace ui
     UISlider* _spray_size_slider;
     UISlider* _spray_pressure_slider;
     UITextureSwitcher* _texture_switcher;
+
+    const math::vector_3d* _camera_pos;
   };
 }

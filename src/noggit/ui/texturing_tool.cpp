@@ -17,7 +17,7 @@
 
 namespace ui
 {
-  texturing_tool::texturing_tool(float x, float y)
+  texturing_tool::texturing_tool(float x, float y, const math::vector_3d* camera_pos)
     : UIWindow(x, y, 180.0f, 280.0f)
     , _brush_level(255.0f)
     , _hardness(0.5f)
@@ -27,6 +27,7 @@ namespace ui
     , _paint_inner_radius(false)
     , _spray_size(1.0f)
     , _spray_pressure(2.0f)
+    , _camera_pos(camera_pos)
   {
 
     _texture_brush.init();
@@ -104,7 +105,7 @@ namespace ui
                          , "Remove texture duplicates"
                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                         , [] { gWorld->removeTexDuplicateOnADT(gWorld->camera); }
+                         , [this] { gWorld->removeTexDuplicateOnADT(*_camera_pos); }
                          ));
   }
   
