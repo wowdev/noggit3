@@ -830,7 +830,7 @@ void main()
       bool const is_hidden (hidden_map_objects.count (it->second.wmo.get()));
       if (!is_hidden)
       {
-        it->second.draw (frustum, is_hidden, draw_wmo_doodads);
+        it->second.draw (frustum, culldistance, camera_pos, is_hidden, draw_wmo_doodads);
       }
     }
 
