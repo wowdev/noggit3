@@ -6,7 +6,7 @@
 #include <noggit/ui/TextureSwitcher.h>
 #include <noggit/ui/TexturingGUI.h>
 
-UITextureSwitcher::UITextureSwitcher (float x_right, float y, UIWindow* parent)
+UITextureSwitcher::UITextureSwitcher (float x_right, float y, UIWindow* parent, const math::vector_3d* camera_pos)
   : UICloseWindow (x_right - 130, y, 130, 200, "swapper", true, [parent] { parent->show(); })
 {
   float const textureSize = 110.f;
@@ -37,9 +37,9 @@ UITextureSwitcher::UITextureSwitcher (float x_right, float y, UIWindow* parent)
                           , "swap ADT"
                           , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
                           , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                          , [this]
+                          , [this, camera_pos]
                             {
-                              gWorld->swapTexture (gWorld->camera, current_texture());
+                              gWorld->swapTexture (*camera_pos, current_texture());
                             }
                           )
            );

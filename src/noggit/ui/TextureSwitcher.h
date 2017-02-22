@@ -8,7 +8,7 @@
 class UITextureSwitcher : public UICloseWindow
 {
 public:
-  UITextureSwitcher (float x_right, float y, UIWindow* parent);
+  UITextureSwitcher (float x_right, float y, UIWindow* parent, const math::vector_3d* camera_pos);
 
   scoped_blp_texture_reference const& current_texture() const
   {

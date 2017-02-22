@@ -89,7 +89,7 @@ namespace ui
     _spray_pressure_slider->setText("Spray pressure: ");
     addChild(_spray_pressure_slider);
 
-    _texture_switcher = new UITextureSwitcher(x, 40.0f, this);
+    _texture_switcher = new UITextureSwitcher(x, 40.0f, this, _camera_pos);
 
     addChild(new UIButton( 6.0f , 230.0f, 170.0f, 30.0f
                          , "Texture swapper"
