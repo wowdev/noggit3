@@ -66,7 +66,9 @@ public:
     return *this;
   }
 
-  void draw ( math::frustum const&
+  void draw ( math::frustum const& frustum
+            , const float& cull_distance
+            , const math::vector_3d& camera
             , bool force_box
             , bool all_boxes
             );

@@ -809,7 +809,7 @@ void main()
       bool const is_hidden (hidden_models.count (it->second.model.get()));
       if (!is_hidden)
       {
-        it->second.draw (frustum, is_hidden, draw_models_with_box);
+        it->second.draw (frustum, culldistance, camera_pos, is_hidden, draw_models_with_box);
       }
     }
   }
