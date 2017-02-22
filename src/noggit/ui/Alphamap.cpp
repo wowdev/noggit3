@@ -11,8 +11,9 @@
 #include <noggit/MapChunk.h>
 #include <noggit/texture_set.hpp>
 
-UIAlphamap::UIAlphamap(float xPos, float yPos)
+UIAlphamap::UIAlphamap(float xPos, float yPos, const math::vector_3d* camera_pos)
   : UICloseWindow(xPos, yPos, 600, 600, "Alphamap", true)
+  , _camera_pos(camera_pos)
 {
 
 }
@@ -21,7 +22,7 @@ void UIAlphamap::render() const
 {
   UICloseWindow::render();
 
-  tile_index tile(gWorld->camera);
+  tile_index tile(*_camera_pos);
   float colorf[3];
 
   if (!gWorld->mapIndex.tileLoaded(tile))
