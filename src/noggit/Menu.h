@@ -53,8 +53,6 @@ public:
   virtual void mouseReleaseEvent (SDL_MouseButtonEvent*) override;
   virtual void mousePressEvent (SDL_MouseButtonEvent*) override;
 
-  void mousemove(SDL_MouseMotionEvent* e);
-
   //! \todo Make private when new buttons are implemented.
   void loadMap(int mapID);
   void loadBookmark(int bookmarkID);
