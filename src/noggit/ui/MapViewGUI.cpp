@@ -77,7 +77,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, const math::vector_3d* camera_po
   shaderTool->hide();
   addChild(shaderTool);
 
-  texturingTool = new ui::texturing_tool((float)video.xres() - 190.0f, 30.0f);
+  texturingTool = new ui::texturing_tool((float)video.xres() - 190.0f, 30.0f, _camera_pos);
   texturingTool->hide();
   addChild(texturingTool);
 
