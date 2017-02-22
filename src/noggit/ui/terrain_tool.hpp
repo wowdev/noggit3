@@ -5,6 +5,7 @@
 #include <noggit/ui/Window.h>
 
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QDial>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
@@ -26,20 +27,25 @@ namespace ui
     void changeSpeed(float change);
 
     void setRadius (float radius);
+    void setOrientation(float orientation);
+    void setAngle(float angle);
     
     // vertex edit only functions
     void moveVertices(float dt);
     void flattenVertices();
 
-    void changeOrientation(math::vector_3d const& pos, float change);
-    void changeAngle(math::vector_3d const& pos, float change);
+    void changeOrientation(float change);
+    void changeAngle(float change);
     void setOrientRelativeTo(math::vector_3d const& pos);
 
     float brushRadius() const { return _radius; }
     float innerRadius() const { return _inner_radius;  }
-  
+
+    void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
+
   private:
-    void updateVertices(math::vector_3d const& cursor_pos);
+    void updateVertices();
+    void updateVertexGroup();
 
     static const int winWidth = 180;
     
@@ -48,6 +54,8 @@ namespace ui
     float _inner_radius;
     math::degrees _vertex_angle;
     math::degrees _vertex_orientation;
+
+    math::vector_3d* _cursor_pos;
 
     bool _tablet;
 
@@ -58,6 +66,8 @@ namespace ui
 
     QButtonGroup* _type_button_group;
     QButtonGroup* _vertex_button_group;
+    QGroupBox* _speed_box;
+    QGroupBox* _vertex_type_group;
 
     QSlider* _radius_slider;
     QSlider* _inner_radius_slider;
@@ -65,6 +75,9 @@ namespace ui
     QDoubleSpinBox* _radius_spin;
     QDoubleSpinBox* _inner_radius_spin;
     QDoubleSpinBox* _speed_spin;
+
+    QSlider* _angle_slider;
+    QDial* _orientation_dial;
   };
 }
 

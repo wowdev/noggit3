@@ -390,7 +390,7 @@ void MapView::createGUI()
   tool_settings_x = video.xres() - 186;
   tool_settings_y = 38;
 
-
+  mainGui->terrainTool->storeCursorPos (&_cursor_pos);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();
@@ -2180,11 +2180,11 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     {
       if (_mod_alt_down)
       {
-        mainGui->terrainTool->changeAngle(_cursor_pos, _mod_ctrl_down ? 0.2f : 2.0f);
+        mainGui->terrainTool->changeAngle(_mod_ctrl_down ? 0.2f : 2.0f);
       }
       else if (_mod_shift_down)
       {
-        mainGui->terrainTool->changeOrientation(_cursor_pos, _mod_ctrl_down ? 1.0f : 10.0f);
+        mainGui->terrainTool->changeOrientation(_mod_ctrl_down ? 1.0f : 10.0f);
       }
     }
     else if (terrainMode == editing_mode::flatten_blur)
@@ -2238,11 +2238,11 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     {
       if (_mod_alt_down)
       {
-        mainGui->terrainTool->changeAngle(_cursor_pos, _mod_ctrl_down ? -0.2f : -2.0f);
+        mainGui->terrainTool->changeAngle(_mod_ctrl_down ? -0.2f : -2.0f);
       }
       else if (_mod_shift_down)
       {
-        mainGui->terrainTool->changeOrientation(_cursor_pos, _mod_ctrl_down ? -1.0f : -10.0f);
+        mainGui->terrainTool->changeOrientation(_mod_ctrl_down ? -1.0f : -10.0f);
       }
     }
     else if (terrainMode == editing_mode::flatten_blur)
