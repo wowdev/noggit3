@@ -55,7 +55,7 @@ namespace noggit
             for (size_t j (0); j < 64; ++j)
             {
               //! \todo Check, if correct order!
-              if (world()->mapIndex.getChanged (tile_index (j, i)))
+              if (world()->mapIndex.getChanged (tile_index (i, j)))
               {
                 painter.drawLine ( tile_size * i
                                  , tile_size * j
@@ -72,21 +72,39 @@ namespace noggit
           }
 
           //! \todo Draw non-existing tiles aswell?
-          painter.setPen (QColor (0, 0, 0, 0));
           painter.setBrush (QColor (255, 255, 255, 30));
           for (size_t i (0); i < 64; ++i)
           {
             for (size_t j (0); j < 64; ++j)
             {
-              if (world()->mapIndex.hasTile (tile_index (j, i)))
+              tile_index const tile (i, j);
+
+              if (world()->mapIndex.hasTile (tile))
               {
-                painter.drawRect ( QRect ( tile_size * i + 1
-                                         , tile_size * j + 1
-                                         , tile_size - 2
-                                         , tile_size - 2
-                                         )
-                                 );
+                if (world()->mapIndex.isTileExternal (tile))
+                {
+                  painter.setPen (QColor::fromRgbF (1.0f, 0.7f, 0.5f, 0.6f));
+                }
+                else if (world()->mapIndex.tileLoaded (tile))
+                {
+                  painter.setPen (QColor::fromRgbF (0.0f, 1.0f, 1.0f, 0.4f));
+                }
+                else
+                {
+                  painter.setPen (QColor::fromRgbF (0.8f, 0.8f, 0.8f, 0.4f));
+                }
               }
+              else
+              {
+                painter.setPen (QColor::fromRgbF (1.0f, 1.0f, 1.0f, 0.05f));
+              }
+
+              painter.drawRect ( QRect ( tile_size * i + 1
+                                       , tile_size * j + 1
+                                       , tile_size - 2
+                                       , tile_size - 2
+                                       )
+                               );
             }
           }
         }
