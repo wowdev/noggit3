@@ -346,7 +346,7 @@ namespace ui
 
   void FlattenTool::setRadius(float radius)
   {
-    _radius_slider->setValue(radius);
+    _radius_spin->setValue(radius);
   }
 }
 
