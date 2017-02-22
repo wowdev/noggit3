@@ -569,6 +569,8 @@ void World::draw ( math::vector_3d const& cursor_pos
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->draw ( frustum
+                 , culldistance
+                 , camera_pos
                  , highlightPaintableChunks
                  , draw_contour
                  , draw_paintability_overlay
@@ -719,7 +721,7 @@ void main()
     setupFog();
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
-      tile->drawLines (line_shader, frustum, draw_hole_lines);
+      tile->drawLines (line_shader, frustum, culldistance, camera_pos, draw_hole_lines);
     }
   }
 

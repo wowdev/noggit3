@@ -547,10 +547,12 @@ bool MapChunk::is_visible ( const float& cull_distance
 
 void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
                          , math::frustum const& frustum
+                         , const float& cull_distance
+                         , const math::vector_3d& camera
                          , bool draw_hole_lines
                          )
 {
-  if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
+  if (!is_visible (cull_distance, frustum, camera))
     return;
 
   opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
@@ -616,6 +618,8 @@ void MapChunk::drawContour()
 }
 
 void MapChunk::draw ( math::frustum const& frustum
+                    , const float& cull_distance
+                    , const math::vector_3d& camera
                     , bool highlightPaintableChunks
                     , bool draw_contour
                     , bool draw_paintability_overlay
@@ -627,7 +631,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , std::map<int, misc::random_color>& area_id_colors
                     )
 {
-  if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
+  if (!is_visible (cull_distance, frustum, camera))
     return;
 
   bool cantPaint = UITexturingGUI::getSelectedTexture()
