@@ -45,9 +45,10 @@
 
 
 
-UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
+UIMapViewGUI::UIMapViewGUI(MapView *setMapview, const math::vector_3d* camera_pos)
   : UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres())
   , theMapview(setMapview)
+  , _camera_pos(camera_pos)
 {
   // Minimap window
   minimapWindow = new UIMinimapWindow(gWorld);
@@ -177,7 +178,7 @@ void UIMapViewGUI::render() const
   UIFrame::render();
 
   //! \todo Make these some textUIs.
-  app.getArial16().shprint(510, 4, gAreaDB.getAreaName(gWorld->getAreaID (gWorld->camera)));
+  app.getArial16().shprint(510, 4, gAreaDB.getAreaName(gWorld->getAreaID (*_camera_pos)));
 
   int time = static_cast<int>(gWorld->time) % 2880;
   std::stringstream timestrs;
@@ -194,13 +195,13 @@ void UIMapViewGUI::render() const
   }
 
   std::ostringstream statusbarInfo;
-  statusbarInfo << "tile: " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE)
-    << "; coordinates: client (x: " << gWorld->camera.x << ", y: " << gWorld->camera.z << ", z: " << gWorld->camera.y
-    << "), server (x: " << (ZEROPOINT - gWorld->camera.z) << ", y:" << (ZEROPOINT - gWorld->camera.x) << ", z:" << (gWorld->camera.y) << ")";
+  statusbarInfo << "tile: " << std::floor(_camera_pos->x / TILESIZE) << " " << std::floor(_camera_pos->z / TILESIZE)
+    << "; coordinates: client (x: " << _camera_pos->x << ", y: " << _camera_pos->z << ", z: " << _camera_pos->y
+    << "), server (x: " << (ZEROPOINT - _camera_pos->z) << ", y:" << (ZEROPOINT - _camera_pos->x) << ", z:" << (_camera_pos->y) << ")";
   guiStatusbar->setLeftInfo(statusbarInfo.str());
 
   guiStatusbar->setRightInfo("");
-  tile_index tile(gWorld->camera);
+  tile_index tile(*_camera_pos);
   guiWater->updatePos(tile);
 
   if (!_tilemode && !guidetailInfos->hidden())
