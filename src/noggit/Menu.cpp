@@ -61,7 +61,6 @@ Menu::Menu()
                 if (gWorld)
                 {
                   uidFixWindow->hide();
-                  mGUICreditsWindow->show();
                   delete gWorld;
                   gWorld = nullptr;
                 }
