@@ -156,7 +156,7 @@ public:
   void unloadTiles(const tile_index& tile);  // unloads all tiles more then x adts away from given
   void unloadTile(const tile_index& tile);  // unload given tile
   void markOnDisc(const tile_index& tile, bool mto);
-  bool isTileExternal(const tile_index& tile);
+  bool isTileExternal(const tile_index& tile) const;
 
   bool hasAGlobalWMO();
   bool hasTile(const tile_index& index) const;

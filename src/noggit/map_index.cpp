@@ -389,7 +389,7 @@ void MapIndex::markOnDisc(const tile_index& tile, bool mto)
   mTiles[tile.z][tile.x].onDisc = mto;
 }
 
-bool MapIndex::isTileExternal(const tile_index& tile)
+bool MapIndex::isTileExternal(const tile_index& tile) const
 {
   // is onDisc
   return mTiles[tile.z][tile.x].onDisc;
