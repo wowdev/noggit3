@@ -141,7 +141,7 @@ void MapIndex::saveall()
 
 void MapIndex::savecurrent()
 {
-  gWorld->mapIndex.saveTile(tile_index(gWorld->camera));
+  saveTile(tile_index(cx, cz));
 }
 
 
@@ -243,7 +243,7 @@ void MapIndex::enterTile(const tile_index& tile)
       loadTile(tile_index(px, pz));
     }
   }
-
+ 
   if (autoheight && tileLoaded(tile))
   {
     float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
