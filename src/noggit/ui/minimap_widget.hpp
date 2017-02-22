@@ -10,6 +10,7 @@ namespace math
 }
 class World;
 
+//! \todo add adt coordinates/name on mouseover
 namespace noggit
 {
   namespace ui
