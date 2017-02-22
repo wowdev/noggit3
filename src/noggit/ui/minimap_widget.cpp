@@ -164,7 +164,10 @@ namespace noggit
       event->accept();
 
       emit map_clicked ( const_cast<World*> (world())
-                       , ::math::vector_3d (tile.x() * TILESIZE, 0.0f, tile.y() * TILESIZE)
+                       , ::math::vector_3d ( (event->pos().x() / float (tile_size)) * TILESIZE
+                                           , 0.0f
+                                           , (event->pos().y() / float (tile_size)) * TILESIZE
+                                           )
                        );
     }
   }
