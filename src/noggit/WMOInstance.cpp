@@ -48,6 +48,8 @@ WMOInstance::WMOInstance(std::string const& filename)
 }
 
 void WMOInstance::draw ( math::frustum const& frustum
+                       , const float& cull_distance
+                       , const math::vector_3d& camera
                        , bool force_box
                        , bool draw_doodads
                        )
@@ -70,6 +72,8 @@ void WMOInstance::draw ( math::frustum const& frustum
                 , true
                 , true
                 , frustum
+                , cull_distance
+                , camera
                 , draw_doodads
                 );
     else
@@ -80,6 +84,8 @@ void WMOInstance::draw ( math::frustum const& frustum
                 , false
                 , false
                 , frustum
+                , cull_distance
+                , camera
                 , draw_doodads
                 );
   }

@@ -339,6 +339,8 @@ void WMO::draw ( int doodadset
                , bool groupboxes
                , bool /*highlight*/
                , math::frustum const& frustum
+               , const float& cull_distance
+               , const math::vector_3d& camera
                , bool draw_doodads
                )
 {
@@ -357,7 +359,7 @@ void WMO::draw ( int doodadset
 
   for (auto& group : groups)
   {
-    group.draw(ofs, angle, frustum);
+    group.draw(ofs, angle, frustum, cull_distance, camera);
 
     if (draw_doodads)
     {
@@ -1004,7 +1006,12 @@ void WMOGroup::load()
   }
 }
 
-void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, math::frustum const& frustum)
+void WMOGroup::draw( const math::vector_3d& ofs
+                   , const math::degrees angle
+                   , math::frustum const& frustum
+                   , const float& cull_distance
+                   , const math::vector_3d& camera
+                   )
 {
   visible = false;
   // view frustum culling
@@ -1015,8 +1022,8 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, math:
 
   if (!frustum.intersectsSphere(pos, rad)) return;
 
-  float dist = (pos - gWorld->camera).length() - rad;
-  if (dist >= gWorld->culldistance) return;
+  float dist = (pos - camera).length() - rad;
+  if (dist >= cull_distance) return;
   visible = true;
   setupFog();
 
