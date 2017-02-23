@@ -38,34 +38,34 @@ struct map_horizon_batch
 class map_horizon
 {
 public:
-    map_horizon(const std::string& basename);
+  map_horizon(const std::string& basename);
 
-    void upload();
+  void upload();
 
-    void draw( MapIndex *index
-             , const math::vector_3d& color
-             , const float& cull_distance
-             , const math::frustum& frustum
-             , const math::vector_3d& camera );
+  void draw( MapIndex *index
+            , const math::vector_3d& color
+            , const float& cull_distance
+            , const math::frustum& frustum
+            , const math::vector_3d& camera );
 
-    opengl::texture minimap;
+  opengl::texture minimap;
   QImage _qt_minimap;
 
-    //! \todo make this private
-    //! (create base class for all delayed ogl objects)
-    bool _finished_upload;
+  //! \todo make this private
+  //! (create base class for all delayed ogl objects)
+  bool _finished_upload;
 
 private:
-    void upload_minimap();
-    void upload_horizon();
+  void upload_minimap();
+  void upload_horizon();
 
-    std::string _filename;
+  std::string _filename;
 
-    map_horizon_batch _batches[64][64];
+  map_horizon_batch _batches[64][64];
 
-    opengl::scoped::buffers<2> _buffers;
-    GLuint const& _index_buffer = _buffers[0];
-    GLuint const& _vertex_buffer = _buffers[1];
+  opengl::scoped::buffers<2> _buffers;
+  GLuint const& _index_buffer = _buffers[0];
+  GLuint const& _vertex_buffer = _buffers[1];
 
-    std::unique_ptr<map_horizon_tile> _tiles[64][64];
+  std::unique_ptr<map_horizon_tile> _tiles[64][64];
 };
