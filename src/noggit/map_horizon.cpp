@@ -208,7 +208,6 @@ map_horizon::map_horizon(const std::string& basename)
 void map_horizon::upload()
 {
   upload_minimap();
-  upload_horizon();
   
   _finished_upload = true;
 }
@@ -246,7 +245,7 @@ void map_horizon::upload_minimap()
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-void map_horizon::upload_horizon()
+map_horizon::render::render(const map_horizon& horizon)
 {
   std::vector<math::vector_3d> vertices;
 
@@ -254,7 +253,7 @@ void map_horizon::upload_horizon()
   {
     for (size_t x (0); x < 64; ++x)
     {
-      if (!_tiles[y][x])
+      if (!horizon._tiles[y][x])
         continue;
 
       _batches[y][x] = map_horizon_batch (vertices.size(), 17 * 17 + 16 * 16);
@@ -264,7 +263,7 @@ void map_horizon::upload_horizon()
         for (size_t i (0); i < 17; ++i)
         {
           vertices.emplace_back ( TILESIZE * (x + i / 16.0f)
-                                , _tiles[y][x]->height_17[j][i]
+                                , horizon._tiles[y][x]->height_17[j][i]
                                 , TILESIZE * (y + j / 16.0f)
                                 );
         }
@@ -275,7 +274,7 @@ void map_horizon::upload_horizon()
         for (size_t i (0); i < 16; ++i)
         {
           vertices.emplace_back ( TILESIZE * (x + (i + 0.5f) / 16.0f)
-                                , _tiles[y][x]->height_16[j][i]
+                                , horizon._tiles[y][x]->height_16[j][i]
                                 , TILESIZE * (y + (j + 0.5f) / 16.0f)
                                 );
         }
@@ -296,11 +295,11 @@ static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
   return batch.vertex_start + 17 * 17 + y * 16 + x;
 };
 
-void map_horizon::draw( MapIndex *index
-                      , const math::vector_3d& color
-                      , const float& cull_distance
-                      , const math::frustum& frustum
-                      , const math::vector_3d& camera)
+void map_horizon::render::draw( MapIndex *index
+                              , const math::vector_3d& color
+                              , const float& cull_distance
+                              , const math::frustum& frustum
+                              , const math::vector_3d& camera )
 {
   std::vector<uint32_t> indices;
 

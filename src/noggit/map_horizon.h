@@ -38,15 +38,26 @@ struct map_horizon_batch
 class map_horizon
 {
 public:
+  struct render
+  {
+    render(const map_horizon& horizon);
+
+    void draw( MapIndex *index
+             , const math::vector_3d& color
+             , const float& cull_distance
+             , const math::frustum& frustum
+             , const math::vector_3d& camera );
+
+    map_horizon_batch _batches[64][64];
+
+    opengl::scoped::buffers<2> _buffers;
+    GLuint const& _index_buffer = _buffers[0];
+    GLuint const& _vertex_buffer = _buffers[1];
+  };
+
   map_horizon(const std::string& basename);
 
   void upload();
-
-  void draw( MapIndex *index
-            , const math::vector_3d& color
-            , const float& cull_distance
-            , const math::frustum& frustum
-            , const math::vector_3d& camera );
 
   opengl::texture minimap;
   QImage _qt_minimap;
@@ -57,15 +68,8 @@ public:
 
 private:
   void upload_minimap();
-  void upload_horizon();
 
   std::string _filename;
-
-  map_horizon_batch _batches[64][64];
-
-  opengl::scoped::buffers<2> _buffers;
-  GLuint const& _index_buffer = _buffers[0];
-  GLuint const& _vertex_buffer = _buffers[1];
 
   std::unique_ptr<map_horizon_tile> _tiles[64][64];
 };
