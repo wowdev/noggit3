@@ -19,7 +19,6 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <noggit/AppState.h>
 #include <noggit/ConfigFile.h>
 #include <noggit/Environment.h>  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
-#include <noggit/liquid_layer.hpp>
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
 #include <noggit/MapView.h>
@@ -32,6 +31,8 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <noggit/Video.h>
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/errorHandling.h>
+#include <noggit/liquid_layer.hpp>
+#include <noggit/ui/main_window.hpp>
 #include <opengl/context.hpp>
 
 #include <boost/filesystem.hpp>
@@ -547,8 +548,8 @@ int main(int argc, char *argv[])
 
   QApplication qapp (argc, argv);
 
-  QLabel widget_to_keep_qt_alive ("DO NOT CLOSE THIS WINDOW");
-  widget_to_keep_qt_alive.show();
+  noggit::ui::main_window main_window;
+  main_window.show();
 
   app.start(argc, argv);
 
