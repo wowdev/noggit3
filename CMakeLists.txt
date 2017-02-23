@@ -248,6 +248,7 @@ set ( noggit_ui_sources
       src/noggit/ui/WaterTypeBrowser.cpp
       src/noggit/ui/Window.cpp
       src/noggit/ui/ZoneIDBrowser.cpp
+      src/noggit/ui/main_window.cpp
       src/noggit/ui/minimap_widget.cpp
       src/noggit/ui/shader_tool.cpp
       src/noggit/ui/terrain_tool.cpp
@@ -369,6 +370,7 @@ set ( noggit_ui_headers
       src/noggit/ui/WaterTypeBrowser.h
       src/noggit/ui/Window.h
       src/noggit/ui/ZoneIDBrowser.h
+      src/noggit/ui/main_window.hpp
       src/noggit/ui/minimap_widget.hpp
       src/noggit/ui/shader_tool.hpp
       src/noggit/ui/terrain_tool.hpp
