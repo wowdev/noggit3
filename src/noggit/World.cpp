@@ -364,6 +364,7 @@ void World::initDisplay()
   else
   {
     horizon.upload();
+    _horizon_render = std::make_unique<map_horizon::render>(horizon);
   }
 
   skies = std::make_unique<Skies> (mMapId);
@@ -529,7 +530,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   // Draw verylowres heightmap
   if (drawfog && draw_terrain) {
-    horizon.draw (&mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
+    _horizon_render->draw (&mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
   }
 
   // Draw height map
