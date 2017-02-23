@@ -374,16 +374,16 @@ void main()
         }
       };
 
-    opengl::scoped::use_program shader {program};
+  opengl::scoped::use_program shader {program};
 
-    shader.uniform ("model_view", opengl::matrix::model_view());
-    shader.uniform ("projection", opengl::matrix::projection());
-    shader.uniform ("color", color);
+  shader.uniform ("model_view", opengl::matrix::model_view());
+  shader.uniform ("projection", opengl::matrix::projection());
+  shader.uniform ("color", color);
 
-    shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> _ (_index_buffer);
+  shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> _ (_index_buffer);
 
-    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof (uint32_t), indices.data(), GL_STATIC_DRAW);
-    gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof (uint32_t), indices.data(), GL_STATIC_DRAW);
+  gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
