@@ -270,6 +270,8 @@ private:
   math::vector_3d _vertex_center;
   bool _vertex_center_updated = false;
   bool _vertex_border_updated = false;
+
+  std::unique_ptr<map_horizon::render> _horizon_render;
 };
 
 extern World *gWorld;
