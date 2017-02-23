@@ -291,10 +291,6 @@ World::World(const std::string& name)
     LogError << "MapId for \"" << name << "\" not found! What is wrong here?" << std::endl;
 
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
-
-  if (!mapIndex.hasAGlobalWMO()) {
-    horizon.upload();
-  }
 }
 
 bool World::IsSelection(int pSelectionType)
@@ -364,6 +360,10 @@ void World::initDisplay()
     WMOInstance inst(mWmoFilename, &mWmoEntry);
     camera = inst.pos;
     gWorld->mWMOInstances.emplace(mWmoEntry.uniqueID, std::move(inst));
+  }
+  else
+  {
+    horizon.upload();
   }
 
   skies = std::make_unique<Skies> (mMapId);
