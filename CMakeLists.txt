@@ -227,7 +227,6 @@ set ( noggit_ui_sources
       src/noggit/ui/ObjectEditor.cpp
       src/noggit/ui/RotationEditor.cpp
       src/noggit/ui/ScrollBar.cpp
-      src/noggit/ui/ScrollableFrame.cpp
       src/noggit/ui/Slider.cpp
       src/noggit/ui/StatusBar.cpp
       src/noggit/ui/Text.cpp
@@ -347,7 +346,6 @@ set ( noggit_ui_headers
       src/noggit/ui/ObjectEditor.h
       src/noggit/ui/RotationEditor.h
       src/noggit/ui/ScrollBar.h
-      src/noggit/ui/ScrollableFrame.h
       src/noggit/ui/Slider.h
       src/noggit/ui/StatusBar.h
       src/noggit/ui/Text.h
