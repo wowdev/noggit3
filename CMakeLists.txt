@@ -218,7 +218,6 @@ set ( noggit_ui_sources
       src/noggit/ui/Gradient.cpp
       src/noggit/ui/Help.cpp
       src/noggit/ui/HelperModels.cpp
-      src/noggit/ui/ListView.cpp
       src/noggit/ui/MapViewGUI.cpp
       src/noggit/ui/MenuBar.cpp
       src/noggit/ui/MinimapWindow.cpp
@@ -337,7 +336,6 @@ set ( noggit_ui_headers
       src/noggit/ui/Gradient.h
       src/noggit/ui/Help.h
       src/noggit/ui/HelperModels.h
-      src/noggit/ui/ListView.h
       src/noggit/ui/MapViewGUI.h
       src/noggit/ui/MenuBar.h
       src/noggit/ui/MinimapWindow.h
