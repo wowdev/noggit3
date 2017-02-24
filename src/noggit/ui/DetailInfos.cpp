@@ -2,22 +2,34 @@
 
 #include <noggit/ui/DetailInfos.h>
 
-#include <string>
+#include <QtWidgets/QFormLayout>
 
-#include <noggit/application.h> // app.getArial14()
-#include <noggit/ui/MapViewGUI.h>
-#include <noggit/ui/MinimizeButton.h>
-#include <noggit/ui/Text.h>
-
-UIDetailInfos::UIDetailInfos(float xPos, float yPos, float w, float h)
-  : UIWindow(xPos, yPos, w, h)
-  , theInfos(new UIText(8.0f, 7.0f, "", app.getArial14(), eJustifyLeft))
+namespace ui
 {
-  addChild(new UIMinimizeButton(width()));
-  addChild(theInfos);
+  detail_infos::detail_infos (float xPos, float yPos, float w, float h)
+    : QWidget (nullptr)
+  {
+    setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
+    auto layout (new QFormLayout (this));
+
+    layout->addRow (_info_text = new QLabel (this));
+  }
+
+  void detail_infos::setText (const std::string& t)
+  {
+    _info_text->setText (t.c_str ());
+  }
+
+  void detail_infos::toggle_visibility()
+  {
+    if (isVisible())
+    {
+      hide();
+    }
+    else
+    {
+      show();
+    }
+  }
 }
 
-void UIDetailInfos::setText(const std::string& t)
-{
-  theInfos->setText(t);
-}

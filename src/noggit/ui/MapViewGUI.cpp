@@ -13,7 +13,7 @@
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include <noggit/Project.h>
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
-#include <noggit/ui/DetailInfos.h> // UIDetailInfos
+#include <noggit/ui/DetailInfos.h> // ui::detail_infos
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
 #include <noggit/ui/MinimapWindow.h>
@@ -94,10 +94,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, const math::vector_3d* camera_po
   addChild(guiStatusbar);
 
   // DetailInfoWindow
-  guidetailInfos = new UIDetailInfos(1.0f, video.yres() - 282.0f, 600.0f, 250.0f);
-  guidetailInfos->movable(true);
+  guidetailInfos = new ui::detail_infos(1.0f, video.yres() - 282.0f, 600.0f, 250.0f);
   guidetailInfos->hide();
-  addChild(guidetailInfos);
 
   // ZoneIDBrowser
   ZoneIDBrowser = new ui::zone_id_browser();
@@ -203,7 +201,7 @@ void UIMapViewGUI::render() const
   tile_index tile(*_camera_pos);
   guiWater->updatePos(tile);
 
-  if (!_tilemode && !guidetailInfos->hidden())
+  if (!_tilemode && !guidetailInfos->isHidden())
   {
     auto lSelection = gWorld->GetCurrentSelection();
     if (lSelection)

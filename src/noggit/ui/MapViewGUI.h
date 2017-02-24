@@ -4,7 +4,6 @@
 
 class UIToolbar;
 class UIStatusBar;
-class UIDetailInfos;
 class UIMinimapWindow;
 class MapView;
 class UIFrame;
@@ -24,6 +23,7 @@ class UIRotationEditor;
 namespace ui
 {
   class caps_warning;
+  class detail_infos;
   class FlattenTool;
   class shader_tool;
   class terrain_tool;
@@ -63,7 +63,7 @@ public:
   UIMinimapWindow* minimapWindow;
   UIToolbar* guiToolbar;
   UIStatusBar* guiStatusbar;
-  UIDetailInfos* guidetailInfos;
+  ui::detail_infos* guidetailInfos;
   ui::zone_id_browser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
   UIWater* guiWater;
