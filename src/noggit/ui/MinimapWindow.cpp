@@ -28,6 +28,7 @@ UIMinimapWindow::UIMinimapWindow(World* setMap)
   , tilesize(0.0f)
   , lookAt(0.0f)
   , map(setMap)
+  , _minimap(setMap->horizon)
 {
   this->cursor_position = new UIText(10, height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft);
   this->addChild(cursor_position);
@@ -112,24 +113,21 @@ void UIMinimapWindow::render() const
   opengl::scoped::matrix_pusher const matrix;
   gl.translatef(x() + borderwidth, y() + borderwidth, 0.0f);
 
-  if (gWorld->horizon._finished_upload)
-  {
-    opengl::texture::enable_texture();
-    gWorld->horizon.minimap.bind();
+  opengl::texture::enable_texture();
+  _minimap.bind();
 
-    gl.begin(GL_QUADS);
-    gl.texCoord2f(0.0f, 0.0f);
-    gl.vertex2f(0.0f, 0.0f);
-    gl.texCoord2f(1.0f, 0.0f);
-    gl.vertex2f(tilesize * 64.0f, 0.0f);
-    gl.texCoord2f(1.0f, 1.0f);
-    gl.vertex2f(tilesize * 64.0f, tilesize * 64.0f);
-    gl.texCoord2f(0.0f, 1.0f);
-    gl.vertex2f(0.0f, tilesize * 64.0f);
-    gl.end();
+  gl.begin(GL_QUADS);
+  gl.texCoord2f(0.0f, 0.0f);
+  gl.vertex2f(0.0f, 0.0f);
+  gl.texCoord2f(1.0f, 0.0f);
+  gl.vertex2f(tilesize * 64.0f, 0.0f);
+  gl.texCoord2f(1.0f, 1.0f);
+  gl.vertex2f(tilesize * 64.0f, tilesize * 64.0f);
+  gl.texCoord2f(0.0f, 1.0f);
+  gl.vertex2f(0.0f, tilesize * 64.0f);
+  gl.end();
 
-    opengl::texture::disable_texture();
-  }
+  opengl::texture::disable_texture();
 
   // draw the ADTs that are existing in the WDT with
   // a transparent 11x11 box. 12x12 is the full size
