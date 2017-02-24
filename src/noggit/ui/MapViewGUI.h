@@ -13,7 +13,6 @@ class UIHelp;
 class UICursorSwitcher;
 class UIWindow;
 class UIExitWarning;
-class UIWaterSaveWarning;
 class UIHelperModels;
 class UISlider;
 class UIGradient;
@@ -29,6 +28,7 @@ namespace ui
   class terrain_tool;
   class texturing_tool;
   class zone_id_browser;
+  class water_save_warning;
 }
 
 class UIWaterTypeBrowser;
@@ -76,7 +76,7 @@ public:
 
   UIExitWarning *escWarning;
   ui::caps_warning *capsWarning;
-  UIWaterSaveWarning *waterSaveWarning;
+  ui::water_save_warning *waterSaveWarning;
   UIHelperModels *HelperModels;
 
   explicit UIMapViewGUI(MapView* setMapview, const math::vector_3d* camera_pos);

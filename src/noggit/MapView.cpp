@@ -972,9 +972,8 @@ void MapView::createGUI()
   mainGui->capsWarning->hide();
 
   // Water unable to save warning
-  mainGui->waterSaveWarning = new UIWaterSaveWarning;
+  mainGui->waterSaveWarning = new ui::water_save_warning;
   mainGui->waterSaveWarning->hide();
-  mainGui->addChild(mainGui->waterSaveWarning);
 
   // modelimport
   mainGui->objectEditor->modelImport = new UIModelImport(this);
