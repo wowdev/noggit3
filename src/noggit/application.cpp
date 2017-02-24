@@ -22,7 +22,6 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
 #include <noggit/MapView.h>
-#include <noggit/Menu.h>
 #include <noggit/Model.h>
 #include <noggit/ModelManager.h> // ModelManager::report()
 #include <noggit/Project.h>    // This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
@@ -457,11 +456,17 @@ int Noggit::start(int argc, char *argv[])
   CreateStrips();
   loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   OpenDBs();
+}
+
+void Noggit::start_main_loop()
+{
+  LogDebug << "Entering Main Loop" << std::endl;
+
 
   if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO))
   {
     LogError << "SDL: " << SDL_GetError() << std::endl;
-    return -2;
+    throw -2;
   }
 
   int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
@@ -491,14 +496,14 @@ int Noggit::start(int argc, char *argv[])
   if (!primary)
   {
     LogError << "SDL: " << SDL_GetError() << std::endl;
-    return -2;
+    throw -2;
   }
 
   GLenum err = glewInit();
   if (GLEW_OK != err)
   {
     LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
-    return -3;
+    throw -3;
   }
 
   gl.enableClientState (GL_VERTEX_ARRAY);
@@ -519,17 +524,11 @@ int Noggit::start(int argc, char *argv[])
   if (!GLEW_ARB_texture_compression)
   {
     LogError << "You GPU does not support ARB texture compression. Initializing video failed." << std::endl;
-    return -1;
+    throw -1;
   }
 
   SDL_WM_SetCaption("Noggit Studio - " STRPRODUCTVER, "");
   initFont();
-
-  LogDebug << "Creating Menu" << std::endl;
-  states.push_back(new Menu());
-
-  LogDebug << "Entering Main Loop" << std::endl;
-
   ticks = SDL_GetTicks();
 
   QTimer::singleShot (0, [primary, this] { mainLoop (primary); });

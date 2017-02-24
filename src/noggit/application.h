@@ -80,10 +80,13 @@ public:
     return fritz16;
   }
 
+  void start_main_loop();
+
 private:
   void initPath(char *argv[]);
   void initFont();
   void initEnv();
+
 
   void parseArgs(int argc, char *argv[]);
   void loadMPQs();

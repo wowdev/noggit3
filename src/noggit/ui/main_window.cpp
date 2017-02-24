@@ -66,6 +66,8 @@ namespace noggit
 
     void main_window::enterMapAt(math::vector_3d pos, float av, float ah)
     {
+      app.start_main_loop();
+
       video.farclip (Settings::getInstance()->FarZ);
 
       gWorld->camera = math::vector_3d (pos.x, pos.y, pos.z);

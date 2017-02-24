@@ -3,7 +3,6 @@
 #include <vector>
 
 #include <noggit/Log.h>
-#include <noggit/Menu.h>
 #include <noggit/Sky.h>
 #include <noggit/ui/MinimapWindow.h>
 #include <noggit/Video.h>
