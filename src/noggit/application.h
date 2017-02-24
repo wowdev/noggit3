@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-class AppState;
-
 #ifdef _WIN32
 #include <external/wacom/MSGPACK.H>
 #include <external/wacom/WINTAB.h>
@@ -25,6 +23,7 @@ HCTX static NEAR TabletInit(HWND hWnd);
 #endif
 
 struct SDL_Surface;
+struct MapView;
 
 class Noggit
 {
@@ -43,11 +42,6 @@ public:
   inline AsyncLoader* loader()
   {
     return asyncLoader.get();
-  }
-
-  inline std::vector<AppState*>& getStates()
-  {
-    return states;
   }
 
   inline const freetype::font_data& getArial12() const
@@ -80,7 +74,7 @@ public:
     return fritz16;
   }
 
-  void start_main_loop();
+  void start_main_loop (MapView*);
 
 private:
   void initPath(char *argv[]);
@@ -99,7 +93,7 @@ private:
 
   AreaDB areaDB;
   std::unique_ptr<AsyncLoader> asyncLoader;
-  std::vector<AppState*> states;
+  MapView* mapview;
 
   bool fullscreen;
   bool doAntiAliasing;
