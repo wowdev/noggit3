@@ -2,14 +2,13 @@
 
 #pragma once
 
-#include <noggit/ui/Window.h>
+#include <QtWidgets/QWidget>
 
-class UIWaterSaveWarning : public UIWindow
+namespace ui
 {
-private:
-  static const int winWidth = 320;
-  static const int winHeight = 80;
-public:
-  UIWaterSaveWarning();
-  void resize();
-};
+  class water_save_warning : public QWidget
+  {
+  public:
+    water_save_warning();
+  };
+}
