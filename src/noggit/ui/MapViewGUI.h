@@ -31,7 +31,6 @@ namespace ui
   class zone_id_browser;
 }
 
-class UIModel;
 class UIWaterTypeBrowser;
 
 #include <noggit/ui/Frame.h>
@@ -58,7 +57,6 @@ public:
   MapView* theMapview;
   // UI elements
   UIFrame* TexturePalette;
-  UIModel* ModelBrowser;
   UIFrame* SelectedTexture;
   UIMinimapWindow* minimapWindow;
   UIToolbar* guiToolbar;

@@ -223,7 +223,6 @@ set ( noggit_ui_sources
       src/noggit/ui/MenuBar.cpp
       src/noggit/ui/MinimapWindow.cpp
       src/noggit/ui/MinimizeButton.cpp
-      src/noggit/ui/Model.cpp
       src/noggit/ui/ModelImport.cpp
       src/noggit/ui/ObjectEditor.cpp
       src/noggit/ui/RotationEditor.cpp
@@ -344,7 +343,6 @@ set ( noggit_ui_headers
       src/noggit/ui/MenuBar.h
       src/noggit/ui/MinimapWindow.h
       src/noggit/ui/MinimizeButton.h
-      src/noggit/ui/Model.h
       src/noggit/ui/ModelImport.h
       src/noggit/ui/ObjectEditor.h
       src/noggit/ui/RotationEditor.h
