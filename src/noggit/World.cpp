@@ -482,6 +482,12 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , std::map<int, misc::random_color>& area_id_colors
                  )
 {
+  if (!_display_initialized)
+  {
+    initDisplay();
+    _display_initialized = true;
+  }
+
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
 
   math::frustum const frustum

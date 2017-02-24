@@ -272,6 +272,8 @@ private:
   bool _vertex_border_updated = false;
 
   std::unique_ptr<map_horizon::render> _horizon_render;
+
+  bool _display_initialized = false;
 };
 
 extern World *gWorld;
