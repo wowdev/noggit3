@@ -14,7 +14,6 @@ class UIHelp;
 class UICursorSwitcher;
 class UIWindow;
 class UIExitWarning;
-class UICapsWarning;
 class UIWaterSaveWarning;
 class UIHelperModels;
 class UISlider;
@@ -24,6 +23,7 @@ class UIObjectEditor;
 class UIRotationEditor;
 namespace ui
 {
+  class caps_warning;
   class FlattenTool;
   class shader_tool;
   class terrain_tool;
@@ -77,7 +77,7 @@ public:
   ui::texturing_tool* texturingTool;
 
   UIExitWarning *escWarning;
-  UICapsWarning *capsWarning;
+  ui::caps_warning *capsWarning;
   UIWaterSaveWarning *waterSaveWarning;
   UIHelperModels *HelperModels;
 
