@@ -55,20 +55,17 @@ public:
     GLuint const& _vertex_buffer = _buffers[1];
   };
 
+  class minimap : public opengl::texture
+  {
+  public:
+    minimap(const map_horizon& horizon);
+  };
+
   map_horizon(const std::string& basename);
-
-  void upload();
-
-  opengl::texture minimap;
+  
   QImage _qt_minimap;
 
-  //! \todo make this private
-  //! (create base class for all delayed ogl objects)
-  bool _finished_upload;
-
 private:
-  void upload_minimap();
-
   std::string _filename;
 
   std::unique_ptr<map_horizon_tile> _tiles[64][64];

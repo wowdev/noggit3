@@ -89,7 +89,6 @@ static inline uint32_t color_for_height (int16_t height)
 }
 
 map_horizon::map_horizon(const std::string& basename)
-  : _finished_upload(false)
 {
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
@@ -205,14 +204,7 @@ map_horizon::map_horizon(const std::string& basename)
   }
 }
 
-void map_horizon::upload()
-{
-  upload_minimap();
-  
-  _finished_upload = true;
-}
-
-void map_horizon::upload_minimap()
+map_horizon::minimap::minimap(const map_horizon& horizon)
 {
   std::vector<uint32_t> texture(1024 * 1024);
 
@@ -220,7 +212,7 @@ void map_horizon::upload_minimap()
   {
     for (size_t x (0); x < 64; ++x)
     {
-      if (!_tiles[y][x])
+      if (!horizon._tiles[y][x])
         continue;
 
       //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
@@ -233,13 +225,13 @@ void map_horizon::upload_minimap()
       {
         for (size_t i (0); i < 16; ++i)
         {
-          texture[(y * 16 + j) * 1024 + x * 16 + i] = color_for_height (_tiles[y][x]->height_17[j][i]);
+          texture[(y * 16 + j) * 1024 + x * 16 + i] = color_for_height (horizon._tiles[y][x]->height_17[j][i]);
         }
       }
     }
   }
 
-  minimap.bind();
+  bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

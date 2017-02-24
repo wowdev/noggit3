@@ -4,6 +4,7 @@
 
 #include <noggit/ui/Window.h>
 #include <noggit/ui/Text.h>
+#include <noggit/map_horizon.h>
 
 class Menu;
 class World;
@@ -17,6 +18,7 @@ private:
   math::degrees lookAt;
   World* map;
   UIText::Ptr cursor_position;
+  map_horizon::minimap _minimap;
 
 public:
   explicit UIMinimapWindow(World* setMap);

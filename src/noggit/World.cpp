@@ -363,7 +363,6 @@ void World::initDisplay()
   }
   else
   {
-    horizon.upload();
     _horizon_render = std::make_unique<map_horizon::render>(horizon);
   }
 
