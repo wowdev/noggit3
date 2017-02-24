@@ -32,7 +32,6 @@ namespace ui
 }
 
 class UIModel;
-class UIAlphamap;
 class UIWaterTypeBrowser;
 
 #include <noggit/ui/Frame.h>

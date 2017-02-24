@@ -40,7 +40,6 @@
 #include <noggit/ui/Model.h>
 #include <noggit/ModelManager.h>
 
-#include <noggit/ui/Alphamap.h>
 #include <noggit/Settings.h>
 
 
