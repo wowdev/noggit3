@@ -2,20 +2,21 @@
 
 #pragma once
 
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QLabel>
+
 #include <string>
 
-#include <noggit/ui/Window.h>
-
-class detailInfos;
-class UIMapViewGUI;
-class UIText;
-
-class UIDetailInfos : public UIWindow
+namespace ui
 {
-private:
-  UIText* theInfos;
+  class detail_infos : public QWidget
+  {
+  private:
+    QLabel* _info_text;
 
-public:
-  UIDetailInfos(float x, float y, float width, float height);
-  void setText(const std::string& t);
-};
+  public:
+    detail_infos (float x, float y, float width, float height);
+    void setText (const std::string& t);
+    void toggle_visibility();
+  };
+}

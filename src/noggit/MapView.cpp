@@ -490,8 +490,13 @@ void MapView::createGUI()
   addHotkey (SDLK_F6, MOD_none, [this] { _draw_wmo = !_draw_wmo; });
   mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &_draw_lines);
   addHotkey (SDLK_F7, MOD_none, [this] { _draw_lines = !_draw_lines; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true);
-  addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggleVisibility(); });
+  mbar->GetMenu ("View")->AddMenuItemButton( "F8 Detail infos"
+                                           , [this]
+                                             {
+                                               mainGui->guidetailInfos->toggle_visibility ();
+                                             }
+                                           );
+  addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggle_visibility(); });
   mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
   addHotkey (SDLK_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
   mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &_draw_wireframe);
@@ -644,7 +649,7 @@ void MapView::createGUI()
 
   addHotkey (SDLK_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
 
-  addHotkey (SDLK_x, MOD_ctrl, [this] { mainGui->guidetailInfos->toggleVisibility(); });
+  addHotkey (SDLK_x, MOD_ctrl, [this] { mainGui->guidetailInfos->toggle_visibility(); });
 
   addHotkey (SDLK_i, MOD_none, [this] { mousedir *= -1.f; });
 
