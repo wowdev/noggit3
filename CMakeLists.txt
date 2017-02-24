@@ -169,7 +169,6 @@ set ( noggit_root_sources
       src/noggit/MapChunk.cpp
       src/noggit/MapTile.cpp
       src/noggit/MapView.cpp
-      src/noggit/Menu.cpp
       src/noggit/Misc.cpp
       src/noggit/Model.cpp
       src/noggit/ModelInstance.cpp
@@ -289,7 +288,6 @@ set ( noggit_root_headers
       src/noggit/MapHeaders.h
       src/noggit/MapTile.h
       src/noggit/MapView.h
-      src/noggit/Menu.h
       src/noggit/Misc.h
       src/noggit/Model.h
       src/noggit/ModelHeaders.h
