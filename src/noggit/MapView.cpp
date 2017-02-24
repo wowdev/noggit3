@@ -1530,7 +1530,7 @@ void MapView::tick(float t, float dt)
 
 selection_result MapView::intersect_result(bool terrain_only)
 {
-  // during rendering we multiply perspective * view 
+  // during rendering we multiply perspective * view
   // so we need the same order here and then invert.
   math::vector_3d const pos
     ( ( ( math::perspective ( video.fov()
@@ -2385,9 +2385,9 @@ void MapView::prompt_exit() const
     QPushButton *continueButton = msgBox.addButton("Continue Editing", QMessageBox::RejectRole);
     msgBox.setDefaultButton(continueButton);
     msgBox.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-    
+
     msgBox.exec();
-    
+
     if (msgBox.buttonRole(msgBox.clickedButton()) == QMessageBox::AcceptRole) {
         app.pop = true;
     }
