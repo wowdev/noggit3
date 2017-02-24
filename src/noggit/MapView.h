@@ -155,7 +155,7 @@ public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
   int cursor_type = 1;
 
-  MapView(float ah0, float av0, math::vector_3d camera_lookat);
+  MapView(float ah0, float av0, math::vector_3d camera_pos, math::vector_3d camera_lookat);
   ~MapView();
 
   void tick(float t, float dt);

@@ -982,7 +982,11 @@ void MapView::createGUI()
   mainGui->HelperModels = new UIHelperModels(this);
 }
 
-MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lookat)
+MapView::MapView( float _camera_ah0
+                , float _camera_av0
+                , math::vector_3d camera_pos
+                , math::vector_3d camera_lookat
+                )
   : _camera_ah(_camera_ah0)
   , _camera_av(_camera_av0)
   , _camera_lookat (camera_lookat)
@@ -1026,6 +1030,7 @@ MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lo
 
   // Set camera y (height) position to current ground height plus some space.
   math::vector_3d t = math::vector_3d(0, 0, 0);
+  gWorld->camera = camera_pos;
   tile_index tile(gWorld->camera);
   if (!gWorld->mapIndex.tileLoaded(tile))
   {
