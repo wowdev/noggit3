@@ -37,7 +37,6 @@
 #include <noggit/Misc.h>
 #include <noggit/ui/WaterTypeBrowser.h>
 
-#include <noggit/ui/Model.h>
 #include <noggit/ModelManager.h>
 
 #include <noggit/Settings.h>
