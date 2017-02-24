@@ -993,8 +993,7 @@ MapView::MapView( float _camera_ah0
   , _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
 {
-  app.getStates().push_back (this);
-  app.start_main_loop();
+  app.start_main_loop (this);
 
   LastClicked = nullptr;
 

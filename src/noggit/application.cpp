@@ -311,8 +311,6 @@ void Noggit::loadMPQs()
 
 void Noggit::mainLoop (SDL_Surface* primary)
 {
-  if (!states.empty())
-  {
     Uint32 lastTicks(ticks);
     ticks = SDL_GetTicks();
     Uint32 tickDelta(ticks - lastTicks);
@@ -327,8 +325,8 @@ void Noggit::mainLoop (SDL_Surface* primary)
     {
       const float ftime(time / 1000.0f);
       const float ftickDelta(tickDelta / 1000.0f);
-      states.back()->tick(ftime, ftickDelta);
-      states.back()->display(ftime, ftickDelta);
+      mapview->tick(ftime, ftickDelta);
+      mapview->display(ftime, ftickDelta);
       SDL_GL_SwapBuffers();
     }
     else
@@ -345,46 +343,61 @@ void Noggit::mainLoop (SDL_Surface* primary)
         e.type = SDL_KEYDOWN;
         e.keysym.sym = SDLK_ESCAPE;
         e.keysym.mod = KMOD_NONE;
-        states.back()->keyPressEvent (&e);
+        mapview->keyPressEvent (&e);
       }
       else if (event.type == SDL_VIDEORESIZE)
       {
         primary = SDL_SetVideoMode (event.resize.w, event.resize.h, 0, primary->flags);
         video.resize (event.resize.w, event.resize.h);
-        states.back()->resizewindow();
+        mapview->resizewindow();
       }
       else if (hasInputFocus)
       {
         if (event.type == SDL_KEYDOWN)
         {
-          states.back()->keyPressEvent (&event.key);
+          mapview->keyPressEvent (&event.key);
         }
         else if (event.type == SDL_KEYUP)
         {
-          states.back()->keyReleaseEvent (&event.key);
+          mapview->keyReleaseEvent (&event.key);
         }
         else if (hasMouseFocus)
         {
           if (event.type == SDL_MOUSEMOTION)
           {
-            states.back()->mousemove(&event.motion);
+            mapview->mousemove(&event.motion);
           }
           else if (event.type == SDL_MOUSEBUTTONDOWN)
           {
-            states.back()->mousePressEvent (&event.button);
+            mapview->mousePressEvent (&event.button);
           }
           else if (event.type == SDL_MOUSEBUTTONUP)
           {
-            states.back()->mouseReleaseEvent (&event.button);
+            mapview->mouseReleaseEvent (&event.button);
           }
         }
       }
     }
     if (pop)
     {
-      pop = false;
-      delete states.back();
-      states.pop_back();
+      SDL_FreeSurface(primary);
+      SDL_Quit();
+
+      TextureManager::report();
+      ModelManager::report();
+      WMOManager::report();
+
+      asyncLoader->stop();
+      asyncLoader->join();
+
+      MPQArchive::unloadAllMPQs();
+      gListfile.clear();
+
+      LogDebug << "Exited" << std::endl;
+
+      QApplication::quit();
+
+      return;
     }
 #ifdef _WIN32
     if (tabletActive)
@@ -398,26 +411,6 @@ void Noggit::mainLoop (SDL_Surface* primary)
 #endif
 
     QTimer::singleShot (0, [primary, this] { mainLoop (primary); });
-  }
-  else
-  {
-    SDL_FreeSurface(primary);
-    SDL_Quit();
-
-    TextureManager::report();
-    ModelManager::report();
-    WMOManager::report();
-
-    asyncLoader->stop();
-    asyncLoader->join();
-
-    MPQArchive::unloadAllMPQs();
-    gListfile.clear();
-
-    LogDebug << "Exited" << std::endl;
-
-    QApplication::quit();
-  }
 }
 
 int Noggit::start(int argc, char *argv[])
@@ -458,8 +451,10 @@ int Noggit::start(int argc, char *argv[])
   OpenDBs();
 }
 
-void Noggit::start_main_loop()
+void Noggit::start_main_loop (MapView* mapview_)
 {
+  mapview = mapview_;
+
   LogDebug << "Entering Main Loop" << std::endl;
 
 
