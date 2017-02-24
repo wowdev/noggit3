@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include <noggit/ui/Window.h>
+#include <QtWidgets/QWidget>
 
-class UICapsWarning : public UIWindow
+namespace ui
 {
-private:
-  static const int winWidth = 320;
-  static const int winHeight = 80;
-public:
-  UICapsWarning();
-  void resize();
-};
+  class caps_warning : public QWidget
+  {
+  public:
+    caps_warning ();
+  };
+}
+

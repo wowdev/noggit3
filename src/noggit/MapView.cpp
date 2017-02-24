@@ -967,9 +967,8 @@ void MapView::createGUI()
   addHotkey (SDLK_9, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 9; }, [] { return gWorld->IsSelection(eEntry_WMO); });
 
   // CAPS warning
-  mainGui->capsWarning = new UICapsWarning;
+  mainGui->capsWarning = new ui::caps_warning;
   mainGui->capsWarning->hide();
-  mainGui->addChild(mainGui->capsWarning);
 
   // Water unable to save warning
   mainGui->waterSaveWarning = new UIWaterSaveWarning;
