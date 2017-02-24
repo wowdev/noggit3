@@ -26,7 +26,6 @@
 #include <QRadioButton>
 #include <QButtonGroup>
 #include <QLineEdit>
-#include <QLabel>
 #include <QPushButton>
 
 void UIObjectEditor::toggleRotationEditor()
@@ -61,10 +60,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
         , selected()
         , pasteMode(PASTE_ON_TERRAIN)
 {
-  filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
-  filename->hide();
   this->mainGui = mainGui;
-  mainGui->addChild(filename);
 
   setWindowTitle("Object Editor");
   setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -88,6 +84,9 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 
   QLabel *minLabel = new QLabel("Min", this);
   QLabel *maxLabel = new QLabel("Max", this);
+
+  _filename = new QLabel (this);
+  _filename->setWordWrap (true);
 
   rotRangeStart->setMaximumWidth(85);
   rotRangeEnd->setMaximumWidth(85);
@@ -163,6 +162,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   inspectorGrid->addWidget(visToggleButton, 3, 0, 1, 1);
   inspectorGrid->addWidget(clearListButton, 4, 0, 1, 1);
   inspectorGrid->addWidget(importBox, 2, 1, 3, 1);
+  inspectorGrid->addWidget (_filename, 5, 0, 1, 2);
 
 //    setWidget(content);
 
@@ -353,5 +353,5 @@ void UIObjectEditor::setModelName(const std::string &name)
 {
   std::stringstream ss;
   ss << "Model: " << name;
-  filename->setLeftInfo(ss.str());
+  _filename->setText(ss.str().c_str());
 }

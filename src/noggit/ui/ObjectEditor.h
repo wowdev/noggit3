@@ -5,10 +5,10 @@
 #include <noggit/ui/Window.h>
 #include <noggit/Selection.h>
 #include <math/vector_3d.hpp>
+#include <QLabel>
 #include <QWidget>
 
 class UIModelImport;
-class UIStatusBar;
 class UIMapViewGUI;
 class QButtonGroup;
 
@@ -31,10 +31,10 @@ public:
   void togglePasteMode();
 
   UIModelImport *modelImport;
-  UIStatusBar *filename;
 private:
   QButtonGroup* pasteModeGroup;
   UIMapViewGUI* mainGui;
+  QLabel* _filename;
 
   boost::optional<selection_type> selected;
   void toggleRotationEditor();
