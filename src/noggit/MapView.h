@@ -148,7 +148,7 @@ private:
   UIFrame* MapChunkWindow;
   UIToggleGroup * gFlagsToggleGroup;
 
-  void prompt_exit() const;
+  void prompt_exit();
   void prompt_save_current() const;
 
 public:
@@ -172,4 +172,12 @@ public:
   void selectModel(selection_type entry);
 
   void set_editing_mode (editing_mode);
+
+private:
+  SDL_Surface* primary;
+
+  unsigned int ticks;
+  unsigned int time = 0;
+
+  void mainLoop();
 };

@@ -22,9 +22,6 @@ HWND static WindowHandle;
 HCTX static NEAR TabletInit(HWND hWnd);
 #endif
 
-struct SDL_Surface;
-struct MapView;
-
 class Noggit
 {
 public:
@@ -74,29 +71,26 @@ public:
     return fritz16;
   }
 
-  void start_main_loop (MapView*);
-
 private:
   void initPath(char *argv[]);
+public:
   void initFont();
+private:
   void initEnv();
-
 
   void parseArgs(int argc, char *argv[]);
   void loadMPQs();
 
-  unsigned int ticks;
-  unsigned int time = 0;
-  void mainLoop (SDL_Surface* primary);
-
   boost::filesystem::path wowpath;
 
   AreaDB areaDB;
+
+public:
   std::unique_ptr<AsyncLoader> asyncLoader;
-  MapView* mapview;
 
   bool fullscreen;
   bool doAntiAliasing;
+private:
 
   freetype::font_data arialn13, arial12, arial14, arial16, arial24, arial32, morpheus40, skurri32, fritz16;
 public:

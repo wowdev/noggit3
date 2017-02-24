@@ -309,110 +309,6 @@ void Noggit::loadMPQs()
   }
 }
 
-void Noggit::mainLoop (SDL_Surface* primary)
-{
-    Uint32 lastTicks(ticks);
-    ticks = SDL_GetTicks();
-    Uint32 tickDelta(ticks - lastTicks);
-    time += tickDelta;
-
-    const Uint8 appState(SDL_GetAppState());
-    const bool isActiveApplication((appState & SDL_APPACTIVE) != 0);
-    const bool hasInputFocus((appState & SDL_APPINPUTFOCUS) != 0);
-    const bool hasMouseFocus(appState & SDL_APPMOUSEFOCUS);
-
-    if (isActiveApplication)
-    {
-      const float ftime(time / 1000.0f);
-      const float ftickDelta(tickDelta / 1000.0f);
-      mapview->tick(ftime, ftickDelta);
-      mapview->display(ftime, ftickDelta);
-      SDL_GL_SwapBuffers();
-    }
-    else
-    {
-      boost::this_thread::sleep(boost::posix_time::milliseconds(200));
-    }
-
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-      if (event.type == SDL_QUIT)
-      {
-        SDL_KeyboardEvent e;
-        e.type = SDL_KEYDOWN;
-        e.keysym.sym = SDLK_ESCAPE;
-        e.keysym.mod = KMOD_NONE;
-        mapview->keyPressEvent (&e);
-      }
-      else if (event.type == SDL_VIDEORESIZE)
-      {
-        primary = SDL_SetVideoMode (event.resize.w, event.resize.h, 0, primary->flags);
-        video.resize (event.resize.w, event.resize.h);
-        mapview->resizewindow();
-      }
-      else if (hasInputFocus)
-      {
-        if (event.type == SDL_KEYDOWN)
-        {
-          mapview->keyPressEvent (&event.key);
-        }
-        else if (event.type == SDL_KEYUP)
-        {
-          mapview->keyReleaseEvent (&event.key);
-        }
-        else if (hasMouseFocus)
-        {
-          if (event.type == SDL_MOUSEMOTION)
-          {
-            mapview->mousemove(&event.motion);
-          }
-          else if (event.type == SDL_MOUSEBUTTONDOWN)
-          {
-            mapview->mousePressEvent (&event.button);
-          }
-          else if (event.type == SDL_MOUSEBUTTONUP)
-          {
-            mapview->mouseReleaseEvent (&event.button);
-          }
-        }
-      }
-    }
-    if (pop)
-    {
-      SDL_FreeSurface(primary);
-      SDL_Quit();
-
-      TextureManager::report();
-      ModelManager::report();
-      WMOManager::report();
-
-      asyncLoader->stop();
-      asyncLoader->join();
-
-      MPQArchive::unloadAllMPQs();
-      gListfile.clear();
-
-      LogDebug << "Exited" << std::endl;
-
-      QApplication::quit();
-
-      return;
-    }
-#ifdef _WIN32
-    if (tabletActive)
-    {
-      PACKET pkt;
-      while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
-      {
-        pressure = pkt.pkNormalPressure;
-      }
-    }
-#endif
-
-    QTimer::singleShot (0, [primary, this] { mainLoop (primary); });
-}
-
 int Noggit::start(int argc, char *argv[])
 {
   InitLogging();
@@ -439,7 +335,7 @@ int Noggit::start(int argc, char *argv[])
     LogError << "Could not find data directory: " << data_path << std::endl;
     return -1;
   }
-    
+
   Log << "Game path: " << wowpath << std::endl;
 
   if (Project::getInstance()->getPath() == "")
@@ -451,83 +347,6 @@ int Noggit::start(int argc, char *argv[])
   OpenDBs();
 }
 
-void Noggit::start_main_loop (MapView* mapview_)
-{
-  mapview = mapview_;
-
-  LogDebug << "Entering Main Loop" << std::endl;
-
-
-  if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO))
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    throw -2;
-  }
-
-  int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
-  if (fullscreen)
-  {
-    flags |= SDL_FULLSCREEN;
-  }
-
-  SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 1);
-  SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
-  SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
-  SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
-  SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
-  SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 8);
-  if (doAntiAliasing)
-  {
-    SDL_GL_SetAttribute (SDL_GL_MULTISAMPLEBUFFERS, 1);
-    //! \todo Make sample count configurable.
-    SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, 4);
-  }
-
-  SDL_EnableUNICODE (true);
-
-  SDL_Surface* primary (SDL_SetVideoMode (xres, yres, 0, flags));
-
-  if (!primary)
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    throw -2;
-  }
-
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-  {
-    LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
-    throw -3;
-  }
-
-  gl.enableClientState (GL_VERTEX_ARRAY);
-  gl.enableClientState (GL_NORMAL_ARRAY);
-  gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
-
-  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
-  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
-  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
-
-  if (doAntiAliasing)
-  {
-    gl.enable(GL_MULTISAMPLE);
-  }
-
-  video.init(xres, yres);
-
-  if (!GLEW_ARB_texture_compression)
-  {
-    LogError << "You GPU does not support ARB texture compression. Initializing video failed." << std::endl;
-    throw -1;
-  }
-
-  SDL_WM_SetCaption("Noggit Studio - " STRPRODUCTVER, "");
-  initFont();
-  ticks = SDL_GetTicks();
-
-  QTimer::singleShot (0, [primary, this] { mainLoop (primary); });
-}
 
 #ifdef _WIN32
 int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
