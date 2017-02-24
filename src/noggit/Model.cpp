@@ -773,7 +773,7 @@ ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *globa
 
 void ModelCamera::setup(int time)
 {
-  video.fov(math::radians (fov / 2));
+  video.fov(math::radians (fov * 0.6f));
   video.nearclip(nearclip);
   video.farclip(farclip);
 
