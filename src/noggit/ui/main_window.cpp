@@ -66,9 +66,7 @@ namespace noggit
 
     void main_window::enterMapAt(math::vector_3d pos, float av, float ah)
     {
-      app.start_main_loop();
-      app.getStates().push_back
-        (new MapView (ah, av, pos, math::vector_3d (pos.x, pos.y, pos.z - 1.0f)));
+      new MapView (ah, av, pos, math::vector_3d (pos.x, pos.y, pos.z - 1.0f));
     }
 
     void main_window::loadMap(int mapID)
