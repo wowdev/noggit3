@@ -70,13 +70,10 @@ namespace noggit
 
       video.farclip (Settings::getInstance()->FarZ);
 
-      gWorld->camera = math::vector_3d (pos.x, pos.y, pos.z);
-
       gWorld->initDisplay();
-      gWorld->mapIndex.enterTile (tile_index (pos));
 
       app.getStates().push_back
-        (new MapView (ah, av, math::vector_3d (pos.x, pos.y, pos.z - 1.0f)));
+        (new MapView (ah, av, pos, math::vector_3d (pos.x, pos.y, pos.z - 1.0f)));
     }
 
     void main_window::loadMap(int mapID)
