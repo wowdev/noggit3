@@ -2,26 +2,18 @@
 
 #pragma once
 
-#include <string>
+#include <QtWidgets/QListWidget>
 
-#include <noggit/ui/Button.h>
-#include <noggit/ui/Window.h>
-#include <noggit/ui/CloseWindow.h>
+class UIWater;
 
-class UIMapViewGUI;
-class UIListView;
-
-class UIWaterTypeBrowser : public UICloseWindow
+namespace ui
 {
-public:
-  typedef UIWaterTypeBrowser* Ptr;
-
-private:
-  UIMapViewGUI *mainGui;
-  UIListView* WaterTypeList;
-
-public:
-  UIWaterTypeBrowser(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui);
-
-  void buildTypeList();
-};
+  class water_type_browser : public QListWidget
+  {
+  public:
+    water_type_browser(UIWater* ui_water);
+    void toggle();
+  private:
+    UIWater* _ui_water;
+  };
+}

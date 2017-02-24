@@ -14,8 +14,6 @@ class UICursorSwitcher;
 class UIWindow;
 class UIExitWarning;
 class UIHelperModels;
-class UISlider;
-class UIGradient;
 class UIWater;
 class UIObjectEditor;
 class UIRotationEditor;
@@ -29,9 +27,8 @@ namespace ui
   class texturing_tool;
   class zone_id_browser;
   class water_save_warning;
+  class water_type_browser;
 }
-
-class UIWaterTypeBrowser;
 
 #include <noggit/ui/Frame.h>
 #include <noggit/ui/CurrentTexture.h>
@@ -65,7 +62,7 @@ public:
   ui::zone_id_browser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
   UIWater* guiWater;
-  UIWaterTypeBrowser* guiWaterTypeSelector;
+  ui::water_type_browser* guiWaterTypeSelector;
   UICurrentTexture* guiCurrentTexture;
   UIObjectEditor* objectEditor;
   UIRotationEditor* rotationEditor;

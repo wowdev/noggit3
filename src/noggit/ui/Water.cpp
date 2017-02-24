@@ -67,7 +67,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     "Type: none",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { mainGui->guiWaterTypeSelector->toggleVisibility(); }
+    [this] { mainGui->guiWaterTypeSelector->toggle(); }
     );
 
   addChild(waterType);
