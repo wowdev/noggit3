@@ -116,10 +116,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, const math::vector_3d* camera_po
   guiWater->movable(true);
   addChild(guiWater);
 
-  guiWaterTypeSelector = new UIWaterTypeBrowser(this->width() - 430.0f, 38.0f, 240.0f, 300.0f, this);
+  guiWaterTypeSelector = new ui::water_type_browser(guiWater);
   guiWaterTypeSelector->hide();
-  guiWaterTypeSelector->movable(true);
-  addChild(guiWaterTypeSelector);
 }
 
 void UIMapViewGUI::showCursorSwitcher()
