@@ -80,7 +80,6 @@ void MapView::set_editing_mode (editing_mode mode)
   mainGui->guiWater->hide();
   mainGui->TexturePicker->hide();
   mainGui->objectEditor->hide();
-  mainGui->objectEditor->filename->hide();
   mainGui->objectEditor->modelImport->hide();
   mainGui->rotationEditor->hide();
   mainGui->ZoneIDBrowser->hide();
@@ -147,10 +146,7 @@ void MapView::set_editing_mode (editing_mode mode)
     mainGui->shaderTool->show();
     break;
   case editing_mode::object:
-//    mainGui->objectEditor->x(tool_settings_x - 90.0f);
-//    mainGui->objectEditor->y(tool_settings_y);
     mainGui->objectEditor->show();
-    mainGui->objectEditor->filename->show();
     mainGui->rotationEditor->move (mainGui->objectEditor->x() - mainGui->rotationEditor->width() - 10.0f, tool_settings_y);
   }
 
