@@ -101,7 +101,7 @@ FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
-find_package (Qt5 COMPONENTS Widgets)
+find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
 find_library(MYSQL_LIBRARY
   NAMES libmysql
@@ -463,6 +463,8 @@ TARGET_LINK_LIBRARIES (noggit
   Boost::system
   ${GLEW_LIBRARY}
   Qt5::Widgets
+  Qt5::OpenGL
+  Qt5::OpenGLExtensions
   ColorWidgets-qt5
 )
 

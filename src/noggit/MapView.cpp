@@ -58,6 +58,7 @@
 #include <boost/filesystem.hpp>
 
 #include <QtCore/QTimer>
+#include <QtGui/QCloseEvent>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMessageBox>
 
@@ -997,77 +998,7 @@ MapView::MapView( float _camera_ah0
   , _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
 {
-  LogDebug << "Entering Main Loop" << std::endl;
-
-  if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO))
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    throw -2;
-  }
-
-  int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
-  if (app.fullscreen)
-  {
-    flags |= SDL_FULLSCREEN;
-  }
-
-  SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 1);
-  SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
-  SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
-  SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
-  SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
-  SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 8);
-  if (app.doAntiAliasing)
-  {
-    SDL_GL_SetAttribute (SDL_GL_MULTISAMPLEBUFFERS, 1);
-    //! \todo Make sample count configurable.
-    SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, 4);
-  }
-
-  SDL_EnableUNICODE (true);
-
-  SDL_Surface* primary (SDL_SetVideoMode (app.xres, app.yres, 0, flags));
-
-  if (!primary)
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    throw -2;
-  }
-
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-  {
-    LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
-    throw -3;
-  }
-
-  gl.enableClientState (GL_VERTEX_ARRAY);
-  gl.enableClientState (GL_NORMAL_ARRAY);
-  gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
-
-  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
-  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
-  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
-
-  if (app.doAntiAliasing)
-  {
-    gl.enable(GL_MULTISAMPLE);
-  }
-
-  video.init(app.xres, app.yres);
-
-  if (!GLEW_ARB_texture_compression)
-  {
-    LogError << "You GPU does not support ARB texture compression. Initializing video failed." << std::endl;
-    throw -1;
-  }
-
-  SDL_WM_SetCaption("Noggit Studio - " STRPRODUCTVER, "");
-  app.initFont();
-  ticks = SDL_GetTicks();
-
-  QTimer::singleShot (0, [this] { mainLoop(); });
+  setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
   LastClicked = nullptr;
 
@@ -1100,13 +1031,46 @@ MapView::MapView( float _camera_ah0
   look = false;
   mViewMode = eViewMode_3D;
 
-  createGUI();
+  gWorld->camera = camera_pos;
+
+  connect (this, &QObject::destroyed
+          , []
+            {
+              TextureManager::report();
+              ModelManager::report();
+              WMOManager::report();
+
+              app.asyncLoader->stop();
+              app.asyncLoader->join();
+
+              MPQArchive::unloadAllMPQs();
+              gListfile.clear();
+
+              LogDebug << "Exited" << std::endl;
+
+              QApplication::quit();
+            }
+          );
+
+  _startup_time.start();
+  _update_every_event_loop.start (0);
+  connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
+}
+
+  void MapView::initializeGL()
+  {
+    opengl::context::scoped_setter const _ (::gl, context());
+    gl.clearColor (0.0f, 0.0f, 0.0f, 1.0f);
+    video.init (width(), height());
+
+    app.initFont();
+    createGUI();
 
   set_editing_mode (editing_mode::ground);
 
+
   // Set camera y (height) position to current ground height plus some space.
   math::vector_3d t = math::vector_3d(0, 0, 0);
-  gWorld->camera = camera_pos;
   tile_index tile(gWorld->camera);
   if (!gWorld->mapIndex.tileLoaded(tile))
   {
@@ -1124,96 +1088,70 @@ MapView::MapView( float _camera_ah0
   }
 
   gWorld->camera.y = t.y + 50.0f;
-}
 
-
-void MapView::mainLoop()
-{
-  if (!primary)
-  {
-    return;
+    gl.enableClientState (GL_VERTEX_ARRAY);
+    gl.enableClientState (GL_NORMAL_ARRAY);
+    gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
   }
 
-    Uint32 lastTicks(ticks);
-    ticks = SDL_GetTicks();
-    Uint32 tickDelta(ticks - lastTicks);
-    time += tickDelta;
+  void MapView::paintGL()
+  {
+    opengl::context::scoped_setter const _ (::gl, context());
 
-    const Uint8 appState(SDL_GetAppState());
-    const bool isActiveApplication((appState & SDL_APPACTIVE) != 0);
-    const bool hasInputFocus((appState & SDL_APPINPUTFOCUS) != 0);
-    const bool hasMouseFocus(appState & SDL_APPMOUSEFOCUS);
+    makeCurrent();
+    const qreal now(_startup_time.elapsed() / 1000.0);
+    tick (now - _last_update);
+    _last_update = now;
 
-    if (isActiveApplication)
-    {
-      const float ftime(time / 1000.0f);
-      const float ftickDelta(tickDelta / 1000.0f);
-      tick(ftickDelta);
-      display();
-      SDL_GL_SwapBuffers();
-    }
-    else
-    {
-      boost::this_thread::sleep(boost::posix_time::milliseconds(200));
-    }
+    gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    display();
+  }
 
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-      if (event.type == SDL_QUIT)
-      {
-        SDL_KeyboardEvent e;
-        e.type = SDL_KEYDOWN;
-        e.keysym.sym = SDLK_ESCAPE;
-        e.keysym.mod = KMOD_NONE;
-        keyPressEvent (&e);
-      }
-      else if (event.type == SDL_VIDEORESIZE)
-      {
-        primary = SDL_SetVideoMode (event.resize.w, event.resize.h, 0, primary->flags);
-        video.resize (event.resize.w, event.resize.h);
-        resizewindow();
-      }
-      else if (hasInputFocus)
-      {
-        if (event.type == SDL_KEYDOWN)
-        {
-          keyPressEvent (&event.key);
-        }
-        else if (event.type == SDL_KEYUP)
-        {
-          keyReleaseEvent (&event.key);
-        }
-        else if (hasMouseFocus)
-        {
-          if (event.type == SDL_MOUSEMOTION)
-          {
-            mousemove(&event.motion);
-          }
-          else if (event.type == SDL_MOUSEBUTTONDOWN)
-          {
-            mousePressEvent (&event.button);
-          }
-          else if (event.type == SDL_MOUSEBUTTONUP)
-          {
-            mouseReleaseEvent (&event.button);
-          }
-        }
-      }
-    }
-#ifdef _WIN32
-    if (tabletActive)
-    {
-      PACKET pkt;
-      while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
-      {
-        pressure = pkt.pkNormalPressure;
-      }
-    }
-#endif
+  void MapView::resizeGL (int width, int height)
+  {
+    opengl::context::scoped_setter const _ (::gl, context());
+    video.resize (width, height);
+    mainGui->resize();
+  }
 
-    QTimer::singleShot (0, [this] { mainLoop(); });
-}
+// void MapView::mainLoop()
+// {
+//     const Uint8 appState(SDL_GetAppState());
+//     const bool isActiveApplication((appState & SDL_APPACTIVE) != 0);
+//     const bool hasInputFocus((appState & SDL_APPINPUTFOCUS) != 0);
+//     const bool hasMouseFocus(appState & SDL_APPMOUSEFOCUS);
+
+//     SDL_Event event;
+//     while (SDL_PollEvent(&event))
+//     {
+//       else if (hasInputFocus)
+//       {
+//         if (event.type == SDL_KEYDOWN)
+//         {
+//           keyPressEvent (&event.key);
+//         }
+//         else if (event.type == SDL_KEYUP)
+//         {
+//           keyReleaseEvent (&event.key);
+//         }
+//         else if (hasMouseFocus)
+//         {
+//           if (event.type == SDL_MOUSEMOTION)
+//           {
+//             mousemove(&event.motion);
+//           }
+//           else if (event.type == SDL_MOUSEBUTTONDOWN)
+//           {
+//             mousePressEvent (&event.button);
+//           }
+//           else if (event.type == SDL_MOUSEBUTTONUP)
+//           {
+//             mouseReleaseEvent (&event.button);
+//           }
+//         }
+//       }
+//     }
+// }
 
 MapView::~MapView()
 {
@@ -1225,6 +1163,17 @@ MapView::~MapView()
 
 void MapView::tick (float dt)
 {
+#ifdef _WIN32
+  if (tabletActive)
+  {
+    PACKET pkt;
+    while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
+    {
+      pressure = pkt.pkNormalPressure;
+    }
+  }
+#endif
+
   // start unloading tiles
   gWorld->mapIndex.enterTile (tile_index (gWorld->camera));
   gWorld->mapIndex.unloadTiles (tile_index (gWorld->camera));
@@ -1940,11 +1889,6 @@ void MapView::display()
   }
 }
 
-void MapView::resizewindow()
-{
-  mainGui->resize();
-}
-
 void MapView::keyPressEvent (SDL_KeyboardEvent *e)
 {
   if (e->keysym.mod & KMOD_CAPS)
@@ -2533,6 +2477,13 @@ void MapView::checkWaterSave()
   }
 }
 
+void MapView::closeEvent (QCloseEvent* event)
+{
+  event->ignore();
+  prompt_exit();
+}
+
+
 void MapView::prompt_exit()
 {
     QMessageBox msgBox;
@@ -2549,23 +2500,7 @@ void MapView::prompt_exit()
 
     if (msgBox.buttonRole(msgBox.clickedButton()) == QMessageBox::AcceptRole)
     {
-      SDL_FreeSurface(primary);
-      primary = nullptr;
-      SDL_Quit();
-
-      TextureManager::report();
-      ModelManager::report();
-      WMOManager::report();
-
-      app.asyncLoader->stop();
-      app.asyncLoader->join();
-
-      MPQArchive::unloadAllMPQs();
-      gListfile.clear();
-
-      LogDebug << "Exited" << std::endl;
-
-      QApplication::quit();
+      deleteLater();
     }
 }
 

@@ -11,6 +11,10 @@
 
 #include <boost/optional.hpp>
 
+#include <QtCore/QTime>
+#include <QtCore/QTimer>
+#include <QtWidgets/QOpenGLWidget>
+
 #include <forward_list>
 #include <map>
 #include <unordered_set>
@@ -32,7 +36,7 @@ enum eViewMode
 class WMO;
 class Model;
 
-class MapView
+class MapView : public QOpenGLWidget
 {
 private:
   bool _mod_alt_down = false;
@@ -202,10 +206,13 @@ private:
   void addHotkey(SDLKey key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
   bool handleHotkeys(SDL_KeyboardEvent* e);
 
-  SDL_Surface* primary;
+  QTime _startup_time;
+  qreal _last_update;
 
-  unsigned int ticks;
-  unsigned int time = 0;
+  QTimer _update_every_event_loop;
 
-  void mainLoop();
+  virtual void initializeGL() override;
+  virtual void paintGL() override;
+  virtual void resizeGL (int w, int h) override;
+  virtual void closeEvent (QCloseEvent*) override;
 };

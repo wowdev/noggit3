@@ -2,8 +2,7 @@
 
 #pragma once
 
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/glew.h>
+#include <QtGui/QOpenGLContext>
 
 namespace opengl
 {
