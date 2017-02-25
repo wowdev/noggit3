@@ -412,23 +412,23 @@ void MapView::createGUI()
   mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [this] { prompt_save_current(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex.saveChanged(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex.saveall(); });
-  addHotkey(SDLK_s, MOD_ctrl | MOD_shift, [this] { prompt_save_current(); });
-  addHotkey(SDLK_a, MOD_ctrl | MOD_shift, [this] { gWorld->mapIndex.saveall(); });
-  addHotkey (SDLK_s, MOD_ctrl, [this] { gWorld->mapIndex.saveChanged(); });
-  addHotkey (SDLK_s, MOD_meta, [this] { gWorld->mapIndex.saveChanged(); });
+  addHotkey (Qt::Key_S, MOD_ctrl | MOD_shift, [this] { prompt_save_current(); });
+  addHotkey (Qt::Key_A, MOD_ctrl | MOD_shift, [this] { gWorld->mapIndex.saveall(); });
+  addHotkey (Qt::Key_S, MOD_ctrl, [this] { gWorld->mapIndex.saveChanged(); });
+  addHotkey (Qt::Key_S, MOD_meta, [this] { gWorld->mapIndex.saveChanged(); });
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
-  addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
+  addHotkey (Qt::Key_J, MOD_shift, [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
   mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [this] { prompt_exit(); });
-  addHotkey (SDLK_ESCAPE, MOD_none, [this] { prompt_exit(); });
+  addHotkey (Qt::Key_Escape, MOD_none, [this] { prompt_exit(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
   mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", [this] { DeleteSelectedObject(); });
-  addHotkey (SDLK_DELETE, MOD_none, [this] { DeleteSelectedObject(); });
+  addHotkey (Qt::Key_Delete, MOD_none, [this] { DeleteSelectedObject(); });
   mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", [this] { ResetSelectedObjectRotation(); });
-  addHotkey (SDLK_r, MOD_ctrl, [this] { ResetSelectedObjectRotation(); });
+  addHotkey (Qt::Key_R, MOD_ctrl, [this] { ResetSelectedObjectRotation(); });
   mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", [this] { SnapSelectedObjectToGround(); });
-  addHotkey (SDLK_PAGEDOWN, MOD_none, [this] { SnapSelectedObjectToGround(); });
+  addHotkey (Qt::Key_PageDown, MOD_none, [this] { SnapSelectedObjectToGround(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("Options");
   mbar->GetMenu("Edit")->AddMenuItemToggle("Auto select mode", &Settings::getInstance()->AutoSelectingMode, false);
@@ -436,9 +436,9 @@ void MapView::createGUI()
 
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
   mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [this] { insert_last_m2_from_wmv(); });
-  addHotkey (SDLK_v, MOD_shift, [this] { insert_last_m2_from_wmv(); });
+  addHotkey (Qt::Key_V, MOD_shift, [this] { insert_last_m2_from_wmv(); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [this] { insert_last_wmo_from_wmv(); });
-  addHotkey (SDLK_v, MOD_alt, [this] { insert_last_wmo_from_wmv(); });
+  addHotkey (Qt::Key_V, MOD_alt, [this] { insert_last_wmo_from_wmv(); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [this] { mainGui->HelperModels->show(); });
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
@@ -480,35 +480,35 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemButton("Cursor options", [this] { mainGui->showCursorSwitcher(); });
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &_draw_models);
-  addHotkey (SDLK_F1, MOD_none, [this] { _draw_models = !_draw_models; });
+  addHotkey (Qt::Key_F1, MOD_none, [this] { _draw_models = !_draw_models; });
   mbar->GetMenu("View")->AddMenuItemToggle("F2 WMO doodadsets", &_draw_wmo_doodads);
-  addHotkey (SDLK_F2, MOD_none, [this] { _draw_wmo_doodads = !_draw_wmo_doodads; });
+  addHotkey (Qt::Key_F2, MOD_none, [this] { _draw_wmo_doodads = !_draw_wmo_doodads; });
   mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &_draw_terrain);
-  addHotkey (SDLK_F3, MOD_none, [this] { _draw_terrain = !_draw_terrain; });
+  addHotkey (Qt::Key_F3, MOD_none, [this] { _draw_terrain = !_draw_terrain; });
   mbar->GetMenu("View")->AddMenuItemToggle("F4 Water", &_draw_water);
-  addHotkey (SDLK_F4, MOD_none, [this] { _draw_water = !_draw_water; });
+  addHotkey (Qt::Key_F4, MOD_none, [this] { _draw_water = !_draw_water; });
   mbar->GetMenu("View")->AddMenuItemToggle("F6 WMOs", &_draw_wmo);
-  addHotkey (SDLK_F6, MOD_none, [this] { _draw_wmo = !_draw_wmo; });
+  addHotkey (Qt::Key_F6, MOD_none, [this] { _draw_wmo = !_draw_wmo; });
   mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &_draw_lines);
-  addHotkey (SDLK_F7, MOD_none, [this] { _draw_lines = !_draw_lines; });
+  addHotkey (Qt::Key_F7, MOD_none, [this] { _draw_lines = !_draw_lines; });
   mbar->GetMenu ("View")->AddMenuItemButton( "F8 Detail infos"
                                            , [this]
                                              {
                                                mainGui->guidetailInfos->toggle_visibility ();
                                              }
                                            );
-  addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggle_visibility(); });
+  addHotkey (Qt::Key_F8, MOD_none, [this] { mainGui->guidetailInfos->toggle_visibility(); });
   mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
-  addHotkey (SDLK_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
+  addHotkey (Qt::Key_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
   mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &_draw_wireframe);
-  addHotkey(SDLK_F10, MOD_none, [this] { _draw_wireframe = !_draw_wireframe; });
+  addHotkey(Qt::Key_F10, MOD_none, [this] { _draw_wireframe = !_draw_wireframe; });
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &_draw_model_animations);
-  addHotkey (SDLK_F11, MOD_none, [this] { _draw_model_animations = !_draw_model_animations; });
+  addHotkey (Qt::Key_F11, MOD_none, [this] { _draw_model_animations = !_draw_model_animations; });
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
-  addHotkey(SDLK_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
+  addHotkey(Qt::Key_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &_draw_mfbo);
   mbar->GetMenu("View")->AddMenuItemToggle("SHIFT+F7 Hole lines always on", &_draw_hole_lines, false);
-  addHotkey (SDLK_F7, MOD_shift, [this] { _draw_hole_lines = !_draw_hole_lines; });
+  addHotkey (Qt::Key_F7, MOD_shift, [this] { _draw_hole_lines = !_draw_hole_lines; });
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &_draw_models_with_box);
 
   mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->showHelp(); });
@@ -541,9 +541,9 @@ void MapView::createGUI()
 
   mainGui->addChild(mbar);
 
-  addHotkey (SDLK_m, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
+  addHotkey (Qt::Key_M, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
 
-  addHotkey ( SDLK_F1
+  addHotkey ( Qt::Key_F1
             , MOD_shift
             , [this]
               {
@@ -576,7 +576,7 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey ( SDLK_F5
+  addHotkey ( Qt::Key_F5
             , MOD_none
             , [this]
               {
@@ -585,13 +585,13 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey (SDLK_n, MOD_none, [this] { mTimespeed += 90.0f; });
-  addHotkey (SDLK_b, MOD_none, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
-  addHotkey (SDLK_j, MOD_none, [this] { mTimespeed = 0.0f; });
+  addHotkey (Qt::Key_N, MOD_none, [this] { mTimespeed += 90.0f; });
+  addHotkey (Qt::Key_B, MOD_none, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
+  addHotkey (Qt::Key_J, MOD_none, [this] { mTimespeed = 0.0f; });
 
-  addHotkey (SDLK_TAB, MOD_none, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
+  addHotkey (Qt::Key_Tab, MOD_none, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
 
-  addHotkey ( SDLK_c
+  addHotkey ( Qt::Key_C
             , MOD_ctrl
             , [this]
               {
@@ -603,7 +603,7 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey ( SDLK_c
+  addHotkey ( Qt::Key_C
             , MOD_alt | MOD_ctrl
             , [this]
               {
@@ -611,7 +611,7 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey ( SDLK_c
+  addHotkey ( Qt::Key_C
             , MOD_none
             , [this]
               {
@@ -620,7 +620,7 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey ( SDLK_c
+  addHotkey ( Qt::Key_C
             , MOD_shift
             , [this]
               {
@@ -629,39 +629,39 @@ void MapView::createGUI()
             , [this] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos, gWorld->camera); });
-  addHotkey ( SDLK_v
+  addHotkey (Qt::Key_V, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos, gWorld->camera); });
+  addHotkey ( Qt::Key_V
             , MOD_none
             , [this] { mainGui->objectEditor->pasteObject (_cursor_pos, gWorld->camera); }
             , [this] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey ( SDLK_c
+  addHotkey ( Qt::Key_C
             , MOD_none
             , [] { gWorld->clearVertexSelection(); }
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
-  addHotkey ( SDLK_x
+  addHotkey ( Qt::Key_X
             , MOD_none
             , [this] { mainGui->TexturePalette->toggleVisibility(); }
             , [this] { return terrainMode == editing_mode::paint; }
             );
 
-  addHotkey (SDLK_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
+  addHotkey (Qt::Key_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
 
-  addHotkey (SDLK_x, MOD_ctrl, [this] { mainGui->guidetailInfos->toggle_visibility(); });
+  addHotkey (Qt::Key_X, MOD_ctrl, [this] { mainGui->guidetailInfos->toggle_visibility(); });
 
-  addHotkey (SDLK_i, MOD_none, [this] { mousedir *= -1.f; });
+  addHotkey (Qt::Key_I, MOD_none, [this] { mousedir *= -1.f; });
 
-  addHotkey (SDLK_o, MOD_none, [this] { movespd *= 0.5f; });
-  addHotkey (SDLK_p, MOD_none, [this] { movespd *= 2.0f; });
+  addHotkey (Qt::Key_O, MOD_none, [this] { movespd *= 0.5f; });
+  addHotkey (Qt::Key_P, MOD_none, [this] { movespd *= 2.0f; });
 
-  addHotkey (SDLK_p, MOD_shift | MOD_ctrl, [this] { Saving = true; });
+  addHotkey (Qt::Key_P, MOD_shift | MOD_ctrl, [this] { Saving = true; });
 
-  addHotkey (SDLK_r, MOD_none, [this] { _camera_ah += 180.f; });
+  addHotkey (Qt::Key_R, MOD_none, [this] { _camera_ah += 180.f; });
 
-  addHotkey ( SDLK_g
+  addHotkey ( Qt::Key_G
             , MOD_none
             , []
               {
@@ -674,19 +674,19 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey ( SDLK_y
+  addHotkey ( Qt::Key_Y
             , MOD_none
             , [this] { mainGui->terrainTool->nextType(); }
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
-  addHotkey ( SDLK_y
+  addHotkey ( Qt::Key_Y
             , MOD_none
             , [this] { mainGui->flattenTool->nextFlattenType(); }
             , [this] { return terrainMode == editing_mode::flatten_blur; }
             );
 
-  addHotkey ( SDLK_u
+  addHotkey ( Qt::Key_U
             , MOD_none
             , [this]
               {
@@ -704,7 +704,7 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey ( SDLK_t
+  addHotkey ( Qt::Key_T
             , MOD_none
             , [&]
               {
@@ -721,7 +721,7 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
 
-  addHotkey ( SDLK_t
+  addHotkey ( Qt::Key_T
             , MOD_none
             , [&]
               {
@@ -730,7 +730,7 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::paint; }
             );
 
-  addHotkey ( SDLK_t
+  addHotkey ( Qt::Key_T
             , MOD_none
             , [&]
               {
@@ -739,7 +739,7 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::holes; }
             );
 
-  addHotkey( SDLK_t
+  addHotkey( Qt::Key_T
            , MOD_none
            , [&]
              {
@@ -749,7 +749,7 @@ void MapView::createGUI()
           );
 
 
-  addHotkey ( SDLK_t
+  addHotkey ( Qt::Key_T
             , MOD_none
             , [&]
               {
@@ -758,7 +758,7 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey ( SDLK_h
+  addHotkey ( Qt::Key_H
             , MOD_none
             , [&]
               {
@@ -767,7 +767,7 @@ void MapView::createGUI()
             , [&] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey ( SDLK_h
+  addHotkey ( Qt::Key_H
             , MOD_none
             , [&]
               {
@@ -819,7 +819,7 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey ( SDLK_f
+  addHotkey ( Qt::Key_F
             , MOD_none
             , [&]
               {
@@ -830,7 +830,7 @@ void MapView::createGUI()
               }
             , [&] { return terrainMode == editing_mode::ground; }
             );
-  addHotkey ( SDLK_f
+  addHotkey ( Qt::Key_F
             , MOD_none
             , [&]
               {
@@ -845,7 +845,7 @@ void MapView::createGUI()
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
-  addHotkey( SDLK_f
+  addHotkey( Qt::Key_F
             , MOD_none
             , [&]
               {
@@ -860,7 +860,7 @@ void MapView::createGUI()
               }
           , [&] { return terrainMode == editing_mode::water; }
           );
-  addHotkey ( SDLK_f
+  addHotkey ( Qt::Key_F
             , MOD_none
             , [&]
               {
@@ -887,21 +887,11 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey (SDLK_KP_PLUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
-  addHotkey (SDLK_PLUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
+  addHotkey (Qt::Key_Plus, MOD_alt, [this] { mainGui->terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
 
-  addHotkey (SDLK_KP_PLUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
-  addHotkey (SDLK_PLUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (Qt::Key_Plus, MOD_alt, [this] { mainGui->flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
 
-  addHotkey ( SDLK_KP_PLUS
-            , MOD_alt
-            , [&]
-              {
-                mainGui->texturingTool->change_radius(0.1f);
-              }
-            , [this] { return terrainMode == editing_mode::paint; }
-            );
-  addHotkey ( SDLK_PLUS
+  addHotkey ( Qt::Key_Plus
             , MOD_alt
             , [&]
               {
@@ -910,25 +900,14 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::paint; }
             );
 
-  addHotkey (SDLK_KP_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
-  addHotkey (SDLK_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
+  addHotkey (Qt::Key_Plus, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
 
 
-  addHotkey (SDLK_KP_MINUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
-  addHotkey (SDLK_MINUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
+  addHotkey (Qt::Key_Minus, MOD_alt, [this] { mainGui->terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
 
-  addHotkey (SDLK_KP_MINUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
-  addHotkey (SDLK_MINUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (Qt::Key_Minus, MOD_alt, [this] { mainGui->flattenTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
 
-  addHotkey ( SDLK_KP_MINUS
-            , MOD_alt
-            , [&]
-              {
-                mainGui->texturingTool->change_radius(-0.1f);
-              }
-            , [this] { return terrainMode == editing_mode::paint; }
-            );
-  addHotkey ( SDLK_MINUS
+  addHotkey ( Qt::Key_Minus
             , MOD_alt
             , [&]
               {
@@ -937,40 +916,39 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::paint; }
             );
 
-  addHotkey (SDLK_KP_MINUS, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
-  addHotkey (SDLK_MINUS, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
+  addHotkey (Qt::Key_Minus, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
 
-  addHotkey (SDLK_1, MOD_shift, [this] { movespd = 15.0f; });
-  addHotkey (SDLK_2, MOD_shift, [this] { movespd = 50.0f; });
-  addHotkey (SDLK_3, MOD_shift, [this] { movespd = 200.0f; });
-  addHotkey (SDLK_4, MOD_shift, [this] { movespd = 800.0f; });
-  addHotkey (SDLK_1, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(0.0f); });
-  addHotkey (SDLK_2, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.25f); });
-  addHotkey (SDLK_3, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.5f); });
-  addHotkey (SDLK_4, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.75f); });
-  addHotkey (SDLK_5, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f); });
+  addHotkey (Qt::Key_1, MOD_shift, [this] { movespd = 15.0f; });
+  addHotkey (Qt::Key_2, MOD_shift, [this] { movespd = 50.0f; });
+  addHotkey (Qt::Key_3, MOD_shift, [this] { movespd = 200.0f; });
+  addHotkey (Qt::Key_4, MOD_shift, [this] { movespd = 800.0f; });
+  addHotkey (Qt::Key_1, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(0.0f); });
+  addHotkey (Qt::Key_2, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.25f); });
+  addHotkey (Qt::Key_3, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.5f); });
+  addHotkey (Qt::Key_4, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.75f); });
+  addHotkey (Qt::Key_5, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f); });
 
-  addHotkey (SDLK_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
-  addHotkey (SDLK_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
-  addHotkey (SDLK_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); });
-  addHotkey (SDLK_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); });
-  addHotkey (SDLK_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); });
-  addHotkey (SDLK_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); });
-  addHotkey (SDLK_7, MOD_none, [this] { set_editing_mode (editing_mode::water); });
-  addHotkey (SDLK_8, MOD_none, [this] { set_editing_mode (editing_mode::light); });
-  addHotkey (SDLK_9, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
-  addHotkey (SDLK_0, MOD_none, [this] { set_editing_mode (editing_mode::object); });
+  addHotkey (Qt::Key_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
+  addHotkey (Qt::Key_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
+  addHotkey (Qt::Key_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); });
+  addHotkey (Qt::Key_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); });
+  addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); });
+  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); });
+  addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); });
+  addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::light); });
+  addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
+  addHotkey (Qt::Key_0, MOD_none, [this] { set_editing_mode (editing_mode::object); });
 
-  addHotkey (SDLK_0, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 0; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_1, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 1; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_2, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 2; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_3, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 3; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_4, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 4; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_5, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 5; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_6, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 6; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_7, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 7; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_8, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 8; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (SDLK_9, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 9; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_0, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 0; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_1, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 1; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_2, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 2; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_3, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 3; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_4, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 4; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_5, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 5; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_6, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 6; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_7, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 7; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_8, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 8; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_9, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 9; }, [] { return gWorld->IsSelection(eEntry_WMO); });
 
   // CAPS warning
   mainGui->capsWarning = new ui::caps_warning;
@@ -1875,133 +1853,129 @@ void MapView::display()
   }
 }
 
-void MapView::keyPressEvent (SDL_KeyboardEvent *e)
+void MapView::keyPressEvent (QKeyEvent *event)
 {
-  if (e->keysym.mod & KMOD_CAPS)
+  if (event->key() == Qt::Key_CapsLock)
     mainGui->capsWarning->show();
-  else
-    mainGui->capsWarning->hide();
 
-  if (handleHotkeys(e))
+  if (handleHotkeys (event))
     return;
 
-  if (e->keysym.sym == SDLK_LSHIFT || e->keysym.sym == SDLK_RSHIFT)
+  if (event->key() == Qt::Key_Shift)
     _mod_shift_down = true;
 
-  if (e->keysym.sym == SDLK_LALT || e->keysym.sym == SDLK_RALT)
+  if (event->key() == Qt::Key_Alt)
     _mod_alt_down = true;
 
-  if (e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL)
+  if (event->key() == Qt::Key_Control)
     _mod_ctrl_down = true;
 
-  if (e->keysym.sym == SDLK_SPACE)
+  if (event->key() == Qt::Key_Space)
     _mod_space_down = true;
 
   // movement
-  if (e->keysym.sym == SDLK_w)
+  if (event->key() == Qt::Key_W)
   {
     key_w = true;
     moving = 1.0f;
   }
 
-  if (e->keysym.sym == SDLK_UP)
+  if (event->key() == Qt::Key_Up)
   {
     lookat = 0.75f;
   }
 
-  if (e->keysym.sym == SDLK_DOWN)
+  if (event->key() == Qt::Key_Down)
   {
     lookat = -0.75f;
   }
 
-  if (e->keysym.sym == SDLK_LEFT)
+  if (event->key() == Qt::Key_Left)
   {
     turn = -0.75f;
   }
 
-  if (e->keysym.sym == SDLK_RIGHT)
+  if (event->key() == Qt::Key_Right)
   {
     turn = 0.75f;
   }
 
   // save
-  if (e->keysym.sym == SDLK_s)
+  if (event->key() == Qt::Key_S)
     moving = -1.0f;
 
-  if (e->keysym.sym == SDLK_a)
+  if (event->key() == Qt::Key_A)
     strafing = -1.0f;
 
-  if (e->keysym.sym == SDLK_d)
+  if (event->key() == Qt::Key_D)
     strafing = 1.0f;
 
-  if (e->keysym.sym == SDLK_e)
+  if (event->key() == Qt::Key_E)
     updown = -1.0f;
 
-  if (e->keysym.sym == SDLK_q)
+  if (event->key() == Qt::Key_Q)
     updown = 1.0f;
 
   // position correction with num pad
-  if (e->keysym.sym == SDLK_KP8)
+  //! \todo revive
+  /*
+  if (event->key() == SDLK_KP8)
     keyx = -1;
 
-  if (e->keysym.sym == SDLK_KP2)
+  if (event->key() == SDLK_KP2)
     keyx = 1;
 
-  if (e->keysym.sym == SDLK_KP6)
+  if (event->key() == SDLK_KP6)
     keyz = -1;
 
-  if (e->keysym.sym == SDLK_KP4)
+  if (event->key() == SDLK_KP4)
     keyz = 1;
 
-  if (e->keysym.sym == SDLK_KP1)
+  if (event->key() == SDLK_KP1)
     keyy = -1;
 
-  if (e->keysym.sym == SDLK_KP3)
+  if (event->key() == SDLK_KP3)
     keyy = 1;
 
-  if (e->keysym.sym == SDLK_KP7)
+  if (event->key() == SDLK_KP7)
     keyr = 1;
 
-  if (e->keysym.sym == SDLK_KP9)
+  if (event->key() == SDLK_KP9)
     keyr = -1;
+  */
 
   // fog distance or brush radius
-  if (e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
+  if (event->key() == Qt::Key_Plus)
   {
     //change selected model size
     if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
-    keys = 1;
+      keys = 1;
   }
 
-  if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS)
+  if (event->key() == Qt::Key_Minus)
   {
     //change selected model size
     if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
-    keys = -1;
+      keys = -1;
   }
 }
 
-void MapView::keyReleaseEvent (SDL_KeyboardEvent* e)
+void MapView::keyReleaseEvent (QKeyEvent* event)
 {
-  if (e->keysym.mod & KMOD_CAPS)
-    mainGui->capsWarning->show();
-  else
-    mainGui->capsWarning->hide();
-
-  if (e->keysym.sym == SDLK_LSHIFT || e->keysym.sym == SDLK_RSHIFT)
+  if (event->key() == Qt::Key_Shift)
     _mod_shift_down = false;
 
-  if (e->keysym.sym == SDLK_LALT || e->keysym.sym == SDLK_RALT)
+  if (event->key() == Qt::Key_Alt)
     _mod_alt_down = false;
 
-  if (e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL)
+  if (event->key() == Qt::Key_Control)
     _mod_ctrl_down = false;
 
-  if (e->keysym.sym == SDLK_SPACE)
+  if (event->key() == Qt::Key_Space)
     _mod_space_down = false;
 
   // movement
-  if (e->keysym.sym == SDLK_w)
+  if (event->key() == Qt::Key_W)
   {
     key_w = false;
     if (!(leftMouse && rightMouse) && moving > 0.0f)
@@ -2010,58 +1984,61 @@ void MapView::keyReleaseEvent (SDL_KeyboardEvent* e)
     }
   }
 
-  if (e->keysym.sym == SDLK_s && moving < 0.0f)
+  if (event->key() == Qt::Key_S && moving < 0.0f)
   {
     moving = 0.0f;
   }
 
-  if (e->keysym.sym == SDLK_UP || e->keysym.sym == SDLK_DOWN)
+  if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
     lookat = 0.0f;
 
-  if (e->keysym.sym == SDLK_LEFT || e->keysym.sym == SDLK_RIGHT)
+  if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right)
     turn = 0.0f;
 
-  if (e->keysym.sym == SDLK_d && strafing > 0.0f)
+  if (event->key() == Qt::Key_D && strafing > 0.0f)
   {
     strafing = 0.0f;
   }
 
-  if (e->keysym.sym == SDLK_a && strafing < 0.0f)
+  if (event->key() == Qt::Key_A && strafing < 0.0f)
   {
     strafing = 0.0f;
   }
 
-  if (e->keysym.sym == SDLK_q && updown > 0.0f)
+  if (event->key() == Qt::Key_Q && updown > 0.0f)
     updown = 0.0f;
 
-  if (e->keysym.sym == SDLK_e && updown < 0.0f)
+  if (event->key() == Qt::Key_E && updown < 0.0f)
     updown = 0.0f;
 
-  if (e->keysym.sym == SDLK_KP8)
+  //! \todo revive
+  /*
+  if (event->key() == SDLK_KP8)
     keyx = 0;
 
-  if (e->keysym.sym == SDLK_KP2)
+  if (event->key() == SDLK_KP2)
     keyx = 0;
 
-  if (e->keysym.sym == SDLK_KP6)
+  if (event->key() == SDLK_KP6)
     keyz = 0;
 
-  if (e->keysym.sym == SDLK_KP4)
+  if (event->key() == SDLK_KP4)
     keyz = 0;
 
-  if (e->keysym.sym == SDLK_KP1)
+  if (event->key() == SDLK_KP1)
     keyy = 0;
 
-  if (e->keysym.sym == SDLK_KP3)
+  if (event->key() == SDLK_KP3)
     keyy = 0;
 
-  if (e->keysym.sym == SDLK_KP7)
+  if (event->key() == SDLK_KP7)
     keyr = 0;
 
-  if (e->keysym.sym == SDLK_KP9)
+  if (event->key() == SDLK_KP9)
     keyr = 0;
+  */
 
-  if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS || e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
+  if (event->key() == Qt::Key_Minus || event->key() == Qt::Key_Plus)
     keys = 0;
 }
 
@@ -2516,40 +2493,22 @@ void MapView::prompt_save_current() const
   }
 }
 
-void MapView::addHotkey(SDLKey key, size_t modifiers, std::function<void()> function, std::function<bool()> condition)
+void MapView::addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition)
 {
   hotkeys.emplace_front (key, modifiers, function, condition);
 }
 
-bool MapView::handleHotkeys(SDL_KeyboardEvent* e)
+bool MapView::handleHotkeys(QKeyEvent* event)
 {
-  /*
-    if( mod & KMOD_NUM ) LogError << "NUMLOCK " << std::endl;
-    if( mod & KMOD_CAPS ) LogError << "CAPSLOCK " << std::endl;
-    if( mod & KMOD_MODE ) LogError << "MODE " << std::endl;
-    if( mod & KMOD_LCTRL ) LogError << "LCTRL " << std::endl;
-    if( mod & KMOD_RCTRL ) LogError << "RCTRL " << std::endl;
-    if( mod & KMOD_LSHIFT ) LogError << "LSHIFT " << std::endl;
-    if( mod & KMOD_RSHIFT ) LogError << "RSHIFT " << std::endl;
-    if( mod & KMOD_LALT ) LogError << "LALT " << std::endl;
-    if( mod & KMOD_RALT ) LogError << "RALT " << std::endl;
-    if( mod & KMOD_LMETA ) LogError << "LMETA " << std::endl;
-    if( mod & KMOD_RMETA )LogError << "RMETA " << std::endl;
-  */
-  size_t modifier = (e->keysym.mod == KMOD_NONE) ? (MOD_none) : (
-    ((e->keysym.mod & KMOD_SHIFT) ? MOD_shift : 0) |
-    ((e->keysym.mod & KMOD_CTRL) ? MOD_ctrl : 0) |
-    ((e->keysym.mod & KMOD_ALT) ? MOD_alt : 0) |
-    ((e->keysym.mod & KMOD_META) ? MOD_meta : 0) |
-    //( ( e->keysym.mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
-    ((e->keysym.mod & KMOD_CAPS) ? MOD_caps : 0) |
-    ((e->keysym.mod & KMOD_MODE) ? MOD_mode : 0));
-
-  //LogError << modifier<< std::endl;
+  size_t modifier = (event->modifiers() == Qt::NoModifier) ? (MOD_none) : (
+    ((event->modifiers() & Qt::ShiftModifier) ? MOD_shift : 0) |
+    ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0) |
+    ((event->modifiers() & Qt::AltModifier) ? MOD_alt : 0) |
+    ((event->modifiers() & Qt::MetaModifier) ? MOD_meta : 0));
 
   for (auto&& hotkey : hotkeys)
   {
-    if (e->keysym.sym == hotkey.key && modifier == hotkey.modifiers && hotkey.condition())
+    if (event->key() == hotkey.key && modifier == hotkey.modifiers && hotkey.condition())
     {
       hotkey.function();
       return true;
