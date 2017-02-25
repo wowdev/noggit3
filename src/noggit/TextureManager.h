@@ -19,7 +19,12 @@ struct blp_texture : public opengl::texture
   void loadFromCompressedData(BLPHeader const* lHeader, char const* lData);
 
   const std::string& filename();
+  int width() const { return original_width; }
+  int height() const { return original_height; }
+
 private:
+  int original_width;
+  int original_height;
   int _width;
   int _height;
   std::string _filename;
@@ -98,3 +103,11 @@ private:
   std::string _filename;
   blp_texture* _blp_texture;
 };
+
+namespace noggit
+{
+  QPixmap render_blp_to_pixmap ( std::string const& blp_filename
+                               , int width = -1
+                               , int height = -1
+                               );
+}

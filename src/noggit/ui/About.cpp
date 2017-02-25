@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/About.h>
+#include <noggit/TextureManager.h>
 
 #include "revision.h"
 
@@ -13,8 +14,9 @@ UIAbout::UIAbout()
   //! \todo make nice looking again, I don't care currently
   new QVBoxLayout (this);
 
-  //! \todo iconize
-  layout()->addWidget (new QLabel ("interface/icons/inv_potion_83.blp", this));
+  auto icon (new QLabel (this));
+  icon->setPixmap (noggit::render_blp_to_pixmap ("interface/icons/inv_potion_83.blp"));
+  layout()->addWidget (icon);
   //! \todo was Skurri32
   layout()->addWidget (new QLabel ("Noggit Studio", this));
   layout()->addWidget (new QLabel ("a wow map editor for 3.3.5a", this));
