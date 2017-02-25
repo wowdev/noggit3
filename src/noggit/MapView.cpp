@@ -1148,8 +1148,8 @@ void MapView::mainLoop()
     {
       const float ftime(time / 1000.0f);
       const float ftickDelta(tickDelta / 1000.0f);
-      tick(ftime, ftickDelta);
-      display(ftime, ftickDelta);
+      tick(ftickDelta);
+      display();
       SDL_GL_SwapBuffers();
     }
     else
@@ -1223,7 +1223,7 @@ MapView::~MapView()
   gWorld = nullptr;
 }
 
-void MapView::tick(float t, float dt)
+void MapView::tick (float dt)
 {
   // start unloading tiles
   gWorld->mapIndex.enterTile (tile_index (gWorld->camera));
@@ -1668,10 +1668,7 @@ void MapView::tick(float t, float dt)
     updown = 0;
   }
 
-  if ((t - lastBrushUpdate) > 0.1f)
-  {
-    mainGui->texturingTool->update_brushes();
-  }
+  mainGui->texturingTool->update_brushes();
 
 
   gWorld->time += this->mTimespeed * dt;
@@ -1680,7 +1677,7 @@ void MapView::tick(float t, float dt)
   gWorld->animtime += dt * 1000.0f;
   globalTime = static_cast<int>(gWorld->animtime);
 
-  gWorld->tick(dt);
+  gWorld->tick (dt);
 
   lastSelected = gWorld->GetCurrentSelection();
 
@@ -1792,7 +1789,7 @@ void MapView::displayGUIIfEnabled()
   }
 }
 
-void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
+void MapView::displayViewMode_2D()
 {
   video.setTileMode();
   gWorld->drawTileMode ( _camera_ah
@@ -1836,7 +1833,7 @@ void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
   displayGUIIfEnabled();
 }
 
-void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
+void MapView::displayViewMode_3D()
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
   if (!gWorld->IsSelection(eEntry_Model) && !gWorld->IsSelection(eEntry_WMO) && Settings::getInstance()->AutoSelectingMode)
@@ -1921,7 +1918,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   displayGUIIfEnabled();
 }
 
-void MapView::display(float t, float dt)
+void MapView::display()
 {
   //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
   if (Saving)
@@ -1934,11 +1931,11 @@ void MapView::display(float t, float dt)
   switch (mViewMode)
   {
   case eViewMode_2D:
-    displayViewMode_2D(t, dt);
+    displayViewMode_2D();
     break;
 
   case eViewMode_3D:
-    displayViewMode_3D(t, dt);
+    displayViewMode_3D();
     break;
   }
 }

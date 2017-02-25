@@ -78,8 +78,8 @@ private:
 
   int mViewMode;
 
-  void displayViewMode_2D(float t, float dt);
-  void displayViewMode_3D(float t, float dt);
+  void displayViewMode_2D();
+  void displayViewMode_3D();
 
   void displayGUIIfEnabled();
 
@@ -160,8 +160,8 @@ public:
   MapView(float ah0, float av0, math::vector_3d camera_pos, math::vector_3d camera_lookat);
   ~MapView();
 
-  void tick(float t, float dt);
-  void display(float t, float dt);
+  void tick (float dt);
+  void display();
 
   void mousemove(SDL_MouseMotionEvent *e);
   void keyReleaseEvent (SDL_KeyboardEvent*);
