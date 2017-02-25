@@ -35,6 +35,14 @@ enum eViewMode
 class WMO;
 class Model;
 
+namespace noggit
+{
+  namespace ui
+  {
+    struct main_window;
+  }
+}
+
 class MapView : public QOpenGLWidget
 {
 private:
@@ -158,7 +166,11 @@ public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
   int cursor_type = 1;
 
-  MapView(float ah0, float av0, math::vector_3d camera_pos);
+  MapView ( float ah0
+          , float av0
+          , math::vector_3d camera_pos
+          , noggit::ui::main_window*
+          );
   ~MapView();
 
   void tick (float dt);
@@ -208,4 +220,6 @@ private:
   virtual void wheelEvent (QWheelEvent*) override;
   virtual void keyReleaseEvent (QKeyEvent*) override;
   virtual void keyPressEvent (QKeyEvent*) override;
+
+  noggit::ui::main_window* _main_window;
 };
