@@ -149,6 +149,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
 set ( noggit_root_sources
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
+      src/noggit/camera.cpp
       src/noggit/ChunkWater.cpp
       src/noggit/ConfigFile.cpp
       src/noggit/DBC.cpp
@@ -266,6 +267,7 @@ set ( noggit_root_headers
       src/noggit/AsyncLoader.h
       src/noggit/AsyncObject.h
       src/noggit/Brush.h
+      src/noggit/camera.hpp
       src/noggit/ChunkWater.hpp
       src/noggit/ConfigFile.h
       src/noggit/DBC.h
