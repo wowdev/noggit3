@@ -61,6 +61,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
 
 #include <algorithm>
@@ -406,24 +407,27 @@ void MapView::createGUI()
   // create the menu
   UIMenuBar * mbar = new UIMenuBar();
 
-  mbar->AddMenu("File");
+  auto file_menu (_main_window->menuBar()->addMenu ("File"));
+  connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
+
   mbar->AddMenu("Edit");
   mbar->AddMenu("View");
   mbar->AddMenu("Assist");
   mbar->AddMenu("Help");
 
-  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [this] { prompt_save_current(); });
-  mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex.saveChanged(); });
-  mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex.saveall(); });
-  addHotkey (Qt::Key_S, MOD_ctrl | MOD_shift, [this] { prompt_save_current(); });
-  addHotkey (Qt::Key_A, MOD_ctrl | MOD_shift, [this] { gWorld->mapIndex.saveall(); });
-  addHotkey (Qt::Key_S, MOD_ctrl, [this] { gWorld->mapIndex.saveChanged(); });
-  addHotkey (Qt::Key_S, MOD_meta, [this] { gWorld->mapIndex.saveChanged(); });
-  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [this] { gWorld->mapIndex.reloadTile(tile_index(_camera.position)); });
-  addHotkey (Qt::Key_J, MOD_shift, [this] { gWorld->mapIndex.reloadTile(tile_index(_camera.position)); });
-  mbar->GetMenu("File")->AddMenuItemSeperator(" ");
-  mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [this] { prompt_exit(); });
-  addHotkey (Qt::Key_Escape, MOD_none, [this] { prompt_exit(); });
+#define ADD_ACTION(menu, name, shortcut, on_action)               \
+  {                                                               \
+    auto action (menu->addAction (name));                         \
+    action->setShortcut (QKeySequence (shortcut));                \
+    connect (action, &QAction::triggered, on_action);             \
+  }
+
+  ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { prompt_save_current(); });
+  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [] { gWorld->mapIndex.saveChanged(); });
+  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [] { gWorld->mapIndex.saveall(); });
+  ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] { gWorld->mapIndex.reloadTile (_camera.position); });
+  file_menu->addSeparator();
+  ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { prompt_exit(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
   mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", [this] { DeleteSelectedObject(); });
