@@ -6,6 +6,7 @@
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/Misc.h>
+#include <noggit/camera.hpp>
 
 #include <boost/optional.hpp>
 
@@ -42,15 +43,14 @@ private:
   bool _mod_shift_down = false;
   bool _mod_space_down = false;
 
-  float _camera_ah;
-  float _camera_av;
-  math::vector_3d _camera_lookat;
   float _2d_zoom = 0.25f;
-  float moving, strafing, updown, mousedir, movespd, turn, lookat;
+  float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
   bool key_w;
   bool look;
   bool _GUIDisplayingEnabled;
+
+  noggit::camera _camera;
 
   bool _draw_contour = false;
   bool _draw_mfbo = false;
@@ -158,7 +158,7 @@ public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
   int cursor_type = 1;
 
-  MapView(float ah0, float av0, math::vector_3d camera_pos, math::vector_3d camera_lookat);
+  MapView(float ah0, float av0, math::vector_3d camera_pos);
   ~MapView();
 
   void tick (float dt);

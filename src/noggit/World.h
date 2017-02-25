@@ -81,8 +81,6 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  math::vector_3d camera;
-
   explicit World(const std::string& name);
 
   void initDisplay();

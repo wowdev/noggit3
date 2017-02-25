@@ -277,7 +277,6 @@ World::World(const std::string& name)
   , culldistance(fogdistance)
   , skies(nullptr)
   , outdoorLightStats(OutdoorLightStats())
-  , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
 {
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
   {
@@ -358,7 +357,8 @@ void World::initDisplay()
   if (mapIndex.hasAGlobalWMO())
   {
     WMOInstance inst(mWmoFilename, &mWmoEntry);
-    camera = inst.pos;
+    //! \todo is this used? does it even make _any_ sense to set the camera position to the center of a wmo?
+    // camera = inst.pos;
     gWorld->mWMOInstances.emplace(mWmoEntry.uniqueID, std::move(inst));
   }
   else

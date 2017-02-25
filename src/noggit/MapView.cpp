@@ -73,7 +73,6 @@
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
-static const float SPEED = 200.6f;
 
 void MapView::set_editing_mode (editing_mode mode)
 {
@@ -386,7 +385,7 @@ void MapView::changeZoneIDValue (int set)
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI(this, &gWorld->camera);
+  mainGui = new UIMapViewGUI(this, &_camera.position);
   mainGui->guiCurrentTexture->current_texture->setClickFunc ([this] { mainGui->TexturePalette->toggleVisibility(); });
 
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
@@ -419,8 +418,8 @@ void MapView::createGUI()
   addHotkey (Qt::Key_A, MOD_ctrl | MOD_shift, [this] { gWorld->mapIndex.saveall(); });
   addHotkey (Qt::Key_S, MOD_ctrl, [this] { gWorld->mapIndex.saveChanged(); });
   addHotkey (Qt::Key_S, MOD_meta, [this] { gWorld->mapIndex.saveChanged(); });
-  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
-  addHotkey (Qt::Key_J, MOD_shift, [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
+  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [this] { gWorld->mapIndex.reloadTile(tile_index(_camera.position)); });
+  addHotkey (Qt::Key_J, MOD_shift, [this] { gWorld->mapIndex.reloadTile(tile_index(_camera.position)); });
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
   mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [this] { prompt_exit(); });
   addHotkey (Qt::Key_Escape, MOD_none, [this] { prompt_exit(); });
@@ -449,25 +448,25 @@ void MapView::createGUI()
                                                {
                                                  if (_selected_area_id != -1)
                                                  {
-                                                   gWorld->setAreaID(gWorld->camera, _selected_area_id, true);
+                                                   gWorld->setAreaID(_camera.position, _selected_area_id, true);
                                                  }
                                                }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear height map"
-                                             , []
+                                             , [this]
                                                {
-                                                 gWorld->clearHeight(gWorld->camera);
+                                                 gWorld->clearHeight(_camera.position);
                                                }
                                              );
 
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear texture"
-                                             , [] { gWorld->setBaseTexture(gWorld->camera); }
+                                             , [this] { gWorld->setBaseTexture(_camera.position); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear models"
-                                             , [] { gWorld->clearAllModelsOnADT(gWorld->camera); }
+                                             , [this] { gWorld->clearAllModelsOnADT(_camera.position); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
-                                             , [] { gWorld->delete_duplicate_model_and_wmo_instances(); }
+                                             , [this] { gWorld->delete_duplicate_model_and_wmo_instances(); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Loaded ADTs");
   mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded ADTs)", [] { gWorld->fixAllGaps(); });
@@ -584,7 +583,7 @@ void MapView::createGUI()
             , [this]
               {
                 std::ofstream f("bookmarks.txt", std::ios_base::app);
-                f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << _camera_ah << " " << _camera_av << " " << gWorld->getAreaID (gWorld->camera) << std::endl;
+                f << gWorld->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw() << " " << _camera.pitch() << " " << gWorld->getAreaID (_camera.position) << std::endl;
               }
             );
 
@@ -632,10 +631,10 @@ void MapView::createGUI()
             , [this] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey (Qt::Key_V, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos, gWorld->camera); });
+  addHotkey (Qt::Key_V, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos, _camera.position); });
   addHotkey ( Qt::Key_V
             , MOD_none
-            , [this] { mainGui->objectEditor->pasteObject (_cursor_pos, gWorld->camera); }
+            , [this] { mainGui->objectEditor->pasteObject (_cursor_pos, _camera.position); }
             , [this] { return terrainMode == editing_mode::object; }
             );
 
@@ -657,22 +656,22 @@ void MapView::createGUI()
 
   addHotkey (Qt::Key_I, MOD_none, [this] { mousedir *= -1.f; });
 
-  addHotkey (Qt::Key_O, MOD_none, [this] { movespd *= 0.5f; });
-  addHotkey (Qt::Key_P, MOD_none, [this] { movespd *= 2.0f; });
+  addHotkey (Qt::Key_O, MOD_none, [this] { _camera.move_speed *= 0.5f; });
+  addHotkey (Qt::Key_P, MOD_none, [this] { _camera.move_speed *= 2.0f; });
 
   addHotkey (Qt::Key_P, MOD_shift | MOD_ctrl, [this] { Saving = true; });
 
-  addHotkey (Qt::Key_R, MOD_none, [this] { _camera_ah += 180.f; });
+  addHotkey (Qt::Key_R, MOD_none, [this] { _camera.add_to_yaw(180.f); });
 
   addHotkey ( Qt::Key_G
             , MOD_none
-            , []
+            , [this]
               {
                 // write teleport cords to txt file
                 std::ofstream f("ports.txt", std::ios_base::app);
-                f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID (gWorld->camera)) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
-                f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl;
-                f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
+                f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
+                f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << gWorld->getMapID() << std::endl;
+                f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
                 f.close();
               }
             );
@@ -737,7 +736,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                gWorld->setHoleADT (gWorld->camera, _mod_alt_down);
+                gWorld->setHoleADT (_camera.position, _mod_alt_down);
               }
             , [&] { return terrainMode == editing_mode::holes; }
             );
@@ -921,10 +920,10 @@ void MapView::createGUI()
 
   addHotkey (Qt::Key_Minus, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
 
-  addHotkey (Qt::Key_1, MOD_shift, [this] { movespd = 15.0f; });
-  addHotkey (Qt::Key_2, MOD_shift, [this] { movespd = 50.0f; });
-  addHotkey (Qt::Key_3, MOD_shift, [this] { movespd = 200.0f; });
-  addHotkey (Qt::Key_4, MOD_shift, [this] { movespd = 800.0f; });
+  addHotkey (Qt::Key_1, MOD_shift, [this] { _camera.move_speed = 15.0f; });
+  addHotkey (Qt::Key_2, MOD_shift, [this] { _camera.move_speed = 50.0f; });
+  addHotkey (Qt::Key_3, MOD_shift, [this] { _camera.move_speed = 200.0f; });
+  addHotkey (Qt::Key_4, MOD_shift, [this] { _camera.move_speed = 800.0f; });
   addHotkey (Qt::Key_1, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(0.0f); });
   addHotkey (Qt::Key_2, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.25f); });
   addHotkey (Qt::Key_3, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.5f); });
@@ -971,13 +970,10 @@ void MapView::createGUI()
 MapView::MapView( float _camera_ah0
                 , float _camera_av0
                 , math::vector_3d camera_pos
-                , math::vector_3d camera_lookat
                 )
-  : _camera_ah(_camera_ah0)
-  , _camera_av(_camera_av0)
-  , _camera_lookat (camera_lookat)
-  , _GUIDisplayingEnabled(true)
+  : _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
+  , _camera(camera_pos, _camera_ah0, _camera_av0)
 {
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
@@ -1008,14 +1004,10 @@ MapView::MapView( float _camera_ah0
 
   mousedir = -1.0f;
 
-  movespd = SPEED;
-
   lastBrushUpdate = 0;
 
   look = false;
   mViewMode = eViewMode_3D;
-
-  gWorld->camera = camera_pos;
 
   connect (this, &QObject::destroyed
           , []
@@ -1055,13 +1047,13 @@ MapView::MapView( float _camera_ah0
 
   // Set camera y (height) position to current ground height plus some space.
   math::vector_3d t = math::vector_3d(0, 0, 0);
-  tile_index tile(gWorld->camera);
+  tile_index tile(_camera.position);
   if (!gWorld->mapIndex.tileLoaded(tile))
   {
     gWorld->mapIndex.loadTile(tile);
   }
 
-  gWorld->GetVertex(gWorld->camera.x, gWorld->camera.z, &t);
+  gWorld->GetVertex(_camera.position.x, _camera.position.z, &t);
 
   // min elevation according to https://wowdev.wiki/AreaTable.dbc
   //! \ todo use the current area's MinElevation
@@ -1071,7 +1063,7 @@ MapView::MapView( float _camera_ah0
     t.y = 0.0f;
   }
 
-  gWorld->camera.y = t.y + 50.0f;
+  _camera.position.y = t.y + 50.0f;
 
     gl.enableClientState (GL_VERTEX_ARRAY);
     gl.enableClientState (GL_NORMAL_ARRAY);
@@ -1142,8 +1134,8 @@ void MapView::tick (float dt)
 #endif
 
   // start unloading tiles
-  gWorld->mapIndex.enterTile (tile_index (gWorld->camera));
-  gWorld->mapIndex.unloadTiles (tile_index (gWorld->camera));
+  gWorld->mapIndex.enterTile (tile_index (_camera.position));
+  gWorld->mapIndex.unloadTiles (tile_index (_camera.position));
 
   dt = std::min(dt, 1.0f);
 
@@ -1174,8 +1166,8 @@ void MapView::tick (float dt)
     math::vector_3d dir(1.0f, 0.0f, 0.0f);
     math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
     math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, math::degrees(_camera_av));
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, math::degrees(_camera_ah));
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, math::degrees(_camera.pitch()));
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, math::degrees(_camera.yaw()));
 
     if (_mod_shift_down)
     {
@@ -1187,15 +1179,15 @@ void MapView::tick (float dt)
     {
       dirUp.x = 0.0f;
       dirUp.y = 1.0f;
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, math::degrees(_camera_av));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, math::degrees(_camera_av));
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera_ah));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera_ah));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, math::degrees(_camera.pitch()));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, math::degrees(_camera.pitch()));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera.yaw()));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera.yaw()));
     }
     else
     {
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera_ah));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera_ah));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera.yaw()));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera.yaw()));
     }
     auto Selection = gWorld->GetCurrentSelection();
     if (Selection)
@@ -1248,9 +1240,9 @@ void MapView::tick (float dt)
       if (gWorld->IsSelection(eEntry_Model))
       {
         //! \todo  Tell me what this is.
-        ObjPos = boost::get<selected_model_type> (*Selection)->pos - gWorld->camera;
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees(_camera_av));
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees(_camera_ah));
+        ObjPos = boost::get<selected_model_type> (*Selection)->pos - _camera.position;
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees(_camera.pitch()));
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees(_camera.yaw()));
         ObjPos.x = std::abs(ObjPos.x);
       }
 
@@ -1429,7 +1421,7 @@ void MapView::tick (float dt)
             if (mViewMode == eViewMode_3D && !underMap)
               gWorld->eraseTextures(_cursor_pos);
             else if (mViewMode == eViewMode_2D)
-              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z});
+              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + _camera.position.z});
           }
           else if (_mod_ctrl_down)
           {
@@ -1449,7 +1441,7 @@ void MapView::tick (float dt)
                                   , CHUNKSIZE * 4.0f * ((float)_last_mouse_pos.y() / (float)video.yres() - 0.5f) / _2d_zoom
                                   );
 
-              pos += gWorld->camera;
+              pos += _camera.position;
               mainGui->texturingTool->paint(pos, dt, *UITexturingGUI::getSelectedTexture());
             }
           }
@@ -1533,39 +1525,36 @@ void MapView::tick (float dt)
 
     if (mViewMode != eViewMode_2D)
     {
-      if (turn != 0.0f)
+      if (turn)
       {
-        _camera_ah += turn;
-        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera_ah));
+        _camera.add_to_yaw(turn);
+        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera.yaw()));
       }
       if (lookat)
       {
-        _camera_av += lookat;
-        if (_camera_av < -80.0f)
-          _camera_av = -80.0f;
-        else if (_camera_av > 80.0f)
-          _camera_av = 80.0f;
-        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera_ah));
+        _camera.add_to_pitch(lookat);
+        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera.pitch()));
       }
       if (moving)
-        gWorld->camera += dir * dt * movespd * moving;
+      {
+        _camera.move_forward(moving, dt);
+      }
       if (strafing)
       {
-        math::vector_3d right = dir % math::vector_3d(0.0f, 1.0f, 0.0f);
-        right.normalize();
-        gWorld->camera += right * dt * movespd * strafing;
+        _camera.move_horizontal(strafing, dt);
       }
       if (updown)
-        gWorld->camera += math::vector_3d(0.0f, dt * movespd * updown, 0.0f);
-
-      _camera_lookat = gWorld->camera + dir;
+      {
+        _camera.move_vertical(updown, dt);
+      }
     }
     else
     {
+      //! \todo this is total bullshit. there should be a seperate view and camera class for tilemode
       if (moving)
-        gWorld->camera.z -= dt * movespd * moving / (_2d_zoom * 1.5f);
+        _camera.position.z -= dt * _camera.move_speed * moving / (_2d_zoom * 1.5f);
       if (strafing)
-        gWorld->camera.x += dt * movespd * strafing / (_2d_zoom * 1.5f);
+        _camera.position.x += dt * _camera.move_speed * strafing / (_2d_zoom * 1.5f);
       if (updown)
         _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
 
@@ -1613,8 +1602,8 @@ selection_result MapView::intersect_result(bool terrain_only)
                             , video.nearclip()
                             , video.farclip()
                             )
-        * math::look_at ( gWorld->camera
-                        , _camera_lookat
+        * math::look_at ( _camera.position
+                        , _camera.look_at()
                         , { 0.0f, 1.0f, 0.0f }
                         )
         ).inverted()
@@ -1622,7 +1611,7 @@ selection_result MapView::intersect_result(bool terrain_only)
       ).xyz_normalized_by_w()
     );
 
-  math::ray ray (gWorld->camera, pos - gWorld->camera);
+  math::ray ray (_camera.position, pos - _camera.position);
 
   selection_result results
     ( gWorld->intersect ( ray
@@ -1708,22 +1697,22 @@ void MapView::displayGUIIfEnabled()
 void MapView::displayViewMode_2D()
 {
   video.setTileMode();
-  gWorld->drawTileMode ( _camera_ah
-                       , gWorld->camera
+  gWorld->drawTileMode ( _camera.yaw()
+                       , _camera.position
                        , _draw_lines
                        , _2d_zoom
                        );
 
 
-  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x) / CHUNKSIZE;
-  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z) / CHUNKSIZE;
+  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + _camera.position.x) / CHUNKSIZE;
+  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + _camera.position.z) / CHUNKSIZE;
 
   // draw brush
   {
     opengl::scoped::matrix_pusher const matrix;
 
     gl.scalef(_2d_zoom, _2d_zoom, 1.0f);
-    gl.translatef(-gWorld->camera.x / CHUNKSIZE, -gWorld->camera.z / CHUNKSIZE, 0);
+    gl.translatef(-_camera.position.x / CHUNKSIZE, -_camera.position.z / CHUNKSIZE, 0);
 
     gl.color4f(1.0f, 1.0f, 1.0f, 0.5f);
     opengl::texture::set_active_texture(1);
@@ -1813,8 +1802,8 @@ void MapView::displayViewMode_3D()
                , terrainMode == editing_mode::water
                , terrainMode == editing_mode::areaid
                , terrainMode
-               , gWorld->camera
-               , _camera_lookat
+               , _camera.position
+               , _camera.look_at()
                , _draw_mfbo
                , _draw_wireframe
                , _draw_lines
@@ -2100,14 +2089,10 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
   {
-    _camera_ah += relative_movement.dx() / XSENS;
-    _camera_av += mousedir * relative_movement.dy() / YSENS;
-    if (_camera_av < -80.0f)
-      _camera_av = -80.0f;
-    else if (_camera_av > 80.0f)
-      _camera_av = 80.0f;
+    _camera.add_to_yaw(relative_movement.dx() / XSENS);
+    _camera.add_to_pitch(mousedir * relative_movement.dy() / YSENS);
 
-    mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera_ah));
+    mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera.pitch()));
   }
 
   if (MoveObj)
@@ -2443,7 +2428,7 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
 
 void MapView::checkWaterSave()
 {
-  tile_index const current (gWorld->camera);
+  tile_index const current (_camera.position);
 
   if (!gWorld->mapIndex.hasTile (current) || gWorld->canWaterSave(current))
   {
