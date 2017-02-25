@@ -7,8 +7,6 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/Misc.h>
 
-#include <SDL.h>
-
 #include <boost/optional.hpp>
 
 #include <QtCore/QTime>

@@ -36,8 +36,6 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
 
-#include <SDL.h>
-
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
