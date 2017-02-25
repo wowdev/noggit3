@@ -3,13 +3,15 @@
 #pragma once
 
 #include <math/vector_4d.hpp>
-#include <noggit/AppState.h>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/Misc.h>
 
+#include <SDL.h>
+
 #include <boost/optional.hpp>
 
+#include <forward_list>
 #include <map>
 #include <unordered_set>
 
@@ -30,7 +32,7 @@ enum eViewMode
 class WMO;
 class Model;
 
-class MapView : public AppState
+class MapView
 {
 private:
   bool _mod_alt_down = false;
@@ -162,10 +164,10 @@ public:
   void display(float t, float dt);
 
   void mousemove(SDL_MouseMotionEvent *e);
-  virtual void keyReleaseEvent (SDL_KeyboardEvent*) override;
-  virtual void keyPressEvent (SDL_KeyboardEvent*) override;
-  virtual void mouseReleaseEvent (SDL_MouseButtonEvent*) override;
-  virtual void mousePressEvent (SDL_MouseButtonEvent*) override;
+  void keyReleaseEvent (SDL_KeyboardEvent*);
+  void keyPressEvent (SDL_KeyboardEvent*);
+  void mouseReleaseEvent (SDL_MouseButtonEvent*);
+  void mousePressEvent (SDL_MouseButtonEvent*);
   void resizewindow();
 
   void inserObjectFromExtern(int model);
@@ -174,6 +176,32 @@ public:
   void set_editing_mode (editing_mode);
 
 private:
+  enum Modifier
+  {
+    MOD_shift = 0x01,
+    MOD_ctrl = 0x02,
+    MOD_alt = 0x04,
+    MOD_meta = 0x08,
+    MOD_num = 0x10,
+    MOD_caps = 0x20,
+    MOD_mode = 0x40,
+    MOD_none = 0x00,
+  };
+  struct HotKey
+  {
+    SDLKey key;
+    size_t modifiers;
+    std::function<void()> function;
+    std::function<bool()> condition;
+    HotKey (SDLKey k, size_t m, std::function<void()> f, std::function<bool()> c)
+      : key (k), modifiers (m), function (f), condition (c) {}
+  };
+
+  std::forward_list<HotKey> hotkeys;
+
+  void addHotkey(SDLKey key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
+  bool handleHotkeys(SDL_KeyboardEvent* e);
+
   SDL_Surface* primary;
 
   unsigned int ticks;

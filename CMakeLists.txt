@@ -271,7 +271,6 @@ set ( external_sources
 
 set ( noggit_root_headers
       src/noggit/Animated.h
-      src/noggit/AppState.h
       src/noggit/AsyncLoader.h
       src/noggit/AsyncObject.h
       src/noggit/Brush.h
