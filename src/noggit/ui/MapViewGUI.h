@@ -76,7 +76,7 @@ public:
   ui::water_save_warning *waterSaveWarning;
   UIHelperModels *HelperModels;
 
-  explicit UIMapViewGUI(MapView* setMapview, const math::vector_3d* camera_pos);
+  explicit UIMapViewGUI(MapView* setMapview, math::vector_3d* camera_pos);
 
   void setTilemode(bool enabled);
   virtual void render() const;

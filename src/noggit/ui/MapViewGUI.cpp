@@ -43,13 +43,13 @@
 
 
 
-UIMapViewGUI::UIMapViewGUI(MapView *setMapview, const math::vector_3d* camera_pos)
+UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
   : UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres())
   , theMapview(setMapview)
   , _camera_pos(camera_pos)
 {
   // Minimap window
-  minimapWindow = new UIMinimapWindow(gWorld);
+  minimapWindow = new UIMinimapWindow(gWorld, camera_pos);
   minimapWindow->hide();
   addChild(minimapWindow);
 
