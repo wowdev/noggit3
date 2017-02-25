@@ -2,6 +2,8 @@
 
 #include <noggit/ui/HelperModels.h>
 
+#include <noggit/TextureManager.h>
+
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
@@ -17,8 +19,9 @@ UIHelperModels::UIHelperModels(MapView *mapview)
   auto bottom_layout (new QGridLayout (nullptr));
   layout->addLayout (bottom_layout);
 
-  //! \todo make icon again
-  top_layout->addWidget (new QLabel ("interface/icons/inv_misc_enggizmos_swissarmy.blp", this));
+  auto icon (new QLabel (this));
+  icon->setPixmap (noggit::render_blp_to_pixmap ("interface/icons/inv_misc_enggizmos_swissarmy.blp"));
+  top_layout->addWidget (icon);
   top_layout->addWidget (new QLabel ("Select a model to add.\nYou should select a chunk first.", this));
 
   auto add_button

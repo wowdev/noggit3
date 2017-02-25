@@ -2,11 +2,8 @@
 
 #include <noggit/ui/SettingsPanel.h>
 
-#include <algorithm>
-
 #include <noggit/Settings.h>
-
-#include "revision.h"
+#include <noggit/TextureManager.h>
 
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFileDialog>
@@ -14,6 +11,8 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
+
+#include <algorithm>
 
 namespace util
 {
@@ -109,17 +108,22 @@ UISettings::UISettings()
             }
           );
 
-  //! \todo make icon again
-  layout->addRow ( new QLabel ("interface/gossipframe/availablequesticon.blp", this)
-                 , new QLabel ("Changes may not take effect until next launch.", this)
-                 );
+  auto warning (new QWidget (this));
+  new QHBoxLayout (warning);
+  auto icon (new QLabel (warning));
+  icon->setPixmap
+    (noggit::render_blp_to_pixmap ("interface/gossipframe/availablequesticon.blp"));
+  warning->layout()->addWidget (icon);
+  warning->layout()->addWidget
+    (new QLabel ("Changes may not take effect until next launch.", warning));
+  layout->addRow (warning);
 
   auto buttonBox ( new QDialogButtonBox ( QDialogButtonBox::Save
                                         | QDialogButtonBox::Cancel
                                         )
                  );
 
-  layout->addWidget (buttonBox);
+  layout->addRow (buttonBox);
 
   connect ( buttonBox, &QDialogButtonBox::accepted
           , [this]
