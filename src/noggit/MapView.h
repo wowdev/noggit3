@@ -168,9 +168,6 @@ public:
 
   void keyReleaseEvent (SDL_KeyboardEvent*);
   void keyPressEvent (SDL_KeyboardEvent*);
-  void mouseReleaseEvent (SDL_MouseButtonEvent*);
-  void mousePressEvent (SDL_MouseButtonEvent*);
-  void resizewindow();
 
   void inserObjectFromExtern(int model);
   void selectModel(selection_type entry);
@@ -214,4 +211,7 @@ private:
   virtual void resizeGL (int w, int h) override;
   virtual void closeEvent (QCloseEvent*) override;
   virtual void mouseMoveEvent (QMouseEvent*) override;
+  virtual void mousePressEvent (QMouseEvent*) override;
+  virtual void mouseReleaseEvent (QMouseEvent*) override;
+  virtual void wheelEvent (QWheelEvent*) override;
 };
