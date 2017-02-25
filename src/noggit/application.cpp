@@ -16,7 +16,6 @@ static LOGCONTEXT  glogContext = { 0 };
 
 #include <noggit/Native.hpp>
 
-#include <noggit/AppState.h>
 #include <noggit/ConfigFile.h>
 #include <noggit/Environment.h>  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
 #include <noggit/Log.h>
