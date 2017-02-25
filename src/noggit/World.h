@@ -37,7 +37,7 @@ class World
 {
 public:
   MapIndex mapIndex;
-  map_horizon horizon;
+  noggit::map_horizon horizon;
 
   // Information about the currently selected model / WMO / triangle.
   boost::optional<selection_type> mCurrentSelection;
@@ -271,7 +271,7 @@ private:
   bool _vertex_center_updated = false;
   bool _vertex_border_updated = false;
 
-  std::unique_ptr<map_horizon::render> _horizon_render;
+  std::unique_ptr<noggit::map_horizon::render> _horizon_render;
 
   bool _display_initialized = false;
 };
