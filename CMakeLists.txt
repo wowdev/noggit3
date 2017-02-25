@@ -82,9 +82,6 @@ macro(includePlattform SUFFIX)
       #storm lib
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/DebugAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/ReleaseAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/Release/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
-      #SDL
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/SDL/lib/x86/")
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/SDL/include/")
       #boost
       include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
@@ -100,7 +97,6 @@ FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test_exec_monitor REQUIRED )
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
-FIND_PACKAGE( SDL REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
 find_library(MYSQL_LIBRARY
@@ -128,12 +124,8 @@ endif()
 
 add_subdirectory (src/external/qt-color-widgets)
 
-# Hack as at least my FindSDL does not do this itself.
-MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
-FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
-
 # Add the found include directories to our include list.
-include_directories (SYSTEM ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR})
+include_directories (SYSTEM ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
 
 OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
@@ -409,16 +401,6 @@ IF(WIN32)
       )
 ENDIF(WIN32)
 
-IF(APPLE)
-  set ( os_sources
-        include/osx/SDLMain.m
-      )
-
-  set ( os_headers
-        include/osx/SDLMain.h
-      )
-ENDIF(APPLE)
-
 
 list (APPEND headers_to_moc
   src/noggit/ui/minimap_widget.hpp
@@ -456,7 +438,6 @@ ADD_EXECUTABLE ( noggit
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   ${FREETYPE_LIBRARIES}
-  ${SDL_LIBRARY}
   StormLib
   Boost::thread
   Boost::filesystem
@@ -467,6 +448,14 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::OpenGLExtensions
   ColorWidgets-qt5
 )
+
+if(APPLE)
+  TARGET_LINK_LIBRARIES (noggit
+    "-framework Cocoa"
+    "-framework AppKit"
+    "-framework Foundation"
+  )
+endif()
 
 if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
   target_link_libraries (noggit ${MYSQL_LIBRARY} ${MYSQLCPPCONN_LIBRARY})
