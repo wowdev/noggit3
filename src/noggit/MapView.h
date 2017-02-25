@@ -101,8 +101,7 @@ private:
   void insert_last_m2_from_wmv();
   void insert_last_wmo_from_wmv();
 
-  int MouseX;
-  int MouseY;
+  QPointF _last_mouse_pos;
   float mh, mv, rh, rv;
 
   float moveratio = 0.1f;
@@ -167,7 +166,6 @@ public:
   void tick (float dt);
   void display();
 
-  void mousemove(SDL_MouseMotionEvent *e);
   void keyReleaseEvent (SDL_KeyboardEvent*);
   void keyPressEvent (SDL_KeyboardEvent*);
   void mouseReleaseEvent (SDL_MouseButtonEvent*);
@@ -215,4 +213,5 @@ private:
   virtual void paintGL() override;
   virtual void resizeGL (int w, int h) override;
   virtual void closeEvent (QCloseEvent*) override;
+  virtual void mouseMoveEvent (QMouseEvent*) override;
 };
