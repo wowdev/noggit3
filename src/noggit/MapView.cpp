@@ -1020,6 +1020,8 @@ MapView::MapView( float _camera_ah0
     }
   }
 
+  setMouseTracking (true);
+
   moving = strafing = updown = lookat = turn = 0.0f;
 
   mousedir = -1.0f;
@@ -1136,10 +1138,6 @@ MapView::MapView( float _camera_ah0
 //         }
 //         else if (hasMouseFocus)
 //         {
-//           if (event.type == SDL_MOUSEMOTION)
-//           {
-//             mousemove(&event.motion);
-//           }
 //           else if (event.type == SDL_MOUSEBUTTONDOWN)
 //           {
 //             mousePressEvent (&event.button);
@@ -1462,7 +1460,7 @@ void MapView::tick (float dt)
             if (mViewMode == eViewMode_3D && !underMap)
               gWorld->eraseTextures(_cursor_pos);
             else if (mViewMode == eViewMode_2D)
-              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z});
+              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z});
           }
           else if (_mod_ctrl_down)
           {
@@ -1477,9 +1475,9 @@ void MapView::tick (float dt)
             }
             else if (mViewMode == eViewMode_2D)
             {
-              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)MouseX / (float)video.xres() - 0.5f ) / _2d_zoom
+              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)_last_mouse_pos.x() / (float)video.xres() - 0.5f ) / _2d_zoom
                                   , 0.0f
-                                  , CHUNKSIZE * 4.0f * ((float)MouseY / (float)video.yres() - 0.5f) / _2d_zoom
+                                  , CHUNKSIZE * 4.0f * ((float)_last_mouse_pos.y() / (float)video.yres() - 0.5f) / _2d_zoom
                                   );
 
               pos += gWorld->camera;
@@ -1651,7 +1649,7 @@ selection_result MapView::intersect_result(bool terrain_only)
                         , { 0.0f, 1.0f, 0.0f }
                         )
         ).inverted()
-      * video.normalized_device_coords (MouseX, MouseY)
+      * video.normalized_device_coords (_last_mouse_pos.x(), _last_mouse_pos.y())
       ).xyz_normalized_by_w()
     );
 
@@ -1748,8 +1746,8 @@ void MapView::displayViewMode_2D()
                        );
 
 
-  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x) / CHUNKSIZE;
-  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z) / CHUNKSIZE;
+  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x) / CHUNKSIZE;
+  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z) / CHUNKSIZE;
 
   // draw brush
   {
@@ -2128,13 +2126,14 @@ void MapView::inserObjectFromExtern(int model)
   //! \todo Memoryleak: These models will never get deleted.
 }
 
-
-void MapView::mousemove(SDL_MouseMotionEvent *e)
+void MapView::mouseMoveEvent (QMouseEvent* event)
 {
+  QLineF const relative_movement (_last_mouse_pos, event->pos());
+
   if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
   {
-    _camera_ah += e->xrel / XSENS;
-    _camera_av += mousedir * e->yrel / YSENS;
+    _camera_ah += relative_movement.dx() / XSENS;
+    _camera_av += mousedir * relative_movement.dy() / YSENS;
     if (_camera_av < -80.0f)
       _camera_av = -80.0f;
     else if (_camera_av > 80.0f)
@@ -2145,8 +2144,8 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 
   if (MoveObj)
   {
-    mh = -video.ratio()*e->xrel / static_cast<float>(video.xres());
-    mv = -e->yrel / static_cast<float>(video.yres());
+    mh = -video.ratio()*relative_movement.dx() / static_cast<float>(video.xres());
+    mv = -relative_movement.dy() / static_cast<float>(video.yres());
   }
   else
   {
@@ -2156,19 +2155,19 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 
   if (_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down)
   {
-    rh = e->xrel / XSENS * 5.0f;
-    rv = e->yrel / YSENS * 5.0f;
+    rh = relative_movement.dx() / XSENS * 5.0f;
+    rv = relative_movement.dy() / YSENS * 5.0f;
   }
 
   if (rightMouse && _mod_alt_down)
   {
     if (terrainMode == editing_mode::ground)
     {
-      mainGui->terrainTool->changeInnerRadius(e->xrel / 100.0f);
+      mainGui->terrainTool->changeInnerRadius(relative_movement.dx() / 100.0f);
     }
     if (terrainMode == editing_mode::paint)
     {
-      mainGui->texturingTool->change_hardness(e->xrel / 300.0f);
+      mainGui->texturingTool->change_hardness(relative_movement.dx() / 300.0f);
     }
   }
 
@@ -2176,7 +2175,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
   {
     if (terrainMode == editing_mode::ground)
     {
-      mainGui->terrainTool->moveVertices(-e->yrel / YSENS);
+      mainGui->terrainTool->moveVertices(-relative_movement.dy() / YSENS);
     }
   }
 
@@ -2191,19 +2190,19 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     switch (terrainMode)
     {
     case editing_mode::ground:
-      mainGui->terrainTool->changeRadius(e->xrel / XSENS);
+      mainGui->terrainTool->changeRadius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::flatten_blur:
-      mainGui->flattenTool->changeRadius(e->xrel / XSENS);
+      mainGui->flattenTool->changeRadius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::paint:
-      mainGui->texturingTool->change_radius(e->xrel / XSENS);
+      mainGui->texturingTool->change_radius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::water:
-      mainGui->guiWater->changeRadius(e->xrel / XSENS);
+      mainGui->guiWater->changeRadius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::mccv:
-      mainGui->shaderTool->changeRadius(e->xrel / XSENS);
+      mainGui->shaderTool->changeRadius(relative_movement.dx() / XSENS);
       break;
     }
   }
@@ -2213,41 +2212,41 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     switch (terrainMode)
     {
     case editing_mode::ground:
-      mainGui->terrainTool->changeSpeed(e->xrel / 30.0f);
+      mainGui->terrainTool->changeSpeed(relative_movement.dx() / 30.0f);
       break;
     case editing_mode::flatten_blur:
-      mainGui->flattenTool->changeSpeed(e->xrel / 30.0f);
+      mainGui->flattenTool->changeSpeed(relative_movement.dx() / 30.0f);
       break;
     case editing_mode::paint:
-      mainGui->texturingTool->change_pressure(e->xrel / 300.0f);
+      mainGui->texturingTool->change_pressure(relative_movement.dx() / 300.0f);
       break;
     case editing_mode::mccv:
-      mainGui->shaderTool->changeSpeed(e->xrel / XSENS);
+      mainGui->shaderTool->changeSpeed(relative_movement.dx() / XSENS);
       break;
     }
   }
 
   if (leftMouse && LastClicked)
   {
-    LastClicked->processLeftDrag((float)(e->x - 4), (float)(e->y - 4), (float)(e->xrel), (float)(e->yrel));
+    LastClicked->processLeftDrag((float)(event->pos().x() - 4), (float)(event->pos().y() - 4), relative_movement.dx(), relative_movement.dy());
   }
 
   if (mViewMode == eViewMode_2D && leftMouse && _mod_alt_down && _mod_shift_down)
   {
-    strafing = ((e->xrel / XSENS) / -1) * 5.0f;
-    moving = (e->yrel / YSENS) * 5.0f;
+    strafing = ((relative_movement.dx() / XSENS) / -1) * 5.0f;
+    moving = (relative_movement.dy() / YSENS) * 5.0f;
   }
 
   if (mViewMode == eViewMode_2D && rightMouse && _mod_shift_down)
   {
-    updown = (e->yrel / YSENS);
+    updown = (relative_movement.dy() / YSENS);
   }
 
-  mainGui->mouse_moved (e->x, e->y);
+  mainGui->mouse_moved (event->pos().x(), event->pos().y());
 
-  MouseX = e->x;
-  MouseY = e->y;
-  checkWaterSave();
+  _last_mouse_pos = event->pos();
+
+  checkWaterSave(); // ????? \todo Move to somewhere more appropriate.
 }
 
 void MapView::selectModel(selection_type entry)
@@ -2412,7 +2411,7 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
   }
   else if (leftMouse)
   {
-    LastClicked = mainGui->processLeftClick(static_cast<float>(MouseX), static_cast<float>(MouseY));
+    LastClicked = mainGui->processLeftClick(static_cast<float>(_last_mouse_pos.x()), static_cast<float>(_last_mouse_pos.y()));
     if (mViewMode == eViewMode_3D && !LastClicked)
     {
       doSelection(false);
