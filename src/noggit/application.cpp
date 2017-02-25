@@ -47,8 +47,12 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <vector>
 
 #include <QtCore/QTimer>
+#include <QtGui/QOffscreenSurface>
+#include <QtOpenGL/QGLFormat>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QLabel>
+
+#include <QtWidgets/QOpenGLWidget>
 
 #include "revision.h"
 
@@ -344,6 +348,38 @@ int Noggit::start(int argc, char *argv[])
   CreateStrips();
   loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   OpenDBs();
+
+  if (!QGLFormat::hasOpenGL())
+  {
+    throw std::runtime_error ("Your system does not support OpenGL. Sorry, this application can't run without it.");
+  }
+
+  QSurfaceFormat format;
+
+  format.setRenderableType(QSurfaceFormat::OpenGL);
+  format.setVersion(2, 1);
+
+  format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  format.setSwapInterval(1);
+
+  if (doAntiAliasing)
+  {
+    format.setSamples (4);
+  }
+
+  QSurfaceFormat::setDefaultFormat (format);
+
+  QOpenGLContext context;
+  context.create();
+  QOffscreenSurface surface;
+  surface.create();
+  context.makeCurrent (&surface);
+
+  opengl::context::scoped_setter const _ (::gl, &context);
+
+  LogDebug << "GL: Version: " << gl.getString (GL_VERSION) << std::endl;
+  LogDebug << "GL: Vendor: " << gl.getString (GL_VENDOR) << std::endl;
+  LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
 }
 
 

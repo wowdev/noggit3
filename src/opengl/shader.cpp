@@ -89,10 +89,6 @@ namespace opengl
     {
       gl.uniform1i (_program.uniform_location (name), value);
     }
-    void use_program::uniform (std::string const& name, GLuint value)
-    {
-      gl.uniform1ui (_program.uniform_location (name), value);
-    }
     void use_program::uniform (std::string const& name, GLfloat value)
     {
       gl.uniform1f (_program.uniform_location (name), value);

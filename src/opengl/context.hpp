@@ -8,8 +8,30 @@ namespace opengl
 {
   struct context
   {
-    //! \todo Multiple context support and actual context usage
-    //! instead of globals (see Qt branch).
+    struct scoped_setter
+    {
+      scoped_setter (context& context_, QOpenGLContext* current_context)
+        : _context (context_)
+        , _old_context (_context._current_context)
+      {
+        _context._current_context = current_context;
+      }
+      ~scoped_setter()
+      {
+        _context._current_context = _old_context;
+      }
+
+      scoped_setter (scoped_setter const&) = delete;
+      scoped_setter (scoped_setter&&) = delete;
+      scoped_setter& operator= (scoped_setter const&) = delete;
+      scoped_setter& operator= (scoped_setter&&) = delete;
+
+    private:
+      context& _context;
+      QOpenGLContext* _old_context;
+    };
+
+    QOpenGLContext* _current_context = nullptr;
 
     void enable (GLenum);
     void disable (GLenum);
@@ -173,7 +195,6 @@ namespace opengl
 
     GLint getUniformLocation (GLuint program, GLchar const* name);
     void uniform1i (GLint location, GLint value);
-    void uniform1ui (GLint location, GLuint value);
     void uniform1f (GLint location, GLfloat value);
     void uniform1iv (GLint location, GLsizei count, GLint const* value);
     void uniform3fv (GLint location, GLsizei count, GLfloat const* value);

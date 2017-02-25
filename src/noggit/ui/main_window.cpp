@@ -66,7 +66,8 @@ namespace noggit
 
     void main_window::enterMapAt(math::vector_3d pos, float av, float ah)
     {
-      new MapView (ah, av, pos, math::vector_3d (pos.x, pos.y, pos.z - 1.0f));
+      auto mapview (new MapView (ah, av, pos, math::vector_3d (pos.x, pos.y, pos.z - 1.0f)));
+      mapview->show();
     }
 
     void main_window::loadMap(int mapID)
