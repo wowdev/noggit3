@@ -411,8 +411,8 @@ void MapView::createGUI()
   mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [this] { prompt_save_current(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex.saveChanged(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex.saveall(); });
-  addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { prompt_save_current(); });
-  addHotkey(SDLK_a, MOD_ctrl + MOD_shift, [this] { gWorld->mapIndex.saveall(); });
+  addHotkey(SDLK_s, MOD_ctrl | MOD_shift, [this] { prompt_save_current(); });
+  addHotkey(SDLK_a, MOD_ctrl | MOD_shift, [this] { gWorld->mapIndex.saveall(); });
   addHotkey (SDLK_s, MOD_ctrl, [this] { gWorld->mapIndex.saveChanged(); });
   addHotkey (SDLK_s, MOD_meta, [this] { gWorld->mapIndex.saveChanged(); });
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
