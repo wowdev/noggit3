@@ -77,6 +77,9 @@ static const float SPEED = 200.6f;
 
 void MapView::set_editing_mode (editing_mode mode)
 {
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
   mainGui->guiWaterTypeSelector->hide();
   mainGui->terrainTool->hide();
   mainGui->flattenTool->hide();
@@ -2221,6 +2224,9 @@ void MapView::selectModel(selection_type entry)
 
 void MapView::mousePressEvent (QMouseEvent* event)
 {
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
   switch (event->button())
   {
   case Qt::LeftButton:
