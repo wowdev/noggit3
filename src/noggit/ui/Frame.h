@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <SDL_keyboard.h>
-
 #include <vector>
 #include <cstddef>
 
