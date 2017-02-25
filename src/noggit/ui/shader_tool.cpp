@@ -2,76 +2,103 @@
 
 #include <noggit/ui/shader_tool.hpp>
 
-#include <noggit/application.h>
-#include <noggit/Environment.h>
-#include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
-#include <noggit/ui/CheckBox.h>
-#include <noggit/ui/Gradient.h>
-#include <noggit/ui/Slider.h>
-#include <noggit/ui/Text.h>
-#include <noggit/ui/ToggleGroup.h>
+#include <qt-color-widgets/color_selector.hpp>
 
+#include <QtWidgets/QFormLayout>
 
 namespace ui
 {
-  shader_tool::shader_tool(float x, float y, bool tablet, math::vector_4d& color)
-    : UIWindow(x, y, winWidth, tablet ? 200.0f : 160.0f)
+  shader_tool::shader_tool(math::vector_4d& color)
+    : QWidget(nullptr)
     , _radius(15.0f)
     , _speed(1.0f)
     , _color(color)
-    , _tablet(tablet)
-    , _tablet_control(eTabletControl_On)
   {
-    addChild(new UIText(78.5f, 2.0f, "Shader", app.getArial14(), eJustifyCenter));
+    setWindowTitle("Vertex Shader");
+    setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
 
-    _radius_slider = new UISlider(6.0f, 33.0f, 167.0f, 1000.0f, 0.00001f);
-    _radius_slider->setFunc([&](float f) { _radius = f; });
-    _radius_slider->setValue(_radius / 1000.0f);
-    _radius_slider->setText("Radius: ");
-    addChild(_radius_slider);
+    auto layout (new QFormLayout(this));
 
-    _speed_slider = new UISlider(6.0f, 59.0f, 167.0f, 10.0f, 0.00001f);
-    _speed_slider->setFunc([&](float f) { _speed = f; });
-    _speed_slider->setValue(_speed / 10.0f);
-    _speed_slider->setText("Speed: ");
-    addChild(_speed_slider);
+    _radius_spin = new QDoubleSpinBox (this);
+    _radius_spin->setRange (0.0f, 100.0f);
+    _radius_spin->setDecimals (2);
+    _radius_spin->setValue (_radius);
 
-    addChild(new UIText(5.0f, 80.0f, "Color:", app.getArial12(), eJustifyLeft));
+    layout->addRow ("Radius:", _radius_spin);
 
-    _red_gradient = new UIGradient(6.0f, 100.0f, 167.0f, 15.0f, true);
-    _red_gradient->setClickFunc([&](float f) { _color.x = f * 2.0f; });
-    _red_gradient->setMinColor(1.0f, 0.0f, 0.0f, 0.0f);
-    _red_gradient->setMaxColor(1.0f, 0.0f, 0.0f, 1.0f);
-    _red_gradient->setClickColor(0.0f, 0.0f, 0.0f, 1.0f);
-    _red_gradient->setValue(_color.x / 2.0f);
-    addChild(_red_gradient);
+    _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+    _radius_slider->setRange (0, 100);
+    _radius_slider->setSliderPosition (_radius);
 
-    _green_gradient = new UIGradient(6.0f, 120.0f, 167.0f, 15.0f, true);
-    _green_gradient->setClickFunc([&](float f) { _color.y = f * 2.0f; });
-    _green_gradient->setMinColor(0.0f, 1.0f, 0.0f, 0.0f);
-    _green_gradient->setMaxColor(0.0f, 1.0f, 0.0f, 1.0f);
-    _green_gradient->setClickColor(0.0f, 0.0f, 0.0f, 1.0f);
-    _green_gradient->setValue(_color.y / 2.0f);
-    addChild(_green_gradient);
+    layout->addRow (_radius_slider);
 
-    _blue_gradient = new UIGradient(6.0f, 140.0f, 167.0f, 15.0f, true);
-    _blue_gradient->setClickFunc([&](float f) { _color.z = f * 2.0f; });
-    _blue_gradient->setMinColor(0.0f, 0.0f, 1.0f, 0.0f);
-    _blue_gradient->setMaxColor(0.0f, 0.0f, 1.0f, 1.0f);
-    _blue_gradient->setClickColor(0.0f, 0.0f, 0.0f, 1.0f);
-    _blue_gradient->setValue(_color.z / 2.0f);
-    addChild(_blue_gradient);
+    _speed_spin = new QDoubleSpinBox (this);
+    _speed_spin->setRange (0.0f, 10.0f);
+    _speed_spin->setDecimals (2);
+    _speed_spin->setValue (_speed);
 
-    if (tablet)
-    {
-      addChild(new UIText(78.5f, 137.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
+    layout->addRow ("Speed:", _speed_spin);
 
-      _tablet_control_toggle = new UIToggleGroup(&_tablet_control);
-      addChild(new UICheckBox(6.0f, 151.0f, "Off", _tablet_control_toggle, eTabletControl_Off));
-      addChild(new UICheckBox(85.0f, 151.0f, "On", _tablet_control_toggle, eTabletControl_On));
-      _tablet_control_toggle->Activate(eTabletControl_Off);
-    }
+    _speed_slider = new QSlider (Qt::Orientation::Horizontal, this);
+    _speed_slider->setRange (0, 10 * 100);
+    _speed_slider->setSingleStep (50);
+    _speed_slider->setSliderPosition (_speed * 100);
+
+    layout->addRow(_speed_slider);
+
+    auto color_picker (new color_widgets::ColorSelector (this));
+    color_picker->setDisplayMode (color_widgets::ColorSelector::NoAlpha);
+    color_picker->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
+
+    layout->addRow("Color:", color_picker);
+
+    connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+            , [&] (double v)
+              {
+                _radius = v;
+                QSignalBlocker const blocker(_radius_slider);
+                _radius_slider->setSliderPosition ((int)std::round (v));
+              }
+            );
+
+    connect ( _radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+            , [&] (int v)
+              {
+                _radius = v;
+                QSignalBlocker const blocker(_radius_spin);
+                _radius_spin->setValue(v);
+              }
+            );
+
+    connect ( _speed_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+            , [&] (double v)
+              {
+                _speed = v;
+                QSignalBlocker const blocker(_speed_slider);
+                _speed_slider->setSliderPosition ((int)std::round (v * 100.0f));
+              }
+            );
+
+    connect ( _speed_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+            , [&] (int v)
+              {
+                _speed = v / 100.0f;
+                QSignalBlocker const blocker(_speed_spin);
+                _speed_spin->setValue (_speed);
+              }
+            );
+
+    connect ( color_picker, &color_widgets::ColorSelector::colorChanged
+            , [&] (QColor new_color)
+              {
+                _color.x = new_color.redF();
+                _color.y = new_color.greenF();
+                _color.z = new_color.blueF();
+                _color.w = 1.0f;
+              }
+            );
+    
   }
 
   void shader_tool::changeShader(math::vector_3d const& pos, float dt, bool add)
@@ -81,23 +108,12 @@ namespace ui
 
   void shader_tool::changeRadius(float change)
   {
-    _radius = std::max(0.0f, std::min(1000.0f, _radius + change));
-    _radius_slider->setValue(_radius / 1000.0f);
+    _radius_spin->setValue (_radius + change);
   }
 
   void shader_tool::changeSpeed(float change)
   {
-    _speed = std::max(0.0f, std::min(10.0f, _speed + change));
-    _speed_slider->setValue(_speed / 10.0f);
-  }
-
-  void shader_tool::setTabletControlValue(float pressure)
-  {
-    if (_tablet_control == eTabletControl_On)
-    {
-      _radius = std::max(0.0f, std::min(1000.0f, pressure / 20.48f));
-      _radius_slider->setValue(_radius / 1000.0f);
-    }
+    _speed_spin->setValue(_speed + change);
   }
 }
 

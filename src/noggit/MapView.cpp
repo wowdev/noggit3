@@ -150,8 +150,6 @@ void MapView::set_editing_mode (editing_mode mode)
     mainGui->guiWater->show();
     break;
   case editing_mode::mccv:
-    mainGui->shaderTool->x(tool_settings_x);
-    mainGui->shaderTool->y(tool_settings_y);
     mainGui->shaderTool->show();
     break;
   case editing_mode::object:
@@ -1113,27 +1111,6 @@ MapView::MapView( float _camera_ah0
     mainGui->resize();
   }
 
-// void MapView::mainLoop()
-// {
-//     const Uint8 appState(SDL_GetAppState());
-//     const bool isActiveApplication((appState & SDL_APPACTIVE) != 0);
-//     const bool hasInputFocus((appState & SDL_APPINPUTFOCUS) != 0);
-//     SDL_Event event;
-//     while (SDL_PollEvent(&event))
-//     {
-//       else if (hasInputFocus)
-//       {
-//         if (event.type == SDL_KEYDOWN)
-//         {
-//           keyPressEvent (&event.key);
-//         }
-//         else if (event.type == SDL_KEYUP)
-//         {
-//           keyReleaseEvent (&event.key);
-//         }
-//       }
-//     }
-// }
 
 MapView::~MapView()
 {
@@ -1176,9 +1153,6 @@ void MapView::tick (float dt)
       break;
     case editing_mode::paint:
       mainGui->texturingTool->change_pressure((float)app.pressure / 2048.0f);
-      break;
-    case editing_mode::mccv:
-      mainGui->shaderTool->setTabletControlValue((float)app.pressure);
       break;
     }
   }

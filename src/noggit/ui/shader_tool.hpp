@@ -2,47 +2,35 @@
 
 #pragma once
 
-#include <noggit/ui/Window.h>
+#include <math/vector_4d.hpp>
 
-class UIGradient;
-class UISlider;
-class UIToggleGroup;
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QWidget>
 
 namespace ui
 {
-  class shader_tool : public UIWindow
+  class shader_tool : public QWidget
   {
   public:
-    shader_tool(float x, float y, bool tablet, math::vector_4d& color);
+    shader_tool(math::vector_4d& color);
 
     void changeShader (math::vector_3d const& pos, float dt, bool add);
 
     void changeRadius(float change);
     void changeSpeed(float change);
 
-    void setTabletControlValue(float pressure);
-
     float brushRadius() const { return _radius; }
   
   private:
-    static const int winWidth = 180;
-    
     float _radius;
     float _speed;
     math::vector_4d& _color;
 
-    bool _tablet;
-
-    int _tablet_control;
-  
-    // UI stuff:
-    UIToggleGroup* _tablet_control_toggle = nullptr;
-
-    UISlider* _radius_slider;
-    UISlider* _speed_slider;
-    UIGradient* _red_gradient;
-    UIGradient* _green_gradient;
-    UIGradient* _blue_gradient;
+    QSlider* _radius_slider;
+    QSlider* _speed_slider;
+    QDoubleSpinBox* _radius_spin;
+    QDoubleSpinBox* _speed_spin;
   };
 }
 
