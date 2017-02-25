@@ -1020,6 +1020,7 @@ MapView::MapView( float _camera_ah0
     }
   }
 
+  setFocusPolicy (Qt::StrongFocus);
   setMouseTracking (true);
 
   moving = strafing = updown = lookat = turn = 0.0f;
@@ -1121,8 +1122,6 @@ MapView::MapView( float _camera_ah0
 //     const Uint8 appState(SDL_GetAppState());
 //     const bool isActiveApplication((appState & SDL_APPACTIVE) != 0);
 //     const bool hasInputFocus((appState & SDL_APPINPUTFOCUS) != 0);
-//     const bool hasMouseFocus(appState & SDL_APPMOUSEFOCUS);
-
 //     SDL_Event event;
 //     while (SDL_PollEvent(&event))
 //     {
@@ -1135,17 +1134,6 @@ MapView::MapView( float _camera_ah0
 //         else if (event.type == SDL_KEYUP)
 //         {
 //           keyReleaseEvent (&event.key);
-//         }
-//         else if (hasMouseFocus)
-//         {
-//           else if (event.type == SDL_MOUSEBUTTONDOWN)
-//           {
-//             mousePressEvent (&event.button);
-//           }
-//           else if (event.type == SDL_MOUSEBUTTONUP)
-//           {
-//             mouseReleaseEvent (&event.button);
-//           }
 //         }
 //       }
 //     }
@@ -1200,7 +1188,7 @@ void MapView::tick (float dt)
   }
 #endif
 
-  if (SDL_GetAppState() & SDL_APPINPUTFOCUS)
+  if (hasFocus())
   {
     math::vector_3d dir(1.0f, 0.0f, 0.0f);
     math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
@@ -2254,19 +2242,19 @@ void MapView::selectModel(selection_type entry)
   mainGui->objectEditor->copy(entry);
 }
 
-void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
+void MapView::mousePressEvent (QMouseEvent* event)
 {
-  switch (e->button)
+  switch (event->button())
   {
-  case SDL_BUTTON_LEFT:
+  case Qt::LeftButton:
     leftMouse = true;
     break;
 
-  case SDL_BUTTON_RIGHT:
+  case Qt::RightButton:
     rightMouse = true;
     break;
 
-  case SDL_BUTTON_MIDDLE:
+  case Qt::MiddleButton:
     if (gWorld->HasSelection())
     {
       MoveObj = true;
@@ -2285,8 +2273,34 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     }
 
     break;
+  }
 
-  case SDL_BUTTON_WHEELUP:
+  if (leftMouse && rightMouse)
+  {
+    // Both buttons
+    moving = 1.0f;
+  }
+  else if (leftMouse)
+  {
+    LastClicked = mainGui->processLeftClick (event->pos().x(), event->pos().y());
+    if (mViewMode == eViewMode_3D && !LastClicked)
+    {
+      doSelection(false);
+    }
+  }
+  else if (rightMouse)
+  {
+    look = true;
+  }
+}
+
+void MapView::wheelEvent (QWheelEvent* event)
+{
+  //! \todo don't just use distance but delta
+  float delta (event->angleDelta().y());
+
+  if (delta > 0.f)
+  {
     if (terrainMode == editing_mode::ground)
     {
       if (_mod_alt_down)
@@ -2343,8 +2357,9 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         mainGui->guiWater->change_height(_mod_ctrl_down ? 0.1f : 1.0f);
       }
     }
-    break;
-  case SDL_BUTTON_WHEELDOWN:
+  }
+  else
+  {
     if (terrainMode == editing_mode::ground)
     {
       if (_mod_alt_down)
@@ -2401,33 +2416,14 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         mainGui->guiWater->change_height(_mod_ctrl_down ? -0.1f : -1.0f);
       }
     }
-    break;
-  }
-
-  if (leftMouse && rightMouse)
-  {
-    // Both buttons
-    moving = 1.0f;
-  }
-  else if (leftMouse)
-  {
-    LastClicked = mainGui->processLeftClick(static_cast<float>(_last_mouse_pos.x()), static_cast<float>(_last_mouse_pos.y()));
-    if (mViewMode == eViewMode_3D && !LastClicked)
-    {
-      doSelection(false);
-    }
-  }
-  else if (rightMouse)
-  {
-    look = true;
   }
 }
 
-void MapView::mouseReleaseEvent (SDL_MouseButtonEvent* e)
+void MapView::mouseReleaseEvent (QMouseEvent* event)
 {
-  switch (e->button)
+  switch (event->button())
   {
-  case SDL_BUTTON_LEFT:
+  case Qt::LeftButton:
     leftMouse = false;
 
     if (LastClicked)
@@ -2443,7 +2439,7 @@ void MapView::mouseReleaseEvent (SDL_MouseButtonEvent* e)
     }
     break;
 
-  case SDL_BUTTON_RIGHT:
+  case Qt::RightButton:
     rightMouse = false;
 
     look = false;
@@ -2456,7 +2452,7 @@ void MapView::mouseReleaseEvent (SDL_MouseButtonEvent* e)
 
     break;
 
-  case SDL_BUTTON_MIDDLE:
+  case Qt::MiddleButton:
     MoveObj = false;
     break;
   }
