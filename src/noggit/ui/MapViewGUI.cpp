@@ -65,15 +65,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
   flattenTool = new ui::FlattenTool();
   flattenTool->hide();
 
-#ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
-    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, true, theMapview->cursor_color);
-  else
-#endif
-    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, false, theMapview->cursor_color);
-  
+  shaderTool = new ui::shader_tool(theMapview->cursor_color);
   shaderTool->hide();
-  addChild(shaderTool);
 
   texturingTool = new ui::texturing_tool((float)video.xres() - 190.0f, 30.0f, _camera_pos);
   texturingTool->hide();
