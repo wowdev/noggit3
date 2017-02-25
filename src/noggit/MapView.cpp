@@ -410,7 +410,9 @@ void MapView::createGUI()
   auto file_menu (_main_window->menuBar()->addMenu ("File"));
   connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
 
-  mbar->AddMenu("Edit");
+  auto edit_menu (_main_window->menuBar()->addMenu ("Edit"));
+  connect (this, &QObject::destroyed, edit_menu, &QObject::deleteLater);
+
   mbar->AddMenu("View");
   mbar->AddMenu("Assist");
   mbar->AddMenu("Help");
@@ -422,6 +424,22 @@ void MapView::createGUI()
     connect (action, &QAction::triggered, on_action);             \
   }
 
+  //! \todo the currrent state is bogus since it is never updated
+  //! afterwards and this is unlikely to be the only way to toggle the
+  //! variable. So add some FRP style callback and encapsulate the
+  //! variable.
+#define ADD_TOGGLE(menu, name, variable)                                \
+  {                                                                     \
+    QAction* action (new QAction (name, this));                         \
+    action->setCheckable (true);                                        \
+    action->setChecked (*variable);                                     \
+    menu->addAction (action);                                           \
+    connect ( action, &QAction::toggled                                 \
+            , [] (bool val) { *variable = val; }                        \
+            );                                                          \
+  }
+
+
   ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { prompt_save_current(); });
   ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [] { gWorld->mapIndex.saveChanged(); });
   ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [] { gWorld->mapIndex.saveall(); });
@@ -429,16 +447,14 @@ void MapView::createGUI()
   file_menu->addSeparator();
   ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { prompt_exit(); });
 
-  mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
-  mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", [this] { DeleteSelectedObject(); });
-  addHotkey (Qt::Key_Delete, MOD_none, [this] { DeleteSelectedObject(); });
-  mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", [this] { ResetSelectedObjectRotation(); });
-  addHotkey (Qt::Key_R, MOD_ctrl, [this] { ResetSelectedObjectRotation(); });
-  mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", [this] { SnapSelectedObjectToGround(); });
-  addHotkey (Qt::Key_PageDown, MOD_none, [this] { SnapSelectedObjectToGround(); });
-
-  mbar->GetMenu("Edit")->AddMenuItemSeperator("Options");
-  mbar->GetMenu("Edit")->AddMenuItemToggle("Auto select mode", &Settings::getInstance()->AutoSelectingMode, false);
+  //! \todo sections are not rendered on all platforms. one should
+  //! probably do separator+disabled entry to force rendering
+  edit_menu->addSection ("selected object");
+  ADD_ACTION (edit_menu, "delete", Qt::Key_Delete, [this] { DeleteSelectedObject(); });
+  ADD_ACTION (edit_menu, "reset rotation", "Ctrl+R", [this] { ResetSelectedObjectRotation(); });
+  ADD_ACTION (edit_menu, "set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
+  edit_menu->addSection ("options");
+  ADD_TOGGLE (edit_menu, "auto select mode", &Settings::getInstance()->AutoSelectingMode);
 
 
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
