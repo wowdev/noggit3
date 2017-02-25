@@ -33,16 +33,13 @@
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
-#include <noggit/ui/shader_tool.hpp>
 #include <noggit/ui/Slider.h> // UISlider
 #include <noggit/ui/StatusBar.h> // statusBar
-#include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/Text.h> // UIText
 #include <noggit/ui/Texture.h> // textureUI
 #include <noggit/ui/TexturePicker.h>
 #include <noggit/ui/TextureSwitcher.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/ToggleGroup.h> // UIToggleGroup
 #include <noggit/ui/Toolbar.h> // UIToolbar
 #include <noggit/ui/ToolbarIcon.h> // ToolbarIcon
@@ -50,6 +47,10 @@
 #include <noggit/ui/WaterSaveWarning.h>
 #include <noggit/ui/WaterTypeBrowser.h>
 #include <noggit/ui/ZoneIDBrowser.h>
+#include <noggit/ui/main_window.hpp>
+#include <noggit/ui/shader_tool.hpp>
+#include <noggit/ui/terrain_tool.hpp>
+#include <noggit/ui/texturing_tool.hpp>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 
@@ -970,10 +971,12 @@ void MapView::createGUI()
 MapView::MapView( float _camera_ah0
                 , float _camera_av0
                 , math::vector_3d camera_pos
+                , noggit::ui::main_window* main_window
                 )
   : _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
   , _camera(camera_pos, _camera_ah0, _camera_av0)
+  , _main_window (main_window)
 {
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
