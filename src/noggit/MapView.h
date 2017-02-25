@@ -166,9 +166,6 @@ public:
   void tick (float dt);
   void display();
 
-  void keyReleaseEvent (SDL_KeyboardEvent*);
-  void keyPressEvent (SDL_KeyboardEvent*);
-
   void inserObjectFromExtern(int model);
   void selectModel(selection_type entry);
 
@@ -181,25 +178,22 @@ private:
     MOD_ctrl = 0x02,
     MOD_alt = 0x04,
     MOD_meta = 0x08,
-    MOD_num = 0x10,
-    MOD_caps = 0x20,
-    MOD_mode = 0x40,
     MOD_none = 0x00,
   };
   struct HotKey
   {
-    SDLKey key;
+    Qt::Key key;
     size_t modifiers;
     std::function<void()> function;
     std::function<bool()> condition;
-    HotKey (SDLKey k, size_t m, std::function<void()> f, std::function<bool()> c)
+    HotKey (Qt::Key k, size_t m, std::function<void()> f, std::function<bool()> c)
       : key (k), modifiers (m), function (f), condition (c) {}
   };
 
   std::forward_list<HotKey> hotkeys;
 
-  void addHotkey(SDLKey key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
-  bool handleHotkeys(SDL_KeyboardEvent* e);
+  void addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
+  bool handleHotkeys(QKeyEvent* e);
 
   QTime _startup_time;
   qreal _last_update;
@@ -214,4 +208,6 @@ private:
   virtual void mousePressEvent (QMouseEvent*) override;
   virtual void mouseReleaseEvent (QMouseEvent*) override;
   virtual void wheelEvent (QWheelEvent*) override;
+  virtual void keyReleaseEvent (QKeyEvent*) override;
+  virtual void keyPressEvent (QKeyEvent*) override;
 };
