@@ -2476,7 +2476,7 @@ void MapView::prompt_save_current() const
          ( nullptr
          , "Save (only) current map tile"
          , "This can cause a collision bug when placing objects between two ADT borders!\n\n"
-           "If you often use this function, we recommend you to use the 'Save all'"
+           "If you often use this function, we recommend you to use the 'Save all' "
            "function as often as possible to get the collisions right."
          , QMessageBox::Save | QMessageBox::Cancel
          , QMessageBox::Cancel
