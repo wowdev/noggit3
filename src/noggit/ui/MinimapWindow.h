@@ -19,9 +19,10 @@ private:
   World* map;
   UIText::Ptr cursor_position;
   noggit::map_horizon::minimap _minimap;
+  math::vector_3d* _camera_pos;
 
 public:
-  explicit UIMinimapWindow(World* setMap);
+  explicit UIMinimapWindow(World* setMap, math::vector_3d* camera_pos);
   UIFrame* processLeftClick(float mx, float my);
   virtual void mouse_moved (float, float) override;
   void resize();

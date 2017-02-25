@@ -21,13 +21,14 @@
 #include <sstream>
 #include <string>
 
-UIMinimapWindow::UIMinimapWindow(World* setMap)
+UIMinimapWindow::UIMinimapWindow(World* setMap, math::vector_3d* camera_pos)
   : UIWindow(0.0f, 0.0f, 0.0f, 0.0f)
   , borderwidth(5.0f)
   , tilesize(0.0f)
   , lookAt(0.0f)
   , map(setMap)
   , _minimap(setMap->horizon)
+  , _camera_pos(camera_pos)
 {
   this->cursor_position = new UIText(10, height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft);
   this->addChild(cursor_position);
@@ -76,7 +77,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
   {
 	  gWorld->GetVertex(pos.x, pos.z, &pos);
 	  pos.y += 50;
-	  map->camera = pos;
+	  *_camera_pos = pos;
   }
 
   return this;
@@ -192,8 +193,8 @@ void UIMinimapWindow::render() const
   {
     gl.begin(GL_LINES);
     gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-    const float fx(map->camera.x / TILESIZE * tilesize);
-    const float fz(map->camera.z / TILESIZE * tilesize);
+    const float fx(_camera_pos->x / TILESIZE * tilesize);
+    const float fz(_camera_pos->z / TILESIZE * tilesize);
     gl.vertex2f(fx, fz);
     gl.vertex2f(fx + 10.0f * math::cos(lookAt), fz + 10.0f * math::sin(lookAt));
     gl.end();
