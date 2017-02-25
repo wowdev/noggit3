@@ -13,6 +13,9 @@
 
 class MapIndex;
 
+namespace noggit
+{
+  
 struct map_horizon_tile
 {
     int16_t height_17[17][17];
@@ -70,3 +73,5 @@ private:
 
   std::unique_ptr<map_horizon_tile> _tiles[64][64];
 };
+
+}

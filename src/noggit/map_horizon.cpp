@@ -87,6 +87,8 @@ static inline uint32_t color_for_height (int16_t height)
 
   return lerp_color(colors[correct_color]._color, colors[correct_color + 1]._color, t);
 }
+namespace noggit
+{
 
 map_horizon::map_horizon(const std::string& basename)
 {
@@ -377,4 +379,6 @@ void main()
 
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof (uint32_t), indices.data(), GL_STATIC_DRAW);
   gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+}
+
 }

@@ -18,7 +18,7 @@ private:
   math::degrees lookAt;
   World* map;
   UIText::Ptr cursor_position;
-  map_horizon::minimap _minimap;
+  noggit::map_horizon::minimap _minimap;
 
 public:
   explicit UIMinimapWindow(World* setMap);

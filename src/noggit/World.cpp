@@ -363,7 +363,7 @@ void World::initDisplay()
   }
   else
   {
-    _horizon_render = std::make_unique<map_horizon::render>(horizon);
+    _horizon_render = std::make_unique<noggit::map_horizon::render>(horizon);
   }
 
   skies = std::make_unique<Skies> (mMapId);
