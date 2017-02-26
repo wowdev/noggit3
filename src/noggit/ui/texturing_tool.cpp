@@ -3,7 +3,7 @@
 #include <noggit/ui/texturing_tool.hpp>
 
 #include <noggit/tool_enums.hpp>
-#include <noggit/ui/TextureSwitcher.h>
+#include <noggit/ui/texture_swapper.hpp>
 #include <noggit/Misc.h>
 #include <noggit/World.h>
 
@@ -116,6 +116,13 @@ namespace ui
 
     QPushButton* toggle_swapper = new QPushButton ("Texture swapper", this);
     layout->addRow (toggle_swapper);
+
+    _texture_switcher = new ui::texture_swapper(this, camera_pos);
+
+    connect(toggle_swapper, &QPushButton::clicked, [this]() {
+      hide();
+      _texture_switcher->show();
+    });
 
     connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
             , [&] (double v)
@@ -309,7 +316,11 @@ namespace ui
 
     if (!isVisible())
     {
-      gWorld->overwriteTextureAtCurrentChunk(pos, _texture_switcher->current_texture(), texture);
+      auto to_swap (_texture_switcher->current_texture());
+      if (to_swap)
+      {
+        gWorld->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
+      }      
     }
     else
     {

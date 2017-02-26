@@ -12,10 +12,10 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
-class UITextureSwitcher;
-
 namespace ui
 {
+  class texture_swapper;
+
   class texturing_tool : public QWidget
   {
   public:
@@ -80,7 +80,7 @@ namespace ui
     QDoubleSpinBox* _spray_size_spin;
     QDoubleSpinBox* _spray_pressure_spin;
 
-    UITextureSwitcher* _texture_switcher = nullptr;
+    ui::texture_swapper* _texture_switcher;
 
     const math::vector_3d* _camera_pos;
   };

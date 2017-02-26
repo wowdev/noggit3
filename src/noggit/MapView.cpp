@@ -37,7 +37,7 @@
 #include <noggit/ui/Text.h> // UIText
 #include <noggit/ui/Texture.h> // textureUI
 #include <noggit/ui/TexturePicker.h>
-#include <noggit/ui/TextureSwitcher.h>
+#include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/ToggleGroup.h> // UIToggleGroup
 #include <noggit/ui/Toolbar.h> // UIToolbar
@@ -1089,9 +1089,8 @@ MapView::MapView( float _camera_ah0
 
   void MapView::paintGL()
   {
-    opengl::context::scoped_setter const _ (::gl, context());
-
     makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
     const qreal now(_startup_time.elapsed() / 1000.0);
     tick (now - _last_update);
     _last_update = now;

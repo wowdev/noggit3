@@ -2,19 +2,25 @@
 
 #pragma once
 
-#include <noggit/ui/CloseWindow.h>
-#include <noggit/ui/Texture.h>
+#include <math/vector_3d.hpp>
+#include <noggit/TextureManager.h>
 
-class UITextureSwitcher : public UICloseWindow
+#include <QtWidgets/QWidget>
+
+#include <boost/optional.hpp>
+
+class UItexture_swapper : public QWidget
 {
 public:
-  UITextureSwitcher (float x_right, float y, UIWindow* parent, const math::vector_3d* camera_pos);
+  UItexture_swapper (QWidget* parent, const math::vector_3d* camera_pos);
 
-  scoped_blp_texture_reference const& current_texture() const
+  boost::optional<scoped_blp_texture_reference> const& current_texture() const
   {
-    return _textureFrom->getTexture();
+    return _texture_to_swap;
   }
 
 private:
-  UITexture* _textureFrom;
+  void closeEvent(QCloseEvent *event);
+
+  boost::optional<scoped_blp_texture_reference> _texture_to_swap;
 };

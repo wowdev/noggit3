@@ -60,7 +60,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
   rotationEditor->hide();
 
   terrainTool = new ui::terrain_tool();
-  terrainTool->show();
+  terrainTool->hide();
 
   flattenTool = new ui::FlattenTool();
   flattenTool->hide();

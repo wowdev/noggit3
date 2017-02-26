@@ -221,7 +221,7 @@ set ( noggit_ui_sources
       src/noggit/ui/Text.cpp
       src/noggit/ui/Texture.cpp
       src/noggit/ui/TexturePicker.cpp
-      src/noggit/ui/TextureSwitcher.cpp
+      src/noggit/ui/texture_swapper.cpp
       src/noggit/ui/TexturingGUI.cpp
       src/noggit/ui/texturing_tool.cpp
       src/noggit/ui/ToggleGroup.cpp
@@ -335,7 +335,7 @@ set ( noggit_ui_headers
       src/noggit/ui/Text.h
       src/noggit/ui/Texture.h
       src/noggit/ui/TexturePicker.h
-      src/noggit/ui/TextureSwitcher.h
+      src/noggit/ui/texture_swapper.hpp
       src/noggit/ui/TexturingGUI.h
       src/noggit/ui/texturing_tool.hpp
       src/noggit/ui/ToggleGroup.h
