@@ -15,6 +15,4 @@ void Video::resize(int xres_, int yres_)
 void Video::init(int xres_, int yres_)
 {
   resize (xres_, yres_);
-
-  _farclip = Settings::getInstance()->FarZ;
 }
