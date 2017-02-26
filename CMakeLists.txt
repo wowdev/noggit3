@@ -207,7 +207,6 @@ set ( noggit_ui_sources
       src/noggit/ui/DetailInfos.cpp
       src/noggit/ui/FlattenTool.cpp
       src/noggit/ui/Frame.cpp
-      src/noggit/ui/Gradient.cpp
       src/noggit/ui/Help.cpp
       src/noggit/ui/HelperModels.cpp
       src/noggit/ui/MapViewGUI.cpp
@@ -217,7 +216,6 @@ set ( noggit_ui_sources
       src/noggit/ui/ModelImport.cpp
       src/noggit/ui/ObjectEditor.cpp
       src/noggit/ui/RotationEditor.cpp
-      src/noggit/ui/ScrollBar.cpp
       src/noggit/ui/Slider.cpp
       src/noggit/ui/StatusBar.cpp
       src/noggit/ui/Text.cpp
@@ -229,7 +227,6 @@ set ( noggit_ui_sources
       src/noggit/ui/ToggleGroup.cpp
       src/noggit/ui/Toolbar.cpp
       src/noggit/ui/ToolbarIcon.cpp
-      src/noggit/ui/TreeView.cpp
       src/noggit/ui/SettingsPanel.cpp
       src/noggit/ui/Water.cpp
       src/noggit/ui/WaterSaveWarning.cpp
@@ -324,7 +321,6 @@ set ( noggit_ui_headers
       src/noggit/ui/DetailInfos.h
       src/noggit/ui/FlattenTool.hpp
       src/noggit/ui/Frame.h
-      src/noggit/ui/Gradient.h
       src/noggit/ui/Help.h
       src/noggit/ui/HelperModels.h
       src/noggit/ui/MapViewGUI.h
@@ -334,7 +330,6 @@ set ( noggit_ui_headers
       src/noggit/ui/ModelImport.h
       src/noggit/ui/ObjectEditor.h
       src/noggit/ui/RotationEditor.h
-      src/noggit/ui/ScrollBar.h
       src/noggit/ui/Slider.h
       src/noggit/ui/StatusBar.h
       src/noggit/ui/Text.h
@@ -346,7 +341,6 @@ set ( noggit_ui_headers
       src/noggit/ui/ToggleGroup.h
       src/noggit/ui/Toolbar.h
       src/noggit/ui/ToolbarIcon.h
-      src/noggit/ui/TreeView.h
       src/noggit/ui/SettingsPanel.h
       src/noggit/ui/Water.h
       src/noggit/ui/WaterSaveWarning.h
