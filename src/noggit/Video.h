@@ -43,8 +43,6 @@ public:
     _farclip = farclip_;
   }
 
-  math::vector_4d normalized_device_coords (int x, int y) const;
-
 private:
   int _xres;
   int _yres;
