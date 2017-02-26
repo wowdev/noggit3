@@ -41,7 +41,7 @@ std::vector<scoped_blp_texture_reference> TextureManager::getAllTexturesMatching
   return results;
 }
 
-#include <stdint.h>
+#include <cstdint>
 //! \todo Cross-platform syntax for packed structs.
 #pragma pack(push,1)
 struct BLPHeader
