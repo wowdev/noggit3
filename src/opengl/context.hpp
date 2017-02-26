@@ -51,6 +51,12 @@ namespace opengl
         }
       }
 
+      save_current_context (save_current_context const&) = delete;
+      save_current_context (save_current_context&&) = delete;
+      save_current_context& operator= (save_current_context const&) = delete;
+      save_current_context& operator= (save_current_context&&) = delete;
+
+    private:
       bool _is_current;
       QOpenGLContext* _gl_context;
       QSurface* _surface;
