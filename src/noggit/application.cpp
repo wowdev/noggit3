@@ -315,6 +315,7 @@ int Noggit::start(int argc, char *argv[])
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
   main_window = std::make_unique<noggit::ui::main_window>();
+  main_window->resize (xres, yres);
   main_window->show();
 
   initEnv();
