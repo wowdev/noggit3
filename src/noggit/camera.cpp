@@ -23,9 +23,9 @@ const float camera::yaw(float value)
 {
   _yaw = value;
 
-  if(_yaw > 360.0f)
+  while (_yaw > 360.0f)
     _yaw -= 360.0f;
-  else if(_yaw < -360.0f)
+  while (_yaw < -360.0f)
     _yaw += 360.0f;
 
   return _yaw;
@@ -43,12 +43,7 @@ const float camera::pitch() const
 
 const float camera::pitch(float value)
 {
-  _pitch = value;
-
-  if(_pitch > 80.0f)
-    _pitch = 80.0f;
-  else if(_pitch < -80.0f)
-    _pitch = -80.0f;
+  _pitch = std::max (-80.f, std::min (80.f, value));
 
   return _pitch;
 }
