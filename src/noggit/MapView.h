@@ -213,7 +213,6 @@ private:
   virtual void initializeGL() override;
   virtual void paintGL() override;
   virtual void resizeGL (int w, int h) override;
-  virtual void closeEvent (QCloseEvent*) override;
   virtual void mouseMoveEvent (QMouseEvent*) override;
   virtual void mousePressEvent (QMouseEvent*) override;
   virtual void mouseReleaseEvent (QMouseEvent*) override;

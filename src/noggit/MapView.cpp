@@ -58,7 +58,8 @@
 #include <boost/filesystem.hpp>
 
 #include <QtCore/QTimer>
-#include <QtGui/QCloseEvent>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
@@ -439,7 +440,7 @@ void MapView::createGUI()
   ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [] { gWorld->mapIndex.saveall(); });
   ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] { gWorld->mapIndex.reloadTile (_camera.position); });
   file_menu->addSeparator();
-  ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { prompt_exit(); });
+  ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
 
   //! \todo sections are not rendered on all platforms. one should
   //! probably do separator+disabled entry to force rendering
@@ -2430,33 +2431,6 @@ void MapView::checkWaterSave()
   {
     mainGui->waterSaveWarning->show();
   }
-}
-
-void MapView::closeEvent (QCloseEvent* event)
-{
-  event->ignore();
-  prompt_exit();
-}
-
-
-void MapView::prompt_exit()
-{
-    QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setWindowTitle("Exit map editor and return to menu?");
-    msgBox.setText("Exit the map editor and return to menu?");
-    msgBox.setInformativeText("Any unsaved changes will be lost.");
-    msgBox.addButton("Return to Menu", QMessageBox::AcceptRole);
-    QPushButton *continueButton = msgBox.addButton("Continue Editing", QMessageBox::RejectRole);
-    msgBox.setDefaultButton(continueButton);
-    msgBox.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-
-    msgBox.exec();
-
-    if (msgBox.buttonRole(msgBox.clickedButton()) == QMessageBox::AcceptRole)
-    {
-      deleteLater();
-    }
 }
 
 void MapView::prompt_save_current() const

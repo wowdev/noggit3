@@ -13,9 +13,11 @@
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/uid_storage.hpp>
 
+#include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
@@ -31,7 +33,10 @@ namespace noggit
   {
     main_window::main_window()
       : QMainWindow (nullptr)
+      , _null_widget (new QWidget (this))
     {
+      setCentralWidget (_null_widget);
+
       createBookmarkList();
 
       auto file_menu (menuBar()->addMenu ("&File"));
@@ -220,6 +225,35 @@ namespace noggit
         mBookmarks.push_back(b);
       }
       f.close();
+    }
+
+    void main_window::closeEvent (QCloseEvent* event)
+    {
+      if (centralWidget() != _null_widget)
+      {
+        event->ignore();
+        prompt_exit();
+      }
+    }
+
+    void main_window::prompt_exit()
+    {
+      QMessageBox prompt;
+      prompt.setIcon (QMessageBox::Warning);
+      prompt.setWindowTitle ("Exit current editor?");
+      prompt.setText ("Exit current editor?");
+      prompt.setInformativeText ("Any unsaved changes will be lost.");
+      prompt.addButton ("Exit", QMessageBox::AcceptRole);
+      prompt.setDefaultButton (prompt.addButton ("Continue Editing", QMessageBox::RejectRole));
+      prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
+      prompt.exec();
+
+      if (prompt.buttonRole (prompt.clickedButton()) == QMessageBox::AcceptRole)
+      {
+        centralWidget()->deleteLater();
+        setCentralWidget (_null_widget);
+      }
     }
   }
 }
