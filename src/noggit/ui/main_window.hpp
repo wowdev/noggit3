@@ -10,6 +10,8 @@ namespace noggit
 {
   namespace ui
   {
+    struct minimap_widget;
+
     struct main_window : QMainWindow
     {
       main_window();
@@ -39,6 +41,8 @@ namespace noggit
 
       std::vector<MapEntry> mMaps;
       std::vector<BookmarkEntry> mBookmarks;
+
+      minimap_widget* _minimap;
     };
   }
 }

@@ -72,6 +72,7 @@ namespace noggit
 
     void main_window::loadMap(int mapID)
     {
+      _minimap->world (nullptr);
       delete gWorld;
       gWorld = nullptr;
 
@@ -80,38 +81,7 @@ namespace noggit
         if (it->getInt(MapDB::MapID) == mapID)
         {
           gWorld = new World(it->getString(MapDB::InternalName));
-          auto mmw (new minimap_widget (nullptr));
-          mmw->world (gWorld);
-          mmw->draw_boundaries (true);
-          mmw->show();
-          QObject::connect
-            ( mmw,  &minimap_widget::map_clicked
-            , [this, mmw] (World* world, ::math::vector_3d const& pos)
-              {
-#ifdef USE_MYSQL_UID_STORAGE
-                if ( Settings::getInstance()->mysql
-                   && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, world->mMapId)
-                   )
-                {
-                  world->mapIndex.loadMaxUID();
-                  enterMapAt (pos, -30.f, -90.f);
-                }
-                else
-#endif
-                if (uid_storage::getInstance()->hasMaxUIDStored(world->mMapId))
-                {
-                  world->mapIndex.loadMaxUID();
-                  enterMapAt (pos, -30.f, -90.f);
-                }
-                else
-                {
-                  auto uidFixWindow
-                    (new ::ui::uid_fix_window ([this, pos] { enterMapAt (pos, -30.f, -90.f); }));
-                  uidFixWindow->show();
-                }
-                mmw->deleteLater();
-              }
-            );
+          _minimap->world (gWorld);
 
           return;
         }
@@ -123,7 +93,7 @@ namespace noggit
     void main_window::build_menu()
     {
       auto widget (new QWidget);
-      auto layout (new QVBoxLayout (widget));
+      auto layout (new QHBoxLayout (widget));
 
       QListWidget* continents_table (new QListWidget (nullptr));
       QListWidget* dungeons_table (new QListWidget (nullptr));
@@ -173,7 +143,6 @@ namespace noggit
                          , [this, widget] (QListWidgetItem* item)
                            {
                              loadMap (item->data (Qt::UserRole).toInt());
-                             widget->deleteLater();
                            }
                          );
       }
@@ -183,9 +152,43 @@ namespace noggit
                          {
                            auto& entry (mBookmarks.at (item->data (Qt::UserRole).toInt()));
                            enterMapAt (entry.pos, entry.av, entry.ah);
-                           widget->deleteLater();
                          }
                        );
+
+
+      _minimap = new minimap_widget (this);
+      _minimap->draw_boundaries (true);
+
+      QObject::connect
+        ( _minimap,  &minimap_widget::map_clicked
+        , [this, widget] (World* world, ::math::vector_3d const& pos)
+          {
+#ifdef USE_MYSQL_UID_STORAGE
+            if ( Settings::getInstance()->mysql
+               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, world->mMapId)
+               )
+            {
+              world->mapIndex.loadMaxUID();
+              enterMapAt (pos, -30.f, -90.f);
+            }
+            else
+#endif
+            if (uid_storage::getInstance()->hasMaxUIDStored(world->mMapId))
+            {
+              world->mapIndex.loadMaxUID();
+              enterMapAt (pos, -30.f, -90.f);
+            }
+            else
+            {
+              auto uidFixWindow
+                (new ::ui::uid_fix_window ([this, pos] { enterMapAt (pos, -30.f, -90.f); }));
+              uidFixWindow->show();
+            }
+            widget->deleteLater();
+          }
+        );
+
+      layout->addWidget (_minimap);
 
       widget->show();
     }
