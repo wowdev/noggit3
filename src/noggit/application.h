@@ -5,6 +5,7 @@
 #include <noggit/AsyncLoader.h>
 #include <noggit/DBC.h>
 #include <noggit/FreeType.h> // fonts.
+#include <noggit/ui/main_window.hpp>
 
 #include <boost/filesystem/path.hpp>
 
@@ -24,6 +25,7 @@ HCTX static NEAR TabletInit(HWND hWnd);
 
 class Noggit
 {
+  std::unique_ptr<noggit::ui::main_window> main_window; 
 public:
 #ifdef _WIN32
   UINT pressure;

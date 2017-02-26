@@ -8,7 +8,6 @@
 #include <winerror.h>
 #define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
 #define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
-#include <SDL_syswm.h>
 HINSTANCE hInst;
 char* gpszProgramName = "Noggit3";
 static LOGCONTEXT  glogContext = { 0 };
@@ -122,9 +121,7 @@ void Noggit::initEnv()
 {
 #ifdef _WIN32
   //this is for graphics tablet (e.g. Wacom, Huion, possibly others) initialization.
-  SDL_SysWMinfo SysInfo;
-  SDL_GetWMInfo(&SysInfo);
-  WindowHandle = SysInfo.window;
+  WindowHandle = (HWND)main_window->effectiveWinId();
   hInst = (HINSTANCE)GetWindowLongPtr(WindowHandle, GWLP_HINSTANCE);
   hCtx = nullptr;
   tabletActive = FALSE;
@@ -317,6 +314,9 @@ int Noggit::start(int argc, char *argv[])
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
+  main_window = std::make_unique<noggit::ui::main_window>();
+  main_window->show();
+
   initEnv();
   parseArgs(argc, argv);
 
@@ -382,6 +382,7 @@ int Noggit::start(int argc, char *argv[])
 
 
 #ifdef _WIN32
+int main(int argc, char *argv[]);
 int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
   return main(__argc, __argv);
@@ -393,9 +394,6 @@ int main(int argc, char *argv[])
   RegisterErrorHandlers();
 
   QApplication qapp (argc, argv);
-
-  noggit::ui::main_window main_window;
-  main_window.show();
 
   app.start(argc, argv);
 

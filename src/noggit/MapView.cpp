@@ -1146,12 +1146,12 @@ MapView::~MapView()
 void MapView::tick (float dt)
 {
 #ifdef _WIN32
-  if (tabletActive)
+  if (app.tabletActive)
   {
     PACKET pkt;
-    while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
+    while (gpWTPacketsGet(app.hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
     {
-      pressure = pkt.pkNormalPressure;
+      app.pressure = pkt.pkNormalPressure;
     }
   }
 #endif
