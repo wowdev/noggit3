@@ -25,19 +25,12 @@ public:
   {
     return static_cast<float>(xres()) / static_cast<float>(yres());
   }
-  float nearclip() const
-  {
-    return _nearclip;
-  }
+
   float farclip() const
   {
     return _farclip;
   }
 
-  void nearclip(float nearclip_)
-  {
-    _nearclip = nearclip_;
-  }
   void farclip(float farclip_)
   {
     _farclip = farclip_;
@@ -48,7 +41,6 @@ private:
   int _yres;
   float _ratio;
 
-  float _nearclip;
   float _farclip;
 };
 
