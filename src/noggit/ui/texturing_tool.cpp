@@ -17,7 +17,7 @@ namespace ui
     , _brush_level(255.0f)
     , _hardness(0.5f)
     , _pressure(0.9f)
-    , _highlight_paintable_chunks(true)
+    , _show_unpaintable_chunks(true)
     , _spray_size(1.0f)
     , _spray_pressure(2.0f)
     , _camera_pos(camera_pos)
@@ -76,9 +76,9 @@ namespace ui
     _brush_level_slider->setSliderPosition (_brush_level);
     layout->addRow (_brush_level_slider);
 
-    _highlight_paintable_chunks_cb = new QCheckBox("Highlight paintable chunks", this);
-    _highlight_paintable_chunks_cb->setChecked(true);
-    layout->addRow(_highlight_paintable_chunks_cb);
+    _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", this);
+    _show_unpaintable_chunks_cb->setChecked(true);
+    layout->addRow(_show_unpaintable_chunks_cb);
     
     // spray
     _spray_mode_group = new QGroupBox("Spray", this);
@@ -199,6 +199,13 @@ namespace ui
               }
             );
 
+    connect ( _show_unpaintable_chunks_cb, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
+            , [&] (int state) 
+              {
+                _show_unpaintable_chunks = state;
+              }
+            );
+
     connect ( _spray_size_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
             , [&] (double v)
               {
@@ -314,7 +321,7 @@ namespace ui
   {
     float strength = 1.0f - pow(1.0f - _pressure, dt * 10.0f);
 
-    if (!isVisible())
+    if (!isVisible() && _texture_switcher->isVisible())
     {
       auto to_swap (_texture_switcher->current_texture());
       if (to_swap)

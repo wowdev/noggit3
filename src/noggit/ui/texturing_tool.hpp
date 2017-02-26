@@ -23,7 +23,7 @@ namespace ui
 
     float brush_radius() { return _texture_brush.getRadius(); }
     float hardness() const { return _hardness; }
-    bool highlight_paintable_chunks() const { return _highlight_paintable_chunks; }
+    bool show_unpaintable_chunks() const { return _show_unpaintable_chunks; }
 
     void set_brush_level (float level);
 
@@ -55,7 +55,7 @@ namespace ui
     float _hardness;
     float _pressure;
 
-    bool _highlight_paintable_chunks;
+    bool _show_unpaintable_chunks;
 
     float _spray_size;
     float _spray_pressure;
@@ -70,7 +70,7 @@ namespace ui
     QDoubleSpinBox* _radius_spin;
     QDoubleSpinBox* _pressure_spin;
     
-    QCheckBox* _highlight_paintable_chunks_cb;
+    QCheckBox* _show_unpaintable_chunks_cb;
     
     QGroupBox* _spray_mode_group;
     QWidget* _spray_content;

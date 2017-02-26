@@ -91,7 +91,7 @@ public:
             , int cursor_type
             , float brushRadius
             , float hardness
-            , bool highlightPaintableChunks
+            , bool show_unpaintable_chunks
             , bool draw_contour
             , float innerRadius
             , math::vector_3d const& ref_pos

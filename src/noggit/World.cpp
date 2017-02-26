@@ -451,7 +451,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , int cursor_type
                  , float brushRadius
                  , float hardness
-                 , bool highlightPaintableChunks
+                 , bool show_unpaintable_chunks
                  , bool draw_contour
                  , float innerRadius
                  , math::vector_3d const& ref_pos
@@ -574,7 +574,7 @@ void World::draw ( math::vector_3d const& cursor_pos
       tile->draw ( frustum
                  , culldistance
                  , camera_pos
-                 , highlightPaintableChunks
+                 , show_unpaintable_chunks
                  , draw_contour
                  , draw_paintability_overlay
                  , draw_chunk_flag_overlay
