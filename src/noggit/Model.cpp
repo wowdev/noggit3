@@ -773,11 +773,12 @@ ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *globa
 
 void ModelCamera::setup(int time)
 {
-  video.fov(math::radians (fov * 0.6f));
-  video.nearclip(nearclip);
-  video.farclip(farclip);
-
-  video.set3D();
+  gl.matrixMode (GL_PROJECTION);
+  gl.loadIdentity();
+  opengl::matrix::perspective
+    (math::radians (fov * 0.6f), video.ratio(), nearclip, farclip);
+  gl.matrixMode (GL_MODELVIEW);
+  gl.loadIdentity();
   opengl::matrix::look_at ( pos + tPos.getValue( 0, time )
                           , target + tTarget.getValue( 0, time )
                           , {0.0f, 1.0f, 0.0f}

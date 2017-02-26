@@ -1590,7 +1590,7 @@ selection_result MapView::intersect_result(bool terrain_only)
   // during rendering we multiply perspective * view
   // so we need the same order here and then invert.
   math::vector_3d const pos
-    ( ( ( math::perspective ( video.fov()
+    ( ( ( math::perspective ( _camera.fov()
                             , video.ratio()
                             , video.nearclip()
                             , video.farclip()
@@ -1739,8 +1739,6 @@ void MapView::displayViewMode_3D()
     doSelection(true);
   }
 
-  video.set3D();
-
   //! \ todo: make the current tool return the radius
   float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
   math::vector_3d ref_pos;
@@ -1777,6 +1775,15 @@ void MapView::displayViewMode_3D()
     break;
   }
 
+  gl.matrixMode (GL_PROJECTION);
+  gl.loadIdentity();
+  opengl::matrix::perspective
+    (_camera.fov(), video.ratio(), video.nearclip(), video.farclip());
+  gl.matrixMode (GL_MODELVIEW);
+  gl.loadIdentity();
+  opengl::matrix::look_at
+    (_camera.position, _camera.look_at(), {0.0f, 1.0f, 0.0f});
+
   gWorld->draw ( _cursor_pos
                , cursor_color
                , cursor_type
@@ -1796,7 +1803,6 @@ void MapView::displayViewMode_3D()
                , terrainMode == editing_mode::areaid
                , terrainMode
                , _camera.position
-               , _camera.look_at()
                , _draw_mfbo
                , _draw_wireframe
                , _draw_lines

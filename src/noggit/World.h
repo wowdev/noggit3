@@ -106,7 +106,6 @@ public:
             //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
             , editing_mode
             , math::vector_3d const& camera_pos
-            , math::vector_3d const& camera_lookat
             , bool draw_mfbo
             , bool draw_wireframe
             , bool draw_lines

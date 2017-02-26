@@ -24,18 +24,8 @@ void Video::init(int xres_, int yres_)
 {
   resize (xres_, yres_);
 
-  _fov = math::degrees (45.0f);
   _nearclip = 1.0f;
   _farclip = Settings::getInstance()->FarZ;
-}
-
-void Video::set3D() const
-{
-  gl.matrixMode(GL_PROJECTION);
-  gl.loadIdentity();
-  opengl::matrix::perspective (fov(), ratio(), nearclip(), farclip());
-  gl.matrixMode(GL_MODELVIEW);
-  gl.loadIdentity();
 }
 
 void Video::set2D() const

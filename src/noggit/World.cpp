@@ -465,7 +465,6 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_areaid_overlay
                  , editing_mode terrainMode
                  , math::vector_3d const& camera_pos
-                 , math::vector_3d const& camera_lookat
                  , bool draw_mfbo
                  , bool draw_wireframe
                  , bool draw_lines
@@ -487,8 +486,6 @@ void World::draw ( math::vector_3d const& cursor_pos
     initDisplay();
     _display_initialized = true;
   }
-
-  opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
 
   math::frustum const frustum
     (::opengl::matrix::model_view() * ::opengl::matrix::projection());

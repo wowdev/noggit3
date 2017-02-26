@@ -20,6 +20,8 @@ public:
   const float pitch(float value);
   void add_to_pitch(float value);
 
+  math::radians fov() const;
+
   const math::vector_3d look_at() const;
   const math::vector_3d direction() const;
 
@@ -34,7 +36,7 @@ private:
   float _roll; // this is not used currently
   float _yaw;
   float _pitch;
-    
+  math::radians _fov;
 };
 
 }

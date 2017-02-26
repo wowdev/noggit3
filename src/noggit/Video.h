@@ -11,7 +11,6 @@ class Video
 public:
   void init(int xres_, int yres_);
 
-  void set3D() const;
   void set2D() const;
   void setTileMode() const;
   void resize(int w, int h);
@@ -28,10 +27,6 @@ public:
   {
     return _ratio;
   }
-  math::degrees fov() const
-  {
-    return _fov;
-  }
   float nearclip() const
   {
     return _nearclip;
@@ -41,10 +36,6 @@ public:
     return _farclip;
   }
 
-  void fov(math::degrees fov_)
-  {
-    _fov = fov_;
-  }
   void nearclip(float nearclip_)
   {
     _nearclip = nearclip_;
@@ -61,7 +52,6 @@ private:
   int _yres;
   float _ratio;
 
-  math::degrees _fov = math::degrees (45.0f);
   float _nearclip;
   float _farclip;
 };
