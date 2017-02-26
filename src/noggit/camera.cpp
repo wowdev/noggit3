@@ -8,6 +8,7 @@ camera::camera(const math::vector_3d& position, float yaw_, float pitch_)
     , _roll(0.0f)
     , _yaw(0.0f)
     , _pitch(0.0f)
+    , _fov (math::degrees (54.f))
     , move_speed(200.6f)
 {
   add_to_yaw(yaw_);
@@ -52,6 +53,11 @@ void camera::add_to_pitch(float value)
 {
   pitch(_pitch - value);
 }
+
+  math::radians camera::fov() const
+  {
+    return _fov;
+  }
 
 const math::vector_3d camera::look_at() const
 {
