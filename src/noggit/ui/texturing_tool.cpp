@@ -85,8 +85,8 @@ namespace ui
     _spray_mode_group->setCheckable(true);
     layout->addRow (_spray_mode_group);
 
-    auto spray_layout (new QFormLayout (_spray_content));
     _spray_content = new QWidget(_spray_mode_group);
+    auto spray_layout (new QFormLayout (_spray_content));
     _spray_mode_group->setLayout(spray_layout);
 
     _inner_radius_cb = new QCheckBox("Inner radius", _spray_content);
