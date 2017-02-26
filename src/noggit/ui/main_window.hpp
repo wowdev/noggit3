@@ -10,7 +10,7 @@ namespace noggit
 {
   namespace ui
   {
-    struct minimap_widget;
+    class minimap_widget;
 
     struct main_window : QMainWindow
     {
