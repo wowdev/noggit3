@@ -22,22 +22,9 @@ public:
     return _yres;
   }
 
-  float farclip() const
-  {
-    return _farclip;
-  }
-
-  void farclip(float farclip_)
-  {
-    _farclip = farclip_;
-  }
-
 private:
   int _xres;
   int _yres;
-  float _ratio;
-
-  float _farclip;
 };
 
 extern Video video;

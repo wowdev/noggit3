@@ -1607,7 +1607,7 @@ selection_result MapView::intersect_result(bool terrain_only)
     ( ( ( math::perspective ( _camera.fov()
                             , aspect_ratio()
                             , 1.f
-                            , video.farclip()
+                            , Settings::getInstance()->FarZ
                             )
         * math::look_at ( _camera.position
                         , _camera.look_at()
@@ -1803,7 +1803,7 @@ void MapView::displayViewMode_3D()
   gl.matrixMode (GL_PROJECTION);
   gl.loadIdentity();
   opengl::matrix::perspective
-    (_camera.fov(), aspect_ratio(), 1.f, video.farclip());
+    (_camera.fov(), aspect_ratio(), 1.f, Settings::getInstance()->FarZ);
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
   opengl::matrix::look_at
