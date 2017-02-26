@@ -1057,7 +1057,8 @@ MapView::MapView( float _camera_ah0
     gl.viewport(0.0f, 0.0f, width(), height());
 
     gl.clearColor (0.0f, 0.0f, 0.0f, 1.0f);
-    video.init (width(), height());
+    video::width = width();
+    video::height = height();
 
     app.initFont();
     createGUI();
@@ -1107,7 +1108,8 @@ MapView::MapView( float _camera_ah0
     opengl::context::scoped_setter const _ (::gl, context());
     gl.viewport(0.0f, 0.0f, width, height);
 
-    video.resize (width, height);
+    video::width = width;
+    video::height = height;
     mainGui->resize();
   }
 

@@ -86,12 +86,12 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 
 void UIMinimapWindow::resize()
 {
-  tilesize = (video.yres() - 90.0f - borderwidth * 2.0f) / 64.0f;
+  tilesize = (video::height - 90.0f - borderwidth * 2.0f) / 64.0f;
 
   width(borderwidth * 2.0f + tilesize * 64.0f);
   height(width() + 20.0f);
-  x(video.xres() / 2.0f - width() / 2.0f);
-  y(video.yres() / 2.0f - height() / 2.0f);
+  x(video::width / 2.0f - width() / 2.0f);
+  y(video::height / 2.0f - height() / 2.0f);
 
   this->cursor_position->y(height() - 20.0f);
 }

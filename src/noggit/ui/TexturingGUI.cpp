@@ -409,7 +409,7 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   textGui = setgui;
   pal_rows = 10;
   pal_cols = 5;
-  windowTexturePalette = new UICloseWindow(((float)video.xres()/2) - (((pal_rows * 68.0f + 355.0f)/2) + 10.0f), ((float)video.yres()/2) - (((pal_cols * 68.0f) + 60.0f)/2) - 200, (pal_rows * 68.0f + 355.0f) + 10.0f, (pal_cols * 68.0f) + 60.0f, "Texture Palette", true);
+  windowTexturePalette = new UICloseWindow(((float)video::width/2) - (((pal_rows * 68.0f + 355.0f)/2) + 10.0f), ((float)video::height/2) - (((pal_cols * 68.0f) + 60.0f)/2) - 200, (pal_rows * 68.0f + 355.0f) + 10.0f, (pal_cols * 68.0f) + 60.0f, "Texture Palette", true);
 
   for (int i = 0; i<(pal_cols*pal_rows); ++i)
   {
@@ -455,8 +455,8 @@ UIFrame* UITexturingGUI::createTilesetLoader()
 
   UIButton * name;
   windowTilesetLoader = new UICloseWindow(
-    video.xres() / 2.0f - 308.0f,
-    video.yres() / 2.0f - 139.0f,
+    video::width / 2.0f - 308.0f,
+    video::height / 2.0f - 139.0f,
     856.0f,
     22.0f + 21.0f * columns + 5.0f,
     "Tileset Loading");
@@ -495,7 +495,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
   InitFilenameFilterList();
 
   LoadTextureNames();
-  windowTextureFilter = new UICloseWindow(video.xres() / 2.0f - 610.0f, video.yres() / 2.0f - 450.0f, 1220.0f, 905.0f, "", true);
+  windowTextureFilter = new UICloseWindow(video::width / 2.0f - 610.0f, video::height / 2.0f - 450.0f, 1220.0f, 905.0f, "", true);
   windowTextureFilter->hide();
 
   //Filename Filters
@@ -544,7 +544,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 UIFrame* UITexturingGUI::createMapChunkWindow()
 {
   UIWindow *chunkSettingsWindow, *chunkTextureWindow, *chunkEffectWindow;
-  windowMapChunk = new UICloseWindow(video.xres() / 2.0f - 316.0f, video.yres() - 369.0f, 634.0f, 337.0f, "Map Chunk Settings");
+  windowMapChunk = new UICloseWindow(video::width / 2.0f - 316.0f, video::height - 369.0f, 634.0f, 337.0f, "Map Chunk Settings");
   windowMapChunk->movable(true);
 
   chunkSettingsWindow = new UIWindow(11.0f, 26.0f, 300.0f, 300.0f);
