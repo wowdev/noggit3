@@ -620,7 +620,7 @@ void MapChunk::drawContour()
 void MapChunk::draw ( math::frustum const& frustum
                     , const float& cull_distance
                     , const math::vector_3d& camera
-                    , bool highlightPaintableChunks
+                    , bool show_unpaintable_chunks
                     , bool draw_contour
                     , bool draw_paintability_overlay
                     , bool draw_chunk_flag_overlay
@@ -636,7 +636,7 @@ void MapChunk::draw ( math::frustum const& frustum
 
   bool cantPaint = UITexturingGUI::getSelectedTexture()
                  && !canPaintTexture(*UITexturingGUI::getSelectedTexture())
-                 && highlightPaintableChunks
+                 && show_unpaintable_chunks
                  && draw_paintability_overlay;
 
   if (cantPaint)

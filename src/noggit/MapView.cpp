@@ -1816,7 +1816,7 @@ void MapView::displayViewMode_3D()
                , cursor_type
                , radius
                , hardness
-               , mainGui->texturingTool->highlight_paintable_chunks()
+               , mainGui->texturingTool->show_unpaintable_chunks()
                , _draw_contour
                , inner_radius
                , ref_pos
