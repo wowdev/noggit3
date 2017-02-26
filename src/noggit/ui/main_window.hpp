@@ -16,6 +16,8 @@ namespace noggit
     {
       main_window();
 
+      void prompt_exit();
+
     private:
       void loadMap (int mapID);
       void enterMapAt (math::vector_3d pos, float av, float ah);
@@ -43,6 +45,9 @@ namespace noggit
       std::vector<BookmarkEntry> mBookmarks;
 
       minimap_widget* _minimap;
+      QWidget* _null_widget;
+
+      virtual void closeEvent (QCloseEvent*) override;
     };
   }
 }
