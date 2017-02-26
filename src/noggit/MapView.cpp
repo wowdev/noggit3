@@ -1601,7 +1601,7 @@ selection_result MapView::intersect_result(bool terrain_only)
   math::vector_3d const pos
     ( ( ( math::perspective ( _camera.fov()
                             , video.ratio()
-                            , video.nearclip()
+                            , 1.f
                             , video.farclip()
                             )
         * math::look_at ( _camera.position

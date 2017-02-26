@@ -16,6 +16,5 @@ void Video::init(int xres_, int yres_)
 {
   resize (xres_, yres_);
 
-  _nearclip = 1.0f;
   _farclip = Settings::getInstance()->FarZ;
 }
