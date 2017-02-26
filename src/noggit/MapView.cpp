@@ -1585,6 +1585,11 @@ void MapView::tick (float dt)
   }
 }
 
+math::vector_4d MapView::normalized_device_coords (int x, int y) const
+{
+  return {2.0f * x / width() - 1.0f, 1.0f - 2.0f * y / height(), 0.0f, 1.0f};
+}
+
 selection_result MapView::intersect_result(bool terrain_only)
 {
   // during rendering we multiply perspective * view
@@ -1600,7 +1605,7 @@ selection_result MapView::intersect_result(bool terrain_only)
                         , { 0.0f, 1.0f, 0.0f }
                         )
         ).inverted()
-      * video.normalized_device_coords (_last_mouse_pos.x(), _last_mouse_pos.y())
+      * normalized_device_coords (_last_mouse_pos.x(), _last_mouse_pos.y())
       ).xyz_normalized_by_w()
     );
 

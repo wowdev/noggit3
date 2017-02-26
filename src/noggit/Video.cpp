@@ -6,11 +6,6 @@
 
 Video video;
 
-math::vector_4d Video::normalized_device_coords (int x, int y) const
-{
-  return {2.0f * x / xres() - 1.0f, 1.0f - 2.0f * y / yres(), 0.0f, 1.0f};
-}
-
 void Video::resize(int xres_, int yres_)
 {
   _xres = xres_;
