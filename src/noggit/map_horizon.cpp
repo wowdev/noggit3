@@ -20,7 +20,7 @@ struct color
   {}
 
   uint32_t to_int() const {
-    return (_r) | (_g << 8) | (_b << 16) | (uint32_t)(255 << 24);
+    return (_b) | (_g << 8) | (_r << 16) | (uint32_t)(255 << 24);
   }
 
   operator uint32_t () const {
@@ -181,7 +181,7 @@ map_horizon::map_horizon(const std::string& basename)
 
   wdl_file.close();
 
-  _qt_minimap = QImage (16 * 64, 16 * 64, QImage::Format_RGB32);
+  _qt_minimap = QImage (16 * 64, 16 * 64, QImage::Format_ARGB32);
   _qt_minimap.fill (Qt::transparent);
 
   for (size_t y (0); y < 64; ++y)
@@ -234,7 +234,7 @@ map_horizon::minimap::minimap(const map_horizon& horizon)
   }
 
   bind();
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data());
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, texture.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
