@@ -991,6 +991,7 @@ void World::drawTileMode ( float /*ah*/
                          , math::vector_3d const& camera_pos
                          , bool draw_lines
                          , float zoom
+                         , float aspect_ratio
                          )
 {
   gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -1005,8 +1006,8 @@ void World::drawTileMode ( float /*ah*/
     opengl::scoped::matrix_pusher const matrix;
     gl.translatef(-camera_pos.x / CHUNKSIZE, -camera_pos.z / CHUNKSIZE, 0);
 
-    float minX = camera_pos.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
-    float maxX = camera_pos.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
+    float minX = camera_pos.x / CHUNKSIZE - 2.0f * aspect_ratio / zoom;
+    float maxX = camera_pos.x / CHUNKSIZE + 2.0f * aspect_ratio / zoom;
     float minY = camera_pos.z / CHUNKSIZE - 2.0f / zoom;
     float maxY = camera_pos.z / CHUNKSIZE + 2.0f / zoom;
 

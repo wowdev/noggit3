@@ -771,12 +771,12 @@ ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *globa
   tTarget.apply(fixCoordSystem);
 }
 
-void ModelCamera::setup(int time)
+void ModelCamera::setup (float aspect_ratio, int time)
 {
   gl.matrixMode (GL_PROJECTION);
   gl.loadIdentity();
   opengl::matrix::perspective
-    (math::radians (fov * 0.6f), video.ratio(), nearclip, farclip);
+    (math::radians (fov * 0.6f), aspect_ratio, nearclip, farclip);
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
   opengl::matrix::look_at ( pos + tPos.getValue( 0, time )

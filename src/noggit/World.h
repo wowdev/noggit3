@@ -141,6 +141,7 @@ public:
                     , math::vector_3d const& camera_pos
                     , bool draw_lines
                     , float zoom
+                    , float aspect_ratio
                     );
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);

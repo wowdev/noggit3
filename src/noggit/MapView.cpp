@@ -1418,7 +1418,7 @@ void MapView::tick (float dt)
             if (mViewMode == eViewMode_3D && !underMap)
               gWorld->eraseTextures(_cursor_pos);
             else if (mViewMode == eViewMode_2D)
-              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z});
+              gWorld->eraseTextures({CHUNKSIZE * 4.0f * aspect_ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z});
           }
           else if (_mod_ctrl_down)
           {
@@ -1433,7 +1433,7 @@ void MapView::tick (float dt)
             }
             else if (mViewMode == eViewMode_2D)
             {
-              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)_last_mouse_pos.x() / (float)width() - 0.5f ) / _2d_zoom
+              math::vector_3d pos( CHUNKSIZE * 4.0f * aspect_ratio() * ((float)_last_mouse_pos.x() / (float)width() - 0.5f ) / _2d_zoom
                                   , 0.0f
                                   , CHUNKSIZE * 4.0f * ((float)_last_mouse_pos.y() / (float)height() - 0.5f) / _2d_zoom
                                   );
@@ -1594,13 +1594,18 @@ math::vector_4d MapView::normalized_device_coords (int x, int y) const
   return {2.0f * x / width() - 1.0f, 1.0f - 2.0f * y / height(), 0.0f, 1.0f};
 }
 
+float MapView::aspect_ratio() const
+{
+  return float (width()) / float (height());
+}
+
 selection_result MapView::intersect_result(bool terrain_only)
 {
   // during rendering we multiply perspective * view
   // so we need the same order here and then invert.
   math::vector_3d const pos
     ( ( ( math::perspective ( _camera.fov()
-                            , video.ratio()
+                            , aspect_ratio()
                             , 1.f
                             , video.farclip()
                             )
@@ -1705,7 +1710,7 @@ void MapView::displayViewMode_2D()
   gl.matrixMode (GL_PROJECTION);
   gl.loadIdentity();
   gl.ortho
-    (-2.0f * video.ratio(), 2.0f * video.ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
+    (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
 
@@ -1713,10 +1718,11 @@ void MapView::displayViewMode_2D()
                        , _camera.position
                        , _draw_lines
                        , _2d_zoom
+                       , aspect_ratio()
                        );
 
 
-  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x) / CHUNKSIZE;
+  const float mX = (CHUNKSIZE * 4.0f * aspect_ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x) / CHUNKSIZE;
   const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z) / CHUNKSIZE;
 
   // draw brush
@@ -1797,7 +1803,7 @@ void MapView::displayViewMode_3D()
   gl.matrixMode (GL_PROJECTION);
   gl.loadIdentity();
   opengl::matrix::perspective
-    (_camera.fov(), video.ratio(), video.nearclip(), video.farclip());
+    (_camera.fov(), aspect_ratio(), 1.f, video.farclip());
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
   opengl::matrix::look_at
@@ -1849,7 +1855,7 @@ void MapView::display()
     gl.matrixMode (GL_PROJECTION);
     gl.loadIdentity();
     gl.ortho
-      (-2.0f * video.ratio(), 2.0f * video.ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
+      (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
     gl.matrixMode (GL_MODELVIEW);
     gl.loadIdentity();
 
@@ -2121,7 +2127,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if (MoveObj)
   {
-    mh = -video.ratio()*relative_movement.dx() / static_cast<float>(width());
+    mh = -aspect_ratio()*relative_movement.dx() / static_cast<float>(width());
     mv = -relative_movement.dy() / static_cast<float>(height());
   }
   else
