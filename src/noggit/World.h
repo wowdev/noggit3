@@ -204,7 +204,7 @@ public:
   void updateTilesWMO(WMOInstance* wmo);
   void updateTilesModel(ModelInstance* m2);
 
-  void saveMap();
+  void saveMap (int width, int height);
 
   void deleteModelInstance(int pUniqueID);
   void deleteWMOInstance(int pUniqueID);

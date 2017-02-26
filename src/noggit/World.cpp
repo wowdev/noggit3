@@ -1296,7 +1296,7 @@ void World::convert_alphamap(bool to_big_alpha)
   mapIndex.save();
 }
 
-void World::saveMap()
+void World::saveMap (int width, int height)
 {
   //! \todo  Output as BLP.
   unsigned char image[256 * 256 * 3];
@@ -1337,7 +1337,7 @@ void World::saveMap()
 
 
       ATile->drawTextures (minX, minY, maxX, maxY);
-      gl.readPixels(video.xres() / 2 - 128, video.yres() / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
+      gl.readPixels(width / 2 - 128, height / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
 
       std::stringstream ss;
       ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";

@@ -1859,7 +1859,7 @@ void MapView::display()
     gl.matrixMode (GL_MODELVIEW);
     gl.loadIdentity();
 
-    gWorld->saveMap();
+    gWorld->saveMap (width(), height());
     Saving = false;
   }
 
