@@ -25,7 +25,6 @@
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
 #include <noggit/ui/FlattenTool.hpp>
-#include <noggit/ui/Gradient.h> // UIGradient
 #include <noggit/ui/HelperModels.h>
 #include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
