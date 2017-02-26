@@ -136,8 +136,6 @@ void MapView::set_editing_mode (editing_mode mode)
     mainGui->flattenTool->show();
     break;
   case editing_mode::paint:
-    mainGui->texturingTool->x(tool_settings_x);
-    mainGui->texturingTool->y(tool_settings_y);
     mainGui->texturingTool->show();
     break;
   case editing_mode::areaid:
