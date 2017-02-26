@@ -17,9 +17,11 @@ class UIHelperModels;
 class UIWater;
 class UIObjectEditor;
 class UIRotationEditor;
+class MapView;
 namespace ui
 {
   class caps_warning;
+  class current_texture;
   class detail_infos;
   class FlattenTool;
   class shader_tool;
@@ -30,8 +32,8 @@ namespace ui
   class water_type_browser;
 }
 
+#include <math/vector_3d.hpp>
 #include <noggit/ui/Frame.h>
-#include <noggit/ui/CurrentTexture.h>
 
 //! \todo Give better name.
 class UIMapViewGUI : public UIFrame
@@ -63,7 +65,7 @@ public:
   UITexturePicker* TexturePicker;
   UIWater* guiWater;
   ui::water_type_browser* guiWaterTypeSelector;
-  UICurrentTexture* guiCurrentTexture;
+  ui::current_texture* guiCurrentTexture;
   UIObjectEditor* objectEditor;
   UIRotationEditor* rotationEditor;
   ui::FlattenTool* flattenTool;

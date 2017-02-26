@@ -2,22 +2,25 @@
 
 #pragma once
 
+#include <noggit/TextureManager.h>
+
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QWidget>
+
 #include <string>
 
-#include <noggit/ui/Window.h>
-
-class UIMapViewGUI;
-class UITexture;
-
-class UICurrentTexture : public UIWindow
+namespace ui
 {
-private:
-  UIMapViewGUI* mainGui;
+  class current_texture : public QWidget
+  {
+  private:
+    QLabel* _texture;
+    std::string _filename;
 
-public:
-
-  // current active texture
-  UITexture* current_texture;
-  UICurrentTexture(float x, float y, UIMapViewGUI *setGui);
-  void IconSelect(int i);
-};
+    virtual void resizeEvent (QResizeEvent * event) { update(); }
+    void update();
+  public:
+    current_texture();
+    void set_texture(std::string const& texture);
+  };
+}

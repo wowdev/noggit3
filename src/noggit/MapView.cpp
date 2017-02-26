@@ -386,7 +386,6 @@ void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
   mainGui = new UIMapViewGUI(this, &_camera.position);
-  mainGui->guiCurrentTexture->current_texture->setClickFunc ([this] { mainGui->TexturePalette->toggleVisibility(); });
 
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
