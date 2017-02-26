@@ -209,6 +209,8 @@ namespace noggit
                                , int height
                                )
   {
+    opengl::context::save_current_context const context_save (::gl);
+
     QOpenGLContext context;
     context.create();
 
@@ -221,7 +223,7 @@ namespace noggit
 
     context.makeCurrent (&surface);
 
-    opengl::context::scoped_setter const _ (::gl, &context);
+    opengl::context::scoped_setter const context_set (::gl, &context);
 
     opengl::scoped::texture_setter<0, GL_TRUE> const texture0;
     blp_texture const texture (blp_filename);
