@@ -31,6 +31,31 @@ namespace opengl
       QOpenGLContext* _old_context;
     };
 
+    struct save_current_context
+    {
+      save_current_context (context& context_)
+        : _is_current (QOpenGLContext::currentContext() == context_._current_context)
+        , _gl_context (!_is_current ? nullptr : context_._current_context)
+        , _surface (!_is_current ? nullptr : context_._current_context->surface())
+      {
+        if (_is_current)
+        {
+          _gl_context->doneCurrent();
+        }
+      }
+      ~save_current_context()
+      {
+        if (_is_current)
+        {
+          _gl_context->makeCurrent (_surface);
+        }
+      }
+
+      bool _is_current;
+      QOpenGLContext* _gl_context;
+      QSurface* _surface;
+    };
+
     QOpenGLContext* _current_context = nullptr;
 
     void enable (GLenum);
