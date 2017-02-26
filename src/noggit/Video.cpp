@@ -27,21 +27,3 @@ void Video::init(int xres_, int yres_)
   _nearclip = 1.0f;
   _farclip = Settings::getInstance()->FarZ;
 }
-
-void Video::set2D() const
-{
-  gl.matrixMode(GL_PROJECTION);
-  gl.loadIdentity();
-  gl.ortho(0.0f, xres(), yres(), 0.0f, -1.0f, 1.0f);
-  gl.matrixMode(GL_MODELVIEW);
-  gl.loadIdentity();
-}
-
-void Video::setTileMode() const
-{
-  gl.matrixMode(GL_PROJECTION);
-  gl.loadIdentity();
-  gl.ortho(-2.0f * ratio(), 2.0f * ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
-  gl.matrixMode(GL_MODELVIEW);
-  gl.loadIdentity();
-}

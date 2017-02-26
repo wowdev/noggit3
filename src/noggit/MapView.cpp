@@ -1665,7 +1665,11 @@ void MapView::displayGUIIfEnabled()
 {
   if (_GUIDisplayingEnabled)
   {
-    video.set2D();
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
+    gl.ortho (0.0f, video.xres(), video.yres(), 0.0f, -1.0f, 1.0f);
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
 
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1689,7 +1693,13 @@ void MapView::displayGUIIfEnabled()
 
 void MapView::displayViewMode_2D()
 {
-  video.setTileMode();
+  gl.matrixMode (GL_PROJECTION);
+  gl.loadIdentity();
+  gl.ortho
+    (-2.0f * video.ratio(), 2.0f * video.ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
+  gl.matrixMode (GL_MODELVIEW);
+  gl.loadIdentity();
+
   gWorld->drawTileMode ( _camera.yaw()
                        , _camera.position
                        , _draw_lines
@@ -1827,7 +1837,13 @@ void MapView::display()
   //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
   if (Saving)
   {
-    video.setTileMode();
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
+    gl.ortho
+      (-2.0f * video.ratio(), 2.0f * video.ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
+
     gWorld->saveMap();
     Saving = false;
   }

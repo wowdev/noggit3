@@ -11,8 +11,6 @@ class Video
 public:
   void init(int xres_, int yres_);
 
-  void set2D() const;
-  void setTileMode() const;
   void resize(int w, int h);
 
   int xres() const
