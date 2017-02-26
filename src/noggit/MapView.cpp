@@ -387,7 +387,7 @@ void MapView::createGUI()
 
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
-  tool_settings_x = video.xres() - 186;
+  tool_settings_x = width() - 186;
   tool_settings_y = 38;
 
   mainGui->terrainTool->storeCursorPos (&_cursor_pos);
@@ -1414,7 +1414,7 @@ void MapView::tick (float dt)
             if (mViewMode == eViewMode_3D && !underMap)
               gWorld->eraseTextures(_cursor_pos);
             else if (mViewMode == eViewMode_2D)
-              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + _camera.position.z});
+              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z});
           }
           else if (_mod_ctrl_down)
           {
@@ -1429,9 +1429,9 @@ void MapView::tick (float dt)
             }
             else if (mViewMode == eViewMode_2D)
             {
-              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)_last_mouse_pos.x() / (float)video.xres() - 0.5f ) / _2d_zoom
+              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)_last_mouse_pos.x() / (float)width() - 0.5f ) / _2d_zoom
                                   , 0.0f
-                                  , CHUNKSIZE * 4.0f * ((float)_last_mouse_pos.y() / (float)video.yres() - 0.5f) / _2d_zoom
+                                  , CHUNKSIZE * 4.0f * ((float)_last_mouse_pos.y() / (float)height() - 0.5f) / _2d_zoom
                                   );
 
               pos += _camera.position;
@@ -1672,7 +1672,7 @@ void MapView::displayGUIIfEnabled()
   {
     gl.matrixMode (GL_PROJECTION);
     gl.loadIdentity();
-    gl.ortho (0.0f, video.xres(), video.yres(), 0.0f, -1.0f, 1.0f);
+    gl.ortho (0.0f, width(), height(), 0.0f, -1.0f, 1.0f);
     gl.matrixMode (GL_MODELVIEW);
     gl.loadIdentity();
 
@@ -1712,8 +1712,8 @@ void MapView::displayViewMode_2D()
                        );
 
 
-  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + _camera.position.x) / CHUNKSIZE;
-  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + _camera.position.z) / CHUNKSIZE;
+  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x) / CHUNKSIZE;
+  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z) / CHUNKSIZE;
 
   // draw brush
   {
@@ -2117,8 +2117,8 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if (MoveObj)
   {
-    mh = -video.ratio()*relative_movement.dx() / static_cast<float>(video.xres());
-    mv = -relative_movement.dy() / static_cast<float>(video.yres());
+    mh = -video.ratio()*relative_movement.dx() / static_cast<float>(width());
+    mv = -relative_movement.dy() / static_cast<float>(height());
   }
   else
   {
