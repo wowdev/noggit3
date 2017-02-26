@@ -25,7 +25,7 @@
 #include <noggit/Log.h>
 
 UIWater::UIWater(UIMapViewGUI *setGui)
-  : UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight)
+  : UIWindow((float)video::width / 2.0f - (float)winWidth / 2.0f, (float)video::height / 2.0f - (float)winHeight / 2.0f - (float)(video::height / 4), (float)winWidth, (float)winHeight)
   , mainGui(setGui)
   , tile(0, 0)
   , _liquid_id(5)

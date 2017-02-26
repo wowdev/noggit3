@@ -2,29 +2,8 @@
 
 #pragma once
 
-#include <math/trig.hpp>
-#include <math/vector_4d.hpp>
-#include <opengl/types.hpp>
-
-class Video
+namespace video
 {
-public:
-  void init(int xres_, int yres_);
-
-  void resize(int w, int h);
-
-  int xres() const
-  {
-    return _xres;
-  }
-  int yres() const
-  {
-    return _yres;
-  }
-
-private:
-  int _xres;
-  int _yres;
+  extern int width;
+  extern int height;
 };
-
-extern Video video;

@@ -12,7 +12,7 @@
 #include <opengl/scoped.hpp>
 
 UIMenuBar::UIMenuBar()
-  : UIWindow(0.0f, 0.0f, static_cast<float>(video.xres()), static_cast<float>(video.yres()))
+  : UIWindow(0.0f, 0.0f, static_cast<float>(video::width), static_cast<float>(video::height))
   , mNumMenus(0)
 {
 }
@@ -22,9 +22,9 @@ void UIMenuBar::render() const
   gl.color4f(0.2f, 0.2f, 0.2f, 0.5f);
   gl.begin(GL_TRIANGLE_STRIP);
   gl.vertex2f(0.0f, 0.0f);
-  gl.vertex2f(static_cast<float>(video.xres()), 0.0f);
+  gl.vertex2f(static_cast<float>(video::width), 0.0f);
   gl.vertex2f(0.0f, 30.0f);
-  gl.vertex2f(static_cast<float>(video.xres()), 30.0f);
+  gl.vertex2f(static_cast<float>(video::width), 30.0f);
   gl.end();
 
   UIFrame::render();
@@ -41,11 +41,11 @@ void UIMenuBar::render() const
   gl.texCoord2f(0.5f, 1.0f);
   gl.vertex2f(0.0f, 33.0f);
   gl.texCoord2f(0.5f, 0.0f);
-  gl.vertex2f(static_cast<float>(video.xres()), 33.0f);
+  gl.vertex2f(static_cast<float>(video::width), 33.0f);
   gl.texCoord2f(0.375f, 1.0f);
   gl.vertex2f(0.0f, 17.0f);
   gl.texCoord2f(0.375f, 0.0f);
-  gl.vertex2f(static_cast<float>(video.xres()), 17.0f);
+  gl.vertex2f(static_cast<float>(video::width), 17.0f);
   gl.end();
 
   opengl::texture::disable_texture();
@@ -53,7 +53,7 @@ void UIMenuBar::render() const
 
 void UIMenuBar::resize()
 {
-  width(static_cast<float>(video.xres()));
+  width(static_cast<float>(video::width));
 }
 
 void UIMenuBar::CloseAll()

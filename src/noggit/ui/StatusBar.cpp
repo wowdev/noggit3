@@ -59,8 +59,8 @@ void UIStatusBar::render() const
 
 void UIStatusBar::resize()
 {
-  y(video.yres() - 30.0f);
-  width((const float)video.xres());
+  y(video::height - 30.0f);
+  width((const float)video::width);
   rightInfo->x(width() - 8.0f);
 }
 

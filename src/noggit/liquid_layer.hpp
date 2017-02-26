@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include <noggit/liquid_render.hpp>
+#include <math/trig.hpp>
 #include <noggit/MapHeaders.h>
+#include <noggit/liquid_render.hpp>
 #include <opengl/scoped.hpp>
 
 class MapChunk;

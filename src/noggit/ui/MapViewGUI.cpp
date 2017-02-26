@@ -44,7 +44,7 @@
 
 
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
-  : UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres())
+  : UIFrame(0.0f, 0.0f, (float)video::width, (float)video::height)
   , theMapview(setMapview)
   , _camera_pos(camera_pos)
 {
@@ -53,7 +53,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
   minimapWindow->hide();
   addChild(minimapWindow);
 
-  objectEditor = new UIObjectEditor((float)video.xres() - 410.0f, 10.0f, this);
+  objectEditor = new UIObjectEditor((float)video::width - 410.0f, 10.0f, this);
   objectEditor->hide();
 
   rotationEditor = new UIRotationEditor();
@@ -79,18 +79,18 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
 
 
   // Statusbar
-  guiStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);
+  guiStatusbar = new UIStatusBar(0.0f, (float)video::height - 30.0f, (float)video::width, 30.0f);
   addChild(guiStatusbar);
 
   // DetailInfoWindow
-  guidetailInfos = new ui::detail_infos(1.0f, video.yres() - 282.0f, 600.0f, 250.0f);
+  guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);
   guidetailInfos->hide();
 
   // ZoneIDBrowser
   ZoneIDBrowser = new ui::zone_id_browser();
   ZoneIDBrowser->hide();
 
-  TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f, 490.0f, 170.0f);
+  TexturePicker = new UITexturePicker(video::width / 2 - 100.0f, video::height / 2 - 100.0f, 490.0f, 170.0f);
   TexturePicker->hide();
   TexturePicker->movable(true);
   addChild(TexturePicker);
@@ -169,13 +169,13 @@ void UIMapViewGUI::render() const
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode) {
     timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", Pres: " << app.pressure;
-    app.getArial16().shprint(video.xres() - 250.0f, 5.0f, timestrs.str());
+    app.getArial16().shprint(video::width - 250.0f, 5.0f, timestrs.str());
   }
   else
 #endif
   {
     timestrs << "Time: " << (time / 120) << ":" << (time % 120);
-    app.getArial16().shprint(video.xres() - 200.0f, 5.0f, timestrs.str());
+    app.getArial16().shprint(video::width - 200.0f, 5.0f, timestrs.str());
   }
 
   std::ostringstream statusbarInfo;
