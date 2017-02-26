@@ -21,10 +21,6 @@ public:
   {
     return _yres;
   }
-  float ratio() const
-  {
-    return static_cast<float>(xres()) / static_cast<float>(yres());
-  }
 
   float farclip() const
   {

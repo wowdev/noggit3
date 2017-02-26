@@ -120,7 +120,7 @@ struct ModelCamera {
   Animation::M2Value<float> rot;
 
   ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global);
-  void setup(int time = 0);
+  void setup (float aspect_ratio, int time = 0);
 };
 
 struct ModelLight {
