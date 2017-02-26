@@ -13,6 +13,7 @@
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include <noggit/Project.h>
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
+#include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/DetailInfos.h> // ui::detail_infos
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
@@ -72,9 +73,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
   texturingTool->hide();
   addChild(texturingTool);
 
-  // UICurrentTexture
-  guiCurrentTexture = new UICurrentTexture(6.0f, 35.0f, this);
-  addChild(guiCurrentTexture);
+  guiCurrentTexture = new ui::current_texture();
 
   // UIToolbar
   guiToolbar = new UIToolbar(6.0f, 145.0f, [this] (editing_mode mode) { theMapview->set_editing_mode (mode); });

@@ -19,6 +19,7 @@
 #include <noggit/ui/Button.h> // UIButton
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CloseWindow.h> // UICloseWindow
+#include <noggit/ui/CurrentTexture.h> // UICloseWindow
 #include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
 #include <noggit/ui/Text.h> // UIText
 #include <noggit/ui/Texture.h> // UITexture
@@ -241,13 +242,17 @@ void changePage(UIFrame*, int direction)
 void UITexturingGUI::updateSelectedTexture()
 {
   if (textureSelected)
+  {
     textureSelected->setTexture(*UITexturingGUI::getSelectedTexture());
+  }    
   if (textSelectedTexture)
+  {
     textSelectedTexture->setText(UITexturingGUI::getSelectedTexture().get()->filename());
+  }
   if (textGui)
-    textGui->guiCurrentTexture->current_texture->setTexture(*UITexturingGUI::getSelectedTexture());
-
-
+  {
+    textGui->guiCurrentTexture->set_texture(UITexturingGUI::getSelectedTexture().get()->filename());
+  }
 }
 
 void texturePaletteClick(int id)

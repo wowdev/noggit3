@@ -2,23 +2,32 @@
 
 #include <noggit/ui/CurrentTexture.h>
 
+#include <QtWidgets/QGridLayout>
 
-#include <noggit/Environment.h> // Environment
-#include <noggit/FreeType.h> // fonts.
-#include <noggit/Log.h>
-#include <noggit/MapView.h> // MapView
-#include <noggit/application.h> // app.getapp.getArialn13()()
-#include <noggit/ui/MapViewGUI.h>
-#include <noggit/ui/Texture.h>
-
-
-UICurrentTexture::UICurrentTexture(float xPos, float yPos, UIMapViewGUI *setGui)
-  : UIWindow(xPos, yPos, 95.0f, 115.0f, "interface\\tooltips\\ui-tooltip-border.blp")
-  , mainGui(setGui)
-  , current_texture(new UITexture(0, 0, 92.0f, 92.0f, "tileset\\generic\\black.blp"))
+namespace ui
 {
-  movable(false);
+  current_texture::current_texture()
+    : QWidget (nullptr)
+  {
+    setWindowTitle ("Texture");
+    setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
 
-  addChild(current_texture);
+    auto layout (new QGridLayout(this));
+    layout->setContentsMargins (QMargins(0, 0, 0, 0));  
+    layout->addWidget (_texture = new QLabel (this), 0, 0);
 
+    _texture->setMinimumSize (64, 64);
+  }
+
+  void current_texture::set_texture (std::string const& texture)
+  {
+    _filename = texture;
+    update();
+  }
+
+  void current_texture::update()
+  {
+    show();
+    _texture->setPixmap (noggit::render_blp_to_pixmap (_filename, _texture->width(), _texture->height()));
+  }
 }
