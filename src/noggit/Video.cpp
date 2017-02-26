@@ -10,7 +10,6 @@ void Video::resize(int xres_, int yres_)
 {
   _xres = xres_;
   _yres = yres_;
-  _ratio = static_cast<float>(xres()) / static_cast<float>(yres());
 
   gl.viewport(0.0f, 0.0f, xres(), yres());
 }

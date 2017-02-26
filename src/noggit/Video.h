@@ -23,7 +23,7 @@ public:
   }
   float ratio() const
   {
-    return _ratio;
+    return static_cast<float>(xres()) / static_cast<float>(yres());
   }
   float nearclip() const
   {
