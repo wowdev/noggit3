@@ -23,7 +23,6 @@
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/TexturePicker.h> //
-#include <noggit/ui/TextureSwitcher.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/Toolbar.h> // UIToolbar
 #include <noggit/ui/ZoneIDBrowser.h> //
@@ -69,9 +68,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
   shaderTool = new ui::shader_tool(theMapview->cursor_color);
   shaderTool->hide();
 
-  texturingTool = new ui::texturing_tool((float)video.xres() - 190.0f, 30.0f, _camera_pos);
+  texturingTool = new ui::texturing_tool(_camera_pos);
   texturingTool->hide();
-  addChild(texturingTool);
 
   guiCurrentTexture = new ui::current_texture();
 

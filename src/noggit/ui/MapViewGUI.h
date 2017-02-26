@@ -8,7 +8,6 @@ class UIMinimapWindow;
 class MapView;
 class UIFrame;
 class UITexturePicker;
-class UITextureSwitcher;
 class UIHelp;
 class UICursorSwitcher;
 class UIWindow;
