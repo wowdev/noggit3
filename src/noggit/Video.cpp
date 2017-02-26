@@ -10,8 +10,6 @@ void Video::resize(int xres_, int yres_)
 {
   _xres = xres_;
   _yres = yres_;
-
-  gl.viewport(0.0f, 0.0f, xres(), yres());
 }
 
 void Video::init(int xres_, int yres_)
