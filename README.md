@@ -16,7 +16,6 @@ following libraries:
 * Freetype2
 * storm (stormlib by Ladislav Zezula)
 * Boost
-* SDL 1.2
 
 Further following libraries are required for MySQL GUID Storage builts:
 
