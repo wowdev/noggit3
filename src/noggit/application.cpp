@@ -54,7 +54,6 @@ static LOGCONTEXT  glogContext = { 0 };
 #include "revision.h"
 
 Noggit app;
-void CreateStrips();
 
 Noggit::Noggit()
   : fullscreen(false)
@@ -344,7 +343,6 @@ int Noggit::start(int argc, char *argv[])
     Project::getInstance()->setPath(wowpath.string());
   Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
 
-  CreateStrips();
   loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   OpenDBs();
 
