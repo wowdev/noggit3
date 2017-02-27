@@ -396,7 +396,10 @@ int main(int argc, char *argv[])
 
   QApplication qapp (argc, argv);
 
-  app.start(argc, argv);
+  if (int res = app.start (argc, argv))
+  {
+    return res;
+  }
 
   return qapp.exec();
 }
