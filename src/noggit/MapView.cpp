@@ -599,7 +599,7 @@ void MapView::createGUI()
             , [this]
               {
                 std::ofstream f("bookmarks.txt", std::ios_base::app);
-                f << gWorld->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw() << " " << _camera.pitch() << " " << gWorld->getAreaID (_camera.position) << std::endl;
+                f << gWorld->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw()._ << " " << _camera.pitch()._ << " " << gWorld->getAreaID (_camera.position) << std::endl;
               }
             );
 
@@ -677,7 +677,7 @@ void MapView::createGUI()
 
   addHotkey (Qt::Key_P, MOD_shift | MOD_ctrl, [this] { Saving = true; });
 
-  addHotkey (Qt::Key_R, MOD_none, [this] { _camera.add_to_yaw(180.f); });
+  addHotkey (Qt::Key_R, MOD_none, [this] { _camera.add_to_yaw(math::degrees(180.f)); });
 
   addHotkey ( Qt::Key_G
             , MOD_none
@@ -983,8 +983,8 @@ void MapView::createGUI()
   mainGui->HelperModels = new UIHelperModels(this);
 }
 
-MapView::MapView( float _camera_ah0
-                , float _camera_av0
+MapView::MapView( math::degrees _camera_ah0
+                , math::degrees _camera_av0
                 , math::vector_3d camera_pos
                 , noggit::ui::main_window* main_window
                 )
@@ -1165,8 +1165,8 @@ void MapView::tick (float dt)
     math::vector_3d dir(1.0f, 0.0f, 0.0f);
     math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
     math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, math::degrees(_camera.pitch()));
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, math::degrees(_camera.yaw()));
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, _camera.pitch());
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, _camera.yaw());
 
     if (_mod_shift_down)
     {
@@ -1178,15 +1178,15 @@ void MapView::tick (float dt)
     {
       dirUp.x = 0.0f;
       dirUp.y = 1.0f;
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, math::degrees(_camera.pitch()));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, math::degrees(_camera.pitch()));
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera.yaw()));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera.yaw()));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, _camera.pitch());
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, _camera.pitch());
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, _camera.yaw());
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, _camera.yaw());
     }
     else
     {
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera.yaw()));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera.yaw()));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, _camera.yaw());
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, _camera.yaw());
     }
     auto Selection = gWorld->GetCurrentSelection();
     if (Selection)
@@ -1526,13 +1526,13 @@ void MapView::tick (float dt)
     {
       if (turn)
       {
-        _camera.add_to_yaw(turn);
-        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera.yaw()));
+        _camera.add_to_yaw(math::degrees(turn));
+        mainGui->minimapWindow->changePlayerLookAt(_camera.yaw());
       }
       if (lookat)
       {
-        _camera.add_to_pitch(lookat);
-        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera.pitch()));
+        _camera.add_to_pitch(math::degrees(lookat));
+        mainGui->minimapWindow->changePlayerLookAt(_camera.pitch());
       }
       if (moving)
       {
@@ -1716,7 +1716,7 @@ void MapView::displayViewMode_2D()
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
 
-  gWorld->drawTileMode ( _camera.yaw()
+  gWorld->drawTileMode ( _camera.yaw()._
                        , _camera.position
                        , _draw_lines
                        , _2d_zoom
@@ -2121,8 +2121,8 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
   {
-    _camera.add_to_yaw(relative_movement.dx() / XSENS);
-    _camera.add_to_pitch(mousedir * relative_movement.dy() / YSENS);
+    _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
+    _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
 
     mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera.pitch()));
   }

@@ -10,15 +10,15 @@ namespace noggit
 class camera
 {
 public:
-  camera(const math::vector_3d& position, float yaw_, float pitch_);
+  camera(const math::vector_3d& position, math::degrees yaw_, math::degrees pitch_);
 
-  const float yaw() const;
-  const float yaw(float value);
-  void add_to_yaw(float value);
+  const math::degrees yaw() const;
+  const math::degrees yaw(math::degrees value);
+  void add_to_yaw(math::degrees value);
 
-  const float pitch() const;
-  const float pitch(float value);
-  void add_to_pitch(float value);
+  const math::degrees pitch() const;
+  const math::degrees pitch(math::degrees value);
+  void add_to_pitch(math::degrees value);
 
   math::radians fov() const;
 
@@ -33,9 +33,9 @@ public:
   float move_speed;
 
 private:
-  float _roll; // this is not used currently
-  float _yaw;
-  float _pitch;
+  math::degrees _roll; // this is not used currently
+  math::degrees _yaw;
+  math::degrees _pitch;
   math::radians _fov;
 };
 

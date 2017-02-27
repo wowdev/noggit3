@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
+#include <math/trig.hpp>
 
 #include <QtWidgets/QMainWindow>
 
@@ -20,7 +21,7 @@ namespace noggit
 
     private:
       void loadMap (int mapID);
-      void enterMapAt (math::vector_3d pos, float av, float ah);
+      void enterMapAt (math::vector_3d pos, math::degrees av, math::degrees ah);
 
       void createBookmarkList();
       void build_menu();
