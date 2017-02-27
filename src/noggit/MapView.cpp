@@ -2485,7 +2485,7 @@ void MapView::prompt_save_current() const
          ) == QMessageBox::Save
      )
   {
-    gWorld->mapIndex.savecurrent();
+    gWorld->mapIndex.saveTile(tile_index(_camera.position));
   }
 }
 

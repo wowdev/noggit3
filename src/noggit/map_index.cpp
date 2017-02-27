@@ -139,12 +139,6 @@ void MapIndex::saveall()
   }
 }
 
-void MapIndex::savecurrent()
-{
-  saveTile(tile_index(cx, cz));
-}
-
-
 void MapIndex::save()
 {
   std::stringstream filename;
