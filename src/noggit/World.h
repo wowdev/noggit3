@@ -154,7 +154,7 @@ public:
   void SetCurrentSelection (boost::optional<selection_type> entry) { mCurrentSelection = entry; }
   void ResetSelection() { mCurrentSelection.reset(); }
 
-  bool GetVertex(float x, float z, math::vector_3d *V);
+  bool GetVertex(float x, float z, math::vector_3d *V) const;
 
   // check if the cursor is under map or in an unloaded tile
   bool isUnderMap(math::vector_3d const& pos);
@@ -255,6 +255,8 @@ public:
   void clearVertexSelection();
 
   math::vector_3d const& vertexCenter();
+
+  void recalc_norms (MapChunk*) const;
 
 private:
   void getSelection();
