@@ -30,10 +30,6 @@ static const float texDetail = 8.0f;
 
 static const float TEX_RANGE = 1.0f;
 
-StripType LineStrip[32];
-StripType HoleStrip[128];
-
-
 void GenerateContourMap()
 {
   unsigned char CTexture[CONTOUR_WIDTH * 4];
@@ -63,43 +59,6 @@ void GenerateContourMap()
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-}
-
-void CreateStrips()
-{
-  for (int i = 0; i < 32; ++i)
-  {
-    if (i < 9)
-      LineStrip[i] = i;
-    else if (i < 17)
-      LineStrip[i] = 8 + (i - 8) * 17;
-    else if (i < 25)
-      LineStrip[i] = 145 - (i - 15);
-    else
-      LineStrip[i] = (32 - i) * 17;
-  }
-
-  LineStrip[31] = 0;
-
-  int iferget = 0;
-
-  for (size_t i = 34; i < 43; ++i)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 68; i < 77; ++i)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 102; i < 111; ++i)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 2; i < 139; i += 17)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 4; i < 141; i += 17)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 6; i < 143; i += 17)
-    HoleStrip[iferget++] = i;
 }
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
@@ -483,6 +442,40 @@ void MapChunk::initStrip()
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
+
+  for (int i = 0; i < 32; ++i)
+  {
+    if (i < 9)
+      LineStrip[i] = i;
+    else if (i < 17)
+      LineStrip[i] = 8 + (i - 8) * 17;
+    else if (i < 25)
+      LineStrip[i] = 145 - (i - 15);
+    else
+      LineStrip[i] = (32 - i) * 17;
+  }
+
+  LineStrip[31] = 0;
+
+  int iferget = 0;
+
+  for (size_t i = 34; i < 43; ++i)
+    HoleStrip[iferget++] = i;
+
+  for (size_t i = 68; i < 77; ++i)
+    HoleStrip[iferget++] = i;
+
+  for (size_t i = 102; i < 111; ++i)
+    HoleStrip[iferget++] = i;
+
+  for (size_t i = 2; i < 139; i += 17)
+    HoleStrip[iferget++] = i;
+
+  for (size_t i = 4; i < 141; i += 17)
+    HoleStrip[iferget++] = i;
+
+  for (size_t i = 6; i < 143; i += 17)
+    HoleStrip[iferget++] = i;
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
