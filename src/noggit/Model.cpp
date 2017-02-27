@@ -48,7 +48,7 @@ void Model::finishLoading()
   anim = 0;
 
   rad = header.VertexBoxRadius;
-  
+
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   if (header.nGlobalSequences)
@@ -1025,8 +1025,8 @@ std::vector<float> Model::intersect (math::ray const& ray)
     for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
     {
       if ( auto distance
-          = ray.intersect_triangle( _current_vertices[_indices[i + 0]].position, 
-                                    _current_vertices[_indices[i + 1]].position, 
+          = ray.intersect_triangle( _current_vertices[_indices[i + 0]].position,
+                                    _current_vertices[_indices[i + 1]].position,
                                     _current_vertices[_indices[i + 2]].position)
           )
       {
