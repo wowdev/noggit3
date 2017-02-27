@@ -69,7 +69,7 @@ namespace noggit
                        );
     }
 
-    void main_window::enterMapAt(math::vector_3d pos, float av, float ah)
+    void main_window::enterMapAt(math::vector_3d pos, math::degrees av, math::degrees ah)
     {
       auto mapview (new MapView (ah, av, pos, this));
       setCentralWidget(mapview);
@@ -156,7 +156,7 @@ namespace noggit
                        , [this, widget] (QListWidgetItem* item)
                          {
                            auto& entry (mBookmarks.at (item->data (Qt::UserRole).toInt()));
-                           enterMapAt (entry.pos, entry.av, entry.ah);
+                           enterMapAt (entry.pos, math::degrees(entry.av), math::degrees(entry.ah));
                          }
                        );
 
@@ -174,19 +174,19 @@ namespace noggit
                )
             {
               world->mapIndex.loadMaxUID();
-              enterMapAt (pos, -30.f, -90.f);
+              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f));
             }
             else
 #endif
             if (uid_storage::getInstance()->hasMaxUIDStored(world->mMapId))
             {
               world->mapIndex.loadMaxUID();
-              enterMapAt (pos, -30.f, -90.f);
+              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f));
             }
             else
             {
               auto uidFixWindow
-                (new ::ui::uid_fix_window ([this, pos] { enterMapAt (pos, -30.f, -90.f); }));
+                (new ::ui::uid_fix_window ([this, pos] { enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f)); }));
               uidFixWindow->show();
             }
             widget->deleteLater();
