@@ -69,6 +69,7 @@ public:
             , bool draw_wireframe_overlay
             , int cursor_type
             , std::map<int, misc::random_color>& area_id_colors
+            , math::vector_4d shadow_color
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines ( opengl::scoped::use_program& line_shader

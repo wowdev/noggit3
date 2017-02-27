@@ -629,6 +629,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , bool draw_wireframe_overlay
                     , int cursor_type
                     , std::map<int, misc::random_color>& area_id_colors
+                    , math::vector_4d shadow_color
                     )
 {
   if (!is_visible (cull_distance, frustum, camera))
@@ -717,8 +718,7 @@ void MapChunk::draw ( math::frustum const& frustum
   opengl::texture::disable_texture();
   gl.disable(GL_LIGHTING);
 
-  math::vector_3d shc = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
-  gl.color4f(shc.x, shc.y, shc.z, 1);
+  gl.color4fv (shadow_color);
 
   //gl.color4f(1,1,1,1);
 
