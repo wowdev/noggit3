@@ -359,7 +359,7 @@ void World::initDisplay()
     WMOInstance inst(mWmoFilename, &mWmoEntry);
     //! \todo is this used? does it even make _any_ sense to set the camera position to the center of a wmo?
     // camera = inst.pos;
-    gWorld->mWMOInstances.emplace(mWmoEntry.uniqueID, std::move(inst));
+    mWMOInstances.emplace(mWmoEntry.uniqueID, std::move(inst));
   }
   else
   {
@@ -539,7 +539,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   // Draw verylowres heightmap
   if (drawfog && draw_terrain) {
-    _horizon_render->draw (&mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
+    _horizon_render->draw (&mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
   }
 
   // Draw height map
@@ -590,7 +590,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , draw_wireframe
                  , cursor_type
                  , area_id_colors
-                 , math::vector_4d {gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f, 1.f}
+                 , math::vector_4d {skies->colorSet[WATER_COLOR_DARK] * 0.3f, 1.f}
                  , mCurrentSelection
                  );
     }
