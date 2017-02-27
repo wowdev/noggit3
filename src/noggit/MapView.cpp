@@ -407,14 +407,22 @@ void MapView::createGUI()
   auto edit_menu (_main_window->menuBar()->addMenu ("Edit"));
   connect (this, &QObject::destroyed, edit_menu, &QObject::deleteLater);
 
+  auto assist_menu (_main_window->menuBar()->addMenu ("Assist"));
+  connect (this, &QObject::destroyed, assist_menu, &QObject::deleteLater);
+
   mbar->AddMenu("View");
-  mbar->AddMenu("Assist");
   mbar->AddMenu("Help");
 
 #define ADD_ACTION(menu, name, shortcut, on_action)               \
   {                                                               \
     auto action (menu->addAction (name));                         \
     action->setShortcut (QKeySequence (shortcut));                \
+    connect (action, &QAction::triggered, on_action);             \
+  }
+
+#define ADD_ACTION_NS(menu, name, on_action)                      \
+  {                                                               \
+    auto action (menu->addAction (name));                         \
     connect (action, &QAction::triggered, on_action);             \
   }
 
@@ -438,8 +446,10 @@ void MapView::createGUI()
   ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] { _world->mapIndex.saveChanged(); });
   ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] { _world->mapIndex.saveall(); });
   ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] { _world->mapIndex.reloadTile (_camera.position); });
+
   file_menu->addSeparator();
   ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
+
 
   //! \todo sections are not rendered on all platforms. one should
   //! probably do separator+disabled entry to force rendering
@@ -447,48 +457,54 @@ void MapView::createGUI()
   ADD_ACTION (edit_menu, "delete", Qt::Key_Delete, [this] { DeleteSelectedObject(); });
   ADD_ACTION (edit_menu, "reset rotation", "Ctrl+R", [this] { ResetSelectedObjectRotation(); });
   ADD_ACTION (edit_menu, "set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
+
   edit_menu->addSection ("options");
   ADD_TOGGLE (edit_menu, "auto select mode", &Settings::getInstance()->AutoSelectingMode);
 
 
-  mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [this] { insert_last_m2_from_wmv(); });
-  addHotkey (Qt::Key_V, MOD_shift, [this] { insert_last_m2_from_wmv(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [this] { insert_last_wmo_from_wmv(); });
-  addHotkey (Qt::Key_V, MOD_alt, [this] { insert_last_wmo_from_wmv(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [this] { mainGui->HelperModels->show(); });
-  mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
-                                             , [this]
-                                               {
-                                                 if (_selected_area_id != -1)
-                                                 {
-                                                   _world->setAreaID(_camera.position, _selected_area_id, true);
-                                                 }
-                                               }
-                                             );
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear height map"
-                                             , [this]
-                                               {
-                                                 _world->clearHeight(_camera.position);
-                                               }
-                                             );
+  assist_menu->addSection ("Model");
+  ADD_ACTION (assist_menu, "Last m2 from WMV", "Shift+V", [this] { insert_last_m2_from_wmv(); });
+  ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { insert_last_wmo_from_wmv(); });
+  ADD_ACTION_NS (assist_menu, "Helper models", [this] { mainGui->HelperModels->show(); });
 
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear texture"
-                                             , [this] { _world->setBaseTexture(_camera.position); }
-                                             );
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear models"
-                                             , [this] { _world->clearAllModelsOnADT(_camera.position); }
-                                             );
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
-                                             , [this] { _world->delete_duplicate_model_and_wmo_instances(); }
-                                             );
-  mbar->GetMenu("Assist")->AddMenuItemSeperator("Loaded ADTs");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded ADTs)", [this] { _world->fixAllGaps(); });
+  assist_menu->addSection ("Current ADT");
+  ADD_ACTION_NS ( assist_menu
+                , "Set Area ID"
+                , [this]
+                  {
+                    if (_selected_area_id != -1)
+                    {
+                      _world->setAreaID(_camera.position, _selected_area_id, true);
+                    }
+                  }
+                );
+  ADD_ACTION_NS ( assist_menu
+                , "Clear height map"
+                , [this]
+                  {
+                    _world->clearHeight(_camera.position);
+                  }
+                );
 
-  mbar->GetMenu("Assist")->AddMenuItemSeperator("Global");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [this] { _world->convert_alphamap(true); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Map to old", [this] { _world->convert_alphamap(false); });
+  ADD_ACTION_NS ( assist_menu
+                , "Clear texture"
+                , [this] { _world->setBaseTexture(_camera.position); }
+                );
+  ADD_ACTION_NS ( assist_menu
+                , "Clear models"
+                , [this] { _world->clearAllModelsOnADT(_camera.position); }
+                );
+  ADD_ACTION_NS ( assist_menu
+                , "Clear duplicate models"
+                , [this] { _world->delete_duplicate_model_and_wmo_instances(); }
+                );
+
+  assist_menu->addSection ("Loaded ADTs");
+  ADD_ACTION_NS (assist_menu, "Fix gaps (all loaded ADTs)", [this] { _world->fixAllGaps(); });
+
+  assist_menu->addSection ("Global");
+  ADD_ACTION_NS (assist_menu, "Map to big alpha", [this] { _world->convert_alphamap(true); });
+  ADD_ACTION_NS (assist_menu, "Map to old alpha", [this] { _world->convert_alphamap(false); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
   mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
