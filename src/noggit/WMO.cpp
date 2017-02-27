@@ -342,6 +342,7 @@ void WMO::draw ( int doodadset
                , const float& cull_distance
                , const math::vector_3d& camera
                , bool draw_doodads
+               , bool draw_fog
                )
 {
   if (!finishedLoading ())
@@ -352,7 +353,7 @@ void WMO::draw ( int doodadset
     return;
   }
 
-  if (gWorld && gWorld->drawfog)
+  if (draw_fog)
     gl.enable(GL_FOG);
   else
     gl.disable(GL_FOG);
@@ -363,7 +364,7 @@ void WMO::draw ( int doodadset
 
     if (draw_doodads)
     {
-      group.drawDoodads(doodadset, ofs, angle, frustum);
+      group.drawDoodads (doodadset, ofs, angle, frustum, draw_fog);
     }
 
     group.drawLiquid();
@@ -433,7 +434,11 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   return results;
 }
 
-bool WMO::drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const
+bool WMO::drawSkybox ( math::vector_3d pCamera
+                     , math::vector_3d pLower
+                     , math::vector_3d pUpper
+                     , bool draw_fog
+                     ) const
 {
   if (skybox && pCamera.is_inside_of(pLower, pUpper))
   {
@@ -454,7 +459,7 @@ bool WMO::drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vect
     gl.translatef(o.x, o.y, o.z);
     const float sc = 2.0f;
     gl.scalef(sc, sc, sc);
-    skybox.get()->draw();
+    skybox.get()->draw (draw_fog);
     gl.enable(GL_DEPTH_TEST);
 
     return true;
@@ -1100,7 +1105,12 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 }
 
-void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const angle, math::frustum const& frustum)
+void WMOGroup::drawDoodads ( unsigned int doodadset
+                           , const math::vector_3d& ofs
+                           , math::degrees const angle
+                           , math::frustum const& frustum
+                           , bool draw_fog
+                           )
 {
   if (!visible) return;
   if (ddr.empty()) return;
@@ -1131,7 +1141,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, m
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
       }
       setupFog();
-      wmo->modelis[dd].draw_wmo(ofs, angle, frustum);
+      wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog);
     }
   }
 

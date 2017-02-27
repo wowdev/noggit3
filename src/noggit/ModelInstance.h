@@ -71,11 +71,16 @@ public:
             , const math::vector_3d& camera
             , bool force_box
             , bool all_boxes
+            , bool draw_fog
             );
   void drawMapTile();
   //  void drawHighlight();
   void intersect (math::ray const&, selection_result*);
-  void draw_wmo(const math::vector_3d& ofs, const math::degrees, math::frustum const&);
+  void draw_wmo ( const math::vector_3d& ofs
+                , const math::degrees
+                , math::frustum const&
+                , bool draw_fog
+                );
 
   void resetDirection();
 

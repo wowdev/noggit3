@@ -57,6 +57,7 @@ void ModelInstance::draw ( math::frustum const& frustum
                          , const math::vector_3d& camera
                          , bool force_box
                          , bool all_boxes
+                         , bool draw_fog
                          )
 {
   if(((pos - camera).length() - model->rad * sc) >= cull_distance)
@@ -86,13 +87,13 @@ void ModelInstance::draw ( math::frustum const& frustum
                                  , TransformCoordsForModel(model->header.VertexBoxMax)
                                  ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 3.0f);
   }
-  model->draw();
+  model->draw (draw_fog);
 
   bool currentSelection = gWorld->IsSelection(eEntry_Model) && boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1 == d1;
 
   if (currentSelection || force_box)
   {
-    if (gWorld && gWorld->drawfog)
+    if (draw_fog)
       gl.disable(GL_FOG);
 
     gl.disable(GL_LIGHTING);
@@ -143,7 +144,7 @@ void ModelInstance::draw ( math::frustum const& frustum
 
     gl.enable(GL_LIGHTING);
 
-    if (gWorld && gWorld->drawfog)
+    if (draw_fog)
       gl.enable(GL_FOG);
   }
 }
@@ -199,7 +200,11 @@ void ModelInstance::intersect (math::ray const& ray, selection_result* results)
 }
 
 
-void ModelInstance::draw_wmo(const math::vector_3d& ofs, const math::degrees rotation, math::frustum const& frustum)
+void ModelInstance::draw_wmo ( const math::vector_3d& ofs
+                             , const math::degrees rotation
+                             , math::frustum const& frustum
+                             , bool draw_fog
+                             )
 {
   math::vector_3d tpos(ofs + pos);
   math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
@@ -212,7 +217,7 @@ void ModelInstance::draw_wmo(const math::vector_3d& ofs, const math::degrees rot
   gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
   gl.scalef(sc, -sc, -sc);
 
-  model->draw();
+  model->draw (draw_fog);
 }
 
 void ModelInstance::resetDirection(){

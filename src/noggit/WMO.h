@@ -56,7 +56,12 @@ public:
            , const math::vector_3d& camera
            );
   void drawLiquid();
-  void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, math::frustum const&);
+  void drawDoodads ( unsigned int doodadset
+                   , const math::vector_3d& ofs
+                   , math::degrees const
+                   , math::frustum const&
+                   , bool draw_fog
+                   );
 
   void setupFog();
 
@@ -153,8 +158,13 @@ public:
             , const float& cull_distance
             , const math::vector_3d& camera
             , bool draw_doodads
+            , bool draw_fog
             );
-  bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
+  bool drawSkybox ( math::vector_3d pCamera
+                  , math::vector_3d pLower
+                  , math::vector_3d pUpper
+                  , bool draw_fog
+                  ) const;
   //void drawPortals();
 
   std::vector<float> intersect (math::ray const&) const;

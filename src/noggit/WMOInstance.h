@@ -63,7 +63,13 @@ public:
     return *this;
   }
 
-  void draw (math::frustum const&, const float&, const math::vector_3d&, bool force_box, bool draw_doodads);
+  void draw ( math::frustum const&
+            , const float&
+            , const math::vector_3d&
+            , bool force_box
+            , bool draw_doodads
+            , bool draw_fog
+            );
   void intersect (math::ray const&, selection_result*);
 
   void recalcExtents();
