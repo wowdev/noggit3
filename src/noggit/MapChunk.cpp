@@ -630,6 +630,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , int cursor_type
                     , std::map<int, misc::random_color>& area_id_colors
                     , math::vector_4d shadow_color
+                    , boost::optional<selection_type> selection
                     )
 {
   if (!is_visible (cull_distance, frustum, camera))
@@ -752,12 +753,11 @@ void MapChunk::draw ( math::frustum const& frustum
     gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
   }
 
-  if (cursor_type == 3)
+  if (cursor_type == 3 && selection)
   {
-    if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this)
+    selected_chunk_type const* chunk (nullptr);
+    if ((chunk = boost::get<selected_chunk_type> (&*selection)) && chunk->chunk == this)
     {
-      int poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
-
       gl.color4f(1.0f, 1.0f, 0.0f, 1.0f);
 
       opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
@@ -765,9 +765,9 @@ void MapChunk::draw ( math::frustum const& frustum
       opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
 
       gl.begin(GL_TRIANGLES);
-      gl.vertex3fv(mVertices[strip_without_holes[poly + 0]]);
-      gl.vertex3fv(mVertices[strip_without_holes[poly + 1]]);
-      gl.vertex3fv(mVertices[strip_without_holes[poly + 2]]);
+      gl.vertex3fv(mVertices[strip_without_holes[chunk->triangle + 0]]);
+      gl.vertex3fv(mVertices[strip_without_holes[chunk->triangle + 1]]);
+      gl.vertex3fv(mVertices[strip_without_holes[chunk->triangle + 2]]);
       gl.end();
     }
   }
