@@ -69,10 +69,14 @@ namespace noggit
                        );
     }
 
-    void main_window::enterMapAt(math::vector_3d pos, math::degrees av, math::degrees ah)
+    void main_window::enterMapAt ( math::vector_3d pos
+                                 , math::degrees av
+                                 , math::degrees ah
+                                 , World* world
+                                 )
     {
-      auto mapview (new MapView (ah, av, pos, this));
-      setCentralWidget(mapview);
+      auto mapview (new MapView (ah, av, pos, this, world));
+      setCentralWidget (mapview);
     }
 
     void main_window::loadMap(int mapID)
@@ -156,7 +160,21 @@ namespace noggit
                        , [this, widget] (QListWidgetItem* item)
                          {
                            auto& entry (mBookmarks.at (item->data (Qt::UserRole).toInt()));
-                           enterMapAt (entry.pos, math::degrees(entry.av), math::degrees(entry.ah));
+
+                           for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
+                           {
+                             if (it->getInt(MapDB::MapID) == entry.mapID)
+                             {
+                               gWorld = new World(it->getString(MapDB::InternalName));
+                               enterMapAt ( entry.pos
+                                          , math::degrees(entry.av)
+                                          , math::degrees(entry.ah)
+                                          , gWorld
+                                          );
+
+                               return;
+                             }
+                           }
                          }
                        );
 
@@ -174,19 +192,25 @@ namespace noggit
                )
             {
               world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f));
+              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f), world);
             }
             else
 #endif
             if (uid_storage::getInstance()->hasMaxUIDStored(world->mMapId))
             {
               world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f));
+              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f), world);
             }
             else
             {
               auto uidFixWindow
-                (new ::ui::uid_fix_window ([this, pos] { enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f)); }));
+                ( new ::ui::uid_fix_window
+                    ( [this, pos, world]
+                      {
+                        enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f), world);
+                      }
+                    )
+                );
               uidFixWindow->show();
             }
             widget->deleteLater();

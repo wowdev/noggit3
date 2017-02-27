@@ -7,6 +7,8 @@
 
 #include <string>
 
+class World;
+
 namespace noggit
 {
   namespace ui
@@ -21,7 +23,7 @@ namespace noggit
 
     private:
       void loadMap (int mapID);
-      void enterMapAt (math::vector_3d pos, math::degrees av, math::degrees ah);
+      void enterMapAt (math::vector_3d pos, math::degrees av, math::degrees ah, World*);
 
       void createBookmarkList();
       void build_menu();

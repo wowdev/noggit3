@@ -161,53 +161,53 @@ void MapView::set_editing_mode (editing_mode mode)
 
 void MapView::ResetSelectedObjectRotation()
 {
-  if (gWorld->IsSelection(eEntry_WMO))
+  if (_world->IsSelection(eEntry_WMO))
   {
-    WMOInstance* wmo = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection());
-    gWorld->updateTilesWMO(wmo);
+    WMOInstance* wmo = boost::get<selected_wmo_type> (*_world->GetCurrentSelection());
+    _world->updateTilesWMO(wmo);
     wmo->resetDirection();
-    gWorld->updateTilesWMO(wmo);
+    _world->updateTilesWMO(wmo);
   }
-  else if (gWorld->IsSelection(eEntry_Model))
+  else if (_world->IsSelection(eEntry_Model))
   {
-    ModelInstance* m2 = boost::get<selected_model_type> (*gWorld->GetCurrentSelection());
-    gWorld->updateTilesModel(m2);
+    ModelInstance* m2 = boost::get<selected_model_type> (*_world->GetCurrentSelection());
+    _world->updateTilesModel(m2);
     m2->resetDirection();
     m2->recalcExtents();
-    gWorld->updateTilesModel(m2);
+    _world->updateTilesModel(m2);
   }
 }
 
 void MapView::SnapSelectedObjectToGround()
 {
-  if (gWorld->IsSelection(eEntry_WMO))
+  if (_world->IsSelection(eEntry_WMO))
   {
-    WMOInstance* wmo = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection());
+    WMOInstance* wmo = boost::get<selected_wmo_type> (*_world->GetCurrentSelection());
     math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
-    gWorld->GetVertex(wmo->pos.x, wmo->pos.z, &t);
+    _world->GetVertex(wmo->pos.x, wmo->pos.z, &t);
     wmo->pos.y = t.y;
-    gWorld->updateTilesWMO(wmo);
+    _world->updateTilesWMO(wmo);
   }
-  else if (gWorld->IsSelection(eEntry_Model))
+  else if (_world->IsSelection(eEntry_Model))
   {
-    ModelInstance* m2 = boost::get<selected_model_type> (*gWorld->GetCurrentSelection());
+    ModelInstance* m2 = boost::get<selected_model_type> (*_world->GetCurrentSelection());
     math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
-    gWorld->GetVertex(m2->pos.x, m2->pos.z, &t);
+    _world->GetVertex(m2->pos.x, m2->pos.z, &t);
     m2->pos.y = t.y;
-    gWorld->updateTilesModel(m2);
+    _world->updateTilesModel(m2);
   }
 }
 
 
 void MapView::DeleteSelectedObject()
 {
-  if (gWorld->IsSelection(eEntry_WMO))
+  if (_world->IsSelection(eEntry_WMO))
   {
-    gWorld->deleteWMOInstance(boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID);
+    _world->deleteWMOInstance(boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->mUniqueID);
   }
-  else if (gWorld->IsSelection(eEntry_Model))
+  else if (_world->IsSelection(eEntry_Model))
   {
-    gWorld->deleteModelInstance(boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1);
+    _world->deleteModelInstance(boost::get<selected_model_type> (*_world->GetCurrentSelection())->d1);
   }
 }
 
@@ -216,7 +216,7 @@ void MapView::insert_last_m2_from_wmv()
   //! \todo Beautify.
 
   // Test if there is an selection
-  if (!gWorld->HasSelection())
+  if (!_world->HasSelection())
     return;
 
   std::string importFile (Settings::getInstance()->wmvLogFile);
@@ -268,16 +268,16 @@ void MapView::insert_last_m2_from_wmv()
   }
 
   math::vector_3d selectionPosition;
-  switch (gWorld->GetCurrentSelection()->which())
+  switch (_world->GetCurrentSelection()->which())
   {
   case eEntry_Model:
-    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
+    selectionPosition = boost::get<selected_model_type> (*_world->GetCurrentSelection())->pos;
     break;
   case eEntry_WMO:
-    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
+    selectionPosition = boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->pos;
     break;
   case eEntry_MapChunk:
-    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
+    selectionPosition = boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).position;
     break;
   }
 
@@ -289,7 +289,7 @@ void MapView::insert_last_m2_from_wmv()
     }
     else
     {
-      gWorld->addM2(lastModel, selectionPosition, false);
+      _world->addM2(lastModel, selectionPosition, false);
     }
   }
 }
@@ -298,7 +298,7 @@ void MapView::insert_last_wmo_from_wmv()
 {
   //! \todo Beautify.
 
-  if (!gWorld->HasSelection())
+  if (!_world->HasSelection())
     return;
 
   std::string importFile (Settings::getInstance()->wmvLogFile);
@@ -345,16 +345,16 @@ void MapView::insert_last_wmo_from_wmv()
 
 
   math::vector_3d selectionPosition;
-  switch (gWorld->GetCurrentSelection()->which())
+  switch (_world->GetCurrentSelection()->which())
   {
   case eEntry_Model:
-    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
+    selectionPosition = boost::get<selected_model_type> (*_world->GetCurrentSelection())->pos;
     break;
   case eEntry_WMO:
-    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
+    selectionPosition = boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->pos;
     break;
   case eEntry_MapChunk:
-    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
+    selectionPosition = boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).position;
     break;
   }
 
@@ -366,7 +366,7 @@ void MapView::insert_last_wmo_from_wmv()
     }
     else
     {
-      gWorld->addWMO(lastWMO, selectionPosition, false);
+      _world->addWMO(lastWMO, selectionPosition, false);
     }
   }
   //! \todo Memoryleak: These models will never get deleted.
@@ -385,7 +385,7 @@ void MapView::createGUI()
   // create main gui object that holds all other gui elements for access ( in the future ;) )
   mainGui = new UIMapViewGUI(this, &_camera.position);
 
-  mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
+  mainGui->ZoneIDBrowser->setMapID(_world->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
   tool_settings_x = width() - 186;
   tool_settings_y = 38;
@@ -436,9 +436,9 @@ void MapView::createGUI()
 
 
   ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { prompt_save_current(); });
-  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [] { gWorld->mapIndex.saveChanged(); });
-  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [] { gWorld->mapIndex.saveall(); });
-  ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] { gWorld->mapIndex.reloadTile (_camera.position); });
+  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] { _world->mapIndex.saveChanged(); });
+  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] { _world->mapIndex.saveall(); });
+  ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] { _world->mapIndex.reloadTile (_camera.position); });
   file_menu->addSeparator();
   ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
 
@@ -464,32 +464,32 @@ void MapView::createGUI()
                                                {
                                                  if (_selected_area_id != -1)
                                                  {
-                                                   gWorld->setAreaID(_camera.position, _selected_area_id, true);
+                                                   _world->setAreaID(_camera.position, _selected_area_id, true);
                                                  }
                                                }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear height map"
                                              , [this]
                                                {
-                                                 gWorld->clearHeight(_camera.position);
+                                                 _world->clearHeight(_camera.position);
                                                }
                                              );
 
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear texture"
-                                             , [this] { gWorld->setBaseTexture(_camera.position); }
+                                             , [this] { _world->setBaseTexture(_camera.position); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear models"
-                                             , [this] { gWorld->clearAllModelsOnADT(_camera.position); }
+                                             , [this] { _world->clearAllModelsOnADT(_camera.position); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
-                                             , [this] { gWorld->delete_duplicate_model_and_wmo_instances(); }
+                                             , [this] { _world->delete_duplicate_model_and_wmo_instances(); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Loaded ADTs");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded ADTs)", [] { gWorld->fixAllGaps(); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded ADTs)", [this] { _world->fixAllGaps(); });
 
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Global");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [] { gWorld->convert_alphamap(true); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Map to old", [] { gWorld->convert_alphamap(false); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [this] { _world->convert_alphamap(true); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Map to old", [this] { _world->convert_alphamap(false); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
   mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
@@ -522,8 +522,8 @@ void MapView::createGUI()
   addHotkey(Qt::Key_F10, MOD_none, [this] { _draw_wireframe = !_draw_wireframe; });
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &_draw_model_animations);
   addHotkey (Qt::Key_F11, MOD_none, [this] { _draw_model_animations = !_draw_model_animations; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
-  addHotkey(Qt::Key_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
+  addHotkey(Qt::Key_F12, MOD_none, [this] { _world->drawfog = !_world->drawfog; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &_draw_mfbo);
   mbar->GetMenu("View")->AddMenuItemToggle("SHIFT+F7 Hole lines always on", &_draw_hole_lines, false);
   addHotkey (Qt::Key_F7, MOD_shift, [this] { _draw_hole_lines = !_draw_hole_lines; });
@@ -571,7 +571,7 @@ void MapView::createGUI()
                   alloff_doodads = _draw_wmo_doodads;
                   alloff_contour = _draw_contour;
                   alloff_wmo = _draw_wmo;
-                  alloff_fog = gWorld->drawfog;
+                  alloff_fog = _world->drawfog;
                   alloff_terrain = _draw_terrain;
 
                   _draw_models = false;
@@ -579,7 +579,7 @@ void MapView::createGUI()
                   _draw_contour = true;
                   _draw_wmo = false;
                   _draw_terrain = true;
-                  gWorld->drawfog = false;
+                  _world->drawfog = false;
                 }
                 else
                 {
@@ -588,7 +588,7 @@ void MapView::createGUI()
                   _draw_contour = alloff_contour;
                   _draw_wmo = alloff_wmo;
                   _draw_terrain = alloff_terrain;
-                  gWorld->drawfog = alloff_fog;
+                  _world->drawfog = alloff_fog;
                 }
                 alloff = !alloff;
               }
@@ -599,7 +599,7 @@ void MapView::createGUI()
             , [this]
               {
                 std::ofstream f("bookmarks.txt", std::ios_base::app);
-                f << gWorld->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw()._ << " " << _camera.pitch()._ << " " << gWorld->getAreaID (_camera.position) << std::endl;
+                f << _world->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw()._ << " " << _camera.pitch()._ << " " << _world->getAreaID (_camera.position) << std::endl;
               }
             );
 
@@ -613,11 +613,11 @@ void MapView::createGUI()
             , MOD_ctrl
             , [this]
               {
-                mainGui->objectEditor->copy (*gWorld->GetCurrentSelection());
+                mainGui->objectEditor->copy (*_world->GetCurrentSelection());
               }
             , [this]
               {
-                return !!gWorld->GetCurrentSelection();
+                return !!_world->GetCurrentSelection();
               }
             );
 
@@ -633,7 +633,7 @@ void MapView::createGUI()
             , MOD_none
             , [this]
               {
-                mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
+                mainGui->objectEditor->copy(*_world->GetCurrentSelection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -656,7 +656,7 @@ void MapView::createGUI()
 
   addHotkey ( Qt::Key_C
             , MOD_none
-            , [] { gWorld->clearVertexSelection(); }
+            , [this] { _world->clearVertexSelection(); }
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
@@ -685,9 +685,9 @@ void MapView::createGUI()
               {
                 // write teleport cords to txt file
                 std::ofstream f("ports.txt", std::ios_base::app);
-                f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
-                f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << gWorld->getMapID() << std::endl;
-                f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
+                f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
+                f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID() << std::endl;
+                f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
                 f.close();
               }
             );
@@ -752,7 +752,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                gWorld->setHoleADT (_camera.position, _mod_alt_down);
+                _world->setHoleADT (_camera.position, _mod_alt_down);
               }
             , [&] { return terrainMode == editing_mode::holes; }
             );
@@ -802,9 +802,9 @@ void MapView::createGUI()
                 else
                 {
                   // toggle selected model visibility
-                  if (gWorld->HasSelection())
+                  if (_world->HasSelection())
                   {
-                    auto selection = gWorld->GetCurrentSelection();
+                    auto selection = _world->GetCurrentSelection();
                     if (selection->which() == eEntry_Model)
                     {
                       auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
@@ -882,23 +882,23 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                if (gWorld->HasSelection())
+                if (_world->HasSelection())
                 {
-                  auto selection = gWorld->GetCurrentSelection();
+                  auto selection = _world->GetCurrentSelection();
 
                   if (selection->which() == eEntry_Model)
                   {
-                    gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+                    _world->updateTilesModel(boost::get<selected_model_type> (*selection));
                     boost::get<selected_model_type> (*selection)->pos = _cursor_pos;
                     boost::get<selected_model_type> (*selection)->recalcExtents();
-                    gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+                    _world->updateTilesModel(boost::get<selected_model_type> (*selection));
                   }
                   else if (selection->which() == eEntry_WMO)
                   {
-                    gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
                     boost::get<selected_wmo_type> (*selection)->pos = _cursor_pos;
                     boost::get<selected_wmo_type> (*selection)->recalcExtents();
-                    gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
                   }
                 }
               }
@@ -918,7 +918,7 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::paint; }
             );
 
-  addHotkey (Qt::Key_Plus, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
+  addHotkey (Qt::Key_Plus, MOD_shift, [this] { _world->fogdistance += 60.0f; });
 
 
   addHotkey (Qt::Key_Minus, MOD_alt, [this] { mainGui->terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
@@ -934,7 +934,7 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::paint; }
             );
 
-  addHotkey (Qt::Key_Minus, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
+  addHotkey (Qt::Key_Minus, MOD_shift, [this] { _world->fogdistance -= 60.0f; });
 
   addHotkey (Qt::Key_1, MOD_shift, [this] { _camera.move_speed = 15.0f; });
   addHotkey (Qt::Key_2, MOD_shift, [this] { _camera.move_speed = 50.0f; });
@@ -957,16 +957,16 @@ void MapView::createGUI()
   addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
   addHotkey (Qt::Key_0, MOD_none, [this] { set_editing_mode (editing_mode::object); });
 
-  addHotkey (Qt::Key_0, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 0; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_1, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 1; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_2, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 2; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_3, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 3; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_4, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 4; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_5, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 5; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_6, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 6; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_7, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 7; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_8, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 8; }, [] { return gWorld->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_9, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 9; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_0, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 0; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_1, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 1; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_2, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 2; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_3, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 3; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_4, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 4; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_5, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 5; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_6, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 6; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_7, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 7; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_8, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 8; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_9, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 9; }, [this] { return _world->IsSelection(eEntry_WMO); });
 
   // CAPS warning
   mainGui->capsWarning = new ui::caps_warning;
@@ -987,11 +987,13 @@ MapView::MapView( math::degrees _camera_ah0
                 , math::degrees _camera_av0
                 , math::vector_3d camera_pos
                 , noggit::ui::main_window* main_window
+                , World* world
                 )
   : _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
   , _camera(camera_pos, _camera_ah0, _camera_av0)
   , _main_window (main_window)
+  , _world (world)
 {
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
@@ -1069,12 +1071,12 @@ MapView::MapView( math::degrees _camera_ah0
   // Set camera y (height) position to current ground height plus some space.
   math::vector_3d t = math::vector_3d(0, 0, 0);
   tile_index tile(_camera.position);
-  if (!gWorld->mapIndex.tileLoaded(tile))
+  if (!_world->mapIndex.tileLoaded(tile))
   {
-    gWorld->mapIndex.loadTile(tile);
+    _world->mapIndex.loadTile(tile);
   }
 
-  gWorld->GetVertex(_camera.position.x, _camera.position.z, &t);
+  _world->GetVertex(_camera.position.x, _camera.position.z, &t);
 
   // min elevation according to https://wowdev.wiki/AreaTable.dbc
   //! \ todo use the current area's MinElevation
@@ -1118,8 +1120,8 @@ MapView::~MapView()
 {
   delete mainGui;
   mainGui = nullptr;
-  delete gWorld;
-  gWorld = nullptr;
+  delete _world;
+  _world = nullptr;
 }
 
 void MapView::tick (float dt)
@@ -1136,8 +1138,8 @@ void MapView::tick (float dt)
 #endif
 
   // start unloading tiles
-  gWorld->mapIndex.enterTile (tile_index (_camera.position));
-  gWorld->mapIndex.unloadTiles (tile_index (_camera.position));
+  _world->mapIndex.enterTile (tile_index (_camera.position));
+  _world->mapIndex.unloadTiles (tile_index (_camera.position));
 
   dt = std::min(dt, 1.0f);
 
@@ -1188,7 +1190,7 @@ void MapView::tick (float dt)
       math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, _camera.yaw());
       math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, _camera.yaw());
     }
-    auto Selection = gWorld->GetCurrentSelection();
+    auto Selection = _world->GetCurrentSelection();
     if (Selection)
     {
       // update rotation editor if the selection has changed
@@ -1210,33 +1212,33 @@ void MapView::tick (float dt)
         // Move scale and rotate with numpad keys
         if (Selection->which() == eEntry_WMO)
         {
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
           boost::get<selected_wmo_type> (*Selection)->pos.x += keyx * moveratio;
           boost::get<selected_wmo_type> (*Selection)->pos.y += keyy * moveratio;
           boost::get<selected_wmo_type> (*Selection)->pos.z += keyz * moveratio;
           boost::get<selected_wmo_type> (*Selection)->dir.y += keyr * moveratio * 5;
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
           mainGui->rotationEditor->updateValues();
         }
 
         if (Selection->which() == eEntry_Model)
         {
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
           boost::get<selected_model_type> (*Selection)->pos.x += keyx * moveratio;
           boost::get<selected_model_type> (*Selection)->pos.y += keyy * moveratio;
           boost::get<selected_model_type> (*Selection)->pos.z += keyz * moveratio;
           boost::get<selected_model_type> (*Selection)->dir.y += keyr * moveratio * 5;
           boost::get<selected_model_type> (*Selection)->sc += keys * moveratio / 50;
           boost::get<selected_model_type> (*Selection)->recalcExtents();
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
           mainGui->rotationEditor->updateValues();
         }
       }
 
       math::vector_3d ObjPos;
-      if (gWorld->IsSelection(eEntry_Model))
+      if (_world->IsSelection(eEntry_Model))
       {
         //! \todo  Tell me what this is.
         ObjPos = boost::get<selected_model_type> (*Selection)->pos - _camera.position;
@@ -1252,7 +1254,7 @@ void MapView::tick (float dt)
         ObjPos.x = 80.0f;
         if (Selection->which() == eEntry_WMO)
         {
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
 
           if (_mod_shift_down)
           {
@@ -1274,12 +1276,12 @@ void MapView::tick (float dt)
           }
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
           mainGui->rotationEditor->updateValues();
         }
         else if (Selection->which() == eEntry_Model)
         {
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
           if (_mod_alt_down)
           {
             float ScaleAmount = pow(2.0f, mv * 4.0f);
@@ -1315,7 +1317,7 @@ void MapView::tick (float dt)
 
           mainGui->rotationEditor->updateValues();
           boost::get<selected_model_type> (*Selection)->recalcExtents();
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
         }
       }
 
@@ -1351,7 +1353,7 @@ void MapView::tick (float dt)
 
         if (lModify && lTarget)
         {
-          gWorld->updateTilesEntry(*Selection);
+          _world->updateTilesEntry(*Selection);
 
           *lTarget = *lTarget + rh + rv;
 
@@ -1365,12 +1367,12 @@ void MapView::tick (float dt)
           if (Selection->which() == eEntry_WMO)
           {
             boost::get<selected_wmo_type> (*Selection)->recalcExtents();
-            gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+            _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
           }
           else if (Selection->which() == eEntry_Model)
           {
             boost::get<selected_model_type> (*Selection)->recalcExtents();
-            gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
+            _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
           }
         }
       }
@@ -1383,7 +1385,7 @@ void MapView::tick (float dt)
 
       if (leftMouse && Selection->which() == eEntry_MapChunk)
       {
-        bool underMap = gWorld->isUnderMap(_cursor_pos);
+        bool underMap = _world->isUnderMap(_cursor_pos);
 
         switch (terrainMode)
         {
@@ -1418,14 +1420,14 @@ void MapView::tick (float dt)
           {
             // clear chunk texture
             if (mViewMode == eViewMode_3D && !underMap)
-              gWorld->eraseTextures(_cursor_pos);
+              _world->eraseTextures(_cursor_pos);
             else if (mViewMode == eViewMode_2D)
-              gWorld->eraseTextures({CHUNKSIZE * 4.0f * aspect_ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z});
+              _world->eraseTextures({CHUNKSIZE * 4.0f * aspect_ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z});
           }
           else if (_mod_ctrl_down)
           {
             // Pick texture
-            mainGui->TexturePicker->getTextures(*gWorld->GetCurrentSelection());
+            mainGui->TexturePicker->getTextures(*_world->GetCurrentSelection());
           }
           else  if (_mod_shift_down && !!UITexturingGUI::getSelectedTexture())
           {
@@ -1453,11 +1455,11 @@ void MapView::tick (float dt)
             if (_mod_shift_down)
             {
               auto pos (boost::get<selected_chunk_type> (*Selection).position);
-              gWorld->setHole(pos, _mod_alt_down, false);
+              _world->setHole(pos, _mod_alt_down, false);
             }
             else if (_mod_ctrl_down && !underMap)
             {
-              gWorld->setHole(_cursor_pos, _mod_alt_down, true);
+              _world->setHole(_cursor_pos, _mod_alt_down, true);
             }
           }
           break;
@@ -1467,12 +1469,12 @@ void MapView::tick (float dt)
             if (_mod_shift_down)
             {
               // draw the selected AreaId on current selected chunk
-              gWorld->setAreaID(_cursor_pos, _selected_area_id, false);
+              _world->setAreaID(_cursor_pos, _selected_area_id, false);
             }
             else if (_mod_ctrl_down)
             {
               // pick areaID from chunk
-              MapChunk* chnk (boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
+              MapChunk* chnk (boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).chunk);
               int newID = chnk->getAreaID();
               _selected_area_id = newID;
               mainGui->ZoneIDBrowser->setZoneID(newID);
@@ -1484,11 +1486,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              gWorld->mapIndex.setFlag(true, _cursor_pos, FLAG_IMPASS);
+              _world->mapIndex.setFlag(true, _cursor_pos, FLAG_IMPASS);
             }
             else if (_mod_ctrl_down)
             {
-              gWorld->mapIndex.setFlag(false, _cursor_pos, FLAG_IMPASS);
+              _world->mapIndex.setFlag(false, _cursor_pos, FLAG_IMPASS);
             }
           }
           break;
@@ -1575,19 +1577,19 @@ void MapView::tick (float dt)
   mainGui->texturingTool->update_brushes();
 
 
-  gWorld->time += this->mTimespeed * dt;
+  _world->time += this->mTimespeed * dt;
 
 
-  gWorld->animtime += dt * 1000.0f;
-  globalTime = static_cast<int>(gWorld->animtime);
+  _world->animtime += dt * 1000.0f;
+  globalTime = static_cast<int>(_world->animtime);
 
-  gWorld->tick (dt);
+  _world->tick (dt);
 
-  lastSelected = gWorld->GetCurrentSelection();
+  lastSelected = _world->GetCurrentSelection();
 
-  if (!MapChunkWindow->hidden() && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)
+  if (!MapChunkWindow->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->which() == eEntry_MapChunk)
   {
-    UITexturingGUI::setChunkWindow(boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
+    UITexturingGUI::setChunkWindow(boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).chunk);
   }
 }
 
@@ -1623,7 +1625,7 @@ selection_result MapView::intersect_result(bool terrain_only)
   math::ray ray (_camera.position, pos - _camera.position);
 
   selection_result results
-    ( gWorld->intersect ( ray
+    ( _world->intersect ( ray
                         , terrain_only
                         , terrainMode == editing_mode::object
                         , _draw_terrain
@@ -1636,7 +1638,7 @@ selection_result MapView::intersect_result(bool terrain_only)
 
   std::sort ( results.begin()
             , results.end()
-            , [](selection_entry const& lhs, selection_entry const& rhs)
+            , [] (selection_entry const& lhs, selection_entry const& rhs)
               {
                 return lhs.first < rhs.first;
               }
@@ -1651,12 +1653,12 @@ void MapView::doSelection (bool selectTerrainOnly)
 
   if (results.empty())
   {
-    gWorld->SetCurrentSelection (boost::none);
+    _world->SetCurrentSelection (boost::none);
   }
   else
   {
     auto const& hit (results.front().second);
-    gWorld->SetCurrentSelection (hit);
+    _world->SetCurrentSelection (hit);
 
     _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type>(hit)->pos
       : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type>(hit)->pos
@@ -1716,7 +1718,7 @@ void MapView::displayViewMode_2D()
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
 
-  gWorld->drawTileMode ( _camera.yaw()._
+  _world->drawTileMode ( _camera.yaw()._
                        , _camera.position
                        , _draw_lines
                        , _2d_zoom
@@ -1761,7 +1763,7 @@ void MapView::displayViewMode_2D()
 void MapView::displayViewMode_3D()
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if (!gWorld->IsSelection(eEntry_Model) && !gWorld->IsSelection(eEntry_WMO) && Settings::getInstance()->AutoSelectingMode)
+  if (!_world->IsSelection(eEntry_Model) && !_world->IsSelection(eEntry_WMO) && Settings::getInstance()->AutoSelectingMode)
   {
     doSelection(true);
   }
@@ -1811,7 +1813,7 @@ void MapView::displayViewMode_3D()
   opengl::matrix::look_at
     (_camera.position, _camera.look_at(), {0.0f, 1.0f, 0.0f});
 
-  gWorld->draw ( _cursor_pos
+  _world->draw ( _cursor_pos
                , cursor_color
                , cursor_type
                , radius
@@ -1861,7 +1863,7 @@ void MapView::display()
     gl.matrixMode (GL_MODELVIEW);
     gl.loadIdentity();
 
-    gWorld->saveMap (width(), height());
+    _world->saveMap (width(), height());
     Saving = false;
   }
 
@@ -1972,14 +1974,14 @@ void MapView::keyPressEvent (QKeyEvent *event)
   if (event->key() == Qt::Key_Plus)
   {
     //change selected model size
-    if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
+    if (_world->HasSelection() && _world->GetCurrentSelection()->which() != eEntry_MapChunk)
       keys = 1;
   }
 
   if (event->key() == Qt::Key_Minus)
   {
     //change selected model size
-    if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
+    if (_world->HasSelection() && _world->GetCurrentSelection()->which() != eEntry_MapChunk)
       keys = -1;
   }
 }
@@ -2068,7 +2070,7 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
 
 void MapView::inserObjectFromExtern(int model)
 {
-  if (!gWorld->HasSelection())
+  if (!_world->HasSelection())
     return;
 
   std::string m2_to_add;
@@ -2093,16 +2095,16 @@ void MapView::inserObjectFromExtern(int model)
   m2_to_add = filesToAdd[model];
 
   math::vector_3d selectionPosition;
-  switch (gWorld->GetCurrentSelection()->which())
+  switch (_world->GetCurrentSelection()->which())
   {
   case eEntry_Model:
-    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
+    selectionPosition = boost::get<selected_model_type> (*_world->GetCurrentSelection())->pos;
     break;
   case eEntry_WMO:
-    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
+    selectionPosition = boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->pos;
     break;
   case eEntry_MapChunk:
-    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
+    selectionPosition = boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).position;
     break;
   }
 
@@ -2111,7 +2113,7 @@ void MapView::inserObjectFromExtern(int model)
     LogError << "Failed adding " << m2_to_add << ". It was not in any MPQ." << std::endl;
   }
 
-  gWorld->addM2(m2_to_add, selectionPosition, false);
+  _world->addM2(m2_to_add, selectionPosition, false);
   //! \todo Memoryleak: These models will never get deleted.
 }
 
@@ -2255,10 +2257,10 @@ void MapView::mousePressEvent (QMouseEvent* event)
     break;
 
   case Qt::MiddleButton:
-    if (gWorld->HasSelection())
+    if (_world->HasSelection())
     {
       MoveObj = true;
-      auto selection = gWorld->GetCurrentSelection();
+      auto selection = _world->GetCurrentSelection();
       math::vector_3d objPos;
       if (selection->which() == eEntry_WMO)
       {
@@ -2462,7 +2464,7 @@ void MapView::checkWaterSave()
 {
   tile_index const current (_camera.position);
 
-  if (!gWorld->mapIndex.hasTile (current) || gWorld->canWaterSave(current))
+  if (!_world->mapIndex.hasTile (current) || _world->canWaterSave(current))
   {
     mainGui->waterSaveWarning->hide();
   }
@@ -2485,7 +2487,7 @@ void MapView::prompt_save_current() const
          ) == QMessageBox::Save
      )
   {
-    gWorld->mapIndex.saveTile(tile_index(_camera.position));
+    _world->mapIndex.saveTile(tile_index(_camera.position));
   }
 }
 

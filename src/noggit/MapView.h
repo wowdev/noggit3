@@ -170,6 +170,7 @@ public:
           , math::degrees av0
           , math::vector_3d camera_pos
           , noggit::ui::main_window*
+          , World*
           );
   ~MapView();
 
@@ -224,4 +225,6 @@ private:
 
   math::vector_4d normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
+
+  World* _world;
 };
