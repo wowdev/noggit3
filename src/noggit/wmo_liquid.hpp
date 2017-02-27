@@ -48,7 +48,15 @@ class wmo_liquid
 {
 public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
-  void draw() { render->draw ([&] (opengl::scoped::use_program& shader) { draw_actual (shader); }); }
+  void draw ( math::vector_3d water_color_light
+            , math::vector_3d water_color_dark
+            )
+  {
+    render->draw ( [&] (opengl::scoped::use_program& shader) { draw_actual (shader); }
+                 , water_color_light
+                 , water_color_dark
+                 );
+  }
 
 private:
   int initGeometry(MPQFile* f);

@@ -22,7 +22,10 @@ public:
   void readFromFile(MPQFile &theFile, size_t basePos);
   void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 
-  void draw (opengl::scoped::use_program& water_shader);
+  void draw ( opengl::scoped::use_program& water_shader
+            , math::vector_3d water_color_light
+            , math::vector_3d water_color_dark
+            );
   bool hasData(size_t layer);
   void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);
 

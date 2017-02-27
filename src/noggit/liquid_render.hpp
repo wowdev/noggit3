@@ -16,8 +16,14 @@ class liquid_render
 {
 public:
   liquid_render(bool transparency = true, std::string const& filename = "");
-  void draw (std::function<void (opengl::scoped::use_program&)>);
-  void prepare_draw (opengl::scoped::use_program& water_shader);
+  void draw ( std::function<void (opengl::scoped::use_program&)>
+            , math::vector_3d water_color_light
+            , math::vector_3d water_color_dark
+            );
+  void prepare_draw ( opengl::scoped::use_program& water_shader
+                    , math::vector_3d water_color_light
+                    , math::vector_3d water_color_dark
+                    );
 
   void setTextures(std::string const& filename);
   void setTransparency(bool b) { _transparency = b; }

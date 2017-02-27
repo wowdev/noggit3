@@ -153,7 +153,10 @@ void ChunkWater::setType(int type, size_t layer)
   }
 }
 
-void ChunkWater::draw (opengl::scoped::use_program& water_shader)
+void ChunkWater::draw ( opengl::scoped::use_program& water_shader
+                      , math::vector_3d water_color_light
+                      , math::vector_3d water_color_dark
+                      )
 {
   if (_layers.empty())
   {
@@ -164,12 +167,16 @@ void ChunkWater::draw (opengl::scoped::use_program& water_shader)
   {
     for (liquid_layer& layer : _layers)
     {
-      layer.draw (water_shader);
+      layer.draw ( water_shader
+                 , water_color_light
+                 , water_color_dark
+                 );
     }
   }
   else if (Environment::getInstance()->currentWaterLayer < _layers.size())
   {
-    _layers[Environment::getInstance()->currentWaterLayer].draw (water_shader);
+    _layers[Environment::getInstance()->currentWaterLayer].draw
+      (water_shader, water_color_light, water_color_dark);
   }
 }
 

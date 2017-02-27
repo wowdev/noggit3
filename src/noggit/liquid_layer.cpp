@@ -275,9 +275,12 @@ void liquid_layer::updateRender()
     );
 }
 
-void liquid_layer::draw (opengl::scoped::use_program& water_shader)
+void liquid_layer::draw ( opengl::scoped::use_program& water_shader
+                        , math::vector_3d water_color_light
+                        , math::vector_3d water_color_dark
+                        )
 {
-  _render.prepare_draw (water_shader);
+  _render.prepare_draw (water_shader, water_color_light, water_color_dark);
 
   water_shader.attrib ("position", vertices);
   water_shader.attrib ("tex_coord", tex_coords);

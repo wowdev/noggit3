@@ -854,6 +854,8 @@ void main()
                         , is_hidden
                         , draw_wmo_doodads
                         , drawfog
+                        , skies->colorSet[WATER_COLOR_LIGHT]
+                        , skies->colorSet[WATER_COLOR_DARK]
                         );
       }
     }
@@ -879,7 +881,10 @@ void main()
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
-      tile->drawWater (water_shader);
+      tile->drawWater ( water_shader
+                      , skies->colorSet[WATER_COLOR_LIGHT]
+                      , skies->colorSet[WATER_COLOR_DARK]
+                      );
     }
   }
 }
