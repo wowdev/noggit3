@@ -117,12 +117,14 @@ public:
   ChunkWater* liquid_chunk() const;
 
   void updateVerticesData();
-  void recalcNorms();
+  void recalcNorms (std::function<boost::optional<float> (float, float)> height);
 
   //! \todo implement Action stack for these
   bool changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
   bool flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
-  bool blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
+  bool blurTerrain ( math::vector_3d const& pos, float remain, float radius, int BrushType
+                   , std::function<boost::optional<float> (float, float)> height
+                   );
 
   void selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices);
   void fixVertices(std::set<math::vector_3d*>& selected);

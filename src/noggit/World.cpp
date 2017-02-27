@@ -946,8 +946,8 @@ void World::clearHeight(math::vector_3d const& pos)
   for_all_chunks_on_tile(pos, [](MapChunk* chunk) {
     chunk->clearHeight();
   });
-  for_all_chunks_on_tile(pos, [](MapChunk* chunk) {
-    chunk->recalcNorms();
+  for_all_chunks_on_tile(pos, [this] (MapChunk* chunk) {
+      recalc_norms (chunk);
   });
 }
 
@@ -1062,7 +1062,7 @@ void World::drawTileMode ( float /*ah*/
   }
 }
 
-bool World::GetVertex(float x, float z, math::vector_3d *V)
+bool World::GetVertex(float x, float z, math::vector_3d *V) const
 {
   tile_index tile({x, 0, z});
 
@@ -1140,9 +1140,9 @@ void World::changeTerrain(math::vector_3d const& pos, float change, float radius
       {
         return chunk->changeTerrain(pos, change, radius, BrushType, inner_radius);
       }
-    , [] (MapChunk* chunk)
+    , [this] (MapChunk* chunk)
       {
-        chunk->recalcNorms();
+        recalc_norms (chunk);
       }
     );
 }
@@ -1155,9 +1155,9 @@ void World::flattenTerrain(math::vector_3d const& pos, float remain, float radiu
       {
         return chunk->flattenTerrain(pos, remain, radius, BrushType, flattenType, origin, angle, orientation);
       }
-    , [] (MapChunk* chunk)
+    , [this] (MapChunk* chunk)
       {
-        chunk->recalcNorms();
+        recalc_norms (chunk);
       }
     );
 }
@@ -1168,13 +1168,34 @@ void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, 
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->blurTerrain(pos, remain, radius, BrushType);
+        return chunk->blurTerrain ( pos
+                                  , remain
+                                  , radius
+                                  , BrushType
+                                  , [this] (float x, float z) -> boost::optional<float>
+                                    {
+                                      math::vector_3d vec;
+                                      auto res (GetVertex (x, z, &vec));
+                                      return boost::make_optional (res, vec.y);
+                                    }
+                                  );
       }
-    , [] (MapChunk* chunk)
+    , [this] (MapChunk* chunk)
       {
-        chunk->recalcNorms();
+        recalc_norms (chunk);
       }
     );
+}
+
+void World::recalc_norms (MapChunk* chunk) const
+{
+  chunk->recalcNorms ( [this] (float x, float z) -> boost::optional<float>
+                       {
+                         math::vector_3d vec;
+                         auto res (GetVertex (x, z, &vec));
+                         return boost::make_optional (res, vec.y);
+                       }
+                     );
 }
 
 bool World::paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture)
@@ -1690,7 +1711,7 @@ void World::fixAllGaps()
 
   for (MapChunk* chunk : chunks)
   {
-    chunk->recalcNorms();
+    recalc_norms (chunk);
   }
 }
 
@@ -1773,7 +1794,7 @@ void World::updateSelectedVertices()
   for (MapChunk* chunk : _vertex_chunks)
   {
     chunk->updateVerticesData();
-    chunk->recalcNorms();
+    recalc_norms (chunk);
   }
 }
 

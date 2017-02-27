@@ -836,47 +836,40 @@ void MapChunk::updateVerticesData()
   gl.bufferData<GL_ARRAY_BUFFER>(vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
 }
 
-void MapChunk::recalcNorms()
+void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)> height)
 {
-  math::vector_3d P1, P2, P3, P4;
-  math::vector_3d Norm, N1, N2, N3, N4, D;
-
   for (int i = 0; i<mapbufsize; ++i)
   {
-    if (!gWorld->GetVertex(mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P1))
-    {
-      P1.x = mVertices[i].x - UNITSIZE*0.5f;
-      P1.y = mVertices[i].y;
-      P1.z = mVertices[i].z - UNITSIZE*0.5f;
-    }
+    math::vector_3d const P1
+      ( mVertices[i].x - UNITSIZE / 2.f
+      , height (mVertices[i].x - UNITSIZE / 2.f, mVertices[i].z - UNITSIZE / 2.f).get_value_or (mVertices[i].y)
+      , mVertices[i].z - UNITSIZE / 2.f
+      );
 
-    if (!gWorld->GetVertex(mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P2))
-    {
-      P2.x = mVertices[i].x + UNITSIZE*0.5f;
-      P2.y = mVertices[i].y;
-      P2.z = mVertices[i].z - UNITSIZE*0.5f;
-    }
+    math::vector_3d const P2
+      ( mVertices[i].x + UNITSIZE / 2.f
+      , height (mVertices[i].x + UNITSIZE / 2.f, mVertices[i].z - UNITSIZE / 2.f).get_value_or (mVertices[i].y)
+      , mVertices[i].z - UNITSIZE / 2.f
+      );
 
-    if (!gWorld->GetVertex(mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P3))
-    {
-      P3.x = mVertices[i].x + UNITSIZE*0.5f;
-      P3.y = mVertices[i].y;
-      P3.z = mVertices[i].z + UNITSIZE*0.5f;
-    }
+    math::vector_3d const P3
+      ( mVertices[i].x + UNITSIZE / 2.f
+      , height (mVertices[i].x + UNITSIZE / 2.f, mVertices[i].z + UNITSIZE / 2.f).get_value_or (mVertices[i].y)
+      , mVertices[i].z + UNITSIZE / 2.f
+      );
 
-    if (!gWorld->GetVertex(mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P4))
-    {
-      P4.x = mVertices[i].x - UNITSIZE*0.5f;
-      P4.y = mVertices[i].y;
-      P4.z = mVertices[i].z + UNITSIZE*0.5f;
-    }
+    math::vector_3d const P4
+      ( mVertices[i].x - UNITSIZE / 2.f
+      , height (mVertices[i].x - UNITSIZE / 2.f, mVertices[i].z + UNITSIZE / 2.f).get_value_or (mVertices[i].y)
+      , mVertices[i].z + UNITSIZE / 2.f
+      );
 
-    N1 = (P2 - mVertices[i]) % (P1 - mVertices[i]);
-    N2 = (P3 - mVertices[i]) % (P2 - mVertices[i]);
-    N3 = (P4 - mVertices[i]) % (P3 - mVertices[i]);
-    N4 = (P1 - mVertices[i]) % (P4 - mVertices[i]);
+    math::vector_3d const N1 ((P2 - mVertices[i]) % (P1 - mVertices[i]));
+    math::vector_3d const N2 ((P3 - mVertices[i]) % (P2 - mVertices[i]));
+    math::vector_3d const N3 ((P4 - mVertices[i]) % (P3 - mVertices[i]));
+    math::vector_3d const N4 ((P1 - mVertices[i]) % (P4 - mVertices[i]));
 
-    Norm = N1 + N2 + N3 + N4;
+    math::vector_3d Norm (N1 + N2 + N3 + N4);
     Norm.normalize();
     mNormals[i] = Norm;
   }
@@ -1076,7 +1069,12 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
   return changed;
 }
 
-bool MapChunk::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType)
+bool MapChunk::blurTerrain ( math::vector_3d const& pos
+                           , float remain
+                           , float radius
+                           , int BrushType
+                           , std::function<boost::optional<float> (float, float)> height
+                           )
 {
   bool changed (false);
 
@@ -1101,10 +1099,12 @@ bool MapChunk::blurTerrain(math::vector_3d const& pos, float remain, float radiu
         float dist2 = misc::dist (tx, tz, mVertices[i].x, mVertices[i].z);
         if (dist2 > radius)
           continue;
-        math::vector_3d TempVec;
-        gWorld->GetVertex(tx, tz, &TempVec);
-        TotalHeight += (1.0f - dist2 / radius) * TempVec.y;
-        TotalWeight += (1.0f - dist2 / radius);
+        auto h (height (tx, tz));
+        if (h)
+        {
+          TotalHeight += (1.0f - dist2 / radius) * h.get();
+          TotalWeight += (1.0f - dist2 / radius);
+        }
       }
     }
 
