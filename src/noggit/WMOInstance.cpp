@@ -53,6 +53,8 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , bool force_box
                        , bool draw_doodads
                        , bool draw_fog
+                       , math::vector_3d water_color_light
+                       , math::vector_3d water_color_dark
                        )
 {
   {
@@ -77,6 +79,8 @@ void WMOInstance::draw ( math::frustum const& frustum
                 , camera
                 , draw_doodads
                 , draw_fog
+                , water_color_light
+                , water_color_dark
                 );
     else
       wmo->draw ( doodadset
@@ -90,6 +94,8 @@ void WMOInstance::draw ( math::frustum const& frustum
                 , camera
                 , draw_doodads
                 , draw_fog
+                , water_color_light
+                , water_color_dark
                 );
   }
 

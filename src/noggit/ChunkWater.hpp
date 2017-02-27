@@ -21,7 +21,10 @@ public:
   void fromFile(MPQFile &f, size_t basePos);
   void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
-  void draw (opengl::scoped::use_program& water_shader);
+  void draw ( opengl::scoped::use_program& water_shader
+            , math::vector_3d water_color_light
+            , math::vector_3d water_color_dark
+            );
 
   void autoGen(MapChunk* chunk, float factor);
   void CropWater(MapChunk* chunkTerrain);

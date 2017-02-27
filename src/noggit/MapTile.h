@@ -79,7 +79,10 @@ public:
                  , const math::vector_3d& camera
                  , bool draw_hole_lines
                  );
-  void drawWater (opengl::scoped::use_program& water_shader);
+  void drawWater ( opengl::scoped::use_program& water_shader
+                 , math::vector_3d water_color_light
+                 , math::vector_3d water_color_dark
+                 );
   void drawTextures (float minX, float minY, float maxX, float maxY);
   void drawMFBO (opengl::scoped::use_program&);
 

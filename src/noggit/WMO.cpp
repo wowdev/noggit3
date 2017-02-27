@@ -343,6 +343,8 @@ void WMO::draw ( int doodadset
                , const math::vector_3d& camera
                , bool draw_doodads
                , bool draw_fog
+               , math::vector_3d water_color_light
+               , math::vector_3d water_color_dark
                )
 {
   if (!finishedLoading ())
@@ -367,7 +369,7 @@ void WMO::draw ( int doodadset
       group.drawDoodads (doodadset, ofs, angle, frustum, draw_fog);
     }
 
-    group.drawLiquid();
+    group.drawLiquid (water_color_light, water_color_dark);
   }
 
   if (boundingbox)
@@ -1151,7 +1153,9 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
 
 }
 
-void WMOGroup::drawLiquid()
+void WMOGroup::drawLiquid ( math::vector_3d water_color_light
+                          , math::vector_3d water_color_dark
+                          )
 {
   if (!visible) return;
 
@@ -1174,7 +1178,7 @@ void WMOGroup::drawLiquid()
     gl.disable(GL_ALPHA_TEST);
     gl.depthMask(GL_TRUE);
     gl.color4f(1, 1, 1, 1);
-    lq->draw();
+    lq->draw (water_color_light, water_color_dark);
     gl.disable(GL_LIGHT2);
   }
 }

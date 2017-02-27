@@ -55,7 +55,9 @@ public:
            , const float& cull_distance
            , const math::vector_3d& camera
            );
-  void drawLiquid();
+  void drawLiquid ( math::vector_3d water_color_light
+                  , math::vector_3d water_color_dark
+                  );
   void drawDoodads ( unsigned int doodadset
                    , const math::vector_3d& ofs
                    , math::degrees const
@@ -159,6 +161,8 @@ public:
             , const math::vector_3d& camera
             , bool draw_doodads
             , bool draw_fog
+            , math::vector_3d water_color_light
+            , math::vector_3d water_color_dark
             );
   bool drawSkybox ( math::vector_3d pCamera
                   , math::vector_3d pLower
