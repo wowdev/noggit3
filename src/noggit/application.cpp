@@ -313,11 +313,6 @@ int Noggit::start(int argc, char *argv[])
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
-  main_window = std::make_unique<noggit::ui::main_window>();
-  main_window->resize (xres, yres);
-  main_window->show();
-
-  initEnv();
   parseArgs(argc, argv);
 
   srand(::time(nullptr));
@@ -377,6 +372,14 @@ int Noggit::start(int argc, char *argv[])
   LogDebug << "GL: Version: " << gl.getString (GL_VERSION) << std::endl;
   LogDebug << "GL: Vendor: " << gl.getString (GL_VENDOR) << std::endl;
   LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
+
+  main_window = std::make_unique<noggit::ui::main_window>();
+  main_window->resize (xres, yres);
+  main_window->show();
+
+  initEnv();
+
+  return 0;
 }
 
 
