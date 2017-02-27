@@ -942,7 +942,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 }
 
 
-void Model::draw()
+void Model::draw (bool draw_fog)
 {
   if (!finishedLoading())
     return;
@@ -952,7 +952,7 @@ void Model::draw()
     return;
   }
 
-  if (gWorld && gWorld->drawfog)
+  if (draw_fog)
     gl.enable(GL_FOG);
   else
     gl.disable(GL_FOG);

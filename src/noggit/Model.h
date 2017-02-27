@@ -154,7 +154,7 @@ public:
    Model(const std::string& name);
   ~Model();
 
-  void draw();
+  void draw (bool draw_fog);
   void drawTileMode();
 
   std::vector<float> intersect (math::ray const&);

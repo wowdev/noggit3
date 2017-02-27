@@ -495,7 +495,11 @@ void World::draw ( math::vector_3d const& cursor_pos
   {
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
-      hadSky = it->second.wmo->drawSkybox(camera_pos, it->second.extents[0], it->second.extents[1]);
+      hadSky = it->second.wmo->drawSkybox ( camera_pos
+                                          , it->second.extents[0]
+                                          , it->second.extents[1]
+                                          , drawfog
+                                          );
       if (hadSky)
       {
         break;
@@ -514,7 +518,10 @@ void World::draw ( math::vector_3d const& cursor_pos
   skies->initSky(camera_pos, daytime);
 
   if (!hadSky)
-    hadSky = skies->drawSky(camera_pos, outdoorLightStats.nightIntensity);
+    hadSky = skies->drawSky ( camera_pos
+                            , outdoorLightStats.nightIntensity
+                            , drawfog
+                            );
 
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox
@@ -814,7 +821,13 @@ void main()
       bool const is_hidden (hidden_models.count (it->second.model.get()));
       if (!is_hidden)
       {
-        it->second.draw (frustum, culldistance, camera_pos, is_hidden, draw_models_with_box);
+        it->second.draw ( frustum
+                        , culldistance
+                        , camera_pos
+                        , is_hidden
+                        , draw_models_with_box
+                        , drawfog
+                        );
       }
     }
   }
@@ -835,7 +848,13 @@ void main()
       bool const is_hidden (hidden_map_objects.count (it->second.wmo.get()));
       if (!is_hidden)
       {
-        it->second.draw (frustum, culldistance, camera_pos, is_hidden, draw_wmo_doodads);
+        it->second.draw ( frustum
+                        , culldistance
+                        , camera_pos
+                        , is_hidden
+                        , draw_wmo_doodads
+                        , drawfog
+                        );
       }
     }
 
