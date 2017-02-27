@@ -55,8 +55,15 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , bool draw_fog
                        , math::vector_3d water_color_light
                        , math::vector_3d water_color_dark
+                       , boost::optional<selection_type> selection
                        )
 {
+  bool const is_selected
+    ( selection
+    && boost::get<selected_wmo_type> (&*selection)
+    && boost::get<selected_wmo_type> (*selection)->mUniqueID == this->mUniqueID
+    );
+
   {
     opengl::scoped::matrix_pusher const matrix;
     gl.translatef(pos.x, pos.y, pos.z);
@@ -67,39 +74,23 @@ void WMOInstance::draw ( math::frustum const& frustum
     gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
     gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
-    if (gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID)
-      wmo->draw ( doodadset
-                , pos
-                , math::degrees (roty)
-                , true
-                , true
-                , true
-                , frustum
-                , cull_distance
-                , camera
-                , draw_doodads
-                , draw_fog
-                , water_color_light
-                , water_color_dark
-                );
-    else
-      wmo->draw ( doodadset
-                , pos
-                , math::degrees (roty)
-                , false
-                , false
-                , false
-                , frustum
-                , cull_distance
-                , camera
-                , draw_doodads
-                , draw_fog
-                , water_color_light
-                , water_color_dark
-                );
+    wmo->draw ( doodadset
+              , pos
+              , math::degrees (roty)
+              , is_selected
+              , is_selected
+              , is_selected
+              , frustum
+              , cull_distance
+              , camera
+              , draw_doodads
+              , draw_fog
+              , water_color_light
+              , water_color_dark
+              );
   }
 
-  if (force_box || ( gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID))
+  if (force_box || is_selected)
   {
     gl.disable(GL_LIGHTING);
 

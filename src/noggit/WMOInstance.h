@@ -71,6 +71,7 @@ public:
             , bool draw_fog
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , boost::optional<selection_type> selection
             );
   void intersect (math::ray const&, selection_result*);
 
