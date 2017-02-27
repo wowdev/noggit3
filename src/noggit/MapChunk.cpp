@@ -1330,8 +1330,6 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   char * lNormals = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
-  // recalculate the normals
-  recalcNorms();
   for (int i = 0; i < mapbufsize; ++i)
   {
     lNormals[i * 3 + 0] = misc::roundc(-mNormals[i].z * 127);
