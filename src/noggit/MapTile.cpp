@@ -326,6 +326,7 @@ void MapTile::draw ( math::frustum const& frustum
                    , int cursor_type
                    , std::map<int, misc::random_color>& area_id_colors
                    , math::vector_4d shadow_color
+                   , boost::optional<selection_type> selection
                    )
 {
   gl.color4f(1, 1, 1, 1);
@@ -347,6 +348,7 @@ void MapTile::draw ( math::frustum const& frustum
                           , cursor_type
                           , area_id_colors
                           , shadow_color
+                          , selection
                           );
     }
   }

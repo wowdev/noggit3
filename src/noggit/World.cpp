@@ -584,6 +584,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , cursor_type
                  , area_id_colors
                  , math::vector_4d {gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f, 1.f}
+                 , mCurrentSelection
                  );
     }
   }
