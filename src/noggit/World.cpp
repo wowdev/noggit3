@@ -856,6 +856,7 @@ void main()
                         , drawfog
                         , skies->colorSet[WATER_COLOR_LIGHT]
                         , skies->colorSet[WATER_COLOR_DARK]
+                        , mCurrentSelection
                         );
       }
     }
