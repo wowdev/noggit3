@@ -716,11 +716,10 @@ void MapTile::saveTile(bool saveAllModels)
   lCurrentPosition += 8 + 0;
 
 
-  int OBJ_lMMDX_Position;
+  int OBJ_lMMDX_Position (lADTObjFileCurrentPosition);
   if (wodSave)
   {
     // WOD OBJ
-    OBJ_lMMDX_Position = lADTObjFileCurrentPosition;
     lADTObjFile.Extend(8 + 0);  // We don't yet know how big this will be.
     SetChunkHeader(lADTObjFile, lADTObjFileCurrentPosition, 'MMDX');
     lADTRootFile.GetPointer<MHDR>(OBJ_lMMDX_Position + 8)->mmdx = lADTObjFileCurrentPosition - 0x14; //ISTHISRIGHT ???MHDR is in root so I set the mmdx value there not in obj
