@@ -42,6 +42,7 @@ private:
   UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
   const math::vector_3d* _camera_pos;
+  float* _tablet_pressure;
 
 public:
   // position of the tools window(s)
@@ -77,7 +78,10 @@ public:
   ui::water_save_warning *waterSaveWarning;
   UIHelperModels *HelperModels;
 
-  explicit UIMapViewGUI(MapView* setMapview, math::vector_3d* camera_pos);
+  explicit UIMapViewGUI ( MapView* setMapview
+                        , math::vector_3d* camera_pos
+                        , float* tablet_pressure
+                        );
 
   void setTilemode(bool enabled);
   virtual void render() const;

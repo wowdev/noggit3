@@ -227,4 +227,6 @@ private:
   float aspect_ratio() const;
 
   World* _world;
+
+  float _tablet_pressure;
 };

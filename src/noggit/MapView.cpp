@@ -382,7 +382,7 @@ void MapView::changeZoneIDValue (int set)
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI(this, &_camera.position);
+  mainGui = new UIMapViewGUI(this, &_camera.position, &_tablet_pressure);
 
   mainGui->ZoneIDBrowser->setMapID(_world->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
@@ -1149,7 +1149,7 @@ void MapView::tick (float dt)
     PACKET pkt;
     while (gpWTPacketsGet(app.hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
     {
-      app.pressure = pkt.pkNormalPressure;
+      _tablet_pressure = pkt.pkNormalPressure;
     }
   }
 #endif
@@ -1168,12 +1168,12 @@ void MapView::tick (float dt)
     switch (terrainMode)
     {
     case editing_mode::ground:
-      mainGui->terrainTool->setRadius((float)app.pressure / 20.0f);
+      mainGui->terrainTool->setRadius (_tablet_pressure / 20.0f);
     case editing_mode::flatten_blur:
-      mainGui->flattenTool->setRadius((float)app.pressure / 20.0f);
+      mainGui->flattenTool->setRadius (_tablet_pressure / 20.0f);
       break;
     case editing_mode::paint:
-      mainGui->texturingTool->change_pressure((float)app.pressure / 2048.0f);
+      mainGui->texturingTool->change_pressure (_tablet_pressure / 2048.0f);
       break;
     }
   }
