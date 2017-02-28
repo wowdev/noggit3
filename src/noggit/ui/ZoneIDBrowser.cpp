@@ -19,8 +19,8 @@ namespace ui
 {
   zone_id_browser::zone_id_browser()
     : QWidget(nullptr)
-    , mapID(-1)
     , _area_tree(new QTreeWidget())
+    , mapID(-1)
   {
     setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
     setWindowTitle("Area picker");

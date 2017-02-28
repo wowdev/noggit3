@@ -48,10 +48,10 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
                            , bool* tablet_active
                            )
   : UIFrame(0.0f, 0.0f, (float)video::width, (float)video::height)
-  , theMapview(setMapview)
   , _camera_pos(camera_pos)
   , _tablet_pressure (tablet_pressure)
   , _tablet_active (tablet_active)
+  , theMapview(setMapview)
 {
   // Minimap window
   minimapWindow = new UIMinimapWindow(gWorld, camera_pos);

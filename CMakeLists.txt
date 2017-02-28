@@ -19,6 +19,8 @@ endmacro()
 
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
 
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=reorder)
+
 # covered by CMAKE_CXX_STANDARD
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat-pedantic)

@@ -16,13 +16,13 @@ namespace ui
   terrain_tool::terrain_tool()
     : QWidget(nullptr)
     , _radius(15.0f)
-    , _inner_radius(0.0f)
     , _speed(2.0f)
+    , _inner_radius(0.0f)
     , _vertex_angle (0.0f)
     , _vertex_orientation (0.0f)
+    , _cursor_pos(nullptr)
     , _edit_type(Environment::getInstance()->groundBrushType)
     , _vertex_mode(eVertexMode_Center)
-    , _cursor_pos(nullptr)
   {
     setWindowTitle("Raise / Lower");
     setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);

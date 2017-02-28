@@ -18,10 +18,10 @@
 
 
 wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor)
-  : xtiles(header.A)
-  , ytiles(header.B)
-  , pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
+  : pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
   , texRepeats(4.0f)
+  , xtiles(header.A)
+  , ytiles(header.B)
   , render(new liquid_render())
 {
   int flag = initGeometry (f);

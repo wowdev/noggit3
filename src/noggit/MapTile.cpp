@@ -31,9 +31,9 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , changed(0)
+  , Water (this, xbase, zbase)
   , mBigAlpha(pBigAlpha)
   , mFilename(pFilename)
-  , Water (this, xbase, zbase)
 {
   MPQFile theFile(mFilename);
 

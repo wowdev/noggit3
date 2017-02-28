@@ -1009,8 +1009,8 @@ MapView::MapView( math::degrees _camera_ah0
                 , World* world
                 )
   : _GUIDisplayingEnabled(true)
-  , mTimespeed(0.0f)
   , _camera(camera_pos, _camera_ah0, _camera_av0)
+  , mTimespeed(0.0f)
   , _main_window (main_window)
   , _world (world)
 {
