@@ -62,8 +62,8 @@ void GenerateContourMap()
 }
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
-  : use_big_alphamap(bigAlpha)
-  , mt(maintile)
+  : mt(maintile)
+  , use_big_alphamap(bigAlpha)
 {
   uint32_t fourcc;
   uint32_t size;

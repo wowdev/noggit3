@@ -5,11 +5,11 @@ namespace noggit
 
 camera::camera(const math::vector_3d& position, math::degrees yaw_, math::degrees pitch_)
     : position(position)
+    , move_speed(200.6f)
     , _roll(0.0f)
     , _yaw(0.0f)
     , _pitch(0.0f)
     , _fov (math::degrees (54.f))
-    , move_speed(200.6f)
 {
   add_to_yaw(yaw_);
   add_to_pitch(pitch_);

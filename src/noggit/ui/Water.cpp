@@ -26,8 +26,6 @@
 
 UIWater::UIWater(UIMapViewGUI *setGui)
   : UIWindow((float)video::width / 2.0f - (float)winWidth / 2.0f, (float)video::height / 2.0f - (float)winHeight / 2.0f - (float)(video::height / 4), (float)winWidth, (float)winHeight)
-  , mainGui(setGui)
-  , tile(0, 0)
   , _liquid_id(5)
   , _radius(10.0f)
   , _angle(10.0f)
@@ -39,6 +37,8 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   , _opacity_mode(river_opacity)
   , _custom_opacity_factor(0.0337f)
   , _lock_pos(math::vector_3d(0.0f, 0.0f, 0.0f))
+  , mainGui(setGui)
+  , tile(0, 0)
 {
   addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 

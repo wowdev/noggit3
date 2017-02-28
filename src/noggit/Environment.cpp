@@ -4,16 +4,16 @@
 #include <noggit/MapHeaders.h>
 
 Environment::Environment()
-  : minRotation(0.0f)
+  : groundBrushType(1)
+  , minRotation(0.0f)
   , maxRotation(360.0f)
   , minTilt(-5.0f)
   , maxTilt(5.0f)
   , minScale(0.9f)
   , maxScale(1.1f)
-  , groundBrushType(1)
-  , currentWaterLayer(0)
-  , displayAllWaterLayers(true)
   , moveModelToCursorPos(false)
+  , displayAllWaterLayers(true)
+  , currentWaterLayer(0)
 {
 }
 

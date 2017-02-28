@@ -40,10 +40,10 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
 }
 
 liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
-  : _liquid_vertex_format(info.liquid_vertex_format)
+  : _liquid_id(info.liquid_id)
+  , _liquid_vertex_format(info.liquid_vertex_format)
   , _minimum(info.minHeight)
   , _maximum(info.maxHeight)
-  , _liquid_id(info.liquid_id)
   , _subchunks(0)
   , pos(base)
   , texRepeats(4.0f)
@@ -91,7 +91,7 @@ liquid_layer::liquid_layer(liquid_layer const& other)
 liquid_layer& liquid_layer::operator=(liquid_layer const& other)
 {
   changeLiquidID(other._liquid_id);
-  _liquid_vertex_format = other._liquid_vertex_format;  
+  _liquid_vertex_format = other._liquid_vertex_format;
   _minimum = other._minimum;
   _maximum = other._maximum;
   _subchunks = other._subchunks;

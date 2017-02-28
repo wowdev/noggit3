@@ -50,8 +50,8 @@ const std::string& WMO::filename() const
 }
 
 WMO::WMO(const std::string& filenameArg)
-  : _filename(filenameArg)
-  , _finished_upload(false)
+  : _finished_upload(false)
+  , _filename(filenameArg)
 {
   finished = false;
 

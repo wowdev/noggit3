@@ -758,11 +758,11 @@ void TextureAnim::setup(int anim)
 }
 
 ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global)
-  : nearclip (mcd.nearclip)
+  : pos (fixCoordSystem(mcd.pos))
+  , target (fixCoordSystem(mcd.target))
+  , nearclip (mcd.nearclip)
   , farclip (mcd.farclip)
   , fov (mcd.fov)
-  , pos (fixCoordSystem(mcd.pos))
-  , target (fixCoordSystem(mcd.target))
   , tPos (mcd.transPos, f, global)
   , tTarget (mcd.transTarget, f, global)
   , rot (mcd.rot, f, global)
@@ -795,16 +795,16 @@ ModelTransparency::ModelTransparency(const MPQFile& f, const ModelTransDef &mcd,
 {}
 
 ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
-  : tpos (fixCoordSystem(mld.pos))
-  , pos (fixCoordSystem(mld.pos))
-  , tdir (::math::vector_3d(0,1,0)) // obviously wrong
-  , dir (::math::vector_3d(0,1,0))
-  , type (mld.type)
+  : type (mld.type)
   , parent (mld.bone)
-  , ambColor (mld.ambColor, f, global)
-  , ambIntensity (mld.ambIntensity, f, global)
+  , pos (fixCoordSystem(mld.pos))
+  , tpos (fixCoordSystem(mld.pos))
+  , dir (::math::vector_3d(0,1,0))
+  , tdir (::math::vector_3d(0,1,0)) // obviously wrong
   , diffColor (mld.color, f, global)
+  , ambColor (mld.ambColor, f, global)
   , diffIntensity (mld.intensity, f, global)
+  , ambIntensity (mld.ambIntensity, f, global)
 {}
 
 void ModelLight::setup(int time, opengl::light l)
@@ -853,12 +853,12 @@ Bone::Bone( const MPQFile& f,
             const ModelBoneDef &b,
             int *global,
             const std::vector<std::unique_ptr<MPQFile>>& animation_files)
-  : parent (b.parent)
-  , pivot (fixCoordSystem (b.pivot))
-  , billboard (b.flags & MODELBONE_BILLBOARD)
-  , trans (b.translation, f, global, animation_files)
+  : trans (b.translation, f, global, animation_files)
   , rot (b.rotation, f, global, animation_files)
   , scale (b.scaling, f, global, animation_files)
+  , pivot (fixCoordSystem (b.pivot))
+  , parent (b.parent)
+  , billboard (b.flags & MODELBONE_BILLBOARD)
 {
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
