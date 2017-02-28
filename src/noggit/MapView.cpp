@@ -509,8 +509,24 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
   mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
 
+  mbar->GetMenu("View")->AddMenuItemToggle("Minimap", mainGui->minimapWindow->hidden_evil(), true);
+  addHotkey (Qt::Key_M, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
+
   mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", mainGui->TexturePalette->hidden_evil(), true);
+  addHotkey ( Qt::Key_X
+            , MOD_none
+            , [this] { mainGui->TexturePalette->toggleVisibility(); }
+            , [this] { return terrainMode == editing_mode::paint; }
+            );
+
   mbar->GetMenu("View")->AddMenuItemButton("Cursor options", [this] { mainGui->showCursorSwitcher(); });
+  addHotkey ( Qt::Key_C
+            , MOD_alt | MOD_ctrl
+            , [this]
+              {
+                mainGui->toggleCursorSwitcher();
+              }
+            );
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &_draw_models);
   addHotkey (Qt::Key_F1, MOD_none, [this] { _draw_models = !_draw_models; });
@@ -543,38 +559,6 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("SHIFT+F7 Hole lines always on", &_draw_hole_lines, false);
   addHotkey (Qt::Key_F7, MOD_shift, [this] { _draw_hole_lines = !_draw_hole_lines; });
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &_draw_models_with_box);
-
-  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->showHelp(); });
-#if defined(_WIN32) || defined(WIN32)
-  mbar->GetMenu("Help")->AddMenuItemButton ( "Manual online"
-                                           , []
-                                             {
-                                               ShellExecute ( nullptr
-                                                            , "open"
-                                                            , "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual"
-                                                            , nullptr
-                                                            , nullptr
-                                                            , SW_SHOWNORMAL
-                                                            );
-                                             }
-                                           );
-  mbar->GetMenu("Help")->AddMenuItemButton ( "Homepage"
-                                           , []
-                                             {
-                                               ShellExecute ( nullptr
-                                                            , "open"
-                                                            , "http://modcraft.superparanoid.de"
-                                                            , nullptr
-                                                            , nullptr
-                                                            , SW_SHOWNORMAL
-                                                            );
-                                             }
-                                           );
-#endif
-
-  mainGui->addChild(mbar);
-
-  addHotkey (Qt::Key_M, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
 
   addHotkey ( Qt::Key_F1
             , MOD_shift
@@ -609,6 +593,45 @@ void MapView::createGUI()
               }
             );
 
+
+  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->showHelp(); });
+  addHotkey ( Qt::Key_H
+            , MOD_none
+            , [&]
+              {
+                mainGui->toggleHelp();
+              }
+            , [&] { return terrainMode != editing_mode::object; }
+            );
+#if defined(_WIN32) || defined(WIN32)
+  mbar->GetMenu("Help")->AddMenuItemButton ( "Manual online"
+                                           , []
+                                             {
+                                               ShellExecute ( nullptr
+                                                            , "open"
+                                                            , "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual"
+                                                            , nullptr
+                                                            , nullptr
+                                                            , SW_SHOWNORMAL
+                                                            );
+                                             }
+                                           );
+  mbar->GetMenu("Help")->AddMenuItemButton ( "Homepage"
+                                           , []
+                                             {
+                                               ShellExecute ( nullptr
+                                                            , "open"
+                                                            , "http://modcraft.superparanoid.de"
+                                                            , nullptr
+                                                            , nullptr
+                                                            , SW_SHOWNORMAL
+                                                            );
+                                             }
+                                           );
+#endif
+
+  mainGui->addChild(mbar);
+
   addHotkey ( Qt::Key_F5
             , MOD_none
             , [this]
@@ -636,13 +659,6 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey ( Qt::Key_C
-            , MOD_alt | MOD_ctrl
-            , [this]
-              {
-                mainGui->toggleCursorSwitcher();
-              }
-            );
 
   addHotkey ( Qt::Key_C
             , MOD_none
@@ -673,12 +689,6 @@ void MapView::createGUI()
             , MOD_none
             , [this] { _world->clearVertexSelection(); }
             , [this] { return terrainMode == editing_mode::ground; }
-            );
-
-  addHotkey ( Qt::Key_X
-            , MOD_none
-            , [this] { mainGui->TexturePalette->toggleVisibility(); }
-            , [this] { return terrainMode == editing_mode::paint; }
             );
 
   addHotkey (Qt::Key_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
@@ -791,14 +801,6 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey ( Qt::Key_H
-            , MOD_none
-            , [&]
-              {
-                mainGui->toggleHelp();
-              }
-            , [&] { return terrainMode != editing_mode::object; }
-            );
 
   addHotkey ( Qt::Key_H
             , MOD_none
