@@ -24,7 +24,6 @@
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/TexturePicker.h> //
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/ui/Toolbar.h> // UIToolbar
 #include <noggit/ui/ZoneIDBrowser.h> //
 #include <noggit/ui/Water.h> //
 #include <noggit/ui/ObjectEditor.h>
@@ -78,11 +77,6 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   texturingTool->hide();
 
   guiCurrentTexture = new ui::current_texture();
-
-  // UIToolbar
-  guiToolbar = new UIToolbar(6.0f, 145.0f, [this] (editing_mode mode) { theMapview->set_editing_mode (mode); });
-  addChild(guiToolbar);
-
 
   // Statusbar
   guiStatusbar = new UIStatusBar(0.0f, (float)video::height - 30.0f, (float)video::width, 30.0f);

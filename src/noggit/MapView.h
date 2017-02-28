@@ -40,6 +40,7 @@ namespace noggit
   namespace ui
   {
     struct main_window;
+    class toolbar;
   }
 }
 
@@ -155,6 +156,7 @@ private:
   UIFrame* LastClicked;
 
   UIMapViewGUI* mainGui;
+  noggit::ui::toolbar* _toolbar;
 
   UIFrame* MapChunkWindow;
   UIToggleGroup * gFlagsToggleGroup;
