@@ -24,7 +24,8 @@ namespace noggit
 
     void toolbar::add_tool_icon(editing_mode mode, const QString& name, const font_awesome::icons& icon)
     {
-      auto action = addAction(font_awesome_icon(icon), name, [this, mode] () {
+      auto action = addAction(font_awesome_icon(icon), name);
+      connect (action, &QAction::triggered, [this, mode] () {
         _set_editing_mode (mode);
       });
       action->setActionGroup(&_tool_group);
