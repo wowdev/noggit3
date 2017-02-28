@@ -26,6 +26,7 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <noggit/Settings.h>    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
 #include <noggit/TextureManager.h> // TextureManager::report()
 #include <noggit/Video.h>
+#include <noggit/ui/font_awesome.hpp>
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/errorHandling.h>
 #include <noggit/liquid_layer.hpp>
@@ -114,6 +115,7 @@ void Noggit::initFont()
   arial24.init(arialFilename, 24, false);
   arial32.init(arialFilename, 32, false);
 
+  noggit::ui::font_awesome::load();
 }
 
 void Noggit::parseArgs(int argc, char *argv[])
