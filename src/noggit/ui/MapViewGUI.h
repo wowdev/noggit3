@@ -43,6 +43,7 @@ private:
   UIHelp* _help;
   const math::vector_3d* _camera_pos;
   float* _tablet_pressure;
+  bool* _tablet_active;
 
 public:
   // position of the tools window(s)
@@ -81,6 +82,7 @@ public:
   explicit UIMapViewGUI ( MapView* setMapview
                         , math::vector_3d* camera_pos
                         , float* tablet_pressure
+                        , bool* tablet_active
                         );
 
   void setTilemode(bool enabled);

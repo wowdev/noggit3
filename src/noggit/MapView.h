@@ -229,4 +229,9 @@ private:
   World* _world;
 
   float _tablet_pressure;
+  bool _tablet_active = false;
+#ifdef _WIN32
+  HCTX hCtx = nullptr;
+#endif
+  void init_tablet();
 };

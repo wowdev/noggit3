@@ -382,7 +382,7 @@ void MapView::changeZoneIDValue (int set)
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI(this, &_camera.position, &_tablet_pressure);
+  mainGui = new UIMapViewGUI(this, &_camera.position, &_tablet_pressure, &_tablet_active);
 
   mainGui->ZoneIDBrowser->setMapID(_world->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
@@ -1065,6 +1065,8 @@ MapView::MapView( math::degrees _camera_ah0
             }
           );
 
+  init_tablet();
+
   _startup_time.start();
   _update_every_event_loop.start (0);
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
@@ -1144,10 +1146,10 @@ MapView::~MapView()
 void MapView::tick (float dt)
 {
 #ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
+  if (_tablet_active && Settings::getInstance()->tabletMode)
   {
     PACKET pkt;
-    while (gpWTPacketsGet(app.hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
+    while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
     {
       _tablet_pressure = pkt.pkNormalPressure;
     }
@@ -1163,7 +1165,7 @@ void MapView::tick (float dt)
   update_cursor_pos();
 
 #ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
+  if (_tablet_active && Settings::getInstance()->tabletMode)
   {
     switch (terrainMode)
     {
@@ -2537,4 +2539,122 @@ bool MapView::handleHotkeys(QKeyEvent* event)
     }
   }
   return false;
+}
+
+#ifdef _WIN32
+#include <external/wacom/MSGPACK.H>
+#include <external/wacom/WINTAB.h>
+#define PACKETDATA  (PK_BUTTONS | PK_NORMAL_PRESSURE)
+#define PACKETMODE  PK_BUTTONS
+#include <external/wacom/PKTDEF.H>
+#include <external/wacom/Utils.h>
+#endif
+
+#ifdef _WIN32
+HCTX static NEAR TabletInit(HWND hWnd)
+{
+  HCTX hctx = nullptr;
+  UINT wDevice = 0;
+  UINT wExtX = 0;
+  UINT wExtY = 0;
+  UINT wWTInfoRetVal = 0;
+  AXIS TabletX = { 0 };
+  AXIS TabletY = { 0 };
+
+  // Set option to move system cursor before getting default system context.
+  glogContext.lcOptions |= CXO_SYSTEM;
+
+  // Open default system context so that we can get tablet data
+  // in screen coordinates (not tablet coordinates).
+  wWTInfoRetVal = gpWTInfoA(WTI_DEFSYSCTX, 0, &glogContext);
+  WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXT));
+
+  WACOM_ASSERT(glogContext.lcOptions & CXO_SYSTEM);
+
+  // modify the digitizing region
+  wsprintf(glogContext.lcName, "PrsTest Digitizing %x", hInst);
+
+  // We process WT_PACKET (CXO_MESSAGES) messages.
+  glogContext.lcOptions |= CXO_MESSAGES;
+
+  // What data items we want to be included in the tablet packets
+  glogContext.lcPktData = PACKETDATA;
+
+  // Which packet items should show change in value since the last
+  // packet (referred to as 'relative' data) and which items
+  // should be 'absolute'.
+  glogContext.lcPktMode = PACKETMODE;
+
+  // This bitfield determines whether or not this context will receive
+  // a packet when a value for each packet field changes.  This is not
+  // supported by the Intuos Wintab.  Your context will always receive
+  // packets, even if there has been no change in the data.
+  glogContext.lcMoveMask = PACKETDATA;
+
+  // Which buttons events will be handled by this context.  lcBtnMask
+  // is a bitfield with one bit per button.
+  glogContext.lcBtnUpMask = glogContext.lcBtnDnMask;
+
+  // Set the entire tablet as active
+  wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + 0, DVC_X, &TabletX);
+  WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+
+  wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
+  WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+
+  glogContext.lcInOrgX = 0;
+  glogContext.lcInOrgY = 0;
+  glogContext.lcInExtX = TabletX.axMax;
+  glogContext.lcInExtY = TabletY.axMax;
+
+  // Guarantee the output coordinate space to be in screen coordinates.
+  glogContext.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+  glogContext.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+  glogContext.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
+
+                                  // In Wintab, the tablet origin is lower left.  Move origin to upper left
+                                  // so that it coincides with screen origin.
+  glogContext.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);  //SM_CYSCREEN );
+
+                                  // Leave the system origin and extents as received:
+                                  // lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
+
+                                  // open the region
+                                  // The Wintab spec says we must open the context disabled if we are
+                                  // using cursor masks.
+  hctx = gpWTOpenA(hWnd, &glogContext, FALSE);
+
+  WacomTrace("HCTX: %i\n", hctx);
+
+  return hctx;
+}
+#endif
+
+void MapView::init_tablet()
+{
+#ifdef _WIN32
+  //this is for graphics tablet (e.g. Wacom, Huion, possibly others) initialization.
+  HWND WindowHandle = (HWND)effectiveWinId();
+  hInst = (HINSTANCE)GetWindowLongPtr(WindowHandle, GWLP_HINSTANCE);
+
+  if (LoadWintab())
+  {
+    /* check if WinTab available. */
+    if (gpWTInfoA(0, 0, nullptr))
+    {
+      hCtx = TabletInit(WindowHandle);
+      gpWTEnable(hCtx, TRUE);
+      gpWTOverlap(hCtx, TRUE);
+      if (!hCtx)
+      {
+        Log << "Could Not Open Tablet Context." << std::endl;
+      }
+      else
+      {
+        Log << "Opened Tablet Context." << std::endl;
+      }
+      _tablet_active = true;
+    }
+  }
+#endif
 }
