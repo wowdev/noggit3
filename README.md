@@ -33,7 +33,7 @@ Feel   free   to   ask   the   owner  of   the   official   repository
 (https://bitbucket.org/berndloerwald/noggit3/)  for  write  access  or
 fork and post a pull request.
 
-There is a bug tracker at http://modcraft.superparanoid.de/bugtracker/index.php which should be used.
+There is a bug tracker at https://bitbucket.org/berndloerwald/noggit3/issues which should be used.
 
 # CODING GUIDELINES #
 Following is  an example for file  src/noggit/ui/foo_ban.h. .cpp files
