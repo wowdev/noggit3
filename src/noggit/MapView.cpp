@@ -2518,6 +2518,9 @@ void MapView::addHotkey(Qt::Key key, size_t modifiers, std::function<void()> fun
 
 bool MapView::handleHotkeys(QKeyEvent* event)
 {
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
   size_t modifier = (event->modifiers() == Qt::NoModifier) ? (MOD_none) : (
     ((event->modifiers() & Qt::ShiftModifier) ? MOD_shift : 0) |
     ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0) |
