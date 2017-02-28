@@ -2118,6 +2118,9 @@ void MapView::inserObjectFromExtern(int model)
 
 void MapView::mouseMoveEvent (QMouseEvent* event)
 {
+  //! \todo:  move the function call requiring a context in tick ?
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
   QLineF const relative_movement (_last_mouse_pos, event->pos());
 
   if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
@@ -2297,6 +2300,10 @@ void MapView::mousePressEvent (QMouseEvent* event)
 
 void MapView::wheelEvent (QWheelEvent* event)
 {
+  //! \todo: move the function call requiring a context in tick ?
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
   //! \todo don't just use distance but delta
   float delta (event->angleDelta().y());
 
