@@ -1144,7 +1144,7 @@ MapView::~MapView()
 void MapView::tick (float dt)
 {
 #ifdef _WIN32
-  if (app.tabletActive)
+  if (app.tabletActive && Settings::getInstance()->tabletMode)
   {
     PACKET pkt;
     while (gpWTPacketsGet(app.hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
