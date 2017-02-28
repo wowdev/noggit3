@@ -40,7 +40,7 @@
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/ToggleGroup.h> // UIToggleGroup
-#include <noggit/ui/Toolbar.h> // UIToolbar
+#include <noggit/ui/Toolbar.h> // noggit::ui::toolbar
 #include <noggit/ui/ToolbarIcon.h> // ToolbarIcon
 #include <noggit/ui/Water.h>
 #include <noggit/ui/WaterSaveWarning.h>
@@ -155,7 +155,7 @@ void MapView::set_editing_mode (editing_mode mode)
   }
 
   terrainMode = mode;
-  mainGui->guiToolbar->IconSelect (mode);
+  _toolbar->check_tool (mode);
 }
 
 void MapView::ResetSelectedObjectRotation()
@@ -398,6 +398,10 @@ void MapView::createGUI()
   mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
   MapChunkWindow->hide();
 
+  _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
+  _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
+  connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
+
   // create the menu
   UIMenuBar * mbar = new UIMenuBar();
 
@@ -507,7 +511,6 @@ void MapView::createGUI()
   ADD_ACTION_NS (assist_menu, "Map to old alpha", [this] { _world->convert_alphamap(false); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
-  mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
 
   mbar->GetMenu("View")->AddMenuItemToggle("Minimap", mainGui->minimapWindow->hidden_evil(), true);
   addHotkey (Qt::Key_M, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
