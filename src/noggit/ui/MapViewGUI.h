@@ -18,7 +18,6 @@ class UIRotationEditor;
 class MapView;
 namespace ui
 {
-  class caps_warning;
   class current_texture;
   class detail_infos;
   class FlattenTool;
@@ -73,7 +72,6 @@ public:
   ui::texturing_tool* texturingTool;
 
   UIExitWarning *escWarning;
-  ui::caps_warning *capsWarning;
   ui::water_save_warning *waterSaveWarning;
   UIHelperModels *HelperModels;
 

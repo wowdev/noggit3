@@ -202,7 +202,6 @@ endif()
 set ( noggit_ui_sources
       src/noggit/ui/About.cpp
       src/noggit/ui/Button.cpp
-      src/noggit/ui/CapsWarning.cpp
       src/noggit/ui/CheckBox.cpp
       src/noggit/ui/CloseWindow.cpp
       src/noggit/ui/CurrentTexture.cpp
@@ -316,7 +315,6 @@ set ( noggit_root_headers
 set ( noggit_ui_headers
       src/noggit/ui/About.h
       src/noggit/ui/Button.h
-      src/noggit/ui/CapsWarning.h
       src/noggit/ui/CheckBox.h
       src/noggit/ui/CloseWindow.h
       src/noggit/ui/CurrentTexture.h
