@@ -56,7 +56,7 @@ int wmo_liquid::initGeometry(MPQFile* f)
 {
   LiquidVertex const* map = reinterpret_cast<LiquidVertex const*>(f->getPointer());
   unsigned char const* flags = reinterpret_cast<unsigned char const*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));
-  int last_flag;
+  int last_flag = 0;
 
   // generate vertices
   std::vector<math::vector_3d> lVertices ((xtiles + 1)*(ytiles + 1));
