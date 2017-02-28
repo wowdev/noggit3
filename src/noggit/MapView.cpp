@@ -152,7 +152,6 @@ void MapView::set_editing_mode (editing_mode mode)
     break;
   case editing_mode::object:
     mainGui->objectEditor->show();
-    mainGui->rotationEditor->move (mainGui->objectEditor->x() - mainGui->rotationEditor->width() - 10.0f, tool_settings_y);
   }
 
   terrainMode = mode;
