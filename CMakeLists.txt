@@ -227,7 +227,6 @@ set ( noggit_ui_sources
       src/noggit/ui/texturing_tool.cpp
       src/noggit/ui/ToggleGroup.cpp
       src/noggit/ui/Toolbar.cpp
-      src/noggit/ui/ToolbarIcon.cpp
       src/noggit/ui/SettingsPanel.cpp
       src/noggit/ui/Water.cpp
       src/noggit/ui/WaterSaveWarning.cpp
@@ -342,7 +341,6 @@ set ( noggit_ui_headers
       src/noggit/ui/texturing_tool.hpp
       src/noggit/ui/ToggleGroup.h
       src/noggit/ui/Toolbar.h
-      src/noggit/ui/ToolbarIcon.h
       src/noggit/ui/SettingsPanel.h
       src/noggit/ui/Water.h
       src/noggit/ui/WaterSaveWarning.h

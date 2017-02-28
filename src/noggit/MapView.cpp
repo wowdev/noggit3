@@ -41,7 +41,6 @@
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/ToggleGroup.h> // UIToggleGroup
 #include <noggit/ui/Toolbar.h> // noggit::ui::toolbar
-#include <noggit/ui/ToolbarIcon.h> // ToolbarIcon
 #include <noggit/ui/Water.h>
 #include <noggit/ui/WaterSaveWarning.h>
 #include <noggit/ui/WaterTypeBrowser.h>
