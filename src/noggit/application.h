@@ -12,25 +12,10 @@
 #include <string>
 #include <vector>
 
-#ifdef _WIN32
-#include <external/wacom/MSGPACK.H>
-#include <external/wacom/WINTAB.h>
-#define PACKETDATA  (PK_BUTTONS | PK_NORMAL_PRESSURE)
-#define PACKETMODE  PK_BUTTONS
-#include <external/wacom/PKTDEF.H>
-#include <external/wacom/Utils.h>
-HWND static WindowHandle;
-HCTX static NEAR TabletInit(HWND hWnd);
-#endif
-
 class Noggit
 {
   std::unique_ptr<noggit::ui::main_window> main_window;
 public:
-#ifdef _WIN32
-  HCTX hCtx;
-  BOOL tabletActive;
-#endif
   Noggit();
 
   int start(int argc, char *argv[]);
@@ -77,8 +62,6 @@ private:
 public:
   void initFont();
 private:
-  void initEnv();
-
   void parseArgs(int argc, char *argv[]);
   void loadMPQs();
 
