@@ -25,10 +25,9 @@ HCTX static NEAR TabletInit(HWND hWnd);
 
 class Noggit
 {
-  std::unique_ptr<noggit::ui::main_window> main_window; 
+  std::unique_ptr<noggit::ui::main_window> main_window;
 public:
 #ifdef _WIN32
-  UINT pressure;
   HCTX hCtx;
   BOOL tabletActive;
 #endif

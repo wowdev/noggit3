@@ -43,10 +43,14 @@
 
 
 
-UIMapViewGUI::UIMapViewGUI(MapView *setMapview, math::vector_3d* camera_pos)
+UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
+                           , math::vector_3d* camera_pos
+                           , float* tablet_pressure
+                           )
   : UIFrame(0.0f, 0.0f, (float)video::width, (float)video::height)
   , theMapview(setMapview)
   , _camera_pos(camera_pos)
+  , _tablet_pressure (tablet_pressure)
 {
   // Minimap window
   minimapWindow = new UIMinimapWindow(gWorld, camera_pos);
@@ -168,7 +172,7 @@ void UIMapViewGUI::render() const
   std::stringstream timestrs;
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode) {
-    timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", Pres: " << app.pressure;
+    timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", Pres: " << *_tablet_pressure;
     app.getArial16().shprint(video::width - 250.0f, 5.0f, timestrs.str());
   }
   else
