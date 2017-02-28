@@ -20,7 +20,6 @@
 #include <noggit/World.h>
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include <noggit/map_index.hpp>
-#include <noggit/ui/CapsWarning.h>
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
@@ -987,10 +986,6 @@ void MapView::createGUI()
   addHotkey (Qt::Key_8, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 8; }, [this] { return _world->IsSelection(eEntry_WMO); });
   addHotkey (Qt::Key_9, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 9; }, [this] { return _world->IsSelection(eEntry_WMO); });
 
-  // CAPS warning
-  mainGui->capsWarning = new ui::caps_warning;
-  mainGui->capsWarning->hide();
-
   // Water unable to save warning
   mainGui->waterSaveWarning = new ui::water_save_warning;
   mainGui->waterSaveWarning->hide();
@@ -1902,9 +1897,6 @@ void MapView::display()
 
 void MapView::keyPressEvent (QKeyEvent *event)
 {
-  if (event->key() == Qt::Key_CapsLock)
-    mainGui->capsWarning->show();
-
   if (handleHotkeys (event))
     return;
 
