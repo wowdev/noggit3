@@ -18,7 +18,6 @@
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
-#include <noggit/ui/StatusBar.h>
 
 #include <QGridLayout>
 #include <QGroupBox>
