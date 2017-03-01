@@ -18,6 +18,10 @@
 #include <map>
 #include <unordered_set>
 
+#ifdef _WIN32
+#include <external/wacom/WINTAB.h>
+#endif
+
 class UIFrame;
 class World;
 
