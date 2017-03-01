@@ -32,7 +32,6 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/Slider.h> // UISlider
-#include <noggit/ui/StatusBar.h> // statusBar
 #include <noggit/ui/Text.h> // UIText
 #include <noggit/ui/Texture.h> // textureUI
 #include <noggit/ui/TexturePicker.h>
@@ -61,6 +60,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QStatusBar>
 
 #include <algorithm>
 #include <cmath>
@@ -1034,7 +1034,22 @@ MapView::MapView( math::degrees _camera_ah0
   , mTimespeed(0.0f)
   , _main_window (main_window)
   , _world (world)
+  , _status_left (new QLabel (this))
+  , _status_right (new QLabel (this))
 {
+  _main_window->statusBar()->addWidget (_status_left);
+  connect ( this
+          , &QObject::destroyed
+          , _main_window
+          , [=] { _main_window->statusBar()->removeWidget (_status_left); }
+          );
+  _main_window->statusBar()->addWidget (_status_right);
+  connect ( this
+          , &QObject::destroyed
+          , _main_window
+          , [=] { _main_window->statusBar()->removeWidget (_status_right); }
+          );
+
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
   LastClicked = nullptr;
@@ -1137,14 +1152,20 @@ MapView::MapView( math::degrees _camera_ah0
 
   void MapView::paintGL()
   {
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-    const qreal now(_startup_time.elapsed() / 1000.0);
-    tick (now - _last_update);
-    _last_update = now;
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _ (::gl, context());
+      const qreal now(_startup_time.elapsed() / 1000.0);
+      tick (now - _last_update);
+      _last_update = now;
+    }
 
-    gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    display();
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _ (::gl, context());
+      gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      display();
+    }
   }
 
   void MapView::resizeGL (int width, int height)
@@ -1632,6 +1653,61 @@ void MapView::tick (float dt)
   if (!MapChunkWindow->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->which() == eEntry_MapChunk)
   {
     UITexturingGUI::setChunkWindow(boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).chunk);
+  }
+
+  QString status;
+  status += ( QString ("tile: %1 %2")
+            . arg (std::floor (_camera.position.x / TILESIZE))
+            . arg (std::floor (_camera.position.z / TILESIZE))
+            );
+  status += ( QString ("; coordinates client: (%1, %2, %3), server: (%4, %5, %6)")
+            . arg (_camera.position.x)
+            . arg (_camera.position.z)
+            . arg (_camera.position.y)
+            . arg (ZEROPOINT - _camera.position.z)
+            . arg (ZEROPOINT - _camera.position.x)
+            . arg (_camera.position.y)
+            );
+
+  _status_left->setText (status);
+
+  auto lSelection = _world->GetCurrentSelection();
+  if (!lSelection)
+  {
+    _status_right->setText ("");
+  }
+  else
+  {
+    switch (lSelection->which())
+    {
+    case eEntry_Model:
+      {
+        auto instance (boost::get<selected_model_type> (*lSelection));
+        _status_right->setText
+          ( QString ("%1: %2")
+          . arg (instance->d1)
+          . arg (QString::fromStdString (instance->model->_filename))
+          );
+        break;
+      }
+    case eEntry_WMO:
+      {
+        auto instance (boost::get<selected_wmo_type> (*lSelection));
+        _status_right->setText
+          ( QString ("%1: %2")
+          . arg (instance->mUniqueID)
+          . arg (QString::fromStdString (instance->wmo->_filename))
+          );
+        break;
+      }
+    case eEntry_MapChunk:
+      {
+        auto chunk (boost::get<selected_chunk_type> (*lSelection).chunk);
+        _status_right->setText
+          (QString ("%1, %2").arg (chunk->px).arg (chunk->py));
+        break;
+      }
+    }
   }
 }
 

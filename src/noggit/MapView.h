@@ -12,6 +12,7 @@
 
 #include <QtCore/QTime>
 #include <QtCore/QTimer>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QOpenGLWidget>
 
 #include <forward_list>
@@ -240,4 +241,7 @@ private:
   HCTX hCtx = nullptr;
 #endif
   void init_tablet();
+
+  QLabel* _status_left;
+  QLabel* _status_right;
 };

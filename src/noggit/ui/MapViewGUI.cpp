@@ -19,7 +19,6 @@
 #include <noggit/ui/Help.h>
 #include <noggit/ui/MinimapWindow.h>
 #include <noggit/ui/shader_tool.hpp>
-#include <noggit/ui/StatusBar.h> // UIStatusBar
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/TexturePicker.h> //
@@ -77,10 +76,6 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   texturingTool->hide();
 
   guiCurrentTexture = new ui::current_texture();
-
-  // Statusbar
-  guiStatusbar = new UIStatusBar(0.0f, (float)video::height - 30.0f, (float)video::width, 30.0f);
-  addChild(guiStatusbar);
 
   // DetailInfoWindow
   guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);
@@ -178,13 +173,6 @@ void UIMapViewGUI::render() const
     app.getArial16().shprint(video::width - 200.0f, 5.0f, timestrs.str());
   }
 
-  std::ostringstream statusbarInfo;
-  statusbarInfo << "tile: " << std::floor(_camera_pos->x / TILESIZE) << " " << std::floor(_camera_pos->z / TILESIZE)
-    << "; coordinates: client (x: " << _camera_pos->x << ", y: " << _camera_pos->z << ", z: " << _camera_pos->y
-    << "), server (x: " << (ZEROPOINT - _camera_pos->z) << ", y:" << (ZEROPOINT - _camera_pos->x) << ", z:" << (_camera_pos->y) << ")";
-  guiStatusbar->setLeftInfo(statusbarInfo.str());
-
-  guiStatusbar->setRightInfo("");
   tile_index tile(*_camera_pos);
   guiWater->updatePos(tile);
 
@@ -200,7 +188,6 @@ void UIMapViewGUI::render() const
       case eEntry_Model:
         {
           auto instance (boost::get<selected_model_type> (*lSelection));
-          guiStatusbar->setRightInfo (std::to_string (instance->d1) + ": " + instance->model->_filename);
           detailInfo << "filename: " << instance->model->_filename
                      << "\nunique ID: " << instance->d1
                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
@@ -223,7 +210,6 @@ void UIMapViewGUI::render() const
       case eEntry_WMO:
         {
           auto instance (boost::get<selected_wmo_type> (*lSelection));
-          guiStatusbar->setRightInfo (std::to_string (instance->mUniqueID) + ": " + instance->wmo->_filename);
           detailInfo << "filename: " << instance->wmo->_filename
                      << "\nunique ID: " << instance->mUniqueID
                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
@@ -248,7 +234,6 @@ void UIMapViewGUI::render() const
       case eEntry_MapChunk:
         {
           auto chunk (boost::get<selected_chunk_type> (*lSelection).chunk);
-          guiStatusbar->setRightInfo (std::to_string (chunk->px) + ", " + std::to_string (chunk->py));
           int flags = chunk->Flags;
 
           detailInfo << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
