@@ -428,6 +428,9 @@ void MapView::createGUI()
   auto assist_menu (_main_window->menuBar()->addMenu ("Assist"));
   connect (this, &QObject::destroyed, assist_menu, &QObject::deleteLater);
 
+  auto view_menu (_main_window->menuBar()->addMenu ("View"));
+  connect (this, &QObject::destroyed, view_menu, &QObject::deleteLater);
+
   mbar->AddMenu("View");
   mbar->AddMenu("Help");
 
@@ -654,20 +657,21 @@ void MapView::createGUI()
 
   mainGui->addChild(mbar);
 
-  addHotkey ( Qt::Key_F5
-            , MOD_none
-            , [this]
-              {
-                std::ofstream f("bookmarks.txt", std::ios_base::app);
-                f << _world->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw()._ << " " << _camera.pitch()._ << " " << _world->getAreaID (_camera.position) << std::endl;
-              }
-            );
+  ADD_ACTION ( file_menu
+             , "Add bookmark"
+             , Qt::Key_F5
+             , [this]
+               {
+                 std::ofstream f("bookmarks.txt", std::ios_base::app);
+                 f << _world->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw()._ << " " << _camera.pitch()._ << " " << _world->getAreaID (_camera.position) << std::endl;
+               }
+             );
 
-  addHotkey (Qt::Key_N, MOD_none, [this] { mTimespeed += 90.0f; });
-  addHotkey (Qt::Key_B, MOD_none, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
-  addHotkey (Qt::Key_J, MOD_none, [this] { mTimespeed = 0.0f; });
+  ADD_ACTION (view_menu, "increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
+  ADD_ACTION (view_menu, "decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
+  ADD_ACTION (view_menu, "pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
 
-  addHotkey (Qt::Key_Tab, MOD_none, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
+  ADD_ACTION (view_menu, "Show GUI", Qt::Key_Tab, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
 
   addHotkey ( Qt::Key_C
             , MOD_ctrl
@@ -713,31 +717,31 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
-  addHotkey (Qt::Key_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
+  ADD_TOGGLE (view_menu, "toggle auto selection (broken)", &Settings::getInstance()->AutoSelectingMode);
 
-  addHotkey (Qt::Key_X, MOD_ctrl, [this] { mainGui->guidetailInfos->toggle_visibility(); });
+  ADD_ACTION (view_menu, "toggle detail infos", "Ctrl+X", [this] { mainGui->guidetailInfos->toggle_visibility(); });
 
-  addHotkey (Qt::Key_I, MOD_none, [this] { mousedir *= -1.f; });
+  ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
 
-  addHotkey (Qt::Key_O, MOD_none, [this] { _camera.move_speed *= 0.5f; });
-  addHotkey (Qt::Key_P, MOD_none, [this] { _camera.move_speed *= 2.0f; });
+  ADD_ACTION (view_menu, "decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
+  ADD_ACTION (view_menu, "increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
 
-  addHotkey (Qt::Key_P, MOD_shift | MOD_ctrl, [this] { Saving = true; });
+  ADD_ACTION (file_menu, "save minimaps", "Ctrl+Shift+P", [this] { Saving = true; });
 
-  addHotkey (Qt::Key_R, MOD_none, [this] { _camera.add_to_yaw(math::degrees(180.f)); });
+  ADD_ACTION (view_menu, "turn camera around 180°", Qt::Key_R, [this] { _camera.add_to_yaw(math::degrees(180.f)); });
 
-  addHotkey ( Qt::Key_G
-            , MOD_none
-            , [this]
-              {
-                // write teleport cords to txt file
-                std::ofstream f("ports.txt", std::ios_base::app);
-                f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
-                f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID() << std::endl;
-                f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
-                f.close();
-              }
-            );
+  ADD_ACTION ( file_menu
+             , "write coordinates to port.txt"
+             , Qt::Key_G
+             , [this]
+               {
+                 std::ofstream f("ports.txt", std::ios_base::app);
+                 f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
+                 f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID() << std::endl;
+                 f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
+                 f.close();
+               }
+             );
 
   addHotkey ( Qt::Key_Y
             , MOD_none
@@ -751,23 +755,24 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::flatten_blur; }
             );
 
-  addHotkey ( Qt::Key_U
-            , MOD_none
-            , [this]
-              {
-                if (mViewMode == eViewMode_2D)
-                {
-                  mViewMode = eViewMode_3D;
-                  set_editing_mode (saveterrainMode);
-                }
-                else
-                {
-                  mViewMode = eViewMode_2D;
-                  saveterrainMode = terrainMode;
-                  set_editing_mode (editing_mode::paint);
-                }
-              }
-            );
+  ADD_ACTION ( view_menu
+             , "toggle tile mode"
+             , Qt::Key_U
+             , [this]
+               {
+                 if (mViewMode == eViewMode_2D)
+                 {
+                   mViewMode = eViewMode_3D;
+                   set_editing_mode (saveterrainMode);
+                 }
+                 else
+                 {
+                   mViewMode = eViewMode_2D;
+                   saveterrainMode = terrainMode;
+                   set_editing_mode (editing_mode::paint);
+                 }
+               }
+             );
 
   addHotkey ( Qt::Key_T
             , MOD_none
