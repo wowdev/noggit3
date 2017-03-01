@@ -12,7 +12,6 @@ This  project  requires  CMake  to  be built.  It  also  requires  the
 following libraries:
 
 * OpenGL
-* GLEW
 * Freetype2
 * storm (stormlib by Ladislav Zezula)
 * Boost

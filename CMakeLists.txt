@@ -79,9 +79,6 @@ macro(includePlattform SUFFIX)
       # freetype2
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/freetype2/lib/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/freetype2/include/freetype2/" ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/freetype2/include/")
-      #glew
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Glew/lib/Release/Win32/")
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Glew/include/")
       #storm lib
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/DebugAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/ReleaseAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/Release/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
@@ -98,7 +95,6 @@ includePlattform("prefind")
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test_exec_monitor REQUIRED )
-FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
@@ -128,7 +124,7 @@ endif()
 add_subdirectory (src/external/qt-color-widgets)
 
 # Add the found include directories to our include list.
-include_directories (SYSTEM ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
+include_directories (SYSTEM  ${FREETYPE_INCLUDE_DIRS})
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
 
 OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
@@ -439,7 +435,6 @@ TARGET_LINK_LIBRARIES (noggit
   Boost::thread
   Boost::filesystem
   Boost::system
-  ${GLEW_LIBRARY}
   Qt5::Widgets
   Qt5::OpenGL
   Qt5::OpenGLExtensions
