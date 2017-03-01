@@ -2,17 +2,6 @@
 
 #include <noggit/application.h>
 
-#ifdef _WIN32
-#include <direct.h>
-#include <windows.h>
-#include <winerror.h>
-#define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
-#define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
-HINSTANCE hInst;
-char* gpszProgramName = "Noggit3";
-static LOGCONTEXT  glogContext = { 0 };
-#endif
-
 #include <noggit/Native.hpp>
 
 #include <noggit/ConfigFile.h>

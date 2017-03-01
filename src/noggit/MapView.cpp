@@ -71,6 +71,22 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#include <external/wacom/MSGPACK.H>
+#define PACKETDATA  (PK_BUTTONS | PK_NORMAL_PRESSURE)
+#define PACKETMODE  PK_BUTTONS
+#include <external/wacom/PKTDEF.H>
+#include <external/wacom/Utils.h>
+#include <direct.h>
+#include <windows.h>
+#include <winerror.h>
+#define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
+HINSTANCE hInst;
+char* gpszProgramName = "Noggit3";
+static LOGCONTEXT  glogContext = { 0 };
+#endif
+
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
 
@@ -2537,15 +2553,6 @@ bool MapView::handleHotkeys(QKeyEvent* event)
   }
   return false;
 }
-
-#ifdef _WIN32
-#include <external/wacom/MSGPACK.H>
-#include <external/wacom/WINTAB.h>
-#define PACKETDATA  (PK_BUTTONS | PK_NORMAL_PRESSURE)
-#define PACKETMODE  PK_BUTTONS
-#include <external/wacom/PKTDEF.H>
-#include <external/wacom/Utils.h>
-#endif
 
 #ifdef _WIN32
 HCTX static NEAR TabletInit(HWND hWnd)
