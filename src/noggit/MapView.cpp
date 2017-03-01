@@ -431,6 +431,9 @@ void MapView::createGUI()
   mbar->AddMenu("View");
   mbar->AddMenu("Help");
 
+  auto help_menu (_main_window->menuBar()->addMenu ("Help"));
+  connect (this, &QObject::destroyed, help_menu, &QObject::deleteLater);
+
 #define ADD_ACTION(menu, name, shortcut, on_action)               \
   {                                                               \
     auto action (menu->addAction (name));                         \
@@ -621,30 +624,32 @@ void MapView::createGUI()
             , [&] { return terrainMode != editing_mode::object; }
             );
 #if defined(_WIN32) || defined(WIN32)
-  mbar->GetMenu("Help")->AddMenuItemButton ( "Manual online"
-                                           , []
-                                             {
-                                               ShellExecute ( nullptr
-                                                            , "open"
-                                                            , "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual"
-                                                            , nullptr
-                                                            , nullptr
-                                                            , SW_SHOWNORMAL
-                                                            );
-                                             }
-                                           );
-  mbar->GetMenu("Help")->AddMenuItemButton ( "Homepage"
-                                           , []
-                                             {
-                                               ShellExecute ( nullptr
-                                                            , "open"
-                                                            , "http://modcraft.superparanoid.de"
-                                                            , nullptr
-                                                            , nullptr
-                                                            , SW_SHOWNORMAL
-                                                            );
-                                             }
-                                           );
+  ADD_ACTION_NS ( help_menu
+                , "Manual online"
+                , []
+                  {
+                    ShellExecute ( nullptr
+                                 , "open"
+                                 , "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual"
+                                 , nullptr
+                                 , nullptr
+                                 , SW_SHOWNORMAL
+                                 );
+                  }
+                );
+  ADD_ACTION_NS ( help_menu
+                , "Homepage"
+                , []
+                  {
+                    ShellExecute ( nullptr
+                                 , "open"
+                                 , "http://modcraft.superparanoid.de"
+                                 , nullptr
+                                 , nullptr
+                                 , SW_SHOWNORMAL
+                                 );
+                  }
+                );
 #endif
 
   mainGui->addChild(mbar);
