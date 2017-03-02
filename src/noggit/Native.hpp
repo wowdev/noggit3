@@ -10,11 +10,4 @@ public:
     static std::string getGamePath();
     static std::string getConfigPath();
     static std::string showFileChooser();
-
-  //! \todo inline to uses
-  static void showAlertDialog (std::string title, std::string message)
-  {
-    QMessageBox::critical
-      (nullptr, QString::fromStdString (title), QString::fromStdString (message));
-  }
 };
