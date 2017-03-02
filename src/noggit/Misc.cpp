@@ -10,29 +10,6 @@
 
 namespace misc
 {
-  std::string explode(std::string original, std::string exploder) {
-    std::string tmp;
-    tmp = original;
-    int num, loc;
-    num = 1;
-    while (tmp.find(exploder) != std::string::npos) {
-      loc = tmp.find(exploder);
-      tmp = tmp.substr(loc + exploder.length());
-      num++;
-    }
-    std::vector<std::string> result (num);
-    num = 0;
-    tmp = original;
-    while (tmp.find(exploder) != std::string::npos) {
-      loc = tmp.find(exploder);
-      result[num] = tmp.substr(0, loc);
-      tmp = tmp.substr(loc + exploder.length());
-      num++;
-    }
-    result[num] = tmp;
-    return result[num];
-  }
-
   void find_and_replace(std::string& source, const std::string& find, const std::string& replace)
   {
     size_t found = source.rfind(find);
@@ -41,19 +18,6 @@ namespace misc
       source.replace(found, find.length(), replace);
       found = source.rfind(find);
     }
-  }
-
-  std::string floatToStr(float f, int precision)
-  {
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(precision) << f;
-    return ss.str();
-  }
-
-  //dirty hack
-  int FtoIround(float d)
-  {
-    return (int)(d<0 ? d - .5f : d + .5f);
   }
 
   char roundc(float a)
