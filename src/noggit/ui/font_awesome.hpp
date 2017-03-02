@@ -10,7 +10,8 @@ namespace noggit
   {
     struct font_awesome
     {
-      enum icons {
+      enum icons
+      {
         fa_500px                         = 0xf26e,
         addressbook                      = 0xf2b9,
         addressbooko                     = 0xf2ba,
@@ -798,17 +799,12 @@ namespace noggit
         youtubeplay                      = 0xf16a,
         youtubesquare                    = 0xf166
       };
-
-      static void load();
-      static QFont font (int size);
-
-      static QString _family_name;
     };
 
     class font_awesome_icon : public QIcon
     {
     public:
-      font_awesome_icon (const font_awesome::icons& icon);
+      font_awesome_icon (font_awesome::icons const&);
     };
   }
 }
