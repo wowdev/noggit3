@@ -165,7 +165,6 @@ set ( noggit_root_sources
       src/noggit/Model.cpp
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
-      src/noggit/Native.cpp
       src/noggit/Particle.cpp
       src/noggit/Project.cpp
       src/noggit/Settings.cpp
