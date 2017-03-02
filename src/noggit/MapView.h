@@ -167,7 +167,7 @@ private:
   UIToggleGroup * gFlagsToggleGroup;
 
   void prompt_exit();
-  void prompt_save_current() const;
+  void prompt_save_current();
 
 public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
