@@ -239,7 +239,7 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 
   //! \todo this code never runs and is a duplicate of the MapView ctor
-  /*  
+  /*
   if (autoheight && tileLoaded(tile))
   {
     float maxHeight = mTiles[cz][cx].tile->getMaxHeight();

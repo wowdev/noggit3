@@ -64,7 +64,7 @@ std::string Native::getGamePath()
 
 	if (result == ERROR_SUCCESS && queryResult == ERROR_SUCCESS) {
 		return temp;
-	} 
+	}
 
 	RegCloseKey(key);
 

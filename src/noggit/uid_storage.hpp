@@ -8,7 +8,7 @@ class uid_storage
 {
 public:
   static uid_storage* getInstance();
-  
+
   bool hasMaxUIDStored(std::size_t mapID) const;
   uint32_t getMaxUID(std::size_t mapID) const;
 
@@ -16,7 +16,7 @@ public:
 
   // save the uids on the disc
   void save();
-  
+
 private:
   ConfigFile _uidFile;
 

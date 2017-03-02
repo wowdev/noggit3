@@ -251,7 +251,7 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
     update_layers();
     return;
   }
-  
+
   if (hasData(0))
   {
     liquid_layer layer(_layers[0]);

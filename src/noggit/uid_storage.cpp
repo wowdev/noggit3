@@ -40,7 +40,7 @@ inline std::string to_str(std::size_t v)
 }
 
 bool uid_storage::hasMaxUIDStored(std::size_t mapID) const
-{ 
+{
   return _uidFile.keyExists(to_str(mapID));
 }
 
@@ -66,7 +66,7 @@ void uid_storage::save()
   std::ofstream fs;
 
   if (!boost::filesystem::exists("uid.txt"))
-  {  
+  {
     fs.open("uid.txt", std::ios::out);
   }
   else
@@ -79,7 +79,7 @@ void uid_storage::save()
     LogError << "Could not open uid.txt" << std::endl;
     return;
   }
-  
+
   fs << "# UID storage file" << std::endl;
   fs << "# map_id,max_id" << std::endl;
   fs << _uidFile;

@@ -70,7 +70,7 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
                             );
     }
   }
-  
+
   changeLiquidID(_liquid_id);
 }
 
@@ -99,7 +99,7 @@ liquid_layer& liquid_layer::operator=(liquid_layer const& other)
   _depth = other._depth;
   pos = other.pos;
   texRepeats = other.texRepeats;
-  
+
   return *this;
 }
 
@@ -163,7 +163,7 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
       adt.Insert(current_pos, 8, reinterpret_cast<char*>(&mask));
       current_pos += 8;
     }
-  } 
+  }
 
   info.ofsHeightMap = current_pos - base_pos;
 
@@ -215,7 +215,7 @@ void liquid_layer::changeLiquidID(int id)
       _liquid_vertex_format = 0;
       break;
     }
-    
+
     //! \todo  Get texRepeats too.
   }
   catch (...)
@@ -379,7 +379,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
     update_opacity(chunk, opacity_factor);
   }
 
-  int id = 0;  
+  int id = 0;
 
   for (int z = 0; z < 8; ++z)
   {
@@ -401,7 +401,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
             if (no_subchunk || in_range)
             {
               update_vertex_opacity(index % 9, index / 9, chunk, opacity_factor);
-            }            
+            }
           }
         }
         setSubchunk(x, z, add);
@@ -419,7 +419,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
     update_min_max();
   }
 
-  
+
 }
 
 void liquid_layer::update_min_max()

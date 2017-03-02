@@ -467,24 +467,36 @@ void MapView::createGUI()
 
 
   ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { prompt_save_current(); });
-  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] 
-  { 
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-    _world->mapIndex.saveChanged(); 
-  });
-  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] 
-  { 
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-    _world->mapIndex.saveall(); 
-  });
-  ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] 
-  { 
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-    _world->mapIndex.reloadTile (_camera.position); 
-  });
+  ADD_ACTION ( file_menu
+             , "save changed tiles"
+             , QKeySequence::Save
+             , [this]
+               {
+                 makeCurrent();
+                 opengl::context::scoped_setter const _ (::gl, context());
+                 _world->mapIndex.saveChanged();
+               }
+             );
+  ADD_ACTION ( file_menu
+             , "save all tiles"
+             , "Ctrl+Shift+A"
+             , [this]
+               {
+                 makeCurrent();
+                 opengl::context::scoped_setter const _ (::gl, context());
+                 _world->mapIndex.saveall();
+               }
+             );
+  ADD_ACTION ( file_menu
+             , "reload tile"
+             , "Shift+J"
+             , [this]
+               {
+                 makeCurrent();
+                 opengl::context::scoped_setter const _ (::gl, context());
+                 _world->mapIndex.reloadTile (_camera.position);
+               }
+             );
 
   file_menu->addSeparator();
   ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
@@ -529,53 +541,62 @@ void MapView::createGUI()
 
   ADD_ACTION_NS ( assist_menu
                 , "Clear texture"
-                , [this] 
-                  { 
+                , [this]
+                  {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
-                    _world->setBaseTexture(_camera.position); 
+                    _world->setBaseTexture(_camera.position);
                   }
                 );
   ADD_ACTION_NS ( assist_menu
                 , "Clear models"
-                , [this] 
+                , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
-                    _world->clearAllModelsOnADT(_camera.position); 
+                    _world->clearAllModelsOnADT(_camera.position);
                   }
                 );
   ADD_ACTION_NS ( assist_menu
                 , "Clear duplicate models"
-                , [this] 
+                , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
-                    _world->delete_duplicate_model_and_wmo_instances(); 
+                    _world->delete_duplicate_model_and_wmo_instances();
                   }
                 );
 
   assist_menu->addSection ("Loaded ADTs");
-  ADD_ACTION_NS (assist_menu, "Fix gaps (all loaded ADTs)", [this] 
-  {
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-    _world->fixAllGaps(); 
-  });
+  ADD_ACTION_NS ( assist_menu
+                , "Fix gaps (all loaded ADTs)"
+                , [this]
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->fixAllGaps();
+                  }
+                );
 
   assist_menu->addSection ("Global");
-  ADD_ACTION_NS (assist_menu, "Map to big alpha", [this] 
-  {
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-    _world->convert_alphamap(true); 
-  });
-  ADD_ACTION_NS (assist_menu, "Map to old alpha", [this] 
-  {
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-    _world->convert_alphamap(false); 
-  });
+  ADD_ACTION_NS ( assist_menu
+                , "Map to big alpha"
+                , [this]
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->convert_alphamap(true);
+                  }
+                );
+  ADD_ACTION_NS ( assist_menu
+                , "Map to old alpha"
+                , [this]
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->convert_alphamap(false);
+                  }
+                );
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
 

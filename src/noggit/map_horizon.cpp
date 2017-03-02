@@ -37,7 +37,7 @@ struct ranged_color
   ranged_color (const color& c, const int16_t& start, const int16_t& stop)
     : _color (c)
     , _start (start)
-    , _stop (stop) 
+    , _stop (stop)
   {}
 
   const color   _color;
@@ -50,7 +50,7 @@ static inline color lerp_color(const color& start, const color& end, float t)
   return color ( (end._r) * t + (start._r) * (1.0 - t)
                , (end._g) * t + (start._g) * (1.0 - t)
                , (end._b) * t + (start._b) * (1.0 - t)
-               ); 
+               );
 }
 
 static inline uint32_t color_for_height (int16_t height)
@@ -374,7 +374,7 @@ void main()
   shader.uniform ("color", color);
 
   shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  
+
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> _ (_index_buffer);
 
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof (uint32_t), indices.data(), GL_STATIC_DRAW);
