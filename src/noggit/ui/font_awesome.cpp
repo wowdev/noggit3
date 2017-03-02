@@ -22,7 +22,7 @@ namespace noggit
 
       font_awesome_icon_engine* clone() const
       {
-          return new font_awesome_icon_engine (_text);
+        return new font_awesome_icon_engine (_text);
       }
 
       virtual void paint (QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state)
@@ -35,19 +35,19 @@ namespace noggit
             color = QColor (0, 0, 0);
 
           painter->setPen (color);
-          painter->setFont (font_awesome::font(rect.height()));
+          painter->setFont (font_awesome::font (rect.height()));
           painter->drawText (rect, _text, QTextOption (Qt::AlignCenter | Qt::AlignVCenter));
         }
-        painter->restore ();
+        painter->restore();
       }
 
       virtual QPixmap pixmap (const QSize &size, QIcon::Mode mode, QIcon::State state)
       {
         QPixmap pm (size);
-        pm.fill(Qt::transparent);
+        pm.fill (Qt::transparent);
         {
-            QPainter p (&pm);
-            paint (&p, QRect(QPoint(0, 0), size), mode, state);
+          QPainter p (&pm);
+          paint (&p, QRect(QPoint(0, 0), size), mode, state);
         }
         return pm;
       }
@@ -68,7 +68,7 @@ namespace noggit
                               , QObject::tr ("Unable to load FontAwesome")
                               , QObject::tr ("Please make sure to install FontAwesome to your system or place it in the \"fonts\" folder.")
                               );
-        
+
         throw std::runtime_error ("Unable to load FontAwesome");
       }
 
