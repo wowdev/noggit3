@@ -2,7 +2,6 @@
 
 #pragma once
 
-class UIStatusBar;
 class UIMinimapWindow;
 class MapView;
 class UIFrame;
@@ -57,7 +56,6 @@ public:
   UIFrame* TexturePalette;
   UIFrame* SelectedTexture;
   UIMinimapWindow* minimapWindow;
-  UIStatusBar* guiStatusbar;
   ui::detail_infos* guidetailInfos;
   ui::zone_id_browser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
