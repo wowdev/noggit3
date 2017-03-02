@@ -6,37 +6,39 @@
 
 namespace noggit
 {
-//! \todo there should be a seperate class for tile mode
-class camera
-{
-public:
-  camera(const math::vector_3d& position, math::degrees yaw_, math::degrees pitch_);
+  //! \todo there should be a seperate class for tile mode
+  class camera
+  {
+  public:
+    camera ( math::vector_3d const& position
+           , math::degrees yaw_
+           , math::degrees pitch_
+           );
 
-  const math::degrees yaw() const;
-  const math::degrees yaw(math::degrees value);
-  void add_to_yaw(math::degrees value);
+    math::degrees yaw() const;
+    math::degrees yaw (math::degrees);
+    void add_to_yaw (math::degrees);
 
-  const math::degrees pitch() const;
-  const math::degrees pitch(math::degrees value);
-  void add_to_pitch(math::degrees value);
+    math::degrees pitch() const;
+    math::degrees pitch (math::degrees);
+    void add_to_pitch (math::degrees);
 
-  math::radians fov() const;
+    math::radians fov() const;
 
-  const math::vector_3d look_at() const;
-  const math::vector_3d direction() const;
+    math::vector_3d look_at() const;
+    math::vector_3d direction() const;
 
-  void move_forward(float sign, float dt);
-  void move_horizontal(float sign, float dt);
-  void move_vertical(float sign, float dt);
+    void move_forward (float sign, float dt);
+    void move_horizontal (float sign, float dt);
+    void move_vertical (float sign, float dt);
 
-  math::vector_3d position;
-  float move_speed;
+    math::vector_3d position;
+    float move_speed;
 
-private:
-  math::degrees _roll; // this is not used currently
-  math::degrees _yaw;
-  math::degrees _pitch;
-  math::radians _fov;
-};
-
+  private:
+    math::degrees _roll; // this is not used currently
+    math::degrees _yaw;
+    math::degrees _pitch;
+    math::radians _fov;
+  };
 }
