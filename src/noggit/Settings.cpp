@@ -26,7 +26,7 @@ void Settings::readFromDisk()
     this->copyModelStats = true;
     this->tabletMode = false;
     this->importFile = "Import.txt";
-    
+
     std::string configPath = Native::getConfigPath();
     bool configFileExists = boost::filesystem::exists(configPath);
     if (!configFileExists) {
@@ -34,7 +34,7 @@ void Settings::readFromDisk()
             configFileExists = saveToDisk();
         };
     }
-    
+
     if (configFileExists)
     {
         ConfigFile config(configPath);
@@ -50,7 +50,7 @@ void Settings::readFromDisk()
         config.readInto(this->random_tilt, "randomTilt");
         config.readInto(this->random_rotation, "randomRotation");
         config.readInto(this->random_size, "randomSize");
-        
+
         {
             bool use (false);
             config.readInto(use, "MySQL");
@@ -72,31 +72,31 @@ bool Settings::createConfigFile()
     std::string configPath = Native::getConfigPath();
     bool configFileExists = boost::filesystem::exists(configPath);
     if (configFileExists) { return false; }
-    
+
     std::ofstream file(configPath);
-    
+
     if (file << "" << std::endl) {
         return true;
     }
-    
+
     return false;
 }
 
 bool Settings::saveToDisk()
 {
     std::string configPath = Native::getConfigPath();
-    
+
     std::string gamePath(this->gamePath);
     std::string projectPath(this->projectPath);
-    
+
     if (gamePath.length() == 0) {
         gamePath = Native::getGamePath();
     }
-    
+
     if (projectPath.length() == 0) {
         projectPath = gamePath;
     }
-    
+
     ConfigFile config(configPath);
     config.add("Path", gamePath);
     config.add("ProjectPath", projectPath);
@@ -111,13 +111,13 @@ bool Settings::saveToDisk()
     config.add("autoSelectingMode", this->AutoSelectingMode);
     config.add("copyModelStats", this->copyModelStats);
     config.add("TabletMode", this->tabletMode);
-    
+
     std::ofstream file(configPath);
-    
+
     if (file << config) {
         return true;
     }
-    
+
     return false;
 }
 

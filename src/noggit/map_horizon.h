@@ -15,7 +15,7 @@ class MapIndex;
 
 namespace noggit
 {
-  
+
 struct map_horizon_tile
 {
     int16_t height_17[17][17];
@@ -65,7 +65,7 @@ public:
   };
 
   map_horizon(const std::string& basename);
-  
+
   QImage _qt_minimap;
 
 private:

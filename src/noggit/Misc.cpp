@@ -142,8 +142,8 @@ namespace misc
 
   float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation)
   {
-    return ( origin.y 
-           + (  (pos.x - origin.x) * math::cos(orientation) 
+    return ( origin.y
+           + (  (pos.x - origin.x) * math::cos(orientation)
               + (pos.z - origin.z) * math::sin(orientation)
              ) * math::tan(angle));
   }

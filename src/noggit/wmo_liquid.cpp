@@ -26,7 +26,7 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
 {
   int flag = initGeometry (f);
   std::string texture;
-    
+
   // value for the last drawn tile
   if (flag & 1)
   {
@@ -35,13 +35,13 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
     texRepeats = 2.0f;
     mTransparency = false;
   }
-  else if (flag & 2) 
+  else if (flag & 2)
   {
     // "XTEXTURES\\LAVA\\lava.%d.blp"
     texture = "XTextures\\river\\lake_a.%d.blp";
     mTransparency = false;
   }
-  else 
+  else
   {
     // "XTEXTURES\\river\\lake_a.%d.blp"
     texture = "XTextures\\river\\lake_a.%d.blp";

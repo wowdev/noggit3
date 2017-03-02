@@ -30,7 +30,7 @@ public:
             );
   void updateRender();
   void changeLiquidID(int id);
-  
+
   void crop(MapChunk* chunk);
   void update_opacity(MapChunk* chunk, float factor);
 

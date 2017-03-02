@@ -39,9 +39,9 @@ public:
 
   bool calc;
   void calcMatrix(Bone* allbones, int anim, int time);
-  Bone ( const MPQFile& f, 
-         const ModelBoneDef &b, 
-         int *global, 
+  Bone ( const MPQFile& f,
+         const ModelBoneDef &b,
+         int *global,
          const std::vector<std::unique_ptr<MPQFile>>& animation_files
        );
 
@@ -228,7 +228,7 @@ private:
 
   std::vector<ParticleSystem> _particles;
   std::vector<RibbonEmitter> _ribbons;
-  
+
   std::vector<ModelAnimation> _animations;
   std::vector<int> _global_sequences;
   std::vector<TextureAnim> _texture_animations;
