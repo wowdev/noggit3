@@ -103,8 +103,6 @@ void Noggit::initFont()
   arial16.init(arialFilename, 16, false);
   arial24.init(arialFilename, 24, false);
   arial32.init(arialFilename, 32, false);
-
-  noggit::ui::font_awesome::load();
 }
 
 void Noggit::parseArgs(int argc, char *argv[])
