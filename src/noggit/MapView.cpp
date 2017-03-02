@@ -467,9 +467,24 @@ void MapView::createGUI()
 
 
   ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { prompt_save_current(); });
-  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] { _world->mapIndex.saveChanged(); });
-  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] { _world->mapIndex.saveall(); });
-  ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] { _world->mapIndex.reloadTile (_camera.position); });
+  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] 
+  { 
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+    _world->mapIndex.saveChanged(); 
+  });
+  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] 
+  { 
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+    _world->mapIndex.saveall(); 
+  });
+  ADD_ACTION (file_menu, "reload tile", "Shift+J", [this] 
+  { 
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+    _world->mapIndex.reloadTile (_camera.position); 
+  });
 
   file_menu->addSeparator();
   ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
@@ -506,29 +521,61 @@ void MapView::createGUI()
                 , "Clear height map"
                 , [this]
                   {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
                     _world->clearHeight(_camera.position);
                   }
                 );
 
   ADD_ACTION_NS ( assist_menu
                 , "Clear texture"
-                , [this] { _world->setBaseTexture(_camera.position); }
+                , [this] 
+                  { 
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->setBaseTexture(_camera.position); 
+                  }
                 );
   ADD_ACTION_NS ( assist_menu
                 , "Clear models"
-                , [this] { _world->clearAllModelsOnADT(_camera.position); }
+                , [this] 
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->clearAllModelsOnADT(_camera.position); 
+                  }
                 );
   ADD_ACTION_NS ( assist_menu
                 , "Clear duplicate models"
-                , [this] { _world->delete_duplicate_model_and_wmo_instances(); }
+                , [this] 
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->delete_duplicate_model_and_wmo_instances(); 
+                  }
                 );
 
   assist_menu->addSection ("Loaded ADTs");
-  ADD_ACTION_NS (assist_menu, "Fix gaps (all loaded ADTs)", [this] { _world->fixAllGaps(); });
+  ADD_ACTION_NS (assist_menu, "Fix gaps (all loaded ADTs)", [this] 
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+    _world->fixAllGaps(); 
+  });
 
   assist_menu->addSection ("Global");
-  ADD_ACTION_NS (assist_menu, "Map to big alpha", [this] { _world->convert_alphamap(true); });
-  ADD_ACTION_NS (assist_menu, "Map to old alpha", [this] { _world->convert_alphamap(false); });
+  ADD_ACTION_NS (assist_menu, "Map to big alpha", [this] 
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+    _world->convert_alphamap(true); 
+  });
+  ADD_ACTION_NS (assist_menu, "Map to old alpha", [this] 
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+    _world->convert_alphamap(false); 
+  });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
 
@@ -2596,12 +2643,12 @@ void MapView::checkWaterSave()
   }
 }
 
-void MapView::prompt_save_current() const
+void MapView::prompt_save_current()
 {
   if ( QMessageBox::warning
          ( nullptr
          , "Save (only) current map tile"
-         , "This can cause a collision bug when placing objects between two ADT borders!\n\n"
+         , "Thminimap widgetis can cause a collision bug when placing objects between two ADT borders!\n\n"
            "If you often use this function, we recommend you to use the 'Save all' "
            "function as often as possible to get the collisions right."
          , QMessageBox::Save | QMessageBox::Cancel
@@ -2609,6 +2656,8 @@ void MapView::prompt_save_current() const
          ) == QMessageBox::Save
      )
   {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
     _world->mapIndex.saveTile(tile_index(_camera.position));
   }
 }
