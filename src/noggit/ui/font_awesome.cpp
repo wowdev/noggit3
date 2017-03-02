@@ -60,24 +60,9 @@ namespace noggit
 
     void font_awesome::load()
     {
+      auto id (QFontDatabase::addApplicationFont (":/fonts/FontAwesome.otf"));
 
-      QFontDatabase font_database;
-      QStringList awesome_font_family;
-      auto font_families (font_database.families());
-
-      awesome_font_family = font_families.filter ("FontAwesome", Qt::CaseInsensitive);
-
-      if (awesome_font_family.empty())
-      {
-        auto id (QFontDatabase::addApplicationFont("fonts/FontAwesome.otf"));
-
-        if (id != -1)
-        {
-          awesome_font_family = QFontDatabase::applicationFontFamilies (id);
-        }
-      }
-      
-      if (awesome_font_family.empty())
+      if (id == -1)
       {
         QMessageBox::critical ( nullptr
                               , QObject::tr ("Unable to load FontAwesome")
@@ -87,7 +72,7 @@ namespace noggit
         throw std::runtime_error ("Unable to load FontAwesome");
       }
 
-      _family_name = awesome_font_family.at (0);
+      _family_name = QFontDatabase::applicationFontFamilies (id).at (0);
     }
 
     QFont font_awesome::font (int size) {

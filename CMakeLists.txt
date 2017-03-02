@@ -404,6 +404,8 @@ source_group("math"  FILES ${math_sources} ${math_headers})
 source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 
+qt5_add_resources (compiled_resource_files "resources/resources.qrc")
+
 ADD_EXECUTABLE ( noggit
                   WIN32
                   MACOSX_BUNDLE
@@ -423,6 +425,7 @@ ADD_EXECUTABLE ( noggit
                   ${os_headers}
                   ${ResFiles}
                   ${moced}
+                  ${compiled_resource_files}
                 )
 
 TARGET_LINK_LIBRARIES (noggit
