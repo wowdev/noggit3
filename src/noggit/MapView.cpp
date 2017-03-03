@@ -214,6 +214,9 @@ void MapView::SnapSelectedObjectToGround()
 
 void MapView::DeleteSelectedObject()
 {
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
   if (_world->IsSelection(eEntry_WMO))
   {
     _world->deleteWMOInstance(boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->mUniqueID);
