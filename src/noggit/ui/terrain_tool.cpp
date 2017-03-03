@@ -77,6 +77,7 @@ namespace ui
     _inner_radius_spin->setRange (0.0f, 1.0f);
     _inner_radius_spin->setDecimals (2);
     _inner_radius_spin->setValue (_inner_radius);
+    _inner_radius_spin->setSingleStep(0.05f);
 
     _inner_radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
     _inner_radius_slider->setRange (0, 100);

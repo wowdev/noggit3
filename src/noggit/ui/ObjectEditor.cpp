@@ -179,42 +179,42 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   scaleRangeEnd->setValue(env->maxScale);
 
   connect ( rotRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [&] (double v)
+          , [=] (double v)
             {
                 env->minRotation = v;
             }
   );
 
   connect ( rotRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [&] (double v)
+          , [=] (double v)
             {
                 env->maxRotation = v;
             }
   );
 
   connect ( tiltRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [&] (double v)
+          , [=] (double v)
             {
                 env->minTilt = v;
             }
   );
 
   connect ( tiltRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [&] (double v)
+          , [=] (double v)
             {
                 env->maxTilt = v;
             }
   );
 
   connect ( scaleRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [&] (double v)
+          , [=] (double v)
             {
                 env->minScale = v;
             }
   );
 
   connect ( scaleRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [&] (double v)
+          , [=] (double v)
             {
                 env->maxScale = v;
             }

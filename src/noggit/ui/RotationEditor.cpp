@@ -47,11 +47,17 @@ UIRotationEditor::UIRotationEditor()
 
   _rotation_x->setRange (-180.f, 180.f);
   _rotation_x->setDecimals (3);
+  _rotation_x->setWrapping(true);
+  _rotation_x->setSingleStep(5.0f);
   _rotation_z->setRange (-180.f, 180.f);
   _rotation_z->setDecimals (3);
+  _rotation_z->setWrapping(true);
+  _rotation_z->setSingleStep(5.0f);
 
   _rotation_y->setRange (0.f, 360.f);
   _rotation_y->setDecimals (3);
+  _rotation_y->setWrapping(true);
+  _rotation_z->setSingleStep(5.0f);
 
   _position_x->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
   _position_x->setDecimals (5);
@@ -62,6 +68,7 @@ UIRotationEditor::UIRotationEditor()
 
   _scale->setRange (0.01f, 63.0f);
   _scale->setDecimals (2);
+  _scale->setSingleStep(0.1f);
 
 
   connect ( _rotation_x, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)

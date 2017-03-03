@@ -31,16 +31,16 @@ namespace ui
     _inner_brush.init();
     _spray_brush.init();
 
-
     _hardness_spin = new QDoubleSpinBox (this);
-    _hardness_spin->setRange (0.0f, 100.0f);
+    _hardness_spin->setRange (0.0f, 1.0f);
     _hardness_spin->setDecimals (2);
     _hardness_spin->setValue (_hardness);
+    _hardness_spin->setSingleStep(0.05f);
     layout->addRow ("Hardness:", _hardness_spin);
 
     _hardness_slider = new QSlider (Qt::Orientation::Horizontal, this);
     _hardness_slider->setRange (0, 100);
-    _hardness_slider->setSliderPosition (_hardness);
+    _hardness_slider->setSliderPosition (_hardness * 100);
     layout->addRow (_hardness_slider);
 
     _radius_spin = new QDoubleSpinBox (this);
@@ -58,6 +58,7 @@ namespace ui
     _pressure_spin->setRange (0.0f, 1.0);
     _pressure_spin->setDecimals (2);
     _pressure_spin->setValue (_pressure);
+    _pressure_spin->setSingleStep(0.05f);
     layout->addRow ("Pressure:", _pressure_spin);
 
     _pressure_slider = new QSlider (Qt::Orientation::Horizontal, this);
@@ -69,6 +70,7 @@ namespace ui
     _brush_level_spin->setRange (0.0f, 255.0f);
     _brush_level_spin->setDecimals (2);
     _brush_level_spin->setValue (_brush_level);
+    _brush_level_spin->setSingleStep(5.0f);
     layout->addRow ("Level:", _brush_level_spin);
 
     _brush_level_slider = new QSlider (Qt::Orientation::Horizontal, this);
