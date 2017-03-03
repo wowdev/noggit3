@@ -166,8 +166,10 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 //    setWidget(content);
 
   randRotCheck->setChecked(Settings::getInstance()->random_rotation);
-  connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
-  { Settings::getInstance()->random_rotation = s; });
+  connect (randRotCheck, &QCheckBox::stateChanged, [] (int s)
+  { 
+    Settings::getInstance()->random_rotation = s; 
+  });
 
   rotRangeStart->setValue(env->minRotation);
   rotRangeEnd->setValue(env->maxRotation);
@@ -221,16 +223,22 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   );
 
   randTiltCheck->setChecked(Settings::getInstance()->random_tilt);
-  connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
-  { Settings::getInstance()->random_tilt = s; });
+  connect (randTiltCheck, &QCheckBox::stateChanged, [] (int s)
+  { 
+    Settings::getInstance()->random_tilt = s; 
+  });
 
   randScaleCheck->setChecked(Settings::getInstance()->random_tilt);
-  connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
-  { Settings::getInstance()->random_size = s; });
+  connect (randScaleCheck, &QCheckBox::stateChanged, [] (int s)
+  { 
+    Settings::getInstance()->random_size = s; 
+  });
 
   copyAttributesCheck->setChecked(Settings::getInstance()->copyModelStats);
   connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
-  { Settings::getInstance()->copyModelStats = s; });
+  { 
+    Settings::getInstance()->copyModelStats = s; 
+  });
 
   pasteModeGroup->button(pasteMode)->setChecked(true);
 
@@ -242,8 +250,10 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   );
 
   cursorPosCheck->setChecked(Environment::getInstance()->moveModelToCursorPos);
-  connect (copyAttributesCheck, &QCheckBox::stateChanged, [=] (int s)
-  { env->moveModelToCursorPos = s; });
+  connect (cursorPosCheck, &QCheckBox::stateChanged, [=] (int s)
+  { 
+    env->moveModelToCursorPos = s; 
+  });
 
   connect(rotEditorButton, &QPushButton::clicked, [=]() {
       toggleRotationEditor();
