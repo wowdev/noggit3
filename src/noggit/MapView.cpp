@@ -2669,7 +2669,7 @@ void MapView::prompt_save_current()
   if ( QMessageBox::warning
          ( nullptr
          , "Save (only) current map tile"
-         , "Thminimap widgetis can cause a collision bug when placing objects between two ADT borders!\n\n"
+         , "This can cause a collision bug when placing objects between two ADT borders!\n\n"
            "If you often use this function, we recommend you to use the 'Save all' "
            "function as often as possible to get the collisions right."
          , QMessageBox::Save | QMessageBox::Cancel
