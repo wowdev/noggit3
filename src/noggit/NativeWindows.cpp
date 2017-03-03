@@ -68,7 +68,7 @@ std::string Native::getGamePath()
 
 	RegCloseKey(key);
 
-	Native::showAlertDialog(kNotFoundTitle, kNotFoundMessage);
+  QMessageBox::critical(nullptr, "Unable to load WoW", QString::fromStdString(kNotFoundMessage));
 
 	std::string gamePath = showFileChooser();
 
