@@ -1518,7 +1518,7 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
   {
     float min = Environment::getInstance()->minScale;
     float max = Environment::getInstance()->maxScale;
-    newModelis.sc *= misc::randfloat(min, max);
+    newModelis.sc = misc::randfloat(min, max);
   }
 
   newModelis.recalcExtents();
