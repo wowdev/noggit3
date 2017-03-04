@@ -67,6 +67,8 @@ namespace noggit
                            build_menu();
                          }
                        );
+
+      build_menu();
     }
 
     void main_window::enterMapAt ( math::vector_3d pos
@@ -149,7 +151,7 @@ namespace noggit
       for (auto& table : type_to_table)
       {
         QObject::connect ( table, &QListWidget::itemClicked
-                         , [this, widget] (QListWidgetItem* item)
+                         , [this] (QListWidgetItem* item)
                            {
                              loadMap (item->data (Qt::UserRole).toInt());
                            }
@@ -157,7 +159,7 @@ namespace noggit
       }
 
       QObject::connect ( bookmarks_table, &QListWidget::itemDoubleClicked
-                       , [this, widget] (QListWidgetItem* item)
+                       , [this] (QListWidgetItem* item)
                          {
                            auto& entry (mBookmarks.at (item->data (Qt::UserRole).toInt()));
 
@@ -172,8 +174,6 @@ namespace noggit
                                           , gWorld
                                           );
 
-                               widget->deleteLater();
-
                                return;
                              }
                            }
@@ -186,7 +186,7 @@ namespace noggit
 
       QObject::connect
         ( _minimap,  &minimap_widget::map_clicked
-        , [this, widget] (World* world, ::math::vector_3d const& pos)
+        , [this] (World* world, ::math::vector_3d const& pos)
           {
 #ifdef USE_MYSQL_UID_STORAGE
             if ( Settings::getInstance()->mysql
@@ -215,13 +215,12 @@ namespace noggit
                 );
               uidFixWindow->show();
             }
-            widget->deleteLater();
           }
         );
 
       layout->addWidget (_minimap);
 
-      widget->show();
+      setCentralWidget (widget);
     }
 
     void main_window::createBookmarkList()
