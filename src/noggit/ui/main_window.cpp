@@ -39,7 +39,7 @@ namespace noggit
 
       createBookmarkList();
 
-      auto file_menu (menuBar()->addMenu ("&File"));
+      auto file_menu (menuBar()->addMenu ("&Noggit"));
 
       auto settings_action (file_menu->addAction ("Settings"));
       QObject::connect ( settings_action, &QAction::triggered
@@ -60,7 +60,7 @@ namespace noggit
                          }
                        );
 
-      auto mapmenu_action (file_menu->addAction ("Load Map"));
+      auto mapmenu_action (file_menu->addAction ("Create Map Editor"));
       QObject::connect ( mapmenu_action, &QAction::triggered
                        , [this]
                          {
