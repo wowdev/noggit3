@@ -951,19 +951,7 @@ void World::tick(float dt)
 
 unsigned int World::getAreaID (math::vector_3d const& pos)
 {
-  tile_index tile(pos);
-  const int mcx = (const int)(fmod(pos.x, TILESIZE) / CHUNKSIZE);
-  const int mcz = (const int)(fmod(pos.z, TILESIZE) / CHUNKSIZE);
-
-  MapTile* curTile = mapIndex.getTile(tile);
-  if (!curTile)
-  {
-    return 0;
-  }
-
-  MapChunk *curChunk = curTile->getChunk((unsigned int)mcx, (unsigned int)mcz);
-
-  return !curChunk ? (unsigned int)(curChunk->getAreaID()) : 0;
+  return for_chunk_at (pos, [&] (MapChunk* chunk) { return chunk->getAreaID(); });
 }
 
 void World::clearHeight(math::vector_3d const& pos)
