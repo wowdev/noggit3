@@ -26,9 +26,10 @@ namespace noggit
         update();
       }
       void update();
+
     public:
-      current_texture(UIFrame* texture_palette);
-      void set_texture(std::string const& texture);
+      current_texture (UIFrame* texture_palette);
+      void set_texture (std::string const& texture);
     };
   }
 }

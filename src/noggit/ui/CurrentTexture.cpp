@@ -17,7 +17,7 @@ namespace noggit
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
 
       auto layout (new QGridLayout (this));
-      layout->setContentsMargins (QMargins(0, 0, 0, 0));
+      layout->setContentsMargins (QMargins (0, 0, 0, 0));
       layout->addWidget (_texture = new clickable_label (this), 0, 0);
 
       _texture->setMinimumSize (64, 64);
