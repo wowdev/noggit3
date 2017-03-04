@@ -17,6 +17,6 @@ namespace ui
     void clicked();
 
   protected:
-    void mouseReleaseEvent (QMouseEvent* event);
+    virtual void mouseReleaseEvent (QMouseEvent* event) override;
   };
 }
