@@ -214,7 +214,7 @@ private:
   bool handleHotkeys(QKeyEvent* e);
 
   QTime _startup_time;
-  qreal _last_update;
+  qreal _last_update = 0.f;
 
   QTimer _update_every_event_loop;
 
