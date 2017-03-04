@@ -418,7 +418,7 @@ void MapView::createGUI()
   // create the menu
   UIMenuBar * mbar = new UIMenuBar();
 
-  auto file_menu (_main_window->menuBar()->addMenu ("File"));
+  auto file_menu (_main_window->menuBar()->addMenu ("Editor"));
   connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
 
   auto edit_menu (_main_window->menuBar()->addMenu ("Edit"));
