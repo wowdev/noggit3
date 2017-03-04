@@ -30,10 +30,10 @@ namespace noggit
     void current_texture::set_texture (std::string const& texture)
     {
       _filename = texture;
-      update();
+      update_texture();
     }
 
-    void current_texture::update()
+    void current_texture::update_texture()
     {
       show();
       _texture->setPixmap (render_blp_to_pixmap (_filename, _texture->width(), _texture->height()));
