@@ -75,7 +75,14 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   texturingTool = new ui::texturing_tool(_camera_pos);
   texturingTool->hide();
 
-  guiCurrentTexture = new ui::current_texture();
+
+  TexturePalette = UITexturingGUI::createTexturePalette(this);
+  TexturePalette->hide();
+  addChild(TexturePalette);
+  addChild(UITexturingGUI::createTilesetLoader());
+  addChild(UITexturingGUI::createTextureFilter());
+
+  guiCurrentTexture = new ui::current_texture(TexturePalette);
 
   // DetailInfoWindow
   guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);
