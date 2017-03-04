@@ -174,7 +174,7 @@ public:
     void for_all_chunks_on_tile (math::vector_3d const& pos, Fun&&);
 
   template<typename Fun>
-    void for_chunk_at(math::vector_3d const& pos, Fun&&);
+    auto for_chunk_at(math::vector_3d const& pos, Fun&& fun) -> decltype (fun (nullptr));
 
   template<typename Fun>
     void for_tile_at(const tile_index& pos, Fun&&);

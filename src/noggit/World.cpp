@@ -1290,12 +1290,12 @@ template<typename Fun>
 }
 
 template<typename Fun>
-  void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
+  auto World::for_chunk_at(math::vector_3d const& pos, Fun&& fun) -> decltype (fun (nullptr))
   {
     MapTile* tile(mapIndex.getTile(pos));
     mapIndex.setChanged(tile);
 
-    fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
+    return fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }
 
 template<typename Fun>
