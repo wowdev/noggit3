@@ -21,7 +21,7 @@ namespace noggit
       clickable_label* _texture;
       std::string _filename;
 
-      virtual void resizeEvent (QResizeEvent * event)
+      virtual void resizeEvent (QResizeEvent* event) override
       {
         update();
       }
