@@ -23,7 +23,11 @@ namespace noggit
 
     private:
       void loadMap (int mapID);
-      void enterMapAt (math::vector_3d pos, math::degrees av, math::degrees ah, World*);
+      void enterMapAt ( math::vector_3d pos
+                      , math::degrees camera_pitch
+                      , math::degrees camera_yaw
+                      , World*
+                      );
 
       void createBookmarkList();
       void build_menu();
@@ -40,8 +44,8 @@ namespace noggit
         int mapID;
         std::string name;
         math::vector_3d pos;
-        float ah;
-        float av;
+        float camera_yaw;
+        float camera_pitch;
       };
 
       std::vector<MapEntry> mMaps;
