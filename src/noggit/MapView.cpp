@@ -1100,14 +1100,14 @@ void MapView::createGUI()
   mainGui->HelperModels = new UIHelperModels(this);
 }
 
-MapView::MapView( math::degrees _camera_ah0
-                , math::degrees _camera_av0
+MapView::MapView( math::degrees camera_yaw0
+                , math::degrees camera_pitch0
                 , math::vector_3d camera_pos
                 , noggit::ui::main_window* main_window
                 , World* world
                 )
   : _GUIDisplayingEnabled(true)
-  , _camera(camera_pos, _camera_ah0, _camera_av0)
+  , _camera (camera_pos, camera_yaw0, camera_pitch0)
   , mTimespeed(0.0f)
   , _main_window (main_window)
   , _world (world)

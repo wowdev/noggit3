@@ -9,12 +9,13 @@ namespace noggit
     : position (position)
     , move_speed (200.6f)
     , _roll (0.0f)
-    , _yaw (0.0f)
-    , _pitch (0.0f)
+    , _yaw (0.f)
+    , _pitch (0.f)
     , _fov (math::degrees (54.f))
   {
-    add_to_yaw (yaw_);
-    add_to_pitch (pitch_);
+    //! \note ensure ranges
+    yaw (yaw_);
+    pitch (pitch_);
   }
 
   math::degrees camera::yaw() const

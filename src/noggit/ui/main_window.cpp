@@ -70,12 +70,12 @@ namespace noggit
     }
 
     void main_window::enterMapAt ( math::vector_3d pos
-                                 , math::degrees av
-                                 , math::degrees ah
+                                 , math::degrees camera_pitch
+                                 , math::degrees camera_yaw
                                  , World* world
                                  )
     {
-      auto mapview (new MapView (ah, av, pos, this, world));
+      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, world));
       setCentralWidget (mapview);
     }
 
@@ -167,8 +167,8 @@ namespace noggit
                              {
                                gWorld = new World(it->getString(MapDB::InternalName));
                                enterMapAt ( entry.pos
-                                          , math::degrees (-entry.av)
-                                          , math::degrees (-entry.ah)
+                                          , math::degrees (entry.camera_pitch)
+                                          , math::degrees (entry.camera_yaw)
                                           , gWorld
                                           );
 
@@ -192,14 +192,14 @@ namespace noggit
                )
             {
               world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f), world);
+              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);
             }
             else
 #endif
             if (uid_storage::getInstance()->hasMaxUIDStored(world->mMapId))
             {
               world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f), world);
+              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);
             }
             else
             {
@@ -207,7 +207,7 @@ namespace noggit
                 ( new ::ui::uid_fix_window
                     ( [this, pos, world]
                       {
-                        enterMapAt (pos, math::degrees(-30.f), math::degrees(-90.f), world);
+                        enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);
                       }
                     )
                 );
@@ -237,7 +237,7 @@ namespace noggit
       int areaID;
       BookmarkEntry b;
       int mapID = -1;
-      while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID)
+      while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.camera_yaw >> b.camera_pitch >> areaID)
       {
         if (mapID == -1)
           continue;
