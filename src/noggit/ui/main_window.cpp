@@ -167,8 +167,8 @@ namespace noggit
                              {
                                gWorld = new World(it->getString(MapDB::InternalName));
                                enterMapAt ( entry.pos
-                                          , math::degrees(entry.av)
-                                          , math::degrees(entry.ah)
+                                          , math::degrees (-entry.av)
+                                          , math::degrees (-entry.ah)
                                           , gWorld
                                           );
 
