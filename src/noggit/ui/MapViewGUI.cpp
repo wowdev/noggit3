@@ -82,7 +82,7 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   addChild(UITexturingGUI::createTilesetLoader());
   addChild(UITexturingGUI::createTextureFilter());
 
-  guiCurrentTexture = new ui::current_texture(TexturePalette);
+  guiCurrentTexture = new noggit::ui::current_texture(TexturePalette);
 
   // DetailInfoWindow
   guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);

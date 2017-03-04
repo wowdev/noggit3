@@ -15,9 +15,15 @@ class UIWater;
 class UIObjectEditor;
 class UIRotationEditor;
 class MapView;
+namespace noggit
+{
+  namespace ui
+  {
+    class current_texture;
+  }
+}
 namespace ui
 {
-  class current_texture;
   class detail_infos;
   class FlattenTool;
   class shader_tool;
@@ -61,7 +67,7 @@ public:
   UITexturePicker* TexturePicker;
   UIWater* guiWater;
   ui::water_type_browser* guiWaterTypeSelector;
-  ui::current_texture* guiCurrentTexture;
+  noggit::ui::current_texture* guiCurrentTexture;
   UIObjectEditor* objectEditor;
   UIRotationEditor* rotationEditor;
   ui::FlattenTool* flattenTool;

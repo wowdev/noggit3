@@ -4,19 +4,22 @@
 
 #include <QtWidgets/QLabel>
 
-namespace ui
+namespace noggit
 {
-  class clickable_label : public QLabel
+  namespace ui
   {
-    Q_OBJECT
+    class clickable_label : public QLabel
+    {
+      Q_OBJECT
 
-  public:
-    using QLabel::QLabel;
+    public:
+      using QLabel::QLabel;
 
-  signals:
-    void clicked();
+    signals:
+      void clicked();
 
-  protected:
-    virtual void mouseReleaseEvent (QMouseEvent* event) override;
-  };
+    protected:
+      virtual void mouseReleaseEvent (QMouseEvent* event) override;
+    };
+  }
 }

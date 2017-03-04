@@ -2,10 +2,13 @@
 
 #include <noggit/ui/clickable_label.hpp>
 
-namespace ui
+namespace noggit
 {
-  void clickable_label::mouseReleaseEvent (QMouseEvent* event)
+  namespace ui
   {
-    emit clicked();
+    void clickable_label::mouseReleaseEvent (QMouseEvent* event)
+    {
+      emit clicked();
+    }
   }
 }
