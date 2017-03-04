@@ -172,6 +172,8 @@ namespace noggit
                                           , gWorld
                                           );
 
+                               widget->deleteLater();
+
                                return;
                              }
                            }
