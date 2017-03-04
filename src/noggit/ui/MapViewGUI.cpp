@@ -159,17 +159,19 @@ void UIMapViewGUI::render() const
   //! \todo Make these some textUIs.
   app.getArial16().shprint(510, 4, gAreaDB.getAreaName(gWorld->getAreaID (*_camera_pos)));
 
-  int time = static_cast<int>(gWorld->time) % 2880;
+  int time = (static_cast<int>(gWorld->time) % 2880) / 2;
   std::stringstream timestrs;
 #ifdef _WIN32
   if (*_tablet_active && Settings::getInstance()->tabletMode) {
-    timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", Pres: " << *_tablet_pressure;
+    timestrs << "Time: " << (time / 60) << ":" << std::setfill ('0')
+             << std::setw (2) << (time % 60) << ", Pres: " << *_tablet_pressure;
     app.getArial16().shprint(video::width - 250.0f, 5.0f, timestrs.str());
   }
   else
 #endif
   {
-    timestrs << "Time: " << (time / 120) << ":" << (time % 120);
+    timestrs << "Time: " << (time / 60) << ":" << std::setfill ('0')
+             << std::setw (2) << (time % 60);
     app.getArial16().shprint(video::width - 200.0f, 5.0f, timestrs.str());
   }
 
