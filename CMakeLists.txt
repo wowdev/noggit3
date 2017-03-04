@@ -198,6 +198,7 @@ set ( noggit_ui_sources
       src/noggit/ui/About.cpp
       src/noggit/ui/Button.cpp
       src/noggit/ui/CheckBox.cpp
+      src/noggit/ui/clickable_label.cpp
       src/noggit/ui/CloseWindow.cpp
       src/noggit/ui/CurrentTexture.cpp
       src/noggit/ui/CursorSwitcher.cpp
@@ -310,6 +311,7 @@ set ( noggit_ui_headers
       src/noggit/ui/About.h
       src/noggit/ui/Button.h
       src/noggit/ui/CheckBox.h
+      src/noggit/ui/clickable_label.hpp
       src/noggit/ui/CloseWindow.h
       src/noggit/ui/CurrentTexture.h
       src/noggit/ui/CursorSwitcher.h
@@ -394,6 +396,7 @@ ENDIF(WIN32)
 
 list (APPEND headers_to_moc
   src/noggit/ui/minimap_widget.hpp
+  src/noggit/ui/clickable_label.hpp
 )
 qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
 
