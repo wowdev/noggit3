@@ -26,9 +26,10 @@ namespace noggit
   {
     _yaw = value;
 
-    while (_yaw._ > 360.0f)
+    //! [-180, 180)
+    while (_yaw._ >= 180.0f)
       _yaw._ -= 360.0f;
-    while (_yaw._ < -360.0f)
+    while (_yaw._ < -180.0f)
       _yaw._ += 360.0f;
 
     return _yaw;
