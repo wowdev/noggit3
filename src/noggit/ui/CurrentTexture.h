@@ -23,9 +23,9 @@ namespace noggit
 
       virtual void resizeEvent (QResizeEvent* event) override
       {
-        update();
+        update_texture();
       }
-      void update();
+      void update_texture();
 
     public:
       current_texture (UIFrame* texture_palette);
