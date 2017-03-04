@@ -733,8 +733,14 @@ void MapView::createGUI()
              , Qt::Key_F5
              , [this]
                {
-                 std::ofstream f("bookmarks.txt", std::ios_base::app);
-                 f << _world->getMapID() << " " << _camera.position.x << " " << _camera.position.y << " " << _camera.position.z << " " << _camera.yaw()._ << " " << _camera.pitch()._ << " " << _world->getAreaID (_camera.position) << std::endl;
+                 std::ofstream f ("bookmarks.txt", std::ios_base::app);
+                 f << _world->getMapID() << " "
+                   << _camera.position.x << " "
+                   << _camera.position.y << " "
+                   << _camera.position.z << " "
+                   << _camera.yaw()._ << " "
+                   << _camera.pitch()._ << " "
+                   << _world->getAreaID (_camera.position) << std::endl;
                }
              );
 
