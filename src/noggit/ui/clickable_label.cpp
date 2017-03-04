@@ -4,12 +4,7 @@
 
 namespace ui
 {
-  clickable_label::clickable_label (QWidget* parent) 
-    : QLabel(parent) 
-  {
-  } 
-
-  void clickable_label::mouseReleaseEvent(QMouseEvent* event) 
+  void clickable_label::mouseReleaseEvent (QMouseEvent* event)
   {
     emit clicked();
   }

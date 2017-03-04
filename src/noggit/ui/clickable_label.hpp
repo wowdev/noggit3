@@ -9,13 +9,14 @@ namespace ui
   class clickable_label : public QLabel
   {
     Q_OBJECT
+
   public:
-    explicit clickable_label (QWidget* parent = nullptr);
+    using QLabel::QLabel;
 
   signals:
     void clicked();
 
   protected:
-    void mouseReleaseEvent(QMouseEvent* event);
+    void mouseReleaseEvent (QMouseEvent* event);
   };
 }
