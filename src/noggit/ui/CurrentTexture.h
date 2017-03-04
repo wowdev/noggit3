@@ -3,24 +3,26 @@
 #pragma once
 
 #include <noggit/TextureManager.h>
+#include <noggit/ui/clickable_label.hpp>
 
-#include <QtWidgets/QLabel>
 #include <QtWidgets/QWidget>
 
 #include <string>
+
+class UIFrame;
 
 namespace ui
 {
   class current_texture : public QWidget
   {
   private:
-    QLabel* _texture;
+    ui::clickable_label* _texture;
     std::string _filename;
 
     virtual void resizeEvent (QResizeEvent * event) { update(); }
     void update();
   public:
-    current_texture();
+    current_texture(UIFrame* texture_palette);
     void set_texture(std::string const& texture);
   };
 }

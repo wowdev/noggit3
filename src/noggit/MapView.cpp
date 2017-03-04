@@ -408,10 +408,6 @@ void MapView::createGUI()
 
   mainGui->terrainTool->storeCursorPos (&_cursor_pos);
 
-  mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
-  mainGui->TexturePalette->hide();
-  mainGui->addChild(UITexturingGUI::createTilesetLoader());
-  mainGui->addChild(UITexturingGUI::createTextureFilter());
   mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
   MapChunkWindow->hide();
 
