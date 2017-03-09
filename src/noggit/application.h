@@ -47,16 +47,6 @@ public:
     return arial16;
   }
 
-  inline const freetype::font_data& getSkurri32() const
-  {
-    return skurri32;
-  }
-
-  inline const freetype::font_data& getFritz16() const
-  {
-    return fritz16;
-  }
-
 private:
   void initPath(char *argv[]);
 public:
@@ -76,7 +66,7 @@ public:
   bool doAntiAliasing;
 private:
 
-  freetype::font_data arialn13, arial12, arial14, arial16, arial24, arial32, morpheus40, skurri32, fritz16;
+  freetype::font_data arialn13, arial12, arial14, arial16;
 public:
   int xres;
   int yres;

@@ -93,16 +93,11 @@ void Noggit::initFont()
   }
 
   // Initializing Fonts
-  skurri32.init("fonts/skurri.ttf", 32, true);
-  fritz16.init("fonts/frizqt__.ttf", 16, true);
-  morpheus40.init("fonts/morpheus.ttf", 40, true);
   arialn13.init("fonts/arialn.ttf", 13, true);
 
   arial12.init(arialFilename, 12, false);
   arial14.init(arialFilename, 14, false);
   arial16.init(arialFilename, 16, false);
-  arial24.init(arialFilename, 24, false);
-  arial32.init(arialFilename, 32, false);
 }
 
 void Noggit::parseArgs(int argc, char *argv[])

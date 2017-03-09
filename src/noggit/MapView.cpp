@@ -18,7 +18,7 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
-#include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
+#include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), arial...
 #include <noggit/map_index.hpp>
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
