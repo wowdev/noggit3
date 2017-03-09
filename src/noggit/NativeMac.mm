@@ -100,33 +100,4 @@ std::string Native::getConfigPath()
     return [configPath UTF8String];
 }
 
-std::string Native::getArialPath()
-{
-    // Size does not affect ability to find font, but is required by method
-    // This searches fonts at system-stock (/System/Libray/Fonts/), system user (/Library/Fonts/), and user (~/Library/Fonts/) levels
-    NSFont *font = [NSFont fontWithName:@"Arial" size:12];
-
-    if (!font) {
-        // User doesn't have Arial for some reason
-        // Let's try Helvetica since it's stock with all Macs since 1984 and has nearly identical metrics
-        font = [NSFont fontWithName:@"Helvetica" size:12];
-        Log << "NoggitCocoa: Substituting Helvetica for Arial." << std::endl;
-    }
-
-    if (!font) {
-        // Subtitute didn't work, user has likely wrecked his OS install. Bailing.
-        // We could instead subtitute the system sans-serif here if we wanted to.
-        Log << "NoggitCocoa: Couldn't find Arial or Helvetica!" << std::endl;
-        return "";
-    }
-
-    CTFontDescriptorRef fontRef = CTFontDescriptorCreateWithNameAndSize ((CFStringRef)[font fontName], [font pointSize]);
-    CFURLRef url = (CFURLRef)CTFontDescriptorCopyAttribute(fontRef, kCTFontURLAttribute);
-    NSString *fontPath = [NSString stringWithString:[(NSURL *)url path]];
-    CFRelease(fontRef);
-    CFRelease(url);
-
-    return [fontPath UTF8String];
-}
-
 #endif

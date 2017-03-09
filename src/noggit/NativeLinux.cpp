@@ -21,9 +21,4 @@ std::string Native::getConfigPath()
 	return "noggit.conf";
 }
 
-std::string Native::getArialPath()
-{
-	return "arial.ttf";
-}
-
 #endif
