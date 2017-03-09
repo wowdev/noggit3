@@ -11,7 +11,7 @@ class AsyncObject;
 class AsyncLoader
 {
 public:
-  AsyncLoader() { }
+  ~AsyncLoader();
 
   void process();
 
