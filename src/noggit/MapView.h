@@ -245,4 +245,5 @@ private:
   QLabel* _status_position;
   QLabel* _status_selection;
   QLabel* _status_area;
+  QLabel* _status_time;
 };
