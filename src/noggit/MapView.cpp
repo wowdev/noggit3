@@ -1107,21 +1107,21 @@ MapView::MapView( math::degrees camera_yaw0
   , mTimespeed(0.0f)
   , _main_window (main_window)
   , _world (world)
-  , _status_left (new QLabel (this))
-  , _status_right (new QLabel (this))
+  , _status_position (new QLabel (this))
+  , _status_selection (new QLabel (this))
   , _status_area (new QLabel (this))
 {
-  _main_window->statusBar()->addWidget (_status_left);
+  _main_window->statusBar()->addWidget (_status_position);
   connect ( this
           , &QObject::destroyed
           , _main_window
-          , [=] { _main_window->statusBar()->removeWidget (_status_left); }
+          , [=] { _main_window->statusBar()->removeWidget (_status_position); }
           );
-  _main_window->statusBar()->addWidget (_status_right);
+  _main_window->statusBar()->addWidget (_status_selection);
   connect ( this
           , &QObject::destroyed
           , _main_window
-          , [=] { _main_window->statusBar()->removeWidget (_status_right); }
+          , [=] { _main_window->statusBar()->removeWidget (_status_selection); }
           );
   _main_window->statusBar()->addWidget (_status_area);
   connect ( this
@@ -1750,12 +1750,12 @@ void MapView::tick (float dt)
             . arg (_camera.position.y)
             );
 
-  _status_left->setText (status);
+  _status_position->setText (status);
 
   auto lSelection = _world->GetCurrentSelection();
   if (!lSelection)
   {
-    _status_right->setText ("");
+    _status_selection->setText ("");
   }
   else
   {
@@ -1764,7 +1764,7 @@ void MapView::tick (float dt)
     case eEntry_Model:
       {
         auto instance (boost::get<selected_model_type> (*lSelection));
-        _status_right->setText
+        _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->d1)
           . arg (QString::fromStdString (instance->model->_filename))
@@ -1774,7 +1774,7 @@ void MapView::tick (float dt)
     case eEntry_WMO:
       {
         auto instance (boost::get<selected_wmo_type> (*lSelection));
-        _status_right->setText
+        _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->mUniqueID)
           . arg (QString::fromStdString (instance->wmo->_filename))
@@ -1784,7 +1784,7 @@ void MapView::tick (float dt)
     case eEntry_MapChunk:
       {
         auto chunk (boost::get<selected_chunk_type> (*lSelection).chunk);
-        _status_right->setText
+        _status_selection->setText
           (QString ("%1, %2").arg (chunk->px).arg (chunk->py));
         break;
       }

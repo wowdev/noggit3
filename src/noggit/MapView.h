@@ -242,7 +242,7 @@ private:
 #endif
   void init_tablet();
 
-  QLabel* _status_left;
-  QLabel* _status_right;
+  QLabel* _status_position;
+  QLabel* _status_selection;
   QLabel* _status_area;
 };
