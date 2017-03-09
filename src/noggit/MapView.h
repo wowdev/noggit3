@@ -228,6 +228,7 @@ private:
   virtual void keyReleaseEvent (QKeyEvent*) override;
   virtual void keyPressEvent (QKeyEvent*) override;
 
+  friend class UIMapViewGUI;
   noggit::ui::main_window* _main_window;
 
   math::vector_4d normalized_device_coords (int x, int y) const;
