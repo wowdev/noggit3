@@ -244,4 +244,5 @@ private:
 
   QLabel* _status_left;
   QLabel* _status_right;
+  QLabel* _status_area;
 };

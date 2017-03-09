@@ -1109,6 +1109,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _world (world)
   , _status_left (new QLabel (this))
   , _status_right (new QLabel (this))
+  , _status_area (new QLabel (this))
 {
   _main_window->statusBar()->addWidget (_status_left);
   connect ( this
@@ -1122,6 +1123,13 @@ MapView::MapView( math::degrees camera_yaw0
           , _main_window
           , [=] { _main_window->statusBar()->removeWidget (_status_right); }
           );
+  _main_window->statusBar()->addWidget (_status_area);
+  connect ( this
+          , &QObject::destroyed
+          , _main_window
+          , [=] { _main_window->statusBar()->removeWidget (_status_area); }
+          );
+
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
@@ -1782,6 +1790,9 @@ void MapView::tick (float dt)
       }
     }
   }
+
+  _status_area->setText
+    (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
 }
 
 math::vector_4d MapView::normalized_device_coords (int x, int y) const
