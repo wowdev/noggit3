@@ -10,7 +10,7 @@
 #include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
-#include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
+#include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), arial...
 #include <noggit/Project.h>
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/CurrentTexture.h>
