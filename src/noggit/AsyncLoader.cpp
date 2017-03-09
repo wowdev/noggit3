@@ -64,6 +64,12 @@ void AsyncLoader::start(int _numThreads)
   }
 }
 
+AsyncLoader::~AsyncLoader()
+{
+  stop();
+  join();
+}
+
 void AsyncLoader::stop()
 {
   m_threads.interrupt_all();
