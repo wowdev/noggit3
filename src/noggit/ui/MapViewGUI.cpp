@@ -163,9 +163,6 @@ void UIMapViewGUI::render() const
 {
   UIFrame::render();
 
-  //! \todo Make these some textUIs.
-  app.getArial16().shprint(510, 4, gAreaDB.getAreaName(gWorld->getAreaID (*_camera_pos)));
-
   int time = (static_cast<int>(gWorld->time) % 2880) / 2;
   std::stringstream timestrs;
 #ifdef _WIN32
