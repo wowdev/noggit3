@@ -24,9 +24,6 @@ namespace ui
     , _edit_type(Environment::getInstance()->groundBrushType)
     , _vertex_mode(eVertexMode_Center)
   {
-    setWindowTitle("Raise / Lower");
-    setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-
     auto layout (new QFormLayout (this));
 
     _type_button_group = new QButtonGroup (this);

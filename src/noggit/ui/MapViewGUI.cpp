@@ -63,8 +63,13 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   rotationEditor = new UIRotationEditor();
   rotationEditor->hide();
 
-  terrainTool = new ui::terrain_tool();
-  terrainTool->hide();
+  _terrain = new QDockWidget ("Raise / Lower", setMapview);
+  _terrain->setFeatures ( QDockWidget::DockWidgetMovable
+                    | QDockWidget::DockWidgetFloatable
+                    );
+  _terrain->setWidget (terrainTool = new ui::terrain_tool());
+  setMapview->_main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
+
 
   flattenTool = new ui::FlattenTool();
   flattenTool->hide();

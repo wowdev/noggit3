@@ -96,7 +96,7 @@ void MapView::set_editing_mode (editing_mode mode)
   opengl::context::scoped_setter const _ (::gl, context());
 
   mainGui->guiWaterTypeSelector->hide();
-  mainGui->terrainTool->hide();
+  mainGui->_terrain->hide();
   mainGui->flattenTool->hide();
   mainGui->texturingTool->hide();
   mainGui->shaderTool->hide();
@@ -114,8 +114,6 @@ void MapView::set_editing_mode (editing_mode mode)
   switch (terrainMode)
   {
   case editing_mode::ground:
-    tool_settings_x = mainGui->terrainTool->x();
-    tool_settings_y = mainGui->terrainTool->y();
     break;
   case editing_mode::flatten_blur:
     tool_settings_x = mainGui->flattenTool->x();
@@ -142,8 +140,7 @@ void MapView::set_editing_mode (editing_mode mode)
   switch (mode)
   {
   case editing_mode::ground:
-    mainGui->terrainTool->move (tool_settings_x, tool_settings_y);
-    mainGui->terrainTool->show();
+    mainGui->_terrain->show();
     break;
   case editing_mode::flatten_blur:
     mainGui->flattenTool->move(tool_settings_x, tool_settings_y);

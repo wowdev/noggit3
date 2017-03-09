@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <QtWidgets/QDockWidget>
+
 class UIMinimapWindow;
 class MapView;
 class UIFrame;
@@ -72,6 +74,7 @@ public:
   UIRotationEditor* rotationEditor;
   ui::FlattenTool* flattenTool;
   ui::terrain_tool* terrainTool;
+  QDockWidget* _terrain;
   ui::shader_tool* shaderTool;
   ui::texturing_tool* texturingTool;
 
