@@ -276,8 +276,7 @@ namespace noggit
 
       if (prompt.buttonRole (prompt.clickedButton()) == QMessageBox::AcceptRole)
       {
-        centralWidget()->deleteLater();
-        setCentralWidget (_null_widget);
+        setCentralWidget (_null_widget = new QWidget (this));
       }
     }
   }
