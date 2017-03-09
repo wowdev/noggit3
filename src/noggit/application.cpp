@@ -76,28 +76,10 @@ void Noggit::initPath(char *argv[])
 
 void Noggit::initFont()
 {
-  std::string arialFilename = Native::getArialPath();
-
-  if (!boost::filesystem::exists(arialFilename))
-  {
-    arialFilename = "arial.ttf";
-    if (!boost::filesystem::exists(arialFilename))
-    {
-      arialFilename = "fonts/arial.ttf";
-      if (!boost::filesystem::exists(arialFilename))
-      {
-        LogError << "Can not find arial.ttf." << std::endl;
-        //return -1;
-      }
-    }
-  }
-
-  // Initializing Fonts
   arialn13.init("fonts/arialn.ttf", 13, true);
-
-  arial12.init(arialFilename, 12, false);
-  arial14.init(arialFilename, 14, false);
-  arial16.init(arialFilename, 16, false);
+  arial12.init("fonts/arialn.ttf", 12, true);
+  arial14.init("fonts/arialn.ttf", 14, true);
+  arial16.init("fonts/arialn.ttf", 16, true);
 }
 
 void Noggit::parseArgs(int argc, char *argv[])

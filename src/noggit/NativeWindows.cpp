@@ -80,16 +80,4 @@ std::string Native::getConfigPath()
 	return "noggit.conf";
 }
 
-std::string Native::getArialPath()
-{
-	TCHAR fontPath[MAX_PATH] = { 0 };
-	SHGetSpecialFolderPath(
-		NULL,
-		fontPath,
-		CSIDL_FONTS,
-		0
-	);
-	return std::string(fontPath)+"\\arial.ttf";
-}
-
 #endif
