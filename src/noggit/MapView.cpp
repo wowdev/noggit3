@@ -1110,6 +1110,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_position (new QLabel (this))
   , _status_selection (new QLabel (this))
   , _status_area (new QLabel (this))
+  , _status_time (new QLabel (this))
 {
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
@@ -1128,6 +1129,12 @@ MapView::MapView( math::degrees camera_yaw0
           , &QObject::destroyed
           , _main_window
           , [=] { _main_window->statusBar()->removeWidget (_status_area); }
+          );
+  _main_window->statusBar()->addWidget (_status_time);
+  connect ( this
+          , &QObject::destroyed
+          , _main_window
+          , [=] { _main_window->statusBar()->removeWidget (_status_time); }
           );
 
 
@@ -1793,6 +1800,22 @@ void MapView::tick (float dt)
 
   _status_area->setText
     (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
+
+  {
+    int time ((static_cast<int>(_world->time) % 2880) / 2);
+    std::stringstream timestrs;
+    timestrs << "Time: " << (time / 60) << ":" << std::setfill ('0')
+             << std::setw (2) << (time % 60);
+
+#ifdef _WIN32
+    if (*_tablet_active && Settings::getInstance()->tabletMode)
+    {
+      timestrs << ", Pres: " << *_tablet_pressure;
+    }
+#endif
+
+    _status_time->setText (QString::fromStdString (timestrs.str()));
+  }
 }
 
 math::vector_4d MapView::normalized_device_coords (int x, int y) const

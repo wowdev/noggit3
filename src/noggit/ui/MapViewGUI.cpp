@@ -163,22 +163,6 @@ void UIMapViewGUI::render() const
 {
   UIFrame::render();
 
-  int time = (static_cast<int>(gWorld->time) % 2880) / 2;
-  std::stringstream timestrs;
-#ifdef _WIN32
-  if (*_tablet_active && Settings::getInstance()->tabletMode) {
-    timestrs << "Time: " << (time / 60) << ":" << std::setfill ('0')
-             << std::setw (2) << (time % 60) << ", Pres: " << *_tablet_pressure;
-    app.getArial16().shprint(video::width - 250.0f, 5.0f, timestrs.str());
-  }
-  else
-#endif
-  {
-    timestrs << "Time: " << (time / 60) << ":" << std::setfill ('0')
-             << std::setw (2) << (time % 60);
-    app.getArial16().shprint(video::width - 200.0f, 5.0f, timestrs.str());
-  }
-
   tile_index tile(*_camera_pos);
   guiWater->updatePos(tile);
 
