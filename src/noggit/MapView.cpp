@@ -647,6 +647,8 @@ void MapView::createGUI()
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
   ADD_TOGGLE (view_menu, "Hole lines always on", "Shift+F7", _draw_hole_lines);
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
+  //! \todo space+h in object mode
+  ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
 
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
@@ -917,7 +919,7 @@ void MapView::createGUI()
                 // toggle hidden models visibility
                 if (_mod_space_down)
                 {
-                  _draw_hidden_models = !_draw_hidden_models;
+                  _draw_hidden_models.set (!_draw_hidden_models.get());
                 }
                 else if (_mod_shift_down)
                 {
@@ -1864,8 +1866,8 @@ selection_result MapView::intersect_result(bool terrain_only)
                         , _draw_terrain.get()
                         , _draw_wmo.get()
                         , _draw_models.get()
-                        , _draw_hidden_models ? std::unordered_set<WMO*>() : _hidden_map_objects
-                        , _draw_hidden_models ? std::unordered_set<Model*>() : _hidden_models
+                        , _draw_hidden_models.get() ? std::unordered_set<WMO*>() : _hidden_map_objects
+                        , _draw_hidden_models.get() ? std::unordered_set<Model*>() : _hidden_models
                         )
     );
 
@@ -2076,8 +2078,8 @@ void MapView::displayViewMode_3D()
                , _draw_model_animations.get()
                , _draw_hole_lines.get() || terrainMode == editing_mode::holes
                , _draw_models_with_box.get()
-               , _draw_hidden_models ? std::unordered_set<WMO*>() : _hidden_map_objects
-               , _draw_hidden_models ? std::unordered_set<Model*>() : _hidden_models
+               , _draw_hidden_models.get() ? std::unordered_set<WMO*>() : _hidden_map_objects
+               , _draw_hidden_models.get() ? std::unordered_set<Model*>() : _hidden_models
                , _area_id_colors
                );
 
