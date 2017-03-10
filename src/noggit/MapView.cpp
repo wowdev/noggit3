@@ -650,17 +650,15 @@ void MapView::createGUI()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
 
+  view_menu->addSection ("Windows");
+  ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
+  connect ( &_show_detail_info_window, &bool_toggle_property::changed
+          , mainGui->guidetailInfos, &QWidget::setVisible
+          );
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
   addHotkey(Qt::Key_F12, MOD_none, [this] { _world->drawfog = !_world->drawfog; });
-  mbar->GetMenu ("View")->AddMenuItemButton( "F8 Detail infos"
-                                           , [this]
-                                             {
-                                               mainGui->guidetailInfos->toggle_visibility ();
-                                             }
-                                           );
-  addHotkey (Qt::Key_F8, MOD_none, [this] { mainGui->guidetailInfos->toggle_visibility(); });
 
   addHotkey ( Qt::Key_F1
             , MOD_shift
