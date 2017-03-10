@@ -27,7 +27,7 @@
 #include <noggit/ui/HelperModels.h>
 #include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
-#include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
+#include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
@@ -615,9 +615,6 @@ void MapView::createGUI()
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
 
-  mbar->GetMenu("View")->AddMenuItemToggle("Minimap", mainGui->minimapWindow->hidden_evil(), true);
-  addHotkey (Qt::Key_M, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
-
   mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", mainGui->TexturePalette->hidden_evil(), true);
   addHotkey ( Qt::Key_X
             , MOD_none
@@ -654,6 +651,10 @@ void MapView::createGUI()
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
   connect ( &_show_detail_info_window, &bool_toggle_property::changed
           , mainGui->guidetailInfos, &QWidget::setVisible
+          );
+  ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
+  connect ( &_show_minimap_window, &bool_toggle_property::changed
+          , _minimap, &QWidget::setVisible
           );
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
@@ -1119,6 +1120,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_selection (new QLabel (this))
   , _status_area (new QLabel (this))
   , _status_time (new QLabel (this))
+  , _minimap (new noggit::ui::minimap_widget (nullptr))
 {
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
@@ -1144,6 +1146,11 @@ MapView::MapView( math::degrees camera_yaw0
           , _main_window
           , [=] { _main_window->statusBar()->removeWidget (_status_time); }
           );
+
+  _minimap->world (_world);
+  _minimap->camera (&_camera);
+  _minimap->draw_skies (true);
+  _minimap->draw_boundaries (true);
 
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);

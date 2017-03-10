@@ -4,7 +4,6 @@
 
 #include <QtWidgets/QDockWidget>
 
-class UIMinimapWindow;
 class MapView;
 class UIFrame;
 class UITexturePicker;
@@ -64,7 +63,6 @@ public:
   // UI elements
   UIFrame* TexturePalette;
   UIFrame* SelectedTexture;
-  UIMinimapWindow* minimapWindow;
   ui::detail_infos* guidetailInfos;
   ui::zone_id_browser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;

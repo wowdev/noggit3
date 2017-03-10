@@ -7,6 +7,7 @@
 
 #include <noggit/Sky.h>
 #include <noggit/World.h>
+#include <noggit/camera.hpp>
 
 namespace noggit
 {
@@ -15,8 +16,8 @@ namespace noggit
     minimap_widget::minimap_widget (QWidget* parent)
       : QWidget (parent)
       , _world (nullptr)
+      , _camera (nullptr)
       , _draw_skies (false)
-      , _draw_camera (false)
     {
       setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     }
@@ -127,22 +128,24 @@ namespace noggit
           }
         }
 
-        //! \todo Lookat!
-        // if (draw_camera())
-        // {
-        //   painter.setPen (Qt::red);
+        if (_camera)
+        {
+          painter.setPen (Qt::red);
 
-        //   QLineF camera_vector ( QPointF ( world()->camera.x * scale_factor
-        //                                  , world()->camera.z * scale_factor
-        //                                  )
-        //                        , QPointF ( world()->lookat.x * scale_factor
-        //                                  , world()->lookat.z * scale_factor
-        //                                  )
-        //                        );
-        //   camera_vector.setLength (15.0);
+          QLineF camera_vector ( QPointF ( _camera->position.x * scale_factor
+                                         , _camera->position.z * scale_factor
+                                         )
+                               , QPointF ( _camera->position.x * scale_factor
+                                         , _camera->position.z * scale_factor
+                                         )
+                               + QPointF ( math::cos (_camera->yaw()) * scale_factor
+                                         , -math::sin (_camera->yaw()) * scale_factor
+                                         )
+                               );
+          camera_vector.setLength (15.0);
 
-        //   painter.drawLine (camera_vector);
-        // }
+          painter.drawLine (camera_vector);
+        }
       }
       else
       {
