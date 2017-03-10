@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include <noggit/ui/Window.h>
-#include <noggit/ui/Text.h>
+#include <noggit/camera.hpp>
 #include <noggit/map_horizon.h>
+#include <noggit/ui/Text.h>
+#include <noggit/ui/Window.h>
 
 class Menu;
 class World;
@@ -15,17 +16,15 @@ class UIMinimapWindow : public UIWindow
 private:
   float borderwidth;
   float tilesize;
-  math::degrees lookAt;
   World* map;
   UIText::Ptr cursor_position;
   noggit::map_horizon::minimap _minimap;
-  math::vector_3d* _camera_pos;
+  noggit::camera* _camera;
 
 public:
-  explicit UIMinimapWindow(World* setMap, math::vector_3d* camera_pos);
+  explicit UIMinimapWindow(World* setMap, noggit::camera*);
   UIFrame* processLeftClick(float mx, float my);
   virtual void mouse_moved (float, float) override;
   void resize();
   void render() const;
-  void changePlayerLookAt(math::degrees ah);
 };

@@ -396,7 +396,7 @@ void MapView::changeZoneIDValue (int set)
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI(this, &_camera.position, &_tablet_pressure, &_tablet_active);
+  mainGui = new UIMapViewGUI(this, &_camera, &_tablet_pressure, &_tablet_active);
 
   mainGui->ZoneIDBrowser->setMapID(_world->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
@@ -1688,12 +1688,10 @@ void MapView::tick (float dt)
       if (turn)
       {
         _camera.add_to_yaw(math::degrees(turn));
-        mainGui->minimapWindow->changePlayerLookAt(_camera.yaw());
       }
       if (lookat)
       {
         _camera.add_to_pitch(math::degrees(lookat));
-        mainGui->minimapWindow->changePlayerLookAt(_camera.pitch());
       }
       if (moving)
       {
@@ -2358,8 +2356,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
     _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
-
-    mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera.pitch()));
   }
 
   if (MoveObj)

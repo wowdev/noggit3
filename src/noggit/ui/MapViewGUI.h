@@ -19,6 +19,7 @@ class UIRotationEditor;
 class MapView;
 namespace noggit
 {
+  class camera;
   namespace ui
   {
     class current_texture;
@@ -46,7 +47,7 @@ private:
   bool _tilemode;
   UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
-  const math::vector_3d* _camera_pos;
+  noggit::camera* _camera;
   float* _tablet_pressure;
   bool* _tablet_active;
 
@@ -83,7 +84,7 @@ public:
   UIHelperModels *HelperModels;
 
   explicit UIMapViewGUI ( MapView* setMapview
-                        , math::vector_3d* camera_pos
+                        , noggit::camera*
                         , float* tablet_pressure
                         , bool* tablet_active
                         );
