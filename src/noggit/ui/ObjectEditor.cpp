@@ -260,8 +260,8 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   });
 
   connect(visToggleButton, &QPushButton::clicked, [=]() {
-      mainGui->theMapview->_draw_hidden_models
-              = !mainGui->theMapview->_draw_hidden_models;
+      mainGui->theMapview->_draw_hidden_models.set
+        (!mainGui->theMapview->_draw_hidden_models.get());
   });
 
   connect(clearListButton, &QPushButton::clicked, [=]() {

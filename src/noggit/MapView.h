@@ -108,7 +108,7 @@ private:
 public:
   std::unordered_set<WMO*> _hidden_map_objects;
   std::unordered_set<Model*> _hidden_models;
-  bool _draw_hidden_models = false;
+  bool_toggle_property _draw_hidden_models = {false};
 private:
   int _selected_area_id = -1;
   std::map<int, misc::random_color> _area_id_colors;
