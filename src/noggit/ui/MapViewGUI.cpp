@@ -42,18 +42,18 @@
 
 
 UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
-                           , math::vector_3d* camera_pos
+                           , noggit::camera* camera
                            , float* tablet_pressure
                            , bool* tablet_active
                            )
   : UIFrame(0.0f, 0.0f, (float)video::width, (float)video::height)
-  , _camera_pos(camera_pos)
+  , _camera (camera)
   , _tablet_pressure (tablet_pressure)
   , _tablet_active (tablet_active)
   , theMapview(setMapview)
 {
   // Minimap window
-  minimapWindow = new UIMinimapWindow(gWorld, camera_pos);
+  minimapWindow = new UIMinimapWindow(gWorld, camera);
   minimapWindow->hide();
   addChild(minimapWindow);
 
@@ -77,7 +77,7 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   shaderTool = new ui::shader_tool(theMapview->cursor_color);
   shaderTool->hide();
 
-  texturingTool = new ui::texturing_tool(_camera_pos);
+  texturingTool = new ui::texturing_tool (&camera->position);
   texturingTool->hide();
 
 
@@ -168,7 +168,7 @@ void UIMapViewGUI::render() const
 {
   UIFrame::render();
 
-  tile_index tile(*_camera_pos);
+  tile_index tile (_camera->position);
   guiWater->updatePos(tile);
 
   if (!_tilemode && !guidetailInfos->isHidden())
