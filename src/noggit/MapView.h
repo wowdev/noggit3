@@ -45,6 +45,7 @@ namespace noggit
   namespace ui
   {
     struct main_window;
+    class minimap_widget;
     class toolbar;
   }
 }
@@ -278,4 +279,7 @@ private:
   bool_toggle_property _auto_selecting_mode = {true};
 
   bool_toggle_property _show_detail_info_window = {false};
+  bool_toggle_property _show_minimap_window = {false};
+
+  noggit::ui::minimap_widget* _minimap;
 };

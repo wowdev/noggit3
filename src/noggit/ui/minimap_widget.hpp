@@ -13,6 +13,8 @@ class World;
 //! \todo add adt coordinates/name on mouseover
 namespace noggit
 {
+  class camera;
+
   namespace ui
   {
     //! \todo Make this a fixed square somehow.
@@ -33,13 +35,11 @@ namespace noggit
         { _draw_skies = draw_skies_; update(); return _draw_skies; }
       inline const bool& draw_skies() const { return _draw_skies; }
 
-      inline const bool& draw_camera (const bool& draw_camera_)
-        { _draw_camera = draw_camera_; update(); return _draw_camera; }
-      inline const bool& draw_camera() const { return _draw_camera; }
-
       inline const bool& draw_boundaries (const bool& draw_boundaries_)
         { _draw_boundaries = draw_boundaries_; update(); return _draw_boundaries; }
       inline const bool& draw_boundaries() const { return _draw_boundaries; }
+
+      inline void camera (noggit::camera* camera) { _camera = camera; }
 
     protected:
       virtual void paintEvent (QPaintEvent*);
@@ -51,6 +51,7 @@ namespace noggit
 
     private:
       World const* _world;
+      noggit::camera* _camera;
       bool _draw_skies;
       bool _draw_camera;
       bool _draw_boundaries;

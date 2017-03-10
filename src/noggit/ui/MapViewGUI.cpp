@@ -17,7 +17,6 @@
 #include <noggit/ui/DetailInfos.h> // ui::detail_infos
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
-#include <noggit/ui/MinimapWindow.h>
 #include <noggit/ui/shader_tool.hpp>
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/texturing_tool.hpp>
@@ -52,11 +51,6 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   , _tablet_active (tablet_active)
   , theMapview(setMapview)
 {
-  // Minimap window
-  minimapWindow = new UIMinimapWindow(gWorld, camera);
-  minimapWindow->hide();
-  addChild(minimapWindow);
-
   objectEditor = new UIObjectEditor((float)video::width - 410.0f, 10.0f, this);
   objectEditor->hide();
 

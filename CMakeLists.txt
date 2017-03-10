@@ -210,7 +210,6 @@ set ( noggit_ui_sources
       src/noggit/ui/HelperModels.cpp
       src/noggit/ui/MapViewGUI.cpp
       src/noggit/ui/MenuBar.cpp
-      src/noggit/ui/MinimapWindow.cpp
       src/noggit/ui/MinimizeButton.cpp
       src/noggit/ui/ModelImport.cpp
       src/noggit/ui/ObjectEditor.cpp
@@ -323,7 +322,6 @@ set ( noggit_ui_headers
       src/noggit/ui/HelperModels.h
       src/noggit/ui/MapViewGUI.h
       src/noggit/ui/MenuBar.h
-      src/noggit/ui/MinimapWindow.h
       src/noggit/ui/MinimizeButton.h
       src/noggit/ui/ModelImport.h
       src/noggit/ui/ObjectEditor.h
