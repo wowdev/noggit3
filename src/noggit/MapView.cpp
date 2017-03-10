@@ -1805,9 +1805,9 @@ void MapView::tick (float dt)
              << std::setw (2) << (time % 60);
 
 #ifdef _WIN32
-    if (*_tablet_active && Settings::getInstance()->tabletMode)
+    if (_tablet_active && Settings::getInstance()->tabletMode)
     {
-      timestrs << ", Pres: " << *_tablet_pressure;
+      timestrs << ", Pres: " << _tablet_pressure;
     }
 #endif
 
