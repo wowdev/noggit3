@@ -36,7 +36,6 @@ private:
   QDoubleSpinBox* farZField;
 
   QCheckBox* tabletModeCheck;
-  QCheckBox* autoselectCheck;
   QCheckBox* modelStatsCheck;
   QCheckBox* modelsBoxCheck;
   QCheckBox* randRotCheck;
