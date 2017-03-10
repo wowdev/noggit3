@@ -93,18 +93,18 @@ private:
 
   noggit::camera _camera;
 
-  bool _draw_contour = false;
-  bool _draw_mfbo = false;
-  bool _draw_wireframe = false;
-  bool _draw_lines = false;
-  bool _draw_terrain = true;
-  bool _draw_wmo = true;
-  bool _draw_water = true;
-  bool _draw_wmo_doodads = true;
-  bool _draw_models = true;
-  bool _draw_model_animations = false;
-  bool _draw_hole_lines = false;
-  bool _draw_models_with_box = false;
+  bool_toggle_property _draw_contour = {false};
+  bool_toggle_property _draw_mfbo = {false};
+  bool_toggle_property _draw_wireframe = {false};
+  bool_toggle_property _draw_lines = {false};
+  bool_toggle_property _draw_terrain = {true};
+  bool_toggle_property _draw_wmo = {true};
+  bool_toggle_property _draw_water = {true};
+  bool_toggle_property _draw_wmo_doodads = {true};
+  bool_toggle_property _draw_models = {true};
+  bool_toggle_property _draw_model_animations = {false};
+  bool_toggle_property _draw_hole_lines = {false};
+  bool_toggle_property _draw_models_with_box = {false};
 public:
   std::unordered_set<WMO*> _hidden_map_objects;
   std::unordered_set<Model*> _hidden_models;

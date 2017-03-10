@@ -446,6 +446,23 @@ void MapView::createGUI()
     connect (action, &QAction::triggered, on_action);             \
   }
 
+#define ADD_TOGGLE(menu_, name_, shortcut_, property_)            \
+  do                                                              \
+  {                                                               \
+    QAction* action (new QAction (name_, this));                  \
+    action->setShortcut (QKeySequence (shortcut_));               \
+    action->setCheckable (true);                                  \
+    action->setChecked (property_.get());                         \
+    menu_->addAction (action);                                    \
+    connect ( action, &QAction::toggled                           \
+            , &property_, &bool_toggle_property::set              \
+            );                                                    \
+    connect ( &property_, &bool_toggle_property::changed          \
+            , action, &QAction::setChecked                        \
+            );                                                    \
+  }                                                               \
+  while (false)
+
 #define ADD_TOGGLE_NS(menu_, name_, property_)                    \
   do                                                              \
   {                                                               \
@@ -616,19 +633,25 @@ void MapView::createGUI()
                 mainGui->toggleCursorSwitcher();
               }
             );
+
+  view_menu->addSection ("Drawing");
+  ADD_TOGGLE (view_menu, "Doodads", Qt::Key_F1, _draw_models);
+  ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F2, _draw_wmo_doodads);
+  ADD_TOGGLE (view_menu, "Terrain", Qt::Key_F3, _draw_terrain);
+  ADD_TOGGLE (view_menu, "Water", Qt::Key_F4, _draw_water);
+  ADD_TOGGLE (view_menu, "WMOs", Qt::Key_F6, _draw_wmo);
+  ADD_TOGGLE (view_menu, "Lines", Qt::Key_F7, _draw_lines);
+  ADD_TOGGLE (view_menu, "Map contour infos", Qt::Key_F9, _draw_contour);
+  ADD_TOGGLE (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe);
+  ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
+  ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
+  ADD_TOGGLE (view_menu, "Hole lines always on", "Shift+F7", _draw_hole_lines);
+  ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
+
+
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
-  mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &_draw_models);
-  addHotkey (Qt::Key_F1, MOD_none, [this] { _draw_models = !_draw_models; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F2 WMO doodadsets", &_draw_wmo_doodads);
-  addHotkey (Qt::Key_F2, MOD_none, [this] { _draw_wmo_doodads = !_draw_wmo_doodads; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &_draw_terrain);
-  addHotkey (Qt::Key_F3, MOD_none, [this] { _draw_terrain = !_draw_terrain; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F4 Water", &_draw_water);
-  addHotkey (Qt::Key_F4, MOD_none, [this] { _draw_water = !_draw_water; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F6 WMOs", &_draw_wmo);
-  addHotkey (Qt::Key_F6, MOD_none, [this] { _draw_wmo = !_draw_wmo; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &_draw_lines);
-  addHotkey (Qt::Key_F7, MOD_none, [this] { _draw_lines = !_draw_lines; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
+  addHotkey(Qt::Key_F12, MOD_none, [this] { _world->drawfog = !_world->drawfog; });
   mbar->GetMenu ("View")->AddMenuItemButton( "F8 Detail infos"
                                            , [this]
                                              {
@@ -636,18 +659,6 @@ void MapView::createGUI()
                                              }
                                            );
   addHotkey (Qt::Key_F8, MOD_none, [this] { mainGui->guidetailInfos->toggle_visibility(); });
-  mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
-  addHotkey (Qt::Key_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &_draw_wireframe);
-  addHotkey(Qt::Key_F10, MOD_none, [this] { _draw_wireframe = !_draw_wireframe; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &_draw_model_animations);
-  addHotkey (Qt::Key_F11, MOD_none, [this] { _draw_model_animations = !_draw_model_animations; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
-  addHotkey(Qt::Key_F12, MOD_none, [this] { _world->drawfog = !_world->drawfog; });
-  mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &_draw_mfbo);
-  mbar->GetMenu("View")->AddMenuItemToggle("SHIFT+F7 Hole lines always on", &_draw_hole_lines, false);
-  addHotkey (Qt::Key_F7, MOD_shift, [this] { _draw_hole_lines = !_draw_hole_lines; });
-  mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &_draw_models_with_box);
 
   addHotkey ( Qt::Key_F1
             , MOD_shift
@@ -655,27 +666,27 @@ void MapView::createGUI()
               {
                 if (alloff)
                 {
-                  alloff_models = _draw_models;
-                  alloff_doodads = _draw_wmo_doodads;
-                  alloff_contour = _draw_contour;
-                  alloff_wmo = _draw_wmo;
+                  alloff_models = _draw_models.get();
+                  alloff_doodads = _draw_wmo_doodads.get();
+                  alloff_contour = _draw_contour.get();
+                  alloff_wmo = _draw_wmo.get();
                   alloff_fog = _world->drawfog;
-                  alloff_terrain = _draw_terrain;
+                  alloff_terrain = _draw_terrain.get();
 
-                  _draw_models = false;
-                  _draw_wmo_doodads = false;
-                  _draw_contour = true;
-                  _draw_wmo = false;
-                  _draw_terrain = true;
+                  _draw_models.set (false);
+                  _draw_wmo_doodads.set (false);
+                  _draw_contour.set (true);
+                  _draw_wmo.set (false);
+                  _draw_terrain.set (true);
                   _world->drawfog = false;
                 }
                 else
                 {
-                  _draw_models = alloff_models;
-                  _draw_wmo_doodads = alloff_doodads;
-                  _draw_contour = alloff_contour;
-                  _draw_wmo = alloff_wmo;
-                  _draw_terrain = alloff_terrain;
+                  _draw_models.set (alloff_models);
+                  _draw_wmo_doodads.set (alloff_doodads);
+                  _draw_contour.set (alloff_contour);
+                  _draw_wmo.set (alloff_wmo);
+                  _draw_terrain.set (alloff_terrain);
                   _world->drawfog = alloff_fog;
                 }
                 alloff = !alloff;
@@ -1850,9 +1861,9 @@ selection_result MapView::intersect_result(bool terrain_only)
     ( _world->intersect ( ray
                         , terrain_only
                         , terrainMode == editing_mode::object
-                        , _draw_terrain
-                        , _draw_wmo
-                        , _draw_models
+                        , _draw_terrain.get()
+                        , _draw_wmo.get()
+                        , _draw_models.get()
                         , _draw_hidden_models ? std::unordered_set<WMO*>() : _hidden_map_objects
                         , _draw_hidden_models ? std::unordered_set<Model*>() : _hidden_models
                         )
@@ -1942,7 +1953,7 @@ void MapView::displayViewMode_2D()
 
   _world->drawTileMode ( _camera.yaw()._
                        , _camera.position
-                       , _draw_lines
+                       , _draw_lines.get()
                        , _2d_zoom
                        , aspect_ratio()
                        );
@@ -2041,7 +2052,7 @@ void MapView::displayViewMode_3D()
                , radius
                , hardness
                , mainGui->texturingTool->show_unpaintable_chunks()
-               , _draw_contour
+               , _draw_contour.get()
                , inner_radius
                , ref_pos
                , angle
@@ -2054,17 +2065,17 @@ void MapView::displayViewMode_3D()
                , terrainMode == editing_mode::areaid
                , terrainMode
                , _camera.position
-               , _draw_mfbo
-               , _draw_wireframe
-               , _draw_lines
-               , _draw_terrain
-               , _draw_wmo
-               , _draw_water
-               , _draw_wmo_doodads
-               , _draw_models
-               , _draw_model_animations
-               , _draw_hole_lines || terrainMode == editing_mode::holes
-               , _draw_models_with_box
+               , _draw_mfbo.get()
+               , _draw_wireframe.get()
+               , _draw_lines.get()
+               , _draw_terrain.get()
+               , _draw_wmo.get()
+               , _draw_water.get()
+               , _draw_wmo_doodads.get()
+               , _draw_models.get()
+               , _draw_model_animations.get()
+               , _draw_hole_lines.get() || terrainMode == editing_mode::holes
+               , _draw_models_with_box.get()
                , _draw_hidden_models ? std::unordered_set<WMO*>() : _hidden_map_objects
                , _draw_hidden_models ? std::unordered_set<Model*>() : _hidden_models
                , _area_id_colors
