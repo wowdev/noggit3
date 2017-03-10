@@ -446,20 +446,22 @@ void MapView::createGUI()
     connect (action, &QAction::triggered, on_action);             \
   }
 
-  //! \todo the currrent state is bogus since it is never updated
-  //! afterwards and this is unlikely to be the only way to toggle the
-  //! variable. So add some FRP style callback and encapsulate the
-  //! variable.
-#define ADD_TOGGLE(menu, name, variable)                                \
-  {                                                                     \
-    QAction* action (new QAction (name, this));                         \
-    action->setCheckable (true);                                        \
-    action->setChecked (*variable);                                     \
-    menu->addAction (action);                                           \
-    connect ( action, &QAction::toggled                                 \
-            , [] (bool val) { *variable = val; }                        \
-            );                                                          \
-  }
+#define ADD_TOGGLE_NS(menu_, name_, property_)                    \
+  do                                                              \
+  {                                                               \
+    QAction* action (new QAction (name_, this));                  \
+    action->setCheckable (true);                                  \
+    action->setChecked (property_.get());                         \
+    menu_->addAction (action);                                    \
+    connect ( action, &QAction::toggled                           \
+            , &property_, &bool_toggle_property::set              \
+            );                                                    \
+    connect ( &property_, &bool_toggle_property::changed          \
+            , action, &QAction::setChecked                        \
+            );                                                    \
+  }                                                               \
+  while (false)
+
 
 
   ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { prompt_save_current(); });
@@ -506,7 +508,7 @@ void MapView::createGUI()
   ADD_ACTION (edit_menu, "set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
 
   edit_menu->addSection ("options");
-  ADD_TOGGLE (edit_menu, "auto select mode", &Settings::getInstance()->AutoSelectingMode);
+  ADD_TOGGLE_NS (edit_menu, "auto select mode (broken)", _auto_selecting_mode);
 
 
   assist_menu->addSection ("Model");
@@ -786,8 +788,6 @@ void MapView::createGUI()
             , [this] { _world->clearVertexSelection(); }
             , [this] { return terrainMode == editing_mode::ground; }
             );
-
-  ADD_TOGGLE (view_menu, "toggle auto selection (broken)", &Settings::getInstance()->AutoSelectingMode);
 
   ADD_ACTION (view_menu, "toggle detail infos", "Ctrl+X", [this] { mainGui->guidetailInfos->toggle_visibility(); });
 
@@ -1985,7 +1985,7 @@ void MapView::displayViewMode_2D()
 void MapView::displayViewMode_3D()
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if (!_world->IsSelection(eEntry_Model) && !_world->IsSelection(eEntry_WMO) && Settings::getInstance()->AutoSelectingMode)
+  if (!_world->IsSelection(eEntry_Model) && !_world->IsSelection(eEntry_WMO) && _auto_selecting_mode.get())
   {
     doSelection(true);
   }

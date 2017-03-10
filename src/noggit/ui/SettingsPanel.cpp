@@ -145,8 +145,7 @@ UISettings::UISettings()
   //! Settings but are things usually toggled with keybindings during
   //! editing and thus don't really belong here imho.
 
-/*  addChild(autoselectCheck = new UICheckBox(95, 236, "Auto select mode", &Settings::getInstance()->AutoSelectingMode));
-
+/*
   layout->addWidget (new QLabel ("Model Tool", this));
 
     addChild(randRotCheck = new UICheckBox(358, 211, "Random rotation", &Settings::getInstance()->random_rotation));
@@ -171,7 +170,6 @@ void UISettings::readInValues()
   viewDistanceField->setValue (Settings::getInstance()->mapDrawDistance);
   farZField->setValue (Settings::getInstance()->FarZ);
   tabletModeCheck->setChecked (Settings::getInstance()->tabletMode);
-//     autoselectCheck->setState(Settings::getInstance()->AutoSelectingMode);
 //     modelStatsCheck->setState(Settings::getInstance()->copyModelStats);
 //     randRotCheck->setState(Settings::getInstance()->random_rotation);
 //     randSizeCheck->setState(Settings::getInstance()->random_size);
