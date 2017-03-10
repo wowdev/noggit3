@@ -276,4 +276,6 @@ private:
   QLabel* _status_time;
 
   bool_toggle_property _auto_selecting_mode = {true};
+
+  bool_toggle_property _show_detail_info_window = {false};
 };
