@@ -912,15 +912,14 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::holes; }
             );
 
-  addHotkey( Qt::Key_T
-           , MOD_none
-           , [&]
-             {
-               mainGui->guiWater->toggle_angled_mode();
-             }
-          , [&] { return terrainMode == editing_mode::water; }
-          );
-
+  addHotkey ( Qt::Key_T
+            , MOD_none
+            , [&]
+              {
+                mainGui->guiWater->toggle_angled_mode();
+              }
+            , [&] { return terrainMode == editing_mode::water; }
+            );
 
   addHotkey ( Qt::Key_T
             , MOD_none
