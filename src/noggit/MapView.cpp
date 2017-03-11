@@ -2170,8 +2170,27 @@ void MapView::display()
 
 void MapView::keyPressEvent (QKeyEvent *event)
 {
-  if (handleHotkeys (event))
-    return;
+  size_t const modifier
+    ( (event->modifiers() == Qt::NoModifier) ? MOD_none
+    : ( ((event->modifiers() & Qt::ShiftModifier) ? MOD_shift : 0)
+      | ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0)
+      | ((event->modifiers() & Qt::AltModifier) ? MOD_alt : 0)
+      | ((event->modifiers() & Qt::MetaModifier) ? MOD_meta : 0)
+      )
+    );
+
+  for (auto&& hotkey : hotkeys)
+  {
+    if (event->key() == hotkey.key && modifier == hotkey.modifiers && hotkey.condition())
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _ (::gl, context());
+
+      hotkey.function();
+
+      return;
+    }
+  }
 
   if (event->key() == Qt::Key_Shift)
     _mod_shift_down = true;
@@ -2851,28 +2870,6 @@ void MapView::prompt_save_current()
 void MapView::addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition)
 {
   hotkeys.emplace_front (key, modifiers, function, condition);
-}
-
-bool MapView::handleHotkeys(QKeyEvent* event)
-{
-  size_t modifier = (event->modifiers() == Qt::NoModifier) ? (MOD_none) : (
-    ((event->modifiers() & Qt::ShiftModifier) ? MOD_shift : 0) |
-    ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0) |
-    ((event->modifiers() & Qt::AltModifier) ? MOD_alt : 0) |
-    ((event->modifiers() & Qt::MetaModifier) ? MOD_meta : 0));
-
-  for (auto&& hotkey : hotkeys)
-  {
-    if (event->key() == hotkey.key && modifier == hotkey.modifiers && hotkey.condition())
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _ (::gl, context());
-
-      hotkey.function();
-      return true;
-    }
-  }
-  return false;
 }
 
 #ifdef _WIN32
