@@ -256,6 +256,7 @@ private:
   virtual void wheelEvent (QWheelEvent*) override;
   virtual void keyReleaseEvent (QKeyEvent*) override;
   virtual void keyPressEvent (QKeyEvent*) override;
+  virtual void focusOutEvent (QFocusEvent*) override;
 
   friend class UIMapViewGUI;
   noggit::ui::main_window* _main_window;

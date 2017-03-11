@@ -2354,6 +2354,28 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
     keys = 0;
 }
 
+void MapView::focusOutEvent (QFocusEvent*)
+{
+  _mod_alt_down = false;
+  _mod_ctrl_down = false;
+  _mod_shift_down = false;
+  _mod_space_down = false;
+
+  key_w = false;
+
+  moving = 0.0f;
+  lookat = 0.0f;
+  turn = 0.0f;
+  strafing = 0.0f;
+  updown = 0.0f;
+
+  keyx = 0;
+  keyz = 0;
+  keyy = 0;
+  keyr = 0;
+  keys = 0;
+}
+
 void MapView::inserObjectFromExtern(int model)
 {
   if (!_world->HasSelection())
