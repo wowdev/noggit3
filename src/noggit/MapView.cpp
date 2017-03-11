@@ -810,7 +810,15 @@ void MapView::createGUI()
 
   ADD_ACTION (file_menu, "save minimaps", "Ctrl+Shift+P", [this] { Saving = true; });
 
-  ADD_ACTION (view_menu, "turn camera around 180°", Qt::Key_R, [this] { _camera.add_to_yaw(math::degrees(180.f)); });
+  ADD_ACTION ( view_menu
+             , "turn camera around 180°"
+             , Qt::Key_R
+             , [this]
+               {
+                 _camera.add_to_yaw(math::degrees(180.f));
+                 _minimap->update();
+               }
+             );
 
   ADD_ACTION ( file_menu
              , "write coordinates to port.txt"
@@ -1712,6 +1720,7 @@ void MapView::tick (float dt)
       {
         _camera.move_vertical(updown, dt);
       }
+      _minimap->update();
     }
     else
     {
@@ -2363,6 +2372,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
     _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
+    _minimap->update();
   }
 
   if (MoveObj)
