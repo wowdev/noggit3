@@ -25,7 +25,7 @@ namespace noggit
     public:
       minimap_widget (QWidget* parent = nullptr);
 
-      virtual QSize sizeHint() const;
+      virtual QSize sizeHint() const override;
 
       inline const World* world (World* const world_)
         { _world = world_; update(); return _world; }
@@ -42,8 +42,8 @@ namespace noggit
       inline void camera (noggit::camera* camera) { _camera = camera; }
 
     protected:
-      virtual void paintEvent (QPaintEvent*);
-      virtual void mouseDoubleClickEvent (QMouseEvent*);
+      virtual void paintEvent (QPaintEvent*) override;
+      virtual void mouseDoubleClickEvent (QMouseEvent*) override;
 
     signals:
       void map_clicked (World *world, const ::math::vector_3d&);
