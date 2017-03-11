@@ -871,15 +871,16 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                //! \todo space as global modifier?
-                if (_mod_space_down)
-                {
-                  mainGui->flattenTool->nextFlattenMode();
-                }
-                else
-                {
-                  mainGui->flattenTool->toggleFlattenAngle();
-                }
+                mainGui->flattenTool->toggleFlattenAngle();
+              }
+            , [&] { return terrainMode == editing_mode::flatten_blur; }
+            );
+
+  addHotkey ( Qt::Key_T
+            , MOD_space
+            , [&]
+              {
+                mainGui->flattenTool->nextFlattenMode();
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
@@ -935,45 +936,45 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                // toggle hidden models visibility
-                if (_mod_space_down)
+                if (_world->HasSelection())
                 {
-                  _draw_hidden_models.set (!_draw_hidden_models.get());
-                }
-                else
-                {
-                  // toggle selected model visibility
-                  if (_world->HasSelection())
+                  auto selection = _world->GetCurrentSelection();
+                  if (selection->which() == eEntry_Model)
                   {
-                    auto selection = _world->GetCurrentSelection();
-                    if (selection->which() == eEntry_Model)
+                    auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
+                    auto& hidden (_hidden_models);
+                    if (hidden.count (entity))
                     {
-                      auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
-                      auto& hidden (_hidden_models);
-                      if (hidden.count (entity))
-                      {
-                        hidden.erase (entity);
-                      }
-                      else
-                      {
-                        hidden.emplace (entity);
-                      }
+                      hidden.erase (entity);
                     }
-                    else if (selection->which() == eEntry_WMO)
+                    else
                     {
-                      auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
-                      auto& hidden (_hidden_map_objects);
-                      if (hidden.count (entity))
-                      {
-                        hidden.erase (entity);
-                      }
-                      else
-                      {
-                        hidden.emplace (entity);
-                      }
+                      hidden.emplace (entity);
+                    }
+                  }
+                  else if (selection->which() == eEntry_WMO)
+                  {
+                    auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
+                    auto& hidden (_hidden_map_objects);
+                    if (hidden.count (entity))
+                    {
+                      hidden.erase (entity);
+                    }
+                    else
+                    {
+                      hidden.emplace (entity);
                     }
                   }
                 }
+              }
+            , [&] { return terrainMode == editing_mode::object; }
+            );
+
+  addHotkey ( Qt::Key_H
+            , MOD_space
+            , [&]
+              {
+                _draw_hidden_models.set (!_draw_hidden_models.get());
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
@@ -989,43 +990,42 @@ void MapView::createGUI()
             );
 
   addHotkey ( Qt::Key_F
-            , MOD_none
+            , MOD_space
             , [&]
               {
-                if (_mod_space_down)
-                {
-                  mainGui->terrainTool->flattenVertices();
-                }
+                mainGui->terrainTool->flattenVertices();
               }
             , [&] { return terrainMode == editing_mode::ground; }
+            );
+  addHotkey ( Qt::Key_F
+            , MOD_space
+            , [&]
+              {
+                mainGui->flattenTool->toggleFlattenLock();
+              }
+            , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
   addHotkey ( Qt::Key_F
             , MOD_none
             , [&]
               {
-                if (_mod_space_down)
-                {
-                  mainGui->flattenTool->toggleFlattenLock();
-                }
-                else
-                {
-                  mainGui->flattenTool->lockPos (_cursor_pos);
-                }
+                mainGui->flattenTool->lockPos (_cursor_pos);
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
+  addHotkey ( Qt::Key_F
+            , MOD_space
+            , [&]
+              {
+                mainGui->guiWater->toggle_lock();
+              }
+          , [&] { return terrainMode == editing_mode::water; }
+          );
   addHotkey( Qt::Key_F
             , MOD_none
             , [&]
               {
-                if (_mod_space_down)
-                {
-                  mainGui->guiWater->toggle_lock();
-                }
-                else
-                {
-                  mainGui->guiWater->lockPos(_cursor_pos);
-                }
+                mainGui->guiWater->lockPos(_cursor_pos);
               }
           , [&] { return terrainMode == editing_mode::water; }
           );
@@ -2171,12 +2171,11 @@ void MapView::display()
 void MapView::keyPressEvent (QKeyEvent *event)
 {
   size_t const modifier
-    ( (event->modifiers() == Qt::NoModifier) ? MOD_none
-    : ( ((event->modifiers() & Qt::ShiftModifier) ? MOD_shift : 0)
-      | ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0)
-      | ((event->modifiers() & Qt::AltModifier) ? MOD_alt : 0)
-      | ((event->modifiers() & Qt::MetaModifier) ? MOD_meta : 0)
-      )
+    ( ((event->modifiers() & Qt::ShiftModifier) ? MOD_shift : 0)
+    | ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0)
+    | ((event->modifiers() & Qt::AltModifier) ? MOD_alt : 0)
+    | ((event->modifiers() & Qt::MetaModifier) ? MOD_meta : 0)
+    | (_mod_space_down ? MOD_space : 0)
     );
 
   for (auto&& hotkey : hotkeys)
