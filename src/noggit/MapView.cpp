@@ -1164,6 +1164,13 @@ MapView::MapView( math::degrees camera_yaw0
   _minimap->draw_skies (true);
   _minimap->draw_boundaries (true);
 
+  connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
+          , [this] (World* world, math::vector_3d const& pos)
+            {
+              move_camera_with_auto_height (pos);
+            }
+          );
+
   _minimap_dock->setFeatures ( QDockWidget::DockWidgetMovable
                              | QDockWidget::DockWidgetFloatable
                              | QDockWidget::DockWidgetClosable
@@ -1233,6 +1240,34 @@ MapView::MapView( math::degrees camera_yaw0
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
 }
 
+  void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+
+    if (!_world->mapIndex.tileLoaded (pos))
+    {
+      _world->mapIndex.loadTile (pos);
+    }
+
+    _camera.position = pos;
+    _camera.position.y = 0.0f;
+
+    _world->GetVertex (pos.x, pos.z, &_camera.position);
+
+    // min elevation according to https://wowdev.wiki/AreaTable.dbc
+    //! \ todo use the current area's MinElevation
+    if (_camera.position.y < -5000.0f)
+    {
+      //! \todo use the height of a model/wmo of the tile (or the map) ?
+      _camera.position.y = 0.0f;
+    }
+
+    _camera.position.y += 50.0f;
+
+    _minimap->update();
+  }
+
   void MapView::initializeGL()
   {
     opengl::context::scoped_setter const _ (::gl, context());
@@ -1247,26 +1282,7 @@ MapView::MapView( math::degrees camera_yaw0
 
   set_editing_mode (editing_mode::ground);
 
-
-  // Set camera y (height) position to current ground height plus some space.
-  math::vector_3d t = math::vector_3d(0, 0, 0);
-  tile_index tile(_camera.position);
-  if (!_world->mapIndex.tileLoaded(tile))
-  {
-    _world->mapIndex.loadTile(tile);
-  }
-
-  _world->GetVertex(_camera.position.x, _camera.position.z, &t);
-
-  // min elevation according to https://wowdev.wiki/AreaTable.dbc
-  //! \ todo use the current area's MinElevation
-  if (t.y < -5000.0f)
-  {
-    //! \todo use the height of a model/wmo of the tile (or the map) ?
-    t.y = 0.0f;
-  }
-
-  _camera.position.y = t.y + 50.0f;
+    move_camera_with_auto_height (_camera.position);
 
     gl.enableClientState (GL_VERTEX_ARRAY);
     gl.enableClientState (GL_NORMAL_ARRAY);

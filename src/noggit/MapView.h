@@ -284,4 +284,6 @@ private:
 
   noggit::ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
+
+  void move_camera_with_auto_height (math::vector_3d const&);
 };
