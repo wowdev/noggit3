@@ -225,6 +225,7 @@ private:
     MOD_ctrl = 0x02,
     MOD_alt = 0x04,
     MOD_meta = 0x08,
+    MOD_space = 0x10,
     MOD_none = 0x00,
   };
   struct HotKey
