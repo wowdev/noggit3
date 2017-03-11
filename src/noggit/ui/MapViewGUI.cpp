@@ -59,8 +59,8 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
 
   _terrain = new QDockWidget ("Raise / Lower", setMapview);
   _terrain->setFeatures ( QDockWidget::DockWidgetMovable
-                    | QDockWidget::DockWidgetFloatable
-                    );
+                        | QDockWidget::DockWidgetFloatable
+                        );
   _terrain->setWidget (terrainTool = new ui::terrain_tool());
   setMapview->_main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
 
