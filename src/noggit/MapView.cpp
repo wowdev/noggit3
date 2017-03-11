@@ -2189,86 +2189,96 @@ void MapView::keyPressEvent (QKeyEvent *event)
   if (event->key() == Qt::Key_W)
   {
     key_w = true;
-    moving = 1.0f;
+    moving += 1.0f;
+  }
+  if (event->key() == Qt::Key_S)
+  {
+    moving -= 1.0f;
   }
 
   if (event->key() == Qt::Key_Up)
   {
-    lookat = 0.75f;
+    lookat += 0.75f;
   }
-
   if (event->key() == Qt::Key_Down)
   {
-    lookat = -0.75f;
-  }
-
-  if (event->key() == Qt::Key_Left)
-  {
-    turn = -0.75f;
+    lookat -= 0.75f;
   }
 
   if (event->key() == Qt::Key_Right)
   {
-    turn = 0.75f;
+    turn += 0.75f;
+  }
+  if (event->key() == Qt::Key_Left)
+  {
+    turn -= 0.75f;
   }
 
-  // save
-  if (event->key() == Qt::Key_S)
-    moving = -1.0f;
-
-  if (event->key() == Qt::Key_A)
-    strafing = -1.0f;
-
   if (event->key() == Qt::Key_D)
-    strafing = 1.0f;
-
-  if (event->key() == Qt::Key_E)
-    updown = -1.0f;
+  {
+    strafing += 1.0f;
+  }
+  if (event->key() == Qt::Key_A)
+  {
+    strafing -= 1.0f;
+  }
 
   if (event->key() == Qt::Key_Q)
-    updown = 1.0f;
+  {
+    updown += 1.0f;
+  }
+  if (event->key() == Qt::Key_E)
+  {
+    updown -= 1.0f;
+  }
 
   // position correction with num pad
   //! \todo revive
   /*
-  if (event->key() == SDLK_KP8)
-    keyx = -1;
-
   if (event->key() == SDLK_KP2)
-    keyx = 1;
-
-  if (event->key() == SDLK_KP6)
-    keyz = -1;
-
-  if (event->key() == SDLK_KP4)
-    keyz = 1;
-
-  if (event->key() == SDLK_KP1)
-    keyy = -1;
-
-  if (event->key() == SDLK_KP3)
-    keyy = 1;
-
-  if (event->key() == SDLK_KP7)
-    keyr = 1;
-
-  if (event->key() == SDLK_KP9)
-    keyr = -1;
-  */
-
-  // fog distance or brush radius
-  if (event->key() == Qt::Key_Plus)
   {
-    //change selected model size
-    if (_world->HasSelection() && _world->GetCurrentSelection()->which() != eEntry_MapChunk)
-      keys = 1;
+    keyx += 1;
+  }
+  if (event->key() == SDLK_KP8)
+  {
+    keyx -= 1;
   }
 
+  if (event->key() == SDLK_KP4)
+  {
+    keyz += 1;
+  }
+  if (event->key() == SDLK_KP6)
+  {
+    keyz -= 1;
+  }
+
+  if (event->key() == SDLK_KP3)
+  {
+    keyy += 1;
+  }
+  if (event->key() == SDLK_KP1)
+  {
+    keyy -= 1;
+  }
+
+  if (event->key() == SDLK_KP7)
+  {
+    keyr += 1;
+  }
+  if (event->key() == SDLK_KP9)
+  {
+    keyr -= 1;
+  }
+  */
+
+  if (event->key() == Qt::Key_Plus)
+  {
+    keys += 1;
+  }
   if (event->key() == Qt::Key_Minus)
   {
-    //change selected model size
-    if (_world->HasSelection() && _world->GetCurrentSelection()->which() != eEntry_MapChunk)
-      keys = -1;
+    keys -= 1;
   }
 }
 
@@ -2290,68 +2300,99 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
   if (event->key() == Qt::Key_W)
   {
     key_w = false;
-    if (!(leftMouse && rightMouse) && moving > 0.0f)
+    if (!(leftMouse && rightMouse))
     {
-      moving = 0.0f;
+      moving -= 1.0f;
     }
   }
-
-  if (event->key() == Qt::Key_S && moving < 0.0f)
+  if (event->key() == Qt::Key_S)
   {
-    moving = 0.0f;
+    moving += 1.0f;
   }
 
-  if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
-    lookat = 0.0f;
-
-  if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right)
-    turn = 0.0f;
-
-  if (event->key() == Qt::Key_D && strafing > 0.0f)
+  if (event->key() == Qt::Key_Up)
   {
-    strafing = 0.0f;
+    lookat -= 0.75f;
+  }
+  if (event->key() == Qt::Key_Down)
+  {
+    lookat += 0.75f;
   }
 
-  if (event->key() == Qt::Key_A && strafing < 0.0f)
+  if (event->key() == Qt::Key_Right)
   {
-    strafing = 0.0f;
+    turn -= 0.75f;
+  }
+  if (event->key() == Qt::Key_Left)
+  {
+    turn += 0.75f;
   }
 
-  if (event->key() == Qt::Key_Q && updown > 0.0f)
-    updown = 0.0f;
+  if (event->key() == Qt::Key_D)
+  {
+    strafing -= 1.0f;
+  }
+  if (event->key() == Qt::Key_A)
+  {
+    strafing += 1.0f;
+  }
 
-  if (event->key() == Qt::Key_E && updown < 0.0f)
-    updown = 0.0f;
+  if (event->key() == Qt::Key_Q)
+  {
+    updown -= 1.0f;
+  }
+  if (event->key() == Qt::Key_E)
+  {
+    updown += 1.0f;
+  }
 
   //! \todo revive
   /*
-  if (event->key() == SDLK_KP8)
-    keyx = 0;
-
   if (event->key() == SDLK_KP2)
-    keyx = 0;
-
-  if (event->key() == SDLK_KP6)
-    keyz = 0;
+  {
+    keyx -= 1;
+  }
+  if (event->key() == SDLK_KP8)
+  {
+    keyx += 1;
+  }
 
   if (event->key() == SDLK_KP4)
-    keyz = 0;
-
-  if (event->key() == SDLK_KP1)
-    keyy = 0;
+  {
+    keyz -= 1;
+  }
+  if (event->key() == SDLK_KP6)
+  {
+    keyz += 1;
+  }
 
   if (event->key() == SDLK_KP3)
-    keyy = 0;
+  {
+    keyy -= 1;
+  }
+  if (event->key() == SDLK_KP1)
+  {
+    keyy += 1;
+  }
 
   if (event->key() == SDLK_KP7)
-    keyr = 0;
-
+  {
+    keyr -= 1;
+  }
   if (event->key() == SDLK_KP9)
-    keyr = 0;
+  {
+    keyr += 1;
+  }
   */
 
-  if (event->key() == Qt::Key_Minus || event->key() == Qt::Key_Plus)
-    keys = 0;
+  if (event->key() == Qt::Key_Plus)
+  {
+    keys -= 1;
+  }
+  if (event->key() == Qt::Key_Minus)
+  {
+    keys += 1;
+  }
 }
 
 void MapView::focusOutEvent (QFocusEvent*)
