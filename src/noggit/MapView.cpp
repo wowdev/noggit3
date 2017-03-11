@@ -897,7 +897,16 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                _world->setHoleADT (_camera.position, _mod_alt_down);
+                _world->setHoleADT (_camera.position, false);
+              }
+            , [&] { return terrainMode == editing_mode::holes; }
+            );
+
+  addHotkey ( Qt::Key_T
+            , MOD_alt
+            , [&]
+              {
+                _world->setHoleADT (_camera.position, true);
               }
             , [&] { return terrainMode == editing_mode::holes; }
             );
@@ -930,11 +939,6 @@ void MapView::createGUI()
                 if (_mod_space_down)
                 {
                   _draw_hidden_models.set (!_draw_hidden_models.get());
-                }
-                else if (_mod_shift_down)
-                {
-                  _hidden_map_objects.clear();
-                  _hidden_models.clear();
                 }
                 else
                 {
@@ -970,6 +974,16 @@ void MapView::createGUI()
                     }
                   }
                 }
+              }
+            , [&] { return terrainMode == editing_mode::object; }
+            );
+
+  addHotkey ( Qt::Key_H
+            , MOD_shift
+            , [&]
+              {
+                _hidden_map_objects.clear();
+                _hidden_models.clear();
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
