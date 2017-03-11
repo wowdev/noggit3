@@ -951,7 +951,7 @@ void World::tick(float dt)
 
 unsigned int World::getAreaID (math::vector_3d const& pos)
 {
-  return for_chunk_at (pos, [&] (MapChunk* chunk) { return chunk->getAreaID(); });
+  return for_maybe_chunk_at (pos, [&] (MapChunk* chunk) { return chunk->getAreaID(); }).get_value_or (-1);
 }
 
 void World::clearHeight(math::vector_3d const& pos)
@@ -1285,6 +1285,20 @@ template<typename Fun>
 
     return fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }
+
+template<typename Fun>
+  auto World::for_maybe_chunk_at(math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
+{
+  MapTile* tile (mapIndex.getTile (pos));
+  if (tile)
+  {
+    return fun (tile->getChunk ((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
+  }
+  else
+  {
+    return boost::none;
+  }
+}
 
 template<typename Fun>
   void World::for_tile_at(tile_index const& pos, Fun&& fun)

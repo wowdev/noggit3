@@ -175,6 +175,8 @@ public:
 
   template<typename Fun>
     auto for_chunk_at(math::vector_3d const& pos, Fun&& fun) -> decltype (fun (nullptr));
+  template<typename Fun>
+    auto for_maybe_chunk_at (math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>;
 
   template<typename Fun>
     void for_tile_at(const tile_index& pos, Fun&&);
