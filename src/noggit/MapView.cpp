@@ -654,7 +654,10 @@ void MapView::createGUI()
           );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
   connect ( &_show_minimap_window, &bool_toggle_property::changed
-          , _minimap, &QWidget::setVisible
+          , _minimap_dock, &QWidget::setVisible
+          );
+  connect ( _minimap_dock, &QDockWidget::visibilityChanged
+          , &_show_minimap_window, &bool_toggle_property::set
           );
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
@@ -1129,6 +1132,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_area (new QLabel (this))
   , _status_time (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
+  , _minimap_dock (new QDockWidget ("Minimap", this))
 {
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
@@ -1159,6 +1163,14 @@ MapView::MapView( math::degrees camera_yaw0
   _minimap->camera (&_camera);
   _minimap->draw_skies (true);
   _minimap->draw_boundaries (true);
+
+  _minimap_dock->setFeatures ( QDockWidget::DockWidgetMovable
+                             | QDockWidget::DockWidgetFloatable
+                             | QDockWidget::DockWidgetClosable
+                             );
+  _minimap_dock->setWidget (_minimap);
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
+  _minimap_dock->setVisible (false);
 
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);

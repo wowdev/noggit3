@@ -12,6 +12,7 @@
 
 #include <QtCore/QTime>
 #include <QtCore/QTimer>
+#include <QtWidgets/QDockWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QOpenGLWidget>
 
@@ -282,4 +283,5 @@ private:
   bool_toggle_property _show_minimap_window = {false};
 
   noggit::ui::minimap_widget* _minimap;
+  QDockWidget* _minimap_dock;
 };
