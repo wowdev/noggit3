@@ -1,7 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#undef _UNICODE
-
 #include <noggit/Brush.h> // brush
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
