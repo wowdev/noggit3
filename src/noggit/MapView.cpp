@@ -2418,31 +2418,10 @@ void MapView::focusOutEvent (QFocusEvent*)
   look = false;
 }
 
-void MapView::inserObjectFromExtern(int model)
+void MapView::insert_object_at_selection_position (std::string m2_to_add)
 {
   if (!_world->HasSelection())
     return;
-
-  std::string m2_to_add;
-
-  const char* filesToAdd[15] = { ""
-                                 , ""
-                                 , "World\\Scale\\humanmalescale.m2"
-                                 , "World\\Scale\\50x50.m2"
-                                 , "World\\Scale\\100x100.m2"
-                                 , "World\\Scale\\250x250.m2"
-                                 , "World\\Scale\\500x500.m2"
-                                 , "World\\Scale\\1000x1000.m2"
-                                 , "World\\Scale\\50yardradiusdisc.m2"
-                                 , "World\\Scale\\200yardradiusdisc.m2"
-                                 , "World\\Scale\\777yardradiusdisc.m2"
-                                 , "World\\Scale\\50yardradiussphere.m2"
-                                 , "World\\Scale\\200yardradiussphere.m2"
-                                 , "World\\Scale\\777yardradiussphere.m2"
-                                 , ""
-  };
-
-  m2_to_add = filesToAdd[model];
 
   math::vector_3d selectionPosition;
   switch (_world->GetCurrentSelection()->which())

@@ -213,7 +213,7 @@ public:
   void tick (float dt);
   void display();
 
-  void inserObjectFromExtern(int model);
+  void insert_object_at_selection_position (std::string);
   void selectModel(selection_type entry);
 
   void set_editing_mode (editing_mode);
