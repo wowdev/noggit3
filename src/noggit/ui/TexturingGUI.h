@@ -10,10 +10,18 @@ class MapChunk;
 class UIFrame;
 class UIMapViewGUI;
 
+namespace noggit
+{
+  namespace ui
+  {
+    class current_texture;
+  }
+}
+
 class UITexturingGUI
 {
 public:
-  static UIFrame* createTexturePalette(UIMapViewGUI* setgui);
+  static UIFrame* createTexturePalette (noggit::ui::current_texture*);
   static UIFrame* createTilesetLoader();
   static UIFrame* createTextureFilter();
   static UIFrame* createMapChunkWindow();
@@ -21,6 +29,6 @@ public:
   static boost::optional<scoped_blp_texture_reference> getSelectedTexture();
   static void setChunk(MapChunk *chunk);
   static void setChunkWindow(MapChunk *chunk);
-  static void updateSelectedTexture();
+  static void updateSelectedTexture (noggit::ui::current_texture*);
   static boost::optional<scoped_blp_texture_reference> selectedTexture;
 };

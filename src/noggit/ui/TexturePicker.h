@@ -8,13 +8,23 @@
 
 class UITexture;
 
+namespace noggit
+{
+  namespace ui
+  {
+    class current_texture;
+  }
+}
+
 class UITexturePicker : public UICloseWindow
 {
 public:
-  UITexturePicker(float x, float y, float w, float h);
+  UITexturePicker ( float x, float y, float w, float h
+                  , noggit::ui::current_texture*
+                  );
 
   void getTextures(selection_type lSelection);
-  void setTexture(size_t id);
+  void setTexture(size_t id, noggit::ui::current_texture*);
   void shiftSelectedTextureLeft();
   void shiftSelectedTextureRight();
 

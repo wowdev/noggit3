@@ -72,14 +72,13 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   texturingTool = new ui::texturing_tool (&camera->position);
   texturingTool->hide();
 
+  guiCurrentTexture = new noggit::ui::current_texture(TexturePalette);
 
-  TexturePalette = UITexturingGUI::createTexturePalette(this);
+  TexturePalette = UITexturingGUI::createTexturePalette(guiCurrentTexture);
   TexturePalette->hide();
   addChild(TexturePalette);
   addChild(UITexturingGUI::createTilesetLoader());
   addChild(UITexturingGUI::createTextureFilter());
-
-  guiCurrentTexture = new noggit::ui::current_texture(TexturePalette);
 
   // DetailInfoWindow
   guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);
@@ -89,7 +88,9 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   ZoneIDBrowser = new ui::zone_id_browser();
   ZoneIDBrowser->hide();
 
-  TexturePicker = new UITexturePicker(video::width / 2 - 100.0f, video::height / 2 - 100.0f, 490.0f, 170.0f);
+  TexturePicker = new UITexturePicker ( video::width / 2 - 100.0f, video::height / 2 - 100.0f, 490.0f, 170.0f
+                                      , guiCurrentTexture
+                                      );
   TexturePicker->hide();
   TexturePicker->movable(true);
   addChild(TexturePicker);
