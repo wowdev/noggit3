@@ -422,9 +422,6 @@ void MapView::createGUI()
 
   terrainTool->storeCursorPos (&_cursor_pos);
 
-  mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
-  MapChunkWindow->hide();
-
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
@@ -1809,11 +1806,6 @@ void MapView::tick (float dt)
   _world->tick (dt);
 
   lastSelected = _world->GetCurrentSelection();
-
-  if (!MapChunkWindow->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->which() == eEntry_MapChunk)
-  {
-    UITexturingGUI::setChunkWindow(boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).chunk);
-  }
 
   QString status;
   status += ( QString ("tile: %1 %2")
