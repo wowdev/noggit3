@@ -437,8 +437,6 @@ void MapView::createGUI()
   auto view_menu (_main_window->menuBar()->addMenu ("View"));
   connect (this, &QObject::destroyed, view_menu, &QObject::deleteLater);
 
-  mbar->AddMenu("View");
-
   auto help_menu (_main_window->menuBar()->addMenu ("Help"));
   connect (this, &QObject::destroyed, help_menu, &QObject::deleteLater);
 
@@ -622,14 +620,6 @@ void MapView::createGUI()
                   }
                 );
 
-  mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
-
-  mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", TexturePalette->hidden_evil(), true);
-  addHotkey ( Qt::Key_X
-            , MOD_none
-            , [this] { TexturePalette->toggleVisibility(); }
-            );
-
   view_menu->addSection ("Drawing");
   ADD_TOGGLE (view_menu, "Doodads", Qt::Key_F1, _draw_models);
   ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F2, _draw_wmo_doodads);
@@ -669,6 +659,13 @@ void MapView::createGUI()
   connect ( _cursor_switcher.get(), &noggit::ui::widget::visibilityChanged
           , &_show_cursor_switcher_window, &bool_toggle_property::set
           );
+  ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
+  connect ( &_show_texture_palette_window, &bool_toggle_property::changed
+          , [this] (bool shown) { TexturePalette->hidden (!shown); }
+          );
+  // connect ( texture_palette, &noggit::ui::widget::visibilityChanged
+  //         , &_show_texture_palette_window, &bool_toggle_property::set
+  //         );
 
   addHotkey ( Qt::Key_F1
             , MOD_shift
