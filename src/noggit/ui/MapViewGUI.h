@@ -42,12 +42,12 @@ namespace ui
 class UIMapViewGUI : public UIFrame
 {
 private:
-  UIHelp* _help;
   noggit::camera* _camera;
   float* _tablet_pressure;
   bool* _tablet_active;
 
 public:
+  UIHelp* _help;
   // position of the tools window(s)
   int tool_settings_x;
   int tool_settings_y;
@@ -83,12 +83,4 @@ public:
                         , float* tablet_pressure
                         , bool* tablet_active
                         );
-
-  void showHelp();
-  void hideHelp();
-  void toggleHelp();
-
-  void showTest();
-  void hideTest();
-  void toggleTest();
 };

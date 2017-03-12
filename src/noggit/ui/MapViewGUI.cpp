@@ -105,30 +105,3 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   guiWaterTypeSelector = new ui::water_type_browser(guiWater);
   guiWaterTypeSelector->hide();
 }
-
-void UIMapViewGUI::showHelp()
-{
-  _help->show();
-}
-
-void UIMapViewGUI::hideHelp()
-{
-  _help->hide();
-}
-void UIMapViewGUI::toggleHelp()
-{
-  _help->setVisible (!_help->isVisible());
-}
-
-void UIMapViewGUI::showTest()
-{
-  //_test->show();
-}
-void UIMapViewGUI::hideTest()
-{
-  //_test->hide();
-}
-void UIMapViewGUI::toggleTest()
-{
-  //_test->toggleVisibility();
-}
