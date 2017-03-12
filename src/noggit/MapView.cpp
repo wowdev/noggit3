@@ -2654,125 +2654,70 @@ void MapView::wheelEvent (QWheelEvent* event)
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  //! \todo don't just use distance but delta
-  float delta (event->angleDelta().y());
+  auto&& delta_for_range
+    ( [&] (float range)
+      {
+        //! \note / 8.f for degrees, / 40.f for smoothness
+        return (_mod_ctrl_down ? 0.1f : 1.f) * event->angleDelta().y() / 320.f;
+      }
+    );
 
-  if (delta > 0.f)
+  if (terrainMode == editing_mode::ground)
   {
-    if (terrainMode == editing_mode::ground)
+    if (_mod_alt_down)
     {
-      if (_mod_alt_down)
-      {
-        mainGui->terrainTool->changeAngle(_mod_ctrl_down ? 0.2f : 2.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->terrainTool->changeOrientation(_mod_ctrl_down ? 1.0f : 10.0f);
-      }
+      mainGui->terrainTool->changeAngle (delta_for_range (178.f));
     }
-    else if (terrainMode == editing_mode::flatten_blur)
+    else if (_mod_shift_down)
     {
-      if (_mod_alt_down)
-      {
-        mainGui->flattenTool->changeOrientation(_mod_ctrl_down ? 1.0f : 10.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->flattenTool->changeAngle(_mod_ctrl_down ? 0.2f : 2.0f);
-      }
-      else if (_mod_space_down)
-      {
-        mainGui->flattenTool->changeHeight(1.0f);
-      }
-    }
-    else if (terrainMode == editing_mode::paint)
-    {
-      if (_mod_space_down)
-      {
-        mainGui->texturingTool->change_brush_level(10.0f);
-      }
-      else if (_mod_alt_down)
-      {
-        mainGui->texturingTool->change_spray_size(1.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->texturingTool->change_spray_pressure(0.25);
-      }
-    }
-    else if (terrainMode == editing_mode::water)
-    {
-      if (_mod_alt_down)
-      {
-        mainGui->guiWater->changeOrientation(_mod_ctrl_down ? 1.0f : 10.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->guiWater->changeAngle(_mod_ctrl_down ? 0.2f : 2.0f);
-      }
-      else if (_mod_space_down)
-      {
-        mainGui->guiWater->change_height(_mod_ctrl_down ? 0.1f : 1.0f);
-      }
+      mainGui->terrainTool->changeOrientation (delta_for_range (360.f));
     }
   }
-  else
+  else if (terrainMode == editing_mode::paint)
   {
-    if (terrainMode == editing_mode::ground)
+    if (_mod_space_down)
     {
-      if (_mod_alt_down)
-      {
-        mainGui->terrainTool->changeAngle(_mod_ctrl_down ? -0.2f : -2.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->terrainTool->changeOrientation(_mod_ctrl_down ? -1.0f : -10.0f);
-      }
+      mainGui->texturingTool->change_brush_level (delta_for_range (255.f));
     }
-    else if (terrainMode == editing_mode::flatten_blur)
+    else if (_mod_alt_down)
     {
-      if (_mod_alt_down)
-      {
-        mainGui->flattenTool->changeOrientation(_mod_ctrl_down ? -1.0f : -10.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->flattenTool->changeAngle(_mod_ctrl_down ? -0.2f : -2.0f);
-      }
-      else if (_mod_space_down)
-      {
-        mainGui->flattenTool->changeHeight(-1.0f);
-      }
+      mainGui->texturingTool->change_spray_size (delta_for_range (39.f));
     }
-    else if (terrainMode == editing_mode::paint)
+    else if (_mod_shift_down)
     {
-      if (_mod_space_down)
-      {
-        mainGui->texturingTool->change_brush_level(-10.0f);
-      }
-      else if (_mod_alt_down)
-      {
-        mainGui->texturingTool->change_spray_size(-1.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->texturingTool->change_spray_pressure(-0.25);
-      }
+      mainGui->texturingTool->change_spray_pressure (delta_for_range (10.f));
     }
-    else if (terrainMode == editing_mode::water)
+  }
+  else if (terrainMode == editing_mode::flatten_blur)
+  {
+    if (_mod_alt_down)
     {
-      if (_mod_alt_down)
-      {
-        mainGui->guiWater->changeOrientation(_mod_ctrl_down ? -1.0f : -10.0f);
-      }
-      else if (_mod_shift_down)
-      {
-        mainGui->guiWater->changeAngle(_mod_ctrl_down ? -0.2f : -2.0f);
-      }
-      else if (_mod_space_down)
-      {
-        mainGui->guiWater->change_height(_mod_ctrl_down ? -0.1f : -1.0f);
-      }
+      mainGui->flattenTool->changeOrientation (delta_for_range (360.f));
+    }
+    else if (_mod_shift_down)
+    {
+      mainGui->flattenTool->changeAngle (delta_for_range (89.f));
+    }
+    else if (_mod_space_down)
+    {
+      //! \note not actual range
+      mainGui->flattenTool->changeHeight (delta_for_range (40.f));
+    }
+  }
+  else if (terrainMode == editing_mode::water)
+  {
+    if (_mod_alt_down)
+    {
+      mainGui->guiWater->changeOrientation (delta_for_range (360.f));
+    }
+    else if (_mod_shift_down)
+    {
+      mainGui->guiWater->changeAngle (delta_for_range (89.f));
+    }
+    else if (_mod_space_down)
+    {
+      //! \note not actual range
+      mainGui->guiWater->change_height (delta_for_range (40.f));
     }
   }
 }
