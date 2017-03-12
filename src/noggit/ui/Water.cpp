@@ -182,13 +182,13 @@ void UIWater::changeOrientation(float change)
 {
   _orientation += change;
 
-  if (_orientation < 0.0f)
-  {
-    _orientation += 360.0f;
-  }
-  else if (_orientation > 360.0f)
+  while (_orientation >= 360.0f)
   {
     _orientation -= 360.0f;
+  }
+  while (_orientation < 0.0f)
+  {
+    _orientation += 360.0f;
   }
 
   _orientation_slider->setValue(_orientation / 360.0f);
