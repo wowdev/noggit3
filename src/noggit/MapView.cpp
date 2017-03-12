@@ -21,12 +21,12 @@
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), arial...
 #include <noggit/map_index.hpp>
 #include <noggit/ui/CheckBox.h> // UICheckBox
+#include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
 #include <noggit/ui/HelperModels.h>
-#include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
@@ -95,40 +95,40 @@ void MapView::set_editing_mode (editing_mode mode)
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  mainGui->_terrain->hide();
-  mainGui->flattenTool->hide();
-  mainGui->texturingTool->hide();
-  mainGui->shaderTool->hide();
-  mainGui->guiWater->hide();
-  mainGui->TexturePicker->hide();
-  mainGui->objectEditor->hide();
-  mainGui->objectEditor->modelImport->hide();
-  mainGui->objectEditor->rotationEditor->hide();
-  mainGui->ZoneIDBrowser->hide();
-  mainGui->TexturePalette->hide();
+  _terrain->hide();
+  flattenTool->hide();
+  texturingTool->hide();
+  shaderTool->hide();
+  guiWater->hide();
+  TexturePicker->hide();
+  objectEditor->hide();
+  objectEditor->modelImport->hide();
+  objectEditor->rotationEditor->hide();
+  ZoneIDBrowser->hide();
+  TexturePalette->hide();
 
   switch (mode)
   {
   case editing_mode::ground:
-    mainGui->_terrain->show();
+    _terrain->show();
     break;
   case editing_mode::flatten_blur:
-    mainGui->flattenTool->show();
+    flattenTool->show();
     break;
   case editing_mode::paint:
-    mainGui->texturingTool->show();
+    texturingTool->show();
     break;
   case editing_mode::areaid:
-    mainGui->ZoneIDBrowser->show();
+    ZoneIDBrowser->show();
     break;
   case editing_mode::water:
-    mainGui->guiWater->show();
+    guiWater->show();
     break;
   case editing_mode::mccv:
-    mainGui->shaderTool->show();
+    shaderTool->show();
     break;
   case editing_mode::object:
-    mainGui->objectEditor->show();
+    objectEditor->show();
   }
 
   terrainMode = mode;
@@ -362,14 +362,65 @@ void MapView::changeZoneIDValue (int set)
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI(this);
+  mainGui = new UIFrame (0.f, 0.f, width(), height());
 
-  mainGui->ZoneIDBrowser->setMapID(_world->getMapID());
-  mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
+  objectEditor = new UIObjectEditor(this);
+  objectEditor->hide();
+
+  _terrain = new QDockWidget ("Raise / Lower", this);
+  _terrain->setFeatures ( QDockWidget::DockWidgetMovable
+                        | QDockWidget::DockWidgetFloatable
+                        );
+  _terrain->setWidget (terrainTool = new ui::terrain_tool());
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
+
+
+  flattenTool = new ui::FlattenTool();
+  flattenTool->hide();
+
+  shaderTool = new ui::shader_tool(cursor_color);
+  shaderTool->hide();
+
+  texturingTool = new ui::texturing_tool (&_camera.position);
+  texturingTool->hide();
+
+  guiCurrentTexture = new noggit::ui::current_texture(TexturePalette);
+
+  TexturePalette = UITexturingGUI::createTexturePalette(guiCurrentTexture);
+  TexturePalette->hide();
+  mainGui->addChild(TexturePalette);
+  mainGui->addChild(UITexturingGUI::createTilesetLoader());
+  mainGui->addChild(UITexturingGUI::createTextureFilter());
+
+  // DetailInfoWindow
+  guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);
+  guidetailInfos->hide();
+
+  // ZoneIDBrowser
+  ZoneIDBrowser = new ui::zone_id_browser();
+  ZoneIDBrowser->hide();
+
+  TexturePicker = new UITexturePicker ( video::width / 2 - 100.0f, video::height / 2 - 100.0f, 490.0f, 170.0f
+                                      , guiCurrentTexture
+                                      );
+  TexturePicker->hide();
+  TexturePicker->movable(true);
+  mainGui->addChild(TexturePicker);
+
+  _help = new UIHelp();
+
+  guiWater = new UIWater();
+  guiWater->hide();
+  guiWater->movable(true);
+  mainGui->addChild(guiWater);
+
+
+  ZoneIDBrowser->setMapID(_world->getMapID());
+  ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
   tool_settings_x = width() - 186;
   tool_settings_y = 38;
 
-  mainGui->terrainTool->storeCursorPos (&_cursor_pos);
+  terrainTool->storeCursorPos (&_cursor_pos);
 
   mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
   MapChunkWindow->hide();
@@ -497,7 +548,7 @@ void MapView::createGUI()
   assist_menu->addSection ("Model");
   ADD_ACTION (assist_menu, "Last m2 from WMV", "Shift+V", [this] { insert_last_m2_from_wmv(); });
   ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { insert_last_wmo_from_wmv(); });
-  ADD_ACTION_NS (assist_menu, "Helper models", [this] { mainGui->HelperModels->show(); });
+  ADD_ACTION_NS (assist_menu, "Helper models", [this] { HelperModels->show(); });
 
   assist_menu->addSection ("Current ADT");
   ADD_ACTION_NS ( assist_menu
@@ -581,10 +632,10 @@ void MapView::createGUI()
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
 
-  mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", mainGui->TexturePalette->hidden_evil(), true);
+  mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", TexturePalette->hidden_evil(), true);
   addHotkey ( Qt::Key_X
             , MOD_none
-            , [this] { mainGui->TexturePalette->toggleVisibility(); }
+            , [this] { TexturePalette->toggleVisibility(); }
             , [this] { return terrainMode == editing_mode::paint; }
             );
 
@@ -607,9 +658,9 @@ void MapView::createGUI()
   view_menu->addSection ("Windows");
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
   connect ( &_show_detail_info_window, &bool_toggle_property::changed
-          , mainGui->guidetailInfos, &QWidget::setVisible
+          , guidetailInfos, &QWidget::setVisible
           );
-  // connect ( mainGui->guidetailInfos, &::visibilityChanged
+  // connect ( guidetailInfos, &::visibilityChanged
   //         , &_show_detail_info_window, &bool_toggle_property::set
   //         );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
@@ -665,12 +716,12 @@ void MapView::createGUI()
             );
 
 
-  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->_help->show(); });
+  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { _help->show(); });
   addHotkey ( Qt::Key_H
             , MOD_none
             , [&]
               {
-                mainGui->_help->setVisible (!mainGui->_help->isVisible());
+                _help->setVisible (!_help->isVisible());
               }
             , [&] { return terrainMode != editing_mode::object; }
             );
@@ -731,7 +782,7 @@ void MapView::createGUI()
             , MOD_ctrl
             , [this]
               {
-                mainGui->objectEditor->copy (*_world->GetCurrentSelection());
+                objectEditor->copy (*_world->GetCurrentSelection());
               }
             , [this]
               {
@@ -744,7 +795,7 @@ void MapView::createGUI()
             , MOD_none
             , [this]
               {
-                mainGui->objectEditor->copy(*_world->GetCurrentSelection());
+                objectEditor->copy(*_world->GetCurrentSelection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -758,10 +809,10 @@ void MapView::createGUI()
             , [this] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey (Qt::Key_V, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos, _camera.position); });
+  addHotkey (Qt::Key_V, MOD_ctrl, [this] { objectEditor->pasteObject (_cursor_pos, _camera.position); });
   addHotkey ( Qt::Key_V
             , MOD_none
-            , [this] { mainGui->objectEditor->pasteObject (_cursor_pos, _camera.position); }
+            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position); }
             , [this] { return terrainMode == editing_mode::object; }
             );
 
@@ -771,7 +822,7 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
-  ADD_ACTION (view_menu, "toggle detail infos", "Ctrl+X", [this] { mainGui->guidetailInfos->toggle_visibility(); });
+  ADD_ACTION (view_menu, "toggle detail infos", "Ctrl+X", [this] { guidetailInfos->toggle_visibility(); });
 
   ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
 
@@ -805,13 +856,13 @@ void MapView::createGUI()
 
   addHotkey ( Qt::Key_Y
             , MOD_none
-            , [this] { mainGui->terrainTool->nextType(); }
+            , [this] { terrainTool->nextType(); }
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
   addHotkey ( Qt::Key_Y
             , MOD_none
-            , [this] { mainGui->flattenTool->nextFlattenType(); }
+            , [this] { flattenTool->nextFlattenType(); }
             , [this] { return terrainMode == editing_mode::flatten_blur; }
             );
 
@@ -838,7 +889,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                mainGui->flattenTool->toggleFlattenAngle();
+                flattenTool->toggleFlattenAngle();
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
@@ -847,7 +898,7 @@ void MapView::createGUI()
             , MOD_space
             , [&]
               {
-                mainGui->flattenTool->nextFlattenMode();
+                flattenTool->nextFlattenMode();
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
@@ -856,7 +907,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                mainGui->texturingTool->toggle_spray();
+                texturingTool->toggle_spray();
               }
             , [&] { return terrainMode == editing_mode::paint; }
             );
@@ -883,7 +934,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                mainGui->guiWater->toggle_angled_mode();
+                guiWater->toggle_angled_mode();
               }
             , [&] { return terrainMode == editing_mode::water; }
             );
@@ -892,7 +943,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                mainGui->objectEditor->togglePasteMode();
+                objectEditor->togglePasteMode();
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
@@ -959,7 +1010,7 @@ void MapView::createGUI()
             , MOD_space
             , [&]
               {
-                mainGui->terrainTool->flattenVertices();
+                terrainTool->flattenVertices();
               }
             , [&] { return terrainMode == editing_mode::ground; }
             );
@@ -967,7 +1018,7 @@ void MapView::createGUI()
             , MOD_space
             , [&]
               {
-                mainGui->flattenTool->toggleFlattenLock();
+                flattenTool->toggleFlattenLock();
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
@@ -975,7 +1026,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                mainGui->flattenTool->lockPos (_cursor_pos);
+                flattenTool->lockPos (_cursor_pos);
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
@@ -983,7 +1034,7 @@ void MapView::createGUI()
             , MOD_space
             , [&]
               {
-                mainGui->guiWater->toggle_lock();
+                guiWater->toggle_lock();
               }
           , [&] { return terrainMode == editing_mode::water; }
           );
@@ -991,7 +1042,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                mainGui->guiWater->lockPos(_cursor_pos);
+                guiWater->lockPos(_cursor_pos);
               }
           , [&] { return terrainMode == editing_mode::water; }
           );
@@ -1022,15 +1073,15 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey (Qt::Key_Plus, MOD_alt, [this] { mainGui->terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
+  addHotkey (Qt::Key_Plus, MOD_alt, [this] { terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
 
-  addHotkey (Qt::Key_Plus, MOD_alt, [this] { mainGui->flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (Qt::Key_Plus, MOD_alt, [this] { flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
 
   addHotkey ( Qt::Key_Plus
             , MOD_alt
             , [&]
               {
-                mainGui->texturingTool->change_radius(0.1f);
+                texturingTool->change_radius(0.1f);
               }
             , [this] { return terrainMode == editing_mode::paint; }
             );
@@ -1038,15 +1089,15 @@ void MapView::createGUI()
   addHotkey (Qt::Key_Plus, MOD_shift, [this] { _world->fogdistance += 60.0f; });
 
 
-  addHotkey (Qt::Key_Minus, MOD_alt, [this] { mainGui->terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
+  addHotkey (Qt::Key_Minus, MOD_alt, [this] { terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
 
-  addHotkey (Qt::Key_Minus, MOD_alt, [this] { mainGui->flattenTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (Qt::Key_Minus, MOD_alt, [this] { flattenTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
 
   addHotkey ( Qt::Key_Minus
             , MOD_alt
             , [&]
               {
-                mainGui->texturingTool->change_radius(-0.1f);
+                texturingTool->change_radius(-0.1f);
               }
             , [this] { return terrainMode == editing_mode::paint; }
             );
@@ -1057,11 +1108,11 @@ void MapView::createGUI()
   addHotkey (Qt::Key_2, MOD_shift, [this] { _camera.move_speed = 50.0f; });
   addHotkey (Qt::Key_3, MOD_shift, [this] { _camera.move_speed = 200.0f; });
   addHotkey (Qt::Key_4, MOD_shift, [this] { _camera.move_speed = 800.0f; });
-  addHotkey (Qt::Key_1, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(0.0f); });
-  addHotkey (Qt::Key_2, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.25f); });
-  addHotkey (Qt::Key_3, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.5f); });
-  addHotkey (Qt::Key_4, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.75f); });
-  addHotkey (Qt::Key_5, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f); });
+  addHotkey (Qt::Key_1, MOD_alt, [this] { texturingTool->set_brush_level(0.0f); });
+  addHotkey (Qt::Key_2, MOD_alt, [this] { texturingTool->set_brush_level(255.0f* 0.25f); });
+  addHotkey (Qt::Key_3, MOD_alt, [this] { texturingTool->set_brush_level(255.0f* 0.5f); });
+  addHotkey (Qt::Key_4, MOD_alt, [this] { texturingTool->set_brush_level(255.0f* 0.75f); });
+  addHotkey (Qt::Key_5, MOD_alt, [this] { texturingTool->set_brush_level(255.0f); });
 
   addHotkey (Qt::Key_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
   addHotkey (Qt::Key_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
@@ -1086,14 +1137,14 @@ void MapView::createGUI()
   addHotkey (Qt::Key_9, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 9; }, [this] { return _world->IsSelection(eEntry_WMO); });
 
   // Water unable to save warning
-  mainGui->waterSaveWarning = new ui::water_save_warning;
-  mainGui->waterSaveWarning->hide();
+  waterSaveWarning = new ui::water_save_warning;
+  waterSaveWarning->hide();
 
   // modelimport
-  mainGui->objectEditor->modelImport = new UIModelImport(this);
+  objectEditor->modelImport = new UIModelImport(this);
 
   // helper models
-  mainGui->HelperModels = new UIHelperModels(this);
+  HelperModels = new UIHelperModels(this);
 }
 
 MapView::MapView( math::degrees camera_yaw0
@@ -1334,12 +1385,12 @@ void MapView::tick (float dt)
     switch (terrainMode)
     {
     case editing_mode::ground:
-      mainGui->terrainTool->setRadius (_tablet_pressure / 20.0f);
+      terrainTool->setRadius (_tablet_pressure / 20.0f);
     case editing_mode::flatten_blur:
-      mainGui->flattenTool->setRadius (_tablet_pressure / 20.0f);
+      flattenTool->setRadius (_tablet_pressure / 20.0f);
       break;
     case editing_mode::paint:
-      mainGui->texturingTool->change_pressure (_tablet_pressure / 2048.0f);
+      texturingTool->change_pressure (_tablet_pressure / 2048.0f);
       break;
     }
   }
@@ -1377,10 +1428,10 @@ void MapView::tick (float dt)
       // update rotation editor if the selection has changed
       if (!lastSelected || lastSelected != Selection)
       {
-        mainGui->objectEditor->rotationEditor->select(*Selection);
+        objectEditor->rotationEditor->select(*Selection);
       }
 
-      bool canMoveObj = !mainGui->objectEditor->rotationEditor->hasFocus();
+      bool canMoveObj = !objectEditor->rotationEditor->hasFocus();
 
       // Set move scale and rotate for numpad keys
       if (_mod_ctrl_down && _mod_shift_down)  moveratio = 0.1f;
@@ -1401,7 +1452,7 @@ void MapView::tick (float dt)
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
           _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
-          mainGui->objectEditor->rotationEditor->updateValues();
+          objectEditor->rotationEditor->updateValues();
         }
 
         if (Selection->which() == eEntry_Model)
@@ -1414,7 +1465,7 @@ void MapView::tick (float dt)
           boost::get<selected_model_type> (*Selection)->sc += keys * moveratio / 50;
           boost::get<selected_model_type> (*Selection)->recalcExtents();
           _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
-          mainGui->objectEditor->rotationEditor->updateValues();
+          objectEditor->rotationEditor->updateValues();
         }
       }
 
@@ -1458,7 +1509,7 @@ void MapView::tick (float dt)
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
           _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
-          mainGui->objectEditor->rotationEditor->updateValues();
+          objectEditor->rotationEditor->updateValues();
         }
         else if (Selection->which() == eEntry_Model)
         {
@@ -1496,7 +1547,7 @@ void MapView::tick (float dt)
             }
           }
 
-          mainGui->objectEditor->rotationEditor->updateValues();
+          objectEditor->rotationEditor->updateValues();
           boost::get<selected_model_type> (*Selection)->recalcExtents();
           _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
         }
@@ -1543,7 +1594,7 @@ void MapView::tick (float dt)
           else if (*lTarget < -360.0f)
             *lTarget = *lTarget + 360.0f;
 
-          mainGui->objectEditor->rotationEditor->updateValues();
+          objectEditor->rotationEditor->updateValues();
 
           if (Selection->which() == eEntry_WMO)
           {
@@ -1575,11 +1626,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              mainGui->terrainTool->changeTerrain(_cursor_pos, 7.5f * dt);
+              terrainTool->changeTerrain(_cursor_pos, 7.5f * dt);
             }
             else if (_mod_ctrl_down)
             {
-              mainGui->terrainTool->changeTerrain(_cursor_pos, -7.5f * dt);
+              terrainTool->changeTerrain(_cursor_pos, -7.5f * dt);
             }
           }
           break;
@@ -1588,11 +1639,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              mainGui->flattenTool->flatten(_cursor_pos, dt);
+              flattenTool->flatten(_cursor_pos, dt);
             }
             else if (_mod_ctrl_down)
             {
-              mainGui->flattenTool->blur(_cursor_pos, dt);
+              flattenTool->blur(_cursor_pos, dt);
             }
           }
           break;
@@ -1608,13 +1659,13 @@ void MapView::tick (float dt)
           else if (_mod_ctrl_down)
           {
             // Pick texture
-            mainGui->TexturePicker->getTextures(*_world->GetCurrentSelection());
+            TexturePicker->getTextures(*_world->GetCurrentSelection());
           }
           else  if (_mod_shift_down && !!UITexturingGUI::getSelectedTexture())
           {
             if (mViewMode == eViewMode_3D && !underMap)
             {
-              mainGui->texturingTool->paint(_cursor_pos, dt, *UITexturingGUI::getSelectedTexture());
+              texturingTool->paint(_cursor_pos, dt, *UITexturingGUI::getSelectedTexture());
             }
             else if (mViewMode == eViewMode_2D)
             {
@@ -1624,7 +1675,7 @@ void MapView::tick (float dt)
                                   );
 
               pos += _camera.position;
-              mainGui->texturingTool->paint(pos, dt, *UITexturingGUI::getSelectedTexture());
+              texturingTool->paint(pos, dt, *UITexturingGUI::getSelectedTexture());
             }
           }
           break;
@@ -1658,7 +1709,7 @@ void MapView::tick (float dt)
               MapChunk* chnk (boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).chunk);
               int newID = chnk->getAreaID();
               _selected_area_id = newID;
-              mainGui->ZoneIDBrowser->setZoneID(newID);
+              ZoneIDBrowser->setZoneID(newID);
             }
           }
           break;
@@ -1680,11 +1731,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              mainGui->guiWater->paintLiquid(_cursor_pos, true);
+              guiWater->paintLiquid(_cursor_pos, true);
             }
             else if (_mod_ctrl_down)
             {
-              mainGui->guiWater->paintLiquid(_cursor_pos, false);
+              guiWater->paintLiquid(_cursor_pos, false);
             }
           }
           break;
@@ -1693,11 +1744,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              mainGui->shaderTool->changeShader(_cursor_pos, dt, true);
+              shaderTool->changeShader(_cursor_pos, dt, true);
             }
             if (_mod_ctrl_down)
             {
-              mainGui->shaderTool->changeShader(_cursor_pos, dt, false);
+              shaderTool->changeShader(_cursor_pos, dt, false);
             }
           }
           break;
@@ -1742,7 +1793,7 @@ void MapView::tick (float dt)
       _2d_zoom = std::min(std::max(_2d_zoom, 0.1f), 2.0f);
     }
 
-  mainGui->texturingTool->update_brushes();
+  texturingTool->update_brushes();
 
 
   _world->time += this->mTimespeed * dt;
@@ -1834,7 +1885,7 @@ void MapView::tick (float dt)
     _status_time->setText (QString::fromStdString (timestrs.str()));
   }
 
-  mainGui->guiWater->updatePos (_camera.position);
+  guiWater->updatePos (_camera.position);
 
   {
     auto lSelection = gWorld->GetCurrentSelection();
@@ -1934,7 +1985,7 @@ void MapView::tick (float dt)
       }
     }
 
-    mainGui->guidetailInfos->setText(detailInfo.str());
+    guidetailInfos->setText(detailInfo.str());
   }
 }
 
@@ -2086,9 +2137,9 @@ void MapView::displayViewMode_2D()
     opengl::texture::set_active_texture(0);
     opengl::texture::enable_texture();
 
-    mainGui->texturingTool->bind_brush_texture();
+    texturingTool->bind_brush_texture();
 
-    const float tRadius = mainGui->texturingTool->brush_radius() / CHUNKSIZE;// *_2d_zoom;
+    const float tRadius = texturingTool->brush_radius() / CHUNKSIZE;// *_2d_zoom;
     gl.begin(GL_QUADS);
     gl.texCoord2f(0.0f, 0.0f);
     gl.vertex3f(mX - tRadius, mY + tRadius, 0);
@@ -2120,31 +2171,31 @@ void MapView::displayViewMode_3D()
   switch (terrainMode)
   {
   case editing_mode::ground:
-    radius = mainGui->terrainTool->brushRadius();
-    inner_radius = mainGui->terrainTool->innerRadius();
+    radius = terrainTool->brushRadius();
+    inner_radius = terrainTool->innerRadius();
     break;
   case editing_mode::flatten_blur:
-    radius = mainGui->flattenTool->brushRadius();
-    angle = mainGui->flattenTool->angle();
-    orientation = mainGui->flattenTool->orientation();
-    ref_pos = mainGui->flattenTool->ref_pos();
-    angled_mode = mainGui->flattenTool->angled_mode();
-    use_ref_pos = mainGui->flattenTool->use_ref_pos();
+    radius = flattenTool->brushRadius();
+    angle = flattenTool->angle();
+    orientation = flattenTool->orientation();
+    ref_pos = flattenTool->ref_pos();
+    angled_mode = flattenTool->angled_mode();
+    use_ref_pos = flattenTool->use_ref_pos();
     break;
   case editing_mode::paint:
-    radius = mainGui->texturingTool->brush_radius();
-    hardness = mainGui->texturingTool->hardness();
+    radius = texturingTool->brush_radius();
+    hardness = texturingTool->hardness();
     break;
   case editing_mode::water:
-    radius = mainGui->guiWater->brushRadius();
-    angle = mainGui->guiWater->angle();
-    orientation = mainGui->guiWater->orientation();
-    ref_pos = mainGui->guiWater->ref_pos();
-    angled_mode = mainGui->guiWater->angled_mode();
-    use_ref_pos = mainGui->guiWater->use_ref_pos();
+    radius = guiWater->brushRadius();
+    angle = guiWater->angle();
+    orientation = guiWater->orientation();
+    ref_pos = guiWater->ref_pos();
+    angled_mode = guiWater->angled_mode();
+    use_ref_pos = guiWater->use_ref_pos();
     break;
   case editing_mode::mccv:
-    radius = mainGui->shaderTool->brushRadius();
+    radius = shaderTool->brushRadius();
     break;
   }
 
@@ -2162,7 +2213,7 @@ void MapView::displayViewMode_3D()
                , cursor_type
                , radius
                , hardness
-               , mainGui->texturingTool->show_unpaintable_chunks()
+               , texturingTool->show_unpaintable_chunks()
                , _draw_contour.get()
                , inner_radius
                , ref_pos
@@ -2551,11 +2602,11 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     if (terrainMode == editing_mode::ground)
     {
-      mainGui->terrainTool->changeInnerRadius(relative_movement.dx() / 100.0f);
+      terrainTool->changeInnerRadius(relative_movement.dx() / 100.0f);
     }
     if (terrainMode == editing_mode::paint)
     {
-      mainGui->texturingTool->change_hardness(relative_movement.dx() / 300.0f);
+      texturingTool->change_hardness(relative_movement.dx() / 300.0f);
     }
   }
 
@@ -2563,14 +2614,14 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     if (terrainMode == editing_mode::ground)
     {
-      mainGui->terrainTool->moveVertices(-relative_movement.dy() / YSENS);
+      terrainTool->moveVertices(-relative_movement.dy() / YSENS);
     }
   }
 
 
   if (rightMouse && _mod_space_down)
   {
-    mainGui->terrainTool->setOrientRelativeTo(_cursor_pos);
+    terrainTool->setOrientRelativeTo(_cursor_pos);
   }
 
   if (leftMouse && _mod_alt_down)
@@ -2578,19 +2629,19 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     switch (terrainMode)
     {
     case editing_mode::ground:
-      mainGui->terrainTool->changeRadius(relative_movement.dx() / XSENS);
+      terrainTool->changeRadius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::flatten_blur:
-      mainGui->flattenTool->changeRadius(relative_movement.dx() / XSENS);
+      flattenTool->changeRadius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::paint:
-      mainGui->texturingTool->change_radius(relative_movement.dx() / XSENS);
+      texturingTool->change_radius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::water:
-      mainGui->guiWater->changeRadius(relative_movement.dx() / XSENS);
+      guiWater->changeRadius(relative_movement.dx() / XSENS);
       break;
     case editing_mode::mccv:
-      mainGui->shaderTool->changeRadius(relative_movement.dx() / XSENS);
+      shaderTool->changeRadius(relative_movement.dx() / XSENS);
       break;
     }
   }
@@ -2600,16 +2651,16 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     switch (terrainMode)
     {
     case editing_mode::ground:
-      mainGui->terrainTool->changeSpeed(relative_movement.dx() / 30.0f);
+      terrainTool->changeSpeed(relative_movement.dx() / 30.0f);
       break;
     case editing_mode::flatten_blur:
-      mainGui->flattenTool->changeSpeed(relative_movement.dx() / 30.0f);
+      flattenTool->changeSpeed(relative_movement.dx() / 30.0f);
       break;
     case editing_mode::paint:
-      mainGui->texturingTool->change_pressure(relative_movement.dx() / 300.0f);
+      texturingTool->change_pressure(relative_movement.dx() / 300.0f);
       break;
     case editing_mode::mccv:
-      mainGui->shaderTool->changeSpeed(relative_movement.dx() / XSENS);
+      shaderTool->changeSpeed(relative_movement.dx() / XSENS);
       break;
     }
   }
@@ -2639,7 +2690,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
 void MapView::selectModel(selection_type entry)
 {
-  mainGui->objectEditor->copy(entry);
+  objectEditor->copy(entry);
 }
 
 void MapView::mousePressEvent (QMouseEvent* event)
@@ -2715,58 +2766,58 @@ void MapView::wheelEvent (QWheelEvent* event)
   {
     if (_mod_alt_down)
     {
-      mainGui->terrainTool->changeAngle (delta_for_range (178.f));
+      terrainTool->changeAngle (delta_for_range (178.f));
     }
     else if (_mod_shift_down)
     {
-      mainGui->terrainTool->changeOrientation (delta_for_range (360.f));
+      terrainTool->changeOrientation (delta_for_range (360.f));
     }
   }
   else if (terrainMode == editing_mode::paint)
   {
     if (_mod_space_down)
     {
-      mainGui->texturingTool->change_brush_level (delta_for_range (255.f));
+      texturingTool->change_brush_level (delta_for_range (255.f));
     }
     else if (_mod_alt_down)
     {
-      mainGui->texturingTool->change_spray_size (delta_for_range (39.f));
+      texturingTool->change_spray_size (delta_for_range (39.f));
     }
     else if (_mod_shift_down)
     {
-      mainGui->texturingTool->change_spray_pressure (delta_for_range (10.f));
+      texturingTool->change_spray_pressure (delta_for_range (10.f));
     }
   }
   else if (terrainMode == editing_mode::flatten_blur)
   {
     if (_mod_alt_down)
     {
-      mainGui->flattenTool->changeOrientation (delta_for_range (360.f));
+      flattenTool->changeOrientation (delta_for_range (360.f));
     }
     else if (_mod_shift_down)
     {
-      mainGui->flattenTool->changeAngle (delta_for_range (89.f));
+      flattenTool->changeAngle (delta_for_range (89.f));
     }
     else if (_mod_space_down)
     {
       //! \note not actual range
-      mainGui->flattenTool->changeHeight (delta_for_range (40.f));
+      flattenTool->changeHeight (delta_for_range (40.f));
     }
   }
   else if (terrainMode == editing_mode::water)
   {
     if (_mod_alt_down)
     {
-      mainGui->guiWater->changeOrientation (delta_for_range (360.f));
+      guiWater->changeOrientation (delta_for_range (360.f));
     }
     else if (_mod_shift_down)
     {
-      mainGui->guiWater->changeAngle (delta_for_range (89.f));
+      guiWater->changeAngle (delta_for_range (89.f));
     }
     else if (_mod_space_down)
     {
       //! \note not actual range
-      mainGui->guiWater->change_height (delta_for_range (40.f));
+      guiWater->change_height (delta_for_range (40.f));
     }
   }
 }
@@ -2816,11 +2867,11 @@ void MapView::checkWaterSave()
 
   if (!_world->mapIndex.hasTile (current) || _world->canWaterSave(current))
   {
-    mainGui->waterSaveWarning->hide();
+    waterSaveWarning->hide();
   }
   else
   {
-    mainGui->waterSaveWarning->show();
+    waterSaveWarning->show();
   }
 }
 

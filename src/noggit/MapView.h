@@ -50,6 +50,32 @@ namespace noggit
     class toolbar;
   }
 }
+class UITexturePicker;
+class UIHelp;
+class UIWindow;
+class UIExitWarning;
+class UIHelperModels;
+class UIWater;
+class UIObjectEditor;
+class MapView;
+namespace noggit
+{
+  class camera;
+  namespace ui
+  {
+    class current_texture;
+  }
+}
+namespace ui
+{
+  class detail_infos;
+  class FlattenTool;
+  class shader_tool;
+  class terrain_tool;
+  class texturing_tool;
+  class zone_id_browser;
+  class water_save_warning;
+}
 
 struct bool_toggle_property : QObject
 {
@@ -189,7 +215,7 @@ private:
 
   UIFrame* LastClicked;
 
-  UIMapViewGUI* mainGui;
+  UIFrame* mainGui;
   noggit::ui::toolbar* _toolbar;
 
   UIFrame* MapChunkWindow;
@@ -291,4 +317,23 @@ private:
   void move_camera_with_auto_height (math::vector_3d const&);
 
   std::unique_ptr<UICursorSwitcher> _cursor_switcher;
+
+  UIHelp* _help;
+  UIFrame* TexturePalette;
+  UIFrame* SelectedTexture;
+  ui::detail_infos* guidetailInfos;
+  ui::zone_id_browser* ZoneIDBrowser;
+  UITexturePicker* TexturePicker;
+  UIWater* guiWater;
+  noggit::ui::current_texture* guiCurrentTexture;
+  UIObjectEditor* objectEditor;
+  ui::FlattenTool* flattenTool;
+  ui::terrain_tool* terrainTool;
+  QDockWidget* _terrain;
+  ui::shader_tool* shaderTool;
+  ui::texturing_tool* texturingTool;
+
+  UIExitWarning *escWarning;
+  ui::water_save_warning *waterSaveWarning;
+  UIHelperModels *HelperModels;
 };
