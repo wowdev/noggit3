@@ -628,7 +628,6 @@ void MapView::createGUI()
   addHotkey ( Qt::Key_X
             , MOD_none
             , [this] { TexturePalette->toggleVisibility(); }
-            , [this] { return terrainMode == editing_mode::paint; }
             );
 
   view_menu->addSection ("Drawing");
