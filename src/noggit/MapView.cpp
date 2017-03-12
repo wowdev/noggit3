@@ -106,56 +106,23 @@ void MapView::set_editing_mode (editing_mode mode)
   mainGui->objectEditor->modelImport->hide();
   mainGui->rotationEditor->hide();
   mainGui->ZoneIDBrowser->hide();
-
-  if (!mainGui || !mainGui->TexturePalette)
-    return;
   mainGui->TexturePalette->hide();
-  // fetch old win position
-  switch (terrainMode)
-  {
-  case editing_mode::ground:
-    break;
-  case editing_mode::flatten_blur:
-    tool_settings_x = mainGui->flattenTool->x();
-    tool_settings_y = mainGui->flattenTool->y();
-    break;
-  case editing_mode::paint:
-    tool_settings_x = mainGui->texturingTool->x();
-    tool_settings_y = mainGui->texturingTool->y();
-    break;
-  case editing_mode::areaid:
-    tool_settings_x = mainGui->ZoneIDBrowser->x() + 230;
-    tool_settings_y = mainGui->ZoneIDBrowser->y();
-    break;
-  case editing_mode::water:
-    tool_settings_x = mainGui->guiWater->x();
-    tool_settings_y = mainGui->guiWater->y();
-    break;
-  case editing_mode::mccv:
-    tool_settings_x = mainGui->shaderTool->x();
-    tool_settings_y = mainGui->shaderTool->y();
-    break;
-  }
-  // set new win pos and make visible
+
   switch (mode)
   {
   case editing_mode::ground:
     mainGui->_terrain->show();
     break;
   case editing_mode::flatten_blur:
-    mainGui->flattenTool->move(tool_settings_x, tool_settings_y);
     mainGui->flattenTool->show();
     break;
   case editing_mode::paint:
     mainGui->texturingTool->show();
     break;
   case editing_mode::areaid:
-    mainGui->ZoneIDBrowser->move(mainGui->ZoneIDBrowser->x(), tool_settings_y);
     mainGui->ZoneIDBrowser->show();
     break;
   case editing_mode::water:
-    mainGui->guiWater->x(tool_settings_x);
-    mainGui->guiWater->y(tool_settings_y);
     mainGui->guiWater->show();
     break;
   case editing_mode::mccv:
