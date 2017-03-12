@@ -13,7 +13,6 @@ class UIExitWarning;
 class UIHelperModels;
 class UIWater;
 class UIObjectEditor;
-class UIRotationEditor;
 class MapView;
 namespace noggit
 {
@@ -67,7 +66,6 @@ public:
   ui::water_type_browser* guiWaterTypeSelector;
   noggit::ui::current_texture* guiCurrentTexture;
   UIObjectEditor* objectEditor;
-  UIRotationEditor* rotationEditor;
   ui::FlattenTool* flattenTool;
   ui::terrain_tool* terrainTool;
   QDockWidget* _terrain;

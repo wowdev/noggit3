@@ -27,11 +27,6 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-void UIObjectEditor::toggleRotationEditor()
-{
-  mainGui->rotationEditor->setVisible(!mainGui->rotationEditor->isVisible());
-}
-
 void UIObjectEditor::SaveObjecttoTXT()
 {
   if (!gWorld->HasSelection())
@@ -54,13 +49,12 @@ void UIObjectEditor::SaveObjecttoTXT()
   modelImport->buildModelList();
 }
 
-UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
+UIObjectEditor::UIObjectEditor (MapView* mapView)
         : QWidget(nullptr)
+  , rotationEditor (new UIRotationEditor())
         , selected()
         , pasteMode(PASTE_ON_TERRAIN)
 {
-  this->mainGui = mainGui;
-
   setWindowTitle("Object Editor");
   setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
   auto inspectorGrid = new QGridLayout (this);
@@ -256,17 +250,17 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   });
 
   connect(rotEditorButton, &QPushButton::clicked, [=]() {
-      toggleRotationEditor();
+      rotationEditor->show();
   });
 
   connect(visToggleButton, &QPushButton::clicked, [=]() {
-      mainGui->theMapview->_draw_hidden_models.set
-        (!mainGui->theMapview->_draw_hidden_models.get());
+      mapView->_draw_hidden_models.set
+        (!mapView->_draw_hidden_models.get());
   });
 
   connect(clearListButton, &QPushButton::clicked, [=]() {
-      mainGui->theMapview->_hidden_map_objects.clear();
-      mainGui->theMapview->_hidden_models.clear();
+      mapView->_hidden_map_objects.clear();
+      mapView->_hidden_models.clear();
   });
 
   connect(toTxt, &QPushButton::clicked, [=]() {

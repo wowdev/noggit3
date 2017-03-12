@@ -24,7 +24,6 @@
 #include <noggit/ui/ZoneIDBrowser.h> //
 #include <noggit/ui/Water.h> //
 #include <noggit/ui/ObjectEditor.h>
-#include <noggit/ui/RotationEditor.h>
 #include <noggit/Video.h> // video
 #include <noggit/WMOInstance.h>
 #include <noggit/World.h>
@@ -49,11 +48,8 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   , _tablet_active (tablet_active)
   , theMapview(setMapview)
 {
-  objectEditor = new UIObjectEditor((float)video::width - 410.0f, 10.0f, this);
+  objectEditor = new UIObjectEditor(setMapview);
   objectEditor->hide();
-
-  rotationEditor = new UIRotationEditor();
-  rotationEditor->hide();
 
   _terrain = new QDockWidget ("Raise / Lower", setMapview);
   _terrain->setFeatures ( QDockWidget::DockWidgetMovable

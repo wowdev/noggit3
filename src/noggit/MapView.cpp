@@ -103,7 +103,7 @@ void MapView::set_editing_mode (editing_mode mode)
   mainGui->TexturePicker->hide();
   mainGui->objectEditor->hide();
   mainGui->objectEditor->modelImport->hide();
-  mainGui->rotationEditor->hide();
+  mainGui->objectEditor->rotationEditor->hide();
   mainGui->ZoneIDBrowser->hide();
   mainGui->TexturePalette->hide();
 
@@ -1377,10 +1377,10 @@ void MapView::tick (float dt)
       // update rotation editor if the selection has changed
       if (!lastSelected || lastSelected != Selection)
       {
-        mainGui->rotationEditor->select(*Selection);
+        mainGui->objectEditor->rotationEditor->select(*Selection);
       }
 
-      bool canMoveObj = !mainGui->rotationEditor->hasFocus();
+      bool canMoveObj = !mainGui->objectEditor->rotationEditor->hasFocus();
 
       // Set move scale and rotate for numpad keys
       if (_mod_ctrl_down && _mod_shift_down)  moveratio = 0.1f;
@@ -1401,7 +1401,7 @@ void MapView::tick (float dt)
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
           _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
-          mainGui->rotationEditor->updateValues();
+          mainGui->objectEditor->rotationEditor->updateValues();
         }
 
         if (Selection->which() == eEntry_Model)
@@ -1414,7 +1414,7 @@ void MapView::tick (float dt)
           boost::get<selected_model_type> (*Selection)->sc += keys * moveratio / 50;
           boost::get<selected_model_type> (*Selection)->recalcExtents();
           _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
-          mainGui->rotationEditor->updateValues();
+          mainGui->objectEditor->rotationEditor->updateValues();
         }
       }
 
@@ -1458,7 +1458,7 @@ void MapView::tick (float dt)
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
           _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
-          mainGui->rotationEditor->updateValues();
+          mainGui->objectEditor->rotationEditor->updateValues();
         }
         else if (Selection->which() == eEntry_Model)
         {
@@ -1496,7 +1496,7 @@ void MapView::tick (float dt)
             }
           }
 
-          mainGui->rotationEditor->updateValues();
+          mainGui->objectEditor->rotationEditor->updateValues();
           boost::get<selected_model_type> (*Selection)->recalcExtents();
           _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
         }
@@ -1543,7 +1543,7 @@ void MapView::tick (float dt)
           else if (*lTarget < -360.0f)
             *lTarget = *lTarget + 360.0f;
 
-          mainGui->rotationEditor->updateValues();
+          mainGui->objectEditor->rotationEditor->updateValues();
 
           if (Selection->which() == eEntry_WMO)
           {
