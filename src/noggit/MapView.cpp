@@ -445,7 +445,6 @@ void MapView::createGUI()
   connect (this, &QObject::destroyed, view_menu, &QObject::deleteLater);
 
   mbar->AddMenu("View");
-  mbar->AddMenu("Help");
 
   auto help_menu (_main_window->menuBar()->addMenu ("Help"));
   connect (this, &QObject::destroyed, help_menu, &QObject::deleteLater);
@@ -715,16 +714,14 @@ void MapView::createGUI()
               }
             );
 
+  ADD_TOGGLE (help_menu, "Key Bindings", "Ctrl+F1", _show_keybindings_window);
+  connect ( &_show_keybindings_window, &bool_toggle_property::changed
+          , _help, &QWidget::setVisible
+          );
+  connect ( _help, &noggit::ui::widget::visibilityChanged
+          , &_show_keybindings_window, &bool_toggle_property::set
+          );
 
-  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { _help->show(); });
-  addHotkey ( Qt::Key_H
-            , MOD_none
-            , [&]
-              {
-                _help->setVisible (!_help->isVisible());
-              }
-            , [&] { return terrainMode != editing_mode::object; }
-            );
 #if defined(_WIN32) || defined(WIN32)
   ADD_ACTION_NS ( help_menu
                 , "Manual online"

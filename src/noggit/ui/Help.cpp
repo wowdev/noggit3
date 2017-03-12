@@ -6,7 +6,7 @@
 #include <QtWidgets/QLabel>
 
 UIHelp::UIHelp()
-  : QWidget (nullptr)
+  : noggit::ui::widget (nullptr)
 {
   new QHBoxLayout (this);
 

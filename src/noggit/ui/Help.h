@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include <QtWidgets/QWidget>
+#include <noggit/ui/widget.hpp>
 
-class UIHelp : public QWidget
+class UIHelp : public noggit::ui::widget
 {
 public:
   UIHelp();
