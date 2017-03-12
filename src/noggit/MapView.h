@@ -309,6 +309,7 @@ private:
   bool_toggle_property _show_minimap_window = {false};
   bool_toggle_property _show_cursor_switcher_window = {false};
   bool_toggle_property _show_keybindings_window = {false};
+  bool_toggle_property _show_texture_palette_window = {false};
 
   noggit::ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
