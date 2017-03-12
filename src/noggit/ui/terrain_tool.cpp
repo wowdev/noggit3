@@ -308,11 +308,11 @@ namespace ui
     {
       QSignalBlocker const blocker (_orientation_dial);
 
-      if (orientation > 360.0f)
+      while (orientation >= 360.0f)
       {
         orientation -= 360.0f;
       }
-      else if (orientation < 0.0f)
+      while (orientation < 0.0f)
       {
         orientation += 360.0f;
       }
