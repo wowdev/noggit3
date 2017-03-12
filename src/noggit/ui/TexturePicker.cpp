@@ -11,7 +11,10 @@
 
 #include <cassert>
 
-UITexturePicker::UITexturePicker(float x, float y, float w, float h)
+UITexturePicker::UITexturePicker
+    ( float x, float y, float w, float h
+    , noggit::ui::current_texture* current_texture_window
+    )
   : UICloseWindow(x, y, w, h, "Pick one of the textures.", true)
 {
   const int textureSize = 110;
@@ -24,7 +27,8 @@ UITexturePicker::UITexturePicker(float x, float y, float w, float h)
   for (size_t i = 0; i < 4; ++i)
   {
     _textures[i] = new UITexture((float)(startingX + (textureSize + paddingX) * i), (float)positionY, (float)textureSize, (float)textureSize, "tileset\\generic\\black.blp");
-    _textures[i]->setClickFunc ([this, i] { setTexture (i); });
+    _textures[i]->setClickFunc
+      ([=] { setTexture (i, current_texture_window); });
     addChild(_textures[i]);
   }
 
@@ -63,12 +67,13 @@ void UITexturePicker::getTextures(selection_type lSelection)
   }
 }
 
-void UITexturePicker::setTexture(size_t id)
+void UITexturePicker::setTexture
+  (size_t id, noggit::ui::current_texture* current_texture_window)
 {
   assert(id < 4);
 
   UITexturingGUI::setSelectedTexture(_textures[id]->getTexture());
-  UITexturingGUI::updateSelectedTexture();
+  UITexturingGUI::updateSelectedTexture (current_texture_window);
 }
 
 void UITexturePicker::shiftSelectedTextureLeft()

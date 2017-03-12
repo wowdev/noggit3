@@ -34,9 +34,6 @@
 
 //! \todo  Get this whole thing in a seperate class.
 
-//! \todo  Get this via singleton.
-UIMapViewGUI* textGui;
-
 int pal_rows;
 int pal_cols;
 
@@ -239,7 +236,8 @@ void changePage(UIFrame*, int direction)
   showPage(gCurrentPage);
 }
 
-void UITexturingGUI::updateSelectedTexture()
+void UITexturingGUI::updateSelectedTexture
+  (noggit::ui::current_texture* current_texture_window)
 {
   if (textureSelected)
   {
@@ -249,26 +247,17 @@ void UITexturingGUI::updateSelectedTexture()
   {
     textSelectedTexture->setText(UITexturingGUI::getSelectedTexture().get()->filename());
   }
-  if (textGui)
-  {
-    textGui->guiCurrentTexture->set_texture(UITexturingGUI::getSelectedTexture().get()->filename());
-  }
+  current_texture_window->set_texture(UITexturingGUI::getSelectedTexture().get()->filename());
 }
 
-void texturePaletteClick(int id)
+void texturePaletteClick(int id, noggit::ui::current_texture* current_texture_window)
 {
   if (curTextures[id]->hidden())
     return;
 
   UITexturingGUI::setSelectedTexture(gTexturesInPage.at (id));
 
-  if (UITexturingGUI::getSelectedTexture())
-  {
-    UITexturingGUI::updateSelectedTexture();
-  }
-  else{
-    Log << "Somehow getting the texture failed oO";
-  }
+  UITexturingGUI::updateSelectedTexture (current_texture_window);
 
   for (int i = 0; i < (pal_cols * pal_rows); ++i)
   {
@@ -402,11 +391,11 @@ void clickFileFilterTexture(bool value, int id)
 
 
 //! \todo  Make this cleaner.
-UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
+UIFrame* UITexturingGUI::createTexturePalette
+  (noggit::ui::current_texture* current_texture_window)
 {
   gCurrentPage = 0;
 
-  textGui = setgui;
   pal_rows = 10;
   pal_cols = 5;
   windowTexturePalette = new UICloseWindow(((float)video::width/2) - (((pal_rows * 68.0f + 355.0f)/2) + 10.0f), ((float)video::height/2) - (((pal_cols * 68.0f) + 60.0f)/2) - 200, (pal_rows * 68.0f + 355.0f) + 10.0f, (pal_cols * 68.0f) + 60.0f, "Texture Palette", true);
@@ -414,7 +403,7 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   for (int i = 0; i<(pal_cols*pal_rows); ++i)
   {
     curTextures[i] = new UITexture(12.0f + (i%pal_rows)*68.0f, 32.0f + (i / pal_rows)*68.0f, 64.0f, 64.0f, "tileset\\generic\\black.blp");
-    curTextures[i]->setClickFunc([i] { texturePaletteClick (i); });
+    curTextures[i]->setClickFunc([=] { texturePaletteClick (i, current_texture_window); });
     windowTexturePalette->addChild(curTextures[i]);
   }
 
@@ -422,7 +411,7 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   textSelectedTexture = nullptr;
 
   updateTextures();
-  texturePaletteClick(0);
+  texturePaletteClick(0, current_texture_window);
 
   windowTexturePalette->addChild(gPageNumber = new UIText(44.0f, 4.0f, "1 / 1", app.getArialn13(), eJustifyLeft));
   windowTexturePalette->addChild(new UIButton(20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1));
