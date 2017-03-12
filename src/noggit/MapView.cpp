@@ -25,7 +25,6 @@
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
 #include <noggit/ui/HelperModels.h>
-#include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
@@ -422,9 +421,6 @@ void MapView::createGUI()
   _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
-  // create the menu
-  UIMenuBar * mbar = new UIMenuBar();
-
   auto file_menu (_main_window->menuBar()->addMenu ("Editor"));
   connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
 
@@ -736,8 +732,6 @@ void MapView::createGUI()
                   }
                 );
 #endif
-
-  mainGui->addChild(mbar);
 
   ADD_ACTION ( file_menu
              , "Add bookmark"
