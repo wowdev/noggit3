@@ -31,7 +31,6 @@
 #include <noggit/texture_set.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/Misc.h>
-#include <noggit/ui/WaterTypeBrowser.h>
 
 #include <noggit/ModelManager.h>
 
@@ -97,11 +96,8 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
 
   _help = new UIHelp();
 
-  guiWater = new UIWater(this);
+  guiWater = new UIWater();
   guiWater->hide();
   guiWater->movable(true);
   addChild(guiWater);
-
-  guiWaterTypeSelector = new ui::water_type_browser(guiWater);
-  guiWaterTypeSelector->hide();
 }

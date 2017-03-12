@@ -20,11 +20,12 @@
 #include <noggit/Video.h> // video
 #include <iostream>
 #include <sstream>
-#include <noggit/ui/WaterTypeBrowser.h>
 
 #include <noggit/Log.h>
 
-UIWater::UIWater(UIMapViewGUI *setGui)
+#include <QtWidgets/QListWidget>
+
+UIWater::UIWater()
   : UIWindow((float)video::width / 2.0f - (float)winWidth / 2.0f, (float)video::height / 2.0f - (float)winHeight / 2.0f - (float)(video::height / 4), (float)winWidth, (float)winHeight)
   , _liquid_id(5)
   , _radius(10.0f)
@@ -37,7 +38,6 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   , _opacity_mode(river_opacity)
   , _custom_opacity_factor(0.0337f)
   , _lock_pos(math::vector_3d(0.0f, 0.0f, 0.0f))
-  , mainGui(setGui)
   , tile(0, 0)
 {
   addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
@@ -67,7 +67,35 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     "Type: none",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { mainGui->guiWaterTypeSelector->toggle(); }
+    [this]
+    {
+      QListWidget* water_type_browser (new QListWidget (nullptr));
+
+      water_type_browser->setWindowTitle("Water type selector");
+      water_type_browser->setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
+
+      for (DBCFile::Iterator i = gLiquidTypeDB.begin(); i != gLiquidTypeDB.end(); ++i)
+      {
+        int liquid_id = i->getInt(LiquidTypeDB::ID);
+
+        std::stringstream ss;
+        ss << liquid_id << "-" << LiquidTypeDB::getLiquidName(liquid_id);
+
+        auto item (new QListWidgetItem (QString::fromUtf8 (ss.str().c_str()), water_type_browser));
+        item->setData (Qt::UserRole, QVariant (liquid_id));
+
+        water_type_browser->addItem(item);
+      }
+
+      QObject::connect ( water_type_browser, &QListWidget::itemClicked
+                       , [&] (QListWidgetItem* item)
+                         {
+                           changeWaterType(item->data(Qt::UserRole).toInt());
+                         }
+                       );
+
+      water_type_browser->show();
+    }
     );
 
   addChild(waterType);

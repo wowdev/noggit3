@@ -226,7 +226,6 @@ set ( noggit_ui_sources
       src/noggit/ui/SettingsPanel.cpp
       src/noggit/ui/Water.cpp
       src/noggit/ui/WaterSaveWarning.cpp
-      src/noggit/ui/WaterTypeBrowser.cpp
       src/noggit/ui/Window.cpp
       src/noggit/ui/ZoneIDBrowser.cpp
       src/noggit/ui/main_window.cpp
@@ -338,7 +337,6 @@ set ( noggit_ui_headers
       src/noggit/ui/SettingsPanel.h
       src/noggit/ui/Water.h
       src/noggit/ui/WaterSaveWarning.h
-      src/noggit/ui/WaterTypeBrowser.h
       src/noggit/ui/Window.h
       src/noggit/ui/ZoneIDBrowser.h
       src/noggit/ui/main_window.hpp

@@ -40,7 +40,6 @@
 #include <noggit/ui/Toolbar.h> // noggit::ui::toolbar
 #include <noggit/ui/Water.h>
 #include <noggit/ui/WaterSaveWarning.h>
-#include <noggit/ui/WaterTypeBrowser.h>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/main_window.hpp>
 #include <noggit/ui/minimap_widget.hpp>
@@ -96,7 +95,6 @@ void MapView::set_editing_mode (editing_mode mode)
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  mainGui->guiWaterTypeSelector->hide();
   mainGui->_terrain->hide();
   mainGui->flattenTool->hide();
   mainGui->texturingTool->hide();
