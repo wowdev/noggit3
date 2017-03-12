@@ -42,7 +42,6 @@ namespace ui
 class UIMapViewGUI : public UIFrame
 {
 private:
-  bool _tilemode;
   UIHelp* _help;
   noggit::camera* _camera;
   float* _tablet_pressure;
@@ -84,9 +83,6 @@ public:
                         , float* tablet_pressure
                         , bool* tablet_active
                         );
-
-  void setTilemode(bool enabled);
-  virtual void render() const;
 
   void showHelp();
   void hideHelp();
