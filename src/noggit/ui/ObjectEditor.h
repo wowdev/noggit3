@@ -8,9 +8,9 @@
 #include <QLabel>
 #include <QWidget>
 
-class UIModelImport;
-class UIMapViewGUI;
 class QButtonGroup;
+class UIModelImport;
+class UIRotationEditor;
 
 enum ModelPasteMode
 {
@@ -23,7 +23,7 @@ enum ModelPasteMode
 class UIObjectEditor : public QWidget
 {
 public:
-  UIObjectEditor(float x, float y, UIMapViewGUI* mainGui);
+  UIObjectEditor (MapView*);
 
   bool hasSelection() const;
   void copy(selection_type entry);
@@ -31,13 +31,12 @@ public:
   void togglePasteMode();
 
   UIModelImport *modelImport;
+  UIRotationEditor* rotationEditor;
 private:
   QButtonGroup* pasteModeGroup;
-  UIMapViewGUI* mainGui;
   QLabel* _filename;
 
   boost::optional<selection_type> selected;
-  void toggleRotationEditor();
   void showImportModels();
   void SaveObjecttoTXT();
   void setModelName(const std::string &name);
