@@ -37,16 +37,8 @@
 
 
 
-UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
-                           , noggit::camera* camera
-                           , float* tablet_pressure
-                           , bool* tablet_active
-                           )
+UIMapViewGUI::UIMapViewGUI (MapView *setMapview)
   : UIFrame(0.0f, 0.0f, (float)video::width, (float)video::height)
-  , _camera (camera)
-  , _tablet_pressure (tablet_pressure)
-  , _tablet_active (tablet_active)
-  , theMapview(setMapview)
 {
   objectEditor = new UIObjectEditor(setMapview);
   objectEditor->hide();
@@ -62,10 +54,10 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   flattenTool = new ui::FlattenTool();
   flattenTool->hide();
 
-  shaderTool = new ui::shader_tool(theMapview->cursor_color);
+  shaderTool = new ui::shader_tool(setMapview->cursor_color);
   shaderTool->hide();
 
-  texturingTool = new ui::texturing_tool (&camera->position);
+  texturingTool = new ui::texturing_tool (&setMapview->_camera.position);
   texturingTool->hide();
 
   guiCurrentTexture = new noggit::ui::current_texture(TexturePalette);
