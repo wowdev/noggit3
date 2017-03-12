@@ -7,7 +7,7 @@
 namespace ui
 {
   detail_infos::detail_infos (float xPos, float yPos, float w, float h)
-    : QWidget (nullptr)
+    : noggit::ui::widget (nullptr)
   {
     setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
     auto layout (new QFormLayout (this));
@@ -19,17 +19,4 @@ namespace ui
   {
     _info_text->setText (t.c_str ());
   }
-
-  void detail_infos::toggle_visibility()
-  {
-    if (isVisible())
-    {
-      hide();
-    }
-    else
-    {
-      show();
-    }
-  }
 }
-

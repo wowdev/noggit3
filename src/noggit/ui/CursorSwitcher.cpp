@@ -9,7 +9,7 @@
 #include <QtWidgets/QVBoxLayout>
 
 UICursorSwitcher::UICursorSwitcher(math::vector_4d& color, int& cursor_type)
-  : QWidget (nullptr)
+  : noggit::ui::widget (nullptr)
 {
   setWindowTitle("Cursor Options");
   setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);

@@ -660,9 +660,9 @@ void MapView::createGUI()
   connect ( &_show_detail_info_window, &bool_toggle_property::changed
           , guidetailInfos, &QWidget::setVisible
           );
-  // connect ( guidetailInfos, &::visibilityChanged
-  //         , &_show_detail_info_window, &bool_toggle_property::set
-  //         );
+  connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
+          , &_show_detail_info_window, &bool_toggle_property::set
+          );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
   connect ( &_show_minimap_window, &bool_toggle_property::changed
           , _minimap_dock, &QWidget::setVisible
@@ -674,9 +674,9 @@ void MapView::createGUI()
   connect ( &_show_cursor_switcher_window, &bool_toggle_property::changed
           , _cursor_switcher.get(), &QWidget::setVisible
           );
-  // connect ( _cursor_switcher.get(), &::visibilityChanged
-  //         , &_show_cursor_switcher_window, &bool_toggle_property::set
-  //         );
+  connect ( _cursor_switcher.get(), &noggit::ui::widget::visibilityChanged
+          , &_show_cursor_switcher_window, &bool_toggle_property::set
+          );
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
@@ -822,7 +822,14 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
-  ADD_ACTION (view_menu, "toggle detail infos", "Ctrl+X", [this] { guidetailInfos->toggle_visibility(); });
+  ADD_ACTION ( view_menu
+             , "toggle detail infos"
+             , "Ctrl+X"
+             , [this]
+               {
+                 guidetailInfos->setVisible (!guidetailInfos->isVisible());
+               }
+             );
 
   ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
 
