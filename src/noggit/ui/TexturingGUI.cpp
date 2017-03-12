@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <noggit/DBC.h>
-#include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 #include <noggit/MPQ.h>
 #include <noggit/Project.h>
@@ -65,20 +64,6 @@ UICloseWindow  *windowTilesetLoader;
 
 //Texture Filter Window
 UICloseWindow  *windowTextureFilter;
-
-//Map Chunk Window
-UICloseWindow  *windowMapChunk;
-UIText      *chunkLocation;
-UIText      *chunkAreaID;
-UIText      *chunkFlags;
-UICheckBox    *chunkFlagChecks[5];
-UIText      *chunkEffectID;
-UIText      *chunkNumEffects;
-UIText      *chunkEffectModels[4];
-UITexture    *chunkTexture[4];
-UIText      *chunkTextureNames[4];
-UIText      *chunkTextureFlags[4];
-UIText      *chunkTextureEffectID[4];
 
 boost::optional<scoped_blp_texture_reference> UITexturingGUI::selectedTexture = boost::none;
 
@@ -528,131 +513,6 @@ UIFrame* UITexturingGUI::createTextureFilter()
 
   return windowTextureFilter;
 }
-
-UIFrame* UITexturingGUI::createMapChunkWindow()
-{
-  UIWindow *chunkSettingsWindow, *chunkTextureWindow, *chunkEffectWindow;
-  windowMapChunk = new UICloseWindow(video::width / 2.0f - 316.0f, video::height - 369.0f, 634.0f, 337.0f, "Map Chunk Settings");
-  windowMapChunk->movable(true);
-
-  chunkSettingsWindow = new UIWindow(11.0f, 26.0f, 300.0f, 300.0f);
-  windowMapChunk->addChild(chunkSettingsWindow);
-
-  chunkLocation = new UIText(5.0f, 4.0f, "Chunk x, y of Tile x, y at (x, y, z)", app.getArial14(), eJustifyLeft);
-  chunkSettingsWindow->addChild(chunkLocation);
-
-  chunkAreaID = new UIText(5.0, chunkLocation->y() + 25.0f, "AreaID:", app.getArial14(), eJustifyLeft);
-  chunkSettingsWindow->addChild(chunkAreaID);
-
-  chunkFlags = new UIText(5.0, chunkAreaID->y() + 25.0f, "Flags:", app.getArial14(), eJustifyLeft);
-  chunkSettingsWindow->addChild(chunkFlags);
-
-
-  chunkFlagChecks[0] = new UICheckBox(6, chunkFlags->y() + 22.0f, "Shadow");
-  chunkSettingsWindow->addChild(chunkFlagChecks[0]);
-
-
-  chunkFlagChecks[1] = new UICheckBox(150, chunkFlags->y() + 22.0f, "Impassible");
-  chunkSettingsWindow->addChild(chunkFlagChecks[1]);
-
-  chunkFlagChecks[2] = new UICheckBox(chunkFlagChecks[0]->x(), chunkFlagChecks[0]->y() + 30.0f, "River");
-  chunkSettingsWindow->addChild(chunkFlagChecks[2]);
-
-  chunkFlagChecks[3] = new UICheckBox(chunkFlagChecks[1]->x(), chunkFlagChecks[1]->y() + 30.0f, "Ocean");
-  chunkSettingsWindow->addChild(chunkFlagChecks[3]);
-
-  chunkFlagChecks[4] = new UICheckBox(chunkFlagChecks[2]->x(), chunkFlagChecks[2]->y() + 30.0f, "Magma");
-  chunkSettingsWindow->addChild(chunkFlagChecks[4]);
-
-
-  chunkEffectID = new UIText(5.0f, chunkFlagChecks[4]->y() + 35.0f, "EffectID:", app.getArial14(), eJustifyLeft);
-  chunkSettingsWindow->addChild(chunkEffectID);
-  chunkEffectID->hide();
-  chunkNumEffects = new UIText(150.0f, chunkEffectID->y(), "Num Effects:", app.getArial14(), eJustifyLeft);
-  chunkSettingsWindow->addChild(chunkNumEffects);
-  chunkNumEffects->hide();
-
-  chunkEffectWindow = new UIWindow(8.0f, chunkEffectID->y() + 23.0f, 284.0f, 300.0f - (chunkEffectID->y() + 23.0f + 8.0f));
-  chunkSettingsWindow->addChild(chunkEffectWindow);
-  chunkEffectWindow->hide();
-
-  chunkEffectModels[0] = new UIText(8.0f, 8.0f, "Effect Doodad", app.getArial14(), eJustifyLeft);
-  chunkEffectWindow->addChild(chunkEffectModels[0]);
-  chunkEffectModels[0]->hide();
-
-  chunkTextureWindow = new UIWindow(324.0f, 26.0f, 300.0f, 300.0f);
-  windowMapChunk->addChild(chunkTextureWindow);
-
-  float yPos = 11.0f;
-
-  for (int i = 1; i<4; ++i)
-  {
-    chunkEffectModels[i] = new UIText(8.0f, chunkEffectModels[i - 1]->y() + 20.0f, "Effect Doodad", app.getArial14(), eJustifyLeft);
-    chunkEffectWindow->addChild(chunkEffectModels[i]);
-    chunkEffectModels[i]->hide();
-
-    chunkTexture[i] = new UITexture(10.0f, yPos, 64.0f, 64.0f, "tileset\\generic\\black.blp");
-    chunkTextureWindow->addChild(chunkTexture[i]);
-
-    chunkTextureNames[i] = new UIText(83.0f, yPos + 5.0f, "Texture Name", app.getArial14(), eJustifyLeft);
-    chunkTextureWindow->addChild(chunkTextureNames[i]);
-
-    chunkTextureFlags[i] = new UIText(83.0f, yPos + 30.0f, "Flags -", app.getArial14(), eJustifyLeft);
-    chunkTextureWindow->addChild(chunkTextureFlags[i]);
-
-    chunkTextureEffectID[i] = new UIText(184.0f, yPos + 30.0f, "EffectID -", app.getArial14(), eJustifyLeft);
-    chunkTextureWindow->addChild(chunkTextureEffectID[i]);
-
-    yPos += 64.0f + 8.0f;
-  }
-
-  return windowMapChunk;
-}
-
-void UITexturingGUI::setChunkWindow(MapChunk *chunk)
-{
-  std::stringstream Temp;
-  Temp << "Chunk " << chunk->px << ", " << chunk->py << " at (" << chunk->xbase << ", " << chunk->ybase << ", " << chunk->zbase << ")";
-  chunkLocation->setText(Temp.str().c_str());
-
-  std::string areaName;
-  try
-  {
-    AreaDB::Record rec = gAreaDB.getByID(chunk->getAreaID());
-    areaName = rec.getString(AreaDB::Name);
-  }
-  catch (...)
-  {
-    areaName = "";
-  }
-  Temp.clear();
-  Temp << "AreaID: " << areaName.c_str() << " (" << chunk->getAreaID() << ")";
-  chunkAreaID->setText(Temp.str().c_str());///
-
-  Temp.clear();
-  Temp << "Flags: " << chunk->Flags;
-  chunkFlags->setText(Temp.str().c_str());///
-
-  for (int ch = 0; ch<5; ch++)
-    chunkFlagChecks[ch]->setState(false);
-
-
-  if (chunk->Flags & FLAG_SHADOW)
-    chunkFlagChecks[0]->setState(true);
-  if (chunk->Flags & FLAG_IMPASS)
-    chunkFlagChecks[1]->setState(true);
-  if (chunk->Flags & FLAG_LQ_RIVER)
-    chunkFlagChecks[2]->setState(true);
-  if (chunk->Flags & FLAG_LQ_OCEAN)
-    chunkFlagChecks[3]->setState(true);
-  if (chunk->Flags & FLAG_LQ_MAGMA)
-    chunkFlagChecks[4]->setState(true);
-
-  std::stringstream ss;
-  ss << "Num Effects: " << chunk->header.nEffectDoodad;
-  chunkNumEffects->setText(ss.str().c_str());
-}
-
 boost::optional<scoped_blp_texture_reference> UITexturingGUI::getSelectedTexture(){
   return UITexturingGUI::selectedTexture;
 }

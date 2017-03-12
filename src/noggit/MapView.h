@@ -218,9 +218,6 @@ private:
   UIFrame* mainGui;
   noggit::ui::toolbar* _toolbar;
 
-  UIFrame* MapChunkWindow;
-  UIToggleGroup * gFlagsToggleGroup;
-
   void prompt_exit();
   void prompt_save_current();
 

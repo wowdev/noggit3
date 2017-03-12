@@ -6,7 +6,6 @@
 
 #include <boost/optional.hpp>
 
-class MapChunk;
 class UIFrame;
 class UIMapViewGUI;
 
@@ -24,11 +23,8 @@ public:
   static UIFrame* createTexturePalette (noggit::ui::current_texture*);
   static UIFrame* createTilesetLoader();
   static UIFrame* createTextureFilter();
-  static UIFrame* createMapChunkWindow();
   static void setSelectedTexture(scoped_blp_texture_reference t);
   static boost::optional<scoped_blp_texture_reference> getSelectedTexture();
-  static void setChunk(MapChunk *chunk);
-  static void setChunkWindow(MapChunk *chunk);
   static void updateSelectedTexture (noggit::ui::current_texture*);
   static boost::optional<scoped_blp_texture_reference> selectedTexture;
 };
