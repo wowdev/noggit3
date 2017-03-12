@@ -20,7 +20,6 @@
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CloseWindow.h> // UICloseWindow
 #include <noggit/ui/CurrentTexture.h> // UICloseWindow
-#include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
 #include <noggit/ui/Text.h> // UIText
 #include <noggit/ui/Texture.h> // UITexture
 #include <noggit/ui/Toolbar.h> // Toolbar

@@ -14,7 +14,6 @@
 #include <noggit/ui/Texture.h>
 #include <noggit/ui/ToggleGroup.h>
 #include <noggit/ui/Slider.h>
-#include <noggit/ui/MapViewGUI.h>
 #include <noggit/Misc.h>
 #include <noggit/World.h>
 #include <noggit/Video.h> // video

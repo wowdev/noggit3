@@ -14,7 +14,6 @@
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/application.h> // fonts
-#include <noggit/ui/MapViewGUI.h>
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
