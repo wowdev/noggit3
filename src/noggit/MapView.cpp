@@ -407,8 +407,6 @@ void MapView::createGUI()
   TexturePicker->movable(true);
   mainGui->addChild(TexturePicker);
 
-  _help = new UIHelp();
-
   guiWater = new UIWater();
   guiWater->hide();
   guiWater->movable(true);
@@ -713,9 +711,9 @@ void MapView::createGUI()
 
   ADD_TOGGLE (help_menu, "Key Bindings", "Ctrl+F1", _show_keybindings_window);
   connect ( &_show_keybindings_window, &bool_toggle_property::changed
-          , _help, &QWidget::setVisible
+          , _keybindings.get(), &QWidget::setVisible
           );
-  connect ( _help, &noggit::ui::widget::visibilityChanged
+  connect ( _keybindings.get(), &noggit::ui::widget::visibilityChanged
           , &_show_keybindings_window, &bool_toggle_property::set
           );
 
@@ -1166,6 +1164,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
   , _cursor_switcher (new UICursorSwitcher (cursor_color, cursor_type))
+  , _keybindings (new UIHelp)
 {
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this

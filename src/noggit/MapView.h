@@ -315,8 +315,8 @@ private:
   void move_camera_with_auto_height (math::vector_3d const&);
 
   std::unique_ptr<UICursorSwitcher> _cursor_switcher;
+  std::unique_ptr<UIHelp> _keybindings;
 
-  UIHelp* _help;
   UIFrame* TexturePalette;
   UIFrame* SelectedTexture;
   ui::detail_infos* guidetailInfos;
