@@ -8,7 +8,6 @@ class MapView;
 class UIFrame;
 class UITexturePicker;
 class UIHelp;
-class UICursorSwitcher;
 class UIWindow;
 class UIExitWarning;
 class UIHelperModels;
@@ -44,7 +43,6 @@ class UIMapViewGUI : public UIFrame
 {
 private:
   bool _tilemode;
-  UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
   noggit::camera* _camera;
   float* _tablet_pressure;
@@ -90,9 +88,6 @@ public:
   void setTilemode(bool enabled);
   virtual void render() const;
 
-  void showCursorSwitcher();
-  void hideCursorSwitcher();
-  void toggleCursorSwitcher();
   void showHelp();
   void hideHelp();
   void toggleHelp();
