@@ -8,10 +8,10 @@
 #import "Native.hpp"
 #import <Cocoa/Cocoa.h>
 
-const std::string kNotFoundTitle = "Noggit was unable to locate World of Warcraft.";
-const std::string kNotFoundMessage = "Click OK to select the location of your Wrath of the Lich King (3.3.5) installation.";
-const std::string kMismatchTitle = "WoW version mismatch";
-const std::string kMismatchMessage = "The WoW binary found by Noggit wasn't the expected version (3.3.5). Noggit may crash or behave strangely.";
+NSString * const kNotFoundTitle = @"Noggit was unable to locate World of Warcraft.";
+NSString * const kNotFoundMessage = @"Click OK to select the location of your Wrath of the Lich King (3.3.5) installation.";
+NSString * const kMismatchTitle = @"WoW version mismatch";
+NSString * const kMismatchMessage = @"The WoW binary found by Noggit wasn't the expected version (3.3.5). Noggit may crash or behave strangely.";
 
 BOOL checkWoWVersionAtPath(NSString *filePath)
 {
@@ -41,7 +41,10 @@ std::string Native::showFileChooser()
 
 std::string Native::getGamePath()
 {
-    Native::showAlertDialog(kNotFoundTitle, kNotFoundMessage);
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.messageText = kNotFoundTitle;
+    alert.informativeText = kNotFoundMessage;
+    [alert runModal];
 
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];
     openPanel.canChooseDirectories = YES;
@@ -52,7 +55,9 @@ std::string Native::getGamePath()
         path = [path stringByAppendingString:@"/"];
 
         if (!checkWoWVersionAtPath(path)) {
-            Native::showAlertDialog(kMismatchTitle, kMismatchMessage);
+            alert.messageText = kMismatchTitle;
+            alert.informativeText = kMismatchMessage;
+            [alert runModal];
             Log << "NoggitCocoa: WoW binary version mismatch" << std::endl;
         }
 
