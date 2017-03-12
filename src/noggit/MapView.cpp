@@ -619,6 +619,9 @@ void MapView::createGUI()
   connect ( &_show_detail_info_window, &bool_toggle_property::changed
           , mainGui->guidetailInfos, &QWidget::setVisible
           );
+  // connect ( mainGui->guidetailInfos, &::visibilityChanged
+  //         , &_show_detail_info_window, &bool_toggle_property::set
+  //         );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
   connect ( &_show_minimap_window, &bool_toggle_property::changed
           , _minimap_dock, &QWidget::setVisible
