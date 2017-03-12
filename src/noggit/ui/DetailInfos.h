@@ -2,14 +2,15 @@
 
 #pragma once
 
-#include <QtWidgets/QWidget>
+#include <noggit/ui/widget.hpp>
+
 #include <QtWidgets/QLabel>
 
 #include <string>
 
 namespace ui
 {
-  class detail_infos : public QWidget
+  class detail_infos : public noggit::ui::widget
   {
   private:
     QLabel* _info_text;
@@ -17,6 +18,5 @@ namespace ui
   public:
     detail_infos (float x, float y, float width, float height);
     void setText (const std::string& t);
-    void toggle_visibility();
   };
 }
