@@ -133,6 +133,7 @@ private:
   bool_toggle_property _draw_model_animations = {false};
   bool_toggle_property _draw_hole_lines = {false};
   bool_toggle_property _draw_models_with_box = {false};
+  bool_toggle_property _draw_fog = {true};
 public:
   std::unordered_set<WMO*> _hidden_map_objects;
   std::unordered_set<Model*> _hidden_models;

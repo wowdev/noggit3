@@ -54,9 +54,11 @@ public:
            , math::frustum const& frustum
            , const float& cull_distance
            , const math::vector_3d& camera
+           , bool draw_fog
            );
   void drawLiquid ( math::vector_3d water_color_light
                   , math::vector_3d water_color_dark
+                  , bool draw_fog
                   );
   void drawDoodads ( unsigned int doodadset
                    , const math::vector_3d& ofs
@@ -65,7 +67,7 @@ public:
                    , bool draw_fog
                    );
 
-  void setupFog();
+  void setupFog (bool draw_fog);
 
   void intersect (math::ray const&, std::vector<float>* results) const;
 
