@@ -9,12 +9,11 @@ class UISlider;
 class UIText;
 class UIButton;
 class UICheckBox;
-class UIMapViewGUI;
 
 class UIWater : public UIWindow
 {
 public:
-  UIWater(UIMapViewGUI *setGui);
+  UIWater();
 
   void updatePos(tile_index const& newTile);
   void updateData();
@@ -62,7 +61,6 @@ private:
 
   math::vector_3d _lock_pos;  
 
-  UIMapViewGUI *mainGui;
   UISlider* _radius_slider;
   UISlider* _angle_slider;
   UISlider* _orientation_slider;
