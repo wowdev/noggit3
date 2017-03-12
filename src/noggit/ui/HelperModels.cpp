@@ -25,14 +25,14 @@ UIHelperModels::UIHelperModels(MapView *mapview)
   top_layout->addWidget (new QLabel ("Select a model to add.\nYou should select a chunk first.", this));
 
   auto add_button
-    ( [&] (char const* label, int id, int pos_x, int pos_y)
+    ( [&] (char const* label, std::string path, int pos_x, int pos_y)
       {
         auto button (new QPushButton (label, this));
 
         connect ( button, &QPushButton::clicked
                 , [=]
                   {
-                    mapview->inserObjectFromExtern (id);
+                    mapview->insert_object_at_selection_position (path);
                   }
                 );
 
@@ -40,17 +40,17 @@ UIHelperModels::UIHelperModels(MapView *mapview)
       }
     );
 
-  add_button ("Human scale", 2, 0, 0);
-  add_button ("Cube 50", 3, 0, 1);
-  add_button ("Cube 100", 4, 0, 2);
-  add_button ("Cube 250", 5, 0, 3);
-  add_button ("Cube 500", 6, 0, 4);
-  add_button ("Cube 1000", 7, 0, 5);
+  add_button ("Human scale", "world/scale/humanmalescale.m2", 0, 0);
+  add_button ("Cube 50", "world/scale/50x50.m2", 0, 1);
+  add_button ("Cube 100", "world/scale/100x100.m2", 0, 2);
+  add_button ("Cube 250", "world/scale/250x250.m2", 0, 3);
+  add_button ("Cube 500", "world/scale/500x500.m2", 0, 4);
+  add_button ("Cube 1000", "world/scale/1000x1000.m2", 0, 5);
 
-  add_button ("Disc 50", 8, 1, 0);
-  add_button ("Disc 200", 9, 1, 1);
-  add_button ("Disc 777", 10, 1, 2);
-  add_button ("Sphere 50", 11, 1, 3);
-  add_button ("Sphere 200", 12, 1, 4);
-  add_button ("Sphere 777", 13, 1, 5);
+  add_button ("Disc 50 radius", "world/scale/50yardradiusdisc.m2", 1, 0);
+  add_button ("Disc 200 radius", "world/scale/200yardradiusdisc.m2", 1, 1);
+  add_button ("Disc 777 radius", "world/scale/777yardradiusdisc.m2", 1, 2);
+  add_button ("Sphere 50 radius", "world/scale/50yardradiussphere.m2", 1, 3);
+  add_button ("Sphere 200 radius", "world/scale/200yardradiussphere.m2", 1, 4);
+  add_button ("Sphere 777 radius", "world/scale/777yardradiussphere.m2", 1, 5);
 }
