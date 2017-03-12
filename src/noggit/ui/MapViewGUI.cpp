@@ -12,7 +12,6 @@
 #include <noggit/MapView.h>
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), arial...
 #include <noggit/Project.h>
-#include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/DetailInfos.h> // ui::detail_infos
 #include <noggit/ui/FlattenTool.hpp>
@@ -96,10 +95,6 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
   TexturePicker->movable(true);
   addChild(TexturePicker);
 
-  // Cursor Switcher
-  CursorSwitcher = new UICursorSwitcher(theMapview->cursor_color, theMapview->cursor_type);
-  CursorSwitcher->hide();
-
   _help = new UIHelp();
 
   guiWater = new UIWater(this);
@@ -109,21 +104,6 @@ UIMapViewGUI::UIMapViewGUI ( MapView *setMapview
 
   guiWaterTypeSelector = new ui::water_type_browser(guiWater);
   guiWaterTypeSelector->hide();
-}
-
-void UIMapViewGUI::showCursorSwitcher()
-{
-  CursorSwitcher->show();
-}
-
-void UIMapViewGUI::hideCursorSwitcher()
-{
-  CursorSwitcher->hide();
-}
-
-void UIMapViewGUI::toggleCursorSwitcher()
-{
-  CursorSwitcher->setVisible (!CursorSwitcher->isVisible());
 }
 
 void UIMapViewGUI::showHelp()

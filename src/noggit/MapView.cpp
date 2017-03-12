@@ -589,15 +589,6 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::paint; }
             );
 
-  mbar->GetMenu("View")->AddMenuItemButton("Cursor options", [this] { mainGui->showCursorSwitcher(); });
-  addHotkey ( Qt::Key_C
-            , MOD_alt | MOD_ctrl
-            , [this]
-              {
-                mainGui->toggleCursorSwitcher();
-              }
-            );
-
   view_menu->addSection ("Drawing");
   ADD_TOGGLE (view_menu, "Doodads", Qt::Key_F1, _draw_models);
   ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F2, _draw_wmo_doodads);
@@ -629,6 +620,13 @@ void MapView::createGUI()
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
           , &_show_minimap_window, &bool_toggle_property::set
           );
+  ADD_TOGGLE (view_menu, "Cursor switcher", "Ctrl+Alt+C", _show_cursor_switcher_window);
+  connect ( &_show_cursor_switcher_window, &bool_toggle_property::changed
+          , _cursor_switcher.get(), &QWidget::setVisible
+          );
+  // connect ( _cursor_switcher.get(), &::visibilityChanged
+  //         , &_show_cursor_switcher_window, &bool_toggle_property::set
+  //         );
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
@@ -1116,6 +1114,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_time (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
+  , _cursor_switcher (new UICursorSwitcher (cursor_color, cursor_type))
 {
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
