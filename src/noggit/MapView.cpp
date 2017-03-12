@@ -2249,45 +2249,41 @@ void MapView::keyPressEvent (QKeyEvent *event)
     updown -= 1.0f;
   }
 
-  // position correction with num pad
-  //! \todo revive
-  /*
-  if (event->key() == SDLK_KP2)
+  if (event->key() == Qt::Key_2 && event->modifiers() & Qt::KeypadModifier)
   {
     keyx += 1;
   }
-  if (event->key() == SDLK_KP8)
+  if (event->key() == Qt::Key_8 && event->modifiers() & Qt::KeypadModifier)
   {
     keyx -= 1;
   }
 
-  if (event->key() == SDLK_KP4)
+  if (event->key() == Qt::Key_4 && event->modifiers() & Qt::KeypadModifier)
   {
     keyz += 1;
   }
-  if (event->key() == SDLK_KP6)
+  if (event->key() == Qt::Key_6 && event->modifiers() & Qt::KeypadModifier)
   {
     keyz -= 1;
   }
 
-  if (event->key() == SDLK_KP3)
+  if (event->key() == Qt::Key_3 && event->modifiers() & Qt::KeypadModifier)
   {
     keyy += 1;
   }
-  if (event->key() == SDLK_KP1)
+  if (event->key() == Qt::Key_1 && event->modifiers() & Qt::KeypadModifier)
   {
     keyy -= 1;
   }
 
-  if (event->key() == SDLK_KP7)
+  if (event->key() == Qt::Key_7 && event->modifiers() & Qt::KeypadModifier)
   {
     keyr += 1;
   }
-  if (event->key() == SDLK_KP9)
+  if (event->key() == Qt::Key_9 && event->modifiers() & Qt::KeypadModifier)
   {
     keyr -= 1;
   }
-  */
 
   if (event->key() == Qt::Key_Plus)
   {
@@ -2363,44 +2359,41 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
     updown += 1.0f;
   }
 
-  //! \todo revive
-  /*
-  if (event->key() == SDLK_KP2)
+  if (event->key() == Qt::Key_2 && event->modifiers() & Qt::KeypadModifier)
   {
     keyx -= 1;
   }
-  if (event->key() == SDLK_KP8)
+  if (event->key() == Qt::Key_8 && event->modifiers() & Qt::KeypadModifier)
   {
     keyx += 1;
   }
 
-  if (event->key() == SDLK_KP4)
+  if (event->key() == Qt::Key_4 && event->modifiers() & Qt::KeypadModifier)
   {
     keyz -= 1;
   }
-  if (event->key() == SDLK_KP6)
+  if (event->key() == Qt::Key_6 && event->modifiers() & Qt::KeypadModifier)
   {
     keyz += 1;
   }
 
-  if (event->key() == SDLK_KP3)
+  if (event->key() == Qt::Key_3 && event->modifiers() & Qt::KeypadModifier)
   {
     keyy -= 1;
   }
-  if (event->key() == SDLK_KP1)
+  if (event->key() == Qt::Key_1 && event->modifiers() & Qt::KeypadModifier)
   {
     keyy += 1;
   }
 
-  if (event->key() == SDLK_KP7)
+  if (event->key() == Qt::Key_7 && event->modifiers() & Qt::KeypadModifier)
   {
     keyr -= 1;
   }
-  if (event->key() == SDLK_KP9)
+  if (event->key() == Qt::Key_9 && event->modifiers() & Qt::KeypadModifier)
   {
     keyr += 1;
   }
-  */
 
   if (event->key() == Qt::Key_Plus)
   {
