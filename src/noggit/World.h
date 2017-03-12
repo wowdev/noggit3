@@ -60,8 +60,6 @@ public:
   void outdoorLighting();
 
   unsigned int getMapID();
-  // Do we draw *? Should be moved somewhere else, these are not World related.
-  bool drawfog;
   // Time of the day.
   float animtime;
   float time;
@@ -120,10 +118,11 @@ public:
             , std::unordered_set<WMO*> const& hidden_map_objects
             , std::unordered_set<Model*> const& hidden_models
             , std::map<int, misc::random_color>& area_id_colors
+            , bool draw_fog
             );
 
   void outdoorLights(bool on);
-  void setupFog();
+  void setupFog (bool draw_fog);
 
   unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt);

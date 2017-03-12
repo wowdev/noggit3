@@ -646,6 +646,7 @@ void MapView::createGUI()
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
+  ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
 
   view_menu->addSection ("Windows");
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
@@ -670,10 +671,6 @@ void MapView::createGUI()
           , &_show_cursor_switcher_window, &bool_toggle_property::set
           );
 
-  mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
-  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
-  addHotkey(Qt::Key_F12, MOD_none, [this] { _world->drawfog = !_world->drawfog; });
-
   addHotkey ( Qt::Key_F1
             , MOD_shift
             , [this]
@@ -684,7 +681,7 @@ void MapView::createGUI()
                   alloff_doodads = _draw_wmo_doodads.get();
                   alloff_contour = _draw_contour.get();
                   alloff_wmo = _draw_wmo.get();
-                  alloff_fog = _world->drawfog;
+                  alloff_fog = _draw_fog.get();
                   alloff_terrain = _draw_terrain.get();
 
                   _draw_models.set (false);
@@ -692,7 +689,7 @@ void MapView::createGUI()
                   _draw_contour.set (true);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
-                  _world->drawfog = false;
+                  _draw_fog.set (false);
                 }
                 else
                 {
@@ -701,7 +698,7 @@ void MapView::createGUI()
                   _draw_contour.set (alloff_contour);
                   _draw_wmo.set (alloff_wmo);
                   _draw_terrain.set (alloff_terrain);
-                  _world->drawfog = alloff_fog;
+                  _draw_fog.set (alloff_fog);
                 }
                 alloff = !alloff;
               }
@@ -2234,6 +2231,7 @@ void MapView::displayViewMode_3D()
                , _draw_hidden_models.get() ? std::unordered_set<WMO*>() : _hidden_map_objects
                , _draw_hidden_models.get() ? std::unordered_set<Model*>() : _hidden_models
                , _area_id_colors
+               , _draw_fog.get()
                );
 
   displayGUIIfEnabled();
