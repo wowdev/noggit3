@@ -1834,6 +1834,109 @@ void MapView::tick (float dt)
 
     _status_time->setText (QString::fromStdString (timestrs.str()));
   }
+
+  mainGui->guiWater->updatePos (_camera.position);
+
+  {
+    auto lSelection = gWorld->GetCurrentSelection();
+    std::stringstream detailInfo;
+    if (lSelection)
+    {
+      switch (lSelection->which())
+      {
+      case eEntry_Model:
+        {
+          auto instance (boost::get<selected_model_type> (*lSelection));
+          detailInfo << "filename: " << instance->model->_filename
+                     << "\nunique ID: " << instance->d1
+                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                     << "\nscale: " << instance->sc
+                     << "\ntextures Used: " << instance->model->header.nTextures;
+
+          for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
+          {
+            detailInfo << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename();
+          }
+          if (instance->model->header.nTextures > 25)
+          {
+            detailInfo << "\n and more.";
+          }
+
+          detailInfo << "\n";
+          break;
+        }
+      case eEntry_WMO:
+        {
+          auto instance (boost::get<selected_wmo_type> (*lSelection));
+          detailInfo << "filename: " << instance->wmo->_filename
+                     << "\nunique ID: " << instance->mUniqueID
+                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                     << "\ndoodad set: " << instance->doodadset
+                     << "\ntextures used: " << instance->wmo->textures.size();
+
+
+          const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
+          for (unsigned int j = 0; j < texture_count; j++)
+          {
+            detailInfo << "\n " << (j + 1) << ": " << instance->wmo->textures[j];
+          }
+          if (instance->wmo->textures.size() > 25)
+          {
+            detailInfo << "\n and more.";
+          }
+
+          detailInfo << "\n";
+          break;
+        }
+      case eEntry_MapChunk:
+        {
+          auto chunk (boost::get<selected_chunk_type> (*lSelection).chunk);
+          int flags = chunk->Flags;
+
+          detailInfo << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
+                     << ") of tile (" << chunk->mt->index.x << " " << chunk->mt->index.z << ")"
+                     << "\narea ID: " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
+                     << "\nflags: "
+                     << (flags & FLAG_SHADOW ? "shadows " : "")
+                     << (flags & FLAG_IMPASS ? "impassable " : "")
+                     << (flags & FLAG_LQ_RIVER ? "river " : "")
+                     << (flags & FLAG_LQ_OCEAN ? "ocean " : "")
+                     << (flags & FLAG_LQ_MAGMA ? "lava" : "")
+                     << "\ntextures used: " << chunk->_texture_set.num();
+
+          //! \todo get a list of textures and their flags as well as detail doodads.
+          /*
+            for( int q = 0; q < chunk->nTextures; q++ )
+            {
+            //s << " ";
+            //s "  Flags - " << chunk->texFlags[q] << " Effect ID - " << chunk->effectID[q] << std::endl;
+
+            if( chunk->effectID[q] != 0 )
+            for( int r = 0; r < 4; r++ )
+            {
+            const char *EffectModel = getGroundEffectDoodad( chunk->effectID[q], r );
+            if( EffectModel )
+            {
+            s << r << " - World\\NoDXT\\" << EffectModel << endl;
+            //freetype::shprint( app.getArial16(), 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
+            TextOffset += 20;
+            }
+            }
+
+            }
+          */
+
+          detailInfo << "\n";
+
+          break;
+        }
+      }
+    }
+
+    mainGui->guidetailInfos->setText(detailInfo.str());
+  }
 }
 
 math::vector_4d MapView::normalized_device_coords (int x, int y) const
@@ -1945,7 +2048,6 @@ void MapView::displayGUIIfEnabled()
 
     opengl::texture::disable_texture(0);
 
-    mainGui->setTilemode(mViewMode != eViewMode_3D);
     mainGui->render();
 
     opengl::texture::enable_texture(0);
