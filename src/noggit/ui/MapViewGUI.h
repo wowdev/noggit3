@@ -40,23 +40,8 @@ namespace ui
 //! \todo Give better name.
 class UIMapViewGUI : public UIFrame
 {
-private:
-  noggit::camera* _camera;
-  float* _tablet_pressure;
-  bool* _tablet_active;
-
 public:
   UIHelp* _help;
-  // position of the tools window(s)
-  int tool_settings_x;
-  int tool_settings_y;
-
-  // Editor paramter
-  int ground_edit_mode;
-  int selection_view_mode;
-
-  MapView* theMapview;
-  // UI elements
   UIFrame* TexturePalette;
   UIFrame* SelectedTexture;
   ui::detail_infos* guidetailInfos;
@@ -76,9 +61,5 @@ public:
   ui::water_save_warning *waterSaveWarning;
   UIHelperModels *HelperModels;
 
-  explicit UIMapViewGUI ( MapView* setMapview
-                        , noggit::camera*
-                        , float* tablet_pressure
-                        , bool* tablet_active
-                        );
+  explicit UIMapViewGUI (MapView* setMapview);
 };

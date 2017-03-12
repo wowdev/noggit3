@@ -362,7 +362,7 @@ void MapView::changeZoneIDValue (int set)
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI(this, &_camera, &_tablet_pressure, &_tablet_active);
+  mainGui = new UIMapViewGUI(this);
 
   mainGui->ZoneIDBrowser->setMapID(_world->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
