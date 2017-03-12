@@ -1377,8 +1377,6 @@ void MapView::tick (float dt)
   }
 #endif
 
-  if (hasFocus())
-  {
     math::vector_3d dir(1.0f, 0.0f, 0.0f);
     math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
     math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
@@ -1775,18 +1773,6 @@ void MapView::tick (float dt)
 
       _2d_zoom = std::min(std::max(_2d_zoom, 0.1f), 2.0f);
     }
-  }
-  else
-  {
-    leftMouse = false;
-    rightMouse = false;
-    look = false;
-    MoveObj = false;
-
-    moving = 0;
-    strafing = 0;
-    updown = 0;
-  }
 
   mainGui->texturingTool->update_brushes();
 
