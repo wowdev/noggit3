@@ -2425,6 +2425,11 @@ void MapView::focusOutEvent (QFocusEvent*)
   keyy = 0;
   keyr = 0;
   keys = 0;
+
+  leftMouse = false;
+  rightMouse = false;
+  MoveObj = false;
+  look = false;
 }
 
 void MapView::inserObjectFromExtern(int model)
