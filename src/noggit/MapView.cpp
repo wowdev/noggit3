@@ -24,10 +24,10 @@
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
 #include <noggit/ui/FlattenTool.hpp>
+#include <noggit/ui/Help.h>
 #include <noggit/ui/HelperModels.h>
 #include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
-#include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
@@ -35,7 +35,6 @@
 #include <noggit/ui/Text.h> // UIText
 #include <noggit/ui/Texture.h> // textureUI
 #include <noggit/ui/TexturePicker.h>
-#include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/ToggleGroup.h> // UIToggleGroup
 #include <noggit/ui/Toolbar.h> // noggit::ui::toolbar
@@ -44,8 +43,10 @@
 #include <noggit/ui/WaterTypeBrowser.h>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/main_window.hpp>
+#include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/shader_tool.hpp>
 #include <noggit/ui/terrain_tool.hpp>
+#include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
@@ -666,12 +667,12 @@ void MapView::createGUI()
             );
 
 
-  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->showHelp(); });
+  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->_help->show(); });
   addHotkey ( Qt::Key_H
             , MOD_none
             , [&]
               {
-                mainGui->toggleHelp();
+                mainGui->_help->setVisible (!mainGui->_help->isVisible());
               }
             , [&] { return terrainMode != editing_mode::object; }
             );
