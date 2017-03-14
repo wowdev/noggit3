@@ -387,7 +387,7 @@ ENDIF(WIN32)
 
 
 list (APPEND headers_to_moc
-  src/noggit/MapView.h
+  src/noggit/bool_toggle_property.hpp
   src/noggit/ui/clickable_label.hpp
   src/noggit/ui/minimap_widget.hpp
   src/noggit/ui/widget.hpp
