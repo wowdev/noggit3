@@ -163,7 +163,7 @@ void ChunkWater::draw ( opengl::scoped::use_program& water_shader
     return;
   }
 
-  if (Environment::getInstance()->displayAllWaterLayers)
+  if (Environment::getInstance()->displayAllWaterLayers.get())
   {
     for (liquid_layer& layer : _layers)
     {
