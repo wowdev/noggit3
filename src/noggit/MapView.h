@@ -3,10 +3,11 @@
 #pragma once
 
 #include <math/vector_4d.hpp>
-#include <noggit/Selection.h>
-#include <noggit/tool_enums.hpp>
 #include <noggit/Misc.h>
+#include <noggit/Selection.h>
+#include <noggit/bool_toggle_property.hpp>
 #include <noggit/camera.hpp>
+#include <noggit/tool_enums.hpp>
 
 #include <boost/optional.hpp>
 
@@ -77,33 +78,6 @@ namespace ui
   class water_save_warning;
 }
 
-struct bool_toggle_property : QObject
-{
-private:
-  Q_OBJECT
-
-  bool _value;
-signals:
-  void changed (bool);
-
-public slots:
-  void set (bool v)
-  {
-    if (_value != v)
-    {
-      _value = v;
-      emit changed (v);
-    }
-  }
-  bool get() const
-  {
-    return _value;
-  }
-
-public:
-  bool_toggle_property (bool value) : _value (value) {}
-};
-
 class MapView : public QOpenGLWidget
 {
 private:
@@ -121,23 +95,23 @@ private:
 
   noggit::camera _camera;
 
-  bool_toggle_property _draw_contour = {false};
-  bool_toggle_property _draw_mfbo = {false};
-  bool_toggle_property _draw_wireframe = {false};
-  bool_toggle_property _draw_lines = {false};
-  bool_toggle_property _draw_terrain = {true};
-  bool_toggle_property _draw_wmo = {true};
-  bool_toggle_property _draw_water = {true};
-  bool_toggle_property _draw_wmo_doodads = {true};
-  bool_toggle_property _draw_models = {true};
-  bool_toggle_property _draw_model_animations = {false};
-  bool_toggle_property _draw_hole_lines = {false};
-  bool_toggle_property _draw_models_with_box = {false};
-  bool_toggle_property _draw_fog = {true};
+  noggit::bool_toggle_property _draw_contour = {false};
+  noggit::bool_toggle_property _draw_mfbo = {false};
+  noggit::bool_toggle_property _draw_wireframe = {false};
+  noggit::bool_toggle_property _draw_lines = {false};
+  noggit::bool_toggle_property _draw_terrain = {true};
+  noggit::bool_toggle_property _draw_wmo = {true};
+  noggit::bool_toggle_property _draw_water = {true};
+  noggit::bool_toggle_property _draw_wmo_doodads = {true};
+  noggit::bool_toggle_property _draw_models = {true};
+  noggit::bool_toggle_property _draw_model_animations = {false};
+  noggit::bool_toggle_property _draw_hole_lines = {false};
+  noggit::bool_toggle_property _draw_models_with_box = {false};
+  noggit::bool_toggle_property _draw_fog = {true};
 public:
   std::unordered_set<WMO*> _hidden_map_objects;
   std::unordered_set<Model*> _hidden_models;
-  bool_toggle_property _draw_hidden_models = {false};
+  noggit::bool_toggle_property _draw_hidden_models = {false};
 private:
   int _selected_area_id = -1;
   std::map<int, misc::random_color> _area_id_colors;
@@ -303,13 +277,13 @@ private:
   QLabel* _status_area;
   QLabel* _status_time;
 
-  bool_toggle_property _auto_selecting_mode = {true};
+  noggit::bool_toggle_property _auto_selecting_mode = {true};
 
-  bool_toggle_property _show_detail_info_window = {false};
-  bool_toggle_property _show_minimap_window = {false};
-  bool_toggle_property _show_cursor_switcher_window = {false};
-  bool_toggle_property _show_keybindings_window = {false};
-  bool_toggle_property _show_texture_palette_window = {false};
+  noggit::bool_toggle_property _show_detail_info_window = {false};
+  noggit::bool_toggle_property _show_minimap_window = {false};
+  noggit::bool_toggle_property _show_cursor_switcher_window = {false};
+  noggit::bool_toggle_property _show_keybindings_window = {false};
+  noggit::bool_toggle_property _show_texture_palette_window = {false};
 
   noggit::ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;

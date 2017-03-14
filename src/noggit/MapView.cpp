@@ -458,9 +458,9 @@ void MapView::createGUI()
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &bool_toggle_property::set              \
+            , &property_, &noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &bool_toggle_property::changed          \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -474,9 +474,9 @@ void MapView::createGUI()
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &bool_toggle_property::set              \
+            , &property_, &noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &bool_toggle_property::changed          \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -635,32 +635,32 @@ void MapView::createGUI()
 
   view_menu->addSection ("Windows");
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
-  connect ( &_show_detail_info_window, &bool_toggle_property::changed
+  connect ( &_show_detail_info_window, &noggit::bool_toggle_property::changed
           , guidetailInfos, &QWidget::setVisible
           );
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
-          , &_show_detail_info_window, &bool_toggle_property::set
+          , &_show_detail_info_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
-  connect ( &_show_minimap_window, &bool_toggle_property::changed
+  connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
           , _minimap_dock, &QWidget::setVisible
           );
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
-          , &_show_minimap_window, &bool_toggle_property::set
+          , &_show_minimap_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Cursor switcher", "Ctrl+Alt+C", _show_cursor_switcher_window);
-  connect ( &_show_cursor_switcher_window, &bool_toggle_property::changed
+  connect ( &_show_cursor_switcher_window, &noggit::bool_toggle_property::changed
           , _cursor_switcher.get(), &QWidget::setVisible
           );
   connect ( _cursor_switcher.get(), &noggit::ui::widget::visibilityChanged
-          , &_show_cursor_switcher_window, &bool_toggle_property::set
+          , &_show_cursor_switcher_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
-  connect ( &_show_texture_palette_window, &bool_toggle_property::changed
+  connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
           , [this] (bool shown) { TexturePalette->hidden (!shown); }
           );
   // connect ( texture_palette, &noggit::ui::widget::visibilityChanged
-  //         , &_show_texture_palette_window, &bool_toggle_property::set
+  //         , &_show_texture_palette_window, &noggit::bool_toggle_property::set
   //         );
 
   addHotkey ( Qt::Key_F1
@@ -697,11 +697,11 @@ void MapView::createGUI()
             );
 
   ADD_TOGGLE (help_menu, "Key Bindings", "Ctrl+F1", _show_keybindings_window);
-  connect ( &_show_keybindings_window, &bool_toggle_property::changed
+  connect ( &_show_keybindings_window, &noggit::bool_toggle_property::changed
           , _keybindings.get(), &QWidget::setVisible
           );
   connect ( _keybindings.get(), &noggit::ui::widget::visibilityChanged
-          , &_show_keybindings_window, &bool_toggle_property::set
+          , &_show_keybindings_window, &noggit::bool_toggle_property::set
           );
 
 #if defined(_WIN32) || defined(WIN32)
