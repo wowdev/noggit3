@@ -404,11 +404,7 @@ void MapView::createGUI()
   TexturePicker->movable(true);
   mainGui->addChild(TexturePicker);
 
-  guiWater = new UIWater();
-  guiWater->hide();
-  guiWater->movable(true);
-  mainGui->addChild(guiWater);
-
+  guiWater = new noggit::ui::UIWater();
 
   ZoneIDBrowser->setMapID(_world->getMapID());
   ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });

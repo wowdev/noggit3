@@ -56,7 +56,6 @@ class UIHelp;
 class UIWindow;
 class UIExitWarning;
 class UIHelperModels;
-class UIWater;
 class UIObjectEditor;
 class MapView;
 namespace noggit
@@ -65,6 +64,7 @@ namespace noggit
   namespace ui
   {
     class current_texture;
+    class UIWater;
   }
 }
 namespace ui
@@ -298,7 +298,7 @@ private:
   ui::detail_infos* guidetailInfos;
   ui::zone_id_browser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
-  UIWater* guiWater;
+  noggit::ui::UIWater* guiWater;
   noggit::ui::current_texture* guiCurrentTexture;
   UIObjectEditor* objectEditor;
   ui::FlattenTool* flattenTool;
