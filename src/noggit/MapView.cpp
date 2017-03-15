@@ -381,13 +381,24 @@ void MapView::createGUI()
   texturingTool = new ui::texturing_tool (&_camera.position);
   texturingTool->hide();
 
-  guiCurrentTexture = new noggit::ui::current_texture(TexturePalette);
+  guiCurrentTexture = new noggit::ui::current_texture;
+  TexturePalette = new noggit::ui::tileset_chooser;
+  connect ( guiCurrentTexture, &noggit::ui::current_texture::clicked
+          , [=]
+            {
+              TexturePalette->setVisible (!TexturePalette->isVisible());
+            }
+          );
+  connect ( TexturePalette, &noggit::ui::tileset_chooser::selected
+          , [=] (std::string const& filename)
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
 
-  TexturePalette = UITexturingGUI::createTexturePalette(guiCurrentTexture);
-  TexturePalette->hide();
-  mainGui->addChild(TexturePalette);
-  mainGui->addChild(UITexturingGUI::createTilesetLoader());
-  mainGui->addChild(UITexturingGUI::createTextureFilter());
+              UITexturingGUI::setSelectedTexture (filename);
+              guiCurrentTexture->set_texture (filename);
+            }
+          );
 
   // DetailInfoWindow
   guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);
@@ -653,11 +664,11 @@ void MapView::createGUI()
           );
   ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
   connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
-          , [this] (bool shown) { TexturePalette->hidden (!shown); }
+          , TexturePalette, &QWidget::setVisible
           );
-  // connect ( texture_palette, &noggit::ui::widget::visibilityChanged
-  //         , &_show_texture_palette_window, &noggit::bool_toggle_property::set
-  //         );
+  connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
+          , &_show_texture_palette_window, &noggit::bool_toggle_property::set
+          );
 
   addHotkey ( Qt::Key_F1
             , MOD_shift

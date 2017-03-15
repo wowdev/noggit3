@@ -17,8 +17,11 @@ namespace noggit
   {
     class current_texture : public QWidget
     {
+      Q_OBJECT
+
     private:
       clickable_label* _texture;
+      QLabel* _filename_label;
       std::string _filename;
 
       virtual void resizeEvent (QResizeEvent* event) override
@@ -28,8 +31,11 @@ namespace noggit
       void update_texture();
 
     public:
-      current_texture (UIFrame* texture_palette);
+      current_texture();
       void set_texture (std::string const& texture);
+
+    signals:
+      void clicked();
     };
   }
 }

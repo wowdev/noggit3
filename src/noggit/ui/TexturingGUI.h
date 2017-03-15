@@ -3,6 +3,7 @@
 #pragma once
 
 #include <noggit/TextureManager.h>
+#include <noggit/ui/widget.hpp>
 
 #include <boost/optional.hpp>
 
@@ -14,17 +15,24 @@ namespace noggit
   namespace ui
   {
     class current_texture;
+
+    struct tileset_chooser : public widget
+    {
+      Q_OBJECT
+
+    public:
+      tileset_chooser (QWidget* parent = nullptr);
+
+    signals:
+      void selected (std::string);
+    };
   }
 }
 
 class UITexturingGUI
 {
 public:
-  static UIFrame* createTexturePalette (noggit::ui::current_texture*);
-  static UIFrame* createTilesetLoader();
-  static UIFrame* createTextureFilter();
   static void setSelectedTexture(scoped_blp_texture_reference t);
   static boost::optional<scoped_blp_texture_reference> getSelectedTexture();
-  static void updateSelectedTexture (noggit::ui::current_texture*);
   static boost::optional<scoped_blp_texture_reference> selectedTexture;
 };

@@ -10,7 +10,7 @@ namespace noggit
 {
   namespace ui
   {
-    current_texture::current_texture (UIFrame* texture_palette)
+    current_texture::current_texture()
       : QWidget (nullptr)
     {
       setWindowTitle ("Texture");
@@ -22,7 +22,7 @@ namespace noggit
 
       _texture->setMinimumSize (64, 64);
 
-      connect (_texture, &clickable_label::clicked, [texture_palette] { texture_palette->toggleVisibility(); });
+      connect (_texture, &clickable_label::clicked, this, &current_texture::clicked);
 
       set_texture ("tileset\\generic\\black.blp");
     }
