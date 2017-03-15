@@ -4,9 +4,10 @@
 
 #include <noggit/Selection.h>
 #include <noggit/texture_set.hpp>
+#include <noggit/ui/Button.h>
+#include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/Texture.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/ui/Button.h>
 #include <noggit/World.h>
 
 #include <cassert>
@@ -72,8 +73,8 @@ void UITexturePicker::setTexture
 {
   assert(id < 4);
 
-  UITexturingGUI::setSelectedTexture(_textures[id]->getTexture());
-  UITexturingGUI::updateSelectedTexture (current_texture_window);
+  UITexturingGUI::setSelectedTexture (_textures[id]->getTexture());
+  current_texture_window->set_texture (_textures[id]->getTexture()->filename());
 }
 
 void UITexturePicker::shiftSelectedTextureLeft()

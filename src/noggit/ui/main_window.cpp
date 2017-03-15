@@ -13,7 +13,6 @@
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/uid_storage.hpp>
 
-#include <QtCore/QSortFilterProxyModel>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QListWidget>
@@ -70,91 +69,6 @@ namespace noggit
                        );
 
       build_menu();
-
-      auto list (new QListView);
-
-      auto size_slider (new QSlider);
-
-      auto only_specular (new QCheckBox ("only with specular texture variant"));
-
-#define ADD(path_)                                                \
-      new QListWidgetItem ( noggit::render_blp_to_pixmap (path_)  \
-                          , path_                                 \
-                          , list                                  \
-                          )
-
-      while (!MPQArchive::allFinishedLoading())
-      {
-        MPQArchive::allFinishLoading();
-      }
-
-
-      constexpr int const has_specular_role = Qt::UserRole;
-
-      std::vector<std::string> tilesets;
-      std::unordered_set<std::string> tilesets_with_specular_variant;
-
-      for (auto const& entry : gListfile)
-      {
-        if (entry.find("tileset") != std::string::npos)
-        {
-          auto suffix_pos (entry.find ("_s.blp"));
-          if (suffix_pos == std::string::npos)
-          {
-            tilesets.emplace_back (entry);
-          }
-          else
-          {
-            std::string specular = entry;
-            specular.erase(suffix_pos, strlen("_s"));
-            tilesets_with_specular_variant.emplace (specular);
-          }
-        }
-      }
-
-      for (auto const& texture : tilesets)
-      {
-        //! \todo render lazily
-        auto item ( new QListWidgetItem ( noggit::render_blp_to_pixmap (texture, 256, 256)
-                                        , QString::fromStdString (texture).remove ("tileset/")
-                                        )
-                  );
-        item->setData ( has_specular_role
-                      , !!tilesets_with_specular_variant.count (texture)
-                      );
-//        list->addItem (item);
-      }
-
-      list->setViewMode (QListView::IconMode);
-      list->setMovement (QListView::Static);
-      list->setResizeMode (QListView::Adjust);
-      list->setUniformItemSizes (true);
-      list->setIconSize ({128, 128});
-      list->setWrapping (true);
-
-      size_slider->setRange (64, 256);
-      size_slider->setValue (128);
-
-      connect ( size_slider, &QSlider::valueChanged
-              , [=] (int size)
-                {
-                  list->setIconSize ({size, size});
-                }
-              );
-
-      auto specular_filter (new QSortFilterProxyModel);
-      specular_filter->setFilterRole (has_specular_role);
-
-      connect ( only_specular, &QCheckBox::toggled
-              , [=] (bool on)
-                {
-                  specular_filter->setFilterRegExp (on ? "1" : "");
-                }
-              );
-
-      list->show();
-      size_slider->show();
-      only_specular->show();
     }
 
     void main_window::enterMapAt ( math::vector_3d pos

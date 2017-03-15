@@ -49,6 +49,7 @@ namespace noggit
     struct main_window;
     class minimap_widget;
     class toolbar;
+    struct tileset_chooser;
   }
 }
 class UITexturePicker;
@@ -293,8 +294,7 @@ private:
   std::unique_ptr<UICursorSwitcher> _cursor_switcher;
   std::unique_ptr<UIHelp> _keybindings;
 
-  UIFrame* TexturePalette;
-  UIFrame* SelectedTexture;
+  noggit::ui::tileset_chooser* TexturePalette;
   ui::detail_infos* guidetailInfos;
   ui::zone_id_browser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
