@@ -1,7 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#undef _UNICODE
-
 #include <noggit/Brush.h> // brush
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
@@ -27,7 +25,6 @@
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
 #include <noggit/ui/HelperModels.h>
-#include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
@@ -407,11 +404,7 @@ void MapView::createGUI()
   TexturePicker->movable(true);
   mainGui->addChild(TexturePicker);
 
-  guiWater = new UIWater();
-  guiWater->hide();
-  guiWater->movable(true);
-  mainGui->addChild(guiWater);
-
+  guiWater = new noggit::ui::UIWater();
 
   ZoneIDBrowser->setMapID(_world->getMapID());
   ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
@@ -424,9 +417,6 @@ void MapView::createGUI()
   _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
-  // create the menu
-  UIMenuBar * mbar = new UIMenuBar();
-
   auto file_menu (_main_window->menuBar()->addMenu ("Editor"));
   connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
 
@@ -438,8 +428,6 @@ void MapView::createGUI()
 
   auto view_menu (_main_window->menuBar()->addMenu ("View"));
   connect (this, &QObject::destroyed, view_menu, &QObject::deleteLater);
-
-  mbar->AddMenu("View");
 
   auto help_menu (_main_window->menuBar()->addMenu ("Help"));
   connect (this, &QObject::destroyed, help_menu, &QObject::deleteLater);
@@ -466,9 +454,9 @@ void MapView::createGUI()
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &bool_toggle_property::set              \
+            , &property_, &noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &bool_toggle_property::changed          \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -482,9 +470,9 @@ void MapView::createGUI()
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &bool_toggle_property::set              \
+            , &property_, &noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &bool_toggle_property::changed          \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -624,15 +612,6 @@ void MapView::createGUI()
                   }
                 );
 
-  mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
-
-  mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", TexturePalette->hidden_evil(), true);
-  addHotkey ( Qt::Key_X
-            , MOD_none
-            , [this] { TexturePalette->toggleVisibility(); }
-            , [this] { return terrainMode == editing_mode::paint; }
-            );
-
   view_menu->addSection ("Drawing");
   ADD_TOGGLE (view_menu, "Doodads", Qt::Key_F1, _draw_models);
   ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F2, _draw_wmo_doodads);
@@ -648,33 +627,37 @@ void MapView::createGUI()
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
+  ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
 
   view_menu->addSection ("Windows");
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
-  connect ( &_show_detail_info_window, &bool_toggle_property::changed
+  connect ( &_show_detail_info_window, &noggit::bool_toggle_property::changed
           , guidetailInfos, &QWidget::setVisible
           );
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
-          , &_show_detail_info_window, &bool_toggle_property::set
+          , &_show_detail_info_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
-  connect ( &_show_minimap_window, &bool_toggle_property::changed
+  connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
           , _minimap_dock, &QWidget::setVisible
           );
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
-          , &_show_minimap_window, &bool_toggle_property::set
+          , &_show_minimap_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Cursor switcher", "Ctrl+Alt+C", _show_cursor_switcher_window);
-  connect ( &_show_cursor_switcher_window, &bool_toggle_property::changed
+  connect ( &_show_cursor_switcher_window, &noggit::bool_toggle_property::changed
           , _cursor_switcher.get(), &QWidget::setVisible
           );
   connect ( _cursor_switcher.get(), &noggit::ui::widget::visibilityChanged
-          , &_show_cursor_switcher_window, &bool_toggle_property::set
+          , &_show_cursor_switcher_window, &noggit::bool_toggle_property::set
           );
-
-  mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
-  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &_world->drawfog);
-  addHotkey(Qt::Key_F12, MOD_none, [this] { _world->drawfog = !_world->drawfog; });
+  ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
+  connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
+          , [this] (bool shown) { TexturePalette->hidden (!shown); }
+          );
+  // connect ( texture_palette, &noggit::ui::widget::visibilityChanged
+  //         , &_show_texture_palette_window, &noggit::bool_toggle_property::set
+  //         );
 
   addHotkey ( Qt::Key_F1
             , MOD_shift
@@ -686,7 +669,7 @@ void MapView::createGUI()
                   alloff_doodads = _draw_wmo_doodads.get();
                   alloff_contour = _draw_contour.get();
                   alloff_wmo = _draw_wmo.get();
-                  alloff_fog = _world->drawfog;
+                  alloff_fog = _draw_fog.get();
                   alloff_terrain = _draw_terrain.get();
 
                   _draw_models.set (false);
@@ -694,7 +677,7 @@ void MapView::createGUI()
                   _draw_contour.set (true);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
-                  _world->drawfog = false;
+                  _draw_fog.set (false);
                 }
                 else
                 {
@@ -703,18 +686,18 @@ void MapView::createGUI()
                   _draw_contour.set (alloff_contour);
                   _draw_wmo.set (alloff_wmo);
                   _draw_terrain.set (alloff_terrain);
-                  _world->drawfog = alloff_fog;
+                  _draw_fog.set (alloff_fog);
                 }
                 alloff = !alloff;
               }
             );
 
   ADD_TOGGLE (help_menu, "Key Bindings", "Ctrl+F1", _show_keybindings_window);
-  connect ( &_show_keybindings_window, &bool_toggle_property::changed
+  connect ( &_show_keybindings_window, &noggit::bool_toggle_property::changed
           , _keybindings.get(), &QWidget::setVisible
           );
   connect ( _keybindings.get(), &noggit::ui::widget::visibilityChanged
-          , &_show_keybindings_window, &bool_toggle_property::set
+          , &_show_keybindings_window, &noggit::bool_toggle_property::set
           );
 
 #if defined(_WIN32) || defined(WIN32)
@@ -745,8 +728,6 @@ void MapView::createGUI()
                   }
                 );
 #endif
-
-  mainGui->addChild(mbar);
 
   ADD_ACTION ( file_menu
              , "Add bookmark"
@@ -1395,33 +1376,30 @@ void MapView::tick (float dt)
     }
   }
 #endif
+    
+    math::degrees yaw (-_camera.yaw()._);
 
     math::vector_3d dir(1.0f, 0.0f, 0.0f);
     math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
     math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
     math::rotate(0.0f, 0.0f, &dir.x, &dir.y, _camera.pitch());
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, _camera.yaw());
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, yaw);
 
-    if (_mod_shift_down)
-    {
-      dirUp.x = 0.0f;
-      dirUp.y = 1.0f;
-      dirRight *= 0.0f; //! \todo  WAT?
-    }
-    else if (_mod_ctrl_down)
+    if (_mod_ctrl_down)
     {
       dirUp.x = 0.0f;
       dirUp.y = 1.0f;
       math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, _camera.pitch());
       math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, _camera.pitch());
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, _camera.yaw());
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, _camera.yaw());
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, yaw);
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z,yaw);
     }
-    else
+    else if(!_mod_shift_down)
     {
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, _camera.yaw());
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, _camera.yaw());
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, yaw);
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, yaw);
     }
+
     auto Selection = _world->GetCurrentSelection();
     if (Selection)
     {
@@ -1474,8 +1452,8 @@ void MapView::tick (float dt)
       {
         //! \todo  Tell me what this is.
         ObjPos = boost::get<selected_model_type> (*Selection)->pos - _camera.position;
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees(_camera.pitch()));
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees(_camera.yaw()));
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, _camera.pitch());
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, yaw);
         ObjPos.x = std::abs(ObjPos.x);
       }
 
@@ -1490,8 +1468,7 @@ void MapView::tick (float dt)
 
           if (_mod_shift_down)
           {
-            boost::get<selected_wmo_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
-            boost::get<selected_wmo_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+            boost::get<selected_wmo_type> (*Selection)->pos.y += mv * ObjPos.x;
           }
           else
           {
@@ -1528,8 +1505,7 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              boost::get<selected_model_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
-              boost::get<selected_model_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+              boost::get<selected_model_type> (*Selection)->pos.y += mv * ObjPos.x;
             }
             else
             {
@@ -2236,6 +2212,7 @@ void MapView::displayViewMode_3D()
                , _draw_hidden_models.get() ? std::unordered_set<WMO*>() : _hidden_map_objects
                , _draw_hidden_models.get() ? std::unordered_set<Model*>() : _hidden_models
                , _area_id_colors
+               , _draw_fog.get()
                );
 
   displayGUIIfEnabled();

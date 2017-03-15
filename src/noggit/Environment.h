@@ -4,8 +4,9 @@
 
 #include <math/vector_3d.hpp>
 #include <math/vector_4d.hpp>
-#include <noggit/Selection.h>
 #include <noggit/Misc.h>
+#include <noggit/Selection.h>
+#include <noggit/bool_toggle_property.hpp>
 
 #include <boost/optional.hpp>
 
@@ -31,7 +32,7 @@ public:
   float maxScale;
   bool moveModelToCursorPos;
 
-  bool displayAllWaterLayers;
+  noggit::bool_toggle_property displayAllWaterLayers;
   int currentWaterLayer;
 
 private:

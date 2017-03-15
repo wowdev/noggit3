@@ -208,7 +208,6 @@ set ( noggit_ui_sources
       src/noggit/ui/Frame.cpp
       src/noggit/ui/Help.cpp
       src/noggit/ui/HelperModels.cpp
-      src/noggit/ui/MenuBar.cpp
       src/noggit/ui/MinimizeButton.cpp
       src/noggit/ui/ModelImport.cpp
       src/noggit/ui/ObjectEditor.cpp
@@ -318,7 +317,6 @@ set ( noggit_ui_headers
       src/noggit/ui/Frame.h
       src/noggit/ui/Help.h
       src/noggit/ui/HelperModels.h
-      src/noggit/ui/MenuBar.h
       src/noggit/ui/MinimizeButton.h
       src/noggit/ui/ModelImport.h
       src/noggit/ui/ObjectEditor.h
@@ -389,7 +387,7 @@ ENDIF(WIN32)
 
 
 list (APPEND headers_to_moc
-  src/noggit/MapView.h
+  src/noggit/bool_toggle_property.hpp
   src/noggit/ui/clickable_label.hpp
   src/noggit/ui/minimap_widget.hpp
   src/noggit/ui/widget.hpp

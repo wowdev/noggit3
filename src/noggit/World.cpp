@@ -269,7 +269,6 @@ World::World(const std::string& name)
   , alphatexcoords(0)
   , mMapId(0xFFFFFFFF)
   , ol(nullptr)
-  , drawfog(false)
   , animtime(0)
   , time(1450)
   , basename(name)
@@ -419,9 +418,9 @@ void World::outdoorLights(bool on)
   }
 }
 
-void World::setupFog()
+void World::setupFog (bool draw_fog)
 {
-  if (drawfog) {
+  if (draw_fog) {
 
     //float fogdist = 357.0f; // minimum draw distance in wow
     //float fogdist = 777.0f; // maximum draw distance in wow
@@ -479,6 +478,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , std::unordered_set<WMO*> const& hidden_map_objects
                  , std::unordered_set<Model*> const& hidden_models
                  , std::map<int, misc::random_color>& area_id_colors
+                 , bool draw_fog
                  )
 {
   if (!_display_initialized)
@@ -498,7 +498,7 @@ void World::draw ( math::vector_3d const& cursor_pos
       hadSky = it->second.wmo->drawSkybox ( camera_pos
                                           , it->second.extents[0]
                                           , it->second.extents[1]
-                                          , drawfog
+                                          , draw_fog
                                           );
       if (hadSky)
       {
@@ -520,7 +520,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   if (!hadSky)
     hadSky = skies->drawSky ( camera_pos
                             , outdoorLightStats.nightIntensity
-                            , drawfog
+                            , draw_fog
                             );
 
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
@@ -535,10 +535,10 @@ void World::draw ( math::vector_3d const& cursor_pos
   outdoorLights(true);
 
   gl.fogi(GL_FOG_MODE, GL_LINEAR);
-  setupFog();
+  setupFog (draw_fog);
 
   // Draw verylowres heightmap
-  if (drawfog && draw_terrain) {
+  if (draw_fog && draw_terrain) {
     _horizon_render->draw (&mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
   }
 
@@ -730,7 +730,7 @@ void main()
     line_shader.uniform ("model_view", opengl::matrix::model_view());
     line_shader.uniform ("projection", opengl::matrix::projection());
 
-    setupFog();
+    setupFog (draw_fog);
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawLines (line_shader, frustum, culldistance, camera_pos, draw_hole_lines);
@@ -826,7 +826,7 @@ void main()
                         , camera_pos
                         , is_hidden
                         , draw_models_with_box
-                        , drawfog
+                        , draw_fog
                         );
       }
     }
@@ -853,7 +853,7 @@ void main()
                         , camera_pos
                         , is_hidden
                         , draw_wmo_doodads
-                        , drawfog
+                        , draw_fog
                         , skies->colorSet[WATER_COLOR_LIGHT]
                         , skies->colorSet[WATER_COLOR_DARK]
                         , mCurrentSelection
@@ -866,7 +866,7 @@ void main()
   }
 
   outdoorLights(true);
-  setupFog();
+  setupFog (draw_fog);
 
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_BLEND);

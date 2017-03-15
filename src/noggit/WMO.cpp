@@ -362,14 +362,14 @@ void WMO::draw ( int doodadset
 
   for (auto& group : groups)
   {
-    group.draw(ofs, angle, frustum, cull_distance, camera);
+    group.draw (ofs, angle, frustum, cull_distance, camera, draw_fog);
 
     if (draw_doodads)
     {
       group.drawDoodads (doodadset, ofs, angle, frustum, draw_fog);
     }
 
-    group.drawLiquid (water_color_light, water_color_dark);
+    group.drawLiquid (water_color_light, water_color_dark, draw_fog);
   }
 
   if (boundingbox)
@@ -1018,6 +1018,7 @@ void WMOGroup::draw( const math::vector_3d& ofs
                    , math::frustum const& frustum
                    , const float& cull_distance
                    , const math::vector_3d& camera
+                   , bool draw_fog
                    )
 {
   visible = false;
@@ -1032,7 +1033,7 @@ void WMOGroup::draw( const math::vector_3d& ofs
   float dist = (pos - camera).length() - rad;
   if (dist >= cull_distance) return;
   visible = true;
-  setupFog();
+  setupFog (draw_fog);
 
   gl.vertexPointer (_vertices_buffer, 3, GL_FLOAT, 0, nullptr);
   gl.normalPointer (_normals_buffer, GL_FLOAT, 0, nullptr);
@@ -1119,7 +1120,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
   if (doodadset >= wmo->doodadsets.size()) return;
 
   gWorld->outdoorLights(outdoorLights);
-  setupFog();
+  setupFog (draw_fog);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1142,7 +1143,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
       if (!outdoorLights) {
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
       }
-      setupFog();
+      setupFog (draw_fog);
       wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog);
     }
   }
@@ -1155,6 +1156,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
 
 void WMOGroup::drawLiquid ( math::vector_3d water_color_light
                           , math::vector_3d water_color_dark
+                          , bool draw_fog
                           )
 {
   if (!visible) return;
@@ -1162,7 +1164,7 @@ void WMOGroup::drawLiquid ( math::vector_3d water_color_light
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) {
-    setupFog();
+    setupFog (draw_fog);
     if (outdoorLights) {
       gWorld->outdoorLights(true);
     }
@@ -1183,10 +1185,10 @@ void WMOGroup::drawLiquid ( math::vector_3d water_color_light
   }
 }
 
-void WMOGroup::setupFog()
+void WMOGroup::setupFog (bool draw_fog)
 {
   if (outdoorLights || fog == -1) {
-    gWorld->setupFog();
+    gWorld->setupFog (draw_fog);
   }
   else {
     wmo->fogs[fog].setup();

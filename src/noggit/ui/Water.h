@@ -2,78 +2,81 @@
 
 #pragma once
 
-#include <noggit/ui/CloseWindow.h>
 #include <noggit/tile_index.hpp>
+#include <noggit/ui/checkbox.hpp>
 
-class UISlider;
-class UIText;
-class UIButton;
-class UICheckBox;
+class QCheckBox;
+class QDoubleSpinBox;
+class QLabel;
+class QPushButton;
+class QSpinBox;
 
-class UIWater : public UIWindow
+namespace noggit
 {
-public:
-  UIWater();
+  namespace ui
+  {
+    class UIWater : public QWidget
+    {
+    public:
+      UIWater();
 
-  void updatePos(tile_index const& newTile);
-  void updateData();
+      void updatePos(tile_index const& newTile);
+      void updateData();
 
-  void changeWaterType(int waterint);
+      void changeWaterType(int waterint);
 
-  void paintLiquid(math::vector_3d const& pos, bool add);
+      void paintLiquid(math::vector_3d const& pos, bool add);
 
-  void changeRadius(float change);
-  void changeOrientation(float change);
-  void changeAngle(float change);
-  void change_height(float change) { _lock_pos.y += change; }
+      void changeRadius(float change);
+      void changeOrientation(float change);
+      void changeAngle(float change);
+      void change_height(float change) { _lock_pos.y += change; }
 
-  void lockPos(math::vector_3d const& cursor_pos);
-  void toggle_lock();
-  void toggle_angled_mode();
+      void lockPos(math::vector_3d const& cursor_pos);
+      void toggle_lock();
+      void toggle_angled_mode();
 
-  float brushRadius() const { return _radius; }
-  float angle() const { return _angle; }
-  float orientation() const { return _orientation; }
-  bool angled_mode() const { return _angled_mode; }
-  bool use_ref_pos() const { return _locked; }
-  math::vector_3d ref_pos() const { return _lock_pos; }
+      float brushRadius() const { return _radius; }
+      float angle() const { return _angle; }
+      float orientation() const { return _orientation; }
+      bool angled_mode() const { return _angled_mode.get(); }
+      bool use_ref_pos() const { return _locked.get(); }
+      math::vector_3d ref_pos() const { return _lock_pos; }
 
-private:
-  float get_opacity_factor() const;
+    private:
+      float get_opacity_factor() const;
 
-  static const int winWidth = 180;
-  static const int winHeight = 450;
+      int _liquid_id;
+      float _radius;
 
-  int _liquid_id;
-  float _radius;
+      float _angle;
+      float _orientation;
 
-  float _angle;
-  float _orientation;
+      bool_toggle_property _locked;
+      bool_toggle_property _angled_mode;
 
-  bool _locked;
-  bool _angled_mode;
+      bool_toggle_property _override_liquid_id;
+      bool_toggle_property _override_height;
 
-  bool _override_liquid_id;
-  bool _override_height;
+      int _opacity_mode;
+      float _custom_opacity_factor;
 
-  int _opacity_mode;
-  float _custom_opacity_factor;
+      math::vector_3d _lock_pos;
 
-  math::vector_3d _lock_pos;  
+      QDoubleSpinBox* _radius_spin;
+      QDoubleSpinBox* _angle_spin;
+      QDoubleSpinBox* _orientation_spin;
 
-  UISlider* _radius_slider;
-  UISlider* _angle_slider;
-  UISlider* _orientation_slider;
+      QLabel* _lock_display;
 
-  UIText* _lock_display;
+      checkbox* _angle_checkbox;
+      checkbox* _lock_checkbox;
 
-  UICheckBox* _angle_checkbox;
-  UICheckBox* _lock_checkbox;
+      QPushButton *waterType;
+      QPushButton *cropWater;
+      QSpinBox *waterLayer;
 
-  UIButton *waterType;
-  UIButton *cropWater;
-  UIText *waterLayer;
-
-  tile_index tile;
-};
-
+      tile_index tile;
+    };
+  }
+}
