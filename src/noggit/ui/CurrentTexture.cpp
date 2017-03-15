@@ -2,8 +2,6 @@
 
 #include <noggit/ui/CurrentTexture.h>
 
-#include <noggit/ui/Frame.h>
-
 #include <QtWidgets/QGridLayout>
 
 namespace noggit

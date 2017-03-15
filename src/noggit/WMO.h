@@ -9,7 +9,6 @@
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
-#include <noggit/Video.h>
 #include <noggit/multimap_with_normalized_key.hpp>
 #include <noggit/wmo_liquid.hpp>
 

@@ -7,7 +7,6 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h>
-#include <noggit/Video.h> // GLuint
 #include <noggit/WMOInstance.h>
 #include <noggit/texture_set.hpp>
 #include <opengl/scoped.hpp>

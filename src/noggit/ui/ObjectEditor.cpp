@@ -10,7 +10,6 @@
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Settings.h>
-#include <noggit/Video.h> // video
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/application.h> // fonts

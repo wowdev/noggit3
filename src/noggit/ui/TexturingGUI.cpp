@@ -15,14 +15,6 @@
 #include <noggit/Project.h>
 #include <noggit/application.h> // app.getArial14(), app.getapp.getArialn13()()
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/ui/Button.h> // UIButton
-#include <noggit/ui/CheckBox.h> // UICheckBox
-#include <noggit/ui/CloseWindow.h> // UICloseWindow
-#include <noggit/ui/CurrentTexture.h> // UICloseWindow
-#include <noggit/ui/Text.h> // UIText
-#include <noggit/ui/Texture.h> // UITexture
-#include <noggit/ui/Toolbar.h> // Toolbar
-#include <noggit/Video.h>
 
 #include <unordered_set>
 

@@ -5,7 +5,6 @@
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/Model.h>
 #include <noggit/TextureManager.h>
-#include <noggit/Video.h>
 
 #include <list>
 #include <memory>

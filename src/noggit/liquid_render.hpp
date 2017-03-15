@@ -4,7 +4,6 @@
 
 
 #include <noggit/MPQ.h>
-#include <noggit/Video.h>
 #include <noggit/TextureManager.h>
 #include <opengl/shader.hpp>
 

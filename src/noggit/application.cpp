@@ -14,8 +14,6 @@
 #include <noggit/Project.h>    // This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
 #include <noggit/Settings.h>    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
 #include <noggit/TextureManager.h> // TextureManager::report()
-#include <noggit/Video.h>
-#include <noggit/ui/font_awesome.hpp>
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/errorHandling.h>
 #include <noggit/liquid_layer.hpp>

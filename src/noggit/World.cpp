@@ -18,7 +18,6 @@
 #include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
 #include <noggit/TileWater.hpp>// tile water
-#include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
