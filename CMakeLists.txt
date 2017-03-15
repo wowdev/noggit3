@@ -76,9 +76,6 @@ macro(includePlattform SUFFIX)
       include("${CMAKE_SOURCE_DIR}/cmake/win32_${SUFFIX}.cmake")
       # adds for library repo
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")
-      # freetype2
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/freetype2/lib/")
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/freetype2/include/freetype2/" ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/freetype2/include/")
       #storm lib
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/DebugAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/ReleaseAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/Release/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
@@ -92,7 +89,6 @@ endmacro(includePlattform)
 
 includePlattform("prefind")
 
-FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test_exec_monitor REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
@@ -124,7 +120,6 @@ endif()
 add_subdirectory (src/external/qt-color-widgets)
 
 # Add the found include directories to our include list.
-include_directories (SYSTEM  ${FREETYPE_INCLUDE_DIRS})
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
 
 OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
@@ -155,7 +150,6 @@ set ( noggit_root_sources
       src/noggit/DBCFile.cpp
       src/noggit/Directory.cpp
       src/noggit/Environment.cpp
-      src/noggit/FreeType.cpp
       src/noggit/Log.cpp
       src/noggit/MPQ.cpp
       src/noggit/MapChunk.cpp
@@ -171,7 +165,6 @@ set ( noggit_root_sources
       src/noggit/Sky.cpp
       src/noggit/TextureManager.cpp
       src/noggit/TileWater.cpp
-      src/noggit/Video.cpp
       src/noggit/WMO.cpp
       src/noggit/WMOInstance.cpp
       src/noggit/World.cpp
@@ -196,35 +189,25 @@ endif()
 
 set ( noggit_ui_sources
       src/noggit/ui/About.cpp
-      src/noggit/ui/Button.cpp
-      src/noggit/ui/CheckBox.cpp
       src/noggit/ui/clickable_label.cpp
-      src/noggit/ui/CloseWindow.cpp
       src/noggit/ui/CurrentTexture.cpp
       src/noggit/ui/CursorSwitcher.cpp
       src/noggit/ui/DetailInfos.cpp
       src/noggit/ui/FlattenTool.cpp
       src/noggit/ui/font_awesome.cpp
-      src/noggit/ui/Frame.cpp
       src/noggit/ui/Help.cpp
       src/noggit/ui/HelperModels.cpp
-      src/noggit/ui/MinimizeButton.cpp
       src/noggit/ui/ModelImport.cpp
       src/noggit/ui/ObjectEditor.cpp
       src/noggit/ui/RotationEditor.cpp
-      src/noggit/ui/Slider.cpp
-      src/noggit/ui/Text.cpp
-      src/noggit/ui/Texture.cpp
       src/noggit/ui/TexturePicker.cpp
       src/noggit/ui/texture_swapper.cpp
       src/noggit/ui/TexturingGUI.cpp
       src/noggit/ui/texturing_tool.cpp
-      src/noggit/ui/ToggleGroup.cpp
       src/noggit/ui/Toolbar.cpp
       src/noggit/ui/SettingsPanel.cpp
       src/noggit/ui/Water.cpp
       src/noggit/ui/WaterSaveWarning.cpp
-      src/noggit/ui/Window.cpp
       src/noggit/ui/ZoneIDBrowser.cpp
       src/noggit/ui/main_window.cpp
       src/noggit/ui/minimap_widget.cpp
@@ -264,7 +247,6 @@ set ( noggit_root_headers
       src/noggit/DBCFile.h
       src/noggit/Directory.h
       src/noggit/Environment.h
-      src/noggit/FreeType.h
       src/noggit/Log.h
       src/noggit/MPQ.h
       src/noggit/MapChunk.h
@@ -284,7 +266,6 @@ set ( noggit_root_headers
       src/noggit/Sky.h
       src/noggit/TextureManager.h
       src/noggit/TileWater.hpp
-      src/noggit/Video.h
       src/noggit/WMO.h
       src/noggit/WMOInstance.h
       src/noggit/World.h
@@ -305,35 +286,25 @@ set ( noggit_root_headers
 
 set ( noggit_ui_headers
       src/noggit/ui/About.h
-      src/noggit/ui/Button.h
-      src/noggit/ui/CheckBox.h
       src/noggit/ui/clickable_label.hpp
-      src/noggit/ui/CloseWindow.h
       src/noggit/ui/CurrentTexture.h
       src/noggit/ui/CursorSwitcher.h
       src/noggit/ui/DetailInfos.h
       src/noggit/ui/FlattenTool.hpp
       src/noggit/ui/font_awesome.hpp
-      src/noggit/ui/Frame.h
       src/noggit/ui/Help.h
       src/noggit/ui/HelperModels.h
-      src/noggit/ui/MinimizeButton.h
       src/noggit/ui/ModelImport.h
       src/noggit/ui/ObjectEditor.h
       src/noggit/ui/RotationEditor.h
-      src/noggit/ui/Slider.h
-      src/noggit/ui/Text.h
-      src/noggit/ui/Texture.h
       src/noggit/ui/TexturePicker.h
       src/noggit/ui/texture_swapper.hpp
       src/noggit/ui/TexturingGUI.h
       src/noggit/ui/texturing_tool.hpp
-      src/noggit/ui/ToggleGroup.h
       src/noggit/ui/Toolbar.h
       src/noggit/ui/SettingsPanel.h
       src/noggit/ui/Water.h
       src/noggit/ui/WaterSaveWarning.h
-      src/noggit/ui/Window.h
       src/noggit/ui/ZoneIDBrowser.h
       src/noggit/ui/main_window.hpp
       src/noggit/ui/minimap_widget.hpp
@@ -430,7 +401,6 @@ ADD_EXECUTABLE ( noggit
 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
-  ${FREETYPE_LIBRARIES}
   StormLib
   Boost::thread
   Boost::filesystem

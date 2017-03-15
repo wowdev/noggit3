@@ -72,14 +72,6 @@ void Noggit::initPath(char *argv[])
   }
 }
 
-void Noggit::initFont()
-{
-  arialn13.init("fonts/arialn.ttf", 13, true);
-  arial12.init("fonts/arialn.ttf", 12, true);
-  arial14.init("fonts/arialn.ttf", 14, true);
-  arial16.init("fonts/arialn.ttf", 16, true);
-}
-
 void Noggit::parseArgs(int argc, char *argv[])
 {
   // handle starting parameters
