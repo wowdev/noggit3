@@ -33,6 +33,33 @@ namespace noggit
 {
   namespace ui
   {
+    struct model_item : QStandardItem
+    {
+      model_item (QString const& display_role)
+        : QStandardItem (display_role)
+      {}
+
+      virtual QVariant data (int role) const
+      {
+        if (role == Qt::DecorationRole)
+        {
+          if (!_rendered)
+          {
+            //! \note The one time Qt is const correct and we don't want that.
+            auto that (const_cast<model_item*> (this));
+            that->_rendered = true;
+            that->_pixmap = noggit::render_blp_to_pixmap (data (Qt::DisplayRole).toString().prepend ("tileset/").toStdString(), 256, 256);
+          }
+          return _pixmap;
+        }
+
+        return QStandardItem::data (role);
+      }
+
+      bool _rendered = false;
+      QPixmap _pixmap;
+    };
+
     tileset_chooser::tileset_chooser (QWidget* parent)
       : widget (parent)
     {
@@ -106,11 +133,8 @@ namespace noggit
 
       for (auto const& texture : tilesets)
       {
-        //! \todo render lazily
-        auto item ( new QStandardItem
-                      ( noggit::render_blp_to_pixmap (texture, 256, 256)
-                      , QString::fromStdString (texture).remove ("tileset/")
-                      )
+        auto item ( new model_item
+                      (QString::fromStdString (texture).remove ("tileset/"))
                   );
         item->setData ( tilesets_with_specular_variant.count (texture) ? "true" : "false"
                       , has_specular_role
