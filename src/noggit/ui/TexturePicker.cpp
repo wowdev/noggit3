@@ -5,7 +5,6 @@
 #include <noggit/Selection.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/CurrentTexture.h>
-#include <noggit/ui/Texture.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
 
