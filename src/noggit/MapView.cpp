@@ -400,6 +400,7 @@ void MapView::createGUI()
             }
           );
 
+
   // DetailInfoWindow
   guidetailInfos = new ui::detail_infos;
   guidetailInfos->hide();
@@ -408,12 +409,25 @@ void MapView::createGUI()
   ZoneIDBrowser = new ui::zone_id_browser();
   ZoneIDBrowser->hide();
 
-  TexturePicker = new UITexturePicker ( video::width / 2 - 100.0f, video::height / 2 - 100.0f, 490.0f, 170.0f
-                                      , guiCurrentTexture
-                                      );
+  TexturePicker = new noggit::ui::texture_picker (guiCurrentTexture);
   TexturePicker->hide();
-  TexturePicker->movable(true);
-  mainGui->addChild(TexturePicker);
+
+  connect ( TexturePicker, &noggit::ui::texture_picker::shift_left
+          , [=] 
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
+              TexturePicker->shiftSelectedTextureLeft();
+            }
+          );
+  connect ( TexturePicker, &noggit::ui::texture_picker::shift_right
+          , [=] 
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
+              TexturePicker->shiftSelectedTextureRight();
+            }
+          );
 
   guiWater = new noggit::ui::UIWater();
 

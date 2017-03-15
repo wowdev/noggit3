@@ -50,9 +50,9 @@ namespace noggit
     class minimap_widget;
     class toolbar;
     struct tileset_chooser;
+    class texture_picker;
   }
 }
-class UITexturePicker;
 class UIHelp;
 class UIWindow;
 class UIExitWarning;
@@ -297,7 +297,7 @@ private:
   noggit::ui::tileset_chooser* TexturePalette;
   ui::detail_infos* guidetailInfos;
   ui::zone_id_browser* ZoneIDBrowser;
-  UITexturePicker* TexturePicker;
+  noggit::ui::texture_picker* TexturePicker;
   noggit::ui::UIWater* guiWater;
   noggit::ui::current_texture* guiCurrentTexture;
   UIObjectEditor* objectEditor;

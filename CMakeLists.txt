@@ -389,6 +389,7 @@ ENDIF(WIN32)
 list (APPEND headers_to_moc
   src/noggit/bool_toggle_property.hpp
   src/noggit/ui/CurrentTexture.h
+  src/noggit/ui/TexturePicker.h
   src/noggit/ui/TexturingGUI.h
   src/noggit/ui/clickable_label.hpp
   src/noggit/ui/minimap_widget.hpp
