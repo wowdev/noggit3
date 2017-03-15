@@ -12,7 +12,6 @@
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
-#include <noggit/Video.h> // GLuint
 
 #include <string>
 #include <vector>

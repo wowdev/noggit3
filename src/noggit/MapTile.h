@@ -7,7 +7,6 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
 #include <noggit/TileWater.hpp>
-#include <noggit/Video.h> // GLfloat, GLshort, ...
 #include <noggit/tile_index.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <noggit/Misc.h>

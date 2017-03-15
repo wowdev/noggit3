@@ -7,7 +7,6 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/Video.h>
 #include <noggit/World.h>
 #include <noggit/texture_set.hpp>
 

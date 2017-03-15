@@ -4,7 +4,6 @@
 
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
-#include <noggit/ui/Window.h>
 
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDial>

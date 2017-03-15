@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <noggit/ui/Window.h>
 #include <noggit/Selection.h>
 #include <math/vector_3d.hpp>
 #include <QLabel>
