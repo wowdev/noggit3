@@ -401,7 +401,7 @@ void MapView::createGUI()
           );
 
   // DetailInfoWindow
-  guidetailInfos = new ui::detail_infos(1.0f, video::height - 282.0f, 600.0f, 250.0f);
+  guidetailInfos = new ui::detail_infos;
   guidetailInfos->hide();
 
   // ZoneIDBrowser

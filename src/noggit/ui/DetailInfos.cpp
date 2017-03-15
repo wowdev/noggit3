@@ -6,7 +6,7 @@
 
 namespace ui
 {
-  detail_infos::detail_infos (float xPos, float yPos, float w, float h)
+  detail_infos::detail_infos()
     : noggit::ui::widget (nullptr)
   {
     setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
