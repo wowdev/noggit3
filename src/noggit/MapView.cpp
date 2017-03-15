@@ -1383,13 +1383,7 @@ void MapView::tick (float dt)
     math::rotate(0.0f, 0.0f, &dir.x, &dir.y, _camera.pitch());
     math::rotate(0.0f, 0.0f, &dir.x, &dir.z, _camera.yaw());
 
-    if (_mod_shift_down)
-    {
-      dirUp.x = 0.0f;
-      dirUp.y = 1.0f;
-      dirRight *= 0.0f; //! \todo  WAT?
-    }
-    else if (_mod_ctrl_down)
+    if (_mod_ctrl_down)
     {
       dirUp.x = 0.0f;
       dirUp.y = 1.0f;
@@ -1398,11 +1392,12 @@ void MapView::tick (float dt)
       math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, _camera.yaw());
       math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, _camera.yaw());
     }
-    else
+    else if(!_mod_shift_down)
     {
       math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, _camera.yaw());
       math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, _camera.yaw());
     }
+
     auto Selection = _world->GetCurrentSelection();
     if (Selection)
     {
@@ -1471,8 +1466,7 @@ void MapView::tick (float dt)
 
           if (_mod_shift_down)
           {
-            boost::get<selected_wmo_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
-            boost::get<selected_wmo_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+            boost::get<selected_wmo_type> (*Selection)->pos.y += mv * ObjPos.x;
           }
           else
           {
@@ -1509,8 +1503,7 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              boost::get<selected_model_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
-              boost::get<selected_model_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+              boost::get<selected_model_type> (*Selection)->pos.y += mv * ObjPos.x;
             }
             else
             {
