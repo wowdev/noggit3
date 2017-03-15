@@ -1483,8 +1483,8 @@ void MapView::tick (float dt)
             }
             else
             {
-              boost::get<selected_wmo_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
-              boost::get<selected_wmo_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+              boost::get<selected_wmo_type> (*Selection)->pos -= mv * dirUp * ObjPos.x;
+              boost::get<selected_wmo_type> (*Selection)->pos += mh * dirRight * ObjPos.x;
             }
           }
 
@@ -1521,8 +1521,8 @@ void MapView::tick (float dt)
               }
               else
               {
-                boost::get<selected_model_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
-                boost::get<selected_model_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+                boost::get<selected_model_type> (*Selection)->pos -= mv * dirUp * ObjPos.x;
+                boost::get<selected_model_type> (*Selection)->pos += mh * dirRight * ObjPos.x;
               }
 
             }
