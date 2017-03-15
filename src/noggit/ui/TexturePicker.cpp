@@ -4,116 +4,145 @@
 
 #include <noggit/Selection.h>
 #include <noggit/texture_set.hpp>
-#include <noggit/ui/Button.h>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/Texture.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
 
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QPushButton>
+
 #include <cassert>
 
-UITexturePicker::UITexturePicker
-    ( float x, float y, float w, float h
-    , noggit::ui::current_texture* current_texture_window
-    )
-  : UICloseWindow(x, y, w, h, "Pick one of the textures.", true)
+namespace noggit
 {
-  const int textureSize = 110;
-  const int startingX = 10;
-  const int paddingX = 10;
-  const int positionY = 30;
-
-  _chunk = nullptr;
-
-  for (size_t i = 0; i < 4; ++i)
+  namespace ui
   {
-    _textures[i] = new UITexture((float)(startingX + (textureSize + paddingX) * i), (float)positionY, (float)textureSize, (float)textureSize, "tileset\\generic\\black.blp");
-    _textures[i]->setClickFunc
-      ([=] { setTexture (i, current_texture_window); });
-    addChild(_textures[i]);
-  }
-
-  UIButton* bleft = new UIButton((w / 2 - 65), (h - 27.5), 60.0f, 30.0f, "<<<"
-                                , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
-                                , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                                , [this] { shiftSelectedTextureLeft(); });
-  UIButton* bright = new UIButton((w / 2 + 5), (h - 27.5), 60.0f, 30.0f, ">>>"
-                                  , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
-                                  , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                                 , [this] { shiftSelectedTextureRight(); });
-  addChild(bleft);
-  addChild(bright);
-}
-
-void UITexturePicker::getTextures(selection_type lSelection)
-{
-  show();
-
-  if (lSelection.which() == eEntry_MapChunk)
-  {
-    MapChunk* chunk = boost::get<selected_chunk_type> (lSelection).chunk;
-    _chunk = chunk;
-    size_t index = 0;
-
-    for (; index < 4U && chunk->_texture_set.num() > index; ++index)
+    texture_picker::texture_picker
+        (noggit::ui::current_texture* current_texture_window)
+      : widget (nullptr)
+      , _chunk (nullptr)
     {
-      _textures[index]->setTexture(chunk->_texture_set.texture(index));
-      _textures[index]->show();
+      setWindowTitle ("Texture Picker");
+      setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
+
+      auto layout (new QGridLayout(this));
+
+      for (int i = 0; i < 4; i++)
+      {
+        clickable_label* click_label = new clickable_label(this);
+        click_label->setMinimumSize(64, 64);
+        connect ( click_label, &clickable_label::clicked
+                , [=]
+                  {
+                    setTexture(i, current_texture_window);
+                  }
+                );
+
+        layout->addWidget(click_label, 0, i);
+        _labels.push_back(click_label);
+      }
+
+      QPushButton* btn_left = new QPushButton ("<<<", this);
+      QPushButton* btn_right = new QPushButton (">>>", this);
+
+      btn_left->setMinimumHeight(16);
+      btn_right->setMinimumHeight(16);
+
+      auto btn_layout(new QGridLayout(this));
+      btn_layout->addWidget (btn_left, 0, 0);
+      btn_layout->addWidget (btn_right, 0, 1);
+
+      layout->addItem(btn_layout, 1, 0, 1, 4, Qt::AlignCenter);
+
+      connect ( btn_left, &QPushButton::clicked
+              , [this]
+                {
+                  emit shift_left();
+                }
+              );
+
+      connect ( btn_right, &QPushButton::clicked
+              , [this]
+                {
+                  emit shift_right();
+                }
+              );
+  
     }
 
-    for (; index < 4U; ++index)
+    void texture_picker::getTextures(selection_type lSelection)
     {
-      _textures[index]->hide();
+      show();
+
+      if (lSelection.which() == eEntry_MapChunk)
+      {
+        MapChunk* chunk = boost::get<selected_chunk_type> (lSelection).chunk;
+        _chunk = chunk;    
+        update(false);
+      }
     }
-  }
-}
 
-void UITexturePicker::setTexture
-  (size_t id, noggit::ui::current_texture* current_texture_window)
-{
-  assert(id < 4);
-
-  UITexturingGUI::setSelectedTexture (_textures[id]->getTexture());
-  current_texture_window->set_texture (_textures[id]->getTexture()->filename());
-}
-
-void UITexturePicker::shiftSelectedTextureLeft()
-{
-  auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
-  TextureSet& ts = _chunk->_texture_set;
-  for (int i = 1; i < ts.num(); i++)
-  {
-    if (ts.texture(i) == selectedTexture)
+    void texture_picker::setTexture
+      (size_t id, noggit::ui::current_texture* current_texture_window)
     {
-      ts.swapTexture(i - 1, i);
-      update();
-      return;
-    }
-  }
-}
+      assert(id < _textures.size());
 
-void UITexturePicker::shiftSelectedTextureRight()
-{
-  auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
-  TextureSet& ts = _chunk->_texture_set;
-  for (int i = 0; i < ts.num() - 1; i++)
-  {
-    if (ts.texture(i) == selectedTexture)
+      UITexturingGUI::setSelectedTexture (_textures[id]);
+      current_texture_window->set_texture (_textures[id]->filename());
+    }
+
+    void texture_picker::shiftSelectedTextureLeft()
     {
-      ts.swapTexture(i, i + 1);
-      update();
-      return;
+      auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
+      TextureSet& ts = _chunk->_texture_set;
+      for (int i = 1; i < ts.num(); i++)
+      {
+        if (ts.texture(i) == selectedTexture)
+        {
+          ts.swapTexture(i - 1, i);
+          update();
+          return;
+        }
+      }
     }
-  }
-}
 
-void UITexturePicker::update()
-{
-  _chunk->mt->changed = true;
+    void texture_picker::shiftSelectedTextureRight()
+    {
+      auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
+      TextureSet& ts = _chunk->_texture_set;
+      for (int i = 0; i < ts.num() - 1; i++)
+      {
+        if (ts.texture(i) == selectedTexture)
+        {
+          ts.swapTexture(i, i + 1);
+          update();
+          return;
+        }
+      }
+    }
 
-  for (size_t index = 0; index < 4U && _chunk->_texture_set.num() > index; ++index)
-  {
-    _textures[index]->setTexture(_chunk->_texture_set.texture(index));
-    _textures[index]->show();
+    void texture_picker::update(bool set_changed)
+    {
+      if (set_changed)
+      {
+        _chunk->mt->changed = true;
+      }  
+
+      _textures.clear();
+      size_t index = 0;
+
+      for (; index < _chunk->_texture_set.num(); ++index)
+      {
+        _textures.push_back(_chunk->_texture_set.texture(index));
+        _labels[index]->setPixmap(noggit::render_blp_to_pixmap(_textures[index]->filename()));
+        _labels[index]->show();
+      }
+
+      for (; index < 4U; ++index)
+      {
+        _labels[index]->hide();
+      }
+    }
   }
 }
