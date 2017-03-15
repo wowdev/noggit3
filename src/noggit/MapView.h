@@ -29,8 +29,6 @@ class UIFrame;
 class World;
 
 class UICursorSwitcher;
-class UIToggleGroup;
-class UIMapViewGUI;
 
 enum eViewMode
 {
@@ -92,7 +90,6 @@ private:
   math::vector_3d _cursor_pos;
   bool key_w;
   bool look;
-  bool _GUIDisplayingEnabled;
 
   noggit::camera _camera;
 
@@ -127,8 +124,6 @@ private:
 
   void displayViewMode_2D();
   void displayViewMode_3D();
-
-  void displayGUIIfEnabled();
 
   void createGUI();
 
@@ -189,9 +184,6 @@ private:
 
   bool Saving = false;
 
-  UIFrame* LastClicked;
-
-  UIFrame* mainGui;
   noggit::ui::toolbar* _toolbar;
 
   void prompt_exit();
@@ -258,7 +250,6 @@ private:
   virtual void keyPressEvent (QKeyEvent*) override;
   virtual void focusOutEvent (QFocusEvent*) override;
 
-  friend class UIMapViewGUI;
   noggit::ui::main_window* _main_window;
 
   math::vector_4d normalized_device_coords (int x, int y) const;

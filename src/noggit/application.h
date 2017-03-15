@@ -4,7 +4,6 @@
 
 #include <noggit/AsyncLoader.h>
 #include <noggit/DBC.h>
-#include <noggit/FreeType.h> // fonts.
 #include <noggit/ui/main_window.hpp>
 
 #include <boost/filesystem/path.hpp>
@@ -27,31 +26,8 @@ public:
     return asyncLoader.get();
   }
 
-  inline const freetype::font_data& getArial12() const
-  {
-    return arial12;
-  }
-
-  inline const freetype::font_data& getArialn13() const
-  {
-    return arialn13;
-  }
-
-  inline const freetype::font_data& getArial14() const
-  {
-    return arial14;
-  }
-
-  inline const freetype::font_data& getArial16() const
-  {
-    return arial16;
-  }
-
 private:
   void initPath(char *argv[]);
-public:
-  void initFont();
-private:
   void parseArgs(int argc, char *argv[]);
   void loadMPQs();
 
@@ -64,10 +40,7 @@ public:
 
   bool fullscreen;
   bool doAntiAliasing;
-private:
 
-  freetype::font_data arialn13, arial12, arial14, arial16;
-public:
   int xres;
   int yres;
 };

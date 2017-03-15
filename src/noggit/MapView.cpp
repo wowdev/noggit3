@@ -5,7 +5,6 @@
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
 #include <noggit/Environment.h>
-#include <noggit/FreeType.h> // freetype::
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
@@ -18,7 +17,6 @@
 #include <noggit/World.h>
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), arial...
 #include <noggit/map_index.hpp>
-#include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
@@ -28,12 +26,8 @@
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
-#include <noggit/ui/Slider.h> // UISlider
-#include <noggit/ui/Text.h> // UIText
-#include <noggit/ui/Texture.h> // textureUI
 #include <noggit/ui/TexturePicker.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/ui/ToggleGroup.h> // UIToggleGroup
 #include <noggit/ui/Toolbar.h> // noggit::ui::toolbar
 #include <noggit/ui/Water.h>
 #include <noggit/ui/WaterSaveWarning.h>
@@ -358,9 +352,6 @@ void MapView::changeZoneIDValue (int set)
 
 void MapView::createGUI()
 {
-  // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIFrame (0.f, 0.f, width(), height());
-
   objectEditor = new UIObjectEditor(this);
   objectEditor->hide();
 
@@ -774,8 +765,6 @@ void MapView::createGUI()
   ADD_ACTION (view_menu, "decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
   ADD_ACTION (view_menu, "pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
 
-  ADD_ACTION (view_menu, "Show GUI", Qt::Key_Tab, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
-
   addHotkey ( Qt::Key_C
             , MOD_ctrl
             , [this]
@@ -1158,8 +1147,7 @@ MapView::MapView( math::degrees camera_yaw0
                 , noggit::ui::main_window* main_window
                 , World* world
                 )
-  : _GUIDisplayingEnabled(true)
-  , _camera (camera_pos, camera_yaw0, camera_pitch0)
+  : _camera (camera_pos, camera_yaw0, camera_pitch0)
   , mTimespeed(0.0f)
   , _main_window (main_window)
   , _world (world)
@@ -1219,8 +1207,6 @@ MapView::MapView( math::degrees camera_yaw0
 
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
-
-  LastClicked = nullptr;
 
   // load cursor settings
   if (boost::filesystem::exists("noggit.conf"))
@@ -1312,10 +1298,7 @@ MapView::MapView( math::degrees camera_yaw0
     gl.viewport(0.0f, 0.0f, width(), height());
 
     gl.clearColor (0.0f, 0.0f, 0.0f, 1.0f);
-    video::width = width();
-    video::height = height();
 
-    app.initFont();
     createGUI();
 
   set_editing_mode (editing_mode::ground);
@@ -1349,17 +1332,11 @@ MapView::MapView( math::degrees camera_yaw0
   {
     opengl::context::scoped_setter const _ (::gl, context());
     gl.viewport(0.0f, 0.0f, width, height);
-
-    video::width = width;
-    video::height = height;
-    mainGui->resize();
   }
 
 
 MapView::~MapView()
 {
-  delete mainGui;
-  mainGui = nullptr;
   delete _world;
   _world = nullptr;
 }
@@ -2071,35 +2048,6 @@ void MapView::update_cursor_pos()
   }
 }
 
-void MapView::displayGUIIfEnabled()
-{
-  if (_GUIDisplayingEnabled)
-  {
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-    gl.ortho (0.0f, width(), height(), 0.0f, -1.0f, 1.0f);
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
-
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    opengl::texture::disable_texture(1);
-    opengl::texture::enable_texture(0);
-
-    gl.disable(GL_DEPTH_TEST);
-    gl.disable(GL_CULL_FACE);
-    gl.disable(GL_LIGHTING);
-    gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-    opengl::texture::disable_texture(0);
-
-    mainGui->render();
-
-    opengl::texture::enable_texture(0);
-  }
-}
-
 void MapView::displayViewMode_2D()
 {
   gl.matrixMode (GL_PROJECTION);
@@ -2147,8 +2095,6 @@ void MapView::displayViewMode_2D()
     gl.vertex3f(mX - tRadius, mY - tRadius, 0);
     gl.end();
   }
-
-  displayGUIIfEnabled();
 }
 
 void MapView::displayViewMode_3D()
@@ -2239,8 +2185,6 @@ void MapView::displayViewMode_3D()
                , _area_id_colors
                , _draw_fog.get()
                );
-
-  displayGUIIfEnabled();
 }
 
 void MapView::display()
@@ -2662,11 +2606,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (leftMouse && LastClicked)
-  {
-    LastClicked->processLeftDrag((float)(event->pos().x() - 4), (float)(event->pos().y() - 4), relative_movement.dx(), relative_movement.dy());
-  }
-
   if (mViewMode == eViewMode_2D && leftMouse && _mod_alt_down && _mod_shift_down)
   {
     strafing = ((relative_movement.dx() / XSENS) / -1) * 5.0f;
@@ -2677,8 +2616,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     updown = (relative_movement.dy() / YSENS);
   }
-
-  mainGui->mouse_moved (event->pos().x(), event->pos().y());
 
   _last_mouse_pos = event->pos();
 
@@ -2733,8 +2670,7 @@ void MapView::mousePressEvent (QMouseEvent* event)
   }
   else if (leftMouse)
   {
-    LastClicked = mainGui->processLeftClick (event->pos().x(), event->pos().y());
-    if (mViewMode == eViewMode_3D && !LastClicked)
+    if (mViewMode == eViewMode_3D)
     {
       doSelection(false);
     }
@@ -2825,9 +2761,6 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   {
   case Qt::LeftButton:
     leftMouse = false;
-
-    if (LastClicked)
-      LastClicked->processUnclick();
 
     if (!key_w && moving > 0.0f)
       moving = 0.0f;
