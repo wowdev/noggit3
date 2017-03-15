@@ -16,7 +16,7 @@ namespace ui
     QLabel* _info_text;
 
   public:
-    detail_infos (float x, float y, float width, float height);
+    detail_infos();
     void setText (const std::string& t);
   };
 }
