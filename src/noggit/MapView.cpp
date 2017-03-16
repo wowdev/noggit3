@@ -59,6 +59,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -183,58 +184,41 @@ void MapView::DeleteSelectedObject()
 
 void MapView::insert_last_m2_from_wmv()
 {
-  //! \todo Beautify.
-
   // Test if there is an selection
   if (!_world->HasSelection())
+  {
     return;
+  }    
 
-  std::string importFile (Settings::getInstance()->wmvLogFile);
-
+  std::string wmv_log_file (Settings::getInstance()->wmvLogFile);
   std::string lastModel;
-
-  size_t foundString;
   std::string line;
-  std::string findThis;
-  std::ifstream fileReader(importFile.c_str());
+  std::ifstream fileReader(wmv_log_file.c_str());
+
   if (fileReader.is_open())
   {
     while (!fileReader.eof())
     {
       getline(fileReader, line);
       std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+      std::regex regex("([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.(mdx|m2))");
+      std::smatch match;
 
-      if (line.find(".m2") != std::string::npos || line.find(".mdx") != std::string::npos)
+      if (std::regex_search (line, match, regex))
       {
-        // M2 inside line
-        // is it the modelviewer log then cut the log messages out
-        findThis = "loading model: ";
-        foundString = line.find(findThis);
-        if (foundString != std::string::npos)
+        lastModel = match.str(0);
+        size_t found = lastModel.rfind(".mdx");
+        if (found != std::string::npos)
         {
-          // cut path
-          line = line.substr(foundString + findThis.size());
-        }
-        else
-        {
-          // invalid line
-          continue;
+          lastModel.replace(found, 4, ".m2");
         }
       }
-      // swap mdx to m2
-      size_t found = line.rfind(".mdx");
-      if (found != std::string::npos)
-      {
-        line.replace(found, 4, ".m2");
-      }
-
-      lastModel = line.substr(0, line.find(".m2") + 3);
     }
   }
   else
   {
-    // file not exist, no rights ore other error
-    LogError << importFile << std::endl;
+    // file not exist, no rights or other error
+    LogError << wmv_log_file << std::endl;
   }
 
   math::vector_3d selectionPosition;
@@ -266,51 +250,35 @@ void MapView::insert_last_m2_from_wmv()
 
 void MapView::insert_last_wmo_from_wmv()
 {
-  //! \todo Beautify.
-
   if (!_world->HasSelection())
+  {
     return;
+  }    
 
-  std::string importFile (Settings::getInstance()->wmvLogFile);
-
+  std::string wmv_log_file (Settings::getInstance()->wmvLogFile);
   std::string lastWMO;
-
-  size_t foundString;
   std::string line;
-  std::string findThis;
-  std::ifstream fileReader(importFile.c_str());
+  std::ifstream fileReader(wmv_log_file.c_str());
+
   if (fileReader.is_open())
   {
     while (!fileReader.eof())
     {
       getline(fileReader, line);
       std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+      std::regex regex("([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.(wmo))");
+      std::smatch match;
 
-      if (line.find(".wmo") != std::string::npos)
+      if (std::regex_search (line, match, regex))
       {
-        // WMO inside line
-        findThis = "loading wmo ";
-        foundString = line.find(findThis);
-        // is it the modelviewer log then cut the log messages out
-        if (foundString != std::string::npos)
-        {
-          // cut path
-          line = line.substr(foundString + findThis.size());
-        }
-        else
-        {
-          // invalid line
-          continue;
-        }
-
-        lastWMO = line.substr(0, line.find(".wmo") + 4);
+        lastWMO = match.str(0);
       }
     }
   }
   else
   {
-    // file not exist, no rights ore other error
-    LogError << importFile << std::endl;
+    // file not exist, no rights or other error
+    LogError << wmv_log_file << std::endl;
   }
 
 
@@ -800,6 +768,16 @@ void MapView::createGUI()
   addHotkey ( Qt::Key_V
             , MOD_none
             , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position); }
+            , [this] { return terrainMode == editing_mode::object; }
+            );
+  addHotkey ( Qt::Key_V
+            , MOD_shift
+            , [this] { insert_last_m2_from_wmv(); }
+            , [this] { return terrainMode == editing_mode::object; }
+            );
+  addHotkey ( Qt::Key_V
+            , MOD_alt
+            , [this] { insert_last_wmo_from_wmv(); }
             , [this] { return terrainMode == editing_mode::object; }
             );
 
