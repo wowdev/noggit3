@@ -17,9 +17,6 @@ namespace noggit
       , _speed(1.0f)
       , _color(color)
     {
-      setWindowTitle("Vertex Shader");
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-
       auto layout (new QFormLayout(this));
 
       _radius_spin = new QDoubleSpinBox (this);

@@ -24,9 +24,6 @@ namespace noggit
       , _spray_pressure(2.0f)
       , _camera_pos(camera_pos)
     {
-      setWindowTitle("Texturing");
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-
       auto layout (new QFormLayout (this));
 
       _texture_brush.init();
