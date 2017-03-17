@@ -1330,6 +1330,9 @@ MapView::MapView( math::degrees camera_yaw0
 
 MapView::~MapView()
 {
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
   delete _world;
   _world = nullptr;
 }
