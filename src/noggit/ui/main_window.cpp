@@ -45,9 +45,9 @@ namespace noggit
       QObject::connect ( settings_action, &QAction::triggered
                        , []
                          {
-                           auto settings (new settings());
-                           settings->readInValues();
-                           settings->show();
+                           auto window (new settings());
+                           window->readInValues();
+                           window->show();
                          }
                        );
 
@@ -55,8 +55,8 @@ namespace noggit
       QObject::connect ( about_action, &QAction::triggered
                        , []
                          {
-                           auto about (new about());
-                           about->show();
+                           auto window (new about());
+                           window->show();
                          }
                        );
 
