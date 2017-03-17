@@ -59,7 +59,6 @@ enum class editing_mode
   areaid,
   flags,
   water,
-  light,
   mccv,
   object,
 };

@@ -17,7 +17,6 @@ namespace noggit
       add_tool_icon (editing_mode::areaid,       tr("AreaID Paint"),    font_awesome::objectgroup);
       add_tool_icon (editing_mode::flags,        tr("Impassible Flag"), font_awesome::ban);
       add_tool_icon (editing_mode::water,        tr("Water edit"),      font_awesome::tint);
-      add_tool_icon (editing_mode::light,        tr("Light edit"),      font_awesome::lightbulbo);
       add_tool_icon (editing_mode::mccv,         tr("Shader editor"),   font_awesome::eyedropper);
       add_tool_icon (editing_mode::object,       tr("Object editor"),   font_awesome::arrows);
     }

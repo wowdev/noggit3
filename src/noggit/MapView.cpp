@@ -1104,9 +1104,8 @@ void MapView::createGUI()
   addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); });
   addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); });
   addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); });
-  addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::light); });
-  addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
-  addHotkey (Qt::Key_0, MOD_none, [this] { set_editing_mode (editing_mode::object); });
+  addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
+  addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); });
 
   addHotkey (Qt::Key_0, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 0; }, [this] { return _world->IsSelection(eEntry_WMO); });
   addHotkey (Qt::Key_1, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 1; }, [this] { return _world->IsSelection(eEntry_WMO); });
