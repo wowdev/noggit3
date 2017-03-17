@@ -47,7 +47,6 @@ namespace noggit
     class current_texture;
     class cursor_switcher;
     class detail_infos;
-    class exit_warning;
     class flatten_blur_tool;
     class help;
     class helper_models;
@@ -174,7 +173,6 @@ private:
 
   noggit::ui::toolbar* _toolbar;
 
-  void prompt_exit();
   void prompt_save_current();
 
 public:
@@ -286,7 +284,6 @@ private:
   noggit::ui::shader_tool* shaderTool;
   noggit::ui::texturing_tool* texturingTool;
 
-  noggit::ui::exit_warning *escWarning;
   noggit::ui::water_save_warning *waterSaveWarning;
   noggit::ui::helper_models *HelperModels;
 };
