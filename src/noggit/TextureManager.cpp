@@ -26,20 +26,6 @@ void TextureManager::report()
   LogDebug << output;
 }
 
-std::vector<scoped_blp_texture_reference> TextureManager::getAllTexturesMatching(bool(*function)(const std::string& name))
-{
-  std::vector<scoped_blp_texture_reference> results;
-  _.apply ( [&] (std::string const& key, blp_texture const&)
-            {
-              if (function (key))
-              {
-                results.emplace_back (key);
-              }
-            }
-          );
-  return results;
-}
-
 #include <cstdint>
 //! \todo Cross-platform syntax for packed structs.
 #pragma pack(push,1)
