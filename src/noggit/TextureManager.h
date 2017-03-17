@@ -36,10 +36,6 @@ class TextureManager
 public:
   static void report();
 
-  //! \todo This should not be there.
-  //! \note This is only for getting all cached textures in selected_texture.
-  static std::vector<scoped_blp_texture_reference> getAllTexturesMatching(bool(*function)(const std::string& name));
-
 private:
   friend struct scoped_blp_texture_reference;
   static noggit::multimap_with_normalized_key<blp_texture> _;
