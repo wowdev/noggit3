@@ -101,12 +101,12 @@ namespace noggit
       _speed_slider->setRange (0, 10 * 100);
       _speed_slider->setSingleStep (50);
       _speed_slider->setSliderPosition (_speed * 100);
-    
-    
+
+
       QFormLayout* speed_layout (new QFormLayout (this));
       speed_layout->addRow ("Speed:", _speed_spin);
       speed_layout->addRow (_speed_slider);
-    
+
       _speed_box = new QGroupBox (this);
       _speed_box->setLayout (speed_layout);
       layout->addRow (_speed_box);
@@ -122,7 +122,7 @@ namespace noggit
       _vertex_button_group->addButton (radio_center, (int)eVertexMode_Center);
 
       radio_center->toggle();
-    
+
       QFormLayout* vertex_layout (new QFormLayout ());
 
       QGridLayout* vertex_type_layout (new QGridLayout (this));
@@ -136,8 +136,8 @@ namespace noggit
       _orientation_dial->setWrapping(true);
       _orientation_dial->setSliderPosition(_vertex_orientation._ - 90); // to get ingame orientation
       _orientation_dial->setToolTip("Orientation");
-      _orientation_dial->setSingleStep(10);    
-    
+      _orientation_dial->setSingleStep(10);
+
       vertex_angle_layout->addWidget (_angle_slider = new QSlider (this), 0, 1);
       _angle_slider->setRange(-89, 89);
       _angle_slider->setSliderPosition(_vertex_angle._);
@@ -255,7 +255,7 @@ namespace noggit
             _vertex_orientation = math::degrees (0.0f);
             gWorld->clearVertexSelection();
           }
-        }      
+        }
       }
     }
 

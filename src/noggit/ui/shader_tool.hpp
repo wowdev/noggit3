@@ -23,7 +23,7 @@ namespace noggit
       void changeSpeed(float change);
 
       float brushRadius() const { return _radius; }
-  
+
     private:
       float _radius;
       float _speed;

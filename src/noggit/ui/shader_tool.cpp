@@ -97,7 +97,7 @@ namespace noggit
                   _color.w = 1.0f;
                 }
               );
-    
+
     }
 
     void shader_tool::changeShader(math::vector_3d const& pos, float dt, bool add)

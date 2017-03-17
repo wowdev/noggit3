@@ -84,7 +84,7 @@ namespace noggit
       _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", this);
       _show_unpaintable_chunks_cb->setChecked(true);
       layout->addRow(_show_unpaintable_chunks_cb);
-    
+
       // spray
       _spray_mode_group = new QGroupBox("Spray", this);
       _spray_mode_group->setCheckable(true);
@@ -135,7 +135,7 @@ namespace noggit
                   QSignalBlocker const blocker (_radius_slider);
                   set_radius(v);
                   _radius_slider->setSliderPosition ((int)std::round (v));
-      
+
                 }
               );
 
@@ -205,7 +205,7 @@ namespace noggit
               );
 
       connect ( _show_unpaintable_chunks_cb, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
-              , [&] (int state) 
+              , [&] (int state)
                 {
                   _show_unpaintable_chunks = state;
                 }
@@ -226,7 +226,7 @@ namespace noggit
                 {
                   QSignalBlocker const blocker (_spray_size_spin);
                   _spray_size = v * 0.01f;
-                  _spray_size_spin->setValue (_spray_size);      
+                  _spray_size_spin->setValue (_spray_size);
                   update_spray_brush();
                 }
               );
@@ -263,7 +263,7 @@ namespace noggit
       set_radius(15.0f);
       toggle_spray(); // to disable
     }
-  
+
     void texturing_tool::update_brush_hardness()
     {
       _texture_brush.setHardness(_hardness);
@@ -332,7 +332,7 @@ namespace noggit
         if (to_swap)
         {
           gWorld->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
-        }      
+        }
       }
       else
       {

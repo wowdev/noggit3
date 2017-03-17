@@ -58,7 +58,7 @@ namespace noggit
       _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
       _radius_slider->setRange (0, 1000);
       _radius_slider->setSliderPosition (_radius);
-    
+
       layout->addRow (_radius_slider);
 
       _speed_spin = new QDoubleSpinBox (this);
@@ -74,7 +74,7 @@ namespace noggit
       _speed_slider->setSliderPosition (_speed * 100);
 
       layout->addRow(_speed_slider);
-    
+
       layout->addRow(new QLabel("Flatten/Blur:"));
 
       QGridLayout* lock_checkbox_layout(new QGridLayout());
@@ -99,14 +99,14 @@ namespace noggit
       _orientation_dial->setWrapping(true);
       _orientation_dial->setSliderPosition(_orientation - 90); // to get ingame orientation
       _orientation_dial->setToolTip("Orientation");
-      _orientation_dial->setSingleStep(10);    
+      _orientation_dial->setSingleStep(10);
 
       _angle_slider = new QSlider(this);
       _angle_slider->setRange(0, 89);
       _angle_slider->setSliderPosition(_angle);
       _angle_slider->setToolTip("Angle");
       angle_layout->addWidget(_angle_slider, 0, 1);
-    
+
       _angle_group = new QGroupBox("Angled mode");
       _angle_group->setCheckable(true);
       _angle_group->setChecked(false);
@@ -121,9 +121,9 @@ namespace noggit
       _lock_group = new QGroupBox("Lock mode");
       _lock_group->setCheckable(true);
       _lock_group->setChecked(false);
-      _lock_group->setLayout(lock_layout); 
+      _lock_group->setLayout(lock_layout);
 
-      layout->addRow(_lock_group);    
+      layout->addRow(_lock_group);
 
       _lock_x->setRange(0.0, 34133.0);
       _lock_x->setDecimals(3);
@@ -176,7 +176,7 @@ namespace noggit
                 );
 
       connect( _lock_up_checkbox, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
-               , [&] (int state) 
+               , [&] (int state)
                  {
                    if (state)
                    {
@@ -190,7 +190,7 @@ namespace noggit
              );
 
       connect( _lock_down_checkbox, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
-               , [&] (int state) 
+               , [&] (int state)
                  {
                    if (state)
                    {
@@ -270,7 +270,7 @@ namespace noggit
     void flatten_blur_tool::nextFlattenMode()
     {
       _flatten_mode = std::max((int)eFlattenMode_Raise, (++_flatten_mode) % 4);
-    
+
       QSignalBlocker const up_lock(_lock_up_checkbox);
       QSignalBlocker const down_lock(_lock_down_checkbox);
       _lock_up_checkbox->setChecked(_flatten_mode & eFlattenMode_Raise);
@@ -292,7 +292,7 @@ namespace noggit
       _lock_pos = cursor_pos;
       _lock_x->setValue (_lock_pos.x);
       _lock_h->setValue (_lock_pos.y);
-      _lock_z->setValue (_lock_pos.z);    
+      _lock_z->setValue (_lock_pos.z);
 
       if (!use_ref_pos())
       {
@@ -312,7 +312,7 @@ namespace noggit
 
     void flatten_blur_tool::changeOrientation(float change)
     {
-      setOrientation(_orientation + change);    
+      setOrientation(_orientation + change);
     }
 
     void flatten_blur_tool::setOrientation (float orientation)
