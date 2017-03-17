@@ -274,15 +274,21 @@ private:
   noggit::ui::tileset_chooser* TexturePalette;
   noggit::ui::detail_infos* guidetailInfos;
   noggit::ui::zone_id_browser* ZoneIDBrowser;
+  QDockWidget* _areaid;
   noggit::ui::texture_picker* TexturePicker;
   noggit::ui::water* guiWater;
+  QDockWidget* _water;
   noggit::ui::current_texture* guiCurrentTexture;
   noggit::ui::object_editor* objectEditor;
+  QDockWidget* _object;
   noggit::ui::flatten_blur_tool* flattenTool;
+  QDockWidget* _flatten_blur;
   noggit::ui::terrain_tool* terrainTool;
   QDockWidget* _terrain;
   noggit::ui::shader_tool* shaderTool;
+  QDockWidget* _vertex_shading;
   noggit::ui::texturing_tool* texturingTool;
+  QDockWidget* _texturing;
 
   noggit::ui::water_save_warning *waterSaveWarning;
   noggit::ui::helper_models *HelperModels;

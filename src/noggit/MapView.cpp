@@ -88,15 +88,15 @@ void MapView::set_editing_mode (editing_mode mode)
   opengl::context::scoped_setter const _ (::gl, context());
 
   _terrain->hide();
-  flattenTool->hide();
-  texturingTool->hide();
-  shaderTool->hide();
-  guiWater->hide();
+  _flatten_blur->hide();
+  _texturing->hide();
+  _vertex_shading->hide();
+  _water->hide();
   TexturePicker->hide();
-  objectEditor->hide();
+  _object->hide();
   objectEditor->modelImport->hide();
   objectEditor->rotationEditor->hide();
-  ZoneIDBrowser->hide();
+  _areaid->hide();
   TexturePalette->hide();
 
   switch (mode)
@@ -105,22 +105,22 @@ void MapView::set_editing_mode (editing_mode mode)
     _terrain->show();
     break;
   case editing_mode::flatten_blur:
-    flattenTool->show();
+    _flatten_blur->show();
     break;
   case editing_mode::paint:
-    texturingTool->show();
+    _texturing->show();
     break;
   case editing_mode::areaid:
-    ZoneIDBrowser->show();
+    _areaid->show();
     break;
   case editing_mode::water:
-    guiWater->show();
+    _water->show();
     break;
   case editing_mode::mccv:
-    shaderTool->show();
+    _vertex_shading->show();
     break;
   case editing_mode::object:
-    objectEditor->show();
+    _object->show();
   }
 
   terrainMode = mode;
@@ -188,7 +188,7 @@ void MapView::insert_last_m2_from_wmv()
   if (!_world->HasSelection())
   {
     return;
-  }    
+  }
 
   std::string wmv_log_file (Settings::getInstance()->wmvLogFile);
   std::string lastModel;
@@ -253,7 +253,7 @@ void MapView::insert_last_wmo_from_wmv()
   if (!_world->HasSelection())
   {
     return;
-  }    
+  }
 
   std::string wmv_log_file (Settings::getInstance()->wmvLogFile);
   std::string lastWMO;
@@ -320,25 +320,42 @@ void MapView::changeZoneIDValue (int set)
 
 void MapView::createGUI()
 {
-  objectEditor = new noggit::ui::object_editor(this);
-  objectEditor->hide();
-
   _terrain = new QDockWidget ("Raise / Lower", this);
-  _terrain->setFeatures ( QDockWidget::DockWidgetMovable
-                        | QDockWidget::DockWidgetFloatable
-                        );
+  _terrain->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool());
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
 
+  _flatten_blur = new QDockWidget ("Flatten / Blur", this);
+  _flatten_blur->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _flatten_blur->setWidget (flattenTool = new noggit::ui::flatten_blur_tool());
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _flatten_blur);
 
-  flattenTool = new noggit::ui::flatten_blur_tool();
-  flattenTool->hide();
+  _texturing = new QDockWidget ("Texturing", this);
+  _texturing->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position));
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _texturing);
 
-  shaderTool = new noggit::ui::shader_tool(cursor_color);
-  shaderTool->hide();
+  _areaid = new QDockWidget ("Area ID", this);
+  _areaid->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _areaid->setWidget (ZoneIDBrowser = new noggit::ui::zone_id_browser());
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _areaid);
 
-  texturingTool = new noggit::ui::texturing_tool (&_camera.position);
-  texturingTool->hide();
+  _water = new QDockWidget ("Raise / Lower", this);
+  _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _water->setWidget (guiWater = new noggit::ui::water());
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
+
+  _vertex_shading = new QDockWidget ("Vertex Shading", this);
+  _vertex_shading->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _vertex_shading->setWidget (shaderTool = new noggit::ui::shader_tool (cursor_color));
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _vertex_shading);
+
+  _object = new QDockWidget ("Object", this);
+  _object->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _object->setWidget (objectEditor = new noggit::ui::object_editor(this));
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
+
+
 
   guiCurrentTexture = new noggit::ui::current_texture;
   TexturePalette = new noggit::ui::tileset_chooser;
@@ -364,15 +381,11 @@ void MapView::createGUI()
   guidetailInfos = new noggit::ui::detail_infos;
   guidetailInfos->hide();
 
-  // ZoneIDBrowser
-  ZoneIDBrowser = new noggit::ui::zone_id_browser();
-  ZoneIDBrowser->hide();
-
   TexturePicker = new noggit::ui::texture_picker (guiCurrentTexture);
   TexturePicker->hide();
 
   connect ( TexturePicker, &noggit::ui::texture_picker::shift_left
-          , [=] 
+          , [=]
             {
               makeCurrent();
               opengl::context::scoped_setter const _ (::gl, context());
@@ -380,15 +393,13 @@ void MapView::createGUI()
             }
           );
   connect ( TexturePicker, &noggit::ui::texture_picker::shift_right
-          , [=] 
+          , [=]
             {
               makeCurrent();
               opengl::context::scoped_setter const _ (::gl, context());
               TexturePicker->shiftSelectedTextureRight();
             }
           );
-
-  guiWater = new noggit::ui::water();
 
   ZoneIDBrowser->setMapID(_world->getMapID());
   ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
@@ -1356,7 +1367,7 @@ void MapView::tick (float dt)
     }
   }
 #endif
-    
+
     math::degrees yaw (-_camera.yaw()._);
 
     math::vector_3d dir(1.0f, 0.0f, 0.0f);

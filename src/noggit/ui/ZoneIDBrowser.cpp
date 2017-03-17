@@ -22,8 +22,6 @@ namespace noggit
       , _area_tree(new QTreeWidget())
       , mapID(-1)
     {
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-      setWindowTitle("Area picker");
       new QVBoxLayout(this);
       this->layout()->addWidget(_area_tree);
 

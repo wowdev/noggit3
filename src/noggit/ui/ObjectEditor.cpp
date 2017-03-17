@@ -36,8 +36,6 @@ namespace noggit
             , selected()
             , pasteMode(PASTE_ON_TERRAIN)
     {
-      setWindowTitle("Object Editor");
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
       auto inspectorGrid = new QGridLayout (this);
 
       Environment* env = Environment::getInstance();

@@ -23,9 +23,6 @@ namespace noggit
       , _flatten_type(eFlattenType_Linear)
       , _flatten_mode(eFlattenMode_Both)
     {
-      setWindowTitle("Flatten / Blur");
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-
       auto layout (new QFormLayout (this));
 
       _type_button_box = new QButtonGroup (this);
