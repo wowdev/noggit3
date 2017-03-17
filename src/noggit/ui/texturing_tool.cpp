@@ -351,19 +351,5 @@ namespace noggit
         }
       }
     }
-
-    void texturing_tool::update_brushes()
-    {
-      if (_texture_brush.needUpdate())
-      {
-        _texture_brush.GenerateTexture();
-        _inner_brush.GenerateTexture();
-      }
-    }
-
-    void texturing_tool::bind_brush_texture()
-    {
-      _texture_brush.getTexture()->bind();
-    }
   }
 }
