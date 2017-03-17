@@ -41,8 +41,10 @@ namespace noggit
 
       void paint (math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);
 
-      void update_brushes();
-      void bind_brush_texture();
+      Brush const& texture_brush() const
+      {
+        return _texture_brush;
+      }
 
       ui::current_texture* current_texture;
 

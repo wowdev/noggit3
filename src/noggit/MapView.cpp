@@ -1748,9 +1748,6 @@ void MapView::tick (float dt)
       _2d_zoom = std::min(std::max(_2d_zoom, 0.1f), 2.0f);
     }
 
-  texturingTool->update_brushes();
-
-
   _world->time += this->mTimespeed * dt;
 
 
@@ -2058,7 +2055,39 @@ void MapView::displayViewMode_2D()
     opengl::texture::set_active_texture(0);
     opengl::texture::enable_texture();
 
-    texturingTool->bind_brush_texture();
+    opengl::texture brush_texture;
+
+    {
+      char tex[256 * 256];
+
+      float const change = 2.0f / 256.0f;
+      float const hardness (texturingTool->texture_brush().getHardness());
+
+      float y = -1;
+      for (int j = 0; j < 256; j++)
+      {
+        float x = -1;
+        for (int i = 0; i < 256; ++i)
+        {
+          float dist = std::sqrt (x * x + y * y);
+          if (dist > 1)
+            tex[j * 256 + i] = 0;
+          else if (dist < hardness)
+            tex[j * 256 + i] = (unsigned char)255;
+          else
+            tex[j * 256 + i] = (unsigned char)(255.0f * (1 - (dist - hardness) / (1 - hardness)) + 0.5f);
+
+          x += change;
+        }
+        y += change;
+      }
+      brush_texture.bind();
+      gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 256, 256, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
 
     const float tRadius = texturingTool->brush_radius() / CHUNKSIZE;// *_2d_zoom;
     gl.begin(GL_QUADS);
