@@ -74,12 +74,12 @@ namespace noggit
       QDoubleSpinBox* _hardness_spin;
       QDoubleSpinBox* _radius_spin;
       QDoubleSpinBox* _pressure_spin;
-    
+
       QCheckBox* _show_unpaintable_chunks_cb;
-    
+
       QGroupBox* _spray_mode_group;
       QWidget* _spray_content;
-      QCheckBox* _inner_radius_cb;   
+      QCheckBox* _inner_radius_cb;
       QSlider* _spray_size_slider;
       QSlider* _spray_pressure_slider;
       QDoubleSpinBox* _spray_size_spin;

@@ -32,7 +32,7 @@ namespace noggit
       void setRadius (float radius);
       void setOrientation(float orientation);
       void setAngle(float angle);
-    
+
       // vertex edit only functions
       void moveVertices(float dt);
       void flattenVertices();
@@ -51,7 +51,7 @@ namespace noggit
       void updateVertexGroup();
 
       static const int winWidth = 180;
-    
+
       float _radius;
       float _speed;
       float _inner_radius;
@@ -64,7 +64,7 @@ namespace noggit
 
       int& _edit_type;
       int _vertex_mode;
-  
+
       // UI stuff:
 
       QButtonGroup* _type_button_group;

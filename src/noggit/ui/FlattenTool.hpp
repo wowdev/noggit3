@@ -17,7 +17,7 @@ namespace noggit
   namespace ui
   {
     class flatten_blur_tool : public QWidget
-    {  
+    {
     public:
       flatten_blur_tool();
 

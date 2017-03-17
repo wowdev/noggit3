@@ -12,4 +12,3 @@ namespace ui
     caps_warning ();
   };
 }
-

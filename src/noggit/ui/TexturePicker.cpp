@@ -67,7 +67,7 @@ namespace noggit
                   emit shift_right();
                 }
               );
-  
+
     }
 
     void texture_picker::getTextures(selection_type lSelection)
@@ -77,7 +77,7 @@ namespace noggit
       if (lSelection.which() == eEntry_MapChunk)
       {
         MapChunk* chunk = boost::get<selected_chunk_type> (lSelection).chunk;
-        _chunk = chunk;    
+        _chunk = chunk;
         update(false);
       }
     }
@@ -126,7 +126,7 @@ namespace noggit
       if (set_changed)
       {
         _chunk->mt->changed = true;
-      }  
+      }
 
       _textures.clear();
       size_t index = 0;

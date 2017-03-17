@@ -140,8 +140,8 @@ namespace noggit
 
       randRotCheck->setChecked(Settings::getInstance()->random_rotation);
       connect (randRotCheck, &QCheckBox::stateChanged, [] (int s)
-      { 
-        Settings::getInstance()->random_rotation = s; 
+      {
+        Settings::getInstance()->random_rotation = s;
       });
 
       rotRangeStart->setValue(env->minRotation);
@@ -197,20 +197,20 @@ namespace noggit
 
       randTiltCheck->setChecked(Settings::getInstance()->random_tilt);
       connect (randTiltCheck, &QCheckBox::stateChanged, [] (int s)
-      { 
-        Settings::getInstance()->random_tilt = s; 
+      {
+        Settings::getInstance()->random_tilt = s;
       });
 
       randScaleCheck->setChecked(Settings::getInstance()->random_tilt);
       connect (randScaleCheck, &QCheckBox::stateChanged, [] (int s)
-      { 
-        Settings::getInstance()->random_size = s; 
+      {
+        Settings::getInstance()->random_size = s;
       });
 
       copyAttributesCheck->setChecked(Settings::getInstance()->copyModelStats);
       connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
-      { 
-        Settings::getInstance()->copyModelStats = s; 
+      {
+        Settings::getInstance()->copyModelStats = s;
       });
 
       pasteModeGroup->button(pasteMode)->setChecked(true);
@@ -224,8 +224,8 @@ namespace noggit
 
       cursorPosCheck->setChecked(Environment::getInstance()->moveModelToCursorPos);
       connect (cursorPosCheck, &QCheckBox::stateChanged, [=] (int s)
-      { 
-        env->moveModelToCursorPos = s; 
+      {
+        env->moveModelToCursorPos = s;
       });
 
       connect(rotEditorButton, &QPushButton::clicked, [=]() {
