@@ -44,7 +44,6 @@ namespace noggit
   class camera;
   namespace ui
   {
-    class current_texture;
     class cursor_switcher;
     class detail_infos;
     class flatten_blur_tool;
@@ -278,7 +277,6 @@ private:
   noggit::ui::texture_picker* TexturePicker;
   noggit::ui::water* guiWater;
   QDockWidget* _water;
-  noggit::ui::current_texture* guiCurrentTexture;
   noggit::ui::object_editor* objectEditor;
   QDockWidget* _object;
   noggit::ui::flatten_blur_tool* flattenTool;
