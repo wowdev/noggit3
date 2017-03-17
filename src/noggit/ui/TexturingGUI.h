@@ -7,9 +7,6 @@
 
 #include <boost/optional.hpp>
 
-class UIFrame;
-class UIMapViewGUI;
-
 namespace noggit
 {
   namespace ui
@@ -26,13 +23,13 @@ namespace noggit
     signals:
       void selected (std::string);
     };
+
+    class selected_texture
+    {
+    public:
+      static void set(scoped_blp_texture_reference t);
+      static boost::optional<scoped_blp_texture_reference> get();
+      static boost::optional<scoped_blp_texture_reference> texture;
+    };
   }
 }
-
-class UITexturingGUI
-{
-public:
-  static void setSelectedTexture(scoped_blp_texture_reference t);
-  static boost::optional<scoped_blp_texture_reference> getSelectedTexture();
-  static boost::optional<scoped_blp_texture_reference> selectedTexture;
-};

@@ -8,29 +8,31 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
-namespace ui
+namespace noggit
 {
-  class shader_tool : public QWidget
+  namespace ui
   {
-  public:
-    shader_tool(math::vector_4d& color);
+    class shader_tool : public QWidget
+    {
+    public:
+      shader_tool(math::vector_4d& color);
 
-    void changeShader (math::vector_3d const& pos, float dt, bool add);
+      void changeShader (math::vector_3d const& pos, float dt, bool add);
 
-    void changeRadius(float change);
-    void changeSpeed(float change);
+      void changeRadius(float change);
+      void changeSpeed(float change);
 
-    float brushRadius() const { return _radius; }
+      float brushRadius() const { return _radius; }
   
-  private:
-    float _radius;
-    float _speed;
-    math::vector_4d& _color;
+    private:
+      float _radius;
+      float _speed;
+      math::vector_4d& _color;
 
-    QSlider* _radius_slider;
-    QSlider* _speed_slider;
-    QDoubleSpinBox* _radius_spin;
-    QDoubleSpinBox* _speed_spin;
-  };
+      QSlider* _radius_slider;
+      QSlider* _speed_slider;
+      QDoubleSpinBox* _radius_spin;
+      QDoubleSpinBox* _speed_spin;
+    };
+  }
 }
-

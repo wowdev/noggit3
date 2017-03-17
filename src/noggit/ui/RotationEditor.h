@@ -10,31 +10,37 @@
 
 class WMOInstance;
 
-class UIRotationEditor : public QWidget
+namespace noggit
 {
-public:
-  UIRotationEditor();
+  namespace ui
+  {
+    class rotation_editor : public QWidget
+    {
+    public:
+      rotation_editor();
 
-  void select(selection_type entry);
-  void updateValues();
-  bool hasSelection() const { return _selection; }
+      void select(selection_type entry);
+      void updateValues();
+      bool hasSelection() const { return _selection; }
 
-  bool hasFocus() const {return false;}
+      bool hasFocus() const {return false;}
 
-private:
-  void maybe_updateWMO();
-  math::vector_3d* rotationVect;
-  math::vector_3d* posVect;
-  float* scale;
+    private:
+      void maybe_updateWMO();
+      math::vector_3d* rotationVect;
+      math::vector_3d* posVect;
+      float* scale;
 
-  bool _selection;
-  WMOInstance* _wmoInstance;
+      bool _selection;
+      WMOInstance* _wmoInstance;
 
-  QDoubleSpinBox* _rotation_x;
-  QDoubleSpinBox* _rotation_z;
-  QDoubleSpinBox* _rotation_y;
-  QDoubleSpinBox* _position_x;
-  QDoubleSpinBox* _position_z;
-  QDoubleSpinBox* _position_y;
-  QDoubleSpinBox* _scale;
-};
+      QDoubleSpinBox* _rotation_x;
+      QDoubleSpinBox* _rotation_z;
+      QDoubleSpinBox* _rotation_y;
+      QDoubleSpinBox* _position_x;
+      QDoubleSpinBox* _position_z;
+      QDoubleSpinBox* _position_y;
+      QDoubleSpinBox* _scale;
+    };
+  }
+}

@@ -2,12 +2,18 @@
 
 #pragma once
 
-#include <noggit/MapView.h>
-
 #include <QtWidgets/QWidget>
 
-class UIHelperModels : public QWidget
+class MapView;
+
+namespace noggit
 {
-public:
-  UIHelperModels (MapView *mapview);
-};
+  namespace ui
+  {
+    class helper_models : public QWidget
+    {
+    public:
+      helper_models (MapView *mapview);
+    };
+  }
+}

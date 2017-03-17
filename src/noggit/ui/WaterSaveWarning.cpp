@@ -5,16 +5,19 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
 
-namespace ui
+namespace noggit
 {
-  water_save_warning::water_save_warning()
-    : QWidget (nullptr)
+  namespace ui
   {
-    setWindowFlags (Qt::Popup | Qt::WindowStaysOnTopHint);
-    auto layout (new QFormLayout (this));
+    water_save_warning::water_save_warning()
+      : QWidget (nullptr)
+    {
+      setWindowFlags (Qt::Popup | Qt::WindowStaysOnTopHint);
+      auto layout (new QFormLayout (this));
 
-    layout->addRow (new QLabel ("Interface\\ICONS\\Ability_Creature_Poison_06.blp"));
-    layout->addRow (new QLabel ("Old style water! Noggit will not"));
-    layout->addRow (new QLabel ("save some water on this ADT!"));
+      layout->addRow (new QLabel ("Interface\\ICONS\\Ability_Creature_Poison_06.blp"));
+      layout->addRow (new QLabel ("Old style water! Noggit will not"));
+      layout->addRow (new QLabel ("save some water on this ADT!"));
+    }
   }
 }

@@ -629,8 +629,8 @@ void MapChunk::draw ( math::frustum const& frustum
   if (!is_visible (cull_distance, frustum, camera))
     return;
 
-  bool cantPaint = UITexturingGUI::getSelectedTexture()
-                 && !canPaintTexture(*UITexturingGUI::getSelectedTexture())
+  bool cantPaint = noggit::ui::selected_texture::get()
+                 && !canPaintTexture(*noggit::ui::selected_texture::get())
                  && show_unpaintable_chunks
                  && draw_paintability_overlay;
 

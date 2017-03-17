@@ -20,7 +20,7 @@ namespace noggit
 {
   namespace ui
   {
-    UIWater::UIWater()
+    water::water()
       : QWidget (nullptr)
       , _liquid_id(5)
       , _radius(10.0f)
@@ -173,7 +173,7 @@ namespace noggit
       updateData();
     }
 
-    void UIWater::updatePos(tile_index const& newTile)
+    void water::updatePos(tile_index const& newTile)
     {
       if (newTile == tile) return;
 
@@ -182,26 +182,26 @@ namespace noggit
       updateData();
     }
 
-    void UIWater::updateData()
+    void water::updateData()
     {
       std::stringstream mt;
       mt << _liquid_id << " - " << LiquidTypeDB::getLiquidName(_liquid_id);
       waterType->setText (QString::fromStdString (mt.str()));
     }
 
-    void UIWater::changeWaterType(int waterint)
+    void water::changeWaterType(int waterint)
     {
       _liquid_id = waterint;
       updateData();
     }
 
-    void UIWater::changeRadius(float change)
+    void water::changeRadius(float change)
     {
       _angle = std::max(0.0f, std::min(250.0f, _radius + change));
       _radius_spin->setValue(_radius / 250.0f);
     }
 
-    void UIWater::changeOrientation(float change)
+    void water::changeOrientation(float change)
     {
       _orientation += change;
 
@@ -217,13 +217,13 @@ namespace noggit
       _orientation_spin->setValue(_orientation / 360.0f);
     }
 
-    void UIWater::changeAngle(float change)
+    void water::changeAngle(float change)
     {
       _angle = std::max(0.0f, std::min(89.0f, _angle + change));
       _angle_spin->setValue(_angle / 90.0f);
     }
 
-    void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
+    void water::paintLiquid(math::vector_3d const& pos, bool add)
     {
       gWorld->paintLiquid( pos
                          , _radius
@@ -239,7 +239,7 @@ namespace noggit
                          );
     }
 
-    void UIWater::lockPos(math::vector_3d const& cursor_pos)
+    void water::lockPos(math::vector_3d const& cursor_pos)
     {
       _lock_pos = cursor_pos;
 
@@ -249,17 +249,17 @@ namespace noggit
       }
     }
 
-    void UIWater::toggle_lock()
+    void water::toggle_lock()
     {
       _locked.set (!_locked.get());
     }
 
-    void UIWater::toggle_angled_mode()
+    void water::toggle_angled_mode()
     {
       _angled_mode.set (!_angled_mode.get());
     }
 
-    float UIWater::get_opacity_factor() const
+    float water::get_opacity_factor() const
     {
       switch (_opacity_mode)
       {

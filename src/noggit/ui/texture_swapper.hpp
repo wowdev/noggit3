@@ -9,21 +9,24 @@
 
 #include <boost/optional.hpp>
 
-namespace ui
+namespace noggit
 {
-  class texture_swapper : public QWidget
+  namespace ui
   {
-  public:
-    texture_swapper (QWidget* parent, const math::vector_3d* camera_pos);
-
-    boost::optional<scoped_blp_texture_reference> const& current_texture() const
+    class texture_swapper : public QWidget
     {
-      return _texture_to_swap;
-    }
+    public:
+      texture_swapper (QWidget* parent, const math::vector_3d* camera_pos);
 
-  private:
-    void closeEvent (QCloseEvent *event);
+      boost::optional<scoped_blp_texture_reference> const& current_texture() const
+      {
+        return _texture_to_swap;
+      }
 
-    boost::optional<scoped_blp_texture_reference> _texture_to_swap;
-  };
+    private:
+      void closeEvent (QCloseEvent *event);
+
+      boost::optional<scoped_blp_texture_reference> _texture_to_swap;
+    };
+  }
 }

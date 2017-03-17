@@ -8,8 +8,14 @@
 #include <QWidget>
 
 class QButtonGroup;
-class UIModelImport;
-class UIRotationEditor;
+namespace noggit
+{
+  namespace ui
+  {
+    class model_import;
+    class rotation_editor;
+  }
+}
 
 enum ModelPasteMode
 {
@@ -19,25 +25,31 @@ enum ModelPasteMode
   PASTE_MODE_COUNT
 };
 
-class UIObjectEditor : public QWidget
+namespace noggit
 {
-public:
-  UIObjectEditor (MapView*);
+  namespace ui
+  {
+    class object_editor : public QWidget
+    {
+    public:
+      object_editor (MapView*);
 
-  bool hasSelection() const;
-  void copy(selection_type entry);
-  void pasteObject (math::vector_3d cursor_pos, math::vector_3d camera_pos);
-  void togglePasteMode();
+      bool hasSelection() const;
+      void copy(selection_type entry);
+      void pasteObject (math::vector_3d cursor_pos, math::vector_3d camera_pos);
+      void togglePasteMode();
 
-  UIModelImport *modelImport;
-  UIRotationEditor* rotationEditor;
-private:
-  QButtonGroup* pasteModeGroup;
-  QLabel* _filename;
+      model_import *modelImport;
+      rotation_editor* rotationEditor;
+    private:
+      QButtonGroup* pasteModeGroup;
+      QLabel* _filename;
 
-  boost::optional<selection_type> selected;
-  void showImportModels();
-  void SaveObjecttoTXT();
-  void setModelName(const std::string &name);
-  int pasteMode;
-};
+      boost::optional<selection_type> selected;
+      void showImportModels();
+      void SaveObjecttoTXT();
+      void setModelName(const std::string &name);
+      int pasteMode;
+    };
+  }
+}

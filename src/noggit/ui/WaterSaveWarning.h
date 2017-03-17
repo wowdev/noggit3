@@ -4,11 +4,14 @@
 
 #include <QtWidgets/QWidget>
 
-namespace ui
+namespace noggit
 {
-  class water_save_warning : public QWidget
+  namespace ui
   {
-  public:
-    water_save_warning();
-  };
+    class water_save_warning : public QWidget
+    {
+    public:
+      water_save_warning();
+    };
+  }
 }

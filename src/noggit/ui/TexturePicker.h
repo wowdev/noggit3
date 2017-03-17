@@ -15,7 +15,7 @@ namespace noggit
   {
     class current_texture;
 
-    class texture_picker : public widget
+    class texture_picker : public noggit::ui::widget
     {
       Q_OBJECT
 

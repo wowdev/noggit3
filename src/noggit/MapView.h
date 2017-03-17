@@ -25,10 +25,9 @@
 #include <external/wacom/WINTAB.h>
 #endif
 
-class UIFrame;
+
 class World;
 
-class UICursorSwitcher;
 
 enum eViewMode
 {
@@ -42,40 +41,31 @@ class Model;
 
 namespace noggit
 {
-  namespace ui
-  {
-    struct main_window;
-    class minimap_widget;
-    class toolbar;
-    struct tileset_chooser;
-    class texture_picker;
-  }
-}
-class UIHelp;
-class UIWindow;
-class UIExitWarning;
-class UIHelperModels;
-class UIObjectEditor;
-class MapView;
-namespace noggit
-{
   class camera;
   namespace ui
   {
     class current_texture;
-    class UIWater;
+    class cursor_switcher;
+    class detail_infos;
+    class exit_warning;
+    class flatten_blur_tool;
+    class help;
+    class helper_models;
+    class minimap_widget;
+    class object_editor;
+    class shader_tool;
+    class terrain_tool;
+    class texture_picker;
+    class texturing_tool;
+    class toolbar;    
+    class water;
+    class water_save_warning;
+    class zone_id_browser;
+    struct main_window;
+    struct tileset_chooser;
   }
 }
-namespace ui
-{
-  class detail_infos;
-  class FlattenTool;
-  class shader_tool;
-  class terrain_tool;
-  class texturing_tool;
-  class zone_id_browser;
-  class water_save_warning;
-}
+
 
 class MapView : public QOpenGLWidget
 {
@@ -180,8 +170,6 @@ private:
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
 
-  UICursorSwitcher* CursorSwitcher;
-
   bool Saving = false;
 
   noggit::ui::toolbar* _toolbar;
@@ -282,23 +270,23 @@ private:
 
   void move_camera_with_auto_height (math::vector_3d const&);
 
-  std::unique_ptr<UICursorSwitcher> _cursor_switcher;
-  std::unique_ptr<UIHelp> _keybindings;
+  std::unique_ptr<noggit::ui::cursor_switcher> _cursor_switcher;
+  std::unique_ptr<noggit::ui::help> _keybindings;
 
   noggit::ui::tileset_chooser* TexturePalette;
-  ui::detail_infos* guidetailInfos;
-  ui::zone_id_browser* ZoneIDBrowser;
+  noggit::ui::detail_infos* guidetailInfos;
+  noggit::ui::zone_id_browser* ZoneIDBrowser;
   noggit::ui::texture_picker* TexturePicker;
-  noggit::ui::UIWater* guiWater;
+  noggit::ui::water* guiWater;
   noggit::ui::current_texture* guiCurrentTexture;
-  UIObjectEditor* objectEditor;
-  ui::FlattenTool* flattenTool;
-  ui::terrain_tool* terrainTool;
+  noggit::ui::object_editor* objectEditor;
+  noggit::ui::flatten_blur_tool* flattenTool;
+  noggit::ui::terrain_tool* terrainTool;
   QDockWidget* _terrain;
-  ui::shader_tool* shaderTool;
-  ui::texturing_tool* texturingTool;
+  noggit::ui::shader_tool* shaderTool;
+  noggit::ui::texturing_tool* texturingTool;
 
-  UIExitWarning *escWarning;
-  ui::water_save_warning *waterSaveWarning;
-  UIHelperModels *HelperModels;
+  noggit::ui::exit_warning *escWarning;
+  noggit::ui::water_save_warning *waterSaveWarning;
+  noggit::ui::helper_models *HelperModels;
 };

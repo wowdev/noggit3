@@ -45,7 +45,7 @@ namespace noggit
       QObject::connect ( settings_action, &QAction::triggered
                        , []
                          {
-                           auto settings (new UISettings());
+                           auto settings (new settings());
                            settings->readInValues();
                            settings->show();
                          }
@@ -55,7 +55,7 @@ namespace noggit
       QObject::connect ( about_action, &QAction::triggered
                        , []
                          {
-                           auto about (new UIAbout());
+                           auto about (new about());
                            about->show();
                          }
                        );
@@ -206,7 +206,7 @@ namespace noggit
             else
             {
               auto uidFixWindow
-                ( new ::ui::uid_fix_window
+                ( new noggit::ui::uid_fix_window
                     ( [this, pos, world]
                       {
                         enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);

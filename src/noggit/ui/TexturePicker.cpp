@@ -19,7 +19,7 @@ namespace noggit
   {
     texture_picker::texture_picker
         (noggit::ui::current_texture* current_texture_window)
-      : widget (nullptr)
+      : noggit::ui::widget (nullptr)
       , _chunk (nullptr)
     {
       setWindowTitle ("Texture Picker");
@@ -87,13 +87,13 @@ namespace noggit
     {
       assert(id < _textures.size());
 
-      UITexturingGUI::setSelectedTexture (_textures[id]);
+      selected_texture::set (_textures[id]);
       current_texture_window->set_texture (_textures[id]->filename());
     }
 
     void texture_picker::shiftSelectedTextureLeft()
     {
-      auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
+      auto&& selectedTexture = selected_texture::get();
       TextureSet& ts = _chunk->_texture_set;
       for (int i = 1; i < ts.num(); i++)
       {
@@ -108,7 +108,7 @@ namespace noggit
 
     void texture_picker::shiftSelectedTextureRight()
     {
-      auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
+      auto&& selectedTexture = selected_texture::get();
       TextureSet& ts = _chunk->_texture_set;
       for (int i = 0; i < ts.num() - 1; i++)
       {

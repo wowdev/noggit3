@@ -9,8 +9,6 @@
 
 #include <string>
 
-class UIFrame;
-
 namespace noggit
 {
   namespace ui

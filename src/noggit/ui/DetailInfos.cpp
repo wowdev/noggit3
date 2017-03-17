@@ -4,19 +4,22 @@
 
 #include <QtWidgets/QFormLayout>
 
-namespace ui
+namespace noggit
 {
-  detail_infos::detail_infos()
-    : noggit::ui::widget (nullptr)
+  namespace ui
   {
-    setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
-    auto layout (new QFormLayout (this));
+    detail_infos::detail_infos()
+      : noggit::ui::widget (nullptr)
+    {
+      setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
+      auto layout (new QFormLayout (this));
 
-    layout->addRow (_info_text = new QLabel (this));
-  }
+      layout->addRow (_info_text = new QLabel (this));
+    }
 
-  void detail_infos::setText (const std::string& t)
-  {
-    _info_text->setText (t.c_str ());
+    void detail_infos::setText (const std::string& t)
+    {
+      _info_text->setText (t.c_str ());
+    }
   }
 }

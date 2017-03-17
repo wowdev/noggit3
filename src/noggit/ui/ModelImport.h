@@ -2,19 +2,25 @@
 
 #pragma once
 
-#include <noggit/MapView.h>
-
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QWidget>
 
-class UIModelImport : public QWidget
-{
-private:
-  QListWidget* _list;
-  QLineEdit* _textBox;
+class MapView;
 
-public:
-  UIModelImport (MapView *mapview);
-  void buildModelList();
-};
+namespace noggit
+{
+  namespace ui
+  {
+    class model_import : public QWidget
+    {
+    private:
+      QListWidget* _list;
+      QLineEdit* _textBox;
+
+    public:
+      model_import (MapView *mapview);
+      void buildModelList();
+    };
+  }
+}

@@ -24,25 +24,31 @@ namespace util
   };
 }
 
-class UISettings : public QDialog
+namespace noggit
 {
-private:
-  util::file_line_edit* gamePathField;
-  util::file_line_edit* wodPathField;
-  util::file_line_edit* projectPathField;
-  util::file_line_edit* importPathField;
-  util::file_line_edit* wmvLogPathField;
-  QDoubleSpinBox* viewDistanceField;
-  QDoubleSpinBox* farZField;
+  namespace ui
+  {
+    class settings : public QDialog
+    {
+    private:
+      util::file_line_edit* gamePathField;
+      util::file_line_edit* wodPathField;
+      util::file_line_edit* projectPathField;
+      util::file_line_edit* importPathField;
+      util::file_line_edit* wmvLogPathField;
+      QDoubleSpinBox* viewDistanceField;
+      QDoubleSpinBox* farZField;
 
-  QCheckBox* tabletModeCheck;
-  QCheckBox* modelStatsCheck;
-  QCheckBox* modelsBoxCheck;
-  QCheckBox* randRotCheck;
-  QCheckBox* randSizeCheck;
-  QCheckBox* randTiltCheck;
+      QCheckBox* tabletModeCheck;
+      QCheckBox* modelStatsCheck;
+      QCheckBox* modelsBoxCheck;
+      QCheckBox* randRotCheck;
+      QCheckBox* randSizeCheck;
+      QCheckBox* randTiltCheck;
 
-public:
-  UISettings();
-  void readInValues();
-};
+    public:
+      settings();
+      void readInValues();
+    };
+  }
+}

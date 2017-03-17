@@ -4,8 +4,14 @@
 
 #include <noggit/ui/widget.hpp>
 
-class UIHelp : public noggit::ui::widget
+namespace noggit
 {
-public:
-  UIHelp();
-};
+  namespace ui
+  {
+    class help : public noggit::ui::widget
+    {
+    public:
+      help();
+    };
+  }
+}

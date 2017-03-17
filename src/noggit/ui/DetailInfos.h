@@ -8,15 +8,18 @@
 
 #include <string>
 
-namespace ui
+namespace noggit
 {
-  class detail_infos : public noggit::ui::widget
+  namespace ui
   {
-  private:
-    QLabel* _info_text;
+    class detail_infos : public noggit::ui::widget
+    {
+    private:
+      QLabel* _info_text;
 
-  public:
-    detail_infos();
-    void setText (const std::string& t);
-  };
+    public:
+      detail_infos();
+      void setText (const std::string& t);
+    };
+  }
 }
