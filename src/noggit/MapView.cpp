@@ -324,36 +324,43 @@ void MapView::createGUI()
   _terrain->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool());
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
+  connect (this, &QObject::destroyed, _terrain, &QObject::deleteLater);
 
   _flatten_blur = new QDockWidget ("Flatten / Blur", this);
   _flatten_blur->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _flatten_blur->setWidget (flattenTool = new noggit::ui::flatten_blur_tool());
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _flatten_blur);
+  connect (this, &QObject::destroyed, _flatten_blur, &QObject::deleteLater);
 
   _texturing = new QDockWidget ("Texturing", this);
   _texturing->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _texturing);
+  connect (this, &QObject::destroyed, _texturing, &QObject::deleteLater);
 
   _areaid = new QDockWidget ("Area ID", this);
   _areaid->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _areaid->setWidget (ZoneIDBrowser = new noggit::ui::zone_id_browser());
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _areaid);
+  connect (this, &QObject::destroyed, _areaid, &QObject::deleteLater);
 
   _water = new QDockWidget ("Raise / Lower", this);
   _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _water->setWidget (guiWater = new noggit::ui::water());
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
+  connect (this, &QObject::destroyed, _water, &QObject::deleteLater);
 
   _vertex_shading = new QDockWidget ("Vertex Shading", this);
   _vertex_shading->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _vertex_shading->setWidget (shaderTool = new noggit::ui::shader_tool (cursor_color));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _vertex_shading);
+  connect (this, &QObject::destroyed, _vertex_shading, &QObject::deleteLater);
 
   _object = new QDockWidget ("Object", this);
   _object->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _object->setWidget (objectEditor = new noggit::ui::object_editor(this));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
+  connect (this, &QObject::destroyed, _object, &QObject::deleteLater);
 
 
   TexturePalette = new noggit::ui::tileset_chooser;
