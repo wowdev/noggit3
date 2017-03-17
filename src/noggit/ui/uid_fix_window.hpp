@@ -6,11 +6,14 @@
 
 #include <functional>
 
-namespace ui
+namespace noggit
 {
-  class uid_fix_window : public QDialog
+  namespace ui
   {
-  public:
-    uid_fix_window (std::function<void()> after_fix);
-  };
+    class uid_fix_window : public QDialog
+    {
+    public:
+      uid_fix_window (std::function<void()> after_fix);
+    };
+  }
 }

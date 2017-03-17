@@ -12,76 +12,79 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
-namespace ui
+namespace noggit
 {
-  class texture_swapper;
-
-  class texturing_tool : public QWidget
+  namespace ui
   {
-  public:
-    texturing_tool (const math::vector_3d* camera_pos);
+    class texture_swapper;
 
-    float brush_radius() { return _texture_brush.getRadius(); }
-    float hardness() const { return _hardness; }
-    bool show_unpaintable_chunks() const { return _show_unpaintable_chunks; }
+    class texturing_tool : public QWidget
+    {
+    public:
+      texturing_tool (const math::vector_3d* camera_pos);
 
-    void set_brush_level (float level);
+      float brush_radius() { return _texture_brush.getRadius(); }
+      float hardness() const { return _hardness; }
+      bool show_unpaintable_chunks() const { return _show_unpaintable_chunks; }
 
-    void toggle_spray();
+      void set_brush_level (float level);
 
-    void change_radius (float change);
-    void change_hardness (float change);
-    void change_pressure (float change);
-    void change_brush_level (float change);
-    void change_spray_size (float change);
-    void change_spray_pressure (float change);
+      void toggle_spray();
 
-    void paint (math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);
+      void change_radius (float change);
+      void change_hardness (float change);
+      void change_pressure (float change);
+      void change_brush_level (float change);
+      void change_spray_size (float change);
+      void change_spray_pressure (float change);
 
-    void update_brushes();
-    void bind_brush_texture();
+      void paint (math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);
 
-  private:
-    // slider functions
-    void update_brush_hardness();
-    void set_radius (float radius);
-    void update_spray_brush();
+      void update_brushes();
+      void bind_brush_texture();
 
-    Brush _texture_brush;
-    Brush _inner_brush;
-    Brush _spray_brush;
+    private:
+      // slider functions
+      void update_brush_hardness();
+      void set_radius (float radius);
+      void update_spray_brush();
 
-    float _brush_level;
-    float _hardness;
-    float _pressure;
+      Brush _texture_brush;
+      Brush _inner_brush;
+      Brush _spray_brush;
 
-    bool _show_unpaintable_chunks;
+      float _brush_level;
+      float _hardness;
+      float _pressure;
 
-    float _spray_size;
-    float _spray_pressure;
+      bool _show_unpaintable_chunks;
 
-  private:
-    QSlider* _brush_level_slider;
-    QSlider* _hardness_slider;
-    QSlider* _radius_slider;
-    QSlider* _pressure_slider;
-    QDoubleSpinBox* _brush_level_spin;
-    QDoubleSpinBox* _hardness_spin;
-    QDoubleSpinBox* _radius_spin;
-    QDoubleSpinBox* _pressure_spin;
+      float _spray_size;
+      float _spray_pressure;
+
+    private:
+      QSlider* _brush_level_slider;
+      QSlider* _hardness_slider;
+      QSlider* _radius_slider;
+      QSlider* _pressure_slider;
+      QDoubleSpinBox* _brush_level_spin;
+      QDoubleSpinBox* _hardness_spin;
+      QDoubleSpinBox* _radius_spin;
+      QDoubleSpinBox* _pressure_spin;
     
-    QCheckBox* _show_unpaintable_chunks_cb;
+      QCheckBox* _show_unpaintable_chunks_cb;
     
-    QGroupBox* _spray_mode_group;
-    QWidget* _spray_content;
-    QCheckBox* _inner_radius_cb;   
-    QSlider* _spray_size_slider;
-    QSlider* _spray_pressure_slider;
-    QDoubleSpinBox* _spray_size_spin;
-    QDoubleSpinBox* _spray_pressure_spin;
+      QGroupBox* _spray_mode_group;
+      QWidget* _spray_content;
+      QCheckBox* _inner_radius_cb;   
+      QSlider* _spray_size_slider;
+      QSlider* _spray_pressure_slider;
+      QDoubleSpinBox* _spray_size_spin;
+      QDoubleSpinBox* _spray_pressure_spin;
 
-    ui::texture_swapper* _texture_switcher;
+      noggit::ui::texture_swapper* _texture_switcher;
 
-    const math::vector_3d* _camera_pos;
-  };
+      const math::vector_3d* _camera_pos;
+    };
+  }
 }

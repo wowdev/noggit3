@@ -8,23 +8,25 @@
 #include <functional>
 #include <string>
 
-namespace ui
+namespace noggit
 {
-  class zone_id_browser : public QWidget
+  namespace ui
   {
-  public:
-    zone_id_browser();
-    void setMapID(int id);
-    void setZoneID(int id);
-    void setChangeFunc(std::function<void(int)> f);
+    class zone_id_browser : public QWidget
+    {
+    public:
+      zone_id_browser();
+      void setMapID(int id);
+      void setZoneID(int id);
+      void setChangeFunc(std::function<void(int)> f);
 
-  private:
-    std::function<void(int)> _func;
-    QTreeWidget* _area_tree;
-    std::map<int, QTreeWidgetItem*> _items;
-    int mapID;
+    private:
+      std::function<void(int)> _func;
+      QTreeWidget* _area_tree;
+      std::map<int, QTreeWidgetItem*> _items;
+      int mapID;
 
-    void buildAreaList();
-  };
+      void buildAreaList();
+    };
+  }
 }
-

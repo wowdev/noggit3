@@ -6,11 +6,14 @@
 
 #include <math/vector_4d.hpp>
 
-#include <QtWidgets/QWidget>
-#include <QDockWidget>
-
-class UICursorSwitcher : public noggit::ui::widget
+namespace noggit
 {
-public:
-  UICursorSwitcher(math::vector_4d& color, int& cursor_type);
-};
+  namespace ui
+  {
+    class cursor_switcher : public noggit::ui::widget
+    {
+    public:
+      cursor_switcher(math::vector_4d& color, int& cursor_type);
+    };
+  }
+}

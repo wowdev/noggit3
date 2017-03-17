@@ -37,7 +37,7 @@ public:
   static void report();
 
   //! \todo This should not be there.
-  //! \note This is only for getting all cached textures in UITexturingGUI.
+  //! \note This is only for getting all cached textures in selected_texture.
   static std::vector<scoped_blp_texture_reference> getAllTexturesMatching(bool(*function)(const std::string& name));
 
 private:

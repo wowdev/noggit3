@@ -13,72 +13,74 @@
 #include <QtWidgets/QWidget>
 
 
-namespace ui
+namespace noggit
 {
-  class terrain_tool : public QWidget
+  namespace ui
   {
-  public:
-    terrain_tool();
+    class terrain_tool : public QWidget
+    {
+    public:
+      terrain_tool();
 
-    void changeTerrain(math::vector_3d const& pos, float dt);
+      void changeTerrain(math::vector_3d const& pos, float dt);
 
-    void nextType();
-    void changeRadius(float change);
-    void changeInnerRadius(float change);
-    void changeSpeed(float change);
+      void nextType();
+      void changeRadius(float change);
+      void changeInnerRadius(float change);
+      void changeSpeed(float change);
 
-    void setRadius (float radius);
-    void setOrientation(float orientation);
-    void setAngle(float angle);
+      void setRadius (float radius);
+      void setOrientation(float orientation);
+      void setAngle(float angle);
     
-    // vertex edit only functions
-    void moveVertices(float dt);
-    void flattenVertices();
+      // vertex edit only functions
+      void moveVertices(float dt);
+      void flattenVertices();
 
-    void changeOrientation(float change);
-    void changeAngle(float change);
-    void setOrientRelativeTo(math::vector_3d const& pos);
+      void changeOrientation(float change);
+      void changeAngle(float change);
+      void setOrientRelativeTo(math::vector_3d const& pos);
 
-    float brushRadius() const { return _radius; }
-    float innerRadius() const { return _inner_radius;  }
+      float brushRadius() const { return _radius; }
+      float innerRadius() const { return _inner_radius;  }
 
-    void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
+      void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
 
-  private:
-    void updateVertices();
-    void updateVertexGroup();
+    private:
+      void updateVertices();
+      void updateVertexGroup();
 
-    static const int winWidth = 180;
+      static const int winWidth = 180;
     
-    float _radius;
-    float _speed;
-    float _inner_radius;
-    math::degrees _vertex_angle;
-    math::degrees _vertex_orientation;
+      float _radius;
+      float _speed;
+      float _inner_radius;
+      math::degrees _vertex_angle;
+      math::degrees _vertex_orientation;
 
-    math::vector_3d* _cursor_pos;
+      math::vector_3d* _cursor_pos;
 
-    bool _tablet;
+      bool _tablet;
 
-    int& _edit_type;
-    int _vertex_mode;
+      int& _edit_type;
+      int _vertex_mode;
   
-    // UI stuff:
+      // UI stuff:
 
-    QButtonGroup* _type_button_group;
-    QButtonGroup* _vertex_button_group;
-    QGroupBox* _speed_box;
-    QGroupBox* _vertex_type_group;
+      QButtonGroup* _type_button_group;
+      QButtonGroup* _vertex_button_group;
+      QGroupBox* _speed_box;
+      QGroupBox* _vertex_type_group;
 
-    QSlider* _radius_slider;
-    QSlider* _inner_radius_slider;
-    QSlider* _speed_slider;
-    QDoubleSpinBox* _radius_spin;
-    QDoubleSpinBox* _inner_radius_spin;
-    QDoubleSpinBox* _speed_spin;
+      QSlider* _radius_slider;
+      QSlider* _inner_radius_slider;
+      QSlider* _speed_slider;
+      QDoubleSpinBox* _radius_spin;
+      QDoubleSpinBox* _inner_radius_spin;
+      QDoubleSpinBox* _speed_spin;
 
-    QSlider* _angle_slider;
-    QDial* _orientation_dial;
-  };
+      QSlider* _angle_slider;
+      QDial* _orientation_dial;
+    };
+  }
 }
-

@@ -219,17 +219,21 @@ namespace noggit
       top_bar->addWidget (filter);
       layout->addWidget (list);
     }
+
+    
+    // selected_texture:
+    boost::optional<scoped_blp_texture_reference> selected_texture::texture = boost::none;
+
+    boost::optional<scoped_blp_texture_reference> selected_texture::get()
+    {
+      return selected_texture::texture;
+    }
+
+    void selected_texture::set (scoped_blp_texture_reference t)
+    {
+      selected_texture::texture = t;
+    }
   }
 }
 
-boost::optional<scoped_blp_texture_reference> UITexturingGUI::selectedTexture = boost::none;
 
-boost::optional<scoped_blp_texture_reference> UITexturingGUI::getSelectedTexture()
-{
-  return UITexturingGUI::selectedTexture;
-}
-
-void UITexturingGUI::setSelectedTexture (scoped_blp_texture_reference t)
-{
-  UITexturingGUI::selectedTexture = t;
-}

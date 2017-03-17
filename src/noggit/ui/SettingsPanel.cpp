@@ -49,129 +49,113 @@ namespace util
   }
 }
 
-UISettings::UISettings()
-  : QDialog (nullptr)
+namespace noggit
 {
-  setWindowTitle ("Settings");
+  namespace ui
+  {
+    settings::settings()
+      : QDialog (nullptr)
+    {
+      setWindowTitle ("Settings");
 
-  auto layout (new QFormLayout (this));
+      auto layout (new QFormLayout (this));
 
-  auto browse_row
-    ( [&] (util::file_line_edit** line, char const* title, std::string* var, util::file_line_edit::mode mode)
-      {
-        layout->addRow
-          ( title
-          , *line = new util::file_line_edit (mode, title, this)
-          );
-        connect ( (*line)->actual, &QLineEdit::textChanged
-                , [var] (QString value)
-                  {
-                    *var = value.toStdString();
-                  }
-                );
-      }
-    );
+      auto browse_row
+        ( [&] (util::file_line_edit** line, char const* title, std::string* var, util::file_line_edit::mode mode)
+          {
+            layout->addRow
+              ( title
+              , *line = new util::file_line_edit (mode, title, this)
+              );
+            connect ( (*line)->actual, &QLineEdit::textChanged
+                    , [var] (QString value)
+                      {
+                        *var = value.toStdString();
+                      }
+                    );
+          }
+        );
 
-  browse_row (&gamePathField, "Game Path", &Settings::getInstance()->gamePath, util::file_line_edit::directories);
-  browse_row (&projectPathField, "Project Path", &Settings::getInstance()->projectPath, util::file_line_edit::directories);
-  browse_row (&wodPathField, "WoD Save Path", &Settings::getInstance()->wodSavePath, util::file_line_edit::directories);
-  browse_row (&importPathField, "Import Path", &Settings::getInstance()->importFile, util::file_line_edit::files);
-  browse_row (&wmvLogPathField, "WMV Log Path", &Settings::getInstance()->wmvLogFile, util::file_line_edit::files);
+      browse_row (&gamePathField, "Game Path", &Settings::getInstance()->gamePath, util::file_line_edit::directories);
+      browse_row (&projectPathField, "Project Path", &Settings::getInstance()->projectPath, util::file_line_edit::directories);
+      browse_row (&wodPathField, "WoD Save Path", &Settings::getInstance()->wodSavePath, util::file_line_edit::directories);
+      browse_row (&importPathField, "Import Path", &Settings::getInstance()->importFile, util::file_line_edit::files);
+      browse_row (&wmvLogPathField, "WMV Log Path", &Settings::getInstance()->wmvLogFile, util::file_line_edit::files);
 
-  layout->addRow ( "View Distance"
-                 , viewDistanceField = new QDoubleSpinBox
-                 );
-  viewDistanceField->setRange (0.f, 1048576.f);
-  connect ( viewDistanceField, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [] (double val)
-            {
-              Settings::getInstance()->mapDrawDistance = val;
-            }
-          );
+      layout->addRow ( "View Distance"
+                     , viewDistanceField = new QDoubleSpinBox
+                     );
+      viewDistanceField->setRange (0.f, 1048576.f);
+      connect ( viewDistanceField, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+              , [] (double val)
+                {
+                  Settings::getInstance()->mapDrawDistance = val;
+                }
+              );
 
-  layout->addRow ( "FarZ"
-                 , farZField = new QDoubleSpinBox
-                 );
-  farZField->setRange (0.f, 1048576.f);
-  connect ( farZField, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
-          , [] (double val)
-            {
-              Settings::getInstance()->FarZ = val;
-            }
-          );
+      layout->addRow ( "FarZ"
+                     , farZField = new QDoubleSpinBox
+                     );
+      farZField->setRange (0.f, 1048576.f);
+      connect ( farZField, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+              , [] (double val)
+                {
+                  Settings::getInstance()->FarZ = val;
+                }
+              );
 
-  layout->addRow ("Tablet support", tabletModeCheck = new QCheckBox ("enabled", this));
-  connect ( tabletModeCheck, &QCheckBox::toggled
-          , [] (bool enabled)
-            {
-              Settings::getInstance()->tabletMode = enabled;
-            }
-          );
+      layout->addRow ("Tablet support", tabletModeCheck = new QCheckBox ("enabled", this));
+      connect ( tabletModeCheck, &QCheckBox::toggled
+              , [] (bool enabled)
+                {
+                  Settings::getInstance()->tabletMode = enabled;
+                }
+              );
 
-  auto warning (new QWidget (this));
-  new QHBoxLayout (warning);
-  auto icon (new QLabel (warning));
-  icon->setPixmap
-    (noggit::render_blp_to_pixmap ("interface/gossipframe/availablequesticon.blp"));
-  warning->layout()->addWidget (icon);
-  warning->layout()->addWidget
-    (new QLabel ("Changes may not take effect until next launch.", warning));
-  layout->addRow (warning);
+      auto warning (new QWidget (this));
+      new QHBoxLayout (warning);
+      auto icon (new QLabel (warning));
+      icon->setPixmap
+        (noggit::render_blp_to_pixmap ("interface/gossipframe/availablequesticon.blp"));
+      warning->layout()->addWidget (icon);
+      warning->layout()->addWidget
+        (new QLabel ("Changes may not take effect until next launch.", warning));
+      layout->addRow (warning);
 
-  auto buttonBox ( new QDialogButtonBox ( QDialogButtonBox::Save
-                                        | QDialogButtonBox::Cancel
-                                        )
-                 );
+      auto buttonBox ( new QDialogButtonBox ( QDialogButtonBox::Save
+                                            | QDialogButtonBox::Cancel
+                                            )
+                     );
 
-  layout->addRow (buttonBox);
+      layout->addRow (buttonBox);
 
-  connect ( buttonBox, &QDialogButtonBox::accepted
-          , [this]
-            {
-              hide();
-              Settings::getInstance()->saveToDisk();
-            }
-          );
+      connect ( buttonBox, &QDialogButtonBox::accepted
+              , [this]
+                {
+                  hide();
+                  Settings::getInstance()->saveToDisk();
+                }
+              );
 
-  connect ( buttonBox, &QDialogButtonBox::rejected
-          , [this]
-            {
-              hide();
-              Settings::getInstance()->readFromDisk();
-            }
-          );
+      connect ( buttonBox, &QDialogButtonBox::rejected
+              , [this]
+                {
+                  hide();
+                  Settings::getInstance()->readFromDisk();
+                }
+              );
+    }
 
-  //! \note the following are commented out since they might be in
-  //! Settings but are things usually toggled with keybindings during
-  //! editing and thus don't really belong here imho.
-
-/*
-  layout->addWidget (new QLabel ("Model Tool", this));
-
-    addChild(randRotCheck = new UICheckBox(358, 211, "Random rotation", &Settings::getInstance()->random_rotation));
-    addChild(randSizeCheck = new UICheckBox(358, 236, "Random size", &Settings::getInstance()->random_size));
-    addChild(randTiltCheck = new UICheckBox(358, 261, "Random tilt", &Settings::getInstance()->random_tilt));
-    addChild(modelStatsCheck = new UICheckBox(358, 286, "Copy model stats", &Settings::getInstance()->copyModelStats));
-
-    addChild(new UIText(22, height()-29, "Changes may not take effect until next launch.", app.getArial12(), eJustifyLeft));
-
-    addChild(new UIButton(width()-110, height()-32, 100, 32, "Save", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", saveSettings, 0));
-    addChild(new UIButton(width()-215, height()-32, 100, 32, "Cancel", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", discardSettingsChanges, 0));
-*/
-}
-
-void UISettings::readInValues()
-{
-  gamePathField->actual->setText (QString::fromStdString (Settings::getInstance()->gamePath));
-  projectPathField->actual->setText (QString::fromStdString (Settings::getInstance()->projectPath));
-  wodPathField->actual->setText (QString::fromStdString (Settings::getInstance()->wodSavePath));
-  importPathField->actual->setText (QString::fromStdString (Settings::getInstance()->importFile));
-  wmvLogPathField->actual->setText (QString::fromStdString (Settings::getInstance()->wmvLogFile));
-  viewDistanceField->setValue (Settings::getInstance()->mapDrawDistance);
-  farZField->setValue (Settings::getInstance()->FarZ);
-  tabletModeCheck->setChecked (Settings::getInstance()->tabletMode);
-//     modelStatsCheck->setState(Settings::getInstance()->copyModelStats);
-//     randRotCheck->setState(Settings::getInstance()->random_rotation);
-//     randSizeCheck->setState(Settings::getInstance()->random_size);
-//     randTiltCheck->setState(Settings::getInstance()->random_tilt);
+    void settings::readInValues()
+    {
+      gamePathField->actual->setText (QString::fromStdString (Settings::getInstance()->gamePath));
+      projectPathField->actual->setText (QString::fromStdString (Settings::getInstance()->projectPath));
+      wodPathField->actual->setText (QString::fromStdString (Settings::getInstance()->wodSavePath));
+      importPathField->actual->setText (QString::fromStdString (Settings::getInstance()->importFile));
+      wmvLogPathField->actual->setText (QString::fromStdString (Settings::getInstance()->wmvLogFile));
+      viewDistanceField->setValue (Settings::getInstance()->mapDrawDistance);
+      farZField->setValue (Settings::getInstance()->FarZ);
+      tabletModeCheck->setChecked (Settings::getInstance()->tabletMode);
+    }
+  }
 }

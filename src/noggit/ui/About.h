@@ -4,8 +4,14 @@
 
 #include <QtWidgets/QWidget>
 
-class UIAbout : public QWidget
+namespace noggit
 {
-public:
-  UIAbout();
-};
+  namespace ui
+  {
+    class about : public QWidget
+    {
+    public:
+      about();
+    };
+  }
+}

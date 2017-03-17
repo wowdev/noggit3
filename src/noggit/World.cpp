@@ -1592,21 +1592,21 @@ unsigned int World::getMapID()
 
 void World::setBaseTexture(math::vector_3d const& pos)
 {
-  if (!!UITexturingGUI::getSelectedTexture())
+  if (!!noggit::ui::selected_texture::get())
   {
     for_all_chunks_on_tile(pos, [](MapChunk* chunk)
     {
       chunk->eraseTextures();
-      chunk->addTexture(*UITexturingGUI::getSelectedTexture());
+      chunk->addTexture(*noggit::ui::selected_texture::get());
     });
   }
 }
 
 void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex)
 {
-  if (!!UITexturingGUI::getSelectedTexture())
+  if (!!noggit::ui::selected_texture::get())
   {
-    for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->switchTexture(tex, *UITexturingGUI::getSelectedTexture()); });
+    for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->switchTexture(tex, *noggit::ui::selected_texture::get()); });
   }
 }
 

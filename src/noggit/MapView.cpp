@@ -18,7 +18,7 @@
 #include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), arial...
 #include <noggit/map_index.hpp>
 #include <noggit/ui/CurrentTexture.h>
-#include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
+#include <noggit/ui/CursorSwitcher.h> // cursor_switcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
@@ -320,24 +320,24 @@ void MapView::changeZoneIDValue (int set)
 
 void MapView::createGUI()
 {
-  objectEditor = new UIObjectEditor(this);
+  objectEditor = new noggit::ui::object_editor(this);
   objectEditor->hide();
 
   _terrain = new QDockWidget ("Raise / Lower", this);
   _terrain->setFeatures ( QDockWidget::DockWidgetMovable
                         | QDockWidget::DockWidgetFloatable
                         );
-  _terrain->setWidget (terrainTool = new ui::terrain_tool());
+  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool());
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
 
 
-  flattenTool = new ui::FlattenTool();
+  flattenTool = new noggit::ui::flatten_blur_tool();
   flattenTool->hide();
 
-  shaderTool = new ui::shader_tool(cursor_color);
+  shaderTool = new noggit::ui::shader_tool(cursor_color);
   shaderTool->hide();
 
-  texturingTool = new ui::texturing_tool (&_camera.position);
+  texturingTool = new noggit::ui::texturing_tool (&_camera.position);
   texturingTool->hide();
 
   guiCurrentTexture = new noggit::ui::current_texture;
@@ -354,18 +354,18 @@ void MapView::createGUI()
               makeCurrent();
               opengl::context::scoped_setter const _ (::gl, context());
 
-              UITexturingGUI::setSelectedTexture (filename);
+              noggit::ui::selected_texture::set (filename);
               guiCurrentTexture->set_texture (filename);
             }
           );
 
 
   // DetailInfoWindow
-  guidetailInfos = new ui::detail_infos;
+  guidetailInfos = new noggit::ui::detail_infos;
   guidetailInfos->hide();
 
   // ZoneIDBrowser
-  ZoneIDBrowser = new ui::zone_id_browser();
+  ZoneIDBrowser = new noggit::ui::zone_id_browser();
   ZoneIDBrowser->hide();
 
   TexturePicker = new noggit::ui::texture_picker (guiCurrentTexture);
@@ -388,7 +388,7 @@ void MapView::createGUI()
             }
           );
 
-  guiWater = new noggit::ui::UIWater();
+  guiWater = new noggit::ui::water();
 
   ZoneIDBrowser->setMapID(_world->getMapID());
   ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
@@ -1109,14 +1109,14 @@ void MapView::createGUI()
   addHotkey (Qt::Key_9, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 9; }, [this] { return _world->IsSelection(eEntry_WMO); });
 
   // Water unable to save warning
-  waterSaveWarning = new ui::water_save_warning;
+  waterSaveWarning = new noggit::ui::water_save_warning;
   waterSaveWarning->hide();
 
   // modelimport
-  objectEditor->modelImport = new UIModelImport(this);
+  objectEditor->modelImport = new noggit::ui::model_import(this);
 
   // helper models
-  HelperModels = new UIHelperModels(this);
+  HelperModels = new noggit::ui::helper_models(this);
 }
 
 MapView::MapView( math::degrees camera_yaw0
@@ -1135,8 +1135,8 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_time (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
-  , _cursor_switcher (new UICursorSwitcher (cursor_color, cursor_type))
-  , _keybindings (new UIHelp)
+  , _cursor_switcher (new noggit::ui::cursor_switcher (cursor_color, cursor_type))
+  , _keybindings (new noggit::ui::help)
 {
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
@@ -1617,11 +1617,11 @@ void MapView::tick (float dt)
             // Pick texture
             TexturePicker->getTextures(*_world->GetCurrentSelection());
           }
-          else  if (_mod_shift_down && !!UITexturingGUI::getSelectedTexture())
+          else  if (_mod_shift_down && !!noggit::ui::selected_texture::get())
           {
             if (mViewMode == eViewMode_3D && !underMap)
             {
-              texturingTool->paint(_cursor_pos, dt, *UITexturingGUI::getSelectedTexture());
+              texturingTool->paint(_cursor_pos, dt, *noggit::ui::selected_texture::get());
             }
             else if (mViewMode == eViewMode_2D)
             {
@@ -1631,7 +1631,7 @@ void MapView::tick (float dt)
                                   );
 
               pos += _camera.position;
-              texturingTool->paint(pos, dt, *UITexturingGUI::getSelectedTexture());
+              texturingTool->paint(pos, dt, *noggit::ui::selected_texture::get());
             }
           }
           break;

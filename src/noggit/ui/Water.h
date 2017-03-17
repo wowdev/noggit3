@@ -15,10 +15,10 @@ namespace noggit
 {
   namespace ui
   {
-    class UIWater : public QWidget
+    class water : public QWidget
     {
     public:
-      UIWater();
+      water();
 
       void updatePos(tile_index const& newTile);
       void updateData();
