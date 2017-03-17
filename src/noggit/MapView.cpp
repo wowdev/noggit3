@@ -1231,25 +1231,6 @@ MapView::MapView( math::degrees camera_yaw0
   look = false;
   mViewMode = eViewMode_3D;
 
-  connect (this, &QObject::destroyed
-          , []
-            {
-              TextureManager::report();
-              ModelManager::report();
-              WMOManager::report();
-
-              app.asyncLoader->stop();
-              app.asyncLoader->join();
-
-              MPQArchive::unloadAllMPQs();
-              gListfile.clear();
-
-              LogDebug << "Exited" << std::endl;
-
-              QApplication::quit();
-            }
-          );
-
   init_tablet();
 
   _startup_time.start();
