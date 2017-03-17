@@ -356,10 +356,8 @@ void MapView::createGUI()
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
 
 
-
-  guiCurrentTexture = new noggit::ui::current_texture;
   TexturePalette = new noggit::ui::tileset_chooser;
-  connect ( guiCurrentTexture, &noggit::ui::current_texture::clicked
+  connect ( texturingTool->current_texture, &noggit::ui::current_texture::clicked
           , [=]
             {
               TexturePalette->setVisible (!TexturePalette->isVisible());
@@ -372,7 +370,7 @@ void MapView::createGUI()
               opengl::context::scoped_setter const _ (::gl, context());
 
               noggit::ui::selected_texture::set (filename);
-              guiCurrentTexture->set_texture (filename);
+              texturingTool->current_texture->set_texture (filename);
             }
           );
 
@@ -381,7 +379,7 @@ void MapView::createGUI()
   guidetailInfos = new noggit::ui::detail_infos;
   guidetailInfos->hide();
 
-  TexturePicker = new noggit::ui::texture_picker (guiCurrentTexture);
+  TexturePicker = new noggit::ui::texture_picker (texturingTool->current_texture);
   TexturePicker->hide();
 
   connect ( TexturePicker, &noggit::ui::texture_picker::shift_left

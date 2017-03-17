@@ -2,10 +2,11 @@
 
 #include <noggit/ui/texturing_tool.hpp>
 
-#include <noggit/tool_enums.hpp>
-#include <noggit/ui/texture_swapper.hpp>
 #include <noggit/Misc.h>
 #include <noggit/World.h>
+#include <noggit/tool_enums.hpp>
+#include <noggit/ui/CurrentTexture.h>
+#include <noggit/ui/texture_swapper.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
@@ -29,6 +30,9 @@ namespace noggit
       _texture_brush.init();
       _inner_brush.init();
       _spray_brush.init();
+
+      current_texture = new noggit::ui::current_texture;
+      layout->addRow (current_texture);
 
       _hardness_spin = new QDoubleSpinBox (this);
       _hardness_spin->setRange (0.0f, 1.0f);

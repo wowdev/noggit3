@@ -16,6 +16,7 @@ namespace noggit
 {
   namespace ui
   {
+    class current_texture;
     class texture_swapper;
 
     class texturing_tool : public QWidget
@@ -42,6 +43,8 @@ namespace noggit
 
       void update_brushes();
       void bind_brush_texture();
+
+      ui::current_texture* current_texture;
 
     private:
       // slider functions
