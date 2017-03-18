@@ -1099,6 +1099,31 @@ bool World::for_all_chunks_in_range (noggit::chunk_kernel kernel)
                                  : post_nop
                                  );
 }
+bool World::for_all_chunks_in_range (noggit::chunk_stencil_kernel kernel)
+{
+  std::function<void (MapChunk*)> const post_nop ([] (MapChunk*){});
+  std::function<void (MapChunk*)> const post_recalc_normals
+    ([this] (MapChunk* chunk) { recalc_norms (chunk); });
+
+  return for_all_chunks_in_range
+    ( kernel.pos
+    , kernel.radius
+    , [&] (MapChunk* chunk)
+      {
+        return kernel.fun ( chunk
+                          , [this] (float x, float z)
+                            {
+                              math::vector_3d vec;
+                              auto res (GetVertex (x, z, &vec));
+                              return boost::make_optional (res, vec.y);
+                            }
+                          );
+      }
+    , kernel.recalc_normals_after_function
+    ? post_recalc_normals
+    : post_nop
+    );
+}
 
 template<typename Fun>
   bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun)
@@ -1153,31 +1178,6 @@ void World::changeTerrain(math::vector_3d const& pos, float change, float radius
     , [&] (MapChunk* chunk)
       {
         return chunk->changeTerrain(pos, change, radius, BrushType, inner_radius);
-      }
-    , [this] (MapChunk* chunk)
-      {
-        recalc_norms (chunk);
-      }
-    );
-}
-
-void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType)
-{
-  for_all_chunks_in_range
-    ( pos, radius
-    , [&] (MapChunk* chunk)
-      {
-        return chunk->blurTerrain ( pos
-                                  , remain
-                                  , radius
-                                  , BrushType
-                                  , [this] (float x, float z) -> boost::optional<float>
-                                    {
-                                      math::vector_3d vec;
-                                      auto res (GetVertex (x, z, &vec));
-                                      return boost::make_optional (res, vec.y);
-                                    }
-                                  );
       }
     , [this] (MapChunk* chunk)
       {
