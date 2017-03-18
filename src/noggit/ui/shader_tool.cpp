@@ -2,6 +2,7 @@
 
 #include <noggit/ui/shader_tool.hpp>
 #include <noggit/MapChunk.h>
+#include <util/qt/overload.hpp>
 
 #include <qt-color-widgets/color_selector.hpp>
 
@@ -52,7 +53,7 @@ namespace noggit
 
       layout->addRow("Color:", color_picker);
 
-      connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   _radius = v;
@@ -61,7 +62,7 @@ namespace noggit
                 }
               );
 
-      connect ( _radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _radius_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   _radius = v;
@@ -70,7 +71,7 @@ namespace noggit
                 }
               );
 
-      connect ( _speed_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _speed_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   _speed = v;
@@ -79,7 +80,7 @@ namespace noggit
                 }
               );
 
-      connect ( _speed_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _speed_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   _speed = v / 100.0f;

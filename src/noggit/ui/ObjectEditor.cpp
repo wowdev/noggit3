@@ -16,6 +16,7 @@
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
+#include <util/qt/overload.hpp>
 
 #include <QGridLayout>
 #include <QGroupBox>
@@ -153,42 +154,42 @@ namespace noggit
       scaleRangeStart->setValue(env->minScale);
       scaleRangeEnd->setValue(env->maxScale);
 
-      connect ( rotRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( rotRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
                     env->minRotation = v;
                 }
       );
 
-      connect ( rotRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( rotRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
                     env->maxRotation = v;
                 }
       );
 
-      connect ( tiltRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( tiltRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
                     env->minTilt = v;
                 }
       );
 
-      connect ( tiltRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( tiltRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
                     env->maxTilt = v;
                 }
       );
 
-      connect ( scaleRangeStart, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( scaleRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
                     env->minScale = v;
                 }
       );
 
-      connect ( scaleRangeEnd, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( scaleRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
                     env->maxScale = v;
@@ -215,7 +216,7 @@ namespace noggit
 
       pasteModeGroup->button(pasteMode)->setChecked(true);
 
-      connect ( pasteModeGroup, static_cast<void (QButtonGroup::*) (int)> (&QButtonGroup::buttonClicked)
+      connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
                 {
                     pasteMode = id;

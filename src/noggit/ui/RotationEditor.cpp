@@ -7,6 +7,7 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/WMOInstance.h>
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
@@ -70,21 +71,21 @@ namespace noggit
       _scale->setSingleStep(0.1f);
 
 
-      connect ( _rotation_x, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _rotation_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   rotationVect->x = v;
                   maybe_updateWMO();
                 }
               );
-      connect ( _rotation_z, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _rotation_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   rotationVect->z = v;
                   maybe_updateWMO();
                 }
               );
-      connect ( _rotation_y, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _rotation_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   rotationVect->y = v;
@@ -92,21 +93,21 @@ namespace noggit
                 }
               );
 
-      connect ( _position_x, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _position_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   posVect->x = v;
                   maybe_updateWMO();
                 }
               );
-      connect ( _position_z, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _position_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   posVect->z = v;
                   maybe_updateWMO();
                 }
               );
-      connect ( _position_y, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _position_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   posVect->y = v;
@@ -114,7 +115,7 @@ namespace noggit
                 }
               );
 
-      connect ( _scale, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _scale, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   *scale = v;

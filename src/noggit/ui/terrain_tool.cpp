@@ -5,6 +5,7 @@
 #include <noggit/Environment.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
@@ -150,7 +151,7 @@ namespace noggit
       _vertex_type_group->hide();
       layout->addRow (_vertex_type_group);
 
-      connect ( _type_button_group, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
+      connect ( _type_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
                 {
                   _edit_type = id;
@@ -158,7 +159,7 @@ namespace noggit
                 }
               );
 
-      connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   _radius = v;
@@ -167,7 +168,7 @@ namespace noggit
                  }
               );
 
-      connect ( _radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _radius_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   _radius = v;
@@ -176,7 +177,7 @@ namespace noggit
                 }
               );
 
-      connect ( _inner_radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _inner_radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   _inner_radius = v;
@@ -185,7 +186,7 @@ namespace noggit
                  }
               );
 
-      connect ( _inner_radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _inner_radius_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   _inner_radius = v / 100.0f;
@@ -194,7 +195,7 @@ namespace noggit
                 }
               );
 
-      connect ( _speed_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _speed_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
                 , [&] (double v)
                   {
                     _speed = v;
@@ -203,7 +204,7 @@ namespace noggit
                   }
                 );
 
-      connect ( _speed_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _speed_slider, &QSlider::valueChanged
                 , [&] (int v)
                   {
                     _speed = v / 100.0f;
@@ -212,21 +213,21 @@ namespace noggit
                   }
                 );
 
-      connect ( _vertex_button_group, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
+      connect ( _vertex_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
                 {
                   _vertex_mode = id;
                 }
               );
 
-      connect ( _angle_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _angle_slider, &QSlider::valueChanged
                 , [&] (int v)
                   {
                     setAngle (v);
                   }
                 );
 
-      connect ( _orientation_dial, static_cast<void (QDial::*) (int)> (&QDial::valueChanged)
+      connect ( _orientation_dial, &QDial::valueChanged
                 , [this] (int v)
                   {
                     setOrientation(v + 90.0f);
