@@ -5,8 +5,8 @@
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/ModelInstance.h>
-#include <noggit/Settings.h> // gWorld
-#include <noggit/World.h> // gWorld
+#include <noggit/Settings.h>
+#include <noggit/World.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
@@ -57,6 +57,7 @@ void ModelInstance::draw ( math::frustum const& frustum
                          , bool force_box
                          , bool all_boxes
                          , bool draw_fog
+                         , bool is_current_selection
                          )
 {
   if(((pos - camera).length() - model->rad * sc) >= cull_distance)
@@ -88,9 +89,7 @@ void ModelInstance::draw ( math::frustum const& frustum
   }
   model->draw (draw_fog);
 
-  bool currentSelection = gWorld->IsSelection(eEntry_Model) && boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1 == d1;
-
-  if (currentSelection || force_box)
+  if (is_current_selection || force_box)
   {
     if (draw_fog)
       gl.disable(GL_FOG);
@@ -111,7 +110,7 @@ void ModelInstance::draw ( math::frustum const& frustum
                                  , TransformCoordsForModel(model->header.BoundingBoxMax)
                                  ).draw (color, 1.0f);
 
-    if (currentSelection)
+    if (is_current_selection)
     {
       opengl::primitives::wire_box ( TransformCoordsForModel(model->header.VertexBoxMin)
                                    , TransformCoordsForModel(model->header.VertexBoxMax)
@@ -207,7 +206,6 @@ void ModelInstance::draw_wmo ( const math::vector_3d& ofs
 {
   math::vector_3d tpos(ofs + pos);
   math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
-  //if ( (tpos - gWorld->camera).length_squared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
   if (!frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
   opengl::scoped::matrix_pusher const matrix;

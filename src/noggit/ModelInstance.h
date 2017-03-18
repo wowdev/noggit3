@@ -72,6 +72,7 @@ public:
             , bool force_box
             , bool all_boxes
             , bool draw_fog
+            , bool is_current_selection
             );
   void drawMapTile();
   //  void drawHighlight();
