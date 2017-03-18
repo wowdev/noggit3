@@ -9,20 +9,18 @@ namespace noggit
   namespace ui
   {
     current_texture::current_texture()
-      : QWidget (nullptr)
+      : clickable_label (nullptr)
     {
-      setWindowTitle ("Texture");
-      setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
-
-      auto layout (new QGridLayout (this));
-      layout->setContentsMargins (QMargins (0, 0, 0, 0));
-      layout->addWidget (_texture = new clickable_label (this), 0, 0);
-
-      _texture->setMinimumSize (64, 64);
-
-      connect (_texture, &clickable_label::clicked, this, &current_texture::clicked);
+      QSizePolicy policy (QSizePolicy::Expanding, QSizePolicy::Expanding);
+      policy.setHeightForWidth (true);
+      setSizePolicy (policy);
 
       set_texture ("tileset\\generic\\black.blp");
+    }
+
+    int current_texture::heightForWidth (int width) const
+    {
+      return width;
     }
 
     void current_texture::set_texture (std::string const& texture)
@@ -34,7 +32,7 @@ namespace noggit
     void current_texture::update_texture()
     {
       show();
-      _texture->setPixmap (render_blp_to_pixmap (_filename, _texture->width(), _texture->height()));
+      setPixmap (render_blp_to_pixmap (_filename, width(), height()));
     }
   }
 }
