@@ -22,7 +22,7 @@ namespace noggit
       QLabel* _filename_label;
       std::string _filename;
 
-      virtual void resizeEvent (QResizeEvent* event) override
+      virtual void resizeEvent (QResizeEvent*) override
       {
         update_texture();
       }
