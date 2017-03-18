@@ -103,12 +103,12 @@ namespace noggit
 
     chunk_kernel shader_tool::changeShader(math::vector_3d const& pos, float dt, bool add)
     {
-      return { [=] (MapChunk* chunk)
+      return { pos
+             , _radius
+             , [=] (MapChunk* chunk)
                {
                  return chunk->ChangeMCCV (pos, _color, 2.0f * dt * _speed, _radius, add);
                }
-             , pos
-             , _radius
              };
     }
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
+#include <noggit/tool_kernel.hpp>
 
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
@@ -21,7 +22,7 @@ namespace noggit
     public:
       flatten_blur_tool();
 
-      void flatten(math::vector_3d const& cursor_pos, float dt);
+      chunk_kernel flatten(math::vector_3d const& cursor_pos, float dt);
       void blur(math::vector_3d const& cursor_pos, float dt);
 
       void nextFlattenType();
