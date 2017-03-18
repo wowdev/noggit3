@@ -84,7 +84,6 @@ public:
 
   void setup(int anim, int time);
   void draw();
-  void drawHighlight();
 
   friend class PlaneParticleEmitter;
   friend class SphereParticleEmitter;

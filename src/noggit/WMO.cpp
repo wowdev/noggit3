@@ -18,32 +18,6 @@
 #include <string>
 #include <vector>
 
-void WMOHighlight(math::vector_4d color)
-{
-  gl.disable(GL_ALPHA_TEST);
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.disable(GL_CULL_FACE);
-  opengl::texture::set_active_texture (0);
-  opengl::texture::disable_texture();
-  opengl::texture::set_active_texture (1);
-  opengl::texture::disable_texture();
-  gl.color4fv(color);
-  gl.materialfv(GL_FRONT, GL_EMISSION, color);
-  gl.depthMask(GL_FALSE);
-}
-
-void WMOUnhighlight()
-{
-  gl.enable(GL_ALPHA_TEST);
-  gl.disable(GL_BLEND);
-  gl.enable(GL_CULL_FACE);
-  opengl::texture::set_active_texture (0);
-  opengl::texture::enable_texture();
-  gl.color4fv(math::vector_4d(1, 1, 1, 1));
-  gl.depthMask(GL_TRUE);
-}
-
 const std::string& WMO::filename() const
 {
   return _filename;
@@ -555,24 +529,17 @@ WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
   else name = "(no name)";
 }
 
-void setGLColor(unsigned int col)
+namespace
 {
-  //gl.color4ubv((GLubyte*)(&col));
-  GLubyte r, g, b, a;
-  a = (col & 0xFF000000) >> 24;
-  r = (col & 0x00FF0000) >> 16;
-  g = (col & 0x0000FF00) >> 8;
-  b = (col & 0x000000FF);
-  gl.color4ub(r, g, b, 1);
-}
-
-math::vector_4d colorFromInt(unsigned int col) {
-  GLubyte r, g, b, a;
-  a = (col & 0xFF000000) >> 24;
-  r = (col & 0x00FF0000) >> 16;
-  g = (col & 0x0000FF00) >> 8;
-  b = (col & 0x000000FF);
-  return math::vector_4d(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+  math::vector_4d colorFromInt(unsigned int col)
+  {
+    GLubyte r, g, b, a;
+    a = (col & 0xFF000000) >> 24;
+    r = (col & 0x00FF0000) >> 16;
+    g = (col & 0x0000FF00) >> 8;
+    b = (col & 0x000000FF);
+    return math::vector_4d(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+  }
 }
 struct WMOGroupHeader {
   uint32_t nameStart, nameStart2, flags;

@@ -157,14 +157,17 @@ math::vector_3d fixCoordSystem(math::vector_3d v)
   return math::vector_3d(v.x, v.z, -v.y);
 }
 
-math::vector_3d fixCoordSystem2(math::vector_3d v)
+namespace
 {
-  return math::vector_3d(v.x, v.z, v.y);
-}
+  math::vector_3d fixCoordSystem2(math::vector_3d v)
+  {
+    return math::vector_3d(v.x, v.z, v.y);
+  }
 
-math::quaternion fixCoordSystemQuat(math::quaternion v)
-{
-  return math::quaternion(-v.x, -v.z, v.y, v.w);
+  math::quaternion fixCoordSystemQuat(math::quaternion v)
+  {
+    return math::quaternion(-v.x, -v.z, v.y, v.w);
+  }
 }
 
 
@@ -702,32 +705,6 @@ void ModelRenderPass::deinit()
     opengl::texture::set_active_texture (0);
   }
   //gl.color4f(1,1,1,1); //???
-}
-
-void ModelHighlight(math::vector_4d color)
-{
-  gl.disable(GL_ALPHA_TEST);
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.disable(GL_CULL_FACE);
-  opengl::texture::set_active_texture (0);
-  opengl::texture::disable_texture();
-  opengl::texture::set_active_texture (1);
-  opengl::texture::disable_texture();
-  gl.color4fv(color);
-  gl.materialfv(GL_FRONT, GL_EMISSION, color);
-  //  gl.depthMask( GL_FALSE );
-}
-
-void ModelUnhighlight()
-{
-  gl.enable(GL_ALPHA_TEST);
-  gl.disable(GL_BLEND);
-  gl.enable(GL_CULL_FACE);
-  opengl::texture::set_active_texture (0);
-  opengl::texture::enable_texture();
-  gl.color4fv(math::vector_4d(1, 1, 1, 1));
-  //  gl.depthMask( GL_TRUE );
 }
 
 void TextureAnim::calc(int anim, int time)

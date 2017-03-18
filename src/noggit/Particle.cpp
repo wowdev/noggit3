@@ -8,23 +8,6 @@
 
 static const unsigned int MAX_PARTICLES = 10000;
 
-math::vector_4d fromARGB(uint32_t color)
-{
-  const float a = ((color & 0xFF000000) >> 24) / 255.0f;
-  const float r = ((color & 0x00FF0000) >> 16) / 255.0f;
-  const float g = ((color & 0x0000FF00) >> 8) / 255.0f;
-  const float b = ((color & 0x000000FF)) / 255.0f;
-  return math::vector_4d(r, g, b, a);
-}
-math::vector_4d fromBGRA(uint32_t color)
-{
-  const float b = ((color & 0xFF000000) >> 24) / 255.0f;
-  const float g = ((color & 0x00FF0000) >> 16) / 255.0f;
-  const float r = ((color & 0x0000FF00) >> 8) / 255.0f;
-  const float a = ((color & 0x000000FF)) / 255.0f;
-  return math::vector_4d(r, g, b, a);
-}
-
 template<class T>
 T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 {
@@ -413,201 +396,56 @@ void ParticleSystem::draw()
   //gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-void ModelHighlight(math::vector_4d color);
-void ModelUnhighlight();
-void ParticleSystem::drawHighlight()
+namespace
 {
-  /*
-  // just draw points:
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-  gl.color4f(1,1,1,1);
-  gl.begin(GL_POINTS);
-  for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-  gl.vertex3fv(it->tpos);
-  }
-  gl.end();
-  gl.enable(GL_LIGHTING);
-  opengl::texture::enable_texture();
-  */
-
-  math::vector_3d bv0, bv1, bv2, bv3;
-
-  // setup blend mode
-  switch (blend) {
-  case 0:
-    gl.disable(GL_BLEND);
-    gl.disable(GL_ALPHA_TEST);
-    break;
-  case 1:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_COLOR, GL_ONE);
-    gl.disable(GL_ALPHA_TEST);
-    break;
-  case 2:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl.disable(GL_ALPHA_TEST);
-    break;
-  case 3:
-    gl.disable(GL_BLEND);
-    gl.enable(GL_ALPHA_TEST);
-    break;
-  case 4:
-    gl.enable(GL_BLEND);
-    gl.disable(GL_ALPHA_TEST);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-    break;
-  }
-
-  gl.disable(GL_LIGHTING);
-  gl.disable(GL_CULL_FACE);
-  gl.depthMask(GL_FALSE);
-
-  //  gl.pushName(texture);
-  _texture->bind();
-
-  math::matrix_4x4 mbb (math::matrix_4x4::unit);
-
-  ModelHighlight(math::vector_4d(1.00, 0.25, 0.25, 0.50));
-  if (billboard) {
-    // get a billboard matrix
-    math::matrix_4x4 mtrans (math::matrix_4x4::uninitialized);
-    gl.getFloatv(GL_MODELVIEW_MATRIX, mtrans);
-    mtrans = mtrans.transposed();
-    mtrans = mtrans.inverted();
-    math::vector_3d camera = mtrans * math::vector_3d(0, 0, 0);
-    math::vector_3d look = (camera - pos).normalize();
-    math::vector_3d up = ((mtrans * math::vector_3d(0, 1, 0)) - camera).normalize();
-    math::vector_3d right = (up % look).normalize();
-    up = (look % right).normalize();
-    // calculate the billboard matrix
-    mbb (0, 1, right.x);
-    mbb (1, 1, right.y);
-    mbb (2, 1, right.z);
-    mbb (0, 2, up.x);
-    mbb (1, 2, up.y);
-    mbb (2, 2, up.z);
-    mbb (0, 0, look.x);
-    mbb (1, 0, look.y);
-    mbb (2, 0, look.z);
-  }
-
-  if (type == 0 || type == 2) {
-    //! \todo  figure out type 2 (deeprun tram subway sign)
-    // - doesn't seem to be any different from 0 -_-
-    // regular particles
-    float f = 0.707106781f; // sqrt(2)/2
-    if (billboard) {
-      bv0 = mbb * math::vector_3d(0, -f, +f);
-      bv1 = mbb * math::vector_3d(0, +f, +f);
-      bv2 = mbb * math::vector_3d(0, +f, -f);
-      bv3 = mbb * math::vector_3d(0, -f, -f);
-    }
-    else {
-      bv0 = math::vector_3d(-f, 0, +f);
-      bv1 = math::vector_3d(+f, 0, +f);
-      bv2 = math::vector_3d(+f, 0, -f);
-      bv3 = math::vector_3d(-f, 0, -f);
-    }
-    //! \todo  per-particle rotation in a non-expensive way?? :|
-
-    gl.begin(GL_QUADS);
-    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-      //gl.color4fv(it->color);
-      gl.color4f(1.0f, 0.25f, 0.25f, it->color.w*0.5f);
-
-      gl.texCoord2fv(tiles[it->tile].tc[0]);
-      gl.vertex3fv(it->pos + bv0 * it->size);
-
-      gl.texCoord2fv(tiles[it->tile].tc[1]);
-      gl.vertex3fv(it->pos + bv1 * it->size);
-
-      gl.texCoord2fv(tiles[it->tile].tc[2]);
-      gl.vertex3fv(it->pos + bv2 * it->size);
-
-      gl.texCoord2fv(tiles[it->tile].tc[3]);
-      gl.vertex3fv(it->pos + bv3 * it->size);
-    }
-    gl.end();
-  }
-  else if (type == 1) {
-    // particles from origin to position
-    bv0 = mbb * math::vector_3d(0, -1.0f, 0);
-    bv1 = mbb * math::vector_3d(0, +1.0f, 0);
-
-    gl.begin(GL_QUADS);
-    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-      gl.color4fv(it->color);
-
-      gl.texCoord2fv(tiles[it->tile].tc[0]);
-      gl.vertex3fv(it->pos + bv0 * it->size);
-
-      gl.texCoord2fv(tiles[it->tile].tc[1]);
-      gl.vertex3fv(it->pos + bv1 * it->size);
-
-      gl.texCoord2fv(tiles[it->tile].tc[2]);
-      gl.vertex3fv(it->origin + bv1 * it->size);
-
-      gl.texCoord2fv(tiles[it->tile].tc[3]);
-      gl.vertex3fv(it->origin + bv0 * it->size);
-    }
-    gl.end();
-  }
-  ModelUnhighlight();
-  gl.enable(GL_LIGHTING);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.depthMask(GL_TRUE);
-  gl.color4f(1, 1, 1, 1);
-  //  gl.popName();
-}
-//Generates the rotation matrix based on spread
-math::matrix_4x4 CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
-{
-  int i, j;
-  float a[2], c[2], s[2];
-
-  math::matrix_4x4 SpreadMat (math::matrix_4x4::unit);
-
-  a[0] = misc::randfloat(-Spread1, Spread1) / 2.0f;
-  a[1] = misc::randfloat(-Spread2, Spread2) / 2.0f;
-
-  /*SpreadMat.m[0][0]*=l;
-  SpreadMat.m[1][1]*=l;
-  SpreadMat.m[2][2]*=w;*/
-
-  for (i = 0; i<2; ++i)
+  //Generates the rotation matrix based on spread
+  math::matrix_4x4 CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
   {
-    c[i] = cos(a[i]);
-    s[i] = sin(a[i]);
+    int i, j;
+    float a[2], c[2], s[2];
+
+    math::matrix_4x4 SpreadMat (math::matrix_4x4::unit);
+
+    a[0] = misc::randfloat(-Spread1, Spread1) / 2.0f;
+    a[1] = misc::randfloat(-Spread2, Spread2) / 2.0f;
+
+    /*SpreadMat.m[0][0]*=l;
+    SpreadMat.m[1][1]*=l;
+    SpreadMat.m[2][2]*=w;*/
+
+    for (i = 0; i<2; ++i)
+    {
+      c[i] = cos(a[i]);
+      s[i] = sin(a[i]);
+    }
+
+    {
+      math::matrix_4x4 Temp (math::matrix_4x4::unit);
+      Temp (1, 1, c[0]);
+      Temp (2, 1, s[0]);
+      Temp (2, 2, c[0]);
+      Temp (1, 2, -s[0]);
+
+      SpreadMat = SpreadMat*Temp;
+    }
+
+    {
+      math::matrix_4x4 Temp (math::matrix_4x4::unit);
+      Temp (0, 0, c[1]);
+      Temp (1, 0, s[1]);
+      Temp (1, 1, c[1]);
+      Temp (0, 1, -s[1]);
+
+      SpreadMat = SpreadMat*Temp;
+    }
+
+    float Size = std::abs(c[0])*l + std::abs(s[0])*w;
+    for (i = 0; i<3; ++i)
+      for (j = 0; j<3; j++)
+        SpreadMat (i, j, SpreadMat (i, j) * Size);
+
+    return SpreadMat;
   }
-
-  {
-    math::matrix_4x4 Temp (math::matrix_4x4::unit);
-    Temp (1, 1, c[0]);
-    Temp (2, 1, s[0]);
-    Temp (2, 2, c[0]);
-    Temp (1, 2, -s[0]);
-
-    SpreadMat = SpreadMat*Temp;
-  }
-
-  {
-    math::matrix_4x4 Temp (math::matrix_4x4::unit);
-    Temp (0, 0, c[1]);
-    Temp (1, 0, s[1]);
-    Temp (1, 1, c[1]);
-    Temp (0, 1, -s[1]);
-
-    SpreadMat = SpreadMat*Temp;
-  }
-
-  float Size = std::abs(c[0])*l + std::abs(s[0])*w;
-  for (i = 0; i<3; ++i)
-    for (j = 0; j<3; j++)
-      SpreadMat (i, j, SpreadMat (i, j) * Size);
-
-  return SpreadMat;
 }
 
 Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float /*spr2*/)
