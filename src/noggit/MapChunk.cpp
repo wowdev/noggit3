@@ -22,8 +22,11 @@
 #include <iostream>
 #include <map>
 
-GLuint Contour = 0;
-float CoordGen[4];
+namespace
+{
+  GLuint Contour = 0;
+  float CoordGen[4];
+}
 static const int CONTOUR_WIDTH = 128;
 
 static const float texDetail = 8.0f;
