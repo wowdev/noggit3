@@ -324,11 +324,7 @@ void MapIndex::reloadTile(const tile_index& tile)
   {
     mTiles[tile.z][tile.x].tile = nullptr;
 
-    std::stringstream filename;
-    filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
-
-    mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha);
-    enterTile(tile_index(cx, cz));
+    enterTile (tile);
   }
 }
 
