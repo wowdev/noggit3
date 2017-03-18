@@ -16,7 +16,7 @@ namespace noggit
 {
   namespace ui
   {
-    terrain_tool::terrain_tool()
+    terrain_tool::terrain_tool (World* world)
       : QWidget(nullptr)
       , _radius(15.0f)
       , _speed(2.0f)
@@ -221,55 +221,56 @@ namespace noggit
               );
 
       connect ( _angle_slider, &QSlider::valueChanged
-                , [&] (int v)
+              , [this, world] (int v)
                   {
-                    setAngle (v);
+                    setAngle (world, v);
                   }
                 );
 
       connect ( _orientation_dial, &QDial::valueChanged
-                , [this] (int v)
+              , [this, world] (int v)
                   {
-                    setOrientation(v + 90.0f);
+                    setOrientation (world, v + 90.0f);
                   }
                 );
     }
 
-    void terrain_tool::changeTerrain(math::vector_3d const& pos, float dt)
+    void terrain_tool::changeTerrain
+      (World* world, math::vector_3d const& pos, float dt)
     {
       if(_edit_type != eTerrainType_Vertex)
       {
-        gWorld->changeTerrain(pos, dt*_speed, _radius, _edit_type, _inner_radius);
+        world->changeTerrain(pos, dt*_speed, _radius, _edit_type, _inner_radius);
       }
       else
       {
         // < 0 ==> control is pressed
         if (dt >= 0.0f)
         {
-          gWorld->selectVertices(pos, _radius);
+          world->selectVertices(pos, _radius);
         }
         else
         {
-          if (gWorld->deselectVertices(pos, _radius))
+          if (world->deselectVertices(pos, _radius))
           {
             _vertex_angle = math::degrees (0.0f);
             _vertex_orientation = math::degrees (0.0f);
-            gWorld->clearVertexSelection();
+            world->clearVertexSelection();
           }
         }
       }
     }
 
-    void terrain_tool::moveVertices(float dt)
+    void terrain_tool::moveVertices (World* world, float dt)
     {
-      gWorld->moveVertices(dt * _speed);
+      world->moveVertices(dt * _speed);
     }
 
-    void terrain_tool::flattenVertices()
+    void terrain_tool::flattenVertices (World* world)
     {
       if (_edit_type == eTerrainType_Vertex)
       {
-        gWorld->flattenVertices (gWorld->vertexCenter().y);
+        world->flattenVertices (world->vertexCenter().y);
       }
     }
 
@@ -300,12 +301,12 @@ namespace noggit
       _speed_spin->setValue(_speed + change);
     }
 
-    void terrain_tool::changeOrientation(float change)
+    void terrain_tool::changeOrientation (World* world, float change)
     {
-      setOrientation (_vertex_orientation._ + change);
+      setOrientation (world, _vertex_orientation._ + change);
     }
 
-    void terrain_tool::setOrientation (float orientation)
+    void terrain_tool::setOrientation (World* world, float orientation)
     {
       if (_edit_type == eTerrainType_Vertex)
       {
@@ -323,44 +324,44 @@ namespace noggit
         _vertex_orientation = math::degrees (orientation);
         _orientation_dial->setSliderPosition (_vertex_orientation._ - 90.0f);
 
-        updateVertices();
+        updateVertices (world);
       }
     }
 
-    void terrain_tool::setOrientRelativeTo(math::vector_3d const& pos)
+    void terrain_tool::setOrientRelativeTo (World* world, math::vector_3d const& pos)
     {
       if (_edit_type == eTerrainType_Vertex)
       {
-        math::vector_3d const& center = gWorld->vertexCenter();
+        math::vector_3d const& center = world->vertexCenter();
         _vertex_orientation = math::radians (std::atan2(center.z - pos.z, center.x - pos.x));
-        updateVertices();
+        updateVertices (world);
       }
     }
 
-    void terrain_tool::changeAngle(float change)
+    void terrain_tool::changeAngle (World* world, float change)
     {
-      setAngle (_vertex_angle._ + change);
+      setAngle (world, _vertex_angle._ + change);
     }
 
-    void terrain_tool::setAngle (float angle)
+    void terrain_tool::setAngle (World* world, float angle)
     {
       if (_edit_type == eTerrainType_Vertex)
       {
         QSignalBlocker const blocker (_angle_slider);
         _vertex_angle = math::degrees (std::max(-89.0f, std::min(89.0f, angle)));
         _angle_slider->setSliderPosition (_vertex_angle._);
-        updateVertices();
+        updateVertices (world);
       }
     }
 
-    void terrain_tool::updateVertices()
+    void terrain_tool::updateVertices (World* world)
     {
-      gWorld->orientVertices ( _vertex_mode == eVertexMode_Mouse && !!_cursor_pos
-                             ? *_cursor_pos
-                             : gWorld->vertexCenter()
-                             , _vertex_angle
-                             , _vertex_orientation
-                             );
+      world->orientVertices ( _vertex_mode == eVertexMode_Mouse && !!_cursor_pos
+                            ? *_cursor_pos
+                            : world->vertexCenter()
+                            , _vertex_angle
+                            , _vertex_orientation
+                            );
     }
 
     void terrain_tool::updateVertexGroup()

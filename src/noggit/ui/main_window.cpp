@@ -211,6 +211,7 @@ namespace noggit
                       {
                         enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);
                       }
+                    , world
                     )
                 );
               uidFixWindow->show();

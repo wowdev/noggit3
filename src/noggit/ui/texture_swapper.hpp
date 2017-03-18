@@ -9,6 +9,8 @@
 
 #include <boost/optional.hpp>
 
+class World;
+
 namespace noggit
 {
   namespace ui
@@ -16,7 +18,10 @@ namespace noggit
     class texture_swapper : public QWidget
     {
     public:
-      texture_swapper (QWidget* parent, const math::vector_3d* camera_pos);
+      texture_swapper ( QWidget* parent
+                      , const math::vector_3d* camera_pos
+                      , World*
+                      );
 
       boost::optional<scoped_blp_texture_reference> const& current_texture() const
       {

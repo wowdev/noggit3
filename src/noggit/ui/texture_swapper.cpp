@@ -14,7 +14,10 @@ namespace noggit
 {
   namespace ui
   {
-    texture_swapper::texture_swapper (QWidget* parent, const math::vector_3d* camera_pos)
+    texture_swapper::texture_swapper ( QWidget* parent
+                                     , const math::vector_3d* camera_pos
+                                     , World* world
+                                     )
       : QWidget (parent)
       , _texture_to_swap()
     {
@@ -42,10 +45,10 @@ namespace noggit
         }
       });
 
-      connect(swap_adt, &QPushButton::clicked, [this, camera_pos]() {
+      connect(swap_adt, &QPushButton::clicked, [this, camera_pos, world]() {
         if (_texture_to_swap)
         {
-          gWorld->swapTexture (*camera_pos, _texture_to_swap.get());
+          world->swapTexture (*camera_pos, _texture_to_swap.get());
         }
       });
     }

@@ -16,7 +16,9 @@ namespace noggit
 {
   namespace ui
   {
-    texturing_tool::texturing_tool(const math::vector_3d* camera_pos)
+    texturing_tool::texturing_tool ( const math::vector_3d* camera_pos
+                                   , World* world
+                                   )
       : QWidget(nullptr)
       , _brush_level(255.0f)
       , _hardness(0.5f)
@@ -122,7 +124,7 @@ namespace noggit
       QPushButton* toggle_swapper = new QPushButton ("Texture swapper", this);
       layout->addRow (toggle_swapper);
 
-      _texture_switcher = new noggit::ui::texture_swapper(this, camera_pos);
+      _texture_switcher = new noggit::ui::texture_swapper(this, camera_pos, world);
 
       connect(toggle_swapper, &QPushButton::clicked, [this]() {
         hide();
@@ -322,7 +324,7 @@ namespace noggit
       _spray_pressure_spin->setValue(_spray_pressure + change);
     }
 
-    void texturing_tool::paint(math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture)
+    void texturing_tool::paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture)
     {
       float strength = 1.0f - pow(1.0f - _pressure, dt * 10.0f);
 
@@ -331,23 +333,23 @@ namespace noggit
         auto to_swap (_texture_switcher->current_texture());
         if (to_swap)
         {
-          gWorld->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
+          world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
         }
       }
       else
       {
         if (_spray_mode_group->isChecked())
         {
-          gWorld->sprayTexture(pos, &_spray_brush, _brush_level, strength, _texture_brush.getRadius(), _spray_pressure, texture);
+          world->sprayTexture(pos, &_spray_brush, _brush_level, strength, _texture_brush.getRadius(), _spray_pressure, texture);
 
           if (_inner_radius_cb->isChecked())
           {
-            gWorld->paintTexture(pos, &_inner_brush, _brush_level, strength, texture);
+            world->paintTexture(pos, &_inner_brush, _brush_level, strength, texture);
           }
         }
         else
         {
-          gWorld->paintTexture(pos, &_texture_brush, _brush_level, strength, texture);
+          world->paintTexture(pos, &_texture_brush, _brush_level, strength, texture);
         }
       }
     }

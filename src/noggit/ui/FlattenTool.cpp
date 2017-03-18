@@ -240,9 +240,9 @@ namespace noggit
               );
     }
 
-    void flatten_blur_tool::flatten(math::vector_3d const& cursor_pos, float dt)
+    void flatten_blur_tool::flatten (World* world, math::vector_3d const& cursor_pos, float dt)
     {
-      gWorld->flattenTerrain ( cursor_pos
+      world->flattenTerrain ( cursor_pos
                              , 1.f - pow (0.5f, dt *_speed)
                              , _radius
                              , _flatten_type
@@ -253,9 +253,9 @@ namespace noggit
                              );
     }
 
-    void flatten_blur_tool::blur(math::vector_3d const& cursor_pos, float dt)
+    void flatten_blur_tool::blur (World* world, math::vector_3d const& cursor_pos, float dt)
     {
-      gWorld->blurTerrain ( cursor_pos
+      world->blurTerrain ( cursor_pos
                           , 1.f - pow (0.5f, dt * _speed)
                           , _radius
                           , _flatten_type

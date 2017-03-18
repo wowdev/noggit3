@@ -322,7 +322,7 @@ void MapView::createGUI()
 {
   _terrain = new QDockWidget ("Raise / Lower", this);
   _terrain->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool());
+  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool (_world));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
   connect (this, &QObject::destroyed, _terrain, &QObject::deleteLater);
 
@@ -334,7 +334,7 @@ void MapView::createGUI()
 
   _texturing = new QDockWidget ("Texturing", this);
   _texturing->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position));
+  _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position, _world));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _texturing);
   connect (this, &QObject::destroyed, _texturing, &QObject::deleteLater);
 
@@ -346,7 +346,7 @@ void MapView::createGUI()
 
   _water = new QDockWidget ("Raise / Lower", this);
   _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _water->setWidget (guiWater = new noggit::ui::water());
+  _water->setWidget (guiWater = new noggit::ui::water (_world));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
   connect (this, &QObject::destroyed, _water, &QObject::deleteLater);
 
@@ -358,7 +358,7 @@ void MapView::createGUI()
 
   _object = new QDockWidget ("Object", this);
   _object->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _object->setWidget (objectEditor = new noggit::ui::object_editor(this));
+  _object->setWidget (objectEditor = new noggit::ui::object_editor(this, _world));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
   connect (this, &QObject::destroyed, _object, &QObject::deleteLater);
 
@@ -780,10 +780,13 @@ void MapView::createGUI()
             , [this] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey (Qt::Key_V, MOD_ctrl, [this] { objectEditor->pasteObject (_cursor_pos, _camera.position); });
+  addHotkey ( Qt::Key_V
+            , MOD_ctrl
+            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world); }
+            );
   addHotkey ( Qt::Key_V
             , MOD_none
-            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position); }
+            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world); }
             , [this] { return terrainMode == editing_mode::object; }
             );
   addHotkey ( Qt::Key_V
@@ -998,7 +1001,7 @@ void MapView::createGUI()
             , MOD_space
             , [&]
               {
-                terrainTool->flattenVertices();
+                terrainTool->flattenVertices (_world);
               }
             , [&] { return terrainMode == editing_mode::ground; }
             );
@@ -1605,11 +1608,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              terrainTool->changeTerrain(_cursor_pos, 7.5f * dt);
+              terrainTool->changeTerrain (_world, _cursor_pos, 7.5f * dt);
             }
             else if (_mod_ctrl_down)
             {
-              terrainTool->changeTerrain(_cursor_pos, -7.5f * dt);
+              terrainTool->changeTerrain (_world, _cursor_pos, -7.5f * dt);
             }
           }
           break;
@@ -1618,11 +1621,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              flattenTool->flatten(_cursor_pos, dt);
+              flattenTool->flatten (_world, _cursor_pos, dt);
             }
             else if (_mod_ctrl_down)
             {
-              flattenTool->blur(_cursor_pos, dt);
+              flattenTool->blur (_world, _cursor_pos, dt);
             }
           }
           break;
@@ -1644,7 +1647,7 @@ void MapView::tick (float dt)
           {
             if (mViewMode == eViewMode_3D && !underMap)
             {
-              texturingTool->paint(_cursor_pos, dt, *noggit::ui::selected_texture::get());
+              texturingTool->paint (_world, _cursor_pos, dt, *noggit::ui::selected_texture::get());
             }
             else if (mViewMode == eViewMode_2D)
             {
@@ -1654,7 +1657,7 @@ void MapView::tick (float dt)
                                   );
 
               pos += _camera.position;
-              texturingTool->paint(pos, dt, *noggit::ui::selected_texture::get());
+              texturingTool->paint (_world, pos, dt, *noggit::ui::selected_texture::get());
             }
           }
           break;
@@ -1710,11 +1713,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              guiWater->paintLiquid(_cursor_pos, true);
+              guiWater->paintLiquid (_world, _cursor_pos, true);
             }
             else if (_mod_ctrl_down)
             {
-              guiWater->paintLiquid(_cursor_pos, false);
+              guiWater->paintLiquid (_world, _cursor_pos, false);
             }
           }
           break;
@@ -1723,11 +1726,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              shaderTool->changeShader(_cursor_pos, dt, true);
+              shaderTool->changeShader (_world, _cursor_pos, dt, true);
             }
             if (_mod_ctrl_down)
             {
-              shaderTool->changeShader(_cursor_pos, dt, false);
+              shaderTool->changeShader (_world, _cursor_pos, dt, false);
             }
           }
           break;
@@ -2556,14 +2559,14 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     if (terrainMode == editing_mode::ground)
     {
-      terrainTool->moveVertices(-relative_movement.dy() / YSENS);
+      terrainTool->moveVertices (_world, -relative_movement.dy() / YSENS);
     }
   }
 
 
   if (rightMouse && _mod_space_down)
   {
-    terrainTool->setOrientRelativeTo(_cursor_pos);
+    terrainTool->setOrientRelativeTo (_world, _cursor_pos);
   }
 
   if (leftMouse && _mod_alt_down)
@@ -2700,11 +2703,11 @@ void MapView::wheelEvent (QWheelEvent* event)
   {
     if (_mod_alt_down)
     {
-      terrainTool->changeAngle (delta_for_range (178.f));
+      terrainTool->changeAngle (_world, delta_for_range (178.f));
     }
     else if (_mod_shift_down)
     {
-      terrainTool->changeOrientation (delta_for_range (360.f));
+      terrainTool->changeOrientation (_world, delta_for_range (360.f));
     }
   }
   else if (terrainMode == editing_mode::paint)

@@ -17,7 +17,7 @@ namespace noggit
     public:
       shader_tool(math::vector_4d& color);
 
-      void changeShader (math::vector_3d const& pos, float dt, bool add);
+      void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
 
       void changeRadius(float change);
       void changeSpeed(float change);
