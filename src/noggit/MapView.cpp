@@ -1723,13 +1723,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              _world->for_all_chunks_in_range
-                (shaderTool->changeShader (_cursor_pos, dt, true));
+              shaderTool->changeShader(_cursor_pos, dt, true);
             }
-            else if (_mod_ctrl_down)
+            if (_mod_ctrl_down)
             {
-              _world->for_all_chunks_in_range
-                (shaderTool->changeShader (_cursor_pos, dt, false));
+              shaderTool->changeShader(_cursor_pos, dt, false);
             }
           }
           break;

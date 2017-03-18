@@ -1085,10 +1085,6 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
   return mapIndex.getTile(tile)->GetVertex(x, z, V);
 }
 
-bool World::for_all_chunks_in_range (noggit::chunk_kernel kernel)
-{
-  return for_all_chunks_in_range (kernel.pos, kernel.radius, kernel.fun);
-}
 template<typename Fun>
   bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun)
 {
@@ -1133,6 +1129,18 @@ template<typename Fun, typename Post>
   }
 
   return changed;
+}
+
+
+void World::changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
+{
+  for_all_chunks_in_range
+    ( pos, radius
+    , [&] (MapChunk* chunk)
+      {
+        return chunk->ChangeMCCV(pos, color, change, radius, editMode);
+      }
+    );
 }
 
 void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
