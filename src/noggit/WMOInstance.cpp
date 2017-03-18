@@ -78,8 +78,6 @@ void WMOInstance::draw ( math::frustum const& frustum
               , pos
               , math::degrees (roty)
               , is_selected
-              , is_selected
-              , is_selected
               , frustum
               , cull_distance
               , camera

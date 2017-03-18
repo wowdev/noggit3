@@ -155,8 +155,6 @@ public:
             , const math::vector_3d& ofs
             , math::degrees const
             , bool boundingbox
-            , bool groupboxes
-            , bool highlight
             , math::frustum const& frustum
             , const float& cull_distance
             , const math::vector_3d& camera
