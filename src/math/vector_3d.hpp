@@ -40,13 +40,10 @@ namespace math
       return {std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max()};
     }
 
-    inline vector_3d_base<T>& operator= (const vector_3d_base<T> &v)
-    {
-      x = v.x;
-      y = v.y;
-      z = v.z;
-      return *this;
-    }
+    vector_3d_base<T> (vector_3d_base<T> const&) = default;
+    vector_3d_base<T> (vector_3d_base<T>&&) = default;
+    vector_3d_base<T>& operator= (vector_3d_base<T> const&) = default;
+    vector_3d_base<T>& operator= (vector_3d_base<T>&&) = default;
 
     inline vector_3d_base<T> operator+ (const vector_3d_base<T> &v) const
     {
