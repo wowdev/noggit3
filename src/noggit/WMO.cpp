@@ -310,8 +310,6 @@ void WMO::draw ( int doodadset
                , const math::vector_3d &ofs
                , math::degrees const angle
                , bool boundingbox
-               , bool groupboxes
-               , bool /*highlight*/
                , math::frustum const& frustum
                , const float& cull_distance
                , const math::vector_3d& camera
