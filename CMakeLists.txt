@@ -61,6 +61,7 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-padded)
 # msvc++ mangles struct/class into name, thus symbols may be called differently
 # with a bad forward-decl. we want compilation to fail, not linking.
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4099)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
 
 # yes, we intend to use multi-character character constants
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
