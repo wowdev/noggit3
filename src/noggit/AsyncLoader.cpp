@@ -5,9 +5,12 @@
 
 #include <list>
 
-bool isFinished(AsyncObject* object)
+namespace
 {
-  return object->finishedLoading();
+  bool isFinished(AsyncObject* object)
+  {
+    return object->finishedLoading();
+  }
 }
 
 void AsyncLoader::process()
