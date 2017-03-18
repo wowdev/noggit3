@@ -1329,6 +1329,7 @@ void World::convert_alphamap(bool to_big_alpha)
       {
         mTile->convert_alphamap(to_big_alpha);
         mTile->saveTile();
+        mapIndex.markOnDisc (tile, true);
         mapIndex.unsetChanged(tile);
 
         if (unload)

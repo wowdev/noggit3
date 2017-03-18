@@ -999,8 +999,6 @@ void MapTile::saveTile(bool saveAllModels)
     f5.close();
   }
 
-  gWorld->mapIndex.markOnDisc(tile_index(this->index.x, this->index.z), true);
-
   lObjectInstances.clear();
   lModelInstances.clear();
   lModels.clear();
