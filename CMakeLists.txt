@@ -21,6 +21,8 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
 
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=reorder)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=conditional-uninitialized)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused-parameter)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused-private-field)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-variable-declarations)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-prototypes)
