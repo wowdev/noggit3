@@ -1838,7 +1838,7 @@ void World::flattenVertices (float height)
 {
   for (math::vector_3d* v : _vertices_selected)
   {
-    v->y = vertexCenter().y;
+    v->y = height;
   }
   updateSelectedVertices();
 }
