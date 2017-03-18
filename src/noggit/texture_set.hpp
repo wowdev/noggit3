@@ -17,9 +17,9 @@ public:
   void initTextures(MPQFile* f, MapTile *maintile, uint32_t size);
   void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha);
 
-  void start2DAnim(int id);
+  void start2DAnim(int id, int animtime);
   void stop2DAnim(int id);
-  void startAnim(int id);
+  void startAnim(int id, int animtime);
   void stopAnim(int id);
 
   void bindTexture(size_t id, size_t activeTexture);

@@ -18,11 +18,12 @@
 void liquid_render::draw ( std::function<void (opengl::scoped::use_program&)> actual
                          , math::vector_3d water_color_light
                          , math::vector_3d water_color_dark
+                         , int animtime
                          )
 {
   opengl::scoped::use_program water_shader {program};
 
-  prepare_draw (water_shader, water_color_light, water_color_dark);
+  prepare_draw (water_shader, water_color_light, water_color_dark, animtime);
 
   actual (water_shader);
 }
@@ -30,6 +31,7 @@ void liquid_render::draw ( std::function<void (opengl::scoped::use_program&)> ac
 void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
                                  , math::vector_3d water_color_light
                                  , math::vector_3d water_color_dark
+                                 , int animtime
                                  )
 {
   water_shader.uniform ("model_view", opengl::matrix::model_view());
@@ -41,7 +43,7 @@ void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
   water_shader.sampler
     ( "texture"
     , GL_TEXTURE0
-    , _textures[static_cast<std::size_t> (gWorld->animtime / 60.0f) % _textures.size()].get()
+    , _textures[static_cast<std::size_t> (animtime / 60.0f) % _textures.size()].get()
     );
 }
 

@@ -18,10 +18,12 @@ public:
   void draw ( std::function<void (opengl::scoped::use_program&)>
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , int animtime
             );
   void prepare_draw ( opengl::scoped::use_program& water_shader
                     , math::vector_3d water_color_light
                     , math::vector_3d water_color_dark
+                    , int animtime
                     );
 
   void setTextures(std::string const& filename);

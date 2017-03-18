@@ -55,6 +55,7 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , math::vector_3d water_color_light
                        , math::vector_3d water_color_dark
                        , boost::optional<selection_type> selection
+                       , int animtime
                        )
 {
   bool const is_selected
@@ -84,6 +85,7 @@ void WMOInstance::draw ( math::frustum const& frustum
               , draw_fog
               , water_color_light
               , water_color_dark
+              , animtime
               );
   }
 

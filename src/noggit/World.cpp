@@ -589,6 +589,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , area_id_colors
                  , math::vector_4d {skies->colorSet[WATER_COLOR_DARK] * 0.3f, 1.f}
                  , mCurrentSelection
+                 , animtime
                  );
     }
   }
@@ -855,6 +856,7 @@ void main()
                         , skies->colorSet[WATER_COLOR_LIGHT]
                         , skies->colorSet[WATER_COLOR_DARK]
                         , mCurrentSelection
+                        , animtime
                         );
       }
     }
@@ -883,6 +885,7 @@ void main()
       tile->drawWater ( water_shader
                       , skies->colorSet[WATER_COLOR_LIGHT]
                       , skies->colorSet[WATER_COLOR_DARK]
+                      , animtime
                       );
     }
   }
@@ -1032,7 +1035,7 @@ void World::drawTileMode ( float /*ah*/
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
-      tile->drawTextures (minX, minY, maxX, maxY);
+      tile->drawTextures (minX, minY, maxX, maxY, animtime);
     }
 
     gl.disableClientState(GL_COLOR_ARRAY);
@@ -1385,7 +1388,7 @@ void World::saveMap (int width, int height)
       gl.translatef(x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f);
 
 
-      ATile->drawTextures (minX, minY, maxX, maxY);
+      ATile->drawTextures (minX, minY, maxX, maxY, animtime);
       gl.readPixels(width / 2 - 128, height / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
 
       std::stringstream ss;

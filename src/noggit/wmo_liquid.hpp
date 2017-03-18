@@ -50,11 +50,13 @@ public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
   void draw ( math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , int animtime
             )
   {
     render->draw ( [&] (opengl::scoped::use_program& shader) { draw_actual (shader); }
                  , water_color_light
                  , water_color_dark
+                 , animtime
                  );
   }
 
