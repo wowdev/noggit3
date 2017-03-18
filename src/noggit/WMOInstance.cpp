@@ -5,7 +5,6 @@
 #include <noggit/Misc.h> // checkinside
 #include <noggit/WMO.h> // WMO
 #include <noggit/WMOInstance.h>
-#include <noggit/World.h> // gWorld
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
