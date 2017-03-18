@@ -10,14 +10,13 @@
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
-math::vector_3d TransformCoordsForModel(math::vector_3d pIn)
+namespace
 {
-  math::vector_3d lTemp = pIn;
-  lTemp.y = pIn.z;
-  lTemp.z = -pIn.y;
-  return lTemp;
+  math::vector_3d TransformCoordsForModel(math::vector_3d pIn)
+  {
+    return {pIn.x, pIn.z, -pIn.y};
+  }
 }
-
 
 ModelInstance::ModelInstance(std::string const& filename)
   : model (filename)
