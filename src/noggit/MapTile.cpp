@@ -326,6 +326,7 @@ void MapTile::draw ( math::frustum const& frustum
                    , std::map<int, misc::random_color>& area_id_colors
                    , math::vector_4d shadow_color
                    , boost::optional<selection_type> selection
+                   , int animtime
                    )
 {
   gl.color4f(1, 1, 1, 1);
@@ -347,6 +348,7 @@ void MapTile::draw ( math::frustum const& frustum
                           , area_id_colors
                           , shadow_color
                           , selection
+                          , animtime
                           );
     }
   }
@@ -391,6 +393,7 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 void MapTile::drawWater ( opengl::scoped::use_program& water_shader
                         , math::vector_3d water_color_light
                         , math::vector_3d water_color_dark
+                        , int animtime
                         )
 {
   if (!Water.hasData(0))
@@ -401,7 +404,7 @@ void MapTile::drawWater ( opengl::scoped::use_program& water_shader
   gl.disable(GL_COLOR_MATERIAL);
   gl.disable(GL_LIGHTING);
 
-  Water.draw (water_shader, water_color_light, water_color_dark);
+  Water.draw (water_shader, water_color_light, water_color_dark, animtime);
 
   gl.enable(GL_LIGHTING);
   gl.enable(GL_COLOR_MATERIAL);
@@ -440,7 +443,12 @@ void MapTile::getAlpha(size_t id, unsigned char *amap)
 }
 
 // This is for the 2D mode only.
-void MapTile::drawTextures (float minX, float minY, float maxX, float maxY)
+void MapTile::drawTextures ( float minX
+                           , float minY
+                           , float maxX
+                           , float maxY
+                           , int animtime
+                           )
 {
   float xOffset, yOffset;
 
@@ -455,7 +463,7 @@ void MapTile::drawTextures (float minX, float minY, float maxX, float maxY)
   for (int j = 0; j<16; ++j) {
     for (int i = 0; i<16; ++i) {
       if (((i + 1 + xOffset)>minX) && ((j + 1 + yOffset)>minY) && ((i + xOffset)<maxX) && ((j + yOffset)<maxY))
-        mChunks[j][i]->drawTextures();
+        mChunks[j][i]->drawTextures (animtime);
     }
   }
 }

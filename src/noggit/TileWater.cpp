@@ -35,13 +35,18 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
 void TileWater::draw ( opengl::scoped::use_program& water_shader
                      , math::vector_3d water_color_light
                      , math::vector_3d water_color_dark
+                     , int animtime
                      )
 {
   for (int z = 0; z < 16; ++z)
   {
     for (int x = 0; x < 16; ++x)
     {
-      chunks[z][x]->draw (water_shader, water_color_light, water_color_dark);
+      chunks[z][x]->draw ( water_shader
+                         , water_color_light
+                         , water_color_dark
+                         , animtime
+                         );
     }
   }
 }

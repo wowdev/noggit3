@@ -225,7 +225,7 @@ void TextureSet::bindTexture(size_t id, size_t activeTexture)
   textures[id]->bind();
 }
 
-void TextureSet::start2DAnim(int id)
+void TextureSet::start2DAnim(int id, int animtime)
 {
   if (id < 0)
     return;
@@ -243,7 +243,7 @@ void TextureSet::start2DAnim(int id)
     const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
 
-    const float f = (static_cast<int>(gWorld->animtime * (spd / 15.0f)) % 1600) / 1600.0f;
+    const float f = (static_cast<int>(animtime * (spd / 15.0f)) % 1600) / 1600.0f;
     gl.translatef(f*fdx, f*fdy, 0);
   }
 }
@@ -262,7 +262,7 @@ void TextureSet::stop2DAnim(int id)
 }
 
 //! \todo do they really differ? investigate
-void TextureSet::startAnim(int id)
+void TextureSet::startAnim(int id, int animtime)
 {
   if (id < 0)
     return;
@@ -280,7 +280,7 @@ void TextureSet::startAnim(int id)
     const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
     const int animspd = (const int)(200 * detail_size);
-    float f = ((static_cast<int>(gWorld->animtime*(spd / 15.0f))) % animspd) / static_cast<float>(animspd);
+    float f = ((static_cast<int>(animtime*(spd / 15.0f))) % animspd) / static_cast<float>(animspd);
     gl.translatef(f*fdx, f*fdy, 0);
   }
 }

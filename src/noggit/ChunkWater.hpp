@@ -24,6 +24,7 @@ public:
   void draw ( opengl::scoped::use_program& water_shader
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , int animtime
             );
 
   void autoGen(MapChunk* chunk, float factor);

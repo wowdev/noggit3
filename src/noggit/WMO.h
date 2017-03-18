@@ -58,6 +58,7 @@ public:
   void drawLiquid ( math::vector_3d water_color_light
                   , math::vector_3d water_color_dark
                   , bool draw_fog
+                  , int animtime
                   );
   void drawDoodads ( unsigned int doodadset
                    , const math::vector_3d& ofs
@@ -162,6 +163,7 @@ public:
             , bool draw_fog
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , int animtime
             );
   bool drawSkybox ( math::vector_3d pCamera
                   , math::vector_3d pLower

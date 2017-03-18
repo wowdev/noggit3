@@ -69,6 +69,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , math::vector_4d shadow_color
             , boost::optional<selection_type> selection
+            , int animtime
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines ( opengl::scoped::use_program& line_shader
@@ -80,8 +81,14 @@ public:
   void drawWater ( opengl::scoped::use_program& water_shader
                  , math::vector_3d water_color_light
                  , math::vector_3d water_color_dark
+                 , int animtime
                  );
-  void drawTextures (float minX, float minY, float maxX, float maxY);
+  void drawTextures ( float minX
+                    , float minY
+                    , float maxX
+                    , float maxY
+                    , int animtime
+                    );
   void drawMFBO (opengl::scoped::use_program&);
 
   bool GetVertex(float x, float z, math::vector_3d *V);

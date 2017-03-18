@@ -100,6 +100,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , math::vector_4d shadow_color
             , boost::optional<selection_type> selection
+            , int animtime
             );
   //! \todo only this function should be public, all others should be called from it
 
@@ -111,7 +112,7 @@ public:
                  , const math::vector_3d& camera
                  , bool draw_hole_lines
                  );
-  void drawTextures();
+  void drawTextures (int animtime);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
 
   ChunkWater* liquid_chunk() const;

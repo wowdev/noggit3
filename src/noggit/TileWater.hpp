@@ -25,6 +25,7 @@ public:
   void draw ( opengl::scoped::use_program& water_shader
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , int animtime
             );
   bool hasData(size_t layer);
   void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);

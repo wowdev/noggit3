@@ -307,7 +307,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 }
 
 
-void MapChunk::drawTextures()
+void MapChunk::drawTextures (int animtime)
 {
   gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -329,7 +329,7 @@ void MapChunk::drawTextures()
     opengl::texture::disable_texture();
   }
 
-  _texture_set.start2DAnim(0);
+  _texture_set.start2DAnim(0, animtime);
   gl.begin(GL_TRIANGLE_STRIP);
   gl.texCoord2f(0.0f, texDetail);
   gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
@@ -358,7 +358,7 @@ void MapChunk::drawTextures()
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    _texture_set.start2DAnim(i);
+    _texture_set.start2DAnim(i, animtime);
 
     gl.begin(GL_TRIANGLE_STRIP);
     gl.multiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -629,6 +629,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , std::map<int, misc::random_color>& area_id_colors
                     , math::vector_4d shadow_color
                     , boost::optional<selection_type> selection
+                    , int animtime
                     )
 {
   if (!is_visible (cull_distance, frustum, camera))
@@ -693,7 +694,7 @@ void MapChunk::draw ( math::frustum const& frustum
     _texture_set.bindTexture(i, 0);
     _texture_set.bindAlphamap(i - 1, 1);
 
-    _texture_set.startAnim (i);
+    _texture_set.startAnim (i, animtime);
     gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     _texture_set.stopAnim (i);
   }
