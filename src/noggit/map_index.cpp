@@ -17,7 +17,7 @@
 
 #include <forward_list>
 
-MapIndex::MapIndex (const std::string &pBasename, int map_id)
+MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   : basename(pBasename)
   , _map_id (map_id)
   , mBigAlpha(false)
@@ -28,6 +28,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id)
   , cz(-1)
   , highestGUID(0)
   , highestGUIDDB(0)
+  , _world (world)
 {
 
   std::stringstream filename;
@@ -131,11 +132,11 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id)
   theFile.close();
 }
 
-void MapIndex::saveall()
+void MapIndex::saveall (World* world)
 {
   for (MapTile* tile : loaded_tiles())
   {
-    tile->saveTile();
+    tile->saveTile (false, world);
     tile->changed = 0;
   }
 }
@@ -313,7 +314,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha);
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, _world);
 
   return mTiles[tile.z][tile.x].tile.get();
 }
@@ -374,17 +375,17 @@ bool MapIndex::isTileExternal(const tile_index& tile) const
   return mTiles[tile.z][tile.x].onDisc;
 }
 
-void MapIndex::saveTile(const tile_index& tile)
+void MapIndex::saveTile(const tile_index& tile, World* world)
 {
 	// save given tile
 	if (tileLoaded(tile))
 	{
     saveMaxUID();
-		mTiles[tile.z][tile.x].tile->saveTile();
+		mTiles[tile.z][tile.x].tile->saveTile (false, world);
 	}
 }
 
-void MapIndex::saveChanged()
+void MapIndex::saveChanged (World* world)
 {
   if (changed)
     save();
@@ -395,7 +396,7 @@ void MapIndex::saveChanged()
   {
     if (tile->changed)
     {
-      tile->saveTile();
+      tile->saveTile (false, world);
       tile->changed = 0;
     }
   }
@@ -583,7 +584,7 @@ inline bool floatEqual(float const& a, float const& b)
   return std::abs(a - b) < 0.0001f;
 }
 
-void MapIndex::fixUIDs()
+void MapIndex::fixUIDs (World* world)
 {
   // pre-cond: mTiles[z][x].flags are set
 
@@ -831,7 +832,7 @@ void MapIndex::fixUIDs()
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
       // load the tile without the models
-      MapTile tile(x, z, filename.str(), mBigAlpha, false);
+      MapTile tile(x, z, filename.str(), mBigAlpha, false, world);
 
       std::map<int, ModelInstance> modelInst;
       std::map<int, WMOInstance> wmoInst;
@@ -849,12 +850,12 @@ void MapIndex::fixUIDs()
       wmoPerTile[z][x].clear();
 
       // save using the models selected beforehand
-      std::swap(gWorld->mModelInstances, modelInst);
-      std::swap(gWorld->mWMOInstances, wmoInst);
-      tile.saveTile(true);
+      std::swap(world->mModelInstances, modelInst);
+      std::swap(world->mWMOInstances, wmoInst);
+      tile.saveTile(true, world);
       // restore the original map in World
-      std::swap(gWorld->mModelInstances, modelInst);
-      std::swap(gWorld->mWMOInstances, wmoInst);
+      std::swap(world->mModelInstances, modelInst);
+      std::swap(world->mWMOInstances, wmoInst);
     }
   }
 

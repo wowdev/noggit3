@@ -138,7 +138,7 @@ public:
       );
   }
 
-  MapIndex(const std::string& pBasename, int map_id);
+  MapIndex(const std::string& pBasename, int map_id, World*);
 
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile);
@@ -150,8 +150,8 @@ public:
   void setFlag(bool to, math::vector_3d const& pos, uint32_t flag);
   int getChanged(const tile_index& tile) const;
 
-  void saveTile(const tile_index& tile);
-  void saveChanged();
+  void saveTile(const tile_index& tile, World*);
+  void saveChanged (World*);
   void reloadTile(const tile_index& tile);
   void unloadTiles(const tile_index& tile);  // unloads all tiles more then x adts away from given
   void unloadTile(const tile_index& tile);  // unload given tile
@@ -166,7 +166,7 @@ public:
   void setAdt(bool value);
 
   void save();
-  void saveall();
+  void saveall (World*);
 
   MapTile* getTile(const tile_index& tile) const;
   MapTile* getTileAbove(MapTile* tile) const;
@@ -178,7 +178,7 @@ public:
 
   uint32_t newGUID();
 
-  void fixUIDs();
+  void fixUIDs (World*);
   void searchMaxUID();
   void saveMaxUID();
   void loadMaxUID();
@@ -224,4 +224,7 @@ private:
 
   // Holding all MapTiles there can be in a World.
   MapTileEntry mTiles[64][64];
+
+  //! \todo REMOVE!
+  World* _world;
 };

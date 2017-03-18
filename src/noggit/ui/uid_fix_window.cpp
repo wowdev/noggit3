@@ -47,7 +47,7 @@ namespace noggit
               , [this, after_fix, world]
                 {
                   hide();
-                  world->mapIndex.fixUIDs();
+                  world->mapIndex.fixUIDs (world);
                   after_fix();
                   deleteLater();
                 }

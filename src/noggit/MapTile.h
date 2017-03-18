@@ -21,11 +21,13 @@ namespace math
   struct vector_3d;
 }
 
+class World;
+
 class MapTile
 {
 
 public:
-	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels = true);
+	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World*);
 
   //! \todo on destruction, unload ModelInstances and WMOInstances on this tile:
   // a) either keep up the information what tiles the instances are on at all times
@@ -93,7 +95,7 @@ public:
 
   bool GetVertex(float x, float z, math::vector_3d *V);
 
-  void saveTile(bool saveAllModels = false);
+  void saveTile(bool saveAllModels, World*);
 	void CropWater();
 
   bool isTile(int pX, int pZ);
