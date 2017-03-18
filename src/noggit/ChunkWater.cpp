@@ -30,7 +30,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     memset(&Render.mask, 255, 8);
   }
 
-  for (int k = 0; k < (int)header.nLayers; ++k)
+  for (std::size_t k = 0; k < header.nLayers; ++k)
   {
     MH2O_Information info;
     MH2O_HeightMask heightmask;
