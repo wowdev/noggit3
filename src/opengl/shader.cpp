@@ -110,12 +110,6 @@ namespace opengl
       gl.uniformMatrix4fv (_program.uniform_location (name), 1, GL_FALSE, value);
     }
 
-    void use_program::sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id)
-    {
-      uniform (name, GLint (texture_slot - GL_TEXTURE0));
-      texture::enable_texture (texture_slot - GL_TEXTURE0);
-      gl.bindTexture (GL_TEXTURE_2D, id);
-    }
     void use_program::sampler (std::string const& name, GLenum texture_slot, texture* tex)
     {
       uniform (name, GLint (texture_slot - GL_TEXTURE0));
