@@ -31,7 +31,7 @@ namespace noggit
 {
   namespace ui
   {
-    object_editor::object_editor (MapView* mapView)
+    object_editor::object_editor (MapView* mapView, World* world)
             : QWidget(nullptr)
       , rotationEditor (new rotation_editor())
             , selected()
@@ -244,7 +244,7 @@ namespace noggit
       });
 
       connect(toTxt, &QPushButton::clicked, [=]() {
-          SaveObjecttoTXT();
+          SaveObjecttoTXT (world);
       });
 
       connect(fromTxt, &QPushButton::clicked, [=]() {
@@ -257,7 +257,10 @@ namespace noggit
       modelImport->show();
     }
 
-    void object_editor::pasteObject (math::vector_3d cursor_pos, math::vector_3d camera_pos)
+    void object_editor::pasteObject ( math::vector_3d cursor_pos
+                                    , math::vector_3d camera_pos
+                                    , World* world
+                                    )
     {
       if (!hasSelection() || selected->which() == eEntry_MapChunk)
       {
@@ -271,9 +274,9 @@ namespace noggit
         case PASTE_ON_TERRAIN: // use cursor pos
           break;
         case PASTE_ON_SELECTION:
-          if (gWorld->HasSelection())
+          if (world->HasSelection())
           {
-            auto selection = *gWorld->GetCurrentSelection();
+            auto selection = *world->GetCurrentSelection();
             if (selection.which() == eEntry_Model)
             {
               pos = boost::get<selected_model_type> (selection)->pos;
@@ -292,7 +295,7 @@ namespace noggit
           break;
       }
 
-      gWorld->addModel(selected.get(), pos, true);
+      world->addModel(selected.get(), pos, true);
     }
 
     void object_editor::togglePasteMode()
@@ -339,19 +342,19 @@ namespace noggit
       _filename->setText(ss.str().c_str());
     }
 
-    void object_editor::SaveObjecttoTXT()
+    void object_editor::SaveObjecttoTXT (World* world)
     {
-      if (!gWorld->HasSelection())
+      if (!world->HasSelection())
         return;
       std::string path;
 
-      if (gWorld->IsSelection(eEntry_WMO))
+      if (world->IsSelection(eEntry_WMO))
       {
-        path = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->wmo->filename();
+        path = boost::get<selected_wmo_type> (*world->GetCurrentSelection())->wmo->filename();
       }
-      else if (gWorld->IsSelection(eEntry_Model))
+      else if (world->IsSelection(eEntry_Model))
       {
-        path = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->model->_filename;
+        path = boost::get<selected_model_type> (*world->GetCurrentSelection())->model->_filename;
       }
 
       std::ofstream stream(Settings::getInstance()->importFile, std::ios_base::app);

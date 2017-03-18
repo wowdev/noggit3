@@ -8,6 +8,8 @@
 #include <QWidget>
 
 class QButtonGroup;
+class World;
+
 namespace noggit
 {
   namespace ui
@@ -32,11 +34,14 @@ namespace noggit
     class object_editor : public QWidget
     {
     public:
-      object_editor (MapView*);
+      object_editor (MapView*, World*);
 
       bool hasSelection() const;
       void copy(selection_type entry);
-      void pasteObject (math::vector_3d cursor_pos, math::vector_3d camera_pos);
+      void pasteObject ( math::vector_3d cursor_pos
+                       , math::vector_3d camera_pos
+                       , World*
+                       );
       void togglePasteMode();
 
       model_import *modelImport;
@@ -47,7 +52,7 @@ namespace noggit
 
       boost::optional<selection_type> selected;
       void showImportModels();
-      void SaveObjecttoTXT();
+      void SaveObjecttoTXT (World*);
       void setModelName(const std::string &name);
       int pasteMode;
     };

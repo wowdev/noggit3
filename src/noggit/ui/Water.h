@@ -18,14 +18,14 @@ namespace noggit
     class water : public QWidget
     {
     public:
-      water();
+      water (World*);
 
       void updatePos(tile_index const& newTile);
       void updateData();
 
       void changeWaterType(int waterint);
 
-      void paintLiquid(math::vector_3d const& pos, bool add);
+      void paintLiquid (World*, math::vector_3d const& pos, bool add);
 
       void changeRadius(float change);
       void changeOrientation(float change);

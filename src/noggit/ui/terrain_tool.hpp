@@ -12,6 +12,7 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
+class World;
 
 namespace noggit
 {
@@ -20,9 +21,9 @@ namespace noggit
     class terrain_tool : public QWidget
     {
     public:
-      terrain_tool();
+      terrain_tool (World*);
 
-      void changeTerrain(math::vector_3d const& pos, float dt);
+      void changeTerrain (World*, math::vector_3d const& pos, float dt);
 
       void nextType();
       void changeRadius(float change);
@@ -30,16 +31,16 @@ namespace noggit
       void changeSpeed(float change);
 
       void setRadius (float radius);
-      void setOrientation(float orientation);
-      void setAngle(float angle);
+      void setOrientation (World*, float orientation);
+      void setAngle (World*, float angle);
 
       // vertex edit only functions
-      void moveVertices(float dt);
-      void flattenVertices();
+      void moveVertices (World*, float dt);
+      void flattenVertices (World*);
 
-      void changeOrientation(float change);
-      void changeAngle(float change);
-      void setOrientRelativeTo(math::vector_3d const& pos);
+      void changeOrientation (World*, float change);
+      void changeAngle (World*, float change);
+      void setOrientRelativeTo (World*, math::vector_3d const& pos);
 
       float brushRadius() const { return _radius; }
       float innerRadius() const { return _inner_radius;  }
@@ -47,7 +48,7 @@ namespace noggit
       void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
 
     private:
-      void updateVertices();
+      void updateVertices (World*);
       void updateVertexGroup();
 
       static const int winWidth = 180;

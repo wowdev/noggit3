@@ -21,7 +21,7 @@ namespace noggit
 {
   namespace ui
   {
-    water::water()
+    water::water (World* world)
       : QWidget (nullptr)
       , _liquid_id(5)
       , _radius(10.0f)
@@ -144,13 +144,13 @@ namespace noggit
 
       layout->addWidget
         ( new pushbutton ( "Regen ADT opacity",
-                                          [this] { gWorld->autoGenWaterTrans(tile, get_opacity_factor()); }
+                         [this, world] { world->autoGenWaterTrans(tile, get_opacity_factor()); }
                                           ));
 
       cropWater = new pushbutton ( "Crop water",
-                                  [this]
+                                 [this, world]
                                  {
-                                   gWorld->CropWaterADT(tile);
+                                   world->CropWaterADT(tile);
                                    updateData();
                                  }
                                  );
@@ -224,9 +224,9 @@ namespace noggit
       _angle_spin->setValue(_angle / 90.0f);
     }
 
-    void water::paintLiquid(math::vector_3d const& pos, bool add)
+    void water::paintLiquid (World* world, math::vector_3d const& pos, bool add)
     {
-      gWorld->paintLiquid( pos
+      world->paintLiquid ( pos
                          , _radius
                          , _liquid_id
                          , add

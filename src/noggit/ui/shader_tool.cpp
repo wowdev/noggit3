@@ -101,9 +101,10 @@ namespace noggit
 
     }
 
-    void shader_tool::changeShader(math::vector_3d const& pos, float dt, bool add)
+    void shader_tool::changeShader
+      (World* world, math::vector_3d const& pos, float dt, bool add)
     {
-      gWorld->changeShader (pos, _color, 2.0f*dt*_speed, _radius, add);
+      world->changeShader (pos, _color, 2.0f*dt*_speed, _radius, add);
     }
 
     void shader_tool::changeRadius(float change)

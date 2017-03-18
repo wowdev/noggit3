@@ -14,7 +14,9 @@ namespace noggit
 {
   namespace ui
   {
-    uid_fix_window::uid_fix_window (std::function<void()> after_fix)
+    uid_fix_window::uid_fix_window ( std::function<void()> after_fix
+                                   , World* world
+                                   )
       : QDialog (nullptr)
     {
       new QVBoxLayout (this);
@@ -42,20 +44,20 @@ namespace noggit
       auto get_max (buttons->addButton ("Get Max UID", QDialogButtonBox::YesRole));
 
       connect ( fix_all, &QPushButton::clicked
-              , [this, after_fix]
+              , [this, after_fix, world]
                 {
                   hide();
-                  gWorld->mapIndex.fixUIDs();
+                  world->mapIndex.fixUIDs();
                   after_fix();
                   deleteLater();
                 }
               );
 
       connect ( get_max, &QPushButton::clicked
-              , [this, after_fix]
+              , [this, after_fix, world]
                 {
                   hide();
-                  gWorld->mapIndex.searchMaxUID();
+                  world->mapIndex.searchMaxUID();
                   after_fix();
                   deleteLater();
                 }

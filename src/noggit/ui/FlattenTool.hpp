@@ -12,6 +12,7 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
+class World;
 namespace noggit
 {
   namespace ui
@@ -21,8 +22,8 @@ namespace noggit
     public:
       flatten_blur_tool();
 
-      void flatten(math::vector_3d const& cursor_pos, float dt);
-      void blur(math::vector_3d const& cursor_pos, float dt);
+      void flatten (World* world, math::vector_3d const& cursor_pos, float dt);
+      void blur (World* world, math::vector_3d const& cursor_pos, float dt);
 
       void nextFlattenType();
       void nextFlattenMode();
