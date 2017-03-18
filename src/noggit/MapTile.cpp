@@ -320,7 +320,6 @@ void MapTile::draw ( math::frustum const& frustum
                    , bool draw_contour
                    , bool draw_paintability_overlay
                    , bool draw_chunk_flag_overlay
-                   , bool draw_water_overlay
                    , bool draw_areaid_overlay
                    , bool draw_wireframe_overlay
                    , int cursor_type
@@ -342,7 +341,6 @@ void MapTile::draw ( math::frustum const& frustum
                           , draw_contour
                           , draw_paintability_overlay
                           , draw_chunk_flag_overlay
-                          , draw_water_overlay
                           , draw_areaid_overlay
                           , draw_wireframe_overlay
                           , cursor_type

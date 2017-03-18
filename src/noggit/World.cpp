@@ -459,7 +459,6 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool angled_mode
                  , bool draw_paintability_overlay
                  , bool draw_chunk_flag_overlay
-                 , bool draw_water_overlay
                  , bool draw_areaid_overlay
                  , editing_mode terrainMode
                  , math::vector_3d const& camera_pos
@@ -584,7 +583,6 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , draw_contour
                  , draw_paintability_overlay
                  , draw_chunk_flag_overlay
-                 , draw_water_overlay
                  , draw_areaid_overlay
                  , draw_wireframe
                  , cursor_type

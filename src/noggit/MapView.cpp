@@ -2195,7 +2195,6 @@ void MapView::displayViewMode_3D()
                , angled_mode
                , terrainMode == editing_mode::paint
                , terrainMode == editing_mode::flags
-               , terrainMode == editing_mode::water
                , terrainMode == editing_mode::areaid
                , terrainMode
                , _camera.position
