@@ -57,7 +57,7 @@ void main()
       positions.emplace_back (min_point.x, min_point.y, min_point.z);
 
       static std::array<unsigned char, 16> const indices
-        {5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7};
+        {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
 
       {
         scoped::buffer_binder<GL_ARRAY_BUFFER> const buffer (_positions);

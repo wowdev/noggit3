@@ -124,7 +124,7 @@ namespace noggit
       layout->addWidget (entry_points_tabs);
 
       std::array<QListWidget*, 5> type_to_table
-        {continents_table, dungeons_table, raids_table, battlegrounds_table, arenas_table};
+        {{continents_table, dungeons_table, raids_table, battlegrounds_table, arenas_table}};
 
       for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
       {
