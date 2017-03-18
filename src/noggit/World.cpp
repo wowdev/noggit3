@@ -824,6 +824,7 @@ void main()
                         , is_hidden
                         , draw_models_with_box
                         , draw_fog
+                        , IsSelection (eEntry_Model) && boost::get<selected_model_type> (*GetCurrentSelection())->d1 == it->second.d1
                         );
       }
     }
