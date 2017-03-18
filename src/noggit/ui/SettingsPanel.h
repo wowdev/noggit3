@@ -40,11 +40,6 @@ namespace noggit
       QDoubleSpinBox* farZField;
 
       QCheckBox* tabletModeCheck;
-      QCheckBox* modelStatsCheck;
-      QCheckBox* modelsBoxCheck;
-      QCheckBox* randRotCheck;
-      QCheckBox* randSizeCheck;
-      QCheckBox* randTiltCheck;
 
     public:
       settings();

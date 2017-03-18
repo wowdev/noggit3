@@ -58,7 +58,7 @@ class ParticleSystem {
   Animation::M2Value<uint8_t> enabled;
   math::vector_4d colors[3];
   float sizes[3];
-  float mid, slowdown, rotation;
+  float mid, slowdown;
   math::vector_3d pos;
   scoped_blp_texture_reference _texture;
   ParticleList particles;
@@ -114,7 +114,6 @@ class RibbonEmitter {
   int manim, mtime;
   int seglen;
   float length;
-  int numsegs;
 
   math::vector_3d tpos;
   math::vector_4d tcolor;

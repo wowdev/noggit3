@@ -51,7 +51,6 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
   , enabled (mta.en, f, globals)
   , mid (0.5)
   , slowdown (mta.p.slowdown)
-  , rotation (mta.p.rotation)
   , pos (fixCoordSystem(mta.pos))
   , _texture (model->_textures[mta.texture])
   , blend (mta.blend)
@@ -834,7 +833,6 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
   , pos (fixCoordSystem(mta.pos))
   , seglen (mta.length)
   , length (mta.res * seglen)
-  , numsegs (mta.res)
    // just use the first texture for now; most models I've checked only had one
   , tpos (fixCoordSystem(mta.pos))
   , _texture (model->_textures[*reinterpret_cast<uint32_t const*> (f.getBuffer() + mta.ofsTextures)])

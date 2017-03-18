@@ -73,7 +73,6 @@ class Skies {
   int numSkies;
   int cs;
   scoped_model_reference stars;
-  char skyname[128];
 
 public:
   std::vector<Sky> skies;

@@ -88,8 +88,6 @@ namespace noggit
       QDoubleSpinBox* _spray_pressure_spin;
 
       noggit::ui::texture_swapper* _texture_switcher;
-
-      const math::vector_3d* _camera_pos;
     };
   }
 }
