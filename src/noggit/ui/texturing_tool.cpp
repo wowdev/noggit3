@@ -7,6 +7,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/texture_swapper.hpp>
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
@@ -128,7 +129,7 @@ namespace noggit
         _texture_switcher->show();
       });
 
-      connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   QSignalBlocker const blocker (_radius_slider);
@@ -138,7 +139,7 @@ namespace noggit
                 }
               );
 
-      connect ( _radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _radius_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   QSignalBlocker const blocker (_radius_spin);
@@ -147,7 +148,7 @@ namespace noggit
                 }
               );
 
-      connect ( _hardness_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _hardness_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   QSignalBlocker const blocker (_hardness_slider);
@@ -157,7 +158,7 @@ namespace noggit
                 }
               );
 
-      connect ( _hardness_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _hardness_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   QSignalBlocker const blocker (_hardness_spin);
@@ -167,7 +168,7 @@ namespace noggit
                 }
               );
 
-      connect ( _pressure_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _pressure_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   QSignalBlocker const blocker (_pressure_slider);
@@ -176,7 +177,7 @@ namespace noggit
                 }
               );
 
-      connect ( _pressure_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _pressure_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   QSignalBlocker const blocker (_pressure_spin);
@@ -185,7 +186,7 @@ namespace noggit
                 }
               );
 
-      connect ( _brush_level_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _brush_level_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   QSignalBlocker const blocker (_brush_level_slider);
@@ -194,7 +195,7 @@ namespace noggit
                 }
               );
 
-      connect ( _brush_level_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _brush_level_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   QSignalBlocker const blocker (_brush_level_spin);
@@ -203,14 +204,14 @@ namespace noggit
                 }
               );
 
-      connect ( _show_unpaintable_chunks_cb, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
+      connect ( _show_unpaintable_chunks_cb, &QCheckBox::stateChanged
               , [&] (int state)
                 {
                   _show_unpaintable_chunks = state;
                 }
               );
 
-      connect ( _spray_size_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _spray_size_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   QSignalBlocker const blocker (_spray_size_slider);
@@ -220,7 +221,7 @@ namespace noggit
                 }
               );
 
-      connect ( _spray_size_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _spray_size_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   QSignalBlocker const blocker (_spray_size_spin);
@@ -230,7 +231,7 @@ namespace noggit
                 }
               );
 
-      connect ( _spray_pressure_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _spray_pressure_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   QSignalBlocker const blocker (_spray_pressure_slider);
@@ -239,7 +240,7 @@ namespace noggit
                 }
               );
 
-      connect ( _spray_pressure_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _spray_pressure_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   QSignalBlocker const blocker (_spray_pressure_spin);
@@ -248,7 +249,7 @@ namespace noggit
                 }
               );
 
-      connect ( _spray_mode_group, static_cast<void (QGroupBox::*) (bool)> (&QGroupBox::toggled)
+      connect ( _spray_mode_group, &QGroupBox::toggled
               , [&] (bool b)
                 {
                   _spray_content->setVisible(b);

@@ -4,6 +4,7 @@
 
 #include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFileDialog>
@@ -86,7 +87,7 @@ namespace noggit
                      , viewDistanceField = new QDoubleSpinBox
                      );
       viewDistanceField->setRange (0.f, 1048576.f);
-      connect ( viewDistanceField, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( viewDistanceField, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [] (double val)
                 {
                   Settings::getInstance()->mapDrawDistance = val;
@@ -97,7 +98,7 @@ namespace noggit
                      , farZField = new QDoubleSpinBox
                      );
       farZField->setRange (0.f, 1048576.f);
-      connect ( farZField, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( farZField, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [] (double val)
                 {
                   Settings::getInstance()->FarZ = val;

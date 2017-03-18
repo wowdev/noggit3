@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/CursorSwitcher.h>
+#include <util/qt/overload.hpp>
 
 #include <qt-color-widgets/color_selector.hpp>
 
@@ -38,7 +39,7 @@ namespace noggit
 
       group->button (cursor_type)->setChecked (true);
 
-      connect ( group, static_cast<void (QButtonGroup::*) (int)> (&QButtonGroup::buttonClicked)
+      connect ( group, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
                 {
                   cursor_type = id;

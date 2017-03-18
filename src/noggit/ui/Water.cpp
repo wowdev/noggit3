@@ -7,6 +7,7 @@
 #include <noggit/application.h> // fonts
 #include <noggit/ui/Water.h>
 #include <noggit/ui/pushbutton.hpp>
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
@@ -41,7 +42,7 @@ namespace noggit
 
       _radius_spin = new QDoubleSpinBox (this);
       _radius_spin->setRange (0.f, 250.f);
-      connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _radius = f; }
               );
       _radius_spin->setValue(_radius);
@@ -49,7 +50,7 @@ namespace noggit
 
       _angle_spin = new QDoubleSpinBox (this);
       _angle_spin->setRange (0.00001f, 89.f);
-      connect ( _angle_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _angle_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _angle = f; }
               );
       _angle_spin->setValue(_angle);
@@ -57,7 +58,7 @@ namespace noggit
 
       _orientation_spin = new QDoubleSpinBox (this);
       _orientation_spin->setRange (0.f, 359.99999f);
-      connect ( _orientation_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _orientation_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _orientation = f; }
               );
       _orientation_spin->setValue(_orientation);
@@ -120,7 +121,7 @@ namespace noggit
       transparency_toggle->addButton (ocean_button, ocean_opacity);
       transparency_toggle->addButton (custom_button, custom_opacity);
 
-      connect ( transparency_toggle, static_cast<void (QButtonGroup::*) (int)> (&QButtonGroup::buttonClicked)
+      connect ( transparency_toggle, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id) { _opacity_mode = id; }
               );
 
@@ -136,7 +137,7 @@ namespace noggit
       opacity_spin->setRange (0.f, 1.f);
       opacity_spin->setDecimals (4);
       opacity_spin->setValue(_custom_opacity_factor);
-      connect ( opacity_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( opacity_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _custom_opacity_factor = f; }
               );
       layout->addWidget (opacity_spin);
@@ -163,7 +164,7 @@ namespace noggit
       waterLayer->setValue (Environment::getInstance()->currentWaterLayer + 1);
       waterLayer->setRange (1, 100);
       layout->addWidget (waterLayer);
-      connect ( waterLayer, static_cast<void (QSpinBox::*) (int)> (&QSpinBox::valueChanged)
+      connect ( waterLayer, qOverload<int> (&QSpinBox::valueChanged)
               , [] (int layer)
                 {
                   Environment::getInstance()->currentWaterLayer = layer - 1;

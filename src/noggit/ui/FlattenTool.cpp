@@ -2,8 +2,9 @@
 
 #include <noggit/ui/FlattenTool.hpp>
 
-#include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
+#include <noggit/tool_enums.hpp>
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
@@ -132,14 +133,14 @@ namespace noggit
       _lock_h->setRange(0.0, 34133.0);
       _lock_h->setMinimumWidth(30);
 
-      connect ( _type_button_box, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked)
+      connect ( _type_button_box, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
                 {
                   _flatten_type = id;
                 }
               );
 
-      connect ( _radius_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   _radius = v;
@@ -148,7 +149,7 @@ namespace noggit
                  }
               );
 
-      connect ( _radius_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _radius_slider, &QSlider::valueChanged
               , [&] (int v)
                 {
                   _radius = v;
@@ -157,7 +158,7 @@ namespace noggit
                 }
               );
 
-      connect ( _speed_spin, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _speed_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
                 , [&] (double v)
                   {
                     _speed = v;
@@ -166,7 +167,7 @@ namespace noggit
                   }
                 );
 
-      connect ( _speed_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _speed_slider, &QSlider::valueChanged
                 , [&] (int v)
                   {
                     _speed = v / 100.0f;
@@ -175,7 +176,7 @@ namespace noggit
                   }
                 );
 
-      connect( _lock_up_checkbox, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
+      connect( _lock_up_checkbox, &QCheckBox::stateChanged
                , [&] (int state)
                  {
                    if (state)
@@ -189,7 +190,7 @@ namespace noggit
                  }
              );
 
-      connect( _lock_down_checkbox, static_cast<void (QCheckBox::*) (int)> (&QCheckBox::stateChanged)
+      connect( _lock_down_checkbox, &QCheckBox::stateChanged
                , [&] (int state)
                  {
                    if (state)
@@ -203,35 +204,35 @@ namespace noggit
                  }
              );
 
-      connect ( _angle_slider, static_cast<void (QSlider::*) (int)> (&QSlider::valueChanged)
+      connect ( _angle_slider, &QSlider::valueChanged
                 , [&] (int v)
                   {
                     _angle = v;
                   }
                 );
 
-      connect ( _orientation_dial, static_cast<void (QDial::*) (int)> (&QDial::valueChanged)
+      connect ( _orientation_dial, &QDial::valueChanged
                 , [this] (int v)
                   {
                     setOrientation(v + 90.0f);
                   }
                 );
 
-      connect ( _lock_x, static_cast<void (QDoubleSpinBox::*) (double)> (&QDoubleSpinBox::valueChanged)
+      connect ( _lock_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
                 , [&] (double v)
                   {
                     _lock_pos.x = v;
                   }
                 );
 
-      connect ( _lock_h, static_cast<void ( QDoubleSpinBox::* ) ( double )> ( &QDoubleSpinBox::valueChanged )
+      connect ( _lock_h, qOverload<double> (&QDoubleSpinBox::valueChanged)
                 , [&] (double v)
                   {
                     _lock_pos.y = v;
                   }
               );
 
-      connect ( _lock_z, static_cast<void ( QDoubleSpinBox::* ) ( double )> ( &QDoubleSpinBox::valueChanged )
+      connect ( _lock_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
                 , [&] (double v)
                   {
                     _lock_pos.z = v;

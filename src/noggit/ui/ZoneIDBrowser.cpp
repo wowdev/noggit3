@@ -25,7 +25,7 @@ namespace noggit
       new QVBoxLayout(this);
       this->layout()->addWidget(_area_tree);
 
-      connect(_area_tree, static_cast<void (QTreeWidget::*) (void)> (&QTreeWidget::itemSelectionChanged), [this]
+      connect(_area_tree, &QTreeWidget::itemSelectionChanged, [this]
       {
         auto const& selected_items = _area_tree->selectedItems();
         if (selected_items.size() && _func)
