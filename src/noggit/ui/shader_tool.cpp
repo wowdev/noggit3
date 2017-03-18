@@ -1,8 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/shader_tool.hpp>
+#include <noggit/MapChunk.h>
 
-#include <noggit/World.h>
 #include <qt-color-widgets/color_selector.hpp>
 
 #include <QtWidgets/QFormLayout>
@@ -100,9 +100,15 @@ namespace noggit
 
     }
 
-    void shader_tool::changeShader(math::vector_3d const& pos, float dt, bool add)
+    chunk_kernel shader_tool::changeShader(math::vector_3d const& pos, float dt, bool add)
     {
-      gWorld->changeShader (pos, _color, 2.0f*dt*_speed, _radius, add);
+      return { [=] (MapChunk* chunk)
+               {
+                 return chunk->ChangeMCCV (pos, _color, 2.0f * dt * _speed, _radius, add);
+               }
+             , pos
+             , _radius
+             };
     }
 
     void shader_tool::changeRadius(float change)
