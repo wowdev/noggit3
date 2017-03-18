@@ -1618,8 +1618,7 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              _world->for_all_chunks_in_range
-                (flattenTool->flatten (_cursor_pos, dt));
+              flattenTool->flatten(_cursor_pos, dt);
             }
             else if (_mod_ctrl_down)
             {

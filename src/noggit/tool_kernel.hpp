@@ -12,9 +12,8 @@ namespace noggit
 {
   struct chunk_kernel
   {
+    std::function<bool (MapChunk*)> fun;
     math::vector_3d pos;
     float radius;
-    std::function<bool (MapChunk*)> fun;
-    bool recalc_normals_after_function = false;
   };
 }
