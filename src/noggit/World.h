@@ -99,7 +99,6 @@ public:
             , bool angled_mode
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay
-            , bool draw_water_overlay
             , bool draw_areaid_overlay
             //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
             , editing_mode

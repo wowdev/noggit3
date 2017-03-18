@@ -623,7 +623,6 @@ void MapChunk::draw ( math::frustum const& frustum
                     , bool draw_contour
                     , bool draw_paintability_overlay
                     , bool draw_chunk_flag_overlay
-                    , bool draw_water_overlay
                     , bool draw_areaid_overlay
                     , bool draw_wireframe_overlay
                     , int cursor_type
