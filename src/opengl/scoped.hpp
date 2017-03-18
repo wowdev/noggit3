@@ -159,7 +159,7 @@ namespace opengl
     template<GLenum type>
       struct buffer_binder
     {
-      GLint _old;
+      GLuint _old;
       buffer_binder (GLuint buffer)
       {
         //! \todo commented out targets not supported on macOS due to
@@ -177,7 +177,7 @@ namespace opengl
                        : type == GL_TRANSFORM_FEEDBACK_BUFFER ? GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
                        : type == GL_UNIFORM_BUFFER ? GL_UNIFORM_BUFFER_BINDING
                        : throw std::logic_error ("bad bind target")
-                       , &_old
+                       , reinterpret_cast<GLint*> (&_old)
                        );
         gl.bindBuffer (type, buffer);
       }
