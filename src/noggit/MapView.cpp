@@ -1298,7 +1298,31 @@ MapView::MapView( math::degrees camera_yaw0
       makeCurrent();
       opengl::context::scoped_setter const _ (::gl, context());
       gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      display();
+
+      //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
+      if (Saving)
+      {
+        gl.matrixMode (GL_PROJECTION);
+        gl.loadIdentity();
+        gl.ortho
+          (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
+        gl.matrixMode (GL_MODELVIEW);
+        gl.loadIdentity();
+
+        _world->saveMap (width(), height());
+        Saving = false;
+      }
+
+      switch (mViewMode)
+      {
+      case eViewMode_2D:
+        displayViewMode_2D();
+        break;
+
+      case eViewMode_3D:
+        displayViewMode_3D();
+        break;
+      }
     }
   }
 
@@ -2191,34 +2215,6 @@ void MapView::displayViewMode_3D()
                , _area_id_colors
                , _draw_fog.get()
                );
-}
-
-void MapView::display()
-{
-  //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
-  if (Saving)
-  {
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-    gl.ortho
-      (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
-
-    _world->saveMap (width(), height());
-    Saving = false;
-  }
-
-  switch (mViewMode)
-  {
-  case eViewMode_2D:
-    displayViewMode_2D();
-    break;
-
-  case eViewMode_3D:
-    displayViewMode_3D();
-    break;
-  }
 }
 
 void MapView::keyPressEvent (QKeyEvent *event)
