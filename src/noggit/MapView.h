@@ -187,7 +187,6 @@ public:
   ~MapView();
 
   void tick (float dt);
-  void display();
 
   void insert_object_at_selection_position (std::string);
   void selectModel(selection_type entry);
