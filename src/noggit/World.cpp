@@ -257,8 +257,8 @@ bool World::IsEditableWorld(int pMapId)
   return false;
 }
 
-World::World(const std::string& name)
-  : mapIndex (name)
+World::World(const std::string& name, int map_id)
+  : mapIndex (name, map_id)
   , horizon(name)
   , mCurrentSelection()
   , SelectionMode(false)
@@ -266,7 +266,6 @@ World::World(const std::string& name)
   , mWmoEntry(ENTRY_MODF())
   , detailtexcoords(0)
   , alphatexcoords(0)
-  , mMapId(0xFFFFFFFF)
   , ol(nullptr)
   , animtime(0)
   , time(1450)
@@ -276,17 +275,6 @@ World::World(const std::string& name)
   , skies(nullptr)
   , outdoorLightStats(OutdoorLightStats())
 {
-  for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
-  {
-    if (name == std::string(i->getString(MapDB::InternalName)))
-    {
-      mMapId = i->getUInt(MapDB::MapID);
-      break;
-    }
-  }
-  if (mMapId == 0xFFFFFFFF)
-    LogError << "MapId for \"" << name << "\" not found! What is wrong here?" << std::endl;
-
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
 
@@ -364,7 +352,7 @@ void World::initDisplay()
     _horizon_render = std::make_unique<noggit::map_horizon::render>(horizon);
   }
 
-  skies = std::make_unique<Skies> (mMapId);
+  skies = std::make_unique<Skies> (mapIndex._map_id);
 
   ol = std::make_unique<OutdoorLighting> ("World\\dnc.db");
 }
@@ -1590,7 +1578,7 @@ void World::updateTilesModel(ModelInstance* m2)
 
 unsigned int World::getMapID()
 {
-  return this->mMapId;
+  return mapIndex._map_id;
 }
 
 void World::setBaseTexture(math::vector_3d const& pos)

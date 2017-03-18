@@ -91,7 +91,7 @@ namespace noggit
       {
         if (it->getInt(MapDB::MapID) == mapID)
         {
-          gWorld = new World(it->getString(MapDB::InternalName));
+          gWorld = new World(it->getString(MapDB::InternalName), mapID);
           _minimap->world (gWorld);
 
           return;
@@ -167,7 +167,7 @@ namespace noggit
                            {
                              if (it->getInt(MapDB::MapID) == entry.mapID)
                              {
-                               gWorld = new World(it->getString(MapDB::InternalName));
+                               gWorld = new World(it->getString(MapDB::InternalName), entry.mapID);
                                enterMapAt ( entry.pos
                                           , math::degrees (entry.camera_pitch)
                                           , math::degrees (entry.camera_yaw)
@@ -190,7 +190,7 @@ namespace noggit
           {
 #ifdef USE_MYSQL_UID_STORAGE
             if ( Settings::getInstance()->mysql
-               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, world->mMapId)
+               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, world->getMapID())
                )
             {
               world->mapIndex.loadMaxUID();
@@ -198,7 +198,7 @@ namespace noggit
             }
             else
 #endif
-            if (uid_storage::getInstance()->hasMaxUIDStored(world->mMapId))
+            if (uid_storage::getInstance()->hasMaxUIDStored(world->getMapID()))
             {
               world->mapIndex.loadMaxUID();
               enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);

@@ -138,7 +138,7 @@ public:
       );
   }
 
-  MapIndex(const std::string& pBasename);
+  MapIndex(const std::string& pBasename, int map_id);
 
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile);
@@ -194,6 +194,11 @@ private:
   bool tileLoaded(int tileX, int tileZ) const;
 
   const std::string basename;
+
+public:
+  int const _map_id;
+
+private:
   std::string globalWMOName;
 
   int lastUnloadTime;
