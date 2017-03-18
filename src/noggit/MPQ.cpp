@@ -21,14 +21,18 @@
 #include <vector>
 #include <unordered_set>
 
-typedef std::pair<std::string, std::unique_ptr<MPQArchive>> ArchiveEntry;
-typedef std::list<ArchiveEntry> ArchivesMap;
-ArchivesMap _openArchives;
+namespace
+{
+  typedef std::pair<std::string, std::unique_ptr<MPQArchive>> ArchiveEntry;
+  typedef std::list<ArchiveEntry> ArchivesMap;
+  ArchivesMap _openArchives;
+
+  boost::mutex gListfileLoadingMutex;
+  boost::mutex gMPQFileMutex;
+  std::string modmpqpath = "";//this will be the path to modders archive (with 'myworld' file inside)
+}
 
 std::unordered_set<std::string> gListfile;
-boost::mutex gListfileLoadingMutex;
-boost::mutex gMPQFileMutex;
-std::string modmpqpath = "";//this will be the path to modders archive (with 'myworld' file inside)
 
 void MPQArchive::loadMPQ(const std::string& filename, bool doListfile)
 {
