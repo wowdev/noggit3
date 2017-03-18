@@ -50,7 +50,7 @@ namespace noggit
       });
     }
 
-    void texture_swapper::closeEvent(QCloseEvent *event)
+    void texture_swapper::closeEvent(QCloseEvent*)
     {
       auto parent (parentWidget());
       if (parent)

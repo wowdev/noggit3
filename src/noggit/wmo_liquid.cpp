@@ -17,7 +17,7 @@
 
 
 
-wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor)
+wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const&, bool /*indoor*/)
   : pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
   , texRepeats(4.0f)
   , xtiles(header.A)

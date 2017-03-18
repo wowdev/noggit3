@@ -1184,7 +1184,7 @@ MapView::MapView( math::degrees camera_yaw0
   _minimap->draw_boundaries (true);
 
   connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
-          , [this] (World* world, math::vector_3d const& pos)
+          , [this] (World*, math::vector_3d const& pos)
             {
               move_camera_with_auto_height (pos);
             }

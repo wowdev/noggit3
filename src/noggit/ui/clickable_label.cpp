@@ -6,7 +6,7 @@ namespace noggit
 {
   namespace ui
   {
-    void clickable_label::mouseReleaseEvent (QMouseEvent* event)
+    void clickable_label::mouseReleaseEvent (QMouseEvent*)
     {
       emit clicked();
     }
