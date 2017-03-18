@@ -488,7 +488,7 @@ void MapView::createGUI()
                {
                  makeCurrent();
                  opengl::context::scoped_setter const _ (::gl, context());
-                 _world->mapIndex.saveChanged();
+                 _world->mapIndex.saveChanged (_world);
                }
              );
   ADD_ACTION ( file_menu
@@ -498,7 +498,7 @@ void MapView::createGUI()
                {
                  makeCurrent();
                  opengl::context::scoped_setter const _ (::gl, context());
-                 _world->mapIndex.saveall();
+                 _world->mapIndex.saveall (_world);
                }
              );
   ADD_ACTION ( file_menu
@@ -2824,7 +2824,7 @@ void MapView::prompt_save_current()
   {
     makeCurrent();
     opengl::context::scoped_setter const _ (::gl, context());
-    _world->mapIndex.saveTile(tile_index(_camera.position));
+    _world->mapIndex.saveTile(tile_index(_camera.position), _world);
   }
 }
 

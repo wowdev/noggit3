@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels)
+MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World* world)
   : index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
@@ -260,14 +260,14 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
     for (std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it)
     {
-      gWorld->mWMOInstances.emplace(it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it)));
+      world->mWMOInstances.emplace(it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it)));
     }
 
     // - Load M2s ------------------------------------------
 
     for (std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
     {
-      gWorld->mModelInstances.emplace(it->uniqueID, ModelInstance(mModelFilenames[it->nameID], &(*it)));
+      world->mModelInstances.emplace(it->uniqueID, ModelInstance(mModelFilenames[it->nameID], &(*it)));
     }
   }
 
@@ -509,7 +509,7 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 
 /// --- Only saving related below this line. --------------------------
 
-void MapTile::saveTile(bool saveAllModels)
+void MapTile::saveTile(bool saveAllModels, World* world)
 {
 
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
@@ -537,7 +537,7 @@ void MapTile::saveTile(bool saveAllModels)
   lTileExtents[1] = math::vector_3d(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
 
 
-  for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
+  for (std::map<int, WMOInstance>::iterator it = world->mWMOInstances.begin(); it != world->mWMOInstances.end(); ++it)
   {
     if (saveAllModels || it->second.isInsideRect(lTileExtents))
     {
@@ -545,7 +545,7 @@ void MapTile::saveTile(bool saveAllModels)
     }
   }
 
-  for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
+  for (std::map<int, ModelInstance>::iterator it = world->mModelInstances.begin(); it != world->mModelInstances.end(); ++it)
   {
     if (saveAllModels || it->second.isInsideRect(lTileExtents))
     {

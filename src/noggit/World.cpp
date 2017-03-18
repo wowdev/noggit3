@@ -258,7 +258,7 @@ bool World::IsEditableWorld(int pMapId)
 }
 
 World::World(const std::string& name, int map_id)
-  : mapIndex (name, map_id)
+  : mapIndex (name, map_id, this)
   , horizon(name)
   , mCurrentSelection()
   , SelectionMode(false)
@@ -1323,7 +1323,7 @@ void World::convert_alphamap(bool to_big_alpha)
       if (mTile)
       {
         mTile->convert_alphamap(to_big_alpha);
-        mTile->saveTile();
+        mTile->saveTile (false, this);
         mapIndex.markOnDisc (tile, true);
         mapIndex.unsetChanged(tile);
 
