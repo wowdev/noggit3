@@ -23,7 +23,7 @@ namespace noggit
       flatten_blur_tool();
 
       chunk_kernel flatten(math::vector_3d const& cursor_pos, float dt);
-      void blur(math::vector_3d const& cursor_pos, float dt);
+      chunk_stencil_kernel blur(math::vector_3d const& cursor_pos, float dt);
 
       void nextFlattenType();
       void nextFlattenMode();

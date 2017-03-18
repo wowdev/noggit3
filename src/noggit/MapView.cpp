@@ -1623,7 +1623,8 @@ void MapView::tick (float dt)
             }
             else if (_mod_ctrl_down)
             {
-              flattenTool->blur(_cursor_pos, dt);
+              _world->for_all_chunks_in_range
+                (flattenTool->blur (_cursor_pos, dt));
             }
           }
           break;
