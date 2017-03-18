@@ -51,9 +51,6 @@ public:
   GLuint detailtexcoords;
   GLuint alphatexcoords;
 
-  // Map ID of this World.
-  unsigned int mMapId;
-
   // The lighting used.
   std::unique_ptr<OutdoorLighting> ol;
 
@@ -79,7 +76,7 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  explicit World(const std::string& name);
+  explicit World(const std::string& name, int map_id);
 
   void initDisplay();
 
