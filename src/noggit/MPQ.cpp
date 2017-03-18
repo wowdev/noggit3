@@ -424,18 +424,6 @@ size_t MPQFile::getSize() const
   return buffer.size();
 }
 
-void FixFilePath(std::string& pFilename)
-{
-  //std::transform( pFilename.begin(), pFilename.end(), pFilename.begin(), ::tolower );
-
-  size_t found = pFilename.find("/");
-  while (found != std::string::npos)
-  {
-    pFilename.replace(found, 1, "\\");
-    found = pFilename.find("/");
-  }
-}
-
 size_t MPQFile::getPos() const
 {
   return pointer;
