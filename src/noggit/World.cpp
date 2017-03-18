@@ -1087,19 +1087,8 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
 
 bool World::for_all_chunks_in_range (noggit::chunk_kernel kernel)
 {
-  std::function<void (MapChunk*)> const post_nop ([] (MapChunk*){});
-  std::function<void (MapChunk*)> const post_recalc_normals
-    ([this] (MapChunk* chunk) { recalc_norms (chunk); });
-
-  return for_all_chunks_in_range ( kernel.pos
-                                 , kernel.radius
-                                 , kernel.fun
-                                 , kernel.recalc_normals_after_function
-                                 ? post_recalc_normals
-                                 : post_nop
-                                 );
+  return for_all_chunks_in_range (kernel.pos, kernel.radius, kernel.fun);
 }
-
 template<typename Fun>
   bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun)
 {
@@ -1153,6 +1142,21 @@ void World::changeTerrain(math::vector_3d const& pos, float change, float radius
     , [&] (MapChunk* chunk)
       {
         return chunk->changeTerrain(pos, change, radius, BrushType, inner_radius);
+      }
+    , [this] (MapChunk* chunk)
+      {
+        recalc_norms (chunk);
+      }
+    );
+}
+
+void World::flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
+{
+  for_all_chunks_in_range
+    ( pos, radius
+    , [&] (MapChunk* chunk)
+      {
+        return chunk->flattenTerrain(pos, remain, radius, BrushType, flattenType, origin, angle, orientation);
       }
     , [this] (MapChunk* chunk)
       {

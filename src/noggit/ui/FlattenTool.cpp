@@ -240,25 +240,17 @@ namespace noggit
               );
     }
 
-    chunk_kernel flatten_blur_tool::flatten(math::vector_3d const& cursor_pos, float dt)
+    void flatten_blur_tool::flatten(math::vector_3d const& cursor_pos, float dt)
     {
-      return { cursor_pos
-             , _radius
-             , [=] (MapChunk* chunk)
-               {
-                 return chunk->flattenTerrain
-                   ( cursor_pos
-                   , 1.f - pow (0.5f, dt *_speed)
-                   , _radius
-                   , _flatten_type
-                   , _flatten_mode
-                   , use_ref_pos() ? _lock_pos : cursor_pos
-                   , math::degrees (angled_mode() ? _angle : 0.0f)
-                   , math::degrees (angled_mode() ? _orientation : 0.0f)
-                   );
-               }
-             , true
-             };
+      gWorld->flattenTerrain ( cursor_pos
+                             , 1.f - pow (0.5f, dt *_speed)
+                             , _radius
+                             , _flatten_type
+                             , _flatten_mode
+                             , use_ref_pos() ? _lock_pos : cursor_pos
+                             , math::degrees (angled_mode() ? _angle : 0.0f)
+                             , math::degrees (angled_mode() ? _orientation : 0.0f)
+                             );
     }
 
     void flatten_blur_tool::blur(math::vector_3d const& cursor_pos, float dt)
