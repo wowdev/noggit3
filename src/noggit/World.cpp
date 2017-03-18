@@ -845,6 +845,9 @@ void main()
                         , skies->colorSet[WATER_COLOR_DARK]
                         , mCurrentSelection
                         , animtime
+                        , [this] (bool on) { return outdoorLights (on); }
+                        , skies->hasSkies()
+                        , [this] (bool on) { return setupFog (on); }
                         );
       }
     }

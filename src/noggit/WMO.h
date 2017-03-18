@@ -54,20 +54,27 @@ public:
            , const float& cull_distance
            , const math::vector_3d& camera
            , bool draw_fog
+           , std::function<void (bool)> setup_outdoor_lights
+           , bool world_has_skies
+           , std::function<void (bool)> setup_fog
            );
   void drawLiquid ( math::vector_3d water_color_light
                   , math::vector_3d water_color_dark
                   , bool draw_fog
                   , int animtime
+                  , std::function<void (bool)> setup_outdoor_lights
+                  , std::function<void (bool)> setup_fog
                   );
   void drawDoodads ( unsigned int doodadset
                    , const math::vector_3d& ofs
                    , math::degrees const
                    , math::frustum const&
                    , bool draw_fog
+                   , std::function<void (bool)> setup_outdoor_lights
+                   , std::function<void (bool)> setup_fog
                    );
 
-  void setupFog (bool draw_fog);
+  void setupFog (bool draw_fog, std::function<void (bool)> setup_fog);
 
   void intersect (math::ray const&, std::vector<float>* results) const;
 
@@ -164,6 +171,9 @@ public:
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
             , int animtime
+            , std::function<void (bool)> setup_outdoor_lights
+            , bool world_has_skies
+            , std::function<void (bool)> setup_fog
             );
   bool drawSkybox ( math::vector_3d pCamera
                   , math::vector_3d pLower
