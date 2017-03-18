@@ -158,14 +158,12 @@ public:
   // check if the cursor is under map or in an unloaded tile
   bool isUnderMap(math::vector_3d const& pos);
 
-  bool for_all_chunks_in_range (noggit::chunk_kernel);
-  bool for_all_chunks_in_range (noggit::chunk_stencil_kernel);
-
   template<typename Fun>
     bool for_all_chunks_in_range ( math::vector_3d const& pos
                                  , float radius
                                  , Fun&& /* MapChunk* -> bool changed */
                                  );
+  bool for_all_chunks_in_range (noggit::chunk_kernel);
 
   template<typename Fun, typename Post>
     bool for_all_chunks_in_range ( math::vector_3d const& pos
@@ -185,6 +183,7 @@ public:
     void for_tile_at(const tile_index& pos, Fun&&);
 
   void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
+  void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
   bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
   bool sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
 

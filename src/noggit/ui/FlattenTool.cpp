@@ -261,23 +261,13 @@ namespace noggit
              };
     }
 
-    chunk_stencil_kernel flatten_blur_tool::blur(math::vector_3d const& cursor_pos, float dt)
+    void flatten_blur_tool::blur(math::vector_3d const& cursor_pos, float dt)
     {
-      return { cursor_pos
-             , _radius
-             , [=] ( MapChunk* chunk
-                   , std::function<boost::optional<float> (float, float)> vertex
-                   )
-               {
-                 return chunk->blurTerrain ( cursor_pos
-                                           , 1.f - pow (0.5f, dt * _speed)
-                                           , _radius
-                                           , _flatten_type
-                                           , vertex
-                                           );
-               }
-             , true
-             };
+      gWorld->blurTerrain ( cursor_pos
+                          , 1.f - pow (0.5f, dt * _speed)
+                          , _radius
+                          , _flatten_type
+                          );
     }
 
     void flatten_blur_tool::nextFlattenType()
