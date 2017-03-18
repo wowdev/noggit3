@@ -312,7 +312,7 @@ int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 int main(int argc, char *argv[])
 {
-  RegisterErrorHandlers();
+  noggit::RegisterErrorHandlers();
 
   QApplication qapp (argc, argv);
 
