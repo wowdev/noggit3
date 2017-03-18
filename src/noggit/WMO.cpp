@@ -318,6 +318,9 @@ void WMO::draw ( int doodadset
                , math::vector_3d water_color_light
                , math::vector_3d water_color_dark
                , int animtime
+               , std::function<void (bool)> setup_outdoor_lights
+               , bool world_has_skies
+               , std::function<void (bool)> setup_fog
                )
 {
   if (!finishedLoading ())
@@ -335,14 +338,36 @@ void WMO::draw ( int doodadset
 
   for (auto& group : groups)
   {
-    group.draw (ofs, angle, frustum, cull_distance, camera, draw_fog);
+    group.draw ( ofs
+               , angle
+               , frustum
+               , cull_distance
+               , camera
+               , draw_fog
+               , setup_outdoor_lights
+               , world_has_skies
+               , setup_fog
+               );
 
     if (draw_doodads)
     {
-      group.drawDoodads (doodadset, ofs, angle, frustum, draw_fog);
+      group.drawDoodads ( doodadset
+                        , ofs
+                        , angle
+                        , frustum
+                        , draw_fog
+                        , setup_outdoor_lights
+                        , setup_fog
+                        );
     }
 
-    group.drawLiquid (water_color_light, water_color_dark, draw_fog, animtime);
+    group.drawLiquid ( water_color_light
+                     , water_color_dark
+                     , draw_fog
+                     , animtime
+                     , setup_outdoor_lights
+                     , setup_fog
+                     );
   }
 
   if (boundingbox)
@@ -985,6 +1010,9 @@ void WMOGroup::draw( const math::vector_3d& ofs
                    , const float& cull_distance
                    , const math::vector_3d& camera
                    , bool draw_fog
+                   , std::function<void (bool)> setup_outdoor_lights
+                   , bool world_has_skies
+                   , std::function<void (bool)> setup_fog
                    )
 {
   visible = false;
@@ -999,7 +1027,7 @@ void WMOGroup::draw( const math::vector_3d& ofs
   float dist = (pos - camera).length() - rad;
   if (dist >= cull_distance) return;
   visible = true;
-  setupFog (draw_fog);
+  setupFog (draw_fog, setup_fog);
 
   gl.vertexPointer (_vertices_buffer, 3, GL_FLOAT, 0, nullptr);
   gl.normalPointer (_normals_buffer, GL_FLOAT, 0, nullptr);
@@ -1014,14 +1042,13 @@ void WMOGroup::draw( const math::vector_3d& ofs
     }
 
     gl.disable(GL_LIGHTING);
-    gWorld->outdoorLights(false);
+    setup_outdoor_lights (false);
   }
   else
   {
-
-    if (gWorld->skies->hasSkies())
+    if (world_has_skies)
     {
-      gWorld->outdoorLights(true);
+      setup_outdoor_lights (true);
     }
     else gl.disable(GL_LIGHTING);
   }
@@ -1079,14 +1106,16 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
                            , math::degrees const angle
                            , math::frustum const& frustum
                            , bool draw_fog
+                           , std::function<void (bool)> setup_outdoor_lights
+                           , std::function<void (bool)> setup_fog
                            )
 {
   if (!visible) return;
   if (ddr.empty()) return;
   if (doodadset >= wmo->doodadsets.size()) return;
 
-  gWorld->outdoorLights(outdoorLights);
-  setupFog (draw_fog);
+  setup_outdoor_lights (outdoorLights);
+  setupFog (draw_fog, setup_fog);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1109,7 +1138,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
       if (!outdoorLights) {
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
       }
-      setupFog (draw_fog);
+      setupFog (draw_fog, setup_fog);
       wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog);
     }
   }
@@ -1124,6 +1153,8 @@ void WMOGroup::drawLiquid ( math::vector_3d water_color_light
                           , math::vector_3d water_color_dark
                           , bool draw_fog
                           , int animtime
+                          , std::function<void (bool)> setup_outdoor_lights
+                          , std::function<void (bool)> setup_fog
                           )
 {
   if (!visible) return;
@@ -1131,13 +1162,13 @@ void WMOGroup::drawLiquid ( math::vector_3d water_color_light
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) {
-    setupFog (draw_fog);
+    setupFog (draw_fog, setup_fog);
     if (outdoorLights) {
-      gWorld->outdoorLights(true);
+      setup_outdoor_lights (true);
     }
     else {
       //! \todo  setup some kind of indoor lighting... ?
-      gWorld->outdoorLights(false);
+      setup_outdoor_lights (false);
       gl.enable(GL_LIGHT2);
       gl.lightfv(GL_LIGHT2, GL_AMBIENT, math::vector_4d(0.1f, 0.1f, 0.1f, 1));
       gl.lightfv(GL_LIGHT2, GL_DIFFUSE, math::vector_4d(0.8f, 0.8f, 0.8f, 1));
@@ -1152,10 +1183,10 @@ void WMOGroup::drawLiquid ( math::vector_3d water_color_light
   }
 }
 
-void WMOGroup::setupFog (bool draw_fog)
+void WMOGroup::setupFog (bool draw_fog, std::function<void (bool)> setup_fog)
 {
   if (outdoorLights || fog == -1) {
-    gWorld->setupFog (draw_fog);
+    setup_fog (draw_fog);
   }
   else {
     wmo->fogs[fog].setup();

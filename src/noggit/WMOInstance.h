@@ -73,6 +73,9 @@ public:
             , math::vector_3d water_color_dark
             , boost::optional<selection_type> selection
             , int animtime
+            , std::function<void (bool)> setup_outdoor_lights
+            , bool world_has_skies
+            , std::function<void (bool)> setup_fog
             );
   void intersect (math::ray const&, selection_result*);
 

@@ -56,6 +56,9 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , math::vector_3d water_color_dark
                        , boost::optional<selection_type> selection
                        , int animtime
+                       , std::function<void (bool)> setup_outdoor_lights
+                       , bool world_has_skies
+                       , std::function<void (bool)> setup_fog
                        )
 {
   bool const is_selected
@@ -86,6 +89,9 @@ void WMOInstance::draw ( math::frustum const& frustum
               , water_color_light
               , water_color_dark
               , animtime
+              , setup_outdoor_lights
+              , world_has_skies
+              , setup_fog
               );
   }
 
