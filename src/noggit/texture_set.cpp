@@ -582,17 +582,17 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   return changed;
 }
 
-const size_t TextureSet::num()
+size_t TextureSet::num()
 {
   return nTextures;
 }
 
-const unsigned int TextureSet::flag(size_t id)
+unsigned int TextureSet::flag(size_t id)
 {
   return texFlags[id];
 }
 
-const unsigned int TextureSet::effect(size_t id)
+unsigned int TextureSet::effect(size_t id)
 {
   return effectID[id];
 }
@@ -607,7 +607,7 @@ void TextureSet::setAlpha(size_t id, unsigned char *amap)
   alphamaps[id]->setAlpha(amap);
 }
 
-const unsigned char TextureSet::getAlpha(size_t id, size_t offset)
+unsigned char TextureSet::getAlpha(size_t id, size_t offset)
 {
   return alphamaps[id]->getAlpha(offset);
 }

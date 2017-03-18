@@ -37,14 +37,14 @@ public:
 
   const std::string& filename(size_t id);
 
-  const size_t num();
-  const unsigned int flag(size_t id);
-  const unsigned int effect(size_t id);
+  size_t num();
+  unsigned int flag(size_t id);
+  unsigned int effect(size_t id);
 
   void setAlpha(size_t id, size_t offset, unsigned char value);
   void setAlpha(size_t id, unsigned char *amap);
 
-  const unsigned char getAlpha(size_t id, size_t offset);
+  unsigned char getAlpha(size_t id, size_t offset);
   const unsigned char *getAlpha(size_t id);
 
   void convertToBigAlpha();
