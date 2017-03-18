@@ -5,6 +5,7 @@
 #include <cassert>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 class DBCFile
 {
@@ -14,21 +15,10 @@ public:
   // Open database. It must be openened before it can be used.
   void open();
 
-  class Exception
+  class NotFound : public std::runtime_error
   {
   public:
-    explicit Exception(const std::string& pmessage) : message(pmessage)
-    { }
-    virtual ~Exception()
-    { }
-    const std::string& getMessage() { return message; }
-  private:
-    std::string message;
-  };
-  class NotFound : public Exception
-  {
-  public:
-    NotFound() : Exception("Key was not found")
+    NotFound() : std::runtime_error("Key was not found")
     { }
   };
 
