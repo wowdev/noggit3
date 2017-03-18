@@ -67,8 +67,6 @@ namespace noggit
       QDoubleSpinBox* _angle_spin;
       QDoubleSpinBox* _orientation_spin;
 
-      QLabel* _lock_display;
-
       checkbox* _angle_checkbox;
       checkbox* _lock_checkbox;
 

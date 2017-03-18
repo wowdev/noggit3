@@ -74,8 +74,6 @@ namespace noggit
       QDoubleSpinBox* _lock_z;
       QDoubleSpinBox* _lock_h;
 
-      QCheckBox* _angle_checkbox;
-      QCheckBox* _lock_checkbox;
       QCheckBox* _lock_up_checkbox;
       QCheckBox* _lock_down_checkbox;
     };

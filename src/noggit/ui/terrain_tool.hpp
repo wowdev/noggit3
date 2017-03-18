@@ -60,8 +60,6 @@ namespace noggit
 
       math::vector_3d* _cursor_pos;
 
-      bool _tablet;
-
       int& _edit_type;
       int _vertex_mode;
 

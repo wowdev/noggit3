@@ -21,6 +21,7 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
 
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=reorder)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=conditional-uninitialized)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused-private-field)
 
 # covered by CMAKE_CXX_STANDARD
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat)

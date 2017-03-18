@@ -23,7 +23,6 @@ namespace noggit
       , _show_unpaintable_chunks(true)
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
-      , _camera_pos(camera_pos)
     {
       auto layout (new QFormLayout (this));
 
