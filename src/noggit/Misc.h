@@ -52,35 +52,35 @@ class sExtendableArray
 public:
   std::vector<char> data;
 
-	void Allocate(int pSize)
+	void Allocate (unsigned long pSize)
 	{
     data.resize (pSize);
 	}
 
-	void Extend(int pAddition)
+	void Extend (long pAddition)
 	{
     data.resize (data.size() + pAddition);
 	}
 
-  void Insert(int pPosition, int pAddition)
+  void Insert (unsigned long pPosition, unsigned long pAddition)
 	{
     std::vector<char> tmp (pAddition);
     data.insert (data.begin() + pPosition, tmp.begin(), tmp.end());
   }
 
-	void Insert(int pPosition, int pAddition, const char * pAdditionalData)
+	void Insert (unsigned long pPosition, unsigned long pAddition, const char * pAdditionalData)
 	{
     data.insert (data.begin() + pPosition, pAdditionalData, pAdditionalData + pAddition);
 	}
 
 	template<typename To>
-	To * GetPointer(unsigned int pPosition = 0)
+	To * GetPointer(unsigned long pPosition = 0)
 	{
 		return(reinterpret_cast<To*>(data.data() + pPosition));
 	}
 
   sExtendableArray() = default;
-	sExtendableArray(int pSize, const char *pData)
+	sExtendableArray(unsigned long pSize, const char *pData)
     : data (pData, pData + pSize)
 	{}
 };
