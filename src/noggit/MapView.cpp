@@ -1859,7 +1859,7 @@ void MapView::tick (float dt)
   guiWater->updatePos (_camera.position);
 
   {
-    auto lSelection = gWorld->GetCurrentSelection();
+    auto lSelection = _world->GetCurrentSelection();
     std::stringstream detailInfo;
     if (lSelection)
     {
