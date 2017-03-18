@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/vector_4d.hpp>
+#include <noggit/tool_kernel.hpp>
 
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
@@ -17,7 +18,7 @@ namespace noggit
     public:
       shader_tool(math::vector_4d& color);
 
-      void changeShader (math::vector_3d const& pos, float dt, bool add);
+      chunk_kernel changeShader (math::vector_3d const& pos, float dt, bool add);
 
       void changeRadius(float change);
       void changeSpeed(float change);

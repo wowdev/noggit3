@@ -13,6 +13,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/tool_kernel.hpp>
 
 #include <map>
 #include <string>
@@ -162,6 +163,8 @@ public:
                                  , float radius
                                  , Fun&& /* MapChunk* -> bool changed */
                                  );
+  bool for_all_chunks_in_range (noggit::chunk_kernel);
+
   template<typename Fun, typename Post>
     bool for_all_chunks_in_range ( math::vector_3d const& pos
                                  , float radius
@@ -180,7 +183,6 @@ public:
     void for_tile_at(const tile_index& pos, Fun&&);
 
   void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
-  void changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
   void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
   bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
