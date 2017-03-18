@@ -43,8 +43,6 @@
 #include <unordered_set>
 #include <utility>
 
-World *gWorld = nullptr;
-
 namespace
 {
   void render_line (math::vector_3d const& p1, math::vector_3d const& p2)

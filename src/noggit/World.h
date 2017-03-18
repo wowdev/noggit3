@@ -272,5 +272,3 @@ private:
 
   bool _display_initialized = false;
 };
-
-extern World *gWorld;

@@ -74,25 +74,24 @@ namespace noggit
     void main_window::enterMapAt ( math::vector_3d pos
                                  , math::degrees camera_pitch
                                  , math::degrees camera_yaw
-                                 , World* world
                                  )
     {
-      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, world));
+      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world)));
       setCentralWidget (mapview);
     }
 
     void main_window::loadMap(int mapID)
     {
       _minimap->world (nullptr);
-      delete gWorld;
-      gWorld = nullptr;
+
+      _world.reset();
 
       for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
       {
         if (it->getInt(MapDB::MapID) == mapID)
         {
-          gWorld = new World(it->getString(MapDB::InternalName), mapID);
-          _minimap->world (gWorld);
+          _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID);
+          _minimap->world (_world.get());
 
           return;
         }
@@ -163,15 +162,16 @@ namespace noggit
                          {
                            auto& entry (mBookmarks.at (item->data (Qt::UserRole).toInt()));
 
+                           _world.reset();
+
                            for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
                            {
                              if (it->getInt(MapDB::MapID) == entry.mapID)
                              {
-                               gWorld = new World(it->getString(MapDB::InternalName), entry.mapID);
+                               _world = std::make_unique<World> (it->getString(MapDB::InternalName), entry.mapID);
                                enterMapAt ( entry.pos
                                           , math::degrees (entry.camera_pitch)
                                           , math::degrees (entry.camera_yaw)
-                                          , gWorld
                                           );
 
                                return;
@@ -186,32 +186,32 @@ namespace noggit
 
       QObject::connect
         ( _minimap,  &minimap_widget::map_clicked
-        , [this] (World* world, ::math::vector_3d const& pos)
+        , [this] (::math::vector_3d const& pos)
           {
 #ifdef USE_MYSQL_UID_STORAGE
             if ( Settings::getInstance()->mysql
-               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, world->getMapID())
+               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, _world->getMapID())
                )
             {
-              world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);
+              _world->mapIndex.loadMaxUID();
+              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
             }
             else
 #endif
-            if (uid_storage::getInstance()->hasMaxUIDStored(world->getMapID()))
+            if (uid_storage::getInstance()->hasMaxUIDStored (_world->getMapID()))
             {
-              world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);
+              _world->mapIndex.loadMaxUID();
+              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
             }
             else
             {
               auto uidFixWindow
                 ( new noggit::ui::uid_fix_window
-                    ( [this, pos, world]
+                    ( [this, pos]
                       {
-                        enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), world);
+                        enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
                       }
-                    , world
+                    , _world.get()
                     )
                 );
               uidFixWindow->show();

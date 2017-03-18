@@ -2,12 +2,11 @@
 
 #include <math/vector_3d.hpp>
 #include <math/trig.hpp>
+#include <noggit/World.h>
 
 #include <QtWidgets/QMainWindow>
 
 #include <string>
-
-class World;
 
 namespace noggit
 {
@@ -26,7 +25,6 @@ namespace noggit
       void enterMapAt ( math::vector_3d pos
                       , math::degrees camera_pitch
                       , math::degrees camera_yaw
-                      , World*
                       );
 
       void createBookmarkList();
@@ -53,6 +51,8 @@ namespace noggit
 
       minimap_widget* _minimap;
       QWidget* _null_widget;
+
+      std::unique_ptr<World> _world;
 
       virtual void closeEvent (QCloseEvent*) override;
     };

@@ -322,7 +322,7 @@ void MapView::createGUI()
 {
   _terrain = new QDockWidget ("Raise / Lower", this);
   _terrain->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool (_world));
+  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool (_world.get()));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
   connect (this, &QObject::destroyed, _terrain, &QObject::deleteLater);
 
@@ -334,7 +334,7 @@ void MapView::createGUI()
 
   _texturing = new QDockWidget ("Texturing", this);
   _texturing->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position, _world));
+  _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position, _world.get()));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _texturing);
   connect (this, &QObject::destroyed, _texturing, &QObject::deleteLater);
 
@@ -346,7 +346,7 @@ void MapView::createGUI()
 
   _water = new QDockWidget ("Raise / Lower", this);
   _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _water->setWidget (guiWater = new noggit::ui::water (_world));
+  _water->setWidget (guiWater = new noggit::ui::water (_world.get()));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
   connect (this, &QObject::destroyed, _water, &QObject::deleteLater);
 
@@ -358,7 +358,7 @@ void MapView::createGUI()
 
   _object = new QDockWidget ("Object", this);
   _object->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _object->setWidget (objectEditor = new noggit::ui::object_editor(this, _world));
+  _object->setWidget (objectEditor = new noggit::ui::object_editor(this, _world.get()));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
   connect (this, &QObject::destroyed, _object, &QObject::deleteLater);
 
@@ -488,7 +488,7 @@ void MapView::createGUI()
                {
                  makeCurrent();
                  opengl::context::scoped_setter const _ (::gl, context());
-                 _world->mapIndex.saveChanged (_world);
+                 _world->mapIndex.saveChanged (_world.get());
                }
              );
   ADD_ACTION ( file_menu
@@ -498,7 +498,7 @@ void MapView::createGUI()
                {
                  makeCurrent();
                  opengl::context::scoped_setter const _ (::gl, context());
-                 _world->mapIndex.saveall (_world);
+                 _world->mapIndex.saveall (_world.get());
                }
              );
   ADD_ACTION ( file_menu
@@ -782,11 +782,11 @@ void MapView::createGUI()
 
   addHotkey ( Qt::Key_V
             , MOD_ctrl
-            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world); }
+            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get()); }
             );
   addHotkey ( Qt::Key_V
             , MOD_none
-            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world); }
+            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get()); }
             , [this] { return terrainMode == editing_mode::object; }
             );
   addHotkey ( Qt::Key_V
@@ -1001,7 +1001,7 @@ void MapView::createGUI()
             , MOD_space
             , [&]
               {
-                terrainTool->flattenVertices (_world);
+                terrainTool->flattenVertices (_world.get());
               }
             , [&] { return terrainMode == editing_mode::ground; }
             );
@@ -1141,12 +1141,12 @@ MapView::MapView( math::degrees camera_yaw0
                 , math::degrees camera_pitch0
                 , math::vector_3d camera_pos
                 , noggit::ui::main_window* main_window
-                , World* world
+                , std::unique_ptr<World> world
                 )
   : _camera (camera_pos, camera_yaw0, camera_pitch0)
   , mTimespeed(0.0f)
   , _main_window (main_window)
-  , _world (world)
+  , _world (std::move (world))
   , _status_position (new QLabel (this))
   , _status_selection (new QLabel (this))
   , _status_area (new QLabel (this))
@@ -1181,13 +1181,13 @@ MapView::MapView( math::degrees camera_yaw0
           , [=] { _main_window->statusBar()->removeWidget (_status_time); }
           );
 
-  _minimap->world (_world);
+  _minimap->world (_world.get());
   _minimap->camera (&_camera);
   _minimap->draw_skies (true);
   _minimap->draw_boundaries (true);
 
   connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
-          , [this] (World*, math::vector_3d const& pos)
+          , [this] (math::vector_3d const& pos)
             {
               move_camera_with_auto_height (pos);
             }
@@ -1341,8 +1341,7 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  delete _world;
-  _world = nullptr;
+  _world.reset();
 }
 
 void MapView::tick (float dt)
@@ -1608,11 +1607,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              terrainTool->changeTerrain (_world, _cursor_pos, 7.5f * dt);
+              terrainTool->changeTerrain (_world.get(), _cursor_pos, 7.5f * dt);
             }
             else if (_mod_ctrl_down)
             {
-              terrainTool->changeTerrain (_world, _cursor_pos, -7.5f * dt);
+              terrainTool->changeTerrain (_world.get(), _cursor_pos, -7.5f * dt);
             }
           }
           break;
@@ -1621,11 +1620,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              flattenTool->flatten (_world, _cursor_pos, dt);
+              flattenTool->flatten (_world.get(), _cursor_pos, dt);
             }
             else if (_mod_ctrl_down)
             {
-              flattenTool->blur (_world, _cursor_pos, dt);
+              flattenTool->blur (_world.get(), _cursor_pos, dt);
             }
           }
           break;
@@ -1647,7 +1646,7 @@ void MapView::tick (float dt)
           {
             if (mViewMode == eViewMode_3D && !underMap)
             {
-              texturingTool->paint (_world, _cursor_pos, dt, *noggit::ui::selected_texture::get());
+              texturingTool->paint (_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
             }
             else if (mViewMode == eViewMode_2D)
             {
@@ -1657,7 +1656,7 @@ void MapView::tick (float dt)
                                   );
 
               pos += _camera.position;
-              texturingTool->paint (_world, pos, dt, *noggit::ui::selected_texture::get());
+              texturingTool->paint (_world.get(), pos, dt, *noggit::ui::selected_texture::get());
             }
           }
           break;
@@ -1713,11 +1712,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              guiWater->paintLiquid (_world, _cursor_pos, true);
+              guiWater->paintLiquid (_world.get(), _cursor_pos, true);
             }
             else if (_mod_ctrl_down)
             {
-              guiWater->paintLiquid (_world, _cursor_pos, false);
+              guiWater->paintLiquid (_world.get(), _cursor_pos, false);
             }
           }
           break;
@@ -1726,11 +1725,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              shaderTool->changeShader (_world, _cursor_pos, dt, true);
+              shaderTool->changeShader (_world.get(), _cursor_pos, dt, true);
             }
             if (_mod_ctrl_down)
             {
-              shaderTool->changeShader (_world, _cursor_pos, dt, false);
+              shaderTool->changeShader (_world.get(), _cursor_pos, dt, false);
             }
           }
           break;
@@ -2559,14 +2558,14 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     if (terrainMode == editing_mode::ground)
     {
-      terrainTool->moveVertices (_world, -relative_movement.dy() / YSENS);
+      terrainTool->moveVertices (_world.get(), -relative_movement.dy() / YSENS);
     }
   }
 
 
   if (rightMouse && _mod_space_down)
   {
-    terrainTool->setOrientRelativeTo (_world, _cursor_pos);
+    terrainTool->setOrientRelativeTo (_world.get(), _cursor_pos);
   }
 
   if (leftMouse && _mod_alt_down)
@@ -2703,11 +2702,11 @@ void MapView::wheelEvent (QWheelEvent* event)
   {
     if (_mod_alt_down)
     {
-      terrainTool->changeAngle (_world, delta_for_range (178.f));
+      terrainTool->changeAngle (_world.get(), delta_for_range (178.f));
     }
     else if (_mod_shift_down)
     {
-      terrainTool->changeOrientation (_world, delta_for_range (360.f));
+      terrainTool->changeOrientation (_world.get(), delta_for_range (360.f));
     }
   }
   else if (terrainMode == editing_mode::paint)
@@ -2824,7 +2823,7 @@ void MapView::prompt_save_current()
   {
     makeCurrent();
     opengl::context::scoped_setter const _ (::gl, context());
-    _world->mapIndex.saveTile(tile_index(_camera.position), _world);
+    _world->mapIndex.saveTile(tile_index(_camera.position), _world.get());
   }
 }
 

@@ -182,7 +182,7 @@ public:
           , math::degrees av0
           , math::vector_3d camera_pos
           , noggit::ui::main_window*
-          , World*
+          , std::unique_ptr<World>
           );
   ~MapView();
 
@@ -239,7 +239,7 @@ private:
   math::vector_4d normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
 
-  World* _world;
+  std::unique_ptr<World> _world;
 
   float _tablet_pressure;
   bool _tablet_active = false;
