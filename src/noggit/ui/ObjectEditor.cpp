@@ -300,12 +300,12 @@ namespace noggit
           math::vector_3d rotation (0.f, 0.f, 0.f);
 
           if (Settings::getInstance()->copyModelStats
-             && Environment::getInstance()->get_clipboard().which() == eEntry_Model
+             && selected->which() == eEntry_Model
              )
           {
             // copy rot size from original model. Dirty but woring
-            scale = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->sc;
-            rotation = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->dir;
+            scale = boost::get<selected_model_type> (selected.get())->sc;
+            rotation = boost::get<selected_model_type> (selected.get())->dir;
           }
 
           world->addM2(boost::get<selected_model_type> (selected.get())->model->_filename, pos, scale, rotation);
@@ -314,11 +314,11 @@ namespace noggit
         {
           math::vector_3d rotation (0.f, 0.f, 0.f);
           if (Settings::getInstance()->copyModelStats
-             && Environment::getInstance()->get_clipboard().which() == eEntry_WMO
+             && selected->which() == eEntry_WMO
              )
           {
             // copy rot from original model. Dirty but working
-            rotation = boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard())->dir;
+            rotation = boost::get<selected_wmo_type> (selected.get())->dir;
           }
 
           world->addWMO(boost::get<selected_wmo_type> (selected.get())->wmo->_filename, pos, rotation);
@@ -356,11 +356,9 @@ namespace noggit
       }
       else
       {
-        Environment::getInstance()->clear_clipboard();
+        selected = boost::none;
         return;
       }
-
-      Environment::getInstance()->set_clipboard(selected);
     }
 
     void object_editor::setModelName(const std::string &name)
