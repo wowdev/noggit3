@@ -1480,7 +1480,6 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
     // copy rot size from original model. Dirty but woring
     newModelis.sc = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->sc;
     newModelis.dir = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->dir;
-    newModelis.ldir = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->ldir;
   }
 
   if (Settings::getInstance()->random_rotation)
