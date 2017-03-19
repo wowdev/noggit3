@@ -102,8 +102,6 @@ private:
   int _selected_area_id = -1;
   std::map<int, misc::random_color> _area_id_colors;
 
-  float lastBrushUpdate;
-
   selection_result intersect_result(bool terrain_only);
   void doSelection(bool selectTerrainOnly);
   void update_cursor_pos();

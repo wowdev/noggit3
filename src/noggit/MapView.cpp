@@ -1236,8 +1236,6 @@ MapView::MapView( math::degrees camera_yaw0
 
   mousedir = -1.0f;
 
-  lastBrushUpdate = 0;
-
   look = false;
   mViewMode = eViewMode_3D;
 
