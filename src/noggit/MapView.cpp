@@ -410,8 +410,6 @@ void MapView::createGUI()
   connect ( ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
           , [this] (int area_id) { changeZoneIDValue (area_id); }
           );
-  tool_settings_x = width() - 186;
-  tool_settings_y = 38;
 
   terrainTool->storeCursorPos (&_cursor_pos);
 
