@@ -14,14 +14,17 @@ namespace noggit
   {
     class zone_id_browser : public QWidget
     {
+      Q_OBJECT
+
     public:
       zone_id_browser();
       void setMapID(int id);
       void setZoneID(int id);
-      void setChangeFunc(std::function<void(int)> f);
+
+    signals:
+      void selected (int area_id);
 
     private:
-      std::function<void(int)> _func;
       QTreeWidget* _area_tree;
       std::map<int, QTreeWidgetItem*> _items;
       int mapID;

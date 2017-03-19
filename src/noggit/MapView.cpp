@@ -407,7 +407,9 @@ void MapView::createGUI()
           );
 
   ZoneIDBrowser->setMapID(_world->getMapID());
-  ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
+  connect ( ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
+          , [this] (int area_id) { changeZoneIDValue (area_id); }
+          );
   tool_settings_x = width() - 186;
   tool_settings_y = 38;
 

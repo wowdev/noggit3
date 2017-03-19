@@ -25,14 +25,16 @@ namespace noggit
       new QVBoxLayout(this);
       this->layout()->addWidget(_area_tree);
 
-      connect(_area_tree, &QTreeWidget::itemSelectionChanged, [this]
-      {
-        auto const& selected_items = _area_tree->selectedItems();
-        if (selected_items.size() && _func)
-        {
-          _func(selected_items.back()->data(0, 1).toInt());
-        }
-      });
+      connect ( _area_tree, &QTreeWidget::itemSelectionChanged
+              , [this]
+                {
+                  auto const& selected_items = _area_tree->selectedItems();
+                  if (selected_items.size())
+                  {
+                    emit selected (selected_items.back()->data(0, 1).toInt());
+                  }
+                }
+              );
     }
 
     void zone_id_browser::setMapID(int id)
@@ -104,11 +106,6 @@ namespace noggit
           }
         }
       }
-    }
-
-    void zone_id_browser::setChangeFunc(std::function<void(int)> f)
-    {
-      _func = f;
     }
   }
 }
