@@ -243,7 +243,7 @@ void MapView::insert_last_m2_from_wmv()
     }
     else
     {
-      _world->addM2(lastModel, selectionPosition, false);
+      _world->addM2(lastModel, selectionPosition, 1.f, {0.f, 0.f, 0.f});
     }
   }
 }
@@ -2532,7 +2532,7 @@ void MapView::insert_object_at_selection_position (std::string m2_to_add)
     LogError << "Failed adding " << m2_to_add << ". It was not in any MPQ." << std::endl;
   }
 
-  _world->addM2(m2_to_add, selectionPosition, false);
+  _world->addM2(m2_to_add, selectionPosition, 1., {0.f, 0.f, 0.f});
   //! \todo Memoryleak: These models will never get deleted.
 }
 

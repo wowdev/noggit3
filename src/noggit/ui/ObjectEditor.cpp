@@ -295,7 +295,21 @@ namespace noggit
 
       {
         if (selected->which() == eEntry_Model)
-          world->addM2(boost::get<selected_model_type> (selected.get())->model->_filename, pos, true);
+        {
+          float scale (1.f);
+          math::vector_3d rotation (0.f, 0.f, 0.f);
+
+          if (Settings::getInstance()->copyModelStats
+             && Environment::getInstance()->get_clipboard().which() == eEntry_Model
+             )
+          {
+            // copy rot size from original model. Dirty but woring
+            scale = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->sc;
+            rotation = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->dir;
+          }
+
+          world->addM2(boost::get<selected_model_type> (selected.get())->model->_filename, pos, scale, rotation);
+        }
         else if (selected->which() == eEntry_WMO)
         {
           math::vector_3d rotation (0.f, 0.f, 0.f);
