@@ -293,7 +293,24 @@ namespace noggit
           break;
       }
 
-      world->addModel(selected.get(), pos, true);
+      {
+        if (selected->which() == eEntry_Model)
+          world->addM2(boost::get<selected_model_type> (selected.get())->model->_filename, pos, true);
+        else if (selected->which() == eEntry_WMO)
+        {
+          math::vector_3d rotation (0.f, 0.f, 0.f);
+          if (Settings::getInstance()->copyModelStats
+             && Environment::getInstance()->get_clipboard().which() == eEntry_WMO
+             )
+          {
+            // copy rot from original model. Dirty but working
+            rotation = boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard())->dir;
+          }
+
+          world->addWMO(boost::get<selected_wmo_type> (selected.get())->wmo->_filename, pos, rotation);
+        }
+      }
+
     }
 
     void object_editor::togglePasteMode()
