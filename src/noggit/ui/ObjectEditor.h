@@ -50,6 +50,8 @@ namespace noggit
       QButtonGroup* pasteModeGroup;
       QLabel* _filename;
 
+      bool _copy_model_stats;
+
       boost::optional<selection_type> selected;
       void showImportModels();
       void SaveObjecttoTXT (World*);

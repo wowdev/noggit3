@@ -22,7 +22,6 @@ void Settings::readFromDisk()
     this->mapDrawDistance = 998.0f;
     this->FarZ = 1024;
     this->_noAntiAliasing = false;
-    this->copyModelStats = true;
     this->tabletMode = false;
     this->importFile = "Import.txt";
 
@@ -107,7 +106,6 @@ bool Settings::saveToDisk()
     config.add("randomRotation", this->random_rotation);
     config.add("randomTilt", this->random_tilt);
     config.add("randomSize", this->random_size);
-    config.add("copyModelStats", this->copyModelStats);
     config.add("TabletMode", this->tabletMode);
 
     std::ofstream file(configPath);

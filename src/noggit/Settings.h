@@ -15,7 +15,6 @@ public:
   bool random_tilt;      // True = Random tileing on model insert.
   bool random_size;      // True = Random sizing on model insert.
   bool copy_autoselect;  //
-  bool copyModelStats;
 
   int FarZ;        // the far clipping value
   float mapDrawDistance;
