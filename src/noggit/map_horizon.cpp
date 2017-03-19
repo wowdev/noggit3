@@ -20,7 +20,7 @@ struct color
   {}
 
   uint32_t to_int() const {
-    return (_b) | (_g << 8) | (_r << 16) | (uint32_t)(255 << 24);
+    return (_b) | (_g << 8) | (_r << 16) | (uint32_t)(0xFFu << 24);
   }
 
   operator uint32_t () const {
