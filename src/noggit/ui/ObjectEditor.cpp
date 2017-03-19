@@ -39,8 +39,6 @@ namespace noggit
     {
       auto inspectorGrid = new QGridLayout (this);
 
-      Environment* env = Environment::getInstance();
-
       QGroupBox *copyBox = new QGroupBox(this);
       auto copyGrid = new QGridLayout (copyBox);
       QCheckBox *randRotCheck = new QCheckBox("Random rotation", this);
@@ -145,54 +143,54 @@ namespace noggit
         Settings::getInstance()->random_rotation = s;
       });
 
-      rotRangeStart->setValue(env->minRotation);
-      rotRangeEnd->setValue(env->maxRotation);
+      rotRangeStart->setValue(Environment::getInstance()->minRotation);
+      rotRangeEnd->setValue(Environment::getInstance()->maxRotation);
 
-      tiltRangeStart->setValue(env->minTilt);
-      tiltRangeEnd->setValue(env->maxTilt);
+      tiltRangeStart->setValue(Environment::getInstance()->minTilt);
+      tiltRangeEnd->setValue(Environment::getInstance()->maxTilt);
 
-      scaleRangeStart->setValue(env->minScale);
-      scaleRangeEnd->setValue(env->maxScale);
+      scaleRangeStart->setValue(Environment::getInstance()->minScale);
+      scaleRangeEnd->setValue(Environment::getInstance()->maxScale);
 
       connect ( rotRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                    env->minRotation = v;
+                  Environment::getInstance()->minRotation = v;
                 }
       );
 
       connect ( rotRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                    env->maxRotation = v;
+                  Environment::getInstance()->maxRotation = v;
                 }
       );
 
       connect ( tiltRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                    env->minTilt = v;
+                  Environment::getInstance()->minTilt = v;
                 }
       );
 
       connect ( tiltRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                    env->maxTilt = v;
+                  Environment::getInstance()->maxTilt = v;
                 }
       );
 
       connect ( scaleRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                    env->minScale = v;
+                  Environment::getInstance()->minScale = v;
                 }
       );
 
       connect ( scaleRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                    env->maxScale = v;
+                  Environment::getInstance()->maxScale = v;
                 }
       );
 
@@ -226,7 +224,7 @@ namespace noggit
       cursorPosCheck->setChecked(Environment::getInstance()->moveModelToCursorPos);
       connect (cursorPosCheck, &QCheckBox::stateChanged, [=] (int s)
       {
-        env->moveModelToCursorPos = s;
+        Environment::getInstance()->moveModelToCursorPos = s;
       });
 
       connect(rotEditorButton, &QPushButton::clicked, [=]() {
