@@ -299,9 +299,7 @@ namespace noggit
           float scale (1.f);
           math::vector_3d rotation (0.f, 0.f, 0.f);
 
-          if (Settings::getInstance()->copyModelStats
-             && selected->which() == eEntry_Model
-             )
+          if (Settings::getInstance()->copyModelStats)
           {
             // copy rot size from original model. Dirty but woring
             scale = boost::get<selected_model_type> (selected.get())->sc;
@@ -313,9 +311,7 @@ namespace noggit
         else if (selected->which() == eEntry_WMO)
         {
           math::vector_3d rotation (0.f, 0.f, 0.f);
-          if (Settings::getInstance()->copyModelStats
-             && selected->which() == eEntry_WMO
-             )
+          if (Settings::getInstance()->copyModelStats)
           {
             // copy rot from original model. Dirty but working
             rotation = boost::get<selected_wmo_type> (selected.get())->dir;
