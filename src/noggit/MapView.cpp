@@ -304,7 +304,7 @@ void MapView::insert_last_wmo_from_wmv()
     }
     else
     {
-      _world->addWMO(lastWMO, selectionPosition, false);
+      _world->addWMO(lastWMO, selectionPosition, {0.f, 0.f, 0.f});
     }
   }
   //! \todo Memoryleak: These models will never get deleted.

@@ -1471,7 +1471,18 @@ void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
   if (entry.which() == eEntry_Model)
     this->addM2(boost::get<selected_model_type> (entry)->model->_filename, newPos, copyit);
   else if (entry.which() == eEntry_WMO)
-    this->addWMO(boost::get<selected_wmo_type> (entry)->wmo->_filename, newPos, copyit);
+  {
+    math::vector_3d rotation (0.f, 0.f, 0.f);
+    if (Settings::getInstance()->copyModelStats
+       && copyit
+       && Environment::getInstance()->get_clipboard().which() == eEntry_WMO)
+    {
+      // copy rot from original model. Dirty but working
+      rotation = boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard())->dir;
+    }
+
+    this->addWMO(boost::get<selected_wmo_type> (entry)->wmo->_filename, newPos, rotation);
+  }
 }
 
 void World::addM2(std::string const& filename, math::vector_3d newPos, bool copyit)
@@ -1519,20 +1530,16 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
   mModelInstances.emplace(newModelis.d1, std::move(newModelis));
 }
 
-void World::addWMO(std::string const& filename, math::vector_3d newPos, bool copyit)
+void World::addWMO ( std::string const& filename
+                   , math::vector_3d newPos
+                   , math::vector_3d rotation
+                   )
 {
   WMOInstance newWMOis(filename);
 
   newWMOis.mUniqueID = mapIndex.newGUID();
   newWMOis.pos = newPos;
-
-  if (Settings::getInstance()->copyModelStats
-    && copyit
-    && Environment::getInstance()->get_clipboard().which() == eEntry_WMO)
-  {
-    // copy rot from original model. Dirty but working
-    newWMOis.dir = boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard())->dir;
-  }
+  newWMOis.dir = rotation;
 
   // recalc the extends
   newWMOis.recalcExtents();
