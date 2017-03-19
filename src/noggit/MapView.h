@@ -220,6 +220,7 @@ private:
 
   QTime _startup_time;
   qreal _last_update = 0.f;
+  std::list<qreal> _last_frame_durations;
 
   QTimer _update_every_event_loop;
 
@@ -252,6 +253,7 @@ private:
   QLabel* _status_selection;
   QLabel* _status_area;
   QLabel* _status_time;
+  QLabel* _status_fps;
 
   noggit::bool_toggle_property _auto_selecting_mode = {true};
 

@@ -1151,6 +1151,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_selection (new QLabel (this))
   , _status_area (new QLabel (this))
   , _status_time (new QLabel (this))
+  , _status_fps (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
   , _cursor_switcher (new noggit::ui::cursor_switcher (cursor_color, cursor_type))
@@ -1179,6 +1180,12 @@ MapView::MapView( math::degrees camera_yaw0
           , &QObject::destroyed
           , _main_window
           , [=] { _main_window->statusBar()->removeWidget (_status_time); }
+          );
+  _main_window->statusBar()->addWidget (_status_fps);
+  connect ( this
+          , &QObject::destroyed
+          , _main_window
+          , [=] { _main_window->statusBar()->removeWidget (_status_fps); }
           );
 
   _minimap->world (_world.get());
@@ -1293,6 +1300,9 @@ MapView::MapView( math::degrees camera_yaw0
       makeCurrent();
       opengl::context::scoped_setter const _ (::gl, context());
       const qreal now(_startup_time.elapsed() / 1000.0);
+
+      _last_frame_durations.emplace_back (now - _last_update);
+
       tick (now - _last_update);
       _last_update = now;
     }
@@ -1856,6 +1866,23 @@ void MapView::tick (float dt)
 #endif
 
     _status_time->setText (QString::fromStdString (timestrs.str()));
+  }
+
+  if (!_last_frame_durations.empty())
+  {
+    while (_last_frame_durations.size() > 10)
+    {
+      _last_frame_durations.pop_front();
+    }
+
+    auto avg_frame_duration
+      ( std::accumulate ( _last_frame_durations.begin()
+                        , _last_frame_durations.end()
+                        , 0.
+                        )
+      / qreal (_last_frame_durations.size())
+      );
+    _status_fps->setText ("FPS: " + QString::number (int (1. / avg_frame_duration)));
   }
 
   guiWater->updatePos (_camera.position);
