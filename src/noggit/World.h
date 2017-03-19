@@ -194,7 +194,10 @@ public:
 
   void addModel(selection_type, math::vector_3d newPos, bool copyit);
   void addM2(std::string const& filename, math::vector_3d newPos, bool copyit);
-  void addWMO(std::string const& filename, math::vector_3d newPos, bool copyit);
+  void addWMO ( std::string const& filename
+              , math::vector_3d newPos
+              , math::vector_3d rotation
+              );
 
 
   void updateTilesEntry(selection_type const& entry);
