@@ -192,7 +192,6 @@ public:
   void setHole(math::vector_3d const& pos, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);
 
-  void addModel(selection_type, math::vector_3d newPos, bool copyit);
   void addM2(std::string const& filename, math::vector_3d newPos, bool copyit);
   void addWMO ( std::string const& filename
               , math::vector_3d newPos

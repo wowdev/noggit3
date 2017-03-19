@@ -1465,26 +1465,6 @@ void World::delete_duplicate_model_and_wmo_instances()
   Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
 }
 
-
-void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
-{
-  if (entry.which() == eEntry_Model)
-    this->addM2(boost::get<selected_model_type> (entry)->model->_filename, newPos, copyit);
-  else if (entry.which() == eEntry_WMO)
-  {
-    math::vector_3d rotation (0.f, 0.f, 0.f);
-    if (Settings::getInstance()->copyModelStats
-       && copyit
-       && Environment::getInstance()->get_clipboard().which() == eEntry_WMO)
-    {
-      // copy rot from original model. Dirty but working
-      rotation = boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard())->dir;
-    }
-
-    this->addWMO(boost::get<selected_wmo_type> (entry)->wmo->_filename, newPos, rotation);
-  }
-}
-
 void World::addM2(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   ModelInstance newModelis = ModelInstance(filename);
