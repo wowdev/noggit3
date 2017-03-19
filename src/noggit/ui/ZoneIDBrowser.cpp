@@ -63,7 +63,7 @@ namespace noggit
 
         item->setSelected(true);
 
-        while (item = item->parent())
+        while ((item = item->parent()))
         {
           item->setExpanded(true);
         }

@@ -28,6 +28,8 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-variable-declara
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-prototypes)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=deprecated)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-braces)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=inconsistent-missing-override)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=parentheses)
 
 # covered by CMAKE_CXX_STANDARD
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat)
