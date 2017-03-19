@@ -34,6 +34,7 @@ namespace noggit
     object_editor::object_editor (MapView* mapView, World* world)
             : QWidget(nullptr)
       , rotationEditor (new rotation_editor())
+      , _copy_model_stats (true)
             , selected()
             , pasteMode(PASTE_ON_TERRAIN)
     {
@@ -206,10 +207,10 @@ namespace noggit
         Settings::getInstance()->random_size = s;
       });
 
-      copyAttributesCheck->setChecked(Settings::getInstance()->copyModelStats);
-      connect (copyAttributesCheck, &QCheckBox::stateChanged, [] (int s)
+      copyAttributesCheck->setChecked(_copy_model_stats);
+      connect (copyAttributesCheck, &QCheckBox::stateChanged, [this] (int s)
       {
-        Settings::getInstance()->copyModelStats = s;
+        _copy_model_stats = s;
       });
 
       pasteModeGroup->button(pasteMode)->setChecked(true);
@@ -299,7 +300,7 @@ namespace noggit
           float scale (1.f);
           math::vector_3d rotation (0.f, 0.f, 0.f);
 
-          if (Settings::getInstance()->copyModelStats)
+          if (_copy_model_stats)
           {
             // copy rot size from original model. Dirty but woring
             scale = boost::get<selected_model_type> (selected.get())->sc;
@@ -311,7 +312,7 @@ namespace noggit
         else if (selected->which() == eEntry_WMO)
         {
           math::vector_3d rotation (0.f, 0.f, 0.f);
-          if (Settings::getInstance()->copyModelStats)
+          if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working
             rotation = boost::get<selected_wmo_type> (selected.get())->dir;
