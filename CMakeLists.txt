@@ -71,6 +71,12 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
 # yes, we intend to use multi-character character constants
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
 
+
+if(WIN32)
+  # multi core building
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
+
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
