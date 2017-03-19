@@ -1527,7 +1527,7 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
 
   newModelis.recalcExtents();
   updateTilesModel(&newModelis);
-  mModelInstances.emplace(newModelis.d1, std::move(newModelis));
+  mModelInstances.emplace(newModelis.d1, newModelis);
 }
 
 void World::addWMO ( std::string const& filename
@@ -1545,7 +1545,7 @@ void World::addWMO ( std::string const& filename
   newWMOis.recalcExtents();
   updateTilesWMO(&newWMOis);
 
-  mWMOInstances.emplace(newWMOis.mUniqueID, std::move(newWMOis));
+  mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
 
 void World::updateTilesEntry(selection_type const& entry)
