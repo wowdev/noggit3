@@ -25,23 +25,3 @@ Environment* Environment::getInstance()
     instance = new Environment();
   return instance;
 }
-
-selection_type Environment::get_clipboard()
-{
-  return *clipboard;
-}
-
-void Environment::set_clipboard(boost::optional<selection_type> set)
-{
-  clipboard = set;
-}
-
-void Environment::clear_clipboard()
-{
-  clipboard.reset();
-}
-
-bool Environment::is_clipboard()
-{
-  return !!clipboard;
-}

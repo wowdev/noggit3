@@ -17,10 +17,6 @@ class Environment
 {
 public:
   static Environment* getInstance();
-  selection_type get_clipboard();
-  void set_clipboard(boost::optional<selection_type> entry);
-  void clear_clipboard();
-  bool is_clipboard();
 
   int groundBrushType;
 
@@ -38,6 +34,4 @@ public:
 private:
   Environment();
   static Environment* instance;
-
-  boost::optional<selection_type> clipboard;
 };
