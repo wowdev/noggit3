@@ -18,8 +18,6 @@ class Environment
 public:
   static Environment* getInstance();
 
-  int groundBrushType;
-
   float minRotation;
   float maxRotation;
   float minTilt;

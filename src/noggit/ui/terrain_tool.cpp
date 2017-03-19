@@ -18,13 +18,13 @@ namespace noggit
   {
     terrain_tool::terrain_tool (World* world)
       : QWidget(nullptr)
+      , _edit_type (eTerrainType_Flat)
       , _radius(15.0f)
       , _speed(2.0f)
       , _inner_radius(0.0f)
       , _vertex_angle (0.0f)
       , _vertex_orientation (0.0f)
       , _cursor_pos(nullptr)
-      , _edit_type(Environment::getInstance()->groundBrushType)
       , _vertex_mode(eVertexMode_Center)
     {
       auto layout (new QFormLayout (this));
@@ -154,7 +154,7 @@ namespace noggit
       connect ( _type_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
                 {
-                  _edit_type = id;
+                  _edit_type = static_cast<eTerrainType> (id);
                   updateVertexGroup();
                 }
               );
@@ -276,7 +276,7 @@ namespace noggit
 
     void terrain_tool::nextType()
     {
-      _edit_type = (++_edit_type) % eTerrainType_Count;
+      _edit_type = static_cast<eTerrainType> ((static_cast<int> (_edit_type) + 1) % eTerrainType_Count);
       _type_button_group->button (_edit_type)->toggle();
       updateVertexGroup();
     }

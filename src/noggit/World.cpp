@@ -463,6 +463,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , std::unordered_set<Model*> const& hidden_models
                  , std::map<int, misc::random_color>& area_id_colors
                  , bool draw_fog
+                 , eTerrainType ground_editing_brush
                  )
 {
   if (!_display_initialized)
@@ -590,7 +591,7 @@ void World::draw ( math::vector_3d const& cursor_pos
     //gl.depthMask(false);
     //gl.disable(GL_DEPTH_TEST);
 
-    if (terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == eTerrainType_Quadra)
+    if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
     {
       render_square(cursor_pos, brushRadius / 2.0f, 0.0f, brushRadius / 2.0f * innerRadius, true);
     }
@@ -658,7 +659,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   }
 
-  if ( terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == eTerrainType_Vertex )
+  if ( terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex )
   {
     float size = (vertexCenter() - camera_pos).length();
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));

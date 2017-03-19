@@ -2240,6 +2240,7 @@ void MapView::displayViewMode_3D()
                , _draw_hidden_models.get() ? std::unordered_set<Model*>() : _hidden_models
                , _area_id_colors
                , _draw_fog.get()
+               , terrainTool->_edit_type
                );
 }
 

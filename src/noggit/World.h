@@ -115,6 +115,7 @@ public:
             , std::unordered_set<Model*> const& hidden_models
             , std::map<int, misc::random_color>& area_id_colors
             , bool draw_fog
+            , eTerrainType ground_editing_brush
             );
 
   void outdoorLights(bool on);

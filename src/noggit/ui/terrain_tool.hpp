@@ -4,6 +4,7 @@
 
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
+#include <noggit/tool_enums.hpp>
 
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDial>
@@ -47,6 +48,8 @@ namespace noggit
 
       void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
 
+      eTerrainType _edit_type;
+
     private:
       void updateVertices (World*);
       void updateVertexGroup();
@@ -61,7 +64,6 @@ namespace noggit
 
       math::vector_3d* _cursor_pos;
 
-      int& _edit_type;
       int _vertex_mode;
 
       // UI stuff:
