@@ -130,8 +130,6 @@ private:
   QPointF _last_mouse_pos;
   float mh, mv, rh, rv;
 
-  float moveratio = 0.1f;
-  float rotratio = 0.2f;
   float keyx = 0, keyy = 0, keyz = 0, keyr = 0, keys = 0;
 
   bool MoveObj;

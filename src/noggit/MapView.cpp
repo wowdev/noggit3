@@ -1427,10 +1427,10 @@ void MapView::tick (float dt)
       bool canMoveObj = !objectEditor->rotationEditor->hasFocus();
 
       // Set move scale and rotate for numpad keys
+      float moveratio (0.001f);
       if (_mod_ctrl_down && _mod_shift_down)  moveratio = 0.1f;
       else if (_mod_shift_down) moveratio = 0.01f;
       else if (_mod_ctrl_down) moveratio = 0.005f;
-      else moveratio = 0.001f;
 
       if (canMoveObj && (keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
       {
