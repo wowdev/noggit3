@@ -330,7 +330,6 @@ namespace noggit
         auto clone = new ModelInstance(boost::get<selected_model_type> (entry)->model->_filename);
         clone->sc = boost::get<selected_model_type> (entry)->sc;
         clone->dir = boost::get<selected_model_type> (entry)->dir;
-        clone->ldir = boost::get<selected_model_type> (entry)->ldir;
         selected = clone;
         setModelName (boost::get<selected_model_type> (entry)->model->_filename);
       }

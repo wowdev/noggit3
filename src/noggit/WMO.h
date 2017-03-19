@@ -201,6 +201,7 @@ public:
   std::vector<std::string> textures;
   std::vector<std::string> models;
   std::vector<ModelInstance> modelis;
+  std::vector<math::vector_3d> model_nearest_light_vector;
 
   std::vector<WMOLight> lights;
 

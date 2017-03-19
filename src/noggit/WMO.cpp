@@ -268,6 +268,7 @@ void WMO::finishLoading ()
     f.read (&x, sizeof (x));
 
     modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+    model_nearest_light_vector.emplace_back();
 
     f.seek (after_entry);
   }
@@ -993,7 +994,7 @@ void WMOGroup::load()
           lmin = j;
         }
       }
-      mi.ldir = dirmin;
+      wmo->model_nearest_light_vector[doodad] = dirmin;
     }
 
     outdoorLights = false;
@@ -1136,7 +1137,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
       ModelInstance& mi = wmo->modelis[dd];
 
       if (!outdoorLights) {
-        WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
+        WMOLight::setupOnce(GL_LIGHT2, wmo->model_nearest_light_vector[dd], mi.lcol);
       }
       setupFog (draw_fog, setup_fog);
       wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog);

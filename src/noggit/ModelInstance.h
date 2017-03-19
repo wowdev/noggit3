@@ -29,7 +29,6 @@ public:
 
   float sc;
 
-  math::vector_3d ldir;
   math::vector_3d lcol;
 
   explicit ModelInstance(std::string const& filename);
@@ -47,7 +46,6 @@ public:
     , _wmo_orientation (other._wmo_orientation)
     , d1 (other.d1)
     , sc (other.sc)
-    , ldir (other.ldir)
     , lcol (other.lcol)
   {
     std::swap (extents, other.extents);
@@ -61,7 +59,6 @@ public:
     std::swap (_wmo_orientation, other._wmo_orientation);
     std::swap (d1, other.d1);
     std::swap (sc, other.sc);
-    std::swap (ldir, other.ldir);
     std::swap (lcol, other.lcol);
     return *this;
   }
