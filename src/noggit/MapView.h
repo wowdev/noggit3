@@ -134,9 +134,6 @@ private:
   float rotratio = 0.2f;
   float keyx = 0, keyy = 0, keyz = 0, keyr = 0, keys = 0;
 
-  float tool_settings_x;
-  float tool_settings_y;
-
   bool MoveObj;
 
   math::vector_3d objMove;
