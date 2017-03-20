@@ -29,7 +29,7 @@ namespace misc
   float dist(math::vector_3d const& p1, math::vector_3d const& p2);
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
   float getShortestDist(math::vector_3d const& pos, math::vector_3d const& square_pos, float unitSize);
-  bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2);
+  bool rectOverlap(math::vector_3d const*, math::vector_3d const*);
   // used for angled tools, get the height a point (pos) should be given an origin, angle and orientation
   float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation);
 

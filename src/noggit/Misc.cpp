@@ -96,7 +96,7 @@ namespace misc
     return getShortestDist(pos.x, pos.z, square_pos.x, square_pos.z, unitSize);
   }
 
-  bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2)
+  bool rectOverlap(math::vector_3d const* r1, math::vector_3d const* r2)
   {
     return r1[0].x <= r2[1].x
       && r2[0].x <= r1[1].x
