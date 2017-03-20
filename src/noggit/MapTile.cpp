@@ -258,16 +258,16 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
     // - Load WMOs -----------------------------------------
 
-    for (std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it)
+    for (auto const& object : lWMOInstances)
     {
-      world->mWMOInstances.emplace(it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it)));
+      world->mWMOInstances.emplace(object.uniqueID, WMOInstance(mWMOFilenames[object.nameID], &object));
     }
 
     // - Load M2s ------------------------------------------
 
-    for (std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
+    for (auto const& model : lModelInstances)
     {
-      world->mModelInstances.emplace(it->uniqueID, ModelInstance(mModelFilenames[it->nameID], &(*it)));
+      world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
     }
   }
 
@@ -537,19 +537,19 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lTileExtents[1] = math::vector_3d(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
 
 
-  for (std::map<int, WMOInstance>::iterator it = world->mWMOInstances.begin(); it != world->mWMOInstances.end(); ++it)
+  for (auto const& object : world->mWMOInstances)
   {
-    if (saveAllModels || it->second.isInsideRect(lTileExtents))
+    if (saveAllModels || object.second.isInsideRect(lTileExtents))
     {
-      lObjectInstances.emplace(it->second.mUniqueID, it->second);
+      lObjectInstances.emplace(object.second.mUniqueID, object.second);
     }
   }
 
-  for (std::map<int, ModelInstance>::iterator it = world->mModelInstances.begin(); it != world->mModelInstances.end(); ++it)
+  for (auto const& model : world->mModelInstances)
   {
-    if (saveAllModels || it->second.isInsideRect(lTileExtents))
+    if (saveAllModels || model.second.isInsideRect(lTileExtents))
     {
-      lModelInstances.emplace(it->second.d1, it->second);
+      lModelInstances.emplace(model.second.d1, model.second);
     }
   }
 
@@ -558,23 +558,23 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   std::map<std::string, filenameOffsetThing> lModels;
 
-  for (std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
-    if (lModels.find(it->second.model->_filename) == lModels.end())
-      lModels.insert(std::pair<std::string, filenameOffsetThing>(it->second.model->_filename, nullyThing));
+  for (auto const& model : lModelInstances)
+    if (lModels.find(model.second.model->_filename) == lModels.end())
+      lModels.emplace (model.second.model->_filename, nullyThing);
 
   lID = 0;
-  for (std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it)
-    it->second.nameID = lID++;
+  for (auto& model : lModels)
+    model.second.nameID = lID++;
 
   std::map<std::string, filenameOffsetThing> lObjects;
 
-  for (std::map<int, WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it)
-    if (lObjects.find(it->second.wmo->_filename) == lObjects.end())
-      lObjects.insert(std::pair<std::string, filenameOffsetThing>((it->second.wmo->_filename), nullyThing));
+  for (auto const& object : lObjectInstances)
+    if (lObjects.find(object.second.wmo->_filename) == lObjects.end())
+      lObjects.emplace (object.second.wmo->_filename, nullyThing);
 
   lID = 0;
-  for (std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it)
-    it->second.nameID = lID++;
+  for (auto& object : lObjects)
+    object.second.nameID = lID++;
 
   // Check which textures are on this ADT.
   std::map<std::string, int> lTextures;
@@ -583,11 +583,11 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     for (int j = 0; j < 16; ++j)
       for (size_t tex = 0; tex < mChunks[i][j]->_texture_set.num(); tex++)
         if (lTextures.find(mChunks[i][j]->_texture_set.filename(tex)) == lTextures.end())
-          lTextures.insert(std::pair<std::string, int>(mChunks[i][j]->_texture_set.filename(tex), -1));
+          lTextures.emplace (mChunks[i][j]->_texture_set.filename(tex), -1);
 
   lID = 0;
-  for (std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it)
-    it->second = lID++;
+  for (auto& texture : lTextures)
+    texture.second = lID++;
 
   // Now write the file.
   sExtendableArray lADTFile;
@@ -693,20 +693,20 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
 
   // MTEX data
-  for (std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it)
+  for (auto const& texture : lTextures)
   {
-    lADTFile.Insert(lCurrentPosition, it->first.size() + 1, it->first.c_str());
+    lADTFile.Insert(lCurrentPosition, texture.first.size() + 1, texture.first.c_str());
 
-    lCurrentPosition += it->first.size() + 1;
-    lADTFile.GetPointer<sChunkHeader>(lMTEX_Position)->mSize += it->first.size() + 1;
-    LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
+    lCurrentPosition += texture.first.size() + 1;
+    lADTFile.GetPointer<sChunkHeader>(lMTEX_Position)->mSize += texture.first.size() + 1;
+    LogDebug << "Added texture \"" << texture.first << "\"." << std::endl;
 
     if (wodSave)
     {
       // WOD TEX
-      lADTTexFile.Insert(lADTTexFileCurrentPosition, it->first.size() + 1, it->first.c_str());
-      lADTTexFileCurrentPosition += it->first.size() + 1;
-      lADTTexFile.GetPointer<sChunkHeader>(TEX_lMTEX_Position)->mSize += it->first.size() + 1;
+      lADTTexFile.Insert(lADTTexFileCurrentPosition, texture.first.size() + 1, texture.first.c_str());
+      lADTTexFileCurrentPosition += texture.first.size() + 1;
+      lADTTexFile.GetPointer<sChunkHeader>(TEX_lMTEX_Position)->mSize += texture.first.size() + 1;
     }
   }
 
@@ -735,7 +735,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
 
   // MMDX data
-  for (std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it)
+  for (auto it = lModels.begin(); it != lModels.end(); ++it)
   {
     it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize;
     lADTFile.Insert(lCurrentPosition, it->first.size() + 1, it->first.c_str());
@@ -776,10 +776,10 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   int * OBJlMMID_Data = lADTObjFile.GetPointer<int>(lADTObjFileCurrentPosition + 8); // WOD OBJ
 
   lID = 0;
-  for (std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it)
+  for (auto const& model : lModels)
   {
-    lMMID_Data[lID] = it->second.filenamePosition;
-    if (wodSave) OBJlMMID_Data[lID] = it->second.filenamePosition; // WOD OBJ
+    lMMID_Data[lID] = model.second.filenamePosition;
+    if (wodSave) OBJlMMID_Data[lID] = model.second.filenamePosition; // WOD OBJ
     lID++;
   }
   lCurrentPosition += 8 + lMMID_Size;
@@ -794,13 +794,13 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lCurrentPosition += 8 + 0;
 
   // MWMO data
-  for (std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it)
+  for (auto& object : lObjects)
   {
-    it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize;
-    lADTFile.Insert(lCurrentPosition, it->first.size() + 1, it->first.c_str());
-    lCurrentPosition += it->first.size() + 1;
-    lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize += it->first.size() + 1;
-    LogDebug << "Added object \"" << it->first << "\"." << std::endl;
+    object.second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize;
+    lADTFile.Insert(lCurrentPosition, object.first.size() + 1, object.first.c_str());
+    lCurrentPosition += object.first.size() + 1;
+    lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize += object.first.size() + 1;
+    LogDebug << "Added object \"" << object.first << "\"." << std::endl;
   }
 
   // MWID
@@ -813,8 +813,8 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   int * lMWID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
-  for (std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it)
-    lMWID_Data[lID++] = it->second.filenamePosition;
+  for (auto const& object : lObjects)
+    lMWID_Data[lID++] = object.second.filenamePosition;
 
   lCurrentPosition += 8 + lMWID_Size;
 
@@ -828,24 +828,24 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   ENTRY_MDDF* lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
 
   lID = 0;
-  for (std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
+  for (auto const& model : lModelInstances)
   {
-    std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find(it->second.model->_filename);
-    if (lMyFilenameThingey == lModels.end())
+    auto filename_to_offset_and_name = lModels.find(model.second.model->_filename);
+    if (filename_to_offset_and_name == lModels.end())
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
       return;
     }
 
-    lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-    lMDDF_Data[lID].uniqueID = it->second.d1;
-    lMDDF_Data[lID].pos[0] = it->second.pos.x;
-    lMDDF_Data[lID].pos[1] = it->second.pos.y;
-    lMDDF_Data[lID].pos[2] = it->second.pos.z;
-    lMDDF_Data[lID].rot[0] = it->second.dir.x;
-    lMDDF_Data[lID].rot[1] = it->second.dir.y;
-    lMDDF_Data[lID].rot[2] = it->second.dir.z;
-    lMDDF_Data[lID].scale = (uint16_t)(it->second.sc * 1024);
+    lMDDF_Data[lID].nameID = filename_to_offset_and_name->second.nameID;
+    lMDDF_Data[lID].uniqueID = model.second.d1;
+    lMDDF_Data[lID].pos[0] = model.second.pos.x;
+    lMDDF_Data[lID].pos[1] = model.second.pos.y;
+    lMDDF_Data[lID].pos[2] = model.second.pos.z;
+    lMDDF_Data[lID].rot[0] = model.second.dir.x;
+    lMDDF_Data[lID].rot[1] = model.second.dir.y;
+    lMDDF_Data[lID].rot[2] = model.second.dir.z;
+    lMDDF_Data[lID].scale = (uint16_t)(model.second.sc * 1024);
     lMDDF_Data[lID].flags = 0;
     lID++;
   }
@@ -864,36 +864,36 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   ENTRY_MODF *lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>(lCurrentPosition + 8);
 
   lID = 0;
-  for (std::map<int, WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it)
+  for (auto const& object : lObjectInstances)
   {
-    std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find(it->second.wmo->_filename);
-    if (lMyFilenameThingey == lObjects.end())
+    auto filename_to_offset_and_name = lObjects.find(object.second.wmo->_filename);
+    if (filename_to_offset_and_name == lObjects.end())
     {
       LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
       return;
     }
 
-    lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-    lMODF_Data[lID].uniqueID = it->second.mUniqueID;
-    lMODF_Data[lID].pos[0] = it->second.pos.x;
-    lMODF_Data[lID].pos[1] = it->second.pos.y;
-    lMODF_Data[lID].pos[2] = it->second.pos.z;
-    lMODF_Data[lID].rot[0] = it->second.dir.x;
-    lMODF_Data[lID].rot[1] = it->second.dir.y;
-    lMODF_Data[lID].rot[2] = it->second.dir.z;
+    lMODF_Data[lID].nameID = filename_to_offset_and_name->second.nameID;
+    lMODF_Data[lID].uniqueID = object.second.mUniqueID;
+    lMODF_Data[lID].pos[0] = object.second.pos.x;
+    lMODF_Data[lID].pos[1] = object.second.pos.y;
+    lMODF_Data[lID].pos[2] = object.second.pos.z;
+    lMODF_Data[lID].rot[0] = object.second.dir.x;
+    lMODF_Data[lID].rot[1] = object.second.dir.y;
+    lMODF_Data[lID].rot[2] = object.second.dir.z;
 
-    lMODF_Data[lID].extents[0][0] = it->second.extents[0].x;
-    lMODF_Data[lID].extents[0][1] = it->second.extents[0].y;
-    lMODF_Data[lID].extents[0][2] = it->second.extents[0].z;
+    lMODF_Data[lID].extents[0][0] = object.second.extents[0].x;
+    lMODF_Data[lID].extents[0][1] = object.second.extents[0].y;
+    lMODF_Data[lID].extents[0][2] = object.second.extents[0].z;
 
-    lMODF_Data[lID].extents[1][0] = it->second.extents[1].x;
-    lMODF_Data[lID].extents[1][1] = it->second.extents[1].y;
-    lMODF_Data[lID].extents[1][2] = it->second.extents[1].z;
+    lMODF_Data[lID].extents[1][0] = object.second.extents[1].x;
+    lMODF_Data[lID].extents[1][1] = object.second.extents[1].y;
+    lMODF_Data[lID].extents[1][2] = object.second.extents[1].z;
 
-    lMODF_Data[lID].flags = it->second.mFlags;
-    lMODF_Data[lID].doodadSet = it->second.doodadset;
-    lMODF_Data[lID].nameSet = it->second.mNameset;
-    lMODF_Data[lID].unknown = it->second.mUnknown;
+    lMODF_Data[lID].flags = object.second.mFlags;
+    lMODF_Data[lID].doodadSet = object.second.doodadset;
+    lMODF_Data[lID].nameSet = object.second.mNameset;
+    lMODF_Data[lID].unknown = object.second.mUnknown;
     lID++;
   }
 
@@ -946,8 +946,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
     lID = 0;
     //they should be in the correct order...
-    for (std::vector<int>::iterator it = mTextureEffects.begin(); it != mTextureEffects.end(); ++it) {
-      lMTFX_Data[lID] = *it;
+    for (auto const& effect : mTextureEffects)
+    {
+      lMTFX_Data[lID] = effect;
       ++lID;
     }
     lCurrentPosition += 8 + sizeof(uint32_t) * mTextureEffects.size();
