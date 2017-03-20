@@ -66,13 +66,8 @@ int wmo_liquid::initGeometry(MPQFile* f)
     for (int i = 0; i<xtiles + 1; ++i)
     {
       size_t p = j*(xtiles + 1) + i;
-      float h = map[p].h;
-      if (h > 100000)
-      {
-        h = pos.y;
-      }
       lVertices[p] = math::vector_3d( pos.x + UNITSIZE * i
-                                    , h
+                                    , map[p].h
                                     , pos.z + -1.0f * UNITSIZE * j
                                     );
     }
