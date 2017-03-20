@@ -54,8 +54,6 @@ namespace noggit
       void updateVertices (World*);
       void updateVertexGroup();
 
-      static const int winWidth = 180;
-
       float _radius;
       float _speed;
       float _inner_radius;
