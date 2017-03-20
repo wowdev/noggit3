@@ -553,6 +553,11 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     }
   }
 
+  struct filenameOffsetThing
+  {
+    int nameID;
+    int filenamePosition;
+  };
 
   filenameOffsetThing nullyThing = { 0, 0 };
 
