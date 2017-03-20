@@ -22,7 +22,7 @@ WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
   _file->read(&mUnknown, 2);
 }
 
-WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF* d)
+WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
   : wmo(filename)
   , pos(math::vector_3d(d->pos[0], d->pos[1], d->pos[2]))
   , dir(math::vector_3d(d->rot[0], d->rot[1], d->rot[2]))
@@ -198,7 +198,7 @@ void WMOInstance::recalcExtents()
   extents[1] = max;
 }
 
-bool WMOInstance::isInsideRect(math::vector_3d rect[2])
+bool WMOInstance::isInsideRect(math::vector_3d rect[2]) const
 {
   return misc::rectOverlap(extents, rect);
 }

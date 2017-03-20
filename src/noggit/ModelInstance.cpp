@@ -38,7 +38,7 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
   lcol = math::vector_3d(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);
 }
 
-ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
+ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
   : model (filename)
 {
 	d1 = d->uniqueID;
@@ -222,7 +222,7 @@ void ModelInstance::resetDirection(){
   dir.z = 0;
 }
 
-bool ModelInstance::isInsideRect(math::vector_3d rect[2])
+bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const
 {
   return misc::rectOverlap(extents, rect);
 }

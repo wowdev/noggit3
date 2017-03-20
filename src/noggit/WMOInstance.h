@@ -27,7 +27,7 @@ public:
 
 public:
   WMOInstance(std::string const& filename, MPQFile* _file);
-  WMOInstance(std::string const& filename, ENTRY_MODF* d);
+  WMOInstance(std::string const& filename, ENTRY_MODF const* d);
   explicit WMOInstance(std::string const& filename);
 
   WMOInstance(WMOInstance const& other) = default;
@@ -82,5 +82,5 @@ public:
   void recalcExtents();
   void resetDirection();
 
-  bool isInsideRect(math::vector_3d rect[2]);
+  bool isInsideRect(math::vector_3d rect[2]) const;
 };

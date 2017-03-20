@@ -33,7 +33,7 @@ public:
 
   explicit ModelInstance(std::string const& filename);
   explicit ModelInstance(std::string const& filename, MPQFile* f);
-  explicit ModelInstance(std::string const& filename, ENTRY_MDDF *d);
+  explicit ModelInstance(std::string const& filename, ENTRY_MDDF const*d);
 
   ModelInstance(ModelInstance const& other) = default;
   ModelInstance& operator= (ModelInstance const& other) = default;
@@ -82,7 +82,7 @@ public:
 
   void resetDirection();
 
-  bool isInsideRect(math::vector_3d rect[2]);
+  bool isInsideRect(math::vector_3d rect[2]) const;
 
   void recalcExtents();
 };
