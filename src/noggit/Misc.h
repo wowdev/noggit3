@@ -91,12 +91,6 @@ struct sChunkHeader
   int mSize;
 };
 
-struct filenameOffsetThing
-{
-  int nameID;
-  int filenamePosition;
-};
-
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0);
 
 bool pointInside(math::vector_3d point, math::vector_3d extents[2]);
