@@ -144,8 +144,8 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
 void WMOInstance::recalcExtents()
 {
-  math::vector_3d min(100000, 100000, 100000);
-  math::vector_3d max(-100000, -100000, -100000);
+  math::vector_3d min (math::vector_3d::max());
+  math::vector_3d max (math::vector_3d::min());
   math::matrix_4x4 rot
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
     * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx

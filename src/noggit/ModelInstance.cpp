@@ -229,8 +229,8 @@ bool ModelInstance::isInsideRect(math::vector_3d rect[2])
 
 void ModelInstance::recalcExtents()
 {
-  math::vector_3d min(100000, 100000, 100000);
-  math::vector_3d max(-100000, -100000, -100000);
+  math::vector_3d min (math::vector_3d::max());
+  math::vector_3d max (math::vector_3d::min());
   math::matrix_4x4 rot
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
     * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
