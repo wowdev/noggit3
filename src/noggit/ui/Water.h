@@ -10,6 +10,7 @@ class QDoubleSpinBox;
 class QLabel;
 class QPushButton;
 class QSpinBox;
+class World;
 
 namespace noggit
 {
@@ -17,8 +18,10 @@ namespace noggit
   {
     class water : public QWidget
     {
+      Q_OBJECT
+
     public:
-      water (World*);
+      water();
 
       void updatePos(tile_index const& newTile);
       void updateData();
@@ -42,6 +45,10 @@ namespace noggit
       bool angled_mode() const { return _angled_mode.get(); }
       bool use_ref_pos() const { return _locked.get(); }
       math::vector_3d ref_pos() const { return _lock_pos; }
+
+    signals:
+      void regenerate_water_opacity (float factor);
+      void crop_water();
 
     private:
       float get_opacity_factor() const;
@@ -71,7 +78,6 @@ namespace noggit
       checkbox* _lock_checkbox;
 
       QPushButton *waterType;
-      QPushButton *cropWater;
       QSpinBox *waterLayer;
 
       tile_index tile;
