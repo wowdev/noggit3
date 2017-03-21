@@ -74,6 +74,7 @@ namespace noggit
         , [this]
           {
             QListWidget* water_type_browser (new QListWidget (nullptr));
+            connect (this, &QObject::destroyed, water_type_browser, &QObject::deleteLater);
 
             water_type_browser->setWindowTitle("Water type selector");
             water_type_browser->setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
