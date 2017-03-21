@@ -346,9 +346,29 @@ void MapView::createGUI()
 
   _water = new QDockWidget ("Raise / Lower", this);
   _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _water->setWidget (guiWater = new noggit::ui::water (_world.get()));
+  _water->setWidget (guiWater = new noggit::ui::water);
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
   connect (this, &QObject::destroyed, _water, &QObject::deleteLater);
+
+  connect ( guiWater, &noggit::ui::water::regenerate_water_opacity
+          , [this] (float factor)
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
+
+              _world->autoGenWaterTrans (_camera.position, factor);
+            }
+          );
+  connect ( guiWater, &noggit::ui::water::crop_water
+          , [this]
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
+
+              _world->CropWaterADT (_camera.position);
+            }
+          );
+
 
   _vertex_shading = new QDockWidget ("Vertex Shading", this);
   _vertex_shading->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);

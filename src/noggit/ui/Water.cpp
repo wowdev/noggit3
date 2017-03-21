@@ -21,7 +21,7 @@ namespace noggit
 {
   namespace ui
   {
-    water::water (World* world)
+    water::water()
       : QWidget (nullptr)
       , _liquid_id(5)
       , _radius(10.0f)
@@ -142,19 +142,23 @@ namespace noggit
               );
       layout->addWidget (opacity_spin);
 
-      layout->addWidget
-        ( new pushbutton ( "Regen ADT opacity",
-                         [this, world] { world->autoGenWaterTrans(tile, get_opacity_factor()); }
-                                          ));
-
-      cropWater = new pushbutton ( "Crop water",
-                                 [this, world]
-                                 {
-                                   world->CropWaterADT(tile);
-                                   updateData();
-                                 }
-                                 );
-      layout->addWidget (cropWater);
+      layout->addWidget ( new pushbutton
+                            ( "Regen ADT opacity"
+                            , [this]
+                              {
+                                emit regenerate_water_opacity
+                                  (get_opacity_factor());
+                              }
+                            )
+                        );
+      layout->addWidget ( new pushbutton
+                            ( "Crop water"
+                            , [this]
+                              {
+                                emit crop_water();
+                              }
+                            )
+                        );
 
       layout->addWidget (new checkbox("Show all layers", &Environment::getInstance()->displayAllWaterLayers));
 
