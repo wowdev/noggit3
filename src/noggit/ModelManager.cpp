@@ -5,7 +5,6 @@
 #include <noggit/Log.h> // LogDebug
 #include <noggit/Model.h> // Model
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/application.h> // app.loader()
 
 #include <algorithm>
 

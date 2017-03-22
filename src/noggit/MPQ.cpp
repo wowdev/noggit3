@@ -4,7 +4,6 @@
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
 #include <noggit/Project.h>
-#include <noggit/application.h> // app.loader()
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>

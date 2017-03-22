@@ -5,7 +5,6 @@
 #include <noggit/Log.h>
 #include <noggit/World.h>
 #include <noggit/Settings.h>
-#include <noggit/application.h>
 #include <noggit/ui/About.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/SettingsPanel.h>

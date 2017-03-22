@@ -15,7 +15,6 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
-#include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), arial...
 #include <noggit/map_index.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/CursorSwitcher.h> // cursor_switcher
@@ -57,6 +56,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <regex>
