@@ -41,8 +41,6 @@
 
 #include "revision.h"
 
-Noggit app;
-
 Noggit::Noggit()
   : fullscreen(false)
   , doAntiAliasing(true)
@@ -315,6 +313,8 @@ int main(int argc, char *argv[])
   noggit::RegisterErrorHandlers();
 
   QApplication qapp (argc, argv);
+
+  Noggit app;
 
   if (int res = app.start (argc, argv))
   {
