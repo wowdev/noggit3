@@ -180,6 +180,11 @@ blp_texture::blp_texture(const std::string& filenameArg)
   {
     loadFromCompressedData(lHeader, lData);
   }
+  else
+  {
+    throw std::logic_error ("unimplemented BLP colorEncoding");
+  }
+
 
   f.close();
 
