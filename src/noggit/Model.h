@@ -37,7 +37,7 @@ public:
   math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
 
   bool calc;
-  void calcMatrix(Bone* allbones, int anim, int time);
+  void calcMatrix(Bone* allbones, int anim, int time, int animtime);
   Bone ( const MPQFile& f,
          const ModelBoneDef &b,
          int *global,
@@ -53,7 +53,7 @@ class TextureAnim {
 public:
   math::vector_3d tval, rval, sval;
 
-  void calc(int anim, int time);
+  void calc(int anim, int time, int animtime);
   TextureAnim(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
   void setup(int anim);
 };
@@ -119,7 +119,7 @@ struct ModelCamera {
   Animation::M2Value<float> rot;
 
   ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global);
-  void setup (float aspect_ratio, int time = 0);
+  void setup (float aspect_ratio, int time, int animtime);
 };
 
 struct ModelLight {
@@ -131,7 +131,7 @@ struct ModelLight {
   //Animation::M2Value<bool> Enabled;
 
   ModelLight(const MPQFile&  f, const ModelLightDef &mld, int *global);
-  void setup(int time, opengl::light l);
+  void setup(int time, opengl::light l, int animtime);
 };
 
 struct model_vertex
@@ -153,10 +153,10 @@ public:
    Model(const std::string& name);
   ~Model();
 
-  void draw (bool draw_fog);
+  void draw (bool draw_fog, int animtime);
   void drawTileMode();
 
-  std::vector<float> intersect (math::ray const&);
+  std::vector<float> intersect (math::ray const&, int animtime);
 
   void updateEmitters(float dt);
 
@@ -189,14 +189,15 @@ public:
   bool animcalc;
   bool mPerInstanceAnimation;
   int anim, animtime;
+  int _global_animtime;
 
 private:
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
 
-  void animate(int anim);
-  void calcBones(int anim, int time);
+  void animate(int anim, int animtime);
+  void calcBones(int anim, int time, int animtime);
 
   void lightsOn(opengl::light lbase);
   void lightsOff(opengl::light lbase);

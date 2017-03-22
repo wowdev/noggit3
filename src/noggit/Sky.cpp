@@ -277,6 +277,7 @@ void Skies::initSky(math::vector_3d pos, int t)
 bool Skies::drawSky ( const math::vector_3d &pos
                     , float night_intensity
                     , bool draw_fog
+                    , int animtime
                     )
 {
   if (numSkies == 0) return false;
@@ -293,7 +294,7 @@ bool Skies::drawSky ( const math::vector_3d &pos
     gl.scalef(sc, sc, sc);
     opengl::texture::enable_texture();
     stars->trans = night_intensity;
-    stars->draw (draw_fog);
+    stars->draw (draw_fog, animtime);
   }
 
   return true;

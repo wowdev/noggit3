@@ -57,6 +57,7 @@ void ModelInstance::draw ( math::frustum const& frustum
                          , bool all_boxes
                          , bool draw_fog
                          , bool is_current_selection
+                         , int animtime
                          )
 {
   if(((pos - camera).length() - model->rad * sc) >= cull_distance)
@@ -86,7 +87,7 @@ void ModelInstance::draw ( math::frustum const& frustum
                                  , TransformCoordsForModel(model->header.VertexBoxMax)
                                  ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 3.0f);
   }
-  model->draw (draw_fog);
+  model->draw (draw_fog, animtime);
 
   if (is_current_selection || force_box)
   {
@@ -165,7 +166,10 @@ gl.scalef(sc,sc,sc);
 model->draw();
 }*/
 
-void ModelInstance::intersect (math::ray const& ray, selection_result* results)
+void ModelInstance::intersect ( math::ray const& ray
+                              , selection_result* results
+                              , int animtime
+                              )
 {
   math::matrix_4x4 const model_matrix
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
@@ -188,7 +192,7 @@ void ModelInstance::intersect (math::ray const& ray, selection_result* results)
     return;
   }
 
-  for (auto&& result : model->intersect (subray))
+  for (auto&& result : model->intersect (subray, animtime))
   {
     //! \todo why is only sc important? these are relative to subray,
     //! so should be inverted by model_matrix?
@@ -201,6 +205,7 @@ void ModelInstance::draw_wmo ( const math::vector_3d& ofs
                              , const math::degrees rotation
                              , math::frustum const& frustum
                              , bool draw_fog
+                             , int animtime
                              )
 {
   math::vector_3d tpos(ofs + pos);
@@ -213,7 +218,7 @@ void ModelInstance::draw_wmo ( const math::vector_3d& ofs
   gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
   gl.scalef(sc, -sc, -sc);
 
-  model->draw (draw_fog);
+  model->draw (draw_fog, animtime);
 }
 
 void ModelInstance::resetDirection(){

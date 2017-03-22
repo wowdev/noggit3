@@ -484,6 +484,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                                           , it->second.extents[0]
                                           , it->second.extents[1]
                                           , draw_fog
+                                          , animtime
                                           );
       if (hadSky)
       {
@@ -506,6 +507,7 @@ void World::draw ( math::vector_3d const& cursor_pos
     hadSky = skies->drawSky ( camera_pos
                             , outdoorLightStats.nightIntensity
                             , draw_fog
+                            , animtime
                             );
 
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
@@ -813,6 +815,7 @@ void main()
                         , draw_models_with_box
                         , draw_fog
                         , IsSelection (eEntry_Model) && boost::get<selected_model_type> (*GetCurrentSelection())->d1 == it->second.d1
+                        , animtime
                         );
       }
     }
@@ -910,7 +913,7 @@ selection_result World::intersect ( math::ray const& ray
         bool const is_hidden (hidden_models.count (model_instance.second.model.get()));
         if (!is_hidden)
         {
-          model_instance.second.intersect (ray, &results);
+          model_instance.second.intersect (ray, &results, animtime);
         }
       }
     }
