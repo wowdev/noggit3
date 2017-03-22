@@ -41,13 +41,6 @@
 
 #include "revision.h"
 
-Noggit::Noggit()
-  : fullscreen(false)
-  , doAntiAliasing(true)
-  , xres(1280)
-  , yres(720)
-{}
-
 void Noggit::initPath(char *argv[])
 {
   try
@@ -225,7 +218,11 @@ void Noggit::loadMPQs()
   }
 }
 
-int Noggit::start(int argc, char *argv[])
+Noggit::Noggit(int argc, char *argv[])
+  : fullscreen(false)
+  , doAntiAliasing(true)
+  , xres(1280)
+  , yres(720)
 {
   InitLogging();
   initPath(argv);
@@ -240,7 +237,7 @@ int Noggit::start(int argc, char *argv[])
   if (wowpath == "")
   {
     LogError << "Empty wow path" << std::endl;
-    return -1;
+    throw std::runtime_error ("empty wow path");
   }
 
   boost::filesystem::path data_path = wowpath / "Data";
@@ -248,7 +245,7 @@ int Noggit::start(int argc, char *argv[])
   if (!boost::filesystem::exists(data_path))
   {
     LogError << "Could not find data directory: " << data_path << std::endl;
-    return -1;
+    throw std::runtime_error ("could not find data directory: " + data_path.string());
   }
 
   Log << "Game path: " << wowpath << std::endl;
@@ -295,8 +292,6 @@ int Noggit::start(int argc, char *argv[])
   main_window = std::make_unique<noggit::ui::main_window>();
   main_window->resize (xres, yres);
   main_window->show();
-
-  return 0;
 }
 
 
@@ -314,12 +309,7 @@ int main(int argc, char *argv[])
 
   QApplication qapp (argc, argv);
 
-  Noggit app;
-
-  if (int res = app.start (argc, argv))
-  {
-    return res;
-  }
+  Noggit app (argc, argv);
 
   return qapp.exec();
 }
