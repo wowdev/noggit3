@@ -14,12 +14,9 @@
 class Noggit
 {
   std::unique_ptr<noggit::ui::main_window> main_window;
+
 public:
-  Noggit();
-
-  int start(int argc, char *argv[]);
-
-  bool pop;
+  Noggit (int argc, char *argv[]);
 
 private:
   void initPath(char *argv[]);
@@ -30,7 +27,6 @@ private:
 
   AreaDB areaDB;
 
-public:
   std::unique_ptr<AsyncLoader> asyncLoader;
 
   bool fullscreen;
