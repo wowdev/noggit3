@@ -13,7 +13,6 @@
 #include <noggit/Misc.h>
 #include <noggit/MPQ.h>
 #include <noggit/Project.h>
-#include <noggit/application.h> // app.getArial14(), app.getapp.getArialn13()()
 #include <noggit/TextureManager.h> // TextureManager, Texture
 
 #include <unordered_set>

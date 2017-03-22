@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/DBC.h>
 #include <noggit/Environment.h>
 #include <noggit/Log.h>
 #include <noggit/Misc.h>
 #include <noggit/World.h>
-#include <noggit/application.h> // fonts
 #include <noggit/ui/Water.h>
 #include <noggit/ui/pushbutton.hpp>
 #include <util/qt/overload.hpp>

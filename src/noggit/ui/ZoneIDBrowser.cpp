@@ -2,7 +2,6 @@
 
 #include <noggit/ui/ZoneIDBrowser.h>
 
-#include <noggit/application.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/Misc.h>
