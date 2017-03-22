@@ -39,5 +39,3 @@ public:
   int xres;
   int yres;
 };
-
-extern Noggit app;
