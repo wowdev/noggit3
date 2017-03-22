@@ -70,14 +70,19 @@ public:
             , bool all_boxes
             , bool draw_fog
             , bool is_current_selection
+            , int animtime
             );
   void drawMapTile();
   //  void drawHighlight();
-  void intersect (math::ray const&, selection_result*);
+  void intersect ( math::ray const&
+                 , selection_result*
+                 , int animtime
+                 );
   void draw_wmo ( const math::vector_3d& ofs
                 , const math::degrees
                 , math::frustum const&
                 , bool draw_fog
+                , int animtime
                 );
 
   void resetDirection();

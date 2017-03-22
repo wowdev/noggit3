@@ -1806,7 +1806,6 @@ void MapView::tick (float dt)
 
 
   _world->animtime += dt * 1000.0f;
-  globalTime = static_cast<int>(_world->animtime);
 
   _world->tick (dt);
 

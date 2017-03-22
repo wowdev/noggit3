@@ -359,6 +359,7 @@ void WMO::draw ( int doodadset
                         , draw_fog
                         , setup_outdoor_lights
                         , setup_fog
+                        , animtime
                         );
     }
 
@@ -439,6 +440,7 @@ bool WMO::drawSkybox ( math::vector_3d pCamera
                      , math::vector_3d pLower
                      , math::vector_3d pUpper
                      , bool draw_fog
+                     , int animtime
                      ) const
 {
   if (skybox && pCamera.is_inside_of(pLower, pUpper))
@@ -460,7 +462,7 @@ bool WMO::drawSkybox ( math::vector_3d pCamera
     gl.translatef(o.x, o.y, o.z);
     const float sc = 2.0f;
     gl.scalef(sc, sc, sc);
-    skybox.get()->draw (draw_fog);
+    skybox.get()->draw (draw_fog, animtime);
     gl.enable(GL_DEPTH_TEST);
 
     return true;
@@ -1109,6 +1111,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
                            , bool draw_fog
                            , std::function<void (bool)> setup_outdoor_lights
                            , std::function<void (bool)> setup_fog
+                           , int animtime
                            )
 {
   if (!visible) return;
@@ -1140,7 +1143,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
         WMOLight::setupOnce(GL_LIGHT2, wmo->model_nearest_light_vector[dd], mi.lcol);
       }
       setupFog (draw_fog, setup_fog);
-      wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog);
+      wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog, animtime);
     }
   }
 

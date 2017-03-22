@@ -11,10 +11,6 @@
 #include <vector>
 #include <memory>
 
-//! \todo Pass this in somehow and don't define as extern.
-// global time for global sequences
-extern int globalTime;
-
 namespace Animation
 {
   namespace Interpolation
@@ -97,13 +93,13 @@ namespace Animation
       return !data[anim].empty();
     }
 
-    AnimatedType getValue(AnimationIdType anim, TimestampType time)
+    AnimatedType getValue (AnimationIdType anim, TimestampType time, int animtime)
     {
       if (_globalSequenceID != NO_GLOBAL_SEQUENCE)
       {
         if (_globalSequences[_globalSequenceID])
         {
-          time = globalTime % _globalSequences[_globalSequenceID];
+          time = animtime % _globalSequences[_globalSequenceID];
         }
         else
         {

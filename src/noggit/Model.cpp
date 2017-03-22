@@ -13,8 +13,6 @@
 #include <sstream>
 #include <string>
 
-int globalTime = 0;
-
 Model::Model(const std::string& filename)
   : _filename(filename)
   , _finished_upload(false)
@@ -443,18 +441,18 @@ void Model::initAnimated(const MPQFile& f)
   animcalc = false;
 }
 
-void Model::calcBones(int _anim, int time)
+void Model::calcBones(int _anim, int time, int animtime)
 {
   for (size_t i = 0; i<header.nBones; ++i) {
     bones[i].calc = false;
   }
 
   for (size_t i = 0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones.data(), _anim, time);
+    bones[i].calcMatrix(bones.data(), _anim, time, animtime);
   }
 }
 
-void Model::animate(int _anim)
+void Model::animate(int _anim, int animtime_)
 {
   this->anim = _anim;
   ModelAnimation &a = _animations[anim];
@@ -462,13 +460,14 @@ void Model::animate(int _anim)
   if (_animations.empty())
     return;
 
-  int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
+  int t = animtime_;
   int tmax = a.length;
   t %= tmax;
   animtime = t;
+  _global_animtime = animtime_;
 
   if (animBones) {
-    calcBones(anim, t);
+    calcBones(anim, t, _global_animtime);
   }
 
   if (animGeometry) {
@@ -513,16 +512,16 @@ void Model::animate(int _anim)
   for (size_t i = 0; i<header.nParticleEmitters; ++i) {
     // random time distribution for teh win ..?
     int pt = (t + static_cast<int>(tmax*_particles[i].tofs)) % tmax;
-    _particles[i].setup(anim, pt);
+    _particles[i].setup(anim, pt, _global_animtime);
   }
 
   for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-    _ribbons[i].setup(anim, t);
+    _ribbons[i].setup(anim, t, _global_animtime);
   }
 
   if (animTextures) {
     for (size_t i=0; i<header.nTexAnims; ++i) {
-      _texture_animations[i].calc(anim, t);
+      _texture_animations[i].calc(anim, t, animtime);
     }
   }
 }
@@ -543,10 +542,10 @@ bool ModelRenderPass::init(Model *m)
     // emissive colors
     if (color!=-1 && m->_colors[color].color.uses(0))
     {
-      ::math::vector_3d c (m->_colors[color].color.getValue (0, m->animtime));
+      ::math::vector_3d c (m->_colors[color].color.getValue (0, m->animtime, m->_global_animtime));
       if (m->_colors[color].opacity.uses (m->anim))
       {
-        ocol.w = m->_colors[color].opacity.getValue (m->anim, m->animtime);
+        ocol.w = m->_colors[color].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
       }
 
       if (unlit) {
@@ -565,7 +564,7 @@ bool ModelRenderPass::init(Model *m)
     {
       if (m->_transparency[opacity].trans.uses (0))
       {
-        ocol.w = ocol.w * m->_transparency[opacity].trans.getValue (0, m->animtime);
+        ocol.w = ocol.w * m->_transparency[opacity].trans.getValue (0, m->animtime, m->_global_animtime);
       }
     }
 
@@ -707,16 +706,16 @@ void ModelRenderPass::deinit()
   //gl.color4f(1,1,1,1); //???
 }
 
-void TextureAnim::calc(int anim, int time)
+void TextureAnim::calc(int anim, int time, int animtime)
 {
   if (trans.uses(anim)) {
-    tval = trans.getValue(anim, time);
+    tval = trans.getValue(anim, time, animtime);
   }
   if (rot.uses(anim)) {
-    rval = rot.getValue(anim, time);
+    rval = rot.getValue(anim, time, animtime);
   }
   if (scale.uses(anim)) {
-    sval = scale.getValue(anim, time);
+    sval = scale.getValue(anim, time, animtime);
   }
 }
 
@@ -748,7 +747,7 @@ ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *globa
   tTarget.apply(fixCoordSystem);
 }
 
-void ModelCamera::setup (float aspect_ratio, int time)
+void ModelCamera::setup (float aspect_ratio, int time, int animtime)
 {
   gl.matrixMode (GL_PROJECTION);
   gl.loadIdentity();
@@ -756,8 +755,8 @@ void ModelCamera::setup (float aspect_ratio, int time)
     (math::radians (fov * 0.6f), aspect_ratio, nearclip, farclip);
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
-  opengl::matrix::look_at ( pos + tPos.getValue( 0, time )
-                          , target + tTarget.getValue( 0, time )
+  opengl::matrix::look_at ( pos + tPos.getValue( 0, time, animtime )
+                          , target + tTarget.getValue( 0, time, animtime )
                           , {0.0f, 1.0f, 0.0f}
                           );
 }
@@ -784,10 +783,10 @@ ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
   , ambIntensity (mld.ambIntensity, f, global)
 {}
 
-void ModelLight::setup(int time, opengl::light l)
+void ModelLight::setup(int time, opengl::light l, int animtime)
 {
-  math::vector_4d ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
-  math::vector_4d diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
+  math::vector_4d ambcol(ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime), 1.0f);
+  math::vector_4d diffcol(diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime), 1.0f);
   math::vector_4d p;
 
   enum ModelLightTypes {
@@ -842,7 +841,7 @@ Bone::Bone( const MPQFile& f,
   scale.apply(fixCoordSystem2);
 }
 
-void Bone::calcMatrix(Bone *allbones, int anim, int time)
+void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 {
   if (calc) return;
 
@@ -855,17 +854,17 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 
     if (trans.uses(anim))
     {
-      m *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue (anim, time));
+      m *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue (anim, time, animtime));
     }
 
     if (rot.uses(anim))
     {
-      m *= math::matrix_4x4 (math::matrix_4x4::rotation, q = rot.getValue (anim, time));
+      m *= math::matrix_4x4 (math::matrix_4x4::rotation, q = rot.getValue (anim, time, animtime));
     }
 
     if (scale.uses(anim))
     {
-      m *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue (anim, time));
+      m *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue (anim, time, animtime));
     }
 
     if (billboard)
@@ -890,7 +889,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 
   if (parent >= 0)
   {
-    allbones[parent].calcMatrix (allbones, anim, time);
+    allbones[parent].calcMatrix (allbones, anim, time, animtime);
     mat = allbones[parent].mat * m;
   }
   else
@@ -919,7 +918,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 }
 
 
-void Model::draw (bool draw_fog)
+void Model::draw (bool draw_fog, int animtime)
 {
   if (!finishedLoading())
     return;
@@ -936,7 +935,7 @@ void Model::draw (bool draw_fog)
 
   if (animated && (!animcalc || mPerInstanceAnimation))
   {
-    animate(0);
+    animate(0, animtime);
     animcalc = true;
   }
 
@@ -987,13 +986,13 @@ void Model::draw (bool draw_fog)
     _ribbons[i].draw();
 }
 
-std::vector<float> Model::intersect (math::ray const& ray)
+std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 {
   std::vector<float> results;
 
   if (animated && (!animcalc || mPerInstanceAnimation))
   {
-    animate (0);
+    animate (0, animtime);
     animcalc = true;
   }
 
@@ -1018,7 +1017,7 @@ std::vector<float> Model::intersect (math::ray const& ray)
 void Model::lightsOn(opengl::light lbase)
 {
   // setup lights
-  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(animtime, l++);
+  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(animtime, l++, _global_animtime);
 }
 
 void Model::lightsOff(opengl::light lbase)

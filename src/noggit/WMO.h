@@ -72,6 +72,7 @@ public:
                    , bool draw_fog
                    , std::function<void (bool)> setup_outdoor_lights
                    , std::function<void (bool)> setup_fog
+                   , int animtime
                    );
 
   void setupFog (bool draw_fog, std::function<void (bool)> setup_fog);
@@ -179,6 +180,7 @@ public:
                   , math::vector_3d pLower
                   , math::vector_3d pUpper
                   , bool draw_fog
+                  , int animtime
                   ) const;
   //void drawPortals();
 

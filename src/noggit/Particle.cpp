@@ -92,14 +92,14 @@ void ParticleSystem::initTile(math::vector_2d *tc, int num)
 
 void ParticleSystem::update(float dt)
 {
-  float grav = gravity.getValue(manim, mtime);
-  float deaccel = deacceleration.getValue(manim, mtime);
+  float grav = gravity.getValue(manim, mtime, manimtime);
+  float deaccel = deacceleration.getValue(manim, mtime, manimtime);
 
   // spawn new particles
   if (emitter) {
-    float frate = rate.getValue(manim, mtime);
+    float frate = rate.getValue(manim, mtime, manimtime);
     float flife = 1.0f;
-    flife = lifespan.getValue(manim, mtime);
+    flife = lifespan.getValue(manim, mtime, manimtime);
 
     float ftospawn = (dt * frate / flife) + rem;
     if (ftospawn < 1.0f) {
@@ -116,20 +116,20 @@ void ParticleSystem::update(float dt)
       rem = ftospawn - static_cast<float>(tospawn);
 
 
-      float w = areal.getValue(manim, mtime) * 0.5f;
-      float l = areaw.getValue(manim, mtime) * 0.5f;
-      float spd = speed.getValue(manim, mtime);
-      float var = variation.getValue(manim, mtime);
-      float spr = spread.getValue(manim, mtime);
-      float spr2 = lat.getValue(manim, mtime);
+      float w = areal.getValue(manim, mtime, manimtime) * 0.5f;
+      float l = areaw.getValue(manim, mtime, manimtime) * 0.5f;
+      float spd = speed.getValue(manim, mtime, manimtime);
+      float var = variation.getValue(manim, mtime, manimtime);
+      float spr = spread.getValue(manim, mtime, manimtime);
+      float spr2 = lat.getValue(manim, mtime, manimtime);
       bool en = true;
       if (enabled.uses(manim))
-        en = enabled.getValue(manim, mtime) != 0;
+        en = enabled.getValue(manim, mtime, manimtime) != 0;
 
       //rem = 0;
       if (en) {
         for (int i = 0; i<tospawn; ++i) {
-          Particle p = emitter->newParticle(manim, mtime, w, l, spd, var, spr, spr2);
+          Particle p = emitter->newParticle(manim, mtime, manimtime, w, l, spd, var, spr, spr2);
           // sanity check:
           //if (particles.size() < MAX_PARTICLES) // No need to check this every loop iteration. Already checked above.
           particles.push_back(p);
@@ -163,10 +163,11 @@ void ParticleSystem::update(float dt)
   }
 }
 
-void ParticleSystem::setup(int anim, int time)
+void ParticleSystem::setup(int anim, int time, int animtime)
 {
   manim = anim;
   mtime = time;
+  manimtime = animtime;
 
   /*
   if (transform) {
@@ -448,7 +449,7 @@ namespace
   }
 }
 
-Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float /*spr2*/)
+Particle PlaneParticleEmitter::newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float /*spr2*/)
 {
   // Model Flags - *shrug* gotta write this down somewhere.
   // 0x1 =
@@ -549,7 +550,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
   }
 
   p.life = 0;
-  p.maxlife = sys->lifespan.getValue(anim, time);
+  p.maxlife = sys->lifespan.getValue(anim, time, animtime);
 
   p.origin = p.pos;
 
@@ -557,7 +558,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
   return p;
 }
 
-Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2)
+Particle SphereParticleEmitter::newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
   math::vector_3d dir;
@@ -594,11 +595,11 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   //math::vector_3d bdir(0, w*math::cos(t), l*math::sin(t));
 
 
-  float theta_range = sys->spread.getValue(anim, time);
+  float theta_range = sys->spread.getValue(anim, time, animtime);
   float theta = -0.5f* theta_range + misc::randfloat(0, theta_range);
   math::vector_3d bdir(0, l*math::cos(theta), w*math::sin(theta));
 
-  float phi_range = sys->lat.getValue(anim, time);
+  float phi_range = sys->lat.getValue(anim, time, animtime);
   float phi = misc::randfloat(0, phi_range);
   rotate(0,0, &bdir.z, &bdir.x, phi);
   */
@@ -653,7 +654,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   p.down = math::vector_3d(0, -1.0f, 0);
 
   p.life = 0;
-  p.maxlife = sys->lifespan.getValue(anim, time);
+  p.maxlife = sys->lifespan.getValue(anim, time, animtime);
 
   p.origin = p.pos;
 
@@ -682,7 +683,7 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
   segs.emplace_back(tpos, 0);
 }
 
-void RibbonEmitter::setup(int anim, int time)
+void RibbonEmitter::setup(int anim, int time, int animtime)
 {
   math::vector_3d ntpos = parent->mat * pos;
   math::vector_3d ntup = parent->mat * (pos + math::vector_3d(0, 0, 1));
@@ -727,10 +728,10 @@ void RibbonEmitter::setup(int anim, int time)
   }
 
   tpos = ntpos;
-  tcolor = math::vector_4d(color.getValue(anim, time), opacity.getValue(anim, time));
+  tcolor = math::vector_4d(color.getValue(anim, time, animtime), opacity.getValue(anim, time, animtime));
 
-  tabove = above.getValue(anim, time);
-  tbelow = below.getValue(anim, time);
+  tabove = above.getValue(anim, time, animtime);
+  tbelow = below.getValue(anim, time, animtime);
 }
 
 void RibbonEmitter::draw()

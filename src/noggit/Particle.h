@@ -32,19 +32,19 @@ protected:
 public:
   explicit ParticleEmitter(ParticleSystem *psys) : sys(psys) {}
   virtual ~ParticleEmitter() {}
-  virtual Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2) = 0;
+  virtual Particle newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2) = 0;
 };
 
 class PlaneParticleEmitter : public ParticleEmitter {
 public:
   explicit PlaneParticleEmitter(ParticleSystem *_sys) : ParticleEmitter(_sys) {}
-  Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
+  Particle newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 class SphereParticleEmitter : public ParticleEmitter {
 public:
   explicit SphereParticleEmitter(ParticleSystem *_sys) : ParticleEmitter(_sys) {}
-  Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
+  Particle newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 struct TexCoordSet {
@@ -64,6 +64,7 @@ class ParticleSystem {
   ParticleList particles;
   int blend, order, type;
   int manim, mtime;
+  int manimtime;
   int rows, cols;
   std::vector<TexCoordSet> tiles;
   void initTile(math::vector_2d *tc, int num);
@@ -82,7 +83,7 @@ public:
   ParticleSystem(Model*, const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
   void update(float dt);
 
-  void setup(int anim, int time);
+  void setup(int anim, int time, int animtime);
   void draw();
 
   friend class PlaneParticleEmitter;
@@ -124,6 +125,6 @@ class RibbonEmitter {
 
 public:
   RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals);
-  void setup(int anim, int time);
+  void setup(int anim, int time, int animtime);
   void draw();
 };
