@@ -12,7 +12,7 @@ namespace noggit
 {
   namespace ui
   {
-    class detail_infos : public noggit::ui::widget
+    class detail_infos : public widget
     {
     private:
       QLabel* _info_text;

@@ -10,7 +10,7 @@ namespace noggit
 {
   namespace ui
   {
-    class cursor_switcher : public noggit::ui::widget
+    class cursor_switcher : public widget
     {
     public:
       cursor_switcher(math::vector_4d& color, int& cursor_type);

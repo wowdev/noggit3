@@ -206,7 +206,7 @@ namespace noggit
             else
             {
               auto uidFixWindow
-                ( new noggit::ui::uid_fix_window
+                ( new uid_fix_window
                     ( [this, pos]
                       {
                         enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));

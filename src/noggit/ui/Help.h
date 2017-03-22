@@ -8,7 +8,7 @@ namespace noggit
 {
   namespace ui
   {
-    class help : public noggit::ui::widget
+    class help : public widget
     {
     public:
       help();

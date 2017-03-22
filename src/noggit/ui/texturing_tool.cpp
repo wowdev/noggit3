@@ -33,8 +33,8 @@ namespace noggit
       _inner_brush.init();
       _spray_brush.init();
 
-      current_texture = new noggit::ui::current_texture;
-      layout->addRow (current_texture);
+      _current_texture = new current_texture;
+      layout->addRow (_current_texture);
 
       _hardness_spin = new QDoubleSpinBox (this);
       _hardness_spin->setRange (0.0f, 1.0f);
@@ -124,7 +124,7 @@ namespace noggit
       QPushButton* toggle_swapper = new QPushButton ("Texture swapper", this);
       layout->addRow (toggle_swapper);
 
-      _texture_switcher = new noggit::ui::texture_swapper(this, camera_pos, world);
+      _texture_switcher = new texture_swapper(this, camera_pos, world);
 
       connect(toggle_swapper, &QPushButton::clicked, [this]() {
         hide();

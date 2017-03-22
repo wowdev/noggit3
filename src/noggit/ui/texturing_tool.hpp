@@ -47,7 +47,7 @@ namespace noggit
         return _texture_brush;
       }
 
-      ui::current_texture* current_texture;
+      current_texture* _current_texture;
 
     private:
       // slider functions
@@ -88,7 +88,7 @@ namespace noggit
       QDoubleSpinBox* _spray_size_spin;
       QDoubleSpinBox* _spray_pressure_spin;
 
-      noggit::ui::texture_swapper* _texture_switcher;
+      texture_swapper* _texture_switcher;
     };
   }
 }

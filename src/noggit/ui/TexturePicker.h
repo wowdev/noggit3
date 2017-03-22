@@ -15,22 +15,22 @@ namespace noggit
   {
     class current_texture;
 
-    class texture_picker : public noggit::ui::widget
+    class texture_picker : public widget
     {
       Q_OBJECT
 
     public:
-      texture_picker (noggit::ui::current_texture*);
+      texture_picker (current_texture*);
 
       void getTextures(selection_type lSelection);
-      void setTexture(size_t id, noggit::ui::current_texture*);
+      void setTexture(size_t id, current_texture*);
       void shiftSelectedTextureLeft();
       void shiftSelectedTextureRight();
 
     private:
       void update(bool set_changed = true);
 
-      std::vector<noggit::ui::clickable_label*> _labels;
+      std::vector<clickable_label*> _labels;
       std::vector<scoped_blp_texture_reference> _textures;
       MapChunk* _chunk;
 
