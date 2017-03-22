@@ -33,10 +33,10 @@ namespace
 
 std::unordered_set<std::string> gListfile;
 
-void MPQArchive::loadMPQ(const std::string& filename, bool doListfile)
+void MPQArchive::loadMPQ (AsyncLoader* loader, const std::string& filename, bool doListfile)
 {
   _openArchives.emplace_back (filename, std::make_unique<MPQArchive> (filename, doListfile));
-  app.loader()->addObject(_openArchives.back().second.get());
+  loader->addObject(_openArchives.back().second.get());
 }
 
 MPQArchive::MPQArchive(const std::string& filename, bool doListfile)

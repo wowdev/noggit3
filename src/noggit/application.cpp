@@ -207,7 +207,7 @@ void Noggit::loadMPQs()
       {
         path.replace(location, 1, std::string(&j, 1));
         if (boost::filesystem::exists(path))
-          MPQArchive::loadMPQ(path, true);
+          MPQArchive::loadMPQ (asyncLoader.get(), path, true);
       }
     }
     else if (path.find("{character}") != std::string::npos)
@@ -218,12 +218,12 @@ void Noggit::loadMPQs()
       {
         path.replace(location, 1, std::string(&c, 1));
         if (boost::filesystem::exists(path))
-          MPQArchive::loadMPQ(path, true);
+          MPQArchive::loadMPQ (asyncLoader.get(), path, true);
       }
     }
     else
       if (boost::filesystem::exists(path))
-        MPQArchive::loadMPQ(path, true);
+        MPQArchive::loadMPQ (asyncLoader.get(), path, true);
   }
 }
 

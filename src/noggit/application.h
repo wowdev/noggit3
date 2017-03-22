@@ -21,11 +21,6 @@ public:
 
   bool pop;
 
-  inline AsyncLoader* loader()
-  {
-    return asyncLoader.get();
-  }
-
 private:
   void initPath(char *argv[]);
   void parseArgs(int argc, char *argv[]);
