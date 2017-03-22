@@ -280,7 +280,6 @@ set ( noggit_root_headers
       src/noggit/WMOInstance.h
       src/noggit/World.h
       src/noggit/alphamap.hpp
-      src/noggit/application.h
       src/noggit/errorHandling.h
       src/noggit/liquid_layer.hpp
       src/noggit/liquid_render.hpp

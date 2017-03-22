@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/application.h>
-
 #include <noggit/Native.hpp>
 
+#include <noggit/AsyncLoader.h>
 #include <noggit/ConfigFile.h>
+#include <noggit/DBC.h>
 #include <noggit/Environment.h>  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
@@ -29,6 +29,7 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <string>
 #include <vector>
 
 #include <QtCore/QTimer>
@@ -37,9 +38,30 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QLabel>
 
-#include <QtWidgets/QOpenGLWidget>
-
 #include "revision.h"
+
+class Noggit
+{
+public:
+  Noggit (int argc, char *argv[]);
+
+private:
+  void initPath(char *argv[]);
+  void parseArgs(int argc, char *argv[]);
+  void loadMPQs();
+
+  std::unique_ptr<noggit::ui::main_window> main_window;
+
+  boost::filesystem::path wowpath;
+
+  std::unique_ptr<AsyncLoader> asyncLoader;
+
+  bool fullscreen;
+  bool doAntiAliasing;
+
+  int xres;
+  int yres;
+};
 
 void Noggit::initPath(char *argv[])
 {
