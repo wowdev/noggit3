@@ -384,7 +384,7 @@ void MapView::createGUI()
 
 
   TexturePalette = new noggit::ui::tileset_chooser;
-  connect ( texturingTool->current_texture, &noggit::ui::current_texture::clicked
+  connect ( texturingTool->_current_texture, &noggit::ui::current_texture::clicked
           , [=]
             {
               TexturePalette->setVisible (!TexturePalette->isVisible());
@@ -397,7 +397,7 @@ void MapView::createGUI()
               opengl::context::scoped_setter const _ (::gl, context());
 
               noggit::ui::selected_texture::set (filename);
-              texturingTool->current_texture->set_texture (filename);
+              texturingTool->_current_texture->set_texture (filename);
             }
           );
 
@@ -406,7 +406,7 @@ void MapView::createGUI()
   guidetailInfos = new noggit::ui::detail_infos;
   guidetailInfos->hide();
 
-  TexturePicker = new noggit::ui::texture_picker (texturingTool->current_texture);
+  TexturePicker = new noggit::ui::texture_picker (texturingTool->_current_texture);
   TexturePicker->hide();
 
   connect ( TexturePicker, &noggit::ui::texture_picker::shift_left

@@ -14,7 +14,7 @@ namespace noggit
   namespace ui
   {
     cursor_switcher::cursor_switcher(math::vector_4d& color, int& cursor_type)
-      : noggit::ui::widget (nullptr)
+      : widget (nullptr)
     {
       setWindowTitle("Cursor Options");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);

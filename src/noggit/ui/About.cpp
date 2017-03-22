@@ -19,7 +19,7 @@ namespace noggit
       new QVBoxLayout (this);
 
       auto icon (new QLabel (this));
-      icon->setPixmap (noggit::render_blp_to_pixmap ("interface/icons/inv_potion_83.blp"));
+      icon->setPixmap (render_blp_to_pixmap ("interface/icons/inv_potion_83.blp"));
       layout()->addWidget (icon);
       //! \todo was Skurri32
       layout()->addWidget (new QLabel ("Noggit Studio", this));

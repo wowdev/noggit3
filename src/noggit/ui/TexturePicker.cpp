@@ -18,8 +18,8 @@ namespace noggit
   namespace ui
   {
     texture_picker::texture_picker
-        (noggit::ui::current_texture* current_texture_window)
-      : noggit::ui::widget (nullptr)
+        (current_texture* current_texture_window)
+      : widget (nullptr)
       , _chunk (nullptr)
     {
       setWindowTitle ("Texture Picker");
@@ -83,7 +83,7 @@ namespace noggit
     }
 
     void texture_picker::setTexture
-      (size_t id, noggit::ui::current_texture* current_texture_window)
+      (size_t id, current_texture* current_texture_window)
     {
       assert(id < _textures.size());
 
@@ -134,7 +134,7 @@ namespace noggit
       for (; index < _chunk->_texture_set.num(); ++index)
       {
         _textures.push_back(_chunk->_texture_set.texture(index));
-        _labels[index]->setPixmap(noggit::render_blp_to_pixmap(_textures[index]->filename()));
+        _labels[index]->setPixmap(render_blp_to_pixmap(_textures[index]->filename()));
         _labels[index]->show();
       }
 

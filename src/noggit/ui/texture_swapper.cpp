@@ -28,7 +28,7 @@ namespace noggit
 
       QLabel* texture_display = new QLabel (this);
       texture_display->setMinimumSize(64, 64);
-      texture_display->setPixmap (noggit::render_blp_to_pixmap ("tileset\\generic\\black.blp", 64, 64));
+      texture_display->setPixmap (render_blp_to_pixmap ("tileset\\generic\\black.blp", 64, 64));
 
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
@@ -41,7 +41,7 @@ namespace noggit
         _texture_to_swap = *selected_texture::get();
         if (_texture_to_swap)
         {
-          texture_display->setPixmap (noggit::render_blp_to_pixmap (_texture_to_swap.get()->filename().c_str()));
+          texture_display->setPixmap (render_blp_to_pixmap (_texture_to_swap.get()->filename().c_str()));
         }
       });
 

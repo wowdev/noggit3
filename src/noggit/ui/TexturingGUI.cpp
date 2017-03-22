@@ -48,7 +48,7 @@ namespace noggit
             //! \note The one time Qt is const correct and we don't want that.
             auto that (const_cast<model_item*> (this));
             that->_rendered = true;
-            that->_pixmap = noggit::render_blp_to_pixmap (data (Qt::DisplayRole).toString().prepend ("tileset/").toStdString(), 256, 256);
+            that->_pixmap = render_blp_to_pixmap (data (Qt::DisplayRole).toString().prepend ("tileset/").toStdString(), 256, 256);
           }
           return _pixmap;
         }
@@ -103,7 +103,7 @@ namespace noggit
                   (boost::filesystem::recursive_directory_iterator (prefix), {})
               )
           {
-            auto entry ( noggit::mpq::normalized_filename
+            auto entry ( mpq::normalized_filename
                           (entry_abs.path().string().substr (prefix_size))
                        );
 

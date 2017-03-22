@@ -9,7 +9,7 @@ namespace noggit
   namespace ui
   {
     detail_infos::detail_infos()
-      : noggit::ui::widget (nullptr)
+      : widget (nullptr)
     {
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
       auto layout (new QFormLayout (this));

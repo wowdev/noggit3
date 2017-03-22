@@ -10,7 +10,7 @@ namespace noggit
   namespace ui
   {
     help::help()
-      : noggit::ui::widget (nullptr)
+      : widget (nullptr)
     {
       new QHBoxLayout (this);
 

@@ -58,7 +58,7 @@ namespace noggit
 
       std::ifstream fileReader (Settings::getInstance()->importFile);
       std::string const filter
-        (noggit::mpq::normalized_filename (_textBox->text().toStdString()));
+        (mpq::normalized_filename (_textBox->text().toStdString()));
 
       std::string line;
       while (std::getline (fileReader, line))
@@ -68,7 +68,7 @@ namespace noggit
           continue;
         }
 
-        std::string path (noggit::mpq::normalized_filename (line));
+        std::string path (mpq::normalized_filename (line));
 
         if (!filter.empty() && path.find (filter) == std::string::npos)
         {
