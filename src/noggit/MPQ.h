@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <vector>
 
+class AsyncLoader;
 class MPQArchive;
 class MPQFile;
 
@@ -34,7 +35,7 @@ public:
   static bool allFinishedLoading();
   static void allFinishLoading();
 
-  static void loadMPQ(const std::string& filename, bool doListfile = false);
+  static void loadMPQ (AsyncLoader*, const std::string& filename, bool doListfile = false);
   static void unloadAllMPQs();
   static void unloadMPQ(const std::string& filename);
 
