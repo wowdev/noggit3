@@ -25,9 +25,6 @@ public:
   float minScale;
   float maxScale;
 
-  noggit::bool_toggle_property displayAllWaterLayers;
-  int currentWaterLayer;
-
 private:
   Environment();
   static Environment* instance;

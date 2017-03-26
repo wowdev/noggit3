@@ -375,6 +375,7 @@ list (APPEND headers_to_moc
   src/noggit/ui/clickable_label.hpp
   src/noggit/ui/minimap_widget.hpp
   src/noggit/ui/widget.hpp
+  src/noggit/unsigned_int_property.hpp
 )
 qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
 

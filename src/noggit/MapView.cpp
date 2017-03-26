@@ -346,7 +346,10 @@ void MapView::createGUI()
 
   _water = new QDockWidget ("Raise / Lower", this);
   _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _water->setWidget (guiWater = new noggit::ui::water);
+  _water->setWidget ( guiWater = new noggit::ui::water ( &_displayed_water_layer
+                                                       , &_display_all_water_layers
+                                                       )
+                    );
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
   connect (this, &QObject::destroyed, _water, &QObject::deleteLater);
 
@@ -2264,7 +2267,7 @@ void MapView::displayViewMode_3D()
                , _area_id_colors
                , _draw_fog.get()
                , terrainTool->_edit_type
-               , Environment::getInstance()->displayAllWaterLayers.get() ? -1 : Environment::getInstance()->currentWaterLayer
+               , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                );
 }
 

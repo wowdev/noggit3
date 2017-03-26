@@ -21,7 +21,9 @@ namespace noggit
 {
   namespace ui
   {
-    water::water()
+    water::water ( unsigned_int_property* current_layer
+                 , bool_toggle_property* display_all_layers
+                 )
       : QWidget (nullptr)
       , _liquid_id(5)
       , _radius(10.0f)
@@ -161,19 +163,19 @@ namespace noggit
                             )
                         );
 
-      layout->addWidget (new checkbox("Show all layers", &Environment::getInstance()->displayAllWaterLayers));
+      layout->addWidget (new checkbox("Show all layers", display_all_layers));
 
       layout->addWidget (new QLabel("Current layer:", this));
 
       waterLayer = new QSpinBox (this);
-      waterLayer->setValue (Environment::getInstance()->currentWaterLayer + 1);
-      waterLayer->setRange (1, 100);
+      waterLayer->setValue (current_layer->get());
+      waterLayer->setRange (0, 100);
       layout->addWidget (waterLayer);
       connect ( waterLayer, qOverload<int> (&QSpinBox::valueChanged)
-              , [] (int layer)
-                {
-                  Environment::getInstance()->currentWaterLayer = layer - 1;
-                }
+              , current_layer, &unsigned_int_property::set
+              );
+      connect ( current_layer, &unsigned_int_property::changed
+              , waterLayer, &QSpinBox::setValue
               );
 
       updateData();
