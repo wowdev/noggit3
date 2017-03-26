@@ -394,6 +394,7 @@ void MapTile::drawWater ( opengl::scoped::use_program& water_shader
                         , math::vector_3d water_color_light
                         , math::vector_3d water_color_dark
                         , int animtime
+                        , int layer
                         )
 {
   if (!Water.hasData(0))
@@ -404,7 +405,12 @@ void MapTile::drawWater ( opengl::scoped::use_program& water_shader
   gl.disable(GL_COLOR_MATERIAL);
   gl.disable(GL_LIGHTING);
 
-  Water.draw (water_shader, water_color_light, water_color_dark, animtime);
+  Water.draw ( water_shader
+             , water_color_light
+             , water_color_dark
+             , animtime
+             , layer
+             );
 
   gl.enable(GL_LIGHTING);
   gl.enable(GL_COLOR_MATERIAL);

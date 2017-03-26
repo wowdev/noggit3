@@ -2264,6 +2264,7 @@ void MapView::displayViewMode_3D()
                , _area_id_colors
                , _draw_fog.get()
                , terrainTool->_edit_type
+               , Environment::getInstance()->displayAllWaterLayers.get() ? -1 : Environment::getInstance()->currentWaterLayer
                );
 }
 

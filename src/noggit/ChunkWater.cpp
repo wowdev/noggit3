@@ -157,14 +157,10 @@ void ChunkWater::draw ( opengl::scoped::use_program& water_shader
                       , math::vector_3d water_color_light
                       , math::vector_3d water_color_dark
                       , int animtime
+                      , int layer
                       )
 {
-  if (_layers.empty())
-  {
-    return;
-  }
-
-  if (Environment::getInstance()->displayAllWaterLayers.get())
+  if (layer == -1)
   {
     for (liquid_layer& layer : _layers)
     {
@@ -175,9 +171,9 @@ void ChunkWater::draw ( opengl::scoped::use_program& water_shader
                  );
     }
   }
-  else if (Environment::getInstance()->currentWaterLayer < _layers.size())
+  else if (layer < _layers.size())
   {
-    _layers[Environment::getInstance()->currentWaterLayer].draw
+    _layers[layer].draw
       (water_shader, water_color_light, water_color_dark, animtime);
   }
 }

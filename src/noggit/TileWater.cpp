@@ -36,6 +36,7 @@ void TileWater::draw ( opengl::scoped::use_program& water_shader
                      , math::vector_3d water_color_light
                      , math::vector_3d water_color_dark
                      , int animtime
+                     , int layer
                      )
 {
   for (int z = 0; z < 16; ++z)
@@ -46,6 +47,7 @@ void TileWater::draw ( opengl::scoped::use_program& water_shader
                          , water_color_light
                          , water_color_dark
                          , animtime
+                         , layer
                          );
     }
   }

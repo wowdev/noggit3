@@ -464,6 +464,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , std::map<int, misc::random_color>& area_id_colors
                  , bool draw_fog
                  , eTerrainType ground_editing_brush
+                 , int water_layer
                  )
 {
   if (!_display_initialized)
@@ -879,6 +880,7 @@ void main()
                       , skies->colorSet[WATER_COLOR_LIGHT]
                       , skies->colorSet[WATER_COLOR_DARK]
                       , animtime
+                      , water_layer
                       );
     }
   }
@@ -1615,16 +1617,21 @@ bool World::canWaterSave(const tile_index& tile)
   return !!mt && mt->canWaterSave();
 }
 
-void World::setWaterType(const tile_index& pos, int type)
+void World::setWaterType(const tile_index& pos, int type, int layer)
 {
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water.setType(type, Environment::getInstance()->currentWaterLayer);});
+  for_tile_at ( pos
+              , [&] (MapTile* tile)
+                {
+                  tile->Water.setType (type, layer);
+                }
+              );
 }
 
-int World::getWaterType(const tile_index& tile)
+int World::getWaterType(const tile_index& tile, int layer)
 {
   if (mapIndex.tileLoaded(tile))
   {
-    return mapIndex.getTile(tile)->Water.getType(Environment::getInstance()->currentWaterLayer);
+    return mapIndex.getTile(tile)->Water.getType (layer);
   }
   else
   {

@@ -26,6 +26,7 @@ public:
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
             , int animtime
+            , int layer
             );
   bool hasData(size_t layer);
   void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);
