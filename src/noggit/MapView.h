@@ -8,6 +8,7 @@
 #include <noggit/bool_toggle_property.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/ui/ObjectEditor.h>
 #include <noggit/unsigned_int_property.hpp>
 
 #include <boost/optional.hpp>
@@ -51,7 +52,6 @@ namespace noggit
     class help;
     class helper_models;
     class minimap_widget;
-    class object_editor;
     class shader_tool;
     class terrain_tool;
     class texture_picker;
@@ -253,6 +253,7 @@ private:
   noggit::bool_toggle_property _move_model_to_cursor_position = {true};
   noggit::bool_toggle_property _display_all_water_layers = {true};
   noggit::unsigned_int_property _displayed_water_layer = {0};
+  noggit::object_paste_params _object_paste_params;
 
   noggit::bool_toggle_property _show_detail_info_window = {false};
   noggit::bool_toggle_property _show_minimap_window = {false};

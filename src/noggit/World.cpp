@@ -8,7 +8,6 @@
 #include <noggit/ChunkWater.hpp>
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
-#include <noggit/Environment.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
@@ -22,6 +21,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
@@ -1471,7 +1471,12 @@ void World::delete_duplicate_model_and_wmo_instances()
   Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
 }
 
-void World::addM2(std::string const& filename, math::vector_3d newPos, float scale, math::vector_3d rotation)
+void World::addM2 ( std::string const& filename
+                  , math::vector_3d newPos
+                  , float scale
+                  , math::vector_3d rotation
+                  , noggit::object_paste_params* paste_params
+                  )
 {
   ModelInstance newModelis = ModelInstance(filename);
 
@@ -1482,23 +1487,23 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, float sca
 
   if (Settings::getInstance()->random_rotation)
   {
-    float min = Environment::getInstance()->minRotation;
-    float max = Environment::getInstance()->maxRotation;
+    float min = paste_params->minRotation;
+    float max = paste_params->maxRotation;
     newModelis.dir.y += misc::randfloat(min, max);
   }
 
   if (Settings::getInstance()->random_tilt)
   {
-    float min = Environment::getInstance()->minTilt;
-    float max = Environment::getInstance()->maxTilt;
+    float min = paste_params->minTilt;
+    float max = paste_params->maxTilt;
     newModelis.dir.x += misc::randfloat(min, max);
     newModelis.dir.z += misc::randfloat(min, max);
   }
 
   if (Settings::getInstance()->random_size)
   {
-    float min = Environment::getInstance()->minScale;
-    float max = Environment::getInstance()->maxScale;
+    float min = paste_params->minScale;
+    float max = paste_params->maxScale;
     newModelis.sc = misc::randfloat(min, max);
   }
 
