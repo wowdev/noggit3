@@ -3,8 +3,6 @@
 #include <noggit/Brush.h> // brush
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
-#include <noggit/Environment.h>
-#include <noggit/Environment.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>

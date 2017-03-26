@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Brush.h>
-#include <noggit/Environment.h>
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/MapTile.h>

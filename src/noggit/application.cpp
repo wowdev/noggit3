@@ -5,7 +5,6 @@
 #include <noggit/AsyncLoader.h>
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
-#include <noggit/Environment.h>  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
 #include <noggit/MapView.h>

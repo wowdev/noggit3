@@ -2,7 +2,6 @@
 
 #include <noggit/ui/RotationEditor.h>
 
-#include <noggit/Environment.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>

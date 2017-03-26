@@ -5,7 +5,6 @@
 #include <math/vector_3d.hpp>
 #include <noggit/Brush.h>
 #include <noggit/TileWater.hpp>
-#include <noggit/Environment.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>

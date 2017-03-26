@@ -5,7 +5,6 @@
 #include <string>
 #include <sstream>
 
-#include <noggit/Environment.h>
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>

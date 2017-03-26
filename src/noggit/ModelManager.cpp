@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/AsyncLoader.h>// AsyncLoader
-#include <noggit/Environment.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/Model.h> // Model
 #include <noggit/ModelManager.h> // ModelManager
