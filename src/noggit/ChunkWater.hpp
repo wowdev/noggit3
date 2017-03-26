@@ -25,6 +25,7 @@ public:
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
             , int animtime
+            , int layer
             );
 
   void autoGen(MapChunk* chunk, float factor);

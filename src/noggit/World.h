@@ -116,6 +116,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , bool draw_fog
             , eTerrainType ground_editing_brush
+            , int water_layer
             );
 
   void outdoorLights(bool on);
@@ -234,8 +235,8 @@ public:
                   );
   bool canWaterSave(const tile_index& tile);
   void CropWaterADT(const tile_index& pos);
-  void setWaterType(const tile_index& pos, int type);
-  int getWaterType(const tile_index& tile);
+  void setWaterType(const tile_index& pos, int type, int layer);
+  int getWaterType(const tile_index& tile, int layer);
   void autoGenWaterTrans(const tile_index&, float factor);
 
 
