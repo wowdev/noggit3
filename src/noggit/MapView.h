@@ -8,6 +8,7 @@
 #include <noggit/bool_toggle_property.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/unsigned_int_property.hpp>
 
 #include <boost/optional.hpp>
 
@@ -250,6 +251,8 @@ private:
 
   noggit::bool_toggle_property _auto_selecting_mode = {true};
   noggit::bool_toggle_property _move_model_to_cursor_position = {true};
+  noggit::bool_toggle_property _display_all_water_layers = {true};
+  noggit::unsigned_int_property _displayed_water_layer = {0};
 
   noggit::bool_toggle_property _show_detail_info_window = {false};
   noggit::bool_toggle_property _show_minimap_window = {false};

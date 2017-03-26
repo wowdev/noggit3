@@ -4,6 +4,7 @@
 
 #include <noggit/tile_index.hpp>
 #include <noggit/ui/checkbox.hpp>
+#include <noggit/unsigned_int_property.hpp>
 
 class QCheckBox;
 class QDoubleSpinBox;
@@ -21,7 +22,9 @@ namespace noggit
       Q_OBJECT
 
     public:
-      water();
+      water ( unsigned_int_property* current_layer
+            , bool_toggle_property* display_all_layers
+            );
 
       void updatePos(tile_index const& newTile);
       void updateData();

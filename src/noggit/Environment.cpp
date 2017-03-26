@@ -10,8 +10,6 @@ Environment::Environment()
   , maxTilt(5.0f)
   , minScale(0.9f)
   , maxScale(1.1f)
-  , displayAllWaterLayers(true)
-  , currentWaterLayer(0)
 {
 }
 
