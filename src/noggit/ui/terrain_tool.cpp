@@ -2,7 +2,6 @@
 
 #include <noggit/ui/terrain_tool.hpp>
 
-#include <noggit/Environment.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
 #include <util/qt/overload.hpp>
