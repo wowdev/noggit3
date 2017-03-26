@@ -24,7 +24,6 @@ public:
   float maxTilt;
   float minScale;
   float maxScale;
-  bool moveModelToCursorPos;
 
   noggit::bool_toggle_property displayAllWaterLayers;
   int currentWaterLayer;

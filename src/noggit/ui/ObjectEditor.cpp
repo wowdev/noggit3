@@ -15,6 +15,7 @@
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
+#include <noggit/ui/checkbox.hpp>
 #include <util/qt/overload.hpp>
 
 #include <QGridLayout>
@@ -30,7 +31,10 @@ namespace noggit
 {
   namespace ui
   {
-    object_editor::object_editor (MapView* mapView, World* world)
+    object_editor::object_editor ( MapView* mapView
+                                 , World* world
+                                 , bool_toggle_property* move_model_to_cursor_position
+                                 )
             : QWidget(nullptr)
       , rotationEditor (new rotation_editor())
       , _copy_model_stats (true)
@@ -106,7 +110,11 @@ namespace noggit
       pasteModeGroup->addButton(selectionButton, 1);
       pasteModeGroup->addButton(cameraButton, 2);
 
-      QCheckBox *cursorPosCheck = new QCheckBox("Move model to cursor position", this);
+      auto cursorPosCheck ( new checkbox ( "Move model to cursor position"
+                                         , move_model_to_cursor_position
+                                         , this
+                                         )
+                          );
 
       pasteBox->setTitle("Paste Options");
       pasteGrid->addWidget(terrainButton);
@@ -220,12 +228,6 @@ namespace noggit
                     pasteMode = id;
                 }
       );
-
-      cursorPosCheck->setChecked(Environment::getInstance()->moveModelToCursorPos);
-      connect (cursorPosCheck, &QCheckBox::stateChanged, [=] (int s)
-      {
-        Environment::getInstance()->moveModelToCursorPos = s;
-      });
 
       connect(rotEditorButton, &QPushButton::clicked, [=]() {
           rotationEditor->show();
