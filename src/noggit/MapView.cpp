@@ -241,7 +241,7 @@ void MapView::insert_last_m2_from_wmv()
     }
     else
     {
-      _world->addM2(lastModel, selectionPosition, 1.f, {0.f, 0.f, 0.f});
+      _world->addM2(lastModel, selectionPosition, 1.f, {0.f, 0.f, 0.f}, &_object_paste_params);
     }
   }
 }
@@ -382,6 +382,7 @@ void MapView::createGUI()
   _object->setWidget ( objectEditor = new noggit::ui::object_editor ( this
                                                                     , _world.get()
                                                                     , &_move_model_to_cursor_position
+                                                                    , &_object_paste_params
                                                                     )
                      );
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
@@ -807,11 +808,11 @@ void MapView::createGUI()
 
   addHotkey ( Qt::Key_V
             , MOD_ctrl
-            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get()); }
+            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params); }
             );
   addHotkey ( Qt::Key_V
             , MOD_none
-            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get()); }
+            , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params); }
             , [this] { return terrainMode == editing_mode::object; }
             );
   addHotkey ( Qt::Key_V
@@ -2558,7 +2559,7 @@ void MapView::insert_object_at_selection_position (std::string m2_to_add)
     LogError << "Failed adding " << m2_to_add << ". It was not in any MPQ." << std::endl;
   }
 
-  _world->addM2(m2_to_add, selectionPosition, 1., {0.f, 0.f, 0.f});
+  _world->addM2(m2_to_add, selectionPosition, 1., {0.f, 0.f, 0.f}, &_object_paste_params);
   //! \todo Memoryleak: These models will never get deleted.
 }
 

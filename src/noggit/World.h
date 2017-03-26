@@ -23,6 +23,11 @@ namespace opengl
   class call_list;
 }
 
+namespace noggit
+{
+  struct object_paste_params;
+}
+
 class Brush;
 class MapTile;
 
@@ -197,6 +202,7 @@ public:
   void addM2 ( std::string const& filename
              , math::vector_3d newPos
              , float scale, math::vector_3d rotation
+             , noggit::object_paste_params*
              );
   void addWMO ( std::string const& filename
               , math::vector_3d newPos

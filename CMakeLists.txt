@@ -158,7 +158,6 @@ set ( noggit_root_sources
       src/noggit/ConfigFile.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
-      src/noggit/Environment.cpp
       src/noggit/Log.cpp
       src/noggit/MPQ.cpp
       src/noggit/MapChunk.cpp
@@ -256,7 +255,6 @@ set ( noggit_root_headers
       src/noggit/ConfigFile.h
       src/noggit/DBC.h
       src/noggit/DBCFile.h
-      src/noggit/Environment.h
       src/noggit/Log.h
       src/noggit/MPQ.h
       src/noggit/MapChunk.h

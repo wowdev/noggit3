@@ -33,6 +33,7 @@ namespace noggit
     object_editor::object_editor ( MapView* mapView
                                  , World* world
                                  , bool_toggle_property* move_model_to_cursor_position
+                                 , object_paste_params* paste_params
                                  )
             : QWidget(nullptr)
       , rotationEditor (new rotation_editor())
@@ -150,54 +151,54 @@ namespace noggit
         Settings::getInstance()->random_rotation = s;
       });
 
-      rotRangeStart->setValue(Environment::getInstance()->minRotation);
-      rotRangeEnd->setValue(Environment::getInstance()->maxRotation);
+      rotRangeStart->setValue(paste_params->minRotation);
+      rotRangeEnd->setValue(paste_params->maxRotation);
 
-      tiltRangeStart->setValue(Environment::getInstance()->minTilt);
-      tiltRangeEnd->setValue(Environment::getInstance()->maxTilt);
+      tiltRangeStart->setValue(paste_params->minTilt);
+      tiltRangeEnd->setValue(paste_params->maxTilt);
 
-      scaleRangeStart->setValue(Environment::getInstance()->minScale);
-      scaleRangeEnd->setValue(Environment::getInstance()->maxScale);
+      scaleRangeStart->setValue(paste_params->minScale);
+      scaleRangeEnd->setValue(paste_params->maxScale);
 
       connect ( rotRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                  Environment::getInstance()->minRotation = v;
+                  paste_params->minRotation = v;
                 }
       );
 
       connect ( rotRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                  Environment::getInstance()->maxRotation = v;
+                  paste_params->maxRotation = v;
                 }
       );
 
       connect ( tiltRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                  Environment::getInstance()->minTilt = v;
+                  paste_params->minTilt = v;
                 }
       );
 
       connect ( tiltRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                  Environment::getInstance()->maxTilt = v;
+                  paste_params->maxTilt = v;
                 }
       );
 
       connect ( scaleRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                  Environment::getInstance()->minScale = v;
+                  paste_params->minScale = v;
                 }
       );
 
       connect ( scaleRangeEnd, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
-                  Environment::getInstance()->maxScale = v;
+                  paste_params->maxScale = v;
                 }
       );
 
@@ -259,6 +260,7 @@ namespace noggit
     void object_editor::pasteObject ( math::vector_3d cursor_pos
                                     , math::vector_3d camera_pos
                                     , World* world
+                                    , object_paste_params* paste_params
                                     )
     {
       if (!hasSelection() || selected->which() == eEntry_MapChunk)
@@ -307,7 +309,12 @@ namespace noggit
             rotation = boost::get<selected_model_type> (selected.get())->dir;
           }
 
-          world->addM2(boost::get<selected_model_type> (selected.get())->model->_filename, pos, scale, rotation);
+          world->addM2 ( boost::get<selected_model_type> (selected.get())->model->_filename
+                       , pos
+                       , scale
+                       , rotation
+                       , paste_params
+                       );
         }
         else if (selected->which() == eEntry_WMO)
         {
