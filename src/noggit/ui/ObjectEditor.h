@@ -34,7 +34,10 @@ namespace noggit
     class object_editor : public QWidget
     {
     public:
-      object_editor (MapView*, World*);
+      object_editor ( MapView*
+                    , World*
+                    , bool_toggle_property* move_model_to_cursor_position
+                    );
 
       bool hasSelection() const;
       void copy(selection_type entry);

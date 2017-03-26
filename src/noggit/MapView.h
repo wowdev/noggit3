@@ -249,6 +249,7 @@ private:
   QLabel* _status_fps;
 
   noggit::bool_toggle_property _auto_selecting_mode = {true};
+  noggit::bool_toggle_property _move_model_to_cursor_position = {true};
 
   noggit::bool_toggle_property _show_detail_info_window = {false};
   noggit::bool_toggle_property _show_minimap_window = {false};

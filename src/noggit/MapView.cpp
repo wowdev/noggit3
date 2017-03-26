@@ -378,7 +378,11 @@ void MapView::createGUI()
 
   _object = new QDockWidget ("Object", this);
   _object->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _object->setWidget (objectEditor = new noggit::ui::object_editor(this, _world.get()));
+  _object->setWidget ( objectEditor = new noggit::ui::object_editor ( this
+                                                                    , _world.get()
+                                                                    , &_move_model_to_cursor_position
+                                                                    )
+                     );
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
   connect (this, &QObject::destroyed, _object, &QObject::deleteLater);
 
@@ -1505,7 +1509,7 @@ void MapView::tick (float dt)
           }
           else
           {
-            if (Environment::getInstance()->moveModelToCursorPos)
+            if (_move_model_to_cursor_position.get())
             {
               boost::get<selected_wmo_type> (*Selection)->pos.x = _cursor_pos.x - objMoveOffset.x;
               boost::get<selected_wmo_type> (*Selection)->pos.z = _cursor_pos.z - objMoveOffset.z;
@@ -1542,7 +1546,7 @@ void MapView::tick (float dt)
             }
             else
             {
-              if (Environment::getInstance()->moveModelToCursorPos)
+              if (_move_model_to_cursor_position.get())
               {
                 boost::get<selected_model_type> (*Selection)->pos.x = _cursor_pos.x - objMoveOffset.x;
                 boost::get<selected_model_type> (*Selection)->pos.z = _cursor_pos.z - objMoveOffset.z;
