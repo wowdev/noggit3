@@ -39,14 +39,13 @@ namespace noggit
 
       radio_linear->toggle();
 
-      QGridLayout* flatten_type_layout (new QGridLayout (this));
+      QGroupBox* flatten_type_group (new QGroupBox ("Type"));
+      QGridLayout* flatten_type_layout (new QGridLayout (flatten_type_group));
       flatten_type_layout->addWidget (radio_flat, 0, 0);
       flatten_type_layout->addWidget (radio_linear, 0, 1);
       flatten_type_layout->addWidget (radio_smooth, 1, 0);
       flatten_type_layout->addWidget (radio_origin, 1, 1);
 
-      QGroupBox* flatten_type_group (new QGroupBox ("Type"));
-      flatten_type_group->setLayout (flatten_type_layout);
       layout->addRow (flatten_type_group);
 
       _radius_spin = new QDoubleSpinBox (this);
