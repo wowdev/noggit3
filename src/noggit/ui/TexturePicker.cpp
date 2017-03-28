@@ -48,7 +48,7 @@ namespace noggit
       btn_left->setMinimumHeight(16);
       btn_right->setMinimumHeight(16);
 
-      auto btn_layout(new QGridLayout(this));
+      auto btn_layout(new QGridLayout);
       btn_layout->addWidget (btn_left, 0, 0);
       btn_layout->addWidget (btn_right, 0, 1);
 

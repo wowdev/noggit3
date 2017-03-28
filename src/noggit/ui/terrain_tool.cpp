@@ -10,6 +10,7 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QRadioButton>
+#include <QtWidgets/QVBoxLayout>
 
 namespace noggit
 {
@@ -49,7 +50,8 @@ namespace noggit
 
       radio_linear->toggle();
 
-      QGridLayout* terrain_type_layout (new QGridLayout (this));
+      QGroupBox* terrain_type_group (new QGroupBox ("Type"));
+      QGridLayout* terrain_type_layout (new QGridLayout (terrain_type_group));
       terrain_type_layout->addWidget (radio_flat, 0, 0);
       terrain_type_layout->addWidget (radio_linear, 0, 1);
       terrain_type_layout->addWidget (radio_smooth, 1, 0);
@@ -59,9 +61,7 @@ namespace noggit
       terrain_type_layout->addWidget (radio_gauss, 3, 0);
       terrain_type_layout->addWidget (radio_vertex, 3, 1);
 
-      QGroupBox* terrain_type_group (new QGroupBox ("Type"));
-      terrain_type_group->setLayout (terrain_type_layout);
-      layout->addRow (terrain_type_group);
+      layout->addWidget (terrain_type_group);
 
       _radius_spin = new QDoubleSpinBox (this);
       _radius_spin->setRange (0.0f, 1000.0f);
@@ -82,15 +82,14 @@ namespace noggit
       _inner_radius_slider->setRange (0, 100);
       _inner_radius_slider->setSliderPosition ((int)std::round (_inner_radius * 100));
 
-      QFormLayout* radius_layout (new QFormLayout (this));
+      QGroupBox* radius_group (new QGroupBox ("Radius"));
+      QFormLayout* radius_layout (new QFormLayout (radius_group));
       radius_layout->addRow ("Outer:", _radius_spin);
       radius_layout->addRow (_radius_slider);
       radius_layout->addRow ("Inner:", _inner_radius_spin);
       radius_layout->addRow (_inner_radius_slider);
 
-      QGroupBox* radius_group (new QGroupBox ("Radius"));
-      radius_group->setLayout (radius_layout);
-      layout->addRow (radius_group);
+      layout->addWidget (radius_group);
 
       _speed_spin = new QDoubleSpinBox (this);
       _speed_spin->setRange (0.0f, 10.0f);
@@ -103,17 +102,19 @@ namespace noggit
       _speed_slider->setSliderPosition (_speed * 100);
 
 
-      QFormLayout* speed_layout (new QFormLayout (this));
+      _speed_box = new QGroupBox (this);
+      QFormLayout* speed_layout (new QFormLayout (_speed_box));
       speed_layout->addRow ("Speed:", _speed_spin);
       speed_layout->addRow (_speed_slider);
 
-      _speed_box = new QGroupBox (this);
-      _speed_box->setLayout (speed_layout);
-      layout->addRow (_speed_box);
+      layout->addWidget (_speed_box);
+
+      _vertex_type_group = new QGroupBox ("Vertex edit");
+      QVBoxLayout* vertex_layout (new QVBoxLayout (_vertex_type_group));
 
       _vertex_button_group = new QButtonGroup (this);
-      QRadioButton* radio_mouse = new QRadioButton ("Cursor");
-      QRadioButton* radio_center = new QRadioButton ("Selection center");
+      QRadioButton* radio_mouse = new QRadioButton ("Cursor", _vertex_type_group);
+      QRadioButton* radio_center = new QRadioButton ("Selection center", _vertex_type_group);
 
       radio_mouse->setToolTip ("Orient vertices using the cursor pos as reference");
       radio_center->setToolTip ("Orient vertices using the selection center as reference");
@@ -123,32 +124,28 @@ namespace noggit
 
       radio_center->toggle();
 
-      QFormLayout* vertex_layout (new QFormLayout ());
-
-      QGridLayout* vertex_type_layout (new QGridLayout (this));
-      vertex_type_layout->addWidget (radio_mouse, 0, 0);
-      vertex_type_layout->addWidget (radio_center, 0, 1);
+      QHBoxLayout* vertex_type_layout (new QHBoxLayout);
+      vertex_type_layout->addWidget (radio_mouse);
+      vertex_type_layout->addWidget (radio_center);
       vertex_layout->addItem (vertex_type_layout);
 
-      QGridLayout* vertex_angle_layout (new QGridLayout (this));
-      vertex_angle_layout->addWidget (_orientation_dial = new QDial (this), 0, 0);
+      QHBoxLayout* vertex_angle_layout (new QHBoxLayout);
+      vertex_angle_layout->addWidget (_orientation_dial = new QDial (_vertex_type_group));
       _orientation_dial->setRange(0, 360);
       _orientation_dial->setWrapping(true);
       _orientation_dial->setSliderPosition(_vertex_orientation._ - 90); // to get ingame orientation
       _orientation_dial->setToolTip("Orientation");
       _orientation_dial->setSingleStep(10);
 
-      vertex_angle_layout->addWidget (_angle_slider = new QSlider (this), 0, 1);
+      vertex_angle_layout->addWidget (_angle_slider = new QSlider (_vertex_type_group));
       _angle_slider->setRange(-89, 89);
       _angle_slider->setSliderPosition(_vertex_angle._);
       _angle_slider->setToolTip("Angle");
 
       vertex_layout->addItem (vertex_angle_layout);
 
-      _vertex_type_group = new QGroupBox ("Vertex edit");
-      _vertex_type_group->setLayout (vertex_layout);
+      layout->addWidget (_vertex_type_group);
       _vertex_type_group->hide();
-      layout->addRow (_vertex_type_group);
 
       connect ( _type_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
