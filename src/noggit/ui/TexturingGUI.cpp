@@ -49,7 +49,7 @@ namespace noggit
             that->_rendered = true;
             that->_pixmap = render_blp_to_pixmap (data (Qt::DisplayRole).toString().prepend ("tileset/").toStdString(), 256, 256);
           }
-          return _pixmap;
+          return QIcon(_pixmap);
         }
 
         return QStandardItem::data (role);
