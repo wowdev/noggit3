@@ -12,7 +12,6 @@ This  project  requires  CMake  to  be built.  It  also  requires  the
 following libraries:
 
 * OpenGL
-* Freetype2
 * storm (stormlib by Ladislav Zezula)
 * Boost
 * Qt 5
@@ -22,10 +21,24 @@ Further following libraries are required for MySQL GUID Storage builts:
 * LibMySQL
 * MySQLCPPConn
 
-For Windows there is a repo with all needed libs to compile noggit3.
-Read the description there before you start.
+## Windows ##
 
-https://bitbucket.org/modcraft/noggit3libs
+* install msvc++
+* install cmake
+* install boost via https://sourceforge.net/projects/boost/files/boost-binaries/ (be sure to use the right version and compiler version. cmake may not support the latest version) to <boost-install>
+* install Qt via https://www.qt.io/download-open-source/#section-2 to <Qt-install>
+* download stormlib from https://github.com/ladislav-zezula/StormLib
+ * open CMake GUI
+ * configure, generate (save the cache entry CMAKE_INSTALL_PREFIX path somewhere, set it to a empty folder if not present)
+ * open solution with visual studio
+ * build ALL_BUILD, then INSTALL
+* open CMake GUI
+ * set cache entry CMAKE_PREFIX_PATH (path) to <Qt-install>;<stormlib-build>, e.g. C:/Qt/5.6/msvc2015;<Stormlib's CMAKE_INSTALL_PREFIX path>
+ * set cache entry BOOST_ROOT (path) to <boost-install>, e.g. C:/local/boost_1_60_0
+ * set cache entry CMAKE_INSTALL_PREFIX (path) to a empty destination, e.g. C:/Users/loerwald/Documents/noggitinstall
+ * configure, generate
+ * open solution with visual studio
+ * build ALL_BUILD
 
 # DEVELOPMENT #
 Feel   free   to   ask   the   owner  of   the   official   repository
