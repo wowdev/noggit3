@@ -204,8 +204,7 @@ namespace noggit
 
     void water::changeRadius(float change)
     {
-      _angle = std::max(0.0f, std::min(250.0f, _radius + change));
-      _radius_spin->setValue(_radius / 250.0f);
+      _radius_spin->setValue(_radius + change);
     }
 
     void water::changeOrientation(float change)
@@ -221,13 +220,12 @@ namespace noggit
         _orientation += 360.0f;
       }
 
-      _orientation_spin->setValue(_orientation / 360.0f);
+      _orientation_spin->setValue(_orientation);
     }
 
     void water::changeAngle(float change)
     {
-      _angle = std::max(0.0f, std::min(89.0f, _angle + change));
-      _angle_spin->setValue(_angle / 90.0f);
+      _angle_spin->setValue(_angle + change);
     }
 
     void water::paintLiquid (World* world, math::vector_3d const& pos, bool add)
