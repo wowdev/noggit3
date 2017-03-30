@@ -71,11 +71,8 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
 # yes, we intend to use multi-character character constants
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
 
-
-if(WIN32)
-  # multi core building
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-endif()
+# multi core building for visual studio
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
@@ -94,7 +91,6 @@ macro(includePlattform SUFFIX)
       # adds for library repo
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")
       #storm lib
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/DebugAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/ReleaseAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/Release/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
       #boost
       include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
