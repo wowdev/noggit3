@@ -4,14 +4,15 @@
 #include <noggit/Log.h>
 #include <noggit/Misc.h>
 #include <noggit/World.h>
-#include <noggit/ui/Water.h>
 #include <noggit/ui/pushbutton.hpp>
+#include <noggit/ui/Water.h>
 #include <util/qt/overload.hpp>
 
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QRadioButton>
@@ -39,7 +40,8 @@ namespace noggit
     {
       auto layout (new QVBoxLayout (this));
 
-      auto spinners_layout (new QFormLayout);
+      auto brush_group (new QGroupBox (this));
+      auto brush_layout (new QFormLayout (brush_group));
 
       _radius_spin = new QDoubleSpinBox (this);
       _radius_spin->setRange (0.f, 250.f);
@@ -47,28 +49,7 @@ namespace noggit
               , [&] (float f) { _radius = f; }
               );
       _radius_spin->setValue(_radius);
-      spinners_layout->addRow ("Radius", _radius_spin);
-
-      _angle_spin = new QDoubleSpinBox (this);
-      _angle_spin->setRange (0.00001f, 89.f);
-      connect ( _angle_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (float f) { _angle = f; }
-              );
-      _angle_spin->setValue(_angle);
-      spinners_layout->addRow ("Angle", _angle_spin);
-
-      _orientation_spin = new QDoubleSpinBox (this);
-      _orientation_spin->setRange (0.f, 359.99999f);
-      connect ( _orientation_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (float f) { _orientation = f; }
-              );
-      _orientation_spin->setValue(_orientation);
-      spinners_layout->addRow ("Orienation", _orientation_spin);
-
-      layout->addLayout (spinners_layout);
-
-      layout->addWidget (_angle_checkbox = new checkbox ("Angled water", &_angled_mode, this));
-      layout->addWidget (_lock_checkbox = new checkbox ("Lock position", &_locked, this));
+      brush_layout->addRow ("Radius", _radius_spin);
 
       waterType = new pushbutton
         ( "Type: none"
@@ -105,18 +86,83 @@ namespace noggit
         , this
         );
 
-      layout->addWidget (waterType);
+      brush_layout->addRow (waterType);
 
-      layout->addWidget (new QLabel ("Override :"));
+      layout->addWidget (brush_group);
 
-      layout->addWidget (new checkbox ("Liquid ID", &_override_liquid_id, this));
-      layout->addWidget (new checkbox ("Height", &_override_height, this));
+      auto angle_group (new QGroupBox ("Angled mode", this));
+      angle_group->setCheckable (true);
+      angle_group->setChecked (_angled_mode.get());
+      connect ( &_angled_mode, &bool_toggle_property::changed
+              , angle_group, &QGroupBox::setChecked
+              );
+      connect ( angle_group, &QGroupBox::toggled
+              , &_angled_mode, &bool_toggle_property::set
+              );
+      auto angle_layout (new QFormLayout (angle_group));
 
-      layout->addWidget (new QLabel ("Auto opacity:"));
+      _angle_spin = new QDoubleSpinBox (this);
+      _angle_spin->setRange (0.00001f, 89.f);
+      connect ( _angle_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&] (float f) { _angle = f; }
+              );
+      _angle_spin->setValue(_angle);
+      angle_layout->addRow ("Angle", _angle_spin);
+
+      _orientation_spin = new QDoubleSpinBox (this);
+      _orientation_spin->setRange (0.f, 360.f);
+      _orientation_spin->setWrapping (true);
+      _orientation_spin->setValue(_orientation);
+      connect ( _orientation_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&] (float f) { _orientation = f; }
+              );
+
+      angle_layout->addRow ("Orienation", _orientation_spin);
+
+      layout->addWidget (angle_group);
+
+      auto lock_group (new QGroupBox ("Lock", this));
+      lock_group->setCheckable (true);
+      lock_group->setChecked (_locked.get());
+      auto lock_layout (new QFormLayout (lock_group));
+
+      lock_layout->addRow("X:", _x_spin = new QDoubleSpinBox (this));
+      lock_layout->addRow("Z:", _z_spin = new QDoubleSpinBox (this));
+      lock_layout->addRow("H:", _h_spin = new QDoubleSpinBox (this));
+
+      connect ( _x_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&] (float f) { _lock_pos.x = f; }
+              );
+      connect ( _z_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&] (float f) { _lock_pos.z = f; }
+              );
+      connect ( _h_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&] (float f) { _lock_pos.y = f; }
+              );
+
+      connect ( &_locked, &bool_toggle_property::changed
+              , lock_group, &QGroupBox::setChecked
+              );
+      connect ( lock_group, &QGroupBox::toggled
+              , &_locked, &bool_toggle_property::set
+              );
+
+      layout->addWidget(lock_group);
+
+      auto override_group (new QGroupBox ("Override", this));
+      auto override_layout (new QFormLayout (override_group));
+
+      override_layout->addWidget (new checkbox ("Liquid ID", &_override_liquid_id, this));
+      override_layout->addWidget (new checkbox ("Height", &_override_height, this));
+
+      layout->addWidget(override_group);
+
+      auto opacity_group (new QGroupBox ("Auto opacity", this));
+      auto opacity_layout (new QFormLayout (opacity_group));
 
       auto river_button (new QRadioButton ("River", this));
       auto ocean_button (new QRadioButton ("Ocean", this));
-      auto custom_button (new QRadioButton ("Custom", this));
+      auto custom_button (new QRadioButton ("Custom factor:", this));
 
       QButtonGroup *transparency_toggle = new QButtonGroup (this);
       transparency_toggle->addButton (river_button, river_opacity);
@@ -127,13 +173,13 @@ namespace noggit
               , [&] (int id) { _opacity_mode = id; }
               );
 
-      layout->addWidget (river_button);
-      layout->addWidget (ocean_button);
-      layout->addWidget (custom_button);
+      opacity_layout->addRow (river_button);
+      opacity_layout->addRow (ocean_button);
+      opacity_layout->addRow (custom_button);
 
       transparency_toggle->button (river_opacity)->setChecked (true);
 
-      layout->addWidget (new QLabel ("custom factor", this));
+      //layout->addWidget (new QLabel ("custom factor", this));
 
       QDoubleSpinBox *opacity_spin = new QDoubleSpinBox (this);
       opacity_spin->setRange (0.f, 1.f);
@@ -142,7 +188,9 @@ namespace noggit
       connect ( opacity_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _custom_opacity_factor = f; }
               );
-      layout->addWidget (opacity_spin);
+      opacity_layout->addRow (opacity_spin);
+
+      layout->addWidget (opacity_group);
 
       layout->addWidget ( new pushbutton
                             ( "Regen ADT opacity"
@@ -162,14 +210,19 @@ namespace noggit
                             )
                         );
 
-      layout->addWidget (new checkbox("Show all layers", display_all_layers));
+      auto layer_group (new QGroupBox ("Layers", this));
+      auto layer_layout (new QFormLayout (layer_group));
 
-      layout->addWidget (new QLabel("Current layer:", this));
+      layer_layout->addRow (new checkbox("Show all layers", display_all_layers));
+      layer_layout->addRow (new QLabel("Current layer:", this));
 
       waterLayer = new QSpinBox (this);
       waterLayer->setValue (current_layer->get());
       waterLayer->setRange (0, 100);
-      layout->addWidget (waterLayer);
+      layer_layout->addRow (waterLayer);
+
+      layout->addWidget (layer_group);
+
       connect ( waterLayer, qOverload<int> (&QSpinBox::valueChanged)
               , current_layer, &unsigned_int_property::set
               );
@@ -246,7 +299,14 @@ namespace noggit
 
     void water::lockPos(math::vector_3d const& cursor_pos)
     {
+      QSignalBlocker const blocker_x(_x_spin);
+      QSignalBlocker const blocker_z(_z_spin);
+      QSignalBlocker const blocker_h(_h_spin);
       _lock_pos = cursor_pos;
+
+      _x_spin->setValue(_lock_pos.x);
+      _z_spin->setValue(_lock_pos.z);
+      _h_spin->setValue(_lock_pos.y);
 
       if (!_locked.get())
       {
