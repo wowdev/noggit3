@@ -2,12 +2,13 @@
 
 #pragma once
 
+#include <noggit/bool_toggle_property.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/ui/checkbox.hpp>
 #include <noggit/unsigned_int_property.hpp>
 
-class QCheckBox;
 class QDoubleSpinBox;
+class QGroupBox;
 class QLabel;
 class QPushButton;
 class QSpinBox;
@@ -77,8 +78,9 @@ namespace noggit
       QDoubleSpinBox* _angle_spin;
       QDoubleSpinBox* _orientation_spin;
 
-      checkbox* _angle_checkbox;
-      checkbox* _lock_checkbox;
+      QDoubleSpinBox* _x_spin;
+      QDoubleSpinBox* _z_spin;
+      QDoubleSpinBox* _h_spin;
 
       QPushButton *waterType;
       QSpinBox *waterLayer;
