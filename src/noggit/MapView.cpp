@@ -342,7 +342,7 @@ void MapView::createGUI()
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _areaid);
   connect (this, &QObject::destroyed, _areaid, &QObject::deleteLater);
 
-  _water = new QDockWidget ("Raise / Lower", this);
+  _water = new QDockWidget ("Water", this);
   _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _water->setWidget ( guiWater = new noggit::ui::water ( &_displayed_water_layer
                                                        , &_display_all_water_layers
