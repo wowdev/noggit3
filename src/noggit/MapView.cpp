@@ -2746,7 +2746,12 @@ void MapView::wheelEvent (QWheelEvent* event)
     ( [&] (float range)
       {
         //! \note / 8.f for degrees, / 40.f for smoothness
-        return (_mod_ctrl_down ? 0.01f : 0.1f) * range * event->angleDelta().y() / 320.f;
+        return (_mod_ctrl_down ? 0.01f : 0.1f) 
+          * range 
+          // alt = horizontal delta
+          * (_mod_alt_down ? event->angleDelta().x() : event->angleDelta().y())
+          / 320.f
+          ;
       }
     );
 
