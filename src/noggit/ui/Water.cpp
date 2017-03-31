@@ -132,6 +132,13 @@ namespace noggit
       lock_layout->addRow("Z:", _z_spin = new QDoubleSpinBox (this));
       lock_layout->addRow("H:", _h_spin = new QDoubleSpinBox (this));
 
+      _x_spin->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
+      _z_spin->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
+      _h_spin->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
+      _x_spin->setDecimals (2);
+      _z_spin->setDecimals (2);
+      _h_spin->setDecimals (2);
+
       connect ( _x_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _lock_pos.x = f; }
               );
