@@ -103,6 +103,7 @@ namespace noggit
 
       _angle_spin = new QDoubleSpinBox (this);
       _angle_spin->setRange (0.00001f, 89.f);
+      _angle_spin->setSingleStep (2.0f);
       connect ( _angle_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _angle = f; }
               );
@@ -113,6 +114,7 @@ namespace noggit
       _orientation_spin->setRange (0.f, 360.f);
       _orientation_spin->setWrapping (true);
       _orientation_spin->setValue(_orientation);
+      _orientation_spin->setSingleStep (5.0f);
       connect ( _orientation_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _orientation = f; }
               );
@@ -179,11 +181,10 @@ namespace noggit
 
       transparency_toggle->button (river_opacity)->setChecked (true);
 
-      //layout->addWidget (new QLabel ("custom factor", this));
-
       QDoubleSpinBox *opacity_spin = new QDoubleSpinBox (this);
       opacity_spin->setRange (0.f, 1.f);
       opacity_spin->setDecimals (4);
+      opacity_spin->setSingleStep (0.02f);
       opacity_spin->setValue(_custom_opacity_factor);
       connect ( opacity_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _custom_opacity_factor = f; }
