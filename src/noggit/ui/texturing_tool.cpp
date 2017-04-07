@@ -336,6 +336,11 @@ namespace noggit
       _spray_pressure_spin->setValue(_spray_pressure + change);
     }
 
+    bool texturing_tool::show_unpaintable_chunks() const
+    { 
+      return _show_unpaintable_chunks && !_texture_switcher->isVisible(); 
+    }
+
     void texturing_tool::paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture)
     {
       float strength = 1.0f - pow(1.0f - _pressure, dt * 10.0f);
