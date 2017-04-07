@@ -463,6 +463,9 @@ void MapView::createGUI()
     auto action (menu->addAction (name));                         \
     action->setShortcut (QKeySequence (shortcut));                \
     connect (action, &QAction::triggered, on_action);             \
+    connect ( action, &QAction::triggered                         \
+            , [this] { _hotkey = true; }                          \
+            );                                                    \
   }
 
 #define ADD_ACTION_NS(menu, name, on_action)                      \
@@ -484,6 +487,9 @@ void MapView::createGUI()
             );                                                    \
     connect ( &property_, &noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
+            );                                                    \
+    connect ( action, &QAction::triggered                         \
+            , [this] { _hotkey = true; }                          \
             );                                                    \
   }                                                               \
   while (false)
@@ -2288,10 +2294,12 @@ void MapView::keyPressEvent (QKeyEvent *event)
       opengl::context::scoped_setter const _ (::gl, context());
 
       hotkey.function();
-
+      _hotkey = true;
       return;
     }
   }
+
+  _hotkey = false;
 
   if (event->key() == Qt::Key_Shift)
     _mod_shift_down = true;
@@ -2411,6 +2419,11 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
 
   if (event->key() == Qt::Key_Space)
     _mod_space_down = false;
+
+  if (_hotkey)
+  {
+    return;
+  }
 
   // movement
   if (event->key() == Qt::Key_W)
