@@ -324,6 +324,22 @@ void MapView::createGUI()
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
   connect (this, &QObject::destroyed, _terrain, &QObject::deleteLater);
 
+  connect ( terrainTool
+          , &noggit::ui::terrain_tool::updateVertices
+          , [this] (int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
+
+              _world->orientVertices ( vertex_mode == eVertexMode_Mouse
+                                      ? _cursor_pos
+                                      : _world->vertexCenter()
+                                      , angle
+                                      , orientation
+                                      );
+            }
+          );
+
   _flatten_blur = new QDockWidget ("Flatten / Blur", this);
   _flatten_blur->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   _flatten_blur->setWidget (flattenTool = new noggit::ui::flatten_blur_tool());
@@ -406,6 +422,8 @@ void MapView::createGUI()
               texturingTool->_current_texture->set_texture (filename);
             }
           );
+
+
 
 
   // DetailInfoWindow

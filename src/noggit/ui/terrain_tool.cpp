@@ -320,7 +320,7 @@ namespace noggit
         _vertex_orientation = math::degrees (orientation);
         _orientation_dial->setSliderPosition (_vertex_orientation._ - 90.0f);
 
-        updateVertices (world);
+        emit updateVertices(_vertex_mode, _vertex_angle, _vertex_orientation);
       }
     }
 
@@ -330,7 +330,7 @@ namespace noggit
       {
         math::vector_3d const& center = world->vertexCenter();
         _vertex_orientation = math::radians (std::atan2(center.z - pos.z, center.x - pos.x));
-        updateVertices (world);
+        emit updateVertices(_vertex_mode, _vertex_angle, _vertex_orientation);
       }
     }
 
@@ -346,18 +346,8 @@ namespace noggit
         QSignalBlocker const blocker (_angle_slider);
         _vertex_angle = math::degrees (std::max(-89.0f, std::min(89.0f, angle)));
         _angle_slider->setSliderPosition (_vertex_angle._);
-        updateVertices (world);
+        emit updateVertices(_vertex_mode, _vertex_angle, _vertex_orientation);
       }
-    }
-
-    void terrain_tool::updateVertices (World* world)
-    {
-      world->orientVertices ( _vertex_mode == eVertexMode_Mouse && !!_cursor_pos
-                            ? *_cursor_pos
-                            : world->vertexCenter()
-                            , _vertex_angle
-                            , _vertex_orientation
-                            );
     }
 
     void terrain_tool::updateVertexGroup()

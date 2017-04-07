@@ -21,6 +21,8 @@ namespace noggit
   {
     class terrain_tool : public QWidget
     {
+      Q_OBJECT
+
     public:
       terrain_tool (World*);
 
@@ -50,8 +52,10 @@ namespace noggit
 
       eTerrainType _edit_type;
 
+    signals:
+      void updateVertices(int vertex_mode, math::degrees const& angle, math::degrees const& orientation);
+
     private:
-      void updateVertices (World*);
       void updateVertexGroup();
 
       float _radius;
