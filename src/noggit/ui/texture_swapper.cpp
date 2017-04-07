@@ -3,6 +3,7 @@
 #include <noggit/ui/texture_swapper.hpp>
 
 #include <math/vector_3d.hpp>
+#include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
 
@@ -29,14 +30,15 @@ namespace noggit
       QPushButton* close_swapper = new QPushButton ("Close swapper", this);
       
 
-      QLabel* texture_display = new QLabel (this);
-      texture_display->setMinimumSize(64, 64);
-      texture_display->setPixmap (render_blp_to_pixmap ("tileset\\generic\\black.blp", 64, 64));
+      auto texture_display (new noggit::ui::current_texture);
+      texture_display->set_texture("tileset\\generic\\black.blp");
+      
 
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
 
       layout->addRow(close_swapper);
+      layout->addRow(new QLabel("Texture to swap"));
       layout->addRow(texture_display);
       layout->addRow(select);
       layout->addRow(swap_adt);
@@ -52,7 +54,7 @@ namespace noggit
         _texture_to_swap = *selected_texture::get();
         if (_texture_to_swap)
         {
-          texture_display->setPixmap (render_blp_to_pixmap (_texture_to_swap.get()->filename().c_str()));
+          texture_display->set_texture(_texture_to_swap.get()->filename());
         }
       });
 
