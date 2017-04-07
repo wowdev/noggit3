@@ -208,9 +208,9 @@ private:
   };
 
   std::forward_list<HotKey> hotkeys;
+  bool _hotkey = false;
 
   void addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
-  bool handleHotkeys(QKeyEvent* e);
 
   QTime _startup_time;
   qreal _last_update = 0.f;
