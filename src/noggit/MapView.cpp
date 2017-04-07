@@ -2758,12 +2758,7 @@ void MapView::mousePressEvent (QMouseEvent* event)
     break;
   }
 
-  if (leftMouse && rightMouse)
-  {
-    // Both buttons
-    moving = 1.0f;
-  }
-  else if (leftMouse)
+  if (leftMouse)
   {
     if (mViewMode == eViewMode_3D)
     {
@@ -2862,9 +2857,6 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   case Qt::LeftButton:
     leftMouse = false;
 
-    if (!key_w && moving > 0.0f)
-      moving = 0.0f;
-
     if (mViewMode == eViewMode_2D)
     {
       strafing = 0;
@@ -2876,9 +2868,6 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
     rightMouse = false;
 
     look = false;
-
-    if (!key_w && moving > 0.0f)
-      moving = 0.0f;
 
     if (mViewMode == eViewMode_2D)
       updown = 0;
