@@ -27,7 +27,7 @@ namespace noggit
 
       float brush_radius() { return _texture_brush.getRadius(); }
       float hardness() const { return _hardness; }
-      bool show_unpaintable_chunks() const { return _show_unpaintable_chunks; }
+      bool show_unpaintable_chunks() const;
 
       void set_brush_level (float level);
 
