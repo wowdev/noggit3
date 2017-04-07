@@ -26,6 +26,9 @@ namespace noggit
 
       auto layout (new QFormLayout (this));
 
+      QPushButton* close_swapper = new QPushButton ("Close swapper", this);
+      
+
       QLabel* texture_display = new QLabel (this);
       texture_display->setMinimumSize(64, 64);
       texture_display->setPixmap (render_blp_to_pixmap ("tileset\\generic\\black.blp", 64, 64));
@@ -33,10 +36,18 @@ namespace noggit
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
 
+      layout->addRow(close_swapper);
       layout->addRow(texture_display);
       layout->addRow(select);
       layout->addRow(swap_adt);
 
+      connect ( close_swapper, &QPushButton::clicked
+              , [this, parent]
+                {
+                  hide();
+                  parent->show();
+                }
+              );
       connect(select, &QPushButton::clicked, [this, texture_display]() {
         _texture_to_swap = *selected_texture::get();
         if (_texture_to_swap)
@@ -51,15 +62,6 @@ namespace noggit
           world->swapTexture (*camera_pos, _texture_to_swap.get());
         }
       });
-    }
-
-    void texture_swapper::closeEvent(QCloseEvent*)
-    {
-      auto parent (parentWidget());
-      if (parent)
-      {
-        parent->show();
-      }
     }
   }
 }

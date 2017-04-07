@@ -36,61 +36,64 @@ namespace noggit
       _current_texture = new current_texture;
       layout->addRow (_current_texture);
 
-      _hardness_spin = new QDoubleSpinBox (this);
+      auto tool_widget (new QWidget (this));
+      auto tool_layout (new QFormLayout (tool_widget));
+
+      _hardness_spin = new QDoubleSpinBox (tool_widget);
       _hardness_spin->setRange (0.0f, 1.0f);
       _hardness_spin->setDecimals (2);
       _hardness_spin->setValue (_hardness);
       _hardness_spin->setSingleStep(0.05f);
-      layout->addRow ("Hardness:", _hardness_spin);
+      tool_layout->addRow ("Hardness:", _hardness_spin);
 
-      _hardness_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _hardness_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _hardness_slider->setRange (0, 100);
       _hardness_slider->setSliderPosition (_hardness * 100);
-      layout->addRow (_hardness_slider);
+      tool_layout->addRow (_hardness_slider);
 
-      _radius_spin = new QDoubleSpinBox (this);
+      _radius_spin = new QDoubleSpinBox (tool_widget);
       _radius_spin->setRange (0.0f, 100.0f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_texture_brush.getRadius());
-      layout->addRow ("Radius:", _radius_spin);
+      tool_layout->addRow ("Radius:", _radius_spin);
 
-      _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _radius_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _radius_slider->setRange (0, 100);
       _radius_slider->setSliderPosition (_texture_brush.getRadius());
-      layout->addRow (_radius_slider);
+      tool_layout->addRow (_radius_slider);
 
-      _pressure_spin = new QDoubleSpinBox (this);
+      _pressure_spin = new QDoubleSpinBox (tool_widget);
       _pressure_spin->setRange (0.0f, 1.0);
       _pressure_spin->setDecimals (2);
       _pressure_spin->setValue (_pressure);
       _pressure_spin->setSingleStep(0.05f);
-      layout->addRow ("Pressure:", _pressure_spin);
+      tool_layout->addRow ("Pressure:", _pressure_spin);
 
-      _pressure_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _pressure_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _pressure_slider->setRange (0, 100);
       _pressure_slider->setSliderPosition (std::round(_pressure * 100));
-      layout->addRow (_pressure_slider);
+      tool_layout->addRow (_pressure_slider);
 
-      _brush_level_spin = new QDoubleSpinBox (this);
+      _brush_level_spin = new QDoubleSpinBox (tool_widget);
       _brush_level_spin->setRange (0.0f, 255.0f);
       _brush_level_spin->setDecimals (2);
       _brush_level_spin->setValue (_brush_level);
       _brush_level_spin->setSingleStep(5.0f);
-      layout->addRow ("Level:", _brush_level_spin);
+      tool_layout->addRow ("Level:", _brush_level_spin);
 
-      _brush_level_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _brush_level_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _brush_level_slider->setRange (0, 255);
       _brush_level_slider->setSliderPosition (_brush_level);
-      layout->addRow (_brush_level_slider);
+      tool_layout->addRow (_brush_level_slider);
 
-      _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", this);
+      _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", tool_widget);
       _show_unpaintable_chunks_cb->setChecked(true);
-      layout->addRow(_show_unpaintable_chunks_cb);
+      tool_layout->addRow(_show_unpaintable_chunks_cb);
 
       // spray
-      _spray_mode_group = new QGroupBox("Spray", this);
+      _spray_mode_group = new QGroupBox("Spray", tool_widget);
       _spray_mode_group->setCheckable(true);
-      layout->addRow (_spray_mode_group);
+      tool_layout->addRow (_spray_mode_group);
 
       _spray_content = new QWidget(_spray_mode_group);
       auto spray_layout (new QFormLayout (_spray_content));
@@ -119,17 +122,26 @@ namespace noggit
       _spray_pressure_slider = new QSlider (Qt::Orientation::Horizontal, _spray_content);
       _spray_pressure_slider->setRange (0, 10 * 100);
       _spray_pressure_slider->setSliderPosition (std::round(_spray_pressure * 100));
-      spray_layout->addRow (_spray_pressure_slider);
+      spray_layout->addRow (_spray_pressure_slider);      
 
-      QPushButton* toggle_swapper = new QPushButton ("Texture swapper", this);
-      layout->addRow (toggle_swapper);
+      _texture_switcher = new texture_swapper(tool_widget, camera_pos, world);
+      _texture_switcher->hide();
 
-      _texture_switcher = new texture_swapper(this, camera_pos, world);
+      QPushButton* toggle_swapper = new QPushButton ("Texture swapper", tool_widget);
+      tool_layout->addRow (toggle_swapper);
+      connect ( toggle_swapper, &QPushButton::clicked
+              , [this, tool_widget]
+                {
+                  tool_widget->hide();
+                  _texture_switcher->show();
+                }
+              );
 
-      connect(toggle_swapper, &QPushButton::clicked, [this]() {
-        hide();
-        _texture_switcher->show();
-      });
+      layout->addRow (tool_widget);
+
+      layout->addRow(_texture_switcher);
+
+      
 
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)

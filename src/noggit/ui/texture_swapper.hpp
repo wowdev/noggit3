@@ -29,8 +29,6 @@ namespace noggit
       }
 
     private:
-      void closeEvent (QCloseEvent *event);
-
       boost::optional<scoped_blp_texture_reference> _texture_to_swap;
     };
   }
