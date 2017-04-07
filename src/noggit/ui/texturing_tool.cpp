@@ -340,9 +340,9 @@ namespace noggit
     {
       float strength = 1.0f - pow(1.0f - _pressure, dt * 10.0f);
 
-      if (!isVisible() && _texture_switcher->isVisible())
+      if (_texture_switcher->isVisible())
       {
-        auto to_swap (_texture_switcher->current_texture());
+        auto to_swap (_texture_switcher->texture_to_swap());
         if (to_swap)
         {
           world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);

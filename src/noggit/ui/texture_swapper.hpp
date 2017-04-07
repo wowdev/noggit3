@@ -23,7 +23,7 @@ namespace noggit
                       , World*
                       );
 
-      boost::optional<scoped_blp_texture_reference> const& current_texture() const
+      boost::optional<scoped_blp_texture_reference> const& texture_to_swap() const
       {
         return _texture_to_swap;
       }
