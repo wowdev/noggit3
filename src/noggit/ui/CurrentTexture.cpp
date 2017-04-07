@@ -11,10 +11,10 @@ namespace noggit
     current_texture::current_texture()
       : clickable_label (nullptr)
     {
-      QSizePolicy policy (QSizePolicy::Expanding, QSizePolicy::Expanding);
+      QSizePolicy policy (QSizePolicy::Preferred, QSizePolicy::Preferred);
       policy.setHeightForWidth (true);
       setSizePolicy (policy);
-
+      setMinimumSize(64, 64);
       set_texture ("tileset\\generic\\black.blp");
     }
 
