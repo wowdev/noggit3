@@ -604,7 +604,16 @@ void MapView::createGUI()
                 );
 
   ADD_ACTION_NS ( assist_menu
-                , "Clear texture"
+                , "Clear textures"
+                , [this]
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->clearTextures(_camera.position);
+                  }
+                );
+  ADD_ACTION_NS ( assist_menu
+                , "Clear textures + set base"
                 , [this]
                   {
                     makeCurrent();

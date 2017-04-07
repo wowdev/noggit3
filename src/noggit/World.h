@@ -193,6 +193,7 @@ public:
   void eraseTextures(math::vector_3d const& pos);
   void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
   void setBaseTexture(math::vector_3d const& pos);
+  void clearTextures(math::vector_3d const& pos);
   void swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex);
   void removeTexDuplicateOnADT(math::vector_3d const& pos);
 

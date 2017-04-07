@@ -1571,16 +1571,24 @@ unsigned int World::getMapID()
   return mapIndex._map_id;
 }
 
+void World::clearTextures(math::vector_3d const& pos)
+{
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+  {
+    chunk->eraseTextures();
+  });  
+}
+
 void World::setBaseTexture(math::vector_3d const& pos)
 {
-  if (!!noggit::ui::selected_texture::get())
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+    chunk->eraseTextures();
+    if (!!noggit::ui::selected_texture::get())
     {
-      chunk->eraseTextures();
       chunk->addTexture(*noggit::ui::selected_texture::get());
-    });
-  }
+    }
+  });
 }
 
 void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex)
