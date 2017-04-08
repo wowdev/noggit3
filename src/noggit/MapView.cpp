@@ -2343,7 +2343,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
   // movement
   if (event->key() == Qt::Key_W)
   {
-    key_w = true;
     moving += 1.0f;
   }
   if (event->key() == Qt::Key_S)
@@ -2455,11 +2454,7 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
   // movement
   if (event->key() == Qt::Key_W)
   {
-    key_w = false;
-    if (!(leftMouse && rightMouse))
-    {
-      moving -= 1.0f;
-    }
+    moving -= 1.0f;
   }
   if (event->key() == Qt::Key_S)
   {
@@ -2554,8 +2549,6 @@ void MapView::focusOutEvent (QFocusEvent*)
   _mod_ctrl_down = false;
   _mod_shift_down = false;
   _mod_space_down = false;
-
-  key_w = false;
 
   moving = 0.0f;
   lookat = 0.0f;
