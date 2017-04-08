@@ -5,6 +5,7 @@
 #include <util/qt/overload.hpp>
 
 #include <qt-color-widgets/color_selector.hpp>
+#include <qt-color-widgets/color_wheel.hpp>
 
 #include <QtWidgets/QFormLayout>
 
@@ -53,6 +54,10 @@ namespace noggit
 
       layout->addRow("Color:", color_picker);
 
+      auto color_wheel (new color_widgets::ColorWheel(this));
+      color_wheel->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
+      layout->addRow(color_wheel);
+
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
@@ -90,14 +95,18 @@ namespace noggit
               );
 
       connect ( color_picker, &color_widgets::ColorSelector::colorChanged
-              , [&] (QColor new_color)
+              , [this, color_wheel] (QColor new_color)
                 {
+                  QSignalBlocker const blocker (color_wheel);
+                  color_wheel->setColor(new_color);
                   _color.x = new_color.redF();
                   _color.y = new_color.greenF();
                   _color.z = new_color.blueF();
                   _color.w = 1.0f;
                 }
               );
+
+      connect (color_wheel, &color_widgets::ColorWheel::colorChanged, color_picker, &color_widgets::ColorSelector::setColor);
 
     }
 
