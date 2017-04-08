@@ -29,8 +29,7 @@ namespace noggit
 
       for (int i = 0; i < 4; i++)
       {
-        clickable_label* click_label = new clickable_label(this);
-        click_label->setMinimumSize(64, 64);
+        current_texture* click_label = new current_texture;
         connect ( click_label, &clickable_label::clicked
                 , [=]
                   {
@@ -134,7 +133,7 @@ namespace noggit
       for (; index < _chunk->_texture_set.num(); ++index)
       {
         _textures.push_back(_chunk->_texture_set.texture(index));
-        _labels[index]->setPixmap(render_blp_to_pixmap(_textures[index]->filename()));
+        _labels[index]->set_texture(_textures[index]->filename());
         _labels[index]->show();
       }
 

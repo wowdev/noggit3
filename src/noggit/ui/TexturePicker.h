@@ -4,7 +4,6 @@
 
 #include <noggit/MapChunk.h>
 #include <noggit/Selection.h>
-#include <noggit/ui/clickable_label.hpp>
 #include <noggit/ui/widget.hpp>
 
 #include <vector>
@@ -30,7 +29,7 @@ namespace noggit
     private:
       void update(bool set_changed = true);
 
-      std::vector<clickable_label*> _labels;
+      std::vector<current_texture*> _labels;
       std::vector<scoped_blp_texture_reference> _textures;
       MapChunk* _chunk;
 
