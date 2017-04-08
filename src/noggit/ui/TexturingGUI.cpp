@@ -217,6 +217,8 @@ namespace noggit
       top_bar->addWidget (only_specular);
       top_bar->addWidget (filter);
       layout->addWidget (list);
+
+      resize(155 * 5 + 35, height());
     }
 
     
