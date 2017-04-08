@@ -77,7 +77,6 @@ private:
   float _2d_zoom = 0.25f;
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
-  bool key_w;
   bool look;
 
   noggit::camera _camera;
