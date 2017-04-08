@@ -311,8 +311,14 @@ Noggit::Noggit(int argc, char *argv[])
   LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
 
   main_window = std::make_unique<noggit::ui::main_window>();
-  main_window->resize (xres, yres);
-  main_window->show();
+  if (fullscreen)
+  {
+    main_window->showFullScreen();
+  }
+  else
+  {
+    main_window->showMaximized();
+  }  
 }
 
 
