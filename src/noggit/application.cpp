@@ -57,9 +57,6 @@ private:
 
   bool fullscreen;
   bool doAntiAliasing;
-
-  int xres;
-  int yres;
 };
 
 void Noggit::initPath(char *argv[])
@@ -96,50 +93,6 @@ void Noggit::parseArgs(int argc, char *argv[])
     else if (!strcmp(argv[i], "-na") || !strcmp(argv[i], "-noAntiAliasing"))
     {
       doAntiAliasing = false;
-    }
-    else if (!strcmp(argv[i], "-1024") || !strcmp(argv[i], "-1024x768")) {
-      xres = 1024;
-      yres = 768;
-    }
-    else if (!strcmp(argv[i], "-800") || !strcmp(argv[i], "-800x600")) {
-      xres = 800;
-      yres = 600;
-    }
-    else if (!strcmp(argv[i], "-1280") || !strcmp(argv[i], "-1280x1024")) {
-      xres = 1280;
-      yres = 1024;
-    }
-    else if (!strcmp(argv[i], "-1280x960")) {
-      xres = 1280;
-      yres = 960;
-    }
-    else if (!strcmp(argv[i], "-1280x720")) {
-      xres = 1280;
-      yres = 720;
-    }
-    else if (!strcmp(argv[i], "-1400") || !strcmp(argv[i], "-1400x1050")) {
-      xres = 1400;
-      yres = 1050;
-    }
-    else if (!strcmp(argv[i], "-1280x800")) {
-      xres = 1280;
-      yres = 800;
-    }
-    else if (!strcmp(argv[i], "-1600") || !strcmp(argv[i], "-1600x1200")) {
-      xres = 1600;
-      yres = 1200;
-    }
-    else if (!strcmp(argv[i], "-1920") || !strcmp(argv[i], "-1920x1200")) {
-      xres = 1920;
-      yres = 1200;
-    }
-    else if (!strcmp(argv[i], "-1080p") ){
-      xres = 1920;
-      yres = 1080;
-    }
-    else if (!strcmp(argv[i], "-2048") || !strcmp(argv[i], "-2048x1536")) {
-      xres = 2048;
-      yres = 1536;
     }
   }
 
@@ -242,8 +195,6 @@ void Noggit::loadMPQs()
 Noggit::Noggit(int argc, char *argv[])
   : fullscreen(false)
   , doAntiAliasing(true)
-  , xres(1280)
-  , yres(720)
 {
   InitLogging();
   initPath(argv);
