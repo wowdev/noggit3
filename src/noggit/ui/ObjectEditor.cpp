@@ -17,6 +17,7 @@
 #include <noggit/ui/checkbox.hpp>
 #include <util/qt/overload.hpp>
 
+#include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QCheckBox>
@@ -36,19 +37,31 @@ namespace noggit
                                  , object_paste_params* paste_params
                                  )
             : QWidget(nullptr)
-      , rotationEditor (new rotation_editor())
-      , _copy_model_stats (true)
+            , rotationEditor (new rotation_editor())
+            , _copy_model_stats (true)
             , selected()
             , pasteMode(PASTE_ON_TERRAIN)
     {
-      auto inspectorGrid = new QGridLayout (this);
+      auto layout = new QFormLayout (this);
 
-      QGroupBox *copyBox = new QGroupBox(this);
-      auto copyGrid = new QGridLayout (copyBox);
-      QCheckBox *randRotCheck = new QCheckBox("Random rotation", this);
-      QCheckBox *randTiltCheck = new QCheckBox("Random tilt", this);
-      QCheckBox *randScaleCheck = new QCheckBox("Random scale", this);
-      QCheckBox *copyAttributesCheck = new QCheckBox("Copy rotation, tilt, and scale", this);
+      QGroupBox *copyBox = new QGroupBox("Copy options", this);
+      auto copy_layout = new QFormLayout (copyBox);
+
+      auto rotation_group (new QGroupBox ("Random rotation", copyBox));
+      auto tilt_group (new QGroupBox ("Random tilt", copyBox));
+      auto scale_group (new QGroupBox ("Random scale", copyBox));
+      auto rotation_layout (new QFormLayout (rotation_group));
+      auto tilt_layout (new QFormLayout (tilt_group));
+      auto scale_layout (new QFormLayout (scale_group));
+
+      rotation_group->setCheckable(true);
+      rotation_group->setChecked(Settings::getInstance()->random_rotation);
+      tilt_group->setCheckable(true);
+      tilt_group->setChecked(Settings::getInstance()->random_tilt);
+      scale_group->setCheckable(true);
+      scale_group->setChecked(Settings::getInstance()->random_size);
+
+      QCheckBox *copyAttributesCheck = new QCheckBox("Copy rotation,\ntilt, and scale", this);
 
       QDoubleSpinBox *rotRangeStart = new QDoubleSpinBox(this);
       QDoubleSpinBox *rotRangeEnd = new QDoubleSpinBox(this);
@@ -56,9 +69,6 @@ namespace noggit
       QDoubleSpinBox *tiltRangeEnd = new QDoubleSpinBox(this);
       QDoubleSpinBox *scaleRangeStart = new QDoubleSpinBox(this);
       QDoubleSpinBox *scaleRangeEnd = new QDoubleSpinBox(this);
-
-      QLabel *minLabel = new QLabel("Min", this);
-      QLabel *maxLabel = new QLabel("Max", this);
 
       _filename = new QLabel (this);
       _filename->setWordWrap (true);
@@ -83,24 +93,23 @@ namespace noggit
       tiltRangeEnd->setRange (-180.f, 180.f);
       scaleRangeStart->setRange (-180.f, 180.f);
       scaleRangeEnd->setRange (-180.f, 180.f);
+      
+      rotation_layout->addRow("Min:", rotRangeStart);
+      rotation_layout->addRow("Max:", rotRangeEnd);
+      copy_layout->addRow(rotation_group);
 
-      copyBox->setTitle("Copy Options");
-      copyGrid->addWidget(minLabel, 0, 1, 1, 1, Qt::AlignCenter);
-      copyGrid->addWidget(maxLabel, 0, 2, 1, 1, Qt::AlignCenter);
+      tilt_layout->addRow("Min:", tiltRangeStart);
+      tilt_layout->addRow("Max:", tiltRangeEnd);
+      copy_layout->addRow(tilt_group);
 
-      copyGrid->addWidget(randRotCheck, 1, 0, 1, 1);
-      copyGrid->addWidget(rotRangeStart, 1, 1, 1, 1);
-      copyGrid->addWidget(rotRangeEnd, 1, 2, 1, 1);
-      copyGrid->addWidget(randTiltCheck, 3, 0, 1, 1);
-      copyGrid->addWidget(tiltRangeStart, 3, 1, 1, 1);
-      copyGrid->addWidget(tiltRangeEnd, 3, 2, 1, 1);
-      copyGrid->addWidget(randScaleCheck, 4, 0, 1, 1);
-      copyGrid->addWidget(scaleRangeStart, 4, 1, 1, 1);
-      copyGrid->addWidget(scaleRangeEnd, 4, 2, 1, 1);
-      copyGrid->addWidget(copyAttributesCheck, 5, 0, 1, 3);
+      scale_layout->addRow("Min:", scaleRangeStart);
+      scale_layout->addRow("Max:", scaleRangeEnd);
+      copy_layout->addRow(scale_group);
+
+      copy_layout->addRow(copyAttributesCheck);
 
       QGroupBox *pasteBox = new QGroupBox(this);
-      auto pasteGrid = new QGridLayout (pasteBox);
+      auto paste_layout = new QFormLayout (pasteBox);
       QRadioButton *terrainButton = new QRadioButton("Terrain");
       QRadioButton *selectionButton = new QRadioButton("Selection");
       QRadioButton *cameraButton = new QRadioButton("Camera");
@@ -110,17 +119,17 @@ namespace noggit
       pasteModeGroup->addButton(selectionButton, 1);
       pasteModeGroup->addButton(cameraButton, 2);
 
-      auto cursorPosCheck ( new checkbox ( "Move model to cursor position"
+      auto cursorPosCheck ( new checkbox ( "Move model to\ncursor position"
                                          , move_model_to_cursor_position
                                          , this
                                          )
                           );
 
       pasteBox->setTitle("Paste Options");
-      pasteGrid->addWidget(terrainButton);
-      pasteGrid->addWidget(selectionButton, 0, 1, 1, 1);
-      pasteGrid->addWidget(cameraButton, 0, 2, 1, 1);
-      pasteGrid->addWidget(cursorPosCheck, 1, 0, 1, 3);
+      paste_layout->addRow(terrainButton);
+      paste_layout->addRow(selectionButton);
+      paste_layout->addRow(cameraButton);
+      paste_layout->addRow(cursorPosCheck);
 
       QPushButton *rotEditorButton = new QPushButton("Rotation Editor", this);
       QPushButton *visToggleButton = new QPushButton("Toggle Visibility", this);
@@ -135,20 +144,27 @@ namespace noggit
       importBox->layout()->addWidget(toTxt);
       importBox->layout()->addWidget(fromTxt);
 
-      inspectorGrid->addWidget(copyBox, 0, 0, 1, 2);
-      inspectorGrid->addWidget(pasteBox, 1, 0, 1, 2);
-      inspectorGrid->addWidget(rotEditorButton, 2, 0, 1, 1);
-      inspectorGrid->addWidget(visToggleButton, 3, 0, 1, 1);
-      inspectorGrid->addWidget(clearListButton, 4, 0, 1, 1);
-      inspectorGrid->addWidget(importBox, 2, 1, 3, 1);
-      inspectorGrid->addWidget (_filename, 5, 0, 1, 2);
+      layout->addRow(copyBox);
+      layout->addRow(pasteBox);
+      layout->addRow(rotEditorButton);
+      layout->addRow(visToggleButton);
+      layout->addRow(clearListButton);
+      layout->addRow(importBox);
+      layout->addRow (_filename);
 
-    //    setWidget(content);
-
-      randRotCheck->setChecked(Settings::getInstance()->random_rotation);
-      connect (randRotCheck, &QCheckBox::stateChanged, [] (int s)
+      connect (rotation_group, &QGroupBox::toggled, [] (int s)
       {
         Settings::getInstance()->random_rotation = s;
+      });
+
+      connect (tilt_group, &QGroupBox::toggled, [] (int s)
+      {
+        Settings::getInstance()->random_tilt = s;
+      });
+
+      connect (scale_group, &QGroupBox::toggled, [] (int s)
+      {
+        Settings::getInstance()->random_size = s;
       });
 
       rotRangeStart->setValue(paste_params->minRotation);
@@ -201,18 +217,6 @@ namespace noggit
                   paste_params->maxScale = v;
                 }
       );
-
-      randTiltCheck->setChecked(Settings::getInstance()->random_tilt);
-      connect (randTiltCheck, &QCheckBox::stateChanged, [] (int s)
-      {
-        Settings::getInstance()->random_tilt = s;
-      });
-
-      randScaleCheck->setChecked(Settings::getInstance()->random_tilt);
-      connect (randScaleCheck, &QCheckBox::stateChanged, [] (int s)
-      {
-        Settings::getInstance()->random_size = s;
-      });
 
       copyAttributesCheck->setChecked(_copy_model_stats);
       connect (copyAttributesCheck, &QCheckBox::stateChanged, [this] (int s)
