@@ -38,7 +38,7 @@ namespace noggit
       , _lock_pos(math::vector_3d(0.0f, 0.0f, 0.0f))
       , tile(0, 0)
     {
-      auto layout (new QVBoxLayout (this));
+      auto layout (new QFormLayout (this));
 
       auto brush_group (new QGroupBox (this));
       auto brush_layout (new QFormLayout (brush_group));
@@ -88,7 +88,7 @@ namespace noggit
 
       brush_layout->addRow (waterType);
 
-      layout->addWidget (brush_group);
+      layout->addRow (brush_group);
 
       auto angle_group (new QGroupBox ("Angled mode", this));
       angle_group->setCheckable (true);
@@ -121,7 +121,7 @@ namespace noggit
 
       angle_layout->addRow ("Orienation", _orientation_spin);
 
-      layout->addWidget (angle_group);
+      layout->addRow (angle_group);
 
       auto lock_group (new QGroupBox ("Lock", this));
       lock_group->setCheckable (true);
@@ -156,7 +156,7 @@ namespace noggit
               , &_locked, &bool_toggle_property::set
               );
 
-      layout->addWidget(lock_group);
+      layout->addRow(lock_group);
 
       auto override_group (new QGroupBox ("Override", this));
       auto override_layout (new QFormLayout (override_group));
@@ -164,7 +164,7 @@ namespace noggit
       override_layout->addWidget (new checkbox ("Liquid ID", &_override_liquid_id, this));
       override_layout->addWidget (new checkbox ("Height", &_override_height, this));
 
-      layout->addWidget(override_group);
+      layout->addRow(override_group);
 
       auto opacity_group (new QGroupBox ("Auto opacity", this));
       auto opacity_layout (new QFormLayout (opacity_group));
@@ -198,9 +198,9 @@ namespace noggit
               );
       opacity_layout->addRow (opacity_spin);
 
-      layout->addWidget (opacity_group);
+      layout->addRow (opacity_group);
 
-      layout->addWidget ( new pushbutton
+      layout->addRow ( new pushbutton
                             ( "Regen ADT opacity"
                             , [this]
                               {
@@ -209,7 +209,7 @@ namespace noggit
                               }
                             )
                         );
-      layout->addWidget ( new pushbutton
+      layout->addRow ( new pushbutton
                             ( "Crop water"
                             , [this]
                               {
@@ -229,7 +229,7 @@ namespace noggit
       waterLayer->setRange (0, 100);
       layer_layout->addRow (waterLayer);
 
-      layout->addWidget (layer_group);
+      layout->addRow (layer_group);
 
       connect ( waterLayer, qOverload<int> (&QSpinBox::valueChanged)
               , current_layer, &unsigned_int_property::set
