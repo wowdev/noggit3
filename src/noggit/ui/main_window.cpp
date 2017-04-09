@@ -26,6 +26,9 @@
   #include <mysql/mysql.h>
 #endif
 
+#include "revision.h"
+
+
 namespace noggit
 {
   namespace ui
@@ -34,6 +37,11 @@ namespace noggit
       : QMainWindow (nullptr)
       , _null_widget (new QWidget (this))
     {
+      std::stringstream title;
+      title << "Noggit - " << STRPRODUCTVER;
+      setWindowTitle (QString::fromStdString (title.str()));
+      setWindowIcon (QIcon (":/icon"));
+
       setCentralWidget (_null_widget);
 
       createBookmarkList();
