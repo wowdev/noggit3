@@ -62,6 +62,9 @@ namespace noggit
     tileset_chooser::tileset_chooser (QWidget* parent)
       : widget (parent)
     {
+      setWindowTitle ("Texture palette");
+      setWindowIcon (QIcon (":/icon"));
+
       while (!MPQArchive::allFinishedLoading())
       {
         MPQArchive::allFinishLoading();

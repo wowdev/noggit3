@@ -712,7 +712,13 @@ void MapView::createGUI()
           );
   ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
   connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
-          , TexturePalette, &QWidget::setVisible
+          , TexturePalette, [this] 
+                            { 
+                              if (terrainMode == editing_mode::paint)
+                              {
+                                TexturePalette->setVisible(_show_texture_palette_window.get());
+                              }
+                            }
           );
   connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
           , &_show_texture_palette_window, &noggit::bool_toggle_property::set
