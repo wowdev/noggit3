@@ -2791,11 +2791,11 @@ void MapView::wheelEvent (QWheelEvent* event)
 
   if (terrainMode == editing_mode::ground)
   {
-    if (_mod_alt_down)
+    if (_mod_shift_down)
     {
       terrainTool->changeAngle (_world.get(), delta_for_range (178.f));
     }
-    else if (_mod_shift_down)
+    else if (_mod_alt_down)
     {
       terrainTool->changeOrientation (_world.get(), delta_for_range (360.f));
     }
