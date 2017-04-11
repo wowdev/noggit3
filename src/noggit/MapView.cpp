@@ -389,7 +389,7 @@ void MapView::createGUI()
 
   _vertex_shading = new QDockWidget ("Vertex Shading", this);
   _vertex_shading->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _vertex_shading->setWidget (shaderTool = new noggit::ui::shader_tool (cursor_color));
+  _vertex_shading->setWidget (shaderTool = new noggit::ui::shader_tool (shader_color));
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _vertex_shading);
   connect (this, &QObject::destroyed, _vertex_shading, &QObject::deleteLater);
 
@@ -2272,7 +2272,7 @@ void MapView::displayViewMode_3D()
     (_camera.position, _camera.look_at(), {0.0f, 1.0f, 0.0f});
 
   _world->draw ( _cursor_pos
-               , cursor_color
+               , terrainMode == editing_mode::mccv ? shader_color : cursor_color
                , cursor_type
                , radius
                , hardness

@@ -169,6 +169,7 @@ private:
 
 public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
+  math::vector_4d shader_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
   int cursor_type = 1;
 
   MapView ( math::degrees ah0
