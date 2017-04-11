@@ -96,6 +96,7 @@ namespace noggit
         "Edit ground:\n"
         "  SHIFT + F1 - toggle ground edit mode\n"
         "  ALT + left mouse + mouse move - change brush size\n"
+        "  SPACE + left mouse + mouse move - change speed\n"
         "  Z - Change the mode in option window\n"
         "Terrain mode \"raise / lower\":\n"
         "  SHIFT + Left mouse - raise terrain\n"
@@ -131,10 +132,11 @@ namespace noggit
         "  CTRL + SHIFT + ALT + left mouse - clear all textures on chunk\n"
         "  SHIFT + left mouse - draw texture or fills if chunk is empty\n"
         "  CTRL + left mouse - open texture picker for the chunk\n"
-        "  T - toggle spray brush\n"
         "  ALT + left mouse + horizontal movement - change radius\n"
         "  ALT + right mouse + horizontal movement - change hardness\n"
+        "  SPACE + left mouse + mouse move - change pressure\n"
         "  SPACE + mouse wheel - change strength (gradient)\n"
+        "  T - toggle spray brush\n"
         "  ALT + mouse wheel - change spray radius\n"
         "  SHIFT + mouse wheel - change spray pressure\n"
       ));
@@ -184,12 +186,23 @@ namespace noggit
         "    holding SHIFT and CTRL together: half speed \n"
       ));
 
+      auto shader_widget (new QWidget (this));
+      auto shader_layout (new QFormLayout (shader_widget));
+
+      shader_layout->addRow (new QLabel (
+        "  SHIFT + Left mouse - add shader\n"
+        "  CTRL + Left mouse - remove shader\n"
+        "  ALT + left mouse + mouse move - change brush size\n"
+        "  SPACE + left mouse + mouse move - change speed\n"
+      ));
+
       layout->addWidget(tabs);
       tabs->addTab(base_widget, "Base");
       tabs->addTab(ground_widget, "Terrain");
       tabs->addTab(texture_widget, "Texture");
       tabs->addTab(water_widget, "Water");
       tabs->addTab(object_widget, "Objects");
+      tabs->addTab(shader_widget, "Shader");
       tabs->addTab(flag_widget, "Flags/Hole/Area");
     }
   }
