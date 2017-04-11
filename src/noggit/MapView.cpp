@@ -889,7 +889,7 @@ void MapView::createGUI()
 
   ADD_ACTION ( view_menu
              , "turn camera around 180°"
-             , Qt::Key_R
+             , "Shift+R"
              , [this]
                {
                  _camera.add_to_yaw(math::degrees(180.f));

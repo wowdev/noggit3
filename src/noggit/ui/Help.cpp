@@ -32,15 +32,14 @@ namespace noggit
         "  I - Invert mouse up and down\n"
         "  Q, E - Move vertically up, down\n"
         "  A, D, W, S - Move left, right, forward, backward\n"
-        "  C - Switch cursor type\n"
+        "  SHIFT+ C - Switch cursor type\n"
+        "  CTRL + ALT + C - Toggle cursor options\n"
         "  M - Show map\n"
         "  U - 2D texture editor\n"
-        "  H - This help (if not in the object editor)\n"
-        "  CTRL + ALT + C - Toggle cursor options\n"
+        "  CTRL + F1 - This help\n"
         "  SHIFT + R - Turn camera 180 degres\n"
-        "  SHIFT + F4 - Change to auto select mode\n"
-        "  SHIFT + 1, 2, 3 or 4 - Set a predefined speed.\n"
-        "  ESC - exit to main menu\n"
+        "  SHIFT + 1, 2, 3 or 4 - Set a predefined camera speed.\n"
+        "  ALT + F4 - exit to main menu\n"
         "\n"
         "Toggles:\n"
         "  F1 - Toggle M2s\n"
@@ -51,26 +50,23 @@ namespace noggit
         "  F7 - Toggle chunk (red) and ADT (green) lines\n"
         "  F8 - Toggle detailed window\n"
         "  F9 - Toggle map contour\n"
-        "  F - Toggle fog\n"
-        "  TAB - toggle UI view\n"
-        "  X - Toggle tool settings\n"
+        "  F10 - Toggle wireframe\n"
+        "  F10 - Toggle model animations\n"
+        "  F12 - Toggle fog\n"
         "  CTRL + X - detail window\n"
-        "  1,2,3,4,5 and 6 - Select the editing modes\n"
+        "  1-9 - Select the editing modes\n"
         "\n"
         "Files:\n"
         "  F5 - save bookmark\n"
-        "  F10 - reload BLP\n"
-        "  F11 - reload M2s\n"
-        "  F12 - reload wmo\n"
-        "  SHIFT + J - reload ADT tile\n"
         "  CTRL + S -  Save all changed ADT tiles\n"
         "  CTRL + SHIFT + S - Save ADT tile at camera position\n"
         "  CTRL + SHIFT + A - Save all loaded ADT tiles\n"
-        "  g - Save port commands to ports.txt\n"
+        "  G - Save port commands to ports.txt\n"
         "\n"
         "Adjust:\n"
         "  O / P - slower/faster movement\n"
         "  B / N - slower/faster time\n"
+        "  J - Pause time\n"
         "  SHIFT + +/-: fog distance when no model is selected\n"
       ));
 
@@ -190,11 +186,11 @@ namespace noggit
 
       layout->addWidget(tabs);
       tabs->addTab(base_widget, "Base");
-      tabs->addTab(flag_widget, "Flags/Hole/Area");
       tabs->addTab(ground_widget, "Terrain");
       tabs->addTab(texture_widget, "Texture");
       tabs->addTab(water_widget, "Water");
-      tabs->addTab(object_widget, "Objects");  
+      tabs->addTab(object_widget, "Objects");
+      tabs->addTab(flag_widget, "Flags/Hole/Area");
     }
   }
 }
