@@ -51,7 +51,7 @@ namespace noggit
         "  F8 - Toggle detailed window\n"
         "  F9 - Toggle map contour\n"
         "  F10 - Toggle wireframe\n"
-        "  F10 - Toggle model animations\n"
+        "  F11 - Toggle model animations\n"
         "  F12 - Toggle fog\n"
         "  CTRL + X - detail window\n"
         "  1-9 - Select the editing modes\n"
