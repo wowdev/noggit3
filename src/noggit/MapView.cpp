@@ -320,7 +320,7 @@ void MapView::createGUI()
 {
   _terrain = new QDockWidget ("Raise / Lower", this);
   _terrain->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool (_world.get()));
+  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool());
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
   connect (this, &QObject::destroyed, _terrain, &QObject::deleteLater);
 
@@ -2793,11 +2793,11 @@ void MapView::wheelEvent (QWheelEvent* event)
   {
     if (_mod_shift_down)
     {
-      terrainTool->changeAngle (_world.get(), delta_for_range (178.f));
+      terrainTool->changeAngle (delta_for_range (178.f));
     }
     else if (_mod_alt_down)
     {
-      terrainTool->changeOrientation (_world.get(), delta_for_range (360.f));
+      terrainTool->changeOrientation (delta_for_range (360.f));
     }
   }
   else if (terrainMode == editing_mode::paint)
