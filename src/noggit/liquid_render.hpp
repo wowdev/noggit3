@@ -74,7 +74,7 @@ varying vec2 tex_coord_;
 void main()
 {
   vec4 texel = texture2D (texture, tex_coord_ / tex_repeat);
-  vec4 lerp = mix (color_light, color_dark, depth_);
+  vec4 lerp = mix (color_dark, color_light, depth_);
   vec4 tResult = clamp (texel + lerp, 0.0, 1.0); //clamp shouldn't be needed
   vec4 oColor = clamp (texel + tResult, 0.0, 1.0);
   gl_FragColor = vec4 (oColor.rgb, lerp.a);
