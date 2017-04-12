@@ -24,7 +24,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      terrain_tool (World*);
+      terrain_tool();
 
       void changeTerrain (World*, math::vector_3d const& pos, float dt);
 
@@ -34,15 +34,15 @@ namespace noggit
       void changeSpeed(float change);
 
       void setRadius (float radius);
-      void setOrientation (World*, float orientation);
-      void setAngle (World*, float angle);
+      void setOrientation (float orientation);
+      void setAngle (float angle);
 
       // vertex edit only functions
       void moveVertices (World*, float dt);
       void flattenVertices (World*);
 
-      void changeOrientation (World*, float change);
-      void changeAngle (World*, float change);
+      void changeOrientation (float change);
+      void changeAngle (float change);
       void setOrientRelativeTo (World*, math::vector_3d const& pos);
 
       float brushRadius() const { return _radius; }

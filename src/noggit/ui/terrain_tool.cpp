@@ -16,7 +16,7 @@ namespace noggit
 {
   namespace ui
   {
-    terrain_tool::terrain_tool (World* world)
+    terrain_tool::terrain_tool()
       : QWidget(nullptr)
       , _edit_type (eTerrainType_Flat)
       , _radius(15.0f)
@@ -217,16 +217,16 @@ namespace noggit
               );
 
       connect ( _angle_slider, &QSlider::valueChanged
-              , [this, world] (int v)
+              , [this] (int v)
                   {
-                    setAngle (world, v);
+                    setAngle (v);
                   }
                 );
 
       connect ( _orientation_dial, &QDial::valueChanged
-              , [this, world] (int v)
+              , [this] (int v)
                   {
-                    setOrientation (world, v + 90.0f);
+                    setOrientation (v + 90.0f);
                   }
                 );
     }
@@ -297,12 +297,12 @@ namespace noggit
       _speed_spin->setValue(_speed + change);
     }
 
-    void terrain_tool::changeOrientation (World* world, float change)
+    void terrain_tool::changeOrientation (float change)
     {
-      setOrientation (world, _vertex_orientation._ + change);
+      setOrientation (_vertex_orientation._ + change);
     }
 
-    void terrain_tool::setOrientation (World* world, float orientation)
+    void terrain_tool::setOrientation (float orientation)
     {
       if (_edit_type == eTerrainType_Vertex)
       {
@@ -334,12 +334,12 @@ namespace noggit
       }
     }
 
-    void terrain_tool::changeAngle (World* world, float change)
+    void terrain_tool::changeAngle (float change)
     {
-      setAngle (world, _vertex_angle._ + change);
+      setAngle (_vertex_angle._ + change);
     }
 
-    void terrain_tool::setAngle (World* world, float angle)
+    void terrain_tool::setAngle (float angle)
     {
       if (_edit_type == eTerrainType_Vertex)
       {
