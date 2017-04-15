@@ -2,9 +2,6 @@
 
 #include <noggit/ui/uid_fix_window.hpp>
 
-#include <noggit/map_index.hpp>
-#include <noggit/World.h>
-
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
@@ -14,8 +11,9 @@ namespace noggit
 {
   namespace ui
   {
-    uid_fix_window::uid_fix_window ( std::function<void()> after_fix
-                                   , World* world
+    uid_fix_window::uid_fix_window ( math::vector_3d pos
+                                   , math::degrees camera_pitch
+                                   , math::degrees camera_yaw
                                    )
       : QDialog (nullptr)
     {
@@ -44,21 +42,19 @@ namespace noggit
       auto get_max (buttons->addButton ("Get Max UID", QDialogButtonBox::YesRole));
 
       connect ( fix_all, &QPushButton::clicked
-              , [this, after_fix, world]
+              , [=]
                 {
                   hide();
-                  world->mapIndex.fixUIDs (world);
-                  after_fix();
+                  emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::fix_all);
                   deleteLater();
                 }
               );
 
       connect ( get_max, &QPushButton::clicked
-              , [this, after_fix, world]
+              , [=]
                 {
                   hide();
-                  world->mapIndex.searchMaxUID();
-                  after_fix();
+                  emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid);
                   deleteLater();
                 }
               );

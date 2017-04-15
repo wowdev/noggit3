@@ -9,6 +9,7 @@
 #include <noggit/camera.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
+#include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/unsigned_int_property.hpp>
 
 #include <boost/optional.hpp>
@@ -161,6 +162,8 @@ private:
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
 
+  uid_fix_mode _uid_fix;
+
   bool Saving = false;
 
   noggit::ui::toolbar* _toolbar;
@@ -177,6 +180,7 @@ public:
           , math::vector_3d camera_pos
           , noggit::ui::main_window*
           , std::unique_ptr<World>
+          , uid_fix_mode uid_fix = uid_fix_mode::none
           );
   ~MapView();
 
