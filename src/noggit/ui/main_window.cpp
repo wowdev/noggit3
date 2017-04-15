@@ -81,9 +81,10 @@ namespace noggit
     void main_window::enterMapAt ( math::vector_3d pos
                                  , math::degrees camera_pitch
                                  , math::degrees camera_yaw
+                                 , uid_fix_mode uid_fix
                                  )
     {
-      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world)));
+      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix));
       setCentralWidget (mapview);
     }
 
@@ -212,16 +213,20 @@ namespace noggit
             }
             else
             {
-              auto uidFixWindow
-                ( new uid_fix_window
-                    ( [this, pos]
-                      {
-                        enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
-                      }
-                    , _world.get()
-                    )
-                );
+              auto uidFixWindow (new uid_fix_window (pos, math::degrees (30.f), math::degrees (90.f)));
               uidFixWindow->show();
+
+              connect ( uidFixWindow
+                      , &noggit::ui::uid_fix_window::fix_uid
+                      , [this] ( math::vector_3d pos
+                               , math::degrees camera_pitch
+                               , math::degrees camera_yaw
+                               , uid_fix_mode uid_fix
+                               )
+                        {
+                          enterMapAt(pos, camera_pitch, camera_yaw, uid_fix);
+                        }
+                      );
             }
           }
         );

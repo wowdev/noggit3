@@ -1207,9 +1207,11 @@ MapView::MapView( math::degrees camera_yaw0
                 , math::vector_3d camera_pos
                 , noggit::ui::main_window* main_window
                 , std::unique_ptr<World> world
+                , uid_fix_mode uid_fix
                 )
   : _camera (camera_pos, camera_yaw0, camera_pitch0)
   , mTimespeed(0.0f)
+  , _uid_fix (uid_fix)
   , _main_window (main_window)
   , _world (std::move (world))
   , _status_position (new QLabel (this))
@@ -1345,6 +1347,17 @@ MapView::MapView( math::degrees camera_yaw0
     gl.viewport(0.0f, 0.0f, width(), height());
 
     gl.clearColor (0.0f, 0.0f, 0.0f, 1.0f);
+
+    if (_uid_fix == uid_fix_mode::max_uid)
+    {
+      _world->mapIndex.searchMaxUID();
+    }
+    else if (_uid_fix == uid_fix_mode::fix_all)
+    {
+      _world->mapIndex.fixUIDs (_world.get());
+    }
+
+    _uid_fix = uid_fix_mode::none;
 
     createGUI();
 

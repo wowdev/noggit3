@@ -375,6 +375,7 @@ list (APPEND headers_to_moc
   src/noggit/ui/ZoneIDBrowser.h
   src/noggit/ui/clickable_label.hpp
   src/noggit/ui/minimap_widget.hpp
+  src/noggit/ui/uid_fix_window.hpp
   src/noggit/ui/widget.hpp
   src/noggit/unsigned_int_property.hpp
 )
