@@ -1239,6 +1239,8 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //! \todo Is this still 8 if no chunk is present? Or did they correct that?
   lMCNK_header->sizeLiquid = 8;
 
+  lMCNK_header->ypos = mVertices[0].y;
+
   memset(lMCNK_header->low_quality_texture_map, 0, 0x10);
 
   static const size_t minimum_value_to_overwrite(128);
@@ -1284,10 +1286,8 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   float* lHeightmap = lADTFile.GetPointer<float>(lCurrentPosition + 8);
 
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ypos = 0.0f;
-
   for (int i = 0; i < mapbufsize; ++i)
-    lHeightmap[i] = mVertices[i].y;
+    lHeightmap[i] = mVertices[i].y - lMCNK_header->ypos;
 
   lCurrentPosition += 8 + lMCVT_Size;
   lMCNK_Size += 8 + lMCVT_Size;
