@@ -531,7 +531,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     LogDebug << "WOD Save path is set to : " << wodSavePath << std::endl;
   }
 
-  std::map<int, WMOInstance> lObjectInstances;
+  std::vector<WMOInstance> lObjectInstances;
   std::vector<ModelInstance> lModelInstances;
 
   // Collect some information we need later.
@@ -546,7 +546,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   {
     if (saveAllModels || object.second.isInsideRect(lTileExtents))
     {
-      lObjectInstances.emplace(object.second.mUniqueID, object.second);
+      lObjectInstances.emplace_back(object.second);
     }
   }
 
@@ -583,8 +583,12 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   std::map<std::string, filenameOffsetThing> lObjects;
 
   for (auto const& object : lObjectInstances)
-    if (lObjects.find(object.second.wmo->_filename) == lObjects.end())
-      lObjects.emplace (object.second.wmo->_filename, nullyThing);
+  {
+    if (lObjects.find(object.wmo->_filename) == lObjects.end())
+    {
+      lObjects.emplace (object.wmo->_filename, nullyThing);
+    }
+  }
 
   lID = 0;
   for (auto& object : lObjects)
@@ -888,7 +892,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lID = 0;
   for (auto const& object : lObjectInstances)
   {
-    auto filename_to_offset_and_name = lObjects.find(object.second.wmo->_filename);
+    auto filename_to_offset_and_name = lObjects.find(object.wmo->_filename);
     if (filename_to_offset_and_name == lObjects.end())
     {
       LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -896,26 +900,26 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     }
 
     lMODF_Data[lID].nameID = filename_to_offset_and_name->second.nameID;
-    lMODF_Data[lID].uniqueID = object.second.mUniqueID;
-    lMODF_Data[lID].pos[0] = object.second.pos.x;
-    lMODF_Data[lID].pos[1] = object.second.pos.y;
-    lMODF_Data[lID].pos[2] = object.second.pos.z;
-    lMODF_Data[lID].rot[0] = object.second.dir.x;
-    lMODF_Data[lID].rot[1] = object.second.dir.y;
-    lMODF_Data[lID].rot[2] = object.second.dir.z;
+    lMODF_Data[lID].uniqueID = object.mUniqueID;
+    lMODF_Data[lID].pos[0] = object.pos.x;
+    lMODF_Data[lID].pos[1] = object.pos.y;
+    lMODF_Data[lID].pos[2] = object.pos.z;
+    lMODF_Data[lID].rot[0] = object.dir.x;
+    lMODF_Data[lID].rot[1] = object.dir.y;
+    lMODF_Data[lID].rot[2] = object.dir.z;
 
-    lMODF_Data[lID].extents[0][0] = object.second.extents[0].x;
-    lMODF_Data[lID].extents[0][1] = object.second.extents[0].y;
-    lMODF_Data[lID].extents[0][2] = object.second.extents[0].z;
+    lMODF_Data[lID].extents[0][0] = object.extents[0].x;
+    lMODF_Data[lID].extents[0][1] = object.extents[0].y;
+    lMODF_Data[lID].extents[0][2] = object.extents[0].z;
 
-    lMODF_Data[lID].extents[1][0] = object.second.extents[1].x;
-    lMODF_Data[lID].extents[1][1] = object.second.extents[1].y;
-    lMODF_Data[lID].extents[1][2] = object.second.extents[1].z;
+    lMODF_Data[lID].extents[1][0] = object.extents[1].x;
+    lMODF_Data[lID].extents[1][1] = object.extents[1].y;
+    lMODF_Data[lID].extents[1][2] = object.extents[1].z;
 
-    lMODF_Data[lID].flags = object.second.mFlags;
-    lMODF_Data[lID].doodadSet = object.second.doodadset;
-    lMODF_Data[lID].nameSet = object.second.mNameset;
-    lMODF_Data[lID].unknown = object.second.mUnknown;
+    lMODF_Data[lID].flags = object.mFlags;
+    lMODF_Data[lID].doodadSet = object.doodadset;
+    lMODF_Data[lID].nameSet = object.mNameset;
+    lMODF_Data[lID].unknown = object.mUnknown;
     lID++;
   }
 

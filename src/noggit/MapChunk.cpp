@@ -1201,7 +1201,7 @@ int MapChunk::getFlag()
   return this->Flags;
 }
 
-void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
+void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
 {
   int lID;
   int lMCNK_Size = 0x80;
@@ -1388,10 +1388,12 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   // search all wmos that are inside this chunk
   lID = 0;
-  for (std::map<int, WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it)
+  for(auto const& wmo : lObjectInstances)
   {
-    if (it->second.isInsideRect(lChunkExtents))
+    if (wmo.isInsideRect(lChunkExtents))
+    {
       lObjectIDs.push_back(lID);
+    }      
 
     lID++;
   }
