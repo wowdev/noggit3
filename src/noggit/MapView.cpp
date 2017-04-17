@@ -176,7 +176,7 @@ void MapView::DeleteSelectedObject()
   }
   else if (_world->IsSelection(eEntry_Model))
   {
-    _world->deleteModelInstance(boost::get<selected_model_type> (*_world->GetCurrentSelection())->d1);
+    _world->deleteModelInstance(boost::get<selected_model_type> (*_world->GetCurrentSelection())->uid);
   }
 }
 
@@ -1531,7 +1531,7 @@ void MapView::tick (float dt)
           boost::get<selected_model_type> (*Selection)->pos.y += keyy * moveratio;
           boost::get<selected_model_type> (*Selection)->pos.z += keyz * moveratio;
           boost::get<selected_model_type> (*Selection)->dir.y += keyr * moveratio * 5;
-          boost::get<selected_model_type> (*Selection)->sc += keys * moveratio / 50;
+          boost::get<selected_model_type> (*Selection)->scale += keys * moveratio / 50;
           boost::get<selected_model_type> (*Selection)->recalcExtents();
           _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
           objectEditor->rotationEditor->updateValues();
@@ -1586,11 +1586,11 @@ void MapView::tick (float dt)
           {
             float ScaleAmount = pow(2.0f, mv * 4.0f);
 
-            boost::get<selected_model_type> (*Selection)->sc *= ScaleAmount;
-            if (boost::get<selected_model_type> (*Selection)->sc > 63.9f)
-              boost::get<selected_model_type> (*Selection)->sc = 63.9f;
-            else if (boost::get<selected_model_type> (*Selection)->sc < 0.00098f)
-              boost::get<selected_model_type> (*Selection)->sc = 0.00098f;
+            boost::get<selected_model_type> (*Selection)->scale *= ScaleAmount;
+            if (boost::get<selected_model_type> (*Selection)->scale > 63.9f)
+              boost::get<selected_model_type> (*Selection)->scale = 63.9f;
+            else if (boost::get<selected_model_type> (*Selection)->scale < 0.00098f)
+              boost::get<selected_model_type> (*Selection)->scale = 0.00098f;
           }
           else
           {
@@ -1899,7 +1899,7 @@ void MapView::tick (float dt)
         auto instance (boost::get<selected_model_type> (*lSelection));
         _status_selection->setText
           ( QString ("%1: %2")
-          . arg (instance->d1)
+          . arg (instance->uid)
           . arg (QString::fromStdString (instance->model->_filename))
           );
         break;
@@ -1973,10 +1973,10 @@ void MapView::tick (float dt)
         {
           auto instance (boost::get<selected_model_type> (*lSelection));
           detailInfo << "filename: " << instance->model->_filename
-                     << "\nunique ID: " << instance->d1
+                     << "\nunique ID: " << instance->uid
                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                      << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                     << "\nscale: " << instance->sc
+                     << "\nscale: " << instance->scale
                      << "\ntextures Used: " << instance->model->header.nTextures;
 
           for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)

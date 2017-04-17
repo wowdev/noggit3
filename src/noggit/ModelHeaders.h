@@ -115,7 +115,7 @@ struct ModelAnimation {
 
   uint32_t loopType;
   uint32_t flags;
-  uint32_t d1;
+  uint32_t uid;
   uint32_t d2;
   uint32_t playSpeed; // note: this can't be play speed because it's 0 for some models
 

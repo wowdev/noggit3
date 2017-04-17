@@ -111,6 +111,16 @@ namespace misc
               + (pos.z - origin.z) * math::sin(orientation)
              ) * math::tan(angle));
   }
+
+  void extract_v3d_min_max(math::vector_3d const& point, math::vector_3d& min, math::vector_3d& max)
+  {
+    min.x = std::min(min.x, point.x);
+    max.x = std::max(max.x, point.x);
+    min.y = std::min(min.y, point.y);
+    max.y = std::max(max.y, point.y);
+    min.z = std::min(min.z, point.z);
+    max.z = std::max(max.z, point.z);
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)

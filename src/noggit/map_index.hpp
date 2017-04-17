@@ -176,6 +176,8 @@ public:
   void convert_alphamap(bool to_big_alpha);
   bool hasBigAlpha() const { return mBigAlpha; }
 
+  bool sort_models_by_size_class() const { return _sort_models_by_size_class; }
+
   uint32_t newGUID();
 
   void fixUIDs (World*);
@@ -208,6 +210,7 @@ private:
   bool mHasAGlobalWMO;
   bool noadt;
   bool changed;
+  bool _sort_models_by_size_class;
 
   bool autoheight;
 

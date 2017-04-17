@@ -25,9 +25,13 @@ public:
   math::quaternion _wmo_orientation;
 
   //! \todo  Get this out and do somehow else.
-  unsigned int d1;
+  unsigned int uid;
 
-  float sc;
+  float scale;
+
+  // used when flag 0x8 is set in wdt
+  // longest side of an AABB transformed model's bounding box from the M2 header
+  float size_cat;
 
   math::vector_3d lcol;
 
@@ -40,12 +44,12 @@ public:
 
   ModelInstance (ModelInstance&& other)
     : model (std::move (other.model))
-    // , extents (other.extents)
     , pos (other.pos)
     , dir (other.dir)
     , _wmo_orientation (other._wmo_orientation)
-    , d1 (other.d1)
-    , sc (other.sc)
+    , uid (other.uid)
+    , scale (other.scale)
+    , size_cat (other.size_cat)
     , lcol (other.lcol)
   {
     std::swap (extents, other.extents);
@@ -57,8 +61,9 @@ public:
     std::swap (pos, other.pos);
     std::swap (dir, other.dir);
     std::swap (_wmo_orientation, other._wmo_orientation);
-    std::swap (d1, other.d1);
-    std::swap (sc, other.sc);
+    std::swap (uid, other.uid);
+    std::swap (scale, other.scale);
+    std::swap (size_cat, other.size_cat);
     std::swap (lcol, other.lcol);
     return *this;
   }

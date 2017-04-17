@@ -41,7 +41,7 @@ namespace noggit
                   if (item->text().endsWith (".m2"))
                   {
                     auto mi (new ModelInstance (item->text().toStdString()));
-                    mi->sc = 1.0f;
+                    mi->scale = 1.0f;
                     mapview->selectModel(mi);
                   }
                   else if (item->text().endsWith (".wmo"))

@@ -24,6 +24,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   , mHasAGlobalWMO(false)
   , noadt(false)
   , changed(false)
+  , _sort_models_by_size_class(false)
   , cx(-1)
   , cz(-1)
   , highestGUID(0)
@@ -61,6 +62,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
 
   mHasAGlobalWMO = mphd.flags & 1;
   mBigAlpha = (mphd.flags & 4) != 0;
+  _sort_models_by_size_class = mphd.flags & 0x8;
 
   if (!(mphd.flags & FLAG_SHADING))
   {
@@ -774,7 +776,7 @@ void MapIndex::fixUIDs (World* world)
 
   for (ModelInstance& instance : models)
   {
-    instance.d1 = uid++;
+    instance.uid = uid++;
 
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
@@ -839,7 +841,7 @@ void MapIndex::fixUIDs (World* world)
 
       for (ModelInstance* instance : modelPerTile[z][x])
       {
-        modelInst.emplace(instance->d1, *instance);
+        modelInst.emplace(instance->uid, *instance);
       }
       modelPerTile[z][x].clear();
 

@@ -33,19 +33,19 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
   f->read(ff, 16);
   _wmo_orientation = math::quaternion (-ff[3], ff[1], ff[2], ff[0]);
 
-  f->read(&sc, 4);
-  f->read(&d1, 4);
-  lcol = math::vector_3d(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);
+  f->read(&scale, 4);
+  f->read(&uid, 4);
+  lcol = math::vector_3d(((uid & 0xff0000) >> 16) / 255.0f, ((uid & 0x00ff00) >> 8) / 255.0f, (uid & 0x0000ff) / 255.0f);
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
   : model (filename)
 {
-	d1 = d->uniqueID;
+	uid = d->uniqueID;
 	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
 	dir = math::vector_3d(d->rot[0], d->rot[1], d->rot[2]);
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
-	sc = d->scale / 1024.0f;
+	scale = d->scale / 1024.0f;
 
   recalcExtents();
 }
@@ -60,10 +60,10 @@ void ModelInstance::draw ( math::frustum const& frustum
                          , int animtime
                          )
 {
-  if(((pos - camera).length() - model->rad * sc) >= cull_distance)
+  if(((pos - camera).length() - model->rad * scale) >= cull_distance)
     return;
 
-  if (!frustum.intersectsSphere(pos, model->rad * sc))
+  if (!frustum.intersectsSphere(pos, model->rad * scale))
     return;
 
   opengl::scoped::matrix_pusher const matrix;
@@ -76,7 +76,7 @@ void ModelInstance::draw ( math::frustum const& frustum
                          , math::degrees (dir.x)
                          }
                        )
-    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
     );
 
   gl.multMatrixf (model_matrix.transposed());
@@ -85,7 +85,7 @@ void ModelInstance::draw ( math::frustum const& frustum
   {
     opengl::primitives::wire_box ( TransformCoordsForModel(model->header.VertexBoxMin)
                                  , TransformCoordsForModel(model->header.VertexBoxMax)
-                                 ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 3.0f);
+                                 ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
   }
   model->draw (draw_fog, animtime);
 
@@ -150,7 +150,7 @@ void ModelInstance::draw ( math::frustum const& frustum
 //! \todo  Get this drawn on the 2D view.
 /*void ModelInstance::drawMapTile()
 {
-if(CheckUniques(d1))
+if(CheckUniques(uid))
 return;
 
 opengl::scoped::matrix_pusher const matrix;
@@ -179,7 +179,7 @@ void ModelInstance::intersect ( math::ray const& ray
                          , math::degrees (dir.x)
                          }
                        )
-    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
     );
 
   math::ray subray (model_matrix.inverted(), ray);
@@ -196,7 +196,7 @@ void ModelInstance::intersect ( math::ray const& ray
   {
     //! \todo why is only sc important? these are relative to subray,
     //! so should be inverted by model_matrix?
-    results->emplace_back (result * sc, selected_model_type (this));
+    results->emplace_back (result * scale, selected_model_type (this));
   }
 }
 
@@ -210,13 +210,13 @@ void ModelInstance::draw_wmo ( const math::vector_3d& ofs
 {
   math::vector_3d tpos(ofs + pos);
   math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
-  if (!frustum.intersectsSphere(tpos, model->rad*sc)) return;
+  if (!frustum.intersectsSphere(tpos, model->rad*scale)) return;
 
   opengl::scoped::matrix_pusher const matrix;
 
   gl.translatef(pos.x, pos.y, pos.z);
   gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
-  gl.scalef(sc, -sc, -sc);
+  gl.scalef(scale, -scale, -scale);
 
   model->draw (draw_fog, animtime);
 }
@@ -234,8 +234,8 @@ bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const
 
 void ModelInstance::recalcExtents()
 {
-  math::vector_3d min (math::vector_3d::max());
-  math::vector_3d max (math::vector_3d::min());
+  math::vector_3d min (math::vector_3d::max()), vertex_box_min (min);
+  math::vector_3d max (math::vector_3d::min()), vertex_box_max (max);;
   math::matrix_4x4 rot
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
     * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
@@ -244,7 +244,7 @@ void ModelInstance::recalcExtents()
                          , math::degrees (dir.x)
                          }
                        )
-    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
     );
 
   math::vector_3d bounds[8 * 2];
@@ -271,15 +271,20 @@ void ModelInstance::recalcExtents()
 
   for (int i = 0; i < 8 * 2; ++i)
   {
-    if (bounds[i].x < min.x) min.x = bounds[i].x;
-    if (bounds[i].y < min.y) min.y = bounds[i].y;
-    if (bounds[i].z < min.z) min.z = bounds[i].z;
-
-    if (bounds[i].x > max.x) max.x = bounds[i].x;
-    if (bounds[i].y > max.y) max.y = bounds[i].y;
-    if (bounds[i].z > max.z) max.z = bounds[i].z;
+    misc::extract_v3d_min_max (bounds[i], min, max);
+    // vertex box only for size_cat
+    if (i >= 8)
+    {
+      misc::extract_v3d_min_max (bounds[i], vertex_box_min, vertex_box_max);
+    }
   }
 
   extents[0] = min;
   extents[1] = max;
+
+  size_cat = std::max( vertex_box_max.x - vertex_box_min.x
+                     , std::max( vertex_box_max.y - vertex_box_min.y
+                               , vertex_box_max.z - vertex_box_min.z
+                               )
+                     );
 }

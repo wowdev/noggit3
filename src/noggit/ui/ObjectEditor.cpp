@@ -309,7 +309,7 @@ namespace noggit
           if (_copy_model_stats)
           {
             // copy rot size from original model. Dirty but woring
-            scale = boost::get<selected_model_type> (selected.get())->sc;
+            scale = boost::get<selected_model_type> (selected.get())->scale;
             rotation = boost::get<selected_model_type> (selected.get())->dir;
           }
 
@@ -350,7 +350,7 @@ namespace noggit
       if (entry.which() == eEntry_Model)
       {
         auto clone = new ModelInstance(boost::get<selected_model_type> (entry)->model->_filename);
-        clone->sc = boost::get<selected_model_type> (entry)->sc;
+        clone->scale = boost::get<selected_model_type> (entry)->scale;
         clone->dir = boost::get<selected_model_type> (entry)->dir;
         selected = clone;
         setModelName (boost::get<selected_model_type> (entry)->model->_filename);
