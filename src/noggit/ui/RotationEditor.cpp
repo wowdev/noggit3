@@ -130,7 +130,7 @@ namespace noggit
       {
         rotationVect = &(boost::get<selected_model_type> (entry)->dir);
         posVect = &(boost::get<selected_model_type> (entry)->pos);
-        scale = &(boost::get<selected_model_type> (entry)->sc);
+        scale = &(boost::get<selected_model_type> (entry)->scale);
         _wmoInstance = nullptr;
       }
       else if (entry.which() == eEntry_WMO)

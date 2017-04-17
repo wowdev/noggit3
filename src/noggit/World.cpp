@@ -815,7 +815,7 @@ void main()
                         , is_hidden
                         , draw_models_with_box
                         , draw_fog
-                        , IsSelection (eEntry_Model) && boost::get<selected_model_type> (*GetCurrentSelection())->d1 == it->second.d1
+                        , IsSelection (eEntry_Model) && boost::get<selected_model_type> (*GetCurrentSelection())->uid == it->second.uid
                         , animtime
                         );
       }
@@ -976,7 +976,7 @@ void World::clearAllModelsOnADT(math::vector_3d const& pos)
   {
     if (tile_index(it->second.pos) == index)
     {
-      deleteModelInstance(it->second.d1);
+      deleteModelInstance(it->second.uid);
     }
   }
 }
@@ -1449,11 +1449,11 @@ void World::delete_duplicate_model_and_wmo_instances()
 
       if ( lhs->second.pos == rhs->second.pos
         && lhs->second.dir == rhs->second.dir
-        && lhs->second.sc == rhs->second.sc
+        && lhs->second.scale == rhs->second.scale
         && lhs->second.model->_filename == rhs->second.model->_filename
         )
       {
-        models_to_remove.emplace(rhs->second.d1);
+        models_to_remove.emplace(rhs->second.uid);
       }
     }
   }
@@ -1480,9 +1480,9 @@ void World::addM2 ( std::string const& filename
 {
   ModelInstance newModelis = ModelInstance(filename);
 
-  newModelis.d1 = mapIndex.newGUID();
+  newModelis.uid = mapIndex.newGUID();
   newModelis.pos = newPos;
-  newModelis.sc = scale;
+  newModelis.scale = scale;
   newModelis.dir = rotation;
 
   if (Settings::getInstance()->random_rotation)
@@ -1504,12 +1504,12 @@ void World::addM2 ( std::string const& filename
   {
     float min = paste_params->minScale;
     float max = paste_params->maxScale;
-    newModelis.sc = misc::randfloat(min, max);
+    newModelis.scale = misc::randfloat(min, max);
   }
 
   newModelis.recalcExtents();
   updateTilesModel(&newModelis);
-  mModelInstances.emplace(newModelis.d1, newModelis);
+  mModelInstances.emplace(newModelis.uid, newModelis);
 }
 
 void World::addWMO ( std::string const& filename

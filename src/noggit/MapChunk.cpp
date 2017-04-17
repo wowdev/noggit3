@@ -1201,7 +1201,7 @@ int MapChunk::getFlag()
   return this->Flags;
 }
 
-void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances)
+void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
 {
   int lID;
   int lMCNK_Size = 0x80;
@@ -1398,11 +1398,12 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   // search all models that are inside this chunk
   lID = 0;
-  for (std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
+  for(auto const& model : lModelInstances)
   {
-    if (it->second.isInsideRect(lChunkExtents))
+    if (model.isInsideRect (lChunkExtents))
+    {
       lDoodadIDs.push_back(lID);
-
+    }
     lID++;
   }
 

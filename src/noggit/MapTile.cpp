@@ -532,7 +532,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   }
 
   std::map<int, WMOInstance> lObjectInstances;
-  std::map<int, ModelInstance> lModelInstances;
+  std::vector<ModelInstance> lModelInstances;
 
   // Collect some information we need later.
 
@@ -554,7 +554,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   {
     if (saveAllModels || model.second.isInsideRect(lTileExtents))
     {
-      lModelInstances.emplace(model.second.d1, model.second);
+      lModelInstances.emplace_back(model.second);
     }
   }
 
@@ -569,8 +569,12 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   std::map<std::string, filenameOffsetThing> lModels;
 
   for (auto const& model : lModelInstances)
-    if (lModels.find(model.second.model->_filename) == lModels.end())
-      lModels.emplace (model.second.model->_filename, nullyThing);
+  {
+    if (lModels.find(model.model->_filename) == lModels.end())
+    {
+      lModels.emplace (model.model->_filename, nullyThing);
+    }
+  }
 
   lID = 0;
   for (auto& model : lModels)
@@ -837,10 +841,18 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   // MDDF data
   ENTRY_MDDF* lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
 
+  if(world->mapIndex.sort_models_by_size_class())
+  {
+    std::sort(lModelInstances.begin(), lModelInstances.end(), [](ModelInstance const& m1, ModelInstance const& m2)
+    {
+      return m1.size_cat > m2.size_cat;
+    });
+  }
+
   lID = 0;
   for (auto const& model : lModelInstances)
   {
-    auto filename_to_offset_and_name = lModels.find(model.second.model->_filename);
+    auto filename_to_offset_and_name = lModels.find(model.model->_filename);
     if (filename_to_offset_and_name == lModels.end())
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -848,14 +860,14 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     }
 
     lMDDF_Data[lID].nameID = filename_to_offset_and_name->second.nameID;
-    lMDDF_Data[lID].uniqueID = model.second.d1;
-    lMDDF_Data[lID].pos[0] = model.second.pos.x;
-    lMDDF_Data[lID].pos[1] = model.second.pos.y;
-    lMDDF_Data[lID].pos[2] = model.second.pos.z;
-    lMDDF_Data[lID].rot[0] = model.second.dir.x;
-    lMDDF_Data[lID].rot[1] = model.second.dir.y;
-    lMDDF_Data[lID].rot[2] = model.second.dir.z;
-    lMDDF_Data[lID].scale = (uint16_t)(model.second.sc * 1024);
+    lMDDF_Data[lID].uniqueID = model.uid;
+    lMDDF_Data[lID].pos[0] = model.pos.x;
+    lMDDF_Data[lID].pos[1] = model.pos.y;
+    lMDDF_Data[lID].pos[2] = model.pos.z;
+    lMDDF_Data[lID].rot[0] = model.dir.x;
+    lMDDF_Data[lID].rot[1] = model.dir.y;
+    lMDDF_Data[lID].rot[2] = model.dir.z;
+    lMDDF_Data[lID].scale = (uint16_t)(model.scale * 1024);
     lMDDF_Data[lID].flags = 0;
     lID++;
   }
