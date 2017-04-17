@@ -182,16 +182,9 @@ void WMOInstance::recalcExtents()
     *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
   }
 
-
   for (int i = 0; i < 8 * ((int)wmo->groups.size() + 1); ++i)
   {
-    if (bounds[i].x < min.x) min.x = bounds[i].x;
-    if (bounds[i].y < min.y) min.y = bounds[i].y;
-    if (bounds[i].z < min.z) min.z = bounds[i].z;
-
-    if (bounds[i].x > max.x) max.x = bounds[i].x;
-    if (bounds[i].y > max.y) max.y = bounds[i].y;
-    if (bounds[i].z > max.z) max.z = bounds[i].z;
+    misc::extract_v3d_min_max (bounds[i], min, max);
   }
 
   extents[0] = min;
