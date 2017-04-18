@@ -873,15 +873,6 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
-  ADD_ACTION ( view_menu
-             , "toggle detail infos"
-             , "Ctrl+X"
-             , [this]
-               {
-                 guidetailInfos->setVisible (!guidetailInfos->isVisible());
-               }
-             );
-
   ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
 
   ADD_ACTION (view_menu, "decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
