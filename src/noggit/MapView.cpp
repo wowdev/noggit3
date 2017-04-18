@@ -427,7 +427,7 @@ void MapView::createGUI()
 
 
   // DetailInfoWindow
-  guidetailInfos = new noggit::ui::detail_infos;
+  guidetailInfos = new noggit::ui::detail_infos (this);
   guidetailInfos->hide();
 
   TexturePicker = new noggit::ui::texture_picker (texturingTool->_current_texture);
