@@ -127,7 +127,7 @@ namespace
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
-    gl.color4f(color.x, color.y, color.z, color.x);
+    gl.color4f(color.x, color.y, color.z, color.w);
 
     opengl::scoped::matrix_pusher matrix;
 
@@ -193,7 +193,7 @@ namespace
       gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
       gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation_xyz, math::degrees::vec3 {math::degrees (90.0f), math::degrees (0.0f), math::degrees (0.0f)}).transposed());
 
-      gl.color4f(color.x, color.y, color.z, color.x);
+      gl.color4f(color.x, color.y, color.z, color.w);
 
       draw_disk (radius, stipple, angle, orientation);
     }
