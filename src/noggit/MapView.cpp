@@ -406,6 +406,8 @@ void MapView::createGUI()
 
 
   TexturePalette = new noggit::ui::tileset_chooser;
+  
+  connect (this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
   connect ( texturingTool->_current_texture, &noggit::ui::current_texture::clicked
           , [=]
             {
