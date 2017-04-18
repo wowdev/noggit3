@@ -8,10 +8,10 @@ namespace noggit
 {
   namespace ui
   {
-    detail_infos::detail_infos()
-      : widget (nullptr)
+    detail_infos::detail_infos(QWidget* parent)
+      : widget (parent)
     {
-      setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
+      setWindowFlags (Qt::Tool);
       auto layout (new QFormLayout (this));
 
       layout->addRow (_info_text = new QLabel (this));

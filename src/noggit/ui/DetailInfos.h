@@ -18,7 +18,7 @@ namespace noggit
       QLabel* _info_text;
 
     public:
-      detail_infos();
+      detail_infos(QWidget* parent);
       void setText (const std::string& t);
     };
   }
