@@ -576,7 +576,7 @@ void MapView::createGUI()
   ADD_ACTION (edit_menu, "set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
 
   edit_menu->addSection ("options");
-  ADD_TOGGLE_NS (edit_menu, "auto select mode (broken)", _auto_selecting_mode);
+  ADD_TOGGLE_NS (edit_menu, "locked cursor mode", _locked_cursor_mode);
 
 
   assist_menu->addSection ("Model");
@@ -1445,7 +1445,19 @@ void MapView::tick (float dt)
 
   dt = std::min(dt, 1.0f);
 
-  update_cursor_pos();
+  if (_locked_cursor_mode.get())
+  {
+    switch (terrainMode)
+    {
+      case editing_mode::ground:
+      case editing_mode::flatten_blur:
+      case editing_mode::paint:
+      case editing_mode::water:
+      case editing_mode::mccv:
+        update_cursor_pos();
+        break;
+    }    
+  }  
 
 #ifdef _WIN32
   if (_tablet_active && Settings::getInstance()->tabletMode)
@@ -2230,7 +2242,7 @@ void MapView::displayViewMode_2D()
 void MapView::displayViewMode_3D()
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if (!_world->IsSelection(eEntry_Model) && !_world->IsSelection(eEntry_WMO) && _auto_selecting_mode.get())
+  if (!_world->IsSelection(eEntry_Model) && !_world->IsSelection(eEntry_WMO) && _locked_cursor_mode.get())
   {
     doSelection(true);
   }

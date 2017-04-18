@@ -253,7 +253,7 @@ private:
   QLabel* _status_time;
   QLabel* _status_fps;
 
-  noggit::bool_toggle_property _auto_selecting_mode = {true};
+  noggit::bool_toggle_property _locked_cursor_mode = {true};
   noggit::bool_toggle_property _move_model_to_cursor_position = {true};
   noggit::bool_toggle_property _display_all_water_layers = {true};
   noggit::unsigned_int_property _displayed_water_layer = {0};
