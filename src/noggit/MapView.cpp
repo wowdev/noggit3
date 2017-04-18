@@ -1427,6 +1427,9 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
+  //! \ todo: fix the crash when deleting the texture picker
+  TexturePicker->hide();
+
   _world.reset();
 }
 
