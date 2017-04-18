@@ -1221,7 +1221,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_fps (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
-  , _cursor_switcher (new noggit::ui::cursor_switcher (cursor_color, cursor_type))
+  , _cursor_switcher (new noggit::ui::cursor_switcher (this, cursor_color, cursor_type))
   , _keybindings (new noggit::ui::help)
 {
   _main_window->statusBar()->addWidget (_status_position);

@@ -13,11 +13,11 @@ namespace noggit
 {
   namespace ui
   {
-    cursor_switcher::cursor_switcher(math::vector_4d& color, int& cursor_type)
-      : widget (nullptr)
+    cursor_switcher::cursor_switcher(QWidget* parent, math::vector_4d& color, int& cursor_type)
+      : widget (parent)
     {
       setWindowTitle("Cursor Options");
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
+      setWindowFlags(Qt::Tool);
       new QVBoxLayout (this);
 
       auto butt_disk (new QRadioButton ("Disk", this));

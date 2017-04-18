@@ -13,7 +13,7 @@ namespace noggit
     class cursor_switcher : public widget
     {
     public:
-      cursor_switcher(math::vector_4d& color, int& cursor_type);
+      cursor_switcher(QWidget* parent, math::vector_4d& color, int& cursor_type);
     };
   }
 }
