@@ -964,20 +964,31 @@ void World::clearAllModelsOnADT(math::vector_3d const& pos)
 {
   tile_index const index (pos);
 
-  for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+  std::vector<int> wmo_to_delete, m2_to_delete;
+
+  for (auto it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
   {
     if (tile_index(it->second.pos) == index)
     {
-      deleteWMOInstance(it->second.mUniqueID);
+      wmo_to_delete.push_back(it->second.mUniqueID);
     }
   }
 
-  for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
+  for (auto it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
   {
     if (tile_index(it->second.pos) == index)
     {
-      deleteModelInstance(it->second.uid);
+      m2_to_delete.push_back(it->second.uid);
     }
+  }
+
+  for (int uid : wmo_to_delete)
+  {
+    deleteWMOInstance(uid);
+  }
+  for (int uid : m2_to_delete)
+  {
+    deleteModelInstance(uid);
   }
 }
 
