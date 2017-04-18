@@ -53,7 +53,6 @@ namespace noggit
         "  F10 - Toggle wireframe\n"
         "  F11 - Toggle model animations\n"
         "  F12 - Toggle fog\n"
-        "  CTRL + X - detail window\n"
         "  1-9 - Select the editing modes\n"
         "\n"
         "Files:\n"
