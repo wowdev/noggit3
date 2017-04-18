@@ -683,12 +683,12 @@ void MapView::createGUI()
   ADD_TOGGLE (view_menu, "Map contour infos", Qt::Key_F9, _draw_contour);
   ADD_TOGGLE (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe);
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
+  ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
   ADD_TOGGLE (view_menu, "Hole lines always on", "Shift+F7", _draw_hole_lines);
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
-  ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
 
   view_menu->addSection ("Windows");
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
