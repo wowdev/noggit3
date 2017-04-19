@@ -1287,7 +1287,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   float* lHeightmap = lADTFile.GetPointer<float>(lCurrentPosition + 8);
 
   for (int i = 0; i < mapbufsize; ++i)
-    lHeightmap[i] = mVertices[i].y - lMCNK_header->ypos;
+    lHeightmap[i] = mVertices[i].y - mVertices[0].y;
 
   lCurrentPosition += 8 + lMCVT_Size;
   lMCNK_Size += 8 + lMCVT_Size;
