@@ -304,6 +304,11 @@ void map_horizon::render::draw( MapIndex *index
   {
     for (size_t x (current_index.x - lrr); x < current_index.x + lrr; ++x)
     {
+      if (x > 63 || y > 63)
+      {
+        continue;
+      }
+
       map_horizon_batch const& batch = _batches[y][x];
 
       if (batch.vertex_count == 0)
