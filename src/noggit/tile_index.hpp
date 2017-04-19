@@ -7,18 +7,19 @@
 
 struct tile_index
 {
-  tile_index(const math::vector_3d& pos) : tile_index(pos.x / TILESIZE, pos.z / TILESIZE) { }
-  tile_index(std::size_t tileX, std::size_t tileZ) : x(tileX), z(tileZ)
-  {
-//    assert(x < 64);
-//    assert(z < 64);
-  }
+  tile_index(const math::vector_3d& pos) : tile_index(std::floor(pos.x / TILESIZE), std::floor(pos.z / TILESIZE)) { }
+  tile_index(std::size_t tileX, std::size_t tileZ) : x(tileX), z(tileZ) { }
 
   friend bool operator== (tile_index const& lhs, tile_index const& rhs)
   {
     return std::tie (lhs.x, lhs.z) == std::tie (rhs.x, rhs.z);
   }
 
-  int x;
-  int z;
+  bool is_valid() const
+  {
+    return x < 64 && z < 64;
+  }
+
+  std::size_t x;
+  std::size_t z;
 };
