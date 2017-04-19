@@ -192,9 +192,6 @@ private:
   uint32_t newGUIDDB();
 #endif
 
-  bool hasTile(int tileX, int tileZ) const;
-  bool tileLoaded(int tileX, int tileZ) const;
-
   const std::string basename;
 
 public:

@@ -261,7 +261,7 @@ void MapIndex::setChanged(MapTile* tile)
 void MapIndex::unsetChanged(const tile_index& tile)
 {
   // change the changed flag of the map tile
-  if (mTiles[tile.z][tile.x].tile)
+  if (hasTile(tile))
   {
     mTiles[tile.z][tile.x].tile->changed = 0;
   }
@@ -269,15 +269,7 @@ void MapIndex::unsetChanged(const tile_index& tile)
 
 int MapIndex::getChanged(const tile_index& tile) const
 {
-  // Changed 2 are adts around the changed one that have 1 in changed.
-  // You must save them also IF you do any UID recalculation on changed 1 adts.
-  // Because the new UIDs MUST also get saved in surrounding adts to ahve no model duplucation.
-  // So to avoid unnneeded save you can also skip changed 2 adts IF no models get added or moved around.
-  // This would be stepp to IF uid workes. Steff
-  if (mTiles[tile.z][tile.x].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
-    return mTiles[tile.z][tile.x].tile->changed;
-  else
-    return 0;
+  return (tileLoaded(tile) ? getTile(tile)->changed : 0);
 }
 
 void MapIndex::setFlag(bool to, math::vector_3d const& pos, uint32_t flag)
@@ -340,7 +332,7 @@ void MapIndex::unloadTiles(const tile_index& tile)
     {
       for (int px = 0; px < 64; ++px)
       {
-        if (std::abs(px - tile.x) > unloadBoundery || std::abs(pz - tile.z) > unloadBoundery)
+        if (std::abs(px - (int)tile.x) > unloadBoundery || std::abs(pz - (int)tile.z) > unloadBoundery)
         {
           tile_index id(px, pz);
 
@@ -368,13 +360,16 @@ void MapIndex::unloadTile(const tile_index& tile)
 
 void MapIndex::markOnDisc(const tile_index& tile, bool mto)
 {
-  mTiles[tile.z][tile.x].onDisc = mto;
+  if(tile.is_valid())
+  {
+    mTiles[tile.z][tile.x].onDisc = mto;
+  }
 }
 
 bool MapIndex::isTileExternal(const tile_index& tile) const
 {
   // is onDisc
-  return mTiles[tile.z][tile.x].onDisc;
+  return tile.is_valid() && mTiles[tile.z][tile.x].onDisc;
 }
 
 void MapIndex::saveTile(const tile_index& tile, World* world)
@@ -412,22 +407,12 @@ bool MapIndex::hasAGlobalWMO()
 
 bool MapIndex::hasTile(const tile_index& tile) const
 {
-  return (mTiles[tile.z][tile.x].flags & 1);
-}
-
-bool MapIndex::hasTile(int tileX, int tileZ) const
-{
-  return (mTiles[tileZ][tileX].flags & 1);
+  return tile.is_valid() && (mTiles[tile.z][tile.x].flags & 1);
 }
 
 bool MapIndex::tileLoaded(const tile_index& tile) const
 {
   return hasTile(tile) && mTiles[tile.z][tile.x].tile;
-}
-
-bool MapIndex::tileLoaded(int tileX, int tileZ) const
-{
-  return hasTile(tileX, tileZ) && mTiles[tileZ][tileX].tile;
 }
 
 bool MapIndex::hasAdt()
@@ -442,12 +427,12 @@ void MapIndex::setAdt(bool value)
 
 MapTile* MapIndex::getTile(const tile_index& tile) const
 {
-  return mTiles[tile.z][tile.x].tile.get();
+  return (tile.is_valid() ? mTiles[tile.z][tile.x].tile.get() : nullptr);
 }
 
 MapTile* MapIndex::getTileAbove(MapTile* tile) const
 {
-  if (tile->index.z == 0 || !tileLoaded(tile->index.x, tile->index.z - 1))
+  if (tile->index.z == 0 || !tileLoaded({tile->index.x, tile->index.z - 1}))
   {
     return nullptr;
   }
@@ -457,7 +442,7 @@ MapTile* MapIndex::getTileAbove(MapTile* tile) const
 
 MapTile* MapIndex::getTileLeft(MapTile* tile) const
 {
-  if (tile->index.x == 0 || !tileLoaded(tile->index.x - 1, tile->index.z))
+  if (tile->index.x == 0 || !tileLoaded({tile->index.x - 1, tile->index.z}))
   {
     return nullptr;
   }
@@ -467,7 +452,7 @@ MapTile* MapIndex::getTileLeft(MapTile* tile) const
 
 uint32_t MapIndex::getFlag(const tile_index& tile) const
 {
-  return mTiles[tile.z][tile.x].flags;
+  return (tile.is_valid() ? mTiles[tile.z][tile.x].flags : 0);
 }
 
 void MapIndex::convert_alphamap(bool to_big_alpha)
