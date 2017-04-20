@@ -212,7 +212,6 @@ private:
   };
 
   std::forward_list<HotKey> hotkeys;
-  bool _hotkey = false;
 
   void addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
 
