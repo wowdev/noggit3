@@ -1541,6 +1541,12 @@ void World::addWMO ( std::string const& filename
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
 
+void World::reload_tile(tile_index const& tile)
+{
+  ResetSelection();
+  mapIndex.reloadTile(tile);
+}
+
 void World::updateTilesEntry(selection_type const& entry)
 {
   if (entry.which() == eEntry_WMO)

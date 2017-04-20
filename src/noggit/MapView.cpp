@@ -560,7 +560,7 @@ void MapView::createGUI()
                {
                  makeCurrent();
                  opengl::context::scoped_setter const _ (::gl, context());
-                 _world->mapIndex.reloadTile (_camera.position);
+                 _world->reload_tile (_camera.position);
                }
              );
 
