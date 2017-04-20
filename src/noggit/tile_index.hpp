@@ -17,6 +17,7 @@ struct tile_index
 
   bool is_valid() const
   {
+    // x and z are unsigned so negative signed int value are positive and > 63
     return x < 64 && z < 64;
   }
 
