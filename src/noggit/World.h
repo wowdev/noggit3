@@ -226,7 +226,7 @@ public:
 	static bool IsEditableWorld(int pMapId);
 
   void clearHeight(math::vector_3d const& pos);
-  void clearAllModelsOnADT(math::vector_3d const& pos);
+  void clearAllModelsOnADT(tile_index const& tile);
 
   // liquids
   void paintLiquid( math::vector_3d const& pos

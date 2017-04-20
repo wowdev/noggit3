@@ -960,15 +960,13 @@ void World::clearHeight(math::vector_3d const& pos)
   });
 }
 
-void World::clearAllModelsOnADT(math::vector_3d const& pos)
+void World::clearAllModelsOnADT(tile_index const& tile)
 {
-  tile_index const index (pos);
-
   std::vector<int> wmo_to_delete, m2_to_delete;
 
   for (auto it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
   {
-    if (tile_index(it->second.pos) == index)
+    if (tile_index(it->second.pos) == tile)
     {
       wmo_to_delete.push_back(it->second.mUniqueID);
     }
@@ -976,7 +974,7 @@ void World::clearAllModelsOnADT(math::vector_3d const& pos)
 
   for (auto it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
   {
-    if (tile_index(it->second.pos) == index)
+    if (tile_index(it->second.pos) == tile)
     {
       m2_to_delete.push_back(it->second.uid);
     }
@@ -1544,6 +1542,8 @@ void World::addWMO ( std::string const& filename
 void World::reload_tile(tile_index const& tile)
 {
   ResetSelection();
+  // to remove the new models and reload the old ones
+  clearAllModelsOnADT(tile);
   mapIndex.reloadTile(tile);
 }
 
