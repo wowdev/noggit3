@@ -483,9 +483,6 @@ void MapView::createGUI()
     auto action (menu->addAction (name));                         \
     action->setShortcut (QKeySequence (shortcut));                \
     connect (action, &QAction::triggered, on_action);             \
-    connect ( action, &QAction::triggered                         \
-            , [this] { _hotkey = true; }                          \
-            );                                                    \
   }
 
 #define ADD_ACTION_NS(menu, name, on_action)                      \
@@ -507,9 +504,6 @@ void MapView::createGUI()
             );                                                    \
     connect ( &property_, &noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
-            );                                                    \
-    connect ( action, &QAction::triggered                         \
-            , [this] { _hotkey = true; }                          \
             );                                                    \
   }                                                               \
   while (false)
@@ -2348,12 +2342,9 @@ void MapView::keyPressEvent (QKeyEvent *event)
       opengl::context::scoped_setter const _ (::gl, context());
 
       hotkey.function();
-      _hotkey = true;
       return;
     }
   }
-
-  _hotkey = false;
 
   if (event->key() == Qt::Key_Shift)
     _mod_shift_down = true;
@@ -2370,92 +2361,92 @@ void MapView::keyPressEvent (QKeyEvent *event)
   // movement
   if (event->key() == Qt::Key_W)
   {
-    moving += 1.0f;
+    moving = 1.0f;
   }
   if (event->key() == Qt::Key_S)
   {
-    moving -= 1.0f;
+    moving = -1.0f;
   }
 
   if (event->key() == Qt::Key_Up)
   {
-    lookat += 0.75f;
+    lookat = 0.75f;
   }
   if (event->key() == Qt::Key_Down)
   {
-    lookat -= 0.75f;
+    lookat = -0.75f;
   }
 
   if (event->key() == Qt::Key_Right)
   {
-    turn += 0.75f;
+    turn = 0.75f;
   }
   if (event->key() == Qt::Key_Left)
   {
-    turn -= 0.75f;
+    turn = -0.75f;
   }
 
   if (event->key() == Qt::Key_D)
   {
-    strafing += 1.0f;
+    strafing = 1.0f;
   }
   if (event->key() == Qt::Key_A)
   {
-    strafing -= 1.0f;
+    strafing = -1.0f;
   }
 
   if (event->key() == Qt::Key_Q)
   {
-    updown += 1.0f;
+    updown = 1.0f;
   }
   if (event->key() == Qt::Key_E)
   {
-    updown -= 1.0f;
+    updown = -1.0f;
   }
 
   if (event->key() == Qt::Key_2 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyx += 1;
+    keyx = 1;
   }
   if (event->key() == Qt::Key_8 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyx -= 1;
+    keyx = -1;
   }
 
   if (event->key() == Qt::Key_4 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyz += 1;
+    keyz = 1;
   }
   if (event->key() == Qt::Key_6 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyz -= 1;
+    keyz = -1;
   }
 
   if (event->key() == Qt::Key_3 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyy += 1;
+    keyy = 1;
   }
   if (event->key() == Qt::Key_1 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyy -= 1;
+    keyy = -1;
   }
 
   if (event->key() == Qt::Key_7 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyr += 1;
+    keyr = 1;
   }
   if (event->key() == Qt::Key_9 && event->modifiers() & Qt::KeypadModifier)
   {
-    keyr -= 1;
+    keyr = -1;
   }
 
   if (event->key() == Qt::Key_Plus)
   {
-    keys += 1;
+    keys = 1;
   }
   if (event->key() == Qt::Key_Minus)
   {
-    keys -= 1;
+    keys = -1;
   }
 }
 
@@ -2473,100 +2464,56 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
   if (event->key() == Qt::Key_Space)
     _mod_space_down = false;
 
-  if (_hotkey)
-  {
-    return;
-  }
-
   // movement
-  if (event->key() == Qt::Key_W)
+  if (event->key() == Qt::Key_W || event->key() == Qt::Key_S)
   {
-    moving -= 1.0f;
-  }
-  if (event->key() == Qt::Key_S)
-  {
-    moving += 1.0f;
+    moving = 0.0f;
   }
 
-  if (event->key() == Qt::Key_Up)
+  if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
   {
-    lookat -= 0.75f;
-  }
-  if (event->key() == Qt::Key_Down)
-  {
-    lookat += 0.75f;
+    lookat = 0.0f;
   }
 
-  if (event->key() == Qt::Key_Right)
+  if (event->key() == Qt::Key_Right || event->key() == Qt::Key_Left)
   {
-    turn -= 0.75f;
-  }
-  if (event->key() == Qt::Key_Left)
-  {
-    turn += 0.75f;
+    turn  = 0.0f;
   }
 
-  if (event->key() == Qt::Key_D)
+  if (event->key() == Qt::Key_D || event->key() == Qt::Key_A)
   {
-    strafing -= 1.0f;
-  }
-  if (event->key() == Qt::Key_A)
-  {
-    strafing += 1.0f;
+    strafing  = 0.0f;
   }
 
-  if (event->key() == Qt::Key_Q)
+  if (event->key() == Qt::Key_Q || event->key() == Qt::Key_E)
   {
-    updown -= 1.0f;
+    updown  = 0.0f;
   }
-  if (event->key() == Qt::Key_E)
+  
+
+  if ((event->key() == Qt::Key_2 || event->key() == Qt::Key_8) && event->modifiers() & Qt::KeypadModifier)
   {
-    updown += 1.0f;
+    keyx = 0.0f;
   }
 
-  if (event->key() == Qt::Key_2 && event->modifiers() & Qt::KeypadModifier)
+  if ((event->key() == Qt::Key_4 || event->key() == Qt::Key_6) && event->modifiers() & Qt::KeypadModifier)
   {
-    keyx -= 1;
-  }
-  if (event->key() == Qt::Key_8 && event->modifiers() & Qt::KeypadModifier)
-  {
-    keyx += 1;
+    keyz = 0.0f;
   }
 
-  if (event->key() == Qt::Key_4 && event->modifiers() & Qt::KeypadModifier)
+  if ((event->key() == Qt::Key_3 || event->key() == Qt::Key_1) && event->modifiers() & Qt::KeypadModifier)
   {
-    keyz -= 1;
-  }
-  if (event->key() == Qt::Key_6 && event->modifiers() & Qt::KeypadModifier)
-  {
-    keyz += 1;
+    keyy = 0.0f;
   }
 
-  if (event->key() == Qt::Key_3 && event->modifiers() & Qt::KeypadModifier)
+  if ((event->key() == Qt::Key_7 || event->key() == Qt::Key_9) && event->modifiers() & Qt::KeypadModifier)
   {
-    keyy -= 1;
-  }
-  if (event->key() == Qt::Key_1 && event->modifiers() & Qt::KeypadModifier)
-  {
-    keyy += 1;
+    keyr  = 0.0f;
   }
 
-  if (event->key() == Qt::Key_7 && event->modifiers() & Qt::KeypadModifier)
+  if (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Minus)
   {
-    keyr -= 1;
-  }
-  if (event->key() == Qt::Key_9 && event->modifiers() & Qt::KeypadModifier)
-  {
-    keyr += 1;
-  }
-
-  if (event->key() == Qt::Key_Plus)
-  {
-    keys -= 1;
-  }
-  if (event->key() == Qt::Key_Minus)
-  {
-    keys += 1;
+    keys = 0.0f;
   }
 }
 
