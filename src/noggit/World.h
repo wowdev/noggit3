@@ -210,6 +210,7 @@ public:
               , math::vector_3d rotation
               );
 
+  void reload_tile(tile_index const& tile);
 
   void updateTilesEntry(selection_type const& entry);
   void updateTilesWMO(WMOInstance* wmo);
