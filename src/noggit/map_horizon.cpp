@@ -304,6 +304,7 @@ void map_horizon::render::draw( MapIndex *index
   {
     for (size_t x (current_index.x - lrr); x < current_index.x + lrr; ++x)
     {
+      // x and y are unsigned so negative signed int value are positive and > 63
       if (x > 63 || y > 63)
       {
         continue;
