@@ -1262,6 +1262,8 @@ MapView::MapView( math::degrees camera_yaw0
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
   _minimap_dock->setVisible (false);
 
+  connect (this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
+  connect (this, &QObject::destroyed, _minimap, &QObject::deleteLater);
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
