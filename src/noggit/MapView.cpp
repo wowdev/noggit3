@@ -1443,15 +1443,18 @@ void MapView::tick (float dt)
   {
     switch (terrainMode)
     {
-      case editing_mode::ground:
-      case editing_mode::flatten_blur:
-      case editing_mode::paint:
-      case editing_mode::water:
-      case editing_mode::mccv:
+      case editing_mode::areaid:
+      case editing_mode::flags:
+      case editing_mode::holes:
+      case editing_mode::object:
         update_cursor_pos();
         break;
     }    
-  }  
+  }
+  else
+  {
+    update_cursor_pos();
+  }
 
 #ifdef _WIN32
   if (_tablet_active && Settings::getInstance()->tabletMode)
@@ -2236,7 +2239,11 @@ void MapView::displayViewMode_2D()
 void MapView::displayViewMode_3D()
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if (!_world->IsSelection(eEntry_Model) && !_world->IsSelection(eEntry_WMO) && _locked_cursor_mode.get())
+  if (! ( _world->IsSelection(eEntry_Model) 
+       || _world->IsSelection(eEntry_WMO) 
+       || _locked_cursor_mode.get()
+        )
+     )
   {
     doSelection(true);
   }
