@@ -18,7 +18,7 @@ namespace noggit
   {
     terrain_tool::terrain_tool()
       : QWidget(nullptr)
-      , _edit_type (eTerrainType_Flat)
+      , _edit_type (eTerrainType_Linear)
       , _radius(15.0f)
       , _speed(2.0f)
       , _inner_radius(0.0f)
