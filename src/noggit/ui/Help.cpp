@@ -97,11 +97,13 @@ namespace noggit
         "  ALT + left mouse + mouse move - change brush size\n"
         "  SPACE + left mouse + mouse move - change speed\n"
         "  Z - Change the mode in option window\n"
+        "\n"
         "Terrain mode \"raise / lower\":\n"
         "  SHIFT + Left mouse - raise terrain\n"
         "  CTRL + Left mouse - lower terrain\n"
         "  Y - switch to next type\n"
         "  ALT + right mouse + horizontal movement - change inner radius\n"
+        "\n"
         "Terrain mode \"raise / lower\" (vertex mode only):\n"
         "  SHIFT + Left mouse - select vertices\n"
         "  CTRL + Left mouse - deselect vertices\n"
@@ -110,7 +112,8 @@ namespace noggit
         "  SHIFT + right mouse + move - change vertices height\n"
         "  SHIFT + mouse wheel - change angle\n"
         "  ALT + mouse wheel - change orientation\n"
-        "Terrain mode \"flatten / blur\"\n"
+        "Terrain mode \"flatten / blur\":\n"
+        "\n"
         "  SHIFT + Left mouse click - flatten terrain\n"
         "  CTRL + Left mouse  click - blur terrain\n"
         "  T - Toggle flatten angle\n"
@@ -127,10 +130,12 @@ namespace noggit
       auto texture_layout (new QFormLayout (texture_widget));
 
       texture_layout->addRow (new QLabel (
-        "Edit texture:\n"
+        "Common controls:\n"
+        "  CTRL + left mouse - open texture picker for the chunk\n"
+        "\n"
+        "Paint:\n"
         "  CTRL + SHIFT + ALT + left mouse - clear all textures on chunk\n"
         "  SHIFT + left mouse - draw texture or fills if chunk is empty\n"
-        "  CTRL + left mouse - open texture picker for the chunk\n"
         "  ALT + left mouse + horizontal movement - change radius\n"
         "  ALT + right mouse + horizontal movement - change hardness\n"
         "  SPACE + left mouse + mouse move - change pressure\n"
@@ -138,6 +143,13 @@ namespace noggit
         "  T - toggle spray brush\n"
         "  ALT + mouse wheel - change spray radius\n"
         "  SHIFT + mouse wheel - change spray pressure\n"
+        "\n"
+        "Swap:\n"
+        "  SHIFT + left mouse - swap textures\n"
+        "\n"
+        "Anim:\n"
+        "  F - set animation of the current texture on the chunk\n"
+        "  R - remove current texture animation on the chunk\n"
       ));
 
       auto water_widget (new QWidget (this));
