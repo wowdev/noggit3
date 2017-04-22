@@ -20,6 +20,13 @@ namespace noggit
     class current_texture;
     class texture_swapper;
 
+    enum class texturing_mode
+    {
+      paint,
+      swap,
+      anim
+    };
+
     class texturing_tool : public QWidget
     {
     public:
@@ -67,6 +74,8 @@ namespace noggit
 
       float _spray_size;
       float _spray_pressure;
+
+      texturing_mode _mode;
 
     private:
       QSlider* _brush_level_slider;
