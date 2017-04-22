@@ -3,10 +3,13 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
+#include <noggit/bool_toggle_property.hpp>
 #include <noggit/Brush.h>
 #include <noggit/TextureManager.h>
+#include <noggit/unsigned_int_property.hpp>
 
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDial>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
@@ -17,8 +20,9 @@ namespace noggit
 {
   namespace ui
   {
+    class checkbox;
     class current_texture;
-    class texture_swapper;
+    class texture_swapper;    
 
     enum class texturing_mode
     {
@@ -48,6 +52,7 @@ namespace noggit
       void change_spray_pressure (float change);
 
       void paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);
+      void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);
 
       Brush const& texture_brush() const
       {
@@ -75,7 +80,12 @@ namespace noggit
       float _spray_size;
       float _spray_pressure;
 
-      texturing_mode _mode;
+      bool_toggle_property _anim_prop;
+      unsigned_int_property _anim_speed_prop;
+      unsigned_int_property _anim_rotation_prop;
+      bool_toggle_property _overbright_prop;
+
+      texturing_mode _texturing_mode;
 
     private:
       QSlider* _brush_level_slider;

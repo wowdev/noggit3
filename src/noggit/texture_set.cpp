@@ -548,6 +548,31 @@ bool TextureSet::is_animated(std::size_t id) const
   return (id < nTextures ? (texFlags[id] & FLAG_ANIMATE) : false);
 }
 
+void TextureSet::change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add)
+{
+  int tex_level = -1;
+  for (size_t i = 0; i < nTextures; ++i)
+  {
+    if (textures[i] == tex)
+    {
+      if (add)
+      {
+        // override the current speed/rotation
+        if (flag & 0x3F)
+        {
+          texFlags[i] &= ~0x3F;
+        }
+        texFlags[i] |= flag;
+      }
+      else
+      {
+        texFlags[i] &= ~flag;
+      }
+      break;
+    }
+  }
+}
+
 void TextureSet::setAlpha(size_t id, size_t offset, unsigned char value)
 {
   alphamaps[id]->setAlpha(offset, value);

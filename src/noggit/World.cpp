@@ -1621,6 +1621,11 @@ void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
   for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->_texture_set.removeDuplicate(); } );
 }
 
+void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference tex, std::size_t flag, bool add)
+{
+  for_chunk_at(pos, [&] (MapChunk* chunk) { chunk->change_texture_flag(tex, flag, add); });
+}
+
 void World::paintLiquid( math::vector_3d const& pos
                        , float radius
                        , int liquid_id

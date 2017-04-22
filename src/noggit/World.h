@@ -196,6 +196,7 @@ public:
   void clearTextures(math::vector_3d const& pos);
   void swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex);
   void removeTexDuplicateOnADT(math::vector_3d const& pos);
+  void change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference tex, std::size_t flag, bool add);
 
   void setHole(math::vector_3d const& pos, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);

@@ -5,6 +5,7 @@
 #include <noggit/Misc.h>
 #include <noggit/World.h>
 #include <noggit/tool_enums.hpp>
+#include <noggit/ui/checkbox.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/texture_swapper.hpp>
 #include <util/qt/overload.hpp>
@@ -28,6 +29,10 @@ namespace noggit
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
       , _texturing_mode(texturing_mode::paint)
+      , _anim_prop(true)
+      , _anim_speed_prop(1)
+      , _anim_rotation_prop(4)
+      , _overbright_prop(false)
     {
       auto layout (new QFormLayout (this));
 
@@ -135,11 +140,43 @@ namespace noggit
       auto anim_widget (new QWidget (this));
       auto anim_layout (new QFormLayout (anim_widget));
 
+      auto anim_group (new QGroupBox("Add anim", anim_widget));
+      anim_group->setCheckable(true);
+      anim_group->setChecked(_anim_prop.get());
+
+      auto anim_group_layout (new QFormLayout (anim_group));
+
+      auto anim_speed_slider = new QSlider(Qt::Orientation::Horizontal, anim_group);
+      anim_speed_slider->setRange(0, 7);
+      anim_speed_slider->setSingleStep(1);
+      anim_speed_slider->setTickInterval(1);
+      anim_speed_slider->setTickPosition(QSlider::TickPosition::TicksBothSides);
+      anim_speed_slider->setValue(_anim_speed_prop.get());
+      anim_group_layout->addRow("Speed:", anim_speed_slider);
+
+      anim_group_layout->addRow(new QLabel("Orientation:", anim_group));
+
+      auto anim_orientation_dial = new QDial(anim_group);
+      anim_orientation_dial->setRange(0, 8);
+      anim_orientation_dial->setSingleStep(1);
+      anim_orientation_dial->setValue(_anim_rotation_prop.get());
+      anim_orientation_dial->setWrapping(true);
+      anim_group_layout->addRow(anim_orientation_dial);
+
+      anim_layout->addRow(anim_group);
+
+      auto overbright_cb = new checkbox("Overbright", &_overbright_prop, anim_widget);
+      anim_layout->addRow(overbright_cb);
+
       tabs->addTab(tool_widget, "Paint");
       tabs->addTab(_texture_switcher, "Swap");
       tabs->addTab(anim_widget, "Anim");
       
-      layout->addRow(tabs);      
+      layout->addRow(tabs);
+
+      connect (anim_group, &QGroupBox::toggled, &_anim_prop, &noggit::bool_toggle_property::set);
+      connect (anim_speed_slider, &QSlider::valueChanged, &_anim_speed_prop, &noggit::unsigned_int_property::set);
+      connect (anim_orientation_dial, &QDial::valueChanged, &_anim_rotation_prop, &noggit::unsigned_int_property::set);
 
       connect ( tabs, &QTabWidget::currentChanged
               , [this] (int index)
@@ -379,9 +416,29 @@ namespace noggit
           world->paintTexture(pos, &_texture_brush, _brush_level, strength, texture);
         }
       }
-      else if (_texturing_mode == texturing_mode::anim)
-      {
+    }
 
+    void texturing_tool::change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture)
+    {
+      if (_texturing_mode == texturing_mode::anim)
+      {
+        std::size_t flag = 0;
+        if (_anim_prop.get())
+        {
+          flag |= FLAG_ANIMATE;
+          if (add)
+          {
+            // the qdial in inverted compared to the anim rotation
+            flag |= ( _anim_rotation_prop.get() + 4 ) % 8;
+            flag |= _anim_speed_prop.get() << 3;
+          }
+        }
+        if (_overbright_prop.get())
+        {
+          flag |= FLAG_GLOW;
+        }
+
+        world->change_texture_flag(pos, texture, flag, add);
       }
     }
   }
