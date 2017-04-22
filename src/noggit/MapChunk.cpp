@@ -678,6 +678,8 @@ void MapChunk::draw ( math::frustum const& frustum
     opengl::texture::disable_texture();
   }
 
+  //! \todo: increase textures brightness when FLAG_GLOW is set (also in 2D mode)
+
   gl.enable(GL_LIGHTING);
   _texture_set.startAnim (0, animtime);
   gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
