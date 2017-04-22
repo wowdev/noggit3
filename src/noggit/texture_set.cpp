@@ -235,14 +235,14 @@ void TextureSet::startAnim(int id, int animtime)
     gl.matrixMode(GL_TEXTURE);
     gl.pushMatrix();
 
-    // note: this is ad hoc and probably completely wrong
-    const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
-    const int dir = animated[id] & 0x07;
+    
+    const int spd = (animated[id] >> 3) & 0x7;
+    const int dir = animated[id] & 0x7;
     const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
     const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
     const int animspd = (const int)(200 * detail_size);
-    float f = ((static_cast<int>(animtime*(spd / 15.0f))) % animspd) / static_cast<float>(animspd);
+    float f = ((static_cast<int>(animtime*(spd / 7.0f))) % animspd) / static_cast<float>(animspd);
     gl.translatef(f*fdx, f*fdy, 0);
   }
 }
