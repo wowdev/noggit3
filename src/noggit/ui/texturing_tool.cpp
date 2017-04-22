@@ -11,6 +11,7 @@
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QTabWidget>
 
 namespace noggit
 {
@@ -26,6 +27,7 @@ namespace noggit
       , _show_unpaintable_chunks(true)
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
+      , _texturing_mode(texturing_mode::paint)
     {
       auto layout (new QFormLayout (this));
 
@@ -35,6 +37,8 @@ namespace noggit
 
       _current_texture = new current_texture;
       layout->addRow (_current_texture);
+
+      auto tabs (new QTabWidget(this));
 
       auto tool_widget (new QWidget (this));
       auto tool_layout (new QFormLayout (tool_widget));
@@ -127,21 +131,27 @@ namespace noggit
       _texture_switcher = new texture_swapper(tool_widget, camera_pos, world);
       _texture_switcher->hide();
 
-      QPushButton* toggle_swapper = new QPushButton ("Texture swapper", tool_widget);
-      tool_layout->addRow (toggle_swapper);
-      connect ( toggle_swapper, &QPushButton::clicked
-              , [this, tool_widget]
+
+      auto anim_widget (new QWidget (this));
+      auto anim_layout (new QFormLayout (anim_widget));
+
+      tabs->addTab(tool_widget, "Paint");
+      tabs->addTab(_texture_switcher, "Swap");
+      tabs->addTab(anim_widget, "Anim");
+      
+      layout->addRow(tabs);      
+
+      connect ( tabs, &QTabWidget::currentChanged
+              , [this] (int index)
                 {
-                  tool_widget->hide();
-                  _texture_switcher->show();
+                  switch (index)
+                  {
+                    case 0: _texturing_mode = texturing_mode::paint; break;
+                    case 1: _texturing_mode = texturing_mode::swap; break;
+                    case 2: _texturing_mode = texturing_mode::anim; break;
+                  }
                 }
               );
-
-      layout->addRow (tool_widget);
-
-      layout->addRow(_texture_switcher);
-
-      
 
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
@@ -338,14 +348,14 @@ namespace noggit
 
     bool texturing_tool::show_unpaintable_chunks() const
     { 
-      return _show_unpaintable_chunks && !_texture_switcher->isVisible(); 
+      return _show_unpaintable_chunks && _texturing_mode == texturing_mode::paint; 
     }
 
     void texturing_tool::paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture)
     {
       float strength = 1.0f - pow(1.0f - _pressure, dt * 10.0f);
 
-      if (_texture_switcher->isVisible())
+      if (_texturing_mode == texturing_mode::swap)
       {
         auto to_swap (_texture_switcher->texture_to_swap());
         if (to_swap)
@@ -353,7 +363,7 @@ namespace noggit
           world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
         }
       }
-      else
+      else if (_texturing_mode == texturing_mode::paint)
       {
         if (_spray_mode_group->isChecked())
         {
@@ -368,6 +378,10 @@ namespace noggit
         {
           world->paintTexture(pos, &_texture_brush, _brush_level, strength, texture);
         }
+      }
+      else if (_texturing_mode == texturing_mode::anim)
+      {
+
       }
     }
   }
