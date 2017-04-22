@@ -38,6 +38,7 @@ public:
   size_t num();
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
+  bool is_animated(std::size_t id) const;
 
   void setAlpha(size_t id, size_t offset, unsigned char value);
   void setAlpha(size_t id, unsigned char *amap);
@@ -59,7 +60,6 @@ private:
   size_t nTextures;
 
   int tex[4];
-  int animated[4];
 
   unsigned int texFlags[4];
   unsigned int effectID[4];

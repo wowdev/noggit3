@@ -19,20 +19,12 @@ void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
   // texture info
   nTextures = size / 16U;
 
-  for (size_t i = 0; i<nTextures; ++i) {
+  for (size_t i = 0; i<nTextures; ++i) 
+  {
     f->read(&tex[i], 4);
     f->read(&texFlags[i], 4);
     f->read(&MCALoffset[i], 4);
     f->read(&effectID[i], 4);
-
-    if (texFlags[i] & FLAG_ANIMATE)
-    {
-      animated[i] = texFlags[i];
-    }
-    else
-    {
-      animated[i] = 0;
-    }
     textures.emplace_back (maintile->mTextureFilenames[tex[i]]);
   }
 }
@@ -67,7 +59,6 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
     nTextures++;
 
     textures.emplace_back (texture);
-    animated[texLevel] = 0;
     texFlags[texLevel] = 0;
     effectID[texLevel] = 0;
 
@@ -176,7 +167,6 @@ void TextureSet::eraseTexture(size_t id)
     }
 
     textures[i] = textures[i + 1];
-    animated[i] = animated[i + 1];
     texFlags[i] = texFlags[i + 1];
     effectID[i] = effectID[i + 1];
   }
@@ -226,18 +216,15 @@ void TextureSet::bindTexture(size_t id, size_t activeTexture)
 
 void TextureSet::startAnim(int id, int animtime)
 {
-  if (id < 0)
-    return;
-
-  if (animated[id])
+  if (is_animated(id))
   {
     opengl::texture::set_active_texture (0);
     gl.matrixMode(GL_TEXTURE);
     gl.pushMatrix();
 
     
-    const int spd = (animated[id] >> 3) & 0x7;
-    const int dir = animated[id] & 0x7;
+    const int spd = (texFlags[id] >> 3) & 0x7;
+    const int dir = texFlags[id] & 0x7;
     const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
     const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
@@ -249,10 +236,7 @@ void TextureSet::startAnim(int id, int animtime)
 
 void TextureSet::stopAnim(int id)
 {
-  if (id < 0)
-    return;
-
-  if (animated[id])
+  if (is_animated(id))
   {
     gl.popMatrix();
     gl.matrixMode(GL_MODELVIEW);
@@ -557,6 +541,11 @@ unsigned int TextureSet::flag(size_t id)
 unsigned int TextureSet::effect(size_t id)
 {
   return effectID[id];
+}
+
+bool TextureSet::is_animated(std::size_t id) const
+{
+  return (id < nTextures ? (texFlags[id] & FLAG_ANIMATE) : false);
 }
 
 void TextureSet::setAlpha(size_t id, size_t offset, unsigned char value)
