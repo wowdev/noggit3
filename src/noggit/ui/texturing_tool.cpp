@@ -383,6 +383,12 @@ namespace noggit
       _spray_pressure_spin->setValue(_spray_pressure + change);
     }
 
+    float texturing_tool::brush_radius() const
+    {
+      // show only a dot when using the anim / swap mode
+      return (_texturing_mode == texturing_mode::paint ? _texture_brush.getRadius() : 0.0f);
+    }
+
     bool texturing_tool::show_unpaintable_chunks() const
     { 
       return _show_unpaintable_chunks && _texturing_mode == texturing_mode::paint; 
