@@ -39,6 +39,7 @@ public:
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
   bool is_animated(std::size_t id) const;
+  void change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add);
 
   void setAlpha(size_t id, size_t offset, unsigned char value);
   void setAlpha(size_t id, unsigned char *amap);

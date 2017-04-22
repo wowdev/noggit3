@@ -1116,6 +1116,24 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
+  addHotkey ( Qt::Key_F
+            , MOD_none
+            , [&]
+              {
+                texturingTool->change_tex_flag(_world.get(), _cursor_pos, true, *noggit::ui::selected_texture::get());
+              }
+            , [&] { return terrainMode == editing_mode::paint && !!noggit::ui::selected_texture::get(); }
+            );
+
+  addHotkey ( Qt::Key_R
+            , MOD_none
+            , [&]
+              {
+                texturingTool->change_tex_flag(_world.get(), _cursor_pos, false, *noggit::ui::selected_texture::get());
+              }
+            , [&] { return terrainMode == editing_mode::paint && !!noggit::ui::selected_texture::get(); }
+            );
+
   addHotkey (Qt::Key_Plus, MOD_alt, [this] { terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
 
   addHotkey (Qt::Key_Plus, MOD_alt, [this] { flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });

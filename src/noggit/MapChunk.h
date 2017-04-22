@@ -138,6 +138,7 @@ public:
   int addTexture(scoped_blp_texture_reference texture);
   void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
   void eraseTextures();
+  void change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add);
 
   //! \todo implement Action stack for these
   bool isHole(int i, int j);
