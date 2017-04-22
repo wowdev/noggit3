@@ -224,43 +224,6 @@ void TextureSet::bindTexture(size_t id, size_t activeTexture)
   textures[id]->bind();
 }
 
-void TextureSet::start2DAnim(int id, int animtime)
-{
-  if (id < 0)
-    return;
-
-  if (animated[id])
-  {
-    opengl::texture::set_active_texture (0);
-    gl.matrixMode(GL_TEXTURE);
-    gl.pushMatrix();
-
-    // note: this is ad hoc and probably completely wrong
-    const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
-    const int dir = animated[id] & 0x07;
-    const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-    const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
-    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-
-    const float f = (static_cast<int>(animtime * (spd / 15.0f)) % 1600) / 1600.0f;
-    gl.translatef(f*fdx, f*fdy, 0);
-  }
-}
-
-void TextureSet::stop2DAnim(int id)
-{
-  if (id < 0)
-    return;
-
-  if (animated[id])
-  {
-    gl.popMatrix();
-    gl.matrixMode(GL_MODELVIEW);
-    opengl::texture::set_active_texture (1);
-  }
-}
-
-//! \todo do they really differ? investigate
 void TextureSet::startAnim(int id, int animtime)
 {
   if (id < 0)

@@ -328,7 +328,7 @@ void MapChunk::drawTextures (int animtime)
     opengl::texture::disable_texture();
   }
 
-  _texture_set.start2DAnim(0, animtime);
+  _texture_set.startAnim(0, animtime);
   gl.begin(GL_TRIANGLE_STRIP);
   gl.texCoord2f(0.0f, texDetail);
   gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
@@ -339,7 +339,7 @@ void MapChunk::drawTextures (int animtime)
   gl.texCoord2f(texDetail, 0.0f);
   gl.vertex3f(px + 1.0f, static_cast<float>(py), -2.0f);
   gl.end();
-  _texture_set.stop2DAnim(0);
+  _texture_set.stopAnim(0);
 
   if (_texture_set.num() > 1U)
   {
@@ -357,7 +357,7 @@ void MapChunk::drawTextures (int animtime)
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    _texture_set.start2DAnim(i, animtime);
+    _texture_set.startAnim(i, animtime);
 
     gl.begin(GL_TRIANGLE_STRIP);
     gl.multiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -374,7 +374,7 @@ void MapChunk::drawTextures (int animtime)
     gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
     gl.end();
 
-    _texture_set.stop2DAnim(i);
+    _texture_set.stopAnim(i);
   }
 
   opengl::texture::set_active_texture (0);
@@ -679,7 +679,9 @@ void MapChunk::draw ( math::frustum const& frustum
   }
 
   gl.enable(GL_LIGHTING);
+  _texture_set.startAnim (0, animtime);
   gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
+  _texture_set.stopAnim (0);
 
   if (_texture_set.num() > 1U) {
     //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
