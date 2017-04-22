@@ -340,47 +340,74 @@ namespace noggit
 
     void texturing_tool::update_spray_brush()
     {
-      _spray_brush.setRadius(_spray_size * TEXDETAILSIZE / 2.0f);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _spray_brush.setRadius(_spray_size * TEXDETAILSIZE / 2.0f);
+      }
     }
 
     void texturing_tool::toggle_spray()
     {
-      _spray_mode_group->setChecked(!_spray_mode_group->isChecked());
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _spray_mode_group->setChecked(!_spray_mode_group->isChecked());
+      }
     }
 
     void texturing_tool::change_radius(float change)
     {
-      _radius_spin->setValue(_texture_brush.getRadius() + change);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _radius_spin->setValue(_texture_brush.getRadius() + change);
+      }
     }
 
     void texturing_tool::change_hardness(float change)
     {
-      _hardness_spin->setValue(_hardness + change);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _hardness_spin->setValue(_hardness + change);
+      }
     }
 
     void texturing_tool::change_pressure(float change)
     {
-      _pressure_spin->setValue(_pressure + change);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _pressure_spin->setValue(_pressure + change);
+      }
     }
 
     void texturing_tool::change_brush_level(float change)
     {
-      _brush_level_spin->setValue(_brush_level + change);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _brush_level_spin->setValue(_brush_level + change);
+      }
     }
 
     void texturing_tool::set_brush_level (float level)
     {
-      _brush_level_spin->setValue(level);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _brush_level_spin->setValue(level);
+      }
     }
 
     void texturing_tool::change_spray_size(float change)
     {
-      _spray_size_spin->setValue(_spray_size + change);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _spray_size_spin->setValue(_spray_size + change);
+      }
     }
 
     void texturing_tool::change_spray_pressure(float change)
     {
-      _spray_pressure_spin->setValue(_spray_pressure + change);
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _spray_pressure_spin->setValue(_spray_pressure + change);
+      }
     }
 
     float texturing_tool::brush_radius() const
