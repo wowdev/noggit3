@@ -382,11 +382,11 @@ void Model::initAnimated(const MPQFile& f)
       _animations[i].length = std::max(_animations[i].length, 1U);
     }
 
-    std::stringstream tempname;
     for (size_t i = 0; i < header.nAnimations; ++i)
     {
       std::string lodname = _filename.substr(0, _filename.length() - 3);
-      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID;
+      std::stringstream tempname;
+      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID << ".anim";
       if (MPQFile::exists(tempname.str()))
       {
         animation_files.push_back(std::make_unique<MPQFile>(tempname.str()));
