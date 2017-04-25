@@ -1436,6 +1436,7 @@ MapView::~MapView()
 
   //! \ todo: fix the crash when deleting the texture picker
   TexturePicker->hide();
+  _minimap->hide();
 
   _world.reset();
 }
