@@ -593,6 +593,92 @@ const unsigned char *TextureSet::getAlpha(size_t id)
   return alphamaps[id]->getAlpha();
 }
 
+std::vector<char> TextureSet::get_compressed_alpha(std::size_t id)
+{
+  struct entry
+  {
+    enum mode_t
+    {
+      copy = 0,              // append value[0..count - 1]
+      fill = 1,              // append value[0] count times
+    };    
+    uint8_t count : 7;
+    uint8_t mode : 1;
+    uint8_t value[];
+  };
+
+  const unsigned char* alpha = getAlpha(id);
+  std::vector<char> data(alpha, alpha+4096);
+  auto current (data.begin());
+  auto const end (data.end());
+
+  auto const consume_fill
+  ( [&]
+  {
+    int8_t count (0);
+    while ((current + 1 < end) && *current == *(current + 1) && count < std::numeric_limits<int8_t>::max() - 1)
+    {
+      ++current;
+      ++count;
+    }
+    // too small, would be wasting space
+    if (count < 2)
+    {
+      current -= count;
+      count = 0;
+    }
+    return count;
+  }
+  );
+
+  std::vector<char> result;
+  boost::optional<std::size_t> current_copy_entry_offset (boost::none);
+  auto const current_copy_entry
+  ( [&]
+  {
+    return reinterpret_cast<entry*> (&*(result.begin() + *current_copy_entry_offset));
+  }
+  );
+
+  for (; current != end; ++current)
+  {
+    auto const fill (consume_fill());
+    if (fill)
+    {
+      current_copy_entry_offset = boost::none;
+
+      result.emplace_back();
+      result.emplace_back();
+
+      entry* e (reinterpret_cast<entry*> (&*(result.rbegin() + 1)));
+      e->mode = entry::fill;
+      e->count = fill + 1; // include current char
+      e->value[0] = *current;
+    }
+    else
+    {
+      if ( current_copy_entry_offset == boost::none
+          || current_copy_entry()->count == std::numeric_limits<int8_t>::max()
+          )
+      {
+        current_copy_entry_offset = result.size();
+        result.emplace_back();
+        result.emplace_back();
+        current_copy_entry()->mode = entry::copy;
+        current_copy_entry()->value[0] = *current;
+        current_copy_entry()->count = 1; 
+      }
+      else
+      {
+        result.emplace_back(*current);
+        current_copy_entry()->count++;
+      }
+    }
+  }
+
+  return result;
+}
+
 scoped_blp_texture_reference TextureSet::texture(size_t id)
 {
   return textures[id];

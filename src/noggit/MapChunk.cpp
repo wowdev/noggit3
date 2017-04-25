@@ -1366,19 +1366,44 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = _texture_set.num();
 
+  std::vector<std::vector<char>> compressed_alphamaps;
+  int lMCAL_Size = 0;
+
+  // convert bigAlpha to the correct format for saving
+  // moved here since the alphamap are compressed now and require to be in the right format
+  if (use_big_alphamap)
+  {
+    _texture_set.convertToBigAlpha();
+  }    
+
   // MCLY data
   for (size_t j = 0; j < _texture_set.num(); ++j)
   {
     ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * j);
 
     lLayer->textureID = lTextures.find(_texture_set.filename(j))->second;
-
     lLayer->flags = _texture_set.flag(j);
+    lLayer->ofsAlpha = lMCAL_Size;
 
-    // if not first, have alpha layer, if first, have not. never have compression.
-    lLayer->flags = (j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & (~FLAG_USE_ALPHA)) & (~FLAG_ALPHA_COMPRESSED);
-
-    lLayer->ofsAlpha = (j == 0 ? 0 : (use_big_alphamap ? 64 * 64 * (j - 1) : 32 * 64 * (j - 1)));
+    if (j == 0)
+    {
+      lLayer->flags &= ~(FLAG_USE_ALPHA | FLAG_ALPHA_COMPRESSED);  
+    }
+    else
+    {
+      lLayer->flags |= FLAG_USE_ALPHA;
+      // always compress big alpha
+      if (use_big_alphamap)
+      {
+        lLayer->flags |= FLAG_ALPHA_COMPRESSED;
+        compressed_alphamaps.push_back(_texture_set.get_compressed_alpha(j - 1));
+        lMCAL_Size += compressed_alphamaps.back().size();
+      }
+      else
+      {
+        lMCAL_Size += 2048;
+      }      
+    }
     lLayer->effectID = _texture_set.effect(j);
   }
 
@@ -1473,11 +1498,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   }
 
   // MCAL
-  int lDimensions = 64 * (use_big_alphamap ? 64 : 32);
-
   size_t lMaps = _texture_set.num() ? _texture_set.num() - 1U : 0U;
-
-  int lMCAL_Size = lDimensions * lMaps;
 
   lADTFile.Extend(8 + lMCAL_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCAL', lMCAL_Size);
@@ -1487,31 +1508,35 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   char * lAlphaMaps = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
-  // convert bigAlpha to the correct format for saving
+  // always compress big alpha
   if (use_big_alphamap)
-    _texture_set.convertToBigAlpha();
-
-  for (size_t j = 0; j < lMaps; j++)
   {
-    //First thing we have to do is downsample the alpha maps before we can write them
-    if (use_big_alphamap)
-      for (int k = 0; k < lDimensions; k++)
-        lAlphaMaps[lDimensions * j + k] = _texture_set.getAlpha(j, k);
-    else
+    for (auto alpha : compressed_alphamaps)
+    {
+      memcpy(lAlphaMaps, alpha.data(), alpha.size());
+      lAlphaMaps += alpha.size();
+    }
+  }
+  else
+  {
+    for (size_t j = 0; j < lMaps; j++)
     {
       unsigned char upperNibble, lowerNibble;
-      for (int k = 0; k < lDimensions; k++)
+      for (int k = 0; k < 2048; k++)
       {
         lowerNibble = (_texture_set.getAlpha(j, k * 2 + 0) & 0xF0);
         upperNibble = (_texture_set.getAlpha(j, k * 2 + 1) & 0xF0);
-        lAlphaMaps[lDimensions * j + k] = (upperNibble)+(lowerNibble >> 4);
+        lAlphaMaps[2048 * j + k] = (upperNibble)+(lowerNibble >> 4);
       }
     }
   }
+  
 
   // convert bigAlpha to the correct old format to be able to edit them correctly
   if (use_big_alphamap)
+  {
     _texture_set.convertToOldAlpha();
+  }    
 
   lCurrentPosition += 8 + lMCAL_Size;
   lMCNK_Size += 8 + lMCAL_Size;

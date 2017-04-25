@@ -47,6 +47,8 @@ public:
   unsigned char getAlpha(size_t id, size_t offset);
   const unsigned char *getAlpha(size_t id);
 
+  std::vector<char> get_compressed_alpha(std::size_t id);
+
   void convertToBigAlpha();
   void convertToOldAlpha();
 
