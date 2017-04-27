@@ -593,7 +593,26 @@ const unsigned char *TextureSet::getAlpha(size_t id)
   return alphamaps[id]->getAlpha();
 }
 
-std::vector<char> TextureSet::get_compressed_alpha(std::size_t id)
+std::vector<std::vector<char>> TextureSet::get_compressed_alphamaps()
+{
+  std::vector<std::vector<char>> compressed;
+
+  if (nTextures > 1)
+  {
+    unsigned char alpha[3 * 64 * 64];
+
+    alphas_to_big_alpha(alpha);
+
+    for (int i = 0; i < nTextures - 1; ++i)
+    {
+      compressed.emplace_back(get_compressed_alpha(i, alpha));
+    }
+  }
+
+  return compressed;
+}
+
+std::vector<char> TextureSet::get_compressed_alpha(std::size_t id, unsigned char* alphas)
 {
   struct entry
   {
@@ -607,37 +626,39 @@ std::vector<char> TextureSet::get_compressed_alpha(std::size_t id)
     uint8_t value[];
   };
 
-  const unsigned char* alpha = getAlpha(id);
+  const unsigned char* alpha = alphas + 4096*id;
   std::vector<char> data(alpha, alpha+4096);
   auto current (data.begin());
   auto const end (data.end());
 
   auto const consume_fill
-  ( [&]
-  {
-    int8_t count (0);
-    while ((current + 1 < end) && *current == *(current + 1) && count < std::numeric_limits<int8_t>::max() - 1)
+  ( 
+    [&]
     {
-      ++current;
-      ++count;
+      int8_t count (0);
+      while ((current + 1 < end) && *current == *(current + 1) && count < std::numeric_limits<int8_t>::max() - 1)
+      {
+        ++current;
+        ++count;
+      }
+      // too small, would be wasting space
+      if (count < 2)
+      {
+        current -= count;
+        count = 0;
+      }
+      return count;
     }
-    // too small, would be wasting space
-    if (count < 2)
-    {
-      current -= count;
-      count = 0;
-    }
-    return count;
-  }
   );
 
   std::vector<char> result;
   boost::optional<std::size_t> current_copy_entry_offset (boost::none);
   auto const current_copy_entry
-  ( [&]
-  {
-    return reinterpret_cast<entry*> (&*(result.begin() + *current_copy_entry_offset));
-  }
+  ( 
+    [&]
+    {
+      return reinterpret_cast<entry*> (&*(result.begin() + *current_copy_entry_offset));
+    }
   );
 
   for (; current != end; ++current)
@@ -684,18 +705,21 @@ scoped_blp_texture_reference TextureSet::texture(size_t id)
   return textures[id];
 }
 
-
-void TextureSet::convertToBigAlpha()
+// dest = tab [4096 * (nTextures - 1)]
+// call only if nTextures > 1
+void TextureSet::alphas_to_big_alpha(unsigned char* dest)
 {
-  // nothing to do
-  if (nTextures < 2)
-    return;
-
-  unsigned char tab[3][64 * 64];
+  auto alpha 
+  ( 
+    [&] (int layer, int pos = 0)
+    {
+      return dest + layer * 4096 + pos;
+    }
+  );
 
   for (size_t k = 0; k < nTextures - 1; k++)
   {
-    memcpy(tab[k], alphamaps[k]->getAlpha(), 64 * 64);
+    memcpy(alpha(k), alphamaps[k]->getAlpha(), 64 * 64);
   }
 
   float alphas[3] = { 0.0f, 0.0f, 0.0f };
@@ -704,7 +728,7 @@ void TextureSet::convertToBigAlpha()
   {
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      float f = static_cast<float>(tab[k][i]);
+      float f = static_cast<float>(*alpha(k, i));
       alphas[k] = f;
       for (size_t n = 0; n < k; n++)
         alphas[n] = (alphas[n] * ((255.0f - f)) / 255.0f);
@@ -712,13 +736,24 @@ void TextureSet::convertToBigAlpha()
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      tab[k][i] = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
+      *alpha(k, i) = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
+}
+
+void TextureSet::convertToBigAlpha()
+{
+  // nothing to do
+  if (nTextures < 2)
+    return;
+
+  unsigned char tab[64 * 64 * 3];
+
+  alphas_to_big_alpha(tab);
 
   for (size_t k = 0; k < nTextures - 1; k++)
   {
-    alphamaps[k]->setAlpha(tab[k]);
+    alphamaps[k]->setAlpha(tab + 4096 * k);
     alphamaps[k]->loadTexture();
   }
 }

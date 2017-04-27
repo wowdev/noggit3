@@ -47,7 +47,7 @@ public:
   unsigned char getAlpha(size_t id, size_t offset);
   const unsigned char *getAlpha(size_t id);
 
-  std::vector<char> get_compressed_alpha(std::size_t id);
+  std::vector<std::vector<char>> get_compressed_alphamaps();
 
   void convertToBigAlpha();
   void convertToOldAlpha();
@@ -58,6 +58,9 @@ public:
   scoped_blp_texture_reference texture(size_t id);
 
 private:
+  void alphas_to_big_alpha(unsigned char* dest);
+  std::vector<char> get_compressed_alpha(std::size_t id, unsigned char* alphas);
+
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
   size_t nTextures;

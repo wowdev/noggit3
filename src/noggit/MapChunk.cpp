@@ -1373,7 +1373,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   // moved here since the alphamap are compressed now and require to be in the right format
   if (use_big_alphamap)
   {
-    _texture_set.convertToBigAlpha();
+    compressed_alphamaps = _texture_set.get_compressed_alphamaps();
   }    
 
   // MCLY data
@@ -1384,6 +1384,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
     lLayer->textureID = lTextures.find(_texture_set.filename(j))->second;
     lLayer->flags = _texture_set.flag(j);
     lLayer->ofsAlpha = lMCAL_Size;
+    lLayer->effectID = _texture_set.effect(j);
 
     if (j == 0)
     {
@@ -1396,15 +1397,13 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
       if (use_big_alphamap)
       {
         lLayer->flags |= FLAG_ALPHA_COMPRESSED;
-        compressed_alphamaps.push_back(_texture_set.get_compressed_alpha(j - 1));
-        lMCAL_Size += compressed_alphamaps.back().size();
+        lMCAL_Size += compressed_alphamaps[j - 1].size();
       }
       else
       {
         lMCAL_Size += 2048;
-      }      
+      }
     }
-    lLayer->effectID = _texture_set.effect(j);
   }
 
   lCurrentPosition += 8 + lMCLY_Size;
@@ -1530,13 +1529,6 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
       }
     }
   }
-  
-
-  // convert bigAlpha to the correct old format to be able to edit them correctly
-  if (use_big_alphamap)
-  {
-    _texture_set.convertToOldAlpha();
-  }    
 
   lCurrentPosition += 8 + lMCAL_Size;
   lMCNK_Size += 8 + lMCAL_Size;
