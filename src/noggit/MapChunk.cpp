@@ -151,13 +151,10 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     char nor[3];
     math::vector_3d *ttn = mNormals;
-    for (int j = 0; j<17; ++j) {
-      for (int i = 0; i<((j % 2) ? 8 : 9); ++i) {
-        f->read(nor, 3);
-        // order X,Z,Y
-        // *ttn++ = math::vector_3d((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
-        *ttn++ = math::vector_3d(-nor[1] / 127.0f, nor[2] / 127.0f, -nor[0] / 127.0f);
-      }
+    for (int i = 0; i< mapbufsize; ++i) 
+    {
+      f->read(nor, 3);
+      *ttn++ = math::vector_3d(nor[0] / 127.0f, nor[2] / 127.0f, nor[1] / 127.0f);
     }
   }
   // - MCLY ----------------------------------------------
@@ -282,19 +279,9 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
   {
-    ShadowAmount = 1.0f - (-mNormals[j].x + mNormals[j].y - mNormals[j].z);
+    ShadowAmount = 1.0f - (mNormals[j].x + mNormals[j].y + mNormals[j].z);
+    ShadowAmount = std::min(1.0f, std::max(0.0f, ShadowAmount)) * 0.5f;
 
-    if (ShadowAmount < 0)
-      ShadowAmount = 0.0f;
-
-    if (ShadowAmount > 1.0)
-      ShadowAmount = 1.0f;
-
-    ShadowAmount *= 0.5f;
-
-    mFakeShadows[j].x = 0;
-    mFakeShadows[j].y = 0;
-    mFakeShadows[j].z = 0;
     mFakeShadows[j].w = ShadowAmount;
   }
 
@@ -840,31 +827,26 @@ void MapChunk::updateVerticesData()
 
 void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)> height)
 {
+  auto point
+  (
+    [&] (math::vector_3d& v, float xdiff, float zdiff)
+    {
+      return math::vector_3d
+             ( v.x + xdiff
+             , height (v.x + xdiff, v.z + zdiff).get_value_or (v.y)
+             , v.z + zdiff
+             );
+    }
+  );
+
+  float const half_unit = UNITSIZE / 2.f;
+
   for (int i = 0; i<mapbufsize; ++i)
   {
-    math::vector_3d const P1
-      ( mVertices[i].x - UNITSIZE / 2.f
-      , height (mVertices[i].x - UNITSIZE / 2.f, mVertices[i].z - UNITSIZE / 2.f).get_value_or (mVertices[i].y)
-      , mVertices[i].z - UNITSIZE / 2.f
-      );
-
-    math::vector_3d const P2
-      ( mVertices[i].x + UNITSIZE / 2.f
-      , height (mVertices[i].x + UNITSIZE / 2.f, mVertices[i].z - UNITSIZE / 2.f).get_value_or (mVertices[i].y)
-      , mVertices[i].z - UNITSIZE / 2.f
-      );
-
-    math::vector_3d const P3
-      ( mVertices[i].x + UNITSIZE / 2.f
-      , height (mVertices[i].x + UNITSIZE / 2.f, mVertices[i].z + UNITSIZE / 2.f).get_value_or (mVertices[i].y)
-      , mVertices[i].z + UNITSIZE / 2.f
-      );
-
-    math::vector_3d const P4
-      ( mVertices[i].x - UNITSIZE / 2.f
-      , height (mVertices[i].x - UNITSIZE / 2.f, mVertices[i].z + UNITSIZE / 2.f).get_value_or (mVertices[i].y)
-      , mVertices[i].z + UNITSIZE / 2.f
-      );
+    math::vector_3d const P1 (point(mVertices[i], -half_unit, -half_unit));
+    math::vector_3d const P2 (point(mVertices[i],  half_unit, -half_unit));
+    math::vector_3d const P3 (point(mVertices[i],  half_unit,  half_unit));
+    math::vector_3d const P4 (point(mVertices[i], -half_unit,  half_unit));
 
     math::vector_3d const N1 ((P2 - mVertices[i]) % (P1 - mVertices[i]));
     math::vector_3d const N2 ((P3 - mVertices[i]) % (P2 - mVertices[i]));
@@ -873,24 +855,22 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
 
     math::vector_3d Norm (N1 + N2 + N3 + N4);
     Norm.normalize();
-    mNormals[i] = Norm;
+
+    Norm.x = std::floor(Norm.x * 127) / 127;
+    Norm.y = std::floor(Norm.y * 127) / 127;
+    Norm.z = std::floor(Norm.z * 127) / 127;
+
+    //! \todo: find out why recalculating normals without changing the terrain result in slightly different normals
+    mNormals[i] = {-Norm.z, Norm.y, -Norm.x};
   }
   gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
   {
-    //tm[j].z=tv[j].y;
     ShadowAmount = 1.0f - (-mNormals[j].x + mNormals[j].y - mNormals[j].z);
-    if (ShadowAmount<0)
-      ShadowAmount = 0;
-    if (ShadowAmount>1.0)
-      ShadowAmount = 1.0f;
-    ShadowAmount *= 0.5f;
-    //ShadowAmount=0.2;
-    mFakeShadows[j].x = 0;
-    mFakeShadows[j].y = 0;
-    mFakeShadows[j].z = 0;
+    ShadowAmount = std::min(1.0f, std::max(0.0f, ShadowAmount)) * 0.5f;
+
     mFakeShadows[j].w = ShadowAmount;
   }
 
@@ -1339,9 +1319,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    lNormals[i * 3 + 0] = misc::roundc(-mNormals[i].z * 127);
-    lNormals[i * 3 + 1] = misc::roundc(-mNormals[i].x * 127);
-    lNormals[i * 3 + 2] = misc::roundc(mNormals[i].y * 127);
+    lNormals[i * 3 + 0] = static_cast<char>(mNormals[i].x * 127);
+    lNormals[i * 3 + 1] = static_cast<char>(mNormals[i].z * 127);
+    lNormals[i * 3 + 2] = static_cast<char>(mNormals[i].y * 127);
   }
 
   lCurrentPosition += 8 + lMCNR_Size;
