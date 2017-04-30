@@ -22,14 +22,7 @@ namespace misc
 
   char roundc(float a)
   {
-    if (a < 0)
-      a -= 0.5f;
-    if (a > 0)
-      a += 0.5f;
-    if (a < -127)
-      a = -127;
-    else if (a > 127)
-      a = 127;
+    a = std::min(127.0f, std::max(-127.0f, std::round(a)));
     return static_cast<char>(a);
   }
 
