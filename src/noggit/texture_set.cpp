@@ -602,7 +602,6 @@ std::vector<std::vector<char>> TextureSet::get_compressed_alphamaps()
     unsigned char alpha[3 * 64 * 64];
 
     alphas_to_big_alpha(alpha);
-
     for (int i = 0; i < nTextures - 1; ++i)
     {
       compressed.emplace_back(get_compressed_alpha(i, alpha));
@@ -623,6 +622,7 @@ std::vector<char> TextureSet::get_compressed_alpha(std::size_t id, unsigned char
     };    
     uint8_t count : 7;
     uint8_t mode : 1;
+    
     uint8_t value[];
   };
 
@@ -630,23 +630,29 @@ std::vector<char> TextureSet::get_compressed_alpha(std::size_t id, unsigned char
   std::vector<char> data(alpha, alpha+4096);
   auto current (data.begin());
   auto const end (data.end());
+  int column_pos = 0;
 
   auto const consume_fill
   ( 
     [&]
     {
       int8_t count (0);
-      while ((current + 1 < end) && *current == *(current + 1) && count < std::numeric_limits<int8_t>::max() - 1)
+      column_pos %= 64;
+      
+      while ((current + 1 < end) && *current == *(current + 1) && column_pos < 63)
       {
         ++current;
         ++count;
+        ++column_pos;
       }
-      // too small, would be wasting space
-      if (count < 2)
+
+      // include current (current is incremented in the for loop)
+      if (count)
       {
-        current -= count;
-        count = 0;
+        ++count;
+        ++column_pos;
       }
+
       return count;
     }
   );
@@ -669,31 +675,35 @@ std::vector<char> TextureSet::get_compressed_alpha(std::size_t id, unsigned char
       current_copy_entry_offset = boost::none;
 
       result.emplace_back();
-      result.emplace_back();
+      result.emplace_back(*current);
 
       entry* e (reinterpret_cast<entry*> (&*(result.rbegin() + 1)));
       e->mode = entry::fill;
-      e->count = fill + 1; // include current char
-      e->value[0] = *current;
+      e->count = fill;
+
+      column_pos %= 64;
     }
     else
     {
       if ( current_copy_entry_offset == boost::none
-          || current_copy_entry()->count == std::numeric_limits<int8_t>::max()
-          )
+        || column_pos == 64
+         )
       {
         current_copy_entry_offset = result.size();
         result.emplace_back();
-        result.emplace_back();
+        result.emplace_back(*current);
         current_copy_entry()->mode = entry::copy;
-        current_copy_entry()->value[0] = *current;
-        current_copy_entry()->count = 1; 
+        current_copy_entry()->count = 1;
+        
+        column_pos %= 64;
       }
       else
       {
         result.emplace_back(*current);
         current_copy_entry()->count++;
       }
+
+      column_pos++;
     }
   }
 
