@@ -47,6 +47,8 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
   {
     convertToOldAlpha();
   }
+
+  regen_alpha_tex();
 }
 
 int TextureSet::addTexture(scoped_blp_texture_reference texture)
@@ -502,6 +504,8 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     return false;
   }
 
+  regen_alpha_tex();
+
   // stop after k=0 because k is unsigned
   for (size_t k = nTextures - 1; k < 4; k--)
   {
@@ -894,4 +898,36 @@ bool TextureSet::removeDuplicate()
   }
 
   return changed;
+}
+
+void TextureSet::bind_alpha(std::size_t id)
+{
+  opengl::texture::enable_texture (id);
+  amap_gl_tex.bind();
+}
+
+
+void TextureSet::regen_alpha_tex()
+{
+  alphamap_tex.clear();
+
+  unsigned char tab[3 * 4096];
+
+  alphas_to_big_alpha(tab);
+
+  for (int i = 0; i < 4096; ++i)
+  {
+    for (int layer = 0; layer < 3; ++layer)
+    {
+
+      alphamap_tex.push_back(layer < nTextures - 1 ? tab[i + 4096 * layer] : 0);
+    }    
+  }
+
+  amap_gl_tex.bind();
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_UNSIGNED_BYTE, alphamap_tex.data());
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
