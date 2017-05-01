@@ -1239,21 +1239,38 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
     for (size_t x(0); x < 8; ++x)
     {
       size_t winning_layer(0);
-      for (size_t layer(1); layer < _texture_set.num(); ++layer)
-      {
-        size_t sum(0);
+      std::map<std::size_t, float> alpha_visibility;
 
-        for (size_t j(0); j < 8; ++j)
+      for (size_t j(0); j < 8; ++j)
+      {
+        for (size_t i(0); i < 8; ++i)
         {
-          for (size_t i(0); i < 8; ++i)
+          float alphas[4] = { 255.f, 0.f, 0.f, 0.f };
+
+          for (size_t layer(1); layer < _texture_set.num(); ++layer)
+          {            
+            float a = static_cast<float>(_texture_set.getAlpha(layer - 1, (y * 8 + j) * 64 + (x * 8 + i)));
+            alphas[layer] = a;
+            a /= 255.f;
+
+            for (size_t n = 0; n < layer; n++)
+            {
+              alphas[n] = (alphas[n] * (1.f - a));
+            }              
+          }
+
+          for (int k = 0; k < 4; ++k)
           {
-            sum += _texture_set.getAlpha(layer - 1, (y * 8 + j) * 64 + (x * 8 + i));
+            alpha_visibility[k] += alphas[k];
           }
         }
+      }
 
-        if (sum  > minimum_value_to_overwrite * 8 * 8)
+      for (std::size_t i = 1; i < 4; ++i)
+      {
+        if (alpha_visibility[i] > alpha_visibility[winning_layer])
         {
-          winning_layer = layer;
+          winning_layer = i;
         }
       }
 
@@ -1263,6 +1280,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
       lMCNK_header->low_quality_texture_map[array_index] |= ((winning_layer & 3) << bit_index);
     }
   }
+
   lCurrentPosition += 8 + 0x80;
 
   // MCVT
