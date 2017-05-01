@@ -20,12 +20,6 @@ namespace misc
     }
   }
 
-  char roundc(float a)
-  {
-    a = std::min(127.0f, std::max(-127.0f, std::round(a)));
-    return static_cast<char>(a);
-  }
-
   float frand()
   {
     return rand() / static_cast<float>(RAND_MAX);
@@ -39,11 +33,6 @@ namespace misc
   int randint(int lower, int upper)
   {
     return lower + static_cast<int>((upper + 1 - lower) * frand());
-  }
-
-  int getADTCord(float cord)
-  {
-    return (int)(cord / 533.33333f);
   }
 
   float dist(float x1, float z1, float x2, float z2)
