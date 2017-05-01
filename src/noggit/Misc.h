@@ -20,11 +20,9 @@
 namespace misc
 {
   void find_and_replace(std::string& source, const std::string& find, const std::string& replace);
-  char roundc(float a);
   float frand();
   float randfloat(float lower, float upper);
   int randint(int lower, int upper);
-  int getADTCord(float cord);
   float dist(float x1, float z1, float x2, float z2);
   float dist(math::vector_3d const& p1, math::vector_3d const& p2);
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
