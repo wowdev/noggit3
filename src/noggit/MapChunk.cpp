@@ -649,6 +649,13 @@ void MapChunk::draw ( math::frustum const& frustum
   mcnk_shader.uniform("has_mccv", (hasMCCV ? 1 : 0));
   mcnk_shader.uniform("layer_count", int(_texture_set.num()));
   mcnk_shader.uniform("cant_paint", (cantPaint ? 1 : 0));
+  mcnk_shader.uniform("draw_areaid_overlay", (draw_areaid_overlay ? 1 : 0));
+
+  if (draw_areaid_overlay)
+  {
+    mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
+  }
+
   mcnk_shader.attrib("position", mVertices);
   mcnk_shader.attrib("normal", mNormals);
   mcnk_shader.attrib("mccv", mccv);

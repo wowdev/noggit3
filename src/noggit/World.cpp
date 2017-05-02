@@ -610,6 +610,8 @@ uniform sampler2D alphamap;
 uniform int layer_count;
 uniform bool has_mccv;
 uniform bool cant_paint;
+uniform bool draw_areaid_overlay;
+uniform vec4 areaid_color;
 
 varying vec4 vary_position;
 varying vec2 vary_texcoord;
@@ -650,6 +652,11 @@ void main()
   if(cant_paint)
   {
     blend *= vec4(1, 0, 0, 1);
+  }
+  if(draw_areaid_overlay)
+  {
+    // areaid_color.a = 0.7
+    blend = blend * 0.3 + areaid_color;
   }
 
   gl_FragColor = blend;
