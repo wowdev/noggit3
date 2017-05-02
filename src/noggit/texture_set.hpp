@@ -44,7 +44,7 @@ public:
   uint8_t getAlpha(size_t id, size_t offset);
   const uint8_t *getAlpha(size_t id);
 
-  std::vector<std::vector<uint8_t>> get_compressed_alphamaps();
+  std::vector<std::vector<uint8_t>> save_alpha(bool big_alphamap);
 
   void convertToBigAlpha();
   void convertToOldAlpha();
@@ -58,6 +58,7 @@ public:
 
 private:
   void alphas_to_big_alpha(uint8_t* dest);
+  void alphas_to_old_alpha(uint8_t* dest);
   void generate_alpha_tex();
   void update_alpha_tex();
 
