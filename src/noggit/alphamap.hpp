@@ -22,6 +22,8 @@ public:
   unsigned char getAlpha(size_t offset);
   const unsigned char *getAlpha();
 
+  std::vector<uint8_t> compress() const;
+
 private:
   void readCompressed(MPQFile *f);
   void readBigAlpha(MPQFile *f);

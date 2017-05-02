@@ -41,13 +41,10 @@ public:
   bool is_animated(std::size_t id) const;
   void change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add);
 
-  void setAlpha(size_t id, size_t offset, unsigned char value);
-  void setAlpha(size_t id, unsigned char *amap);
+  uint8_t getAlpha(size_t id, size_t offset);
+  const uint8_t *getAlpha(size_t id);
 
-  unsigned char getAlpha(size_t id, size_t offset);
-  const unsigned char *getAlpha(size_t id);
-
-  std::vector<std::vector<char>> get_compressed_alphamaps();
+  std::vector<std::vector<uint8_t>> get_compressed_alphamaps();
 
   void convertToBigAlpha();
   void convertToOldAlpha();
@@ -60,14 +57,13 @@ public:
   void bind_alpha(std::size_t id);
 
 private:
-  void alphas_to_big_alpha(unsigned char* dest);
-  std::vector<char> get_compressed_alpha(std::size_t id);
+  void alphas_to_big_alpha(uint8_t* dest);
   void generate_alpha_tex();
   void update_alpha_tex();
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
-  std::vector<unsigned char> alphamap_tex;
+  std::vector<uint8_t> alphamap_tex;
   opengl::texture amap_gl_tex;
   size_t nTextures;
 
