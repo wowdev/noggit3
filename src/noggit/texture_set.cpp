@@ -114,7 +114,7 @@ void TextureSet::swapTexture(int id1, int id2)
     }
     else
     {
-      unsigned char alpha[4096];
+      uint8_t alpha[4096];
       
       for (int i = 0; i < 4096; ++i)
       {
@@ -365,7 +365,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
         bool baseVisible = true;
         for (size_t k = nTextures - 1; k > 0; k--)
         {
-          unsigned char a = alphamaps[k - 1]->getAlpha(i + j * 64);
+          uint8_t a = alphamaps[k - 1]->getAlpha(i + j * 64);
 
           if (a > 0)
           {
@@ -535,138 +535,29 @@ void TextureSet::change_texture_flag(scoped_blp_texture_reference tex, std::size
   }
 }
 
-void TextureSet::setAlpha(size_t id, size_t offset, unsigned char value)
-{
-  alphamaps[id]->setAlpha(offset, value);
-}
-
-void TextureSet::setAlpha(size_t id, unsigned char *amap)
-{
-  alphamaps[id]->setAlpha(amap);
-}
-
-unsigned char TextureSet::getAlpha(size_t id, size_t offset)
+uint8_t TextureSet::getAlpha(size_t id, size_t offset)
 {
   return alphamaps[id]->getAlpha(offset);
 }
 
-const unsigned char *TextureSet::getAlpha(size_t id)
+const uint8_t *TextureSet::getAlpha(size_t id)
 {
   return alphamaps[id]->getAlpha();
 }
 
-std::vector<std::vector<char>> TextureSet::get_compressed_alphamaps()
+std::vector<std::vector<uint8_t>> TextureSet::get_compressed_alphamaps()
 {
-  std::vector<std::vector<char>> compressed;
+  std::vector<std::vector<uint8_t>> compressed;
 
   if (nTextures > 1)
   {
     for (int i = 0; i < nTextures - 1; ++i)
     {
-      compressed.emplace_back(get_compressed_alpha(i));
+      compressed.emplace_back(alphamaps[i]->compress());
     }
   }
 
   return compressed;
-}
-
-std::vector<char> TextureSet::get_compressed_alpha(std::size_t id)
-{
-  struct entry
-  {
-    enum mode_t
-    {
-      copy = 0,              // append value[0..count - 1]
-      fill = 1,              // append value[0] count times
-    };    
-    uint8_t count : 7;
-    uint8_t mode : 1;
-    
-    uint8_t value[];
-  };
-
-  const unsigned char* alpha = alphamaps[id]->getAlpha();
-  std::vector<char> data(alpha, alpha+4096);
-  auto current (data.begin());
-  auto const end (data.end());
-  int column_pos = 0;
-
-  auto const consume_fill
-  ( 
-    [&]
-    {
-      int8_t count (0);
-      column_pos %= 64;
-      
-      while ((current + 1 < end) && *current == *(current + 1) && column_pos < 63)
-      {
-        ++current;
-        ++count;
-        ++column_pos;
-      }
-
-      // include current (current is incremented in the for loop)
-      if (count)
-      {
-        ++count;
-        ++column_pos;
-      }
-
-      return count;
-    }
-  );
-
-  std::vector<char> result;
-  boost::optional<std::size_t> current_copy_entry_offset (boost::none);
-  auto const current_copy_entry
-  ( 
-    [&]
-    {
-      return reinterpret_cast<entry*> (&*(result.begin() + *current_copy_entry_offset));
-    }
-  );
-
-  for (; current != end; ++current)
-  {
-    auto const fill (consume_fill());
-    if (fill)
-    {
-      current_copy_entry_offset = boost::none;
-
-      result.emplace_back();
-      result.emplace_back(*current);
-
-      entry* e (reinterpret_cast<entry*> (&*(result.rbegin() + 1)));
-      e->mode = entry::fill;
-      e->count = fill;
-
-      column_pos %= 64;
-    }
-    else
-    {
-      if ( current_copy_entry_offset == boost::none
-        || column_pos == 64
-         )
-      {
-        current_copy_entry_offset = result.size();
-        result.emplace_back();
-        result.emplace_back(*current);
-        current_copy_entry()->mode = entry::copy;
-        current_copy_entry()->count = 1;
-        
-        column_pos %= 64;
-      }
-      else
-      {
-        result.emplace_back(*current);
-        current_copy_entry()->count++;
-      }
-
-      column_pos++;
-    }
-  }
-
-  return result;
 }
 
 scoped_blp_texture_reference TextureSet::texture(size_t id)
@@ -676,7 +567,7 @@ scoped_blp_texture_reference TextureSet::texture(size_t id)
 
 // dest = tab [4096 * (nTextures - 1)]
 // call only if nTextures > 1
-void TextureSet::alphas_to_big_alpha(unsigned char* dest)
+void TextureSet::alphas_to_big_alpha(uint8_t* dest)
 {
   auto alpha 
   ( 
@@ -705,7 +596,7 @@ void TextureSet::alphas_to_big_alpha(unsigned char* dest)
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      *alpha(k, i) = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
+      *alpha(k, i) = static_cast<uint8_t>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
 }
@@ -716,7 +607,7 @@ void TextureSet::convertToBigAlpha()
   if (nTextures < 2)
     return;
 
-  unsigned char tab[64 * 64 * 3];
+  uint8_t tab[64 * 64 * 3];
 
   alphas_to_big_alpha(tab);
 
@@ -734,7 +625,7 @@ void TextureSet::convertToOldAlpha()
   if (nTextures < 2)
     return;
 
-  unsigned char tab[3][64 * 64];
+  uint8_t tab[3][64 * 64];
 
   for (size_t k = 0; k < nTextures - 1; k++)
   {
@@ -767,7 +658,7 @@ void TextureSet::convertToOldAlpha()
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      tab[k][i] = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
+      tab[k][i] = static_cast<uint8_t>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
 
@@ -784,7 +675,7 @@ void TextureSet::mergeAlpha(size_t id1, size_t id2)
   if (id1 >= nTextures || id2 >= nTextures || id1 == id2)
     return;
 
-  unsigned char tab[3][64 * 64];
+  uint8_t tab[3][64 * 64];
 
   for (size_t k = 0; k < nTextures - 1; k++)
   {
@@ -825,7 +716,7 @@ void TextureSet::mergeAlpha(size_t id1, size_t id2)
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      tab[k][i] = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
+      tab[k][i] = static_cast<uint8_t>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
 

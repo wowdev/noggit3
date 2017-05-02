@@ -3,6 +3,8 @@
 #include <noggit/alphamap.hpp>
 #include <opengl/context.hpp>
 
+#include <boost/optional/optional.hpp>
+
 Alphamap::Alphamap()
 {
   createNew();
@@ -127,4 +129,102 @@ unsigned char Alphamap::getAlpha(size_t offset)
 const unsigned char *Alphamap::getAlpha()
 {
   return amap;
+}
+
+std::vector<uint8_t> Alphamap::compress() const
+{
+  struct entry
+  {
+    enum mode_t
+    {
+      copy = 0,              // append value[0..count - 1]
+      fill = 1,              // append value[0] count times
+    };    
+    uint8_t count : 7;
+    uint8_t mode : 1;
+
+    uint8_t value[];
+  };
+
+  std::vector<uint8_t> data(amap, amap+4096);
+  auto current (data.begin());
+  auto const end (data.end());
+  int column_pos = 0;
+
+  auto const consume_fill
+  ( 
+    [&]
+  {
+    int8_t count (0);
+    column_pos %= 64;
+
+    while ((current + 1 < end) && *current == *(current + 1) && column_pos < 63)
+    {
+      ++current;
+      ++count;
+      ++column_pos;
+    }
+
+    // include current (current is incremented in the for loop)
+    if (count)
+    {
+      ++count;
+      ++column_pos;
+    }
+
+    return count;
+  }
+  );
+
+  std::vector<uint8_t> result;
+  boost::optional<std::size_t> current_copy_entry_offset (boost::none);
+  auto const current_copy_entry
+  ( 
+    [&]
+  {
+    return reinterpret_cast<entry*> (&*(result.begin() + *current_copy_entry_offset));
+  }
+  );
+
+  for (; current != end; ++current)
+  {
+    auto const fill (consume_fill());
+    if (fill)
+    {
+      current_copy_entry_offset = boost::none;
+
+      result.emplace_back();
+      result.emplace_back(*current);
+
+      entry* e (reinterpret_cast<entry*> (&*(result.rbegin() + 1)));
+      e->mode = entry::fill;
+      e->count = fill;
+
+      column_pos %= 64;
+    }
+    else
+    {
+      if ( current_copy_entry_offset == boost::none
+          || column_pos == 64
+          )
+      {
+        current_copy_entry_offset = result.size();
+        result.emplace_back();
+        result.emplace_back(*current);
+        current_copy_entry()->mode = entry::copy;
+        current_copy_entry()->count = 1;
+
+        column_pos %= 64;
+      }
+      else
+      {
+        result.emplace_back(*current);
+        current_copy_entry()->count++;
+      }
+
+      column_pos++;
+    }
+  }
+
+  return result;
 }

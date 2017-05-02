@@ -1240,7 +1240,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = _texture_set.num();
 
-  std::vector<std::vector<char>> compressed_alphamaps;
+  std::vector<std::vector<uint8_t>> compressed_alphamaps;
   int lMCAL_Size = 0;
 
   // convert bigAlpha to the correct format for saving
