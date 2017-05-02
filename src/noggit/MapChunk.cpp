@@ -1240,15 +1240,8 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = _texture_set.num();
 
-  std::vector<std::vector<uint8_t>> compressed_alphamaps;
-  int lMCAL_Size = 0;
-
-  // convert bigAlpha to the correct format for saving
-  // moved here since the alphamap are compressed now and require to be in the right format
-  if (use_big_alphamap)
-  {
-    compressed_alphamaps = _texture_set.get_compressed_alphamaps();
-  }    
+  std::vector<std::vector<uint8_t>> alphamaps = _texture_set.save_alpha(use_big_alphamap);
+  int lMCAL_Size = 0; 
 
   // MCLY data
   for (size_t j = 0; j < _texture_set.num(); ++j)
@@ -1271,12 +1264,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
       if (use_big_alphamap)
       {
         lLayer->flags |= FLAG_ALPHA_COMPRESSED;
-        lMCAL_Size += compressed_alphamaps[j - 1].size();
       }
-      else
-      {
-        lMCAL_Size += 2048;
-      }
+
+      lMCAL_Size += alphamaps[j - 1].size();
     }
   }
 
@@ -1381,27 +1371,10 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   char * lAlphaMaps = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
-  // always compress big alpha
-  if (use_big_alphamap)
+  for (auto alpha : alphamaps)
   {
-    for (auto alpha : compressed_alphamaps)
-    {
-      memcpy(lAlphaMaps, alpha.data(), alpha.size());
-      lAlphaMaps += alpha.size();
-    }
-  }
-  else
-  {
-    for (size_t j = 0; j < lMaps; j++)
-    {
-      unsigned char upperNibble, lowerNibble;
-      for (int k = 0; k < 2048; k++)
-      {
-        lowerNibble = (_texture_set.getAlpha(j, k * 2 + 0) & 0xF0);
-        upperNibble = (_texture_set.getAlpha(j, k * 2 + 1) & 0xF0);
-        lAlphaMaps[2048 * j + k] = (upperNibble)+(lowerNibble >> 4);
-      }
-    }
+    memcpy(lAlphaMaps, alpha.data(), alpha.size());
+    lAlphaMaps += alpha.size();
   }
 
   lCurrentPosition += 8 + lMCAL_Size;

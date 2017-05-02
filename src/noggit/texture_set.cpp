@@ -545,19 +545,45 @@ const uint8_t *TextureSet::getAlpha(size_t id)
   return alphamaps[id]->getAlpha();
 }
 
-std::vector<std::vector<uint8_t>> TextureSet::get_compressed_alphamaps()
+std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
 {
-  std::vector<std::vector<uint8_t>> compressed;
+  std::vector<std::vector<uint8_t>> amaps;
 
   if (nTextures > 1)
   {
-    for (int i = 0; i < nTextures - 1; ++i)
+    if (big_alphamap)
     {
-      compressed.emplace_back(alphamaps[i]->compress());
+      for (int i = 0; i < nTextures - 1; ++i)
+      {
+        amaps.emplace_back(alphamaps[i]->compress());
+      }
     }
+    else
+    {
+      uint8_t tab[4096 * 3];
+      alphas_to_old_alpha(tab);
+
+      auto const combine_nibble
+      (
+        [&] (int layer, int pos)
+        {
+          int index = layer * 4096 + pos * 2;
+          return ((tab[index] & 0xF0) >> 4) | (tab[index + 1] & 0xF0);
+        }
+      );
+
+      for (size_t layer = 0; layer < nTextures - 1; ++layer)
+      {
+        amaps.emplace_back();
+        for (int i = 0; i < 2048; ++i)
+        {
+          amaps.back().push_back(combine_nibble(layer, i));
+        }
+      }
+    }    
   }
 
-  return compressed;
+  return amaps;
 }
 
 scoped_blp_texture_reference TextureSet::texture(size_t id)
@@ -607,7 +633,7 @@ void TextureSet::convertToBigAlpha()
   if (nTextures < 2)
     return;
 
-  uint8_t tab[64 * 64 * 3];
+  uint8_t tab[4096 * 3];
 
   alphas_to_big_alpha(tab);
 
@@ -619,17 +645,21 @@ void TextureSet::convertToBigAlpha()
   generate_alpha_tex();
 }
 
-void TextureSet::convertToOldAlpha()
+// dest = tab [4096 * (nTextures - 1)]
+// call only if nTextures > 1
+void TextureSet::alphas_to_old_alpha(uint8_t* dest)
 {
-  // nothing to do
-  if (nTextures < 2)
-    return;
-
-  uint8_t tab[3][64 * 64];
+  auto alpha 
+  ( 
+    [&] (int layer, int pos = 0)
+    {
+      return dest + layer * 4096 + pos;
+    }
+  );
 
   for (size_t k = 0; k < nTextures - 1; k++)
   {
-    memcpy(tab[k], alphamaps[k]->getAlpha(), 64 * 64);
+    memcpy(alpha(k), alphamaps[k]->getAlpha(), 64 * 64);
   }
 
   float alphas[3] = { 0.0f, 0.0f, 0.0f };
@@ -638,7 +668,7 @@ void TextureSet::convertToOldAlpha()
   {
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      alphas[k] = static_cast<float>(tab[k][i]);
+      alphas[k] = static_cast<float>(*alpha(k, i));
     }
 
     for (int k = nTextures - 2; k >= 0; k--)
@@ -658,13 +688,24 @@ void TextureSet::convertToOldAlpha()
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      tab[k][i] = static_cast<uint8_t>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
+      *alpha(k, i) = static_cast<uint8_t>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
+}
+
+void TextureSet::convertToOldAlpha()
+{
+  // nothing to do
+  if (nTextures < 2)
+    return;
+
+  uint8_t tab[3 * 4096];
+
+  alphas_to_old_alpha(tab);
 
   for (size_t k = 0; k < nTextures - 1; k++)
   {
-    alphamaps[k]->setAlpha(tab[k]);
+    alphamaps[k]->setAlpha(tab + k * 4096);
   }
 
   generate_alpha_tex();
