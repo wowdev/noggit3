@@ -42,13 +42,13 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
     }
   }
 
-  // convert big alphas to the old format to be rendered correctly in noggit
-  if (mBigAlpha)
+  // always use big alpha for editing / rendering
+  if (!mBigAlpha)
   {
-    convertToOldAlpha();
+    convertToBigAlpha();
   }
 
-  regen_alpha_tex();
+  generate_alpha_tex();
 }
 
 int TextureSet::addTexture(scoped_blp_texture_reference texture)
@@ -92,57 +92,43 @@ void TextureSet::switchTexture (scoped_blp_texture_reference oldTexture, scoped_
 }
 
 // swap 2 textures of a chunk with their alpha
+// assume id1 < id2
 void TextureSet::swapTexture(int id1, int id2)
 {
   if (id1 >= 0 && id2 >= 0 && id1 < nTextures && id2 < nTextures)
   {
-    scoped_blp_texture_reference temp = textures[id1];
-    textures[id1] = textures[id2];
-    textures[id2] = temp;
+    std::swap(textures[id1], textures[id2]);
 
-    for (int j = 0; j < 64; j++)
+    int a1 = id1 - 1, a2 = id2 - 1;
+    auto alpha_it = alphamap_tex.begin();
+
+    if (id1)
     {
-      for (int i = 0; i < 64; ++i)
+      std::swap(alphamaps[a1], alphamaps[a2]);
+
+      for (int i = 0; i < 4096; ++i)
       {
-        float alphas[3] = { 0.0f, 0.0f, 0.0f };
-        float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
-
-        for (size_t k = 0; k < nTextures - 1; k++)
-        {
-          float f = static_cast<float>(alphamaps[k]->getAlpha(i + j * 64));
-          visibility[k + 1] = f;
-          alphas[k] = f;
-          for (size_t n = 0; n <= k; n++)
-            visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
-        }
-
-        float tmp = visibility[id1];
-        visibility[id1] = visibility[id2];
-        visibility[id2] = tmp;
-
-        for (int k = nTextures - 2; k >= 0; k--)
-        {
-          alphas[k] = visibility[k + 1];
-          for (int n = nTextures - 2; n > k; n--)
-          {
-            // prevent 0 division
-            if (alphas[n] == 255.0f)
-            {
-              alphas[k] = 0.0f;
-              break;
-            }
-            else
-              alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
-          }
-        }
-
-        for (size_t k = 0; k < nTextures - 1; k++)
-        {
-          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(alphas[k], 0.0f), 255.0f)));
-          alphamaps[k]->loadTexture();
-        }
+        std::swap(*(alpha_it + a1), *(alpha_it + a2));
+        alpha_it += 3;
       }
     }
+    else
+    {
+      unsigned char alpha[4096];
+      
+      for (int i = 0; i < 4096; ++i)
+      {
+        // base_alpha = 255 - (alphamap[0] + alphamap[1] + alphamap[2])
+        alpha[i] = 255 - (*alpha_it + *(alpha_it + 1) + *(alpha_it + 2));
+        // update the vector with all the alphas at the same time
+        *(alpha_it + a2) = alpha[i];
+        alpha_it += 3;
+      }
+
+      alphamaps[a2]->setAlpha(alpha);
+    }
+
+    update_alpha_tex();
   }
 }
 
@@ -152,6 +138,8 @@ void TextureSet::eraseTextures()
   {
     eraseTexture(i);
   }
+
+  generate_alpha_tex();
 }
 
 void TextureSet::eraseTexture(size_t id)
@@ -223,7 +211,6 @@ void TextureSet::startAnim(int id, int animtime)
     opengl::texture::set_active_texture (0);
     gl.matrixMode(GL_TEXTURE);
     gl.pushMatrix();
-
     
     const int spd = (texFlags[id] >> 3) & 0x7;
     const int dir = texFlags[id] & 0x7;
@@ -248,62 +235,51 @@ void TextureSet::stopAnim(int id)
 
 bool TextureSet::eraseUnusedTextures()
 {
-  bool texRemoved = false;
-
   if (nTextures < 2)
-    return texRemoved;
-
-  unsigned char alpha[64 * 64];
-  bool baseVisible = false;
-  size_t texCount = nTextures;
-
-  for (size_t k = nTextures - 1; k > 0; k--)
   {
-    bool texVisible = false;
-    // use a temp variable because nTexture can be decreased at the end of the loop
-    // if the texture above is fully opaque, don't test textures bellow
-    if (k >= texCount - 1 || baseVisible)
-    {
-      // reset baseVisible because this layer could be fully opaque
-      baseVisible = false;
-      memcpy(alpha, alphamaps[k - 1]->getAlpha(), 64 * 64);
-      for (size_t i = 0; i < 64 * 64; i++)
-      {
-        unsigned char a = alpha[i];
-        if (a > 0)
-        {
-          texVisible = true;
+    return false;
+  }
 
-          if (a < 255)
-          {
-            baseVisible = true;
-            break;
-          }
-        }
-        else
-        {
-          baseVisible = true;
-        }
+  std::set<int> visible_tex;
+  auto alpha_it (alphamap_tex.begin());
+
+  for (int i = 0; i < 4096 && visible_tex.size() < nTextures; ++i)
+  {
+    uint8_t sum = 0;
+    for (int n = 0; n < 3; ++n)
+    {
+      uint8_t a = *(alpha_it + n);
+      sum += a;
+      if (a > 0)
+      {
+        visible_tex.emplace(n + 1);
       }
     }
 
-    if (!texVisible)
+    // base layer visible
+    if (sum < 255)
     {
-      eraseTexture(k);
-      texRemoved = true;
+      visible_tex.emplace(0);
     }
+
+    alpha_it += 3;
   }
 
-  // there will always be at least 2 textures when entering the condition
-  if (!baseVisible)
+  if (visible_tex.size() < nTextures)
   {
-    // swap the base layer with the layer above
-    swapTexture(0, 1);
-    eraseTexture(1);
-    texRemoved = true;
+    for (int i = 3; i >= 0; --i)
+    {
+      if (visible_tex.find(i) == visible_tex.end())
+      {
+        eraseTexture(i);
+      }
+    }
+
+    generate_alpha_tex();
+    return true;
   }
 
-  return texRemoved;
+  return false;
 }
 
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
@@ -375,6 +351,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
   zPos = zbase;
   bool texVisible[4] = { false, false, false, false };
+  auto alpha_it (alphamap_tex.begin());
 
   for (int j = 0; j < 64; j++)
   {
@@ -403,20 +380,17 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
         texVisible[0] = texVisible[0] || baseVisible;
 
         xPos += TEXDETAILSIZE;
+        alpha_it += 3;
         continue;
       }
 
       float tPressure = pressure*brush->getValue(dist);
-      float alphas[3] = { 0.0f, 0.0f, 0.0f };
-      float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
+      float visibility[4] = { 255.f, 0.f , 0.f, 0.f};
 
       for (size_t k = 0; k < nTextures - 1; k++)
       {
-        float f = static_cast<float>(alphamaps[k]->getAlpha(i + j * 64));
-        visibility[k+1] = f;
-        alphas[k] = f;
-        for (size_t n = 0; n <= k; n++)
-          visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
+        visibility[k + 1] = alphamaps[k]->getAlpha(i + j * 64);
+        visibility[0] -= visibility[k + 1];
       }
 
       // nothing to do
@@ -424,10 +398,11 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
       {
         for (size_t k = 0; k < nTextures; k++)
         {
-          texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
+          texVisible[k] = texVisible[k] || (visibility[k] > 0.0);
         }
 
         xPos += TEXDETAILSIZE;
+        alpha_it += 3;
         continue;
       }
 
@@ -469,31 +444,18 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
         }
       }
 
-      for (int k = nTextures - 2; k >= 0; k--)
-      {
-        alphas[k] = visibility[k+1];
-        for (int n = nTextures - 2; n > k; n--)
-        {
-          // prevent 0 division
-          if (alphas[n] == 255.0f)
-          {
-            alphas[k] = 0.0f;
-            break;
-          }
-          else
-            alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
-        }
-      }
-
       for (size_t k = 0; k < nTextures; k++)
       {
         if (k < nTextures - 1)
         {
-          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f)));
+          uint8_t value = static_cast<uint8_t>(std::min(std::max(std::round(visibility[k + 1]), 0.0f), 255.0f));
+          alphamaps[k]->setAlpha(i + j * 64, value);
+          *(alpha_it + k) = value;
         }
         texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
       }
 
+      alpha_it += 3;
       xPos += TEXDETAILSIZE;
     }
     zPos += TEXDETAILSIZE;
@@ -504,29 +466,25 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     return false;
   }
 
-  regen_alpha_tex();
+  bool erased = false;
 
   // stop after k=0 because k is unsigned
-  for (size_t k = nTextures - 1; k < 4; k--)
-  {
+  for (size_t k = 3; k < 4; --k)
+  {  
     if (!texVisible[k])
-      eraseTexture(k);
-  }
-
-  if (nTextures < 2)
-  {
-    return changed;
-  }
-
-  for (size_t j = 0; j < nTextures - 1; j++)
-  {
-    if (j > 2)
     {
-      LogError << "WTF how did you get here??? Get a cookie." << std::endl;
-      continue;
+      eraseTexture(k);
+      erased = true;
     }
+  }
 
-    alphamaps[j]->loadTexture();
+  if (erased)
+  {
+    generate_alpha_tex();
+  }
+  else
+  {
+    update_alpha_tex();
   }
 
   return changed;
@@ -603,19 +561,16 @@ std::vector<std::vector<char>> TextureSet::get_compressed_alphamaps()
 
   if (nTextures > 1)
   {
-    unsigned char alpha[3 * 64 * 64];
-
-    alphas_to_big_alpha(alpha);
     for (int i = 0; i < nTextures - 1; ++i)
     {
-      compressed.emplace_back(get_compressed_alpha(i, alpha));
+      compressed.emplace_back(get_compressed_alpha(i));
     }
   }
 
   return compressed;
 }
 
-std::vector<char> TextureSet::get_compressed_alpha(std::size_t id, unsigned char* alphas)
+std::vector<char> TextureSet::get_compressed_alpha(std::size_t id)
 {
   struct entry
   {
@@ -630,7 +585,7 @@ std::vector<char> TextureSet::get_compressed_alpha(std::size_t id, unsigned char
     uint8_t value[];
   };
 
-  const unsigned char* alpha = alphas + 4096*id;
+  const unsigned char* alpha = alphamaps[id]->getAlpha();
   std::vector<char> data(alpha, alpha+4096);
   auto current (data.begin());
   auto const end (data.end());
@@ -768,8 +723,9 @@ void TextureSet::convertToBigAlpha()
   for (size_t k = 0; k < nTextures - 1; k++)
   {
     alphamaps[k]->setAlpha(tab + 4096 * k);
-    alphamaps[k]->loadTexture();
   }
+
+  generate_alpha_tex();
 }
 
 void TextureSet::convertToOldAlpha()
@@ -818,8 +774,9 @@ void TextureSet::convertToOldAlpha()
   for (size_t k = 0; k < nTextures - 1; k++)
   {
     alphamaps[k]->setAlpha(tab[k]);
-    alphamaps[k]->loadTexture();
   }
+
+  generate_alpha_tex();
 }
 
 void TextureSet::mergeAlpha(size_t id1, size_t id2)
@@ -875,10 +832,10 @@ void TextureSet::mergeAlpha(size_t id1, size_t id2)
   for (size_t k = 0; k < nTextures - 1; k++)
   {
     alphamaps[k]->setAlpha(tab[k]);
-    alphamaps[k]->loadTexture();
   }
 
   eraseTexture(id2);
+  generate_alpha_tex();
 }
 
 bool TextureSet::removeDuplicate()
@@ -907,26 +864,33 @@ void TextureSet::bind_alpha(std::size_t id)
 }
 
 
-void TextureSet::regen_alpha_tex()
+void TextureSet::generate_alpha_tex()
 {
   alphamap_tex.clear();
-
-  unsigned char tab[3 * 4096];
-
-  alphas_to_big_alpha(tab);
 
   for (int i = 0; i < 4096; ++i)
   {
     for (int layer = 0; layer < 3; ++layer)
     {
-      alphamap_tex.push_back(layer < nTextures - 1 ? tab[i + 4096 * layer] : 0);
+      alphamap_tex.push_back(layer < nTextures - 1 ? alphamaps[layer]->getAlpha(i) : 0);
     }    
   }
 
+  update_alpha_tex();
+}
+
+void TextureSet::update_alpha_tex()
+{
   amap_gl_tex.bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_UNSIGNED_BYTE, alphamap_tex.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  // for the 2D view
+  for (int i = 0; i < nTextures - 1; ++i)
+  {
+    alphamaps[i]->loadTexture();
+  }
 }

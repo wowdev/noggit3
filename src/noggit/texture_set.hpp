@@ -61,8 +61,9 @@ public:
 
 private:
   void alphas_to_big_alpha(unsigned char* dest);
-  std::vector<char> get_compressed_alpha(std::size_t id, unsigned char* alphas);
-  void regen_alpha_tex();
+  std::vector<char> get_compressed_alpha(std::size_t id);
+  void generate_alpha_tex();
+  void update_alpha_tex();
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
