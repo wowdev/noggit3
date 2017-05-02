@@ -602,6 +602,7 @@ void main()
 
 uniform mat4 model_view;
 
+uniform sampler2D shadow_map;
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
@@ -658,8 +659,9 @@ void main()
     // areaid_color.a = 0.7
     blend = blend * 0.3 + areaid_color;
   }
+   float shadow_alpha = texture2D (shadow_map, vary_alphacoord).a;
 
-  gl_FragColor = blend;
+  gl_FragColor = vec4 (blend.rgb * (1.0 - shadow_alpha), 1.0);
 }
 )code"
       }
@@ -686,7 +688,6 @@ void main()
                  , draw_wireframe
                  , cursor_type
                  , area_id_colors
-                 , math::vector_4d {skies->colorSet[WATER_COLOR_DARK] * 0.3f, 1.f}
                  , mCurrentSelection
                  , animtime
                  );
@@ -958,8 +959,8 @@ void main()
                         , is_hidden
                         , draw_wmo_doodads
                         , draw_fog
-                        , skies->colorSet[WATER_COLOR_LIGHT]
-                        , skies->colorSet[WATER_COLOR_DARK]
+                        , skies->colorSet[RIVER_COLOR_LIGHT]
+                        , skies->colorSet[RIVER_COLOR_DARK]
                         , mCurrentSelection
                         , animtime
                         , [this] (bool on) { return outdoorLights (on); }
@@ -991,8 +992,8 @@ void main()
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawWater ( water_shader
-                      , skies->colorSet[WATER_COLOR_LIGHT]
-                      , skies->colorSet[WATER_COLOR_DARK]
+                      , skies->colorSet[OCEAN_COLOR_LIGHT]
+                      , skies->colorSet[OCEAN_COLOR_DARK]
                       , animtime
                       , water_layer
                       );
