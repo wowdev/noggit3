@@ -919,7 +919,6 @@ void TextureSet::regen_alpha_tex()
   {
     for (int layer = 0; layer < 3; ++layer)
     {
-
       alphamap_tex.push_back(layer < nTextures - 1 ? tab[i + 4096 * layer] : 0);
     }    
   }

@@ -88,6 +88,7 @@ public:
                   ) const;
 
   void draw ( math::frustum const& frustum
+            , opengl::scoped::use_program& mcnk_shader
             , const float& cull_distance
             , const math::vector_3d& camera
             , bool show_unpaintable_chunks

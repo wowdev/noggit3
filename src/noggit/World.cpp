@@ -564,9 +564,111 @@ void World::draw ( math::vector_3d const& cursor_pos
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
+    opengl::program const mcnk_program
+    { { GL_VERTEX_SHADER
+      , R"code(
+#version 110
+
+attribute vec4 position;
+attribute vec3 normal;
+attribute vec2 texcoord;
+attribute vec2 alphacoord;
+attribute vec3 mccv;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec2 vary_alphacoord;
+varying vec3 vary_normal;
+varying vec3 vary_mccv;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+  //! \todo gl_NormalMatrix deprecated
+  vary_normal = normalize (gl_NormalMatrix * normal);
+  vary_position = position;
+  vary_texcoord = texcoord;
+  vary_alphacoord = alphacoord;
+  vary_mccv = mccv;
+}
+)code"
+      }
+      ,{ GL_FRAGMENT_SHADER
+      , R"code(
+#version 110
+
+uniform mat4 model_view;
+
+uniform sampler2D tex0;
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+uniform sampler2D tex3;
+uniform sampler2D alphamap;
+uniform int layer_count;
+uniform bool has_mccv;
+uniform bool cant_paint;
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec2 vary_alphacoord;
+varying vec3 vary_normal;
+varying vec3 vary_mccv;
+
+vec4 blend_by_alpha (in vec4 source, in vec4 dest)
+{
+  return source * source.w + dest * (1.0 - source.w);
+}
+
+vec4 texture_blend() 
+{
+  if(layer_count == 0)
+    return vec4 (1.0, 1.0, 1.0, 1.0);
+
+  vec3 alpha = texture2D (alphamap, vary_alphacoord).rgb;
+  float a0 = alpha.r;  
+  float a1 = alpha.g;
+  float a2 = alpha.b;
+
+  vec3 t0 = texture2D(tex0, vary_texcoord).rgb;
+  vec3 t1 = texture2D(tex1, vary_texcoord).rgb;
+  vec3 t2 = texture2D(tex2, vary_texcoord).rgb;
+  vec3 t3 = texture2D(tex3, vary_texcoord).rgb;
+
+  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1);
+}
+
+void main()
+{
+  vec4 blend = texture_blend();
+  if(has_mccv)
+  {
+    blend = vec4(blend.xyz * vary_mccv, blend.a);
+  }
+  if(cant_paint)
+  {
+    blend *= vec4(1, 0, 0, 1);
+  }
+
+  gl_FragColor = blend;
+}
+)code"
+      }
+    };
+
+    opengl::scoped::use_program mcnk_shader{ mcnk_program };
+
+    mcnk_shader.uniform("model_view", opengl::matrix::model_view());
+    mcnk_shader.uniform("projection", opengl::matrix::projection());
+    mcnk_shader.attrib("texcoord", detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    mcnk_shader.attrib("alphacoord", alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->draw ( frustum
+                 , mcnk_shader
                  , culldistance
                  , camera_pos
                  , show_unpaintable_chunks
@@ -581,6 +683,11 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , mCurrentSelection
                  , animtime
                  );
+    }
+
+    for (int i = 0; i < 5; ++i)
+    {
+      opengl::texture::disable_texture(i);
     }
   }
 
