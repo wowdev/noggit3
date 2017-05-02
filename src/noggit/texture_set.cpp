@@ -605,7 +605,7 @@ void TextureSet::alphas_to_big_alpha(uint8_t* dest)
 
   for (size_t k = 0; k < nTextures - 1; k++)
   {
-    memcpy(alpha(k), alphamaps[k]->getAlpha(), 64 * 64);
+    memcpy(alpha(k), alphamaps[k]->getAlpha(), 4096);
   }
 
   float alphas[3] = { 0.0f, 0.0f, 0.0f };
@@ -800,12 +800,19 @@ void TextureSet::generate_alpha_tex()
 {
   alphamap_tex.clear();
 
-  for (int i = 0; i < 4096; ++i)
+  if (nTextures < 2)
   {
-    for (int layer = 0; layer < 3; ++layer)
+    alphamap_tex.insert(alphamap_tex.end(), 4096 * 3, 0);
+  }
+  else
+  {
+    for (int i = 0; i < 4096; ++i)
     {
-      alphamap_tex.push_back(layer < nTextures - 1 ? alphamaps[layer]->getAlpha(i) : 0);
-    }    
+      for (int layer = 0; layer < 3; ++layer)
+      {
+        alphamap_tex.push_back(layer < nTextures - 1 ? alphamaps[layer]->getAlpha(i) : 0);
+      }    
+    }
   }
 
   update_alpha_tex();
@@ -821,8 +828,11 @@ void TextureSet::update_alpha_tex()
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   // for the 2D view
-  for (int i = 0; i < nTextures - 1; ++i)
+  if (nTextures)
   {
-    alphamaps[i]->loadTexture();
+    for (int i = 0; i < nTextures - 1; ++i)
+    {
+      alphamaps[i]->loadTexture();
+    }
   }
 }
