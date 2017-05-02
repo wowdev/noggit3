@@ -614,7 +614,6 @@ void MapChunk::draw ( math::frustum const& frustum
                     , bool draw_wireframe_overlay
                     , int cursor_type
                     , std::map<int, misc::random_color>& area_id_colors
-                    , math::vector_4d shadow_color
                     , boost::optional<selection_type> selection
                     , int animtime
                     )
@@ -645,6 +644,10 @@ void MapChunk::draw ( math::frustum const& frustum
     mcnk_shader.uniform(ss.str(), 1 + i);
     _texture_set.bindTexture(i, i + 1);
   }
+
+  opengl::texture::set_active_texture(5);
+  shadow.bind();
+  mcnk_shader.uniform("shadow_map", 5);
 
   mcnk_shader.uniform("has_mccv", (hasMCCV ? 1 : 0));
   mcnk_shader.uniform("layer_count", int(_texture_set.num()));

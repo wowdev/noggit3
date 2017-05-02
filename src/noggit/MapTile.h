@@ -70,7 +70,6 @@ public:
             , bool draw_wireframe_overlay
             , int cursor_type
             , std::map<int, misc::random_color>& area_id_colors
-            , math::vector_4d shadow_color
             , boost::optional<selection_type> selection
             , int animtime
             );
