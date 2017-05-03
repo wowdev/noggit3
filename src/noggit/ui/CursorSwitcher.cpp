@@ -13,7 +13,7 @@ namespace noggit
 {
   namespace ui
   {
-    cursor_switcher::cursor_switcher(QWidget* parent, math::vector_4d& color, int& cursor_type)
+    cursor_switcher::cursor_switcher(QWidget* parent, math::vector_4d& color, noggit::unsigned_int_property& cursor_type)
       : widget (parent)
     {
       setWindowTitle("Cursor Options");
@@ -40,15 +40,25 @@ namespace noggit
       group->addButton (butt_terrain_disk, 4);
       group->addButton (butt_none, 0);
 
-      group->button (cursor_type)->setChecked (true);
+      group->button (cursor_type.get())->setChecked (true);
 
-      connect ( group, qOverload<int> (&QButtonGroup::buttonClicked)
-              , [&] (int id)
-                {
-                  cursor_type = id;
-                }
+      connect ( group
+              , qOverload<int> (&QButtonGroup::buttonClicked)
+               , [&] (int id)
+                 {
+                   QSignalBlocker const blocker(&cursor_type);
+                   cursor_type.set(id);
+                 }
               );
 
+      connect ( &cursor_type
+              , &noggit::unsigned_int_property::changed
+              , [group] (unsigned int id)
+                {
+                  QSignalBlocker const blocker(group);
+                  group->button(id)->setChecked (true);
+                }
+              );
 
       auto color_picker (new color_widgets::ColorSelector (this));
 

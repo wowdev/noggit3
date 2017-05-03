@@ -836,7 +836,7 @@ void MapView::createGUI()
             , MOD_shift
             , [this]
               {
-                cursor_type = ++cursor_type % 5;
+                cursor_type.set ((cursor_type.get() + 1) % 5);
               }
             , [this] { return terrainMode != editing_mode::object; }
             );
@@ -1299,7 +1299,7 @@ MapView::MapView( math::degrees camera_yaw0
 
     if (myConfigfile.keyExists("CursorType"))
     {
-      cursor_type = myConfigfile.read<int>("CursorType");
+      cursor_type.set (myConfigfile.read<int>("CursorType"));
     }
   }
 
@@ -2316,7 +2316,7 @@ void MapView::displayViewMode_3D()
 
   _world->draw ( _cursor_pos
                , terrainMode == editing_mode::mccv ? shader_color : cursor_color
-               , cursor_type
+               , cursor_type.get()
                , radius
                , texturingTool->show_unpaintable_chunks()
                , _draw_contour.get()
