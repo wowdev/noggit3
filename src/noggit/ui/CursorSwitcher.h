@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <noggit/unsigned_int_property.hpp>
 #include <noggit/ui/widget.hpp>
 
 #include <math/vector_4d.hpp>
@@ -13,7 +14,7 @@ namespace noggit
     class cursor_switcher : public widget
     {
     public:
-      cursor_switcher(QWidget* parent, math::vector_4d& color, int& cursor_type);
+      cursor_switcher(QWidget* parent, math::vector_4d& color, noggit::unsigned_int_property& cursor_type);
     };
   }
 }
