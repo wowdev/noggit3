@@ -836,7 +836,7 @@ void MapView::createGUI()
             , MOD_shift
             , [this]
               {
-                cursor_type = ++cursor_type % 4;
+                cursor_type = ++cursor_type % 5;
               }
             , [this] { return terrainMode != editing_mode::object; }
             );
@@ -2270,7 +2270,7 @@ void MapView::displayViewMode_3D()
   }
 
   //! \ todo: make the current tool return the radius
-  float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
+  float radius = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
   math::vector_3d ref_pos;
   bool angled_mode = false, use_ref_pos = false;
 
@@ -2290,7 +2290,7 @@ void MapView::displayViewMode_3D()
     break;
   case editing_mode::paint:
     radius = texturingTool->brush_radius();
-    hardness = texturingTool->hardness();
+    inner_radius = texturingTool->hardness();
     break;
   case editing_mode::water:
     radius = guiWater->brushRadius();
@@ -2318,7 +2318,6 @@ void MapView::displayViewMode_3D()
                , terrainMode == editing_mode::mccv ? shader_color : cursor_color
                , cursor_type
                , radius
-               , hardness
                , texturingTool->show_unpaintable_chunks()
                , _draw_contour.get()
                , inner_radius

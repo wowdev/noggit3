@@ -90,7 +90,6 @@ public:
             , math::vector_4d const& cursor_color
             , int cursor_type
             , float brushRadius
-            , float hardness
             , bool show_unpaintable_chunks
             , bool draw_contour
             , float innerRadius

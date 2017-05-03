@@ -434,7 +434,6 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , math::vector_4d const& cursor_color
                  , int cursor_type
                  , float brushRadius
-                 , float hardness
                  , bool show_unpaintable_chunks
                  , bool draw_contour
                  , float innerRadius
@@ -596,7 +595,7 @@ void main()
 }
 )code"
       }
-      ,{ GL_FRAGMENT_SHADER
+      , { GL_FRAGMENT_SHADER
       , R"code(
 #version 110
 
@@ -613,6 +612,12 @@ uniform bool has_mccv;
 uniform bool cant_paint;
 uniform bool draw_areaid_overlay;
 uniform vec4 areaid_color;
+
+uniform bool draw_cursor_circle;
+uniform vec3 cursor_position;
+uniform float outer_cursor_radius;
+uniform float inner_cursor_ratio;
+uniform vec4 cursor_color;
 
 varying vec4 vary_position;
 varying vec2 vary_texcoord;
@@ -662,6 +667,15 @@ void main()
    float shadow_alpha = texture2D (shadow_map, vary_alphacoord).a;
 
   gl_FragColor = vec4 (blend.rgb * (1.0 - shadow_alpha), 1.0);
+
+  if (draw_cursor_circle)
+  {
+    float cursor_dist = abs (distance (vary_position.xz, cursor_position.xz));
+    if(abs(cursor_dist - outer_cursor_radius) <= 0.1 || abs (cursor_dist - (outer_cursor_radius * inner_cursor_ratio)) <= 0.1)
+    {
+      gl_FragColor = blend_by_alpha (cursor_color, gl_FragColor);
+    }    
+  }
 }
 )code"
       }
@@ -673,6 +687,20 @@ void main()
     mcnk_shader.uniform("projection", opengl::matrix::projection());
     mcnk_shader.attrib("texcoord", detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     mcnk_shader.attrib("alphacoord", alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    if (cursor_type == 4)
+    {
+      mcnk_shader.uniform ("draw_cursor_circle", 1);
+      mcnk_shader.uniform ("cursor_position", cursor_pos);
+      mcnk_shader.uniform ("outer_cursor_radius", brushRadius);
+      mcnk_shader.uniform ("inner_cursor_ratio", innerRadius);
+      mcnk_shader.uniform ("cursor_color", cursor_color);
+    }
+    else
+    {
+      mcnk_shader.uniform ("draw_cursor_circle", 0);
+    }   
+    
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
@@ -721,10 +749,6 @@ void main()
         if (innerRadius >= 0.01f)
         {
           render_disk(cursor_pos, brushRadius * innerRadius, cursor_color, true);
-        }
-        if (hardness >= 0.01f)
-        {
-          render_disk(cursor_pos, brushRadius * hardness, cursor_color, true);
         }
       }
       else if (cursor_type == 2)
