@@ -654,27 +654,27 @@ vec4 texture_blend()
 
 void main()
 {
-  vec4 blend = texture_blend();
+  gl_FragColor = texture_blend();
   if(has_mccv)
   {
-    blend = vec4(blend.xyz * vary_mccv, blend.a);
+    gl_FragColor = vec4(gl_FragColor.rgb * vary_mccv, 1);
   }
   if(cant_paint)
   {
-    blend *= vec4(1, 0, 0, 1);
+    gl_FragColor *= vec4(1, 0, 0, 1);
   }
   if(draw_areaid_overlay)
   {
-    blend = blend * 0.3 + areaid_color;
+    gl_FragColor = gl_FragColor * 0.3 + areaid_color;
   }
   if(draw_impassible_flag)
   {
-    blend = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), blend);
+    gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), gl_FragColor);
   }
   
   float shadow_alpha = texture2D (shadow_map, vary_alphacoord).a;
 
-  gl_FragColor = vec4 (blend.rgb * (1.0 - shadow_alpha), 1.0);
+  gl_FragColor = vec4 (gl_FragColor.rgb * (1.0 - shadow_alpha), 1.0);
 
   if (draw_terrain_height_contour)
   {
