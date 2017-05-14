@@ -654,6 +654,9 @@ void MapChunk::draw ( math::frustum const& frustum
   mcnk_shader.uniform("cant_paint", (cantPaint ? 1 : 0));
   mcnk_shader.uniform("draw_areaid_overlay", (draw_areaid_overlay ? 1 : 0));
 
+  bool impassible = draw_chunk_flag_overlay && (Flags & FLAG_IMPASS);
+  mcnk_shader.uniform ("draw_impassible_flag", (impassible ? 1 : 0));
+
   if (draw_areaid_overlay)
   {
     mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
