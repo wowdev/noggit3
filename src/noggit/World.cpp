@@ -666,7 +666,7 @@ void main()
   }
   if(draw_impassible_flag)
   {
-    blend = vec4(blend.rgb * 0.5 + vec3(0.5, 0.5, 0.5), 1); 
+    blend = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), blend);
   }
   
   float shadow_alpha = texture2D (shadow_map, vary_alphacoord).a;
