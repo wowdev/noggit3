@@ -649,13 +649,13 @@ void MapChunk::draw ( math::frustum const& frustum
   shadow.bind();
   mcnk_shader.uniform("shadow_map", 5);
 
-  mcnk_shader.uniform("has_mccv", (hasMCCV ? 1 : 0));
-  mcnk_shader.uniform("layer_count", int(_texture_set.num()));
-  mcnk_shader.uniform("cant_paint", (cantPaint ? 1 : 0));
-  mcnk_shader.uniform("draw_areaid_overlay", (draw_areaid_overlay ? 1 : 0));
+  mcnk_shader.uniform("has_mccv", (int)hasMCCV);
+  mcnk_shader.uniform("layer_count", (int)_texture_set.num());
+  mcnk_shader.uniform("cant_paint", (int)cantPaint);
+  mcnk_shader.uniform("draw_areaid_overlay", (int)draw_areaid_overlay);
 
   bool impassible = draw_chunk_flag_overlay && (Flags & FLAG_IMPASS);
-  mcnk_shader.uniform ("draw_impassible_flag", (impassible ? 1 : 0));
+  mcnk_shader.uniform ("draw_impassible_flag", (int)impassible);
 
   if (draw_areaid_overlay)
   {
