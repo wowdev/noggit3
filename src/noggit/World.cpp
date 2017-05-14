@@ -612,6 +612,7 @@ uniform bool has_mccv;
 uniform bool cant_paint;
 uniform bool draw_areaid_overlay;
 uniform vec4 areaid_color;
+uniform bool draw_impassible_flag;
 
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -661,10 +662,14 @@ void main()
   }
   if(draw_areaid_overlay)
   {
-    // areaid_color.a = 0.7
     blend = blend * 0.3 + areaid_color;
   }
-   float shadow_alpha = texture2D (shadow_map, vary_alphacoord).a;
+  if(draw_impassible_flag)
+  {
+    blend = vec4(blend.rgb * 0.5 + vec3(0.5, 0.5, 0.5), 1); 
+  }
+  
+  float shadow_alpha = texture2D (shadow_map, vary_alphacoord).a;
 
   gl_FragColor = vec4 (blend.rgb * (1.0 - shadow_alpha), 1.0);
 
