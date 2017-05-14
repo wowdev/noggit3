@@ -364,17 +364,6 @@ void MapTile::intersect (math::ray const& ray, selection_result* results) const
   }
 }
 
-void MapTile::drawLines ( opengl::scoped::use_program& line_shader
-                        , math::frustum const& frustum
-                        , const float& cull_distance
-                        , const math::vector_3d& camera
-                        , bool draw_hole_lines
-                        )
-{
-  for (int j = 0; j<16; ++j)
-    for (int i = 0; i<16; ++i)
-      mChunks[j][i]->drawLines (line_shader, frustum, cull_distance, camera, draw_hole_lines);
-}
 
 void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 {

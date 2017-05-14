@@ -614,6 +614,7 @@ uniform bool draw_areaid_overlay;
 uniform vec4 areaid_color;
 uniform bool draw_impassible_flag;
 uniform bool draw_terrain_height_contour;
+uniform bool draw_lines;
 
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -627,7 +628,9 @@ varying vec2 vary_alphacoord;
 varying vec3 vary_normal;
 varying vec3 vary_mccv;
 
-const float contour_height_delta = 4.0;
+const float TILESIZE = 533.33333f;
+const float CHUNKSIZE = ((TILESIZE) / 16.0f);
+const float UNITSIZE = (CHUNKSIZE / 8.0f);
 
 vec4 blend_by_alpha (in vec4 source, in vec4 dest)
 {
@@ -657,18 +660,22 @@ void main()
   vec3 fw = fwidth(vary_position.xyz);
 
   gl_FragColor = texture_blend();
+
   if(has_mccv)
   {
     gl_FragColor = vec4(gl_FragColor.rgb * vary_mccv, 1);
   }
+
   if(cant_paint)
   {
     gl_FragColor *= vec4(1, 0, 0, 1);
   }
+
   if(draw_areaid_overlay)
   {
     gl_FragColor = gl_FragColor * 0.3 + areaid_color;
   }
+
   if(draw_impassible_flag)
   {
     gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), gl_FragColor);
@@ -685,6 +692,17 @@ void main()
     float alpha  = smoothstep(-1.5*df, 1.5*df, f);
 
     gl_FragColor = vec4(gl_FragColor.rgb * alpha, 1);
+  }
+
+  if(draw_lines)
+  {
+    float fx = abs(fract((vary_position.x + CHUNKSIZE/2) / CHUNKSIZE) - 0.5);
+    float dfx = abs(fw.x / CHUNKSIZE);
+    float fz = abs(fract((vary_position.z + CHUNKSIZE/2) / CHUNKSIZE) - 0.5);
+    float dfz = abs(fw.z / CHUNKSIZE);
+    float alpha = 1 - min(smoothstep(0, dfx, fx), smoothstep(0, dfz, fz));
+
+    gl_FragColor = blend_by_alpha (vec4(0.8, 0, 0, alpha), gl_FragColor);
   }
 
   if (draw_cursor_circle)
@@ -706,7 +724,7 @@ void main()
     mcnk_shader.uniform("projection", opengl::matrix::projection());
     mcnk_shader.attrib("texcoord", detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     mcnk_shader.attrib("alphacoord", alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
+    mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     if (cursor_type == 4)
     {
       mcnk_shader.uniform ("draw_cursor_circle", 1);
@@ -835,51 +853,6 @@ void main()
     gl.color3f(0.0f, 0.0f, 1.0f);
     render_sphere(vertexCenter(), 2.0f, cursor_color);
     gl.color3f(1.0f, 1.0f, 1.0f);
-  }
-
-
-  if (draw_lines)
-  {
-    opengl::program program { { GL_VERTEX_SHADER
-                              , R"code(
-#version 110
-
-attribute vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-void main()
-{
-  gl_Position = projection * model_view * (position + vec4 (0.0, 0.5, 0.0, 0.0));
-}
-)code"
-                              }
-                            , { GL_FRAGMENT_SHADER
-                              , R"code(
-#version 110
-
-uniform vec4 color;
-
-void main()
-{
-  gl_FragColor = color;
-}
-)code"
-                              }
-                            };
-
-
-    opengl::scoped::use_program line_shader {program};
-
-    line_shader.uniform ("model_view", opengl::matrix::model_view());
-    line_shader.uniform ("projection", opengl::matrix::projection());
-
-    setupFog (draw_fog);
-    for (MapTile* tile : mapIndex.loaded_tiles())
-    {
-      tile->drawLines (line_shader, frustum, culldistance, camera_pos, draw_hole_lines);
-    }
   }
 
   if (draw_mfbo)
