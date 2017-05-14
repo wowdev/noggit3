@@ -676,15 +676,6 @@ void main()
 
   gl_FragColor = vec4 (blend.rgb * (1.0 - shadow_alpha), 1.0);
 
-  if (draw_cursor_circle)
-  {
-    float cursor_dist = abs (distance (vary_position.xz, cursor_position.xz));
-    if(abs(cursor_dist - outer_cursor_radius) <= 0.1 || abs (cursor_dist - (outer_cursor_radius * inner_cursor_ratio)) <= 0.1)
-    {
-      gl_FragColor = blend_by_alpha (cursor_color, gl_FragColor);
-    }    
-  }
-
   if (draw_terrain_height_contour)
   {
     float h = abs (mod (vary_position.y, contour_height_delta));
@@ -696,6 +687,19 @@ void main()
     {
       gl_FragColor = vec4(gl_FragColor.rgb * (h / 0.25), 1);
     }
+  }
+
+  if (draw_cursor_circle)
+  {
+    float cursor_dist = abs (distance (vary_position.xz, cursor_position.xz));
+    float diff = min( abs(cursor_dist - outer_cursor_radius)
+                    , abs(cursor_dist - (outer_cursor_radius * inner_cursor_ratio))
+                    );
+
+    if(diff <= 0.2)
+    {
+      gl_FragColor = blend_by_alpha (vec4(cursor_color.rgb, (0.2 - diff) / 0.2), gl_FragColor);
+    }  
   }
 }
 )code"
