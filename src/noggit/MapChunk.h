@@ -104,7 +104,6 @@ public:
             );
   //! \todo only this function should be public, all others should be called from it
 
-  void drawContour();
   void intersect (math::ray const&, selection_result*);
   void drawLines ( opengl::scoped::use_program&
                  , math::frustum const& frustum

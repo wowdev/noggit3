@@ -21,51 +21,8 @@
 #include <iostream>
 #include <map>
 
-namespace
-{
-  GLuint Contour = 0;
-  float CoordGen[4];
-}
-static const int CONTOUR_WIDTH = 128;
-
 static const float texDetail = 8.0f;
-
 static const float TEX_RANGE = 1.0f;
-
-namespace
-{
-  void GenerateContourMap()
-  {
-    unsigned char CTexture[CONTOUR_WIDTH * 4];
-
-    CoordGen[0] = 0.0f;
-    CoordGen[1] = 0.25f;
-    CoordGen[2] = 0.0f;
-    CoordGen[3] = 0.0f;
-
-    for (int i = 0; i<(CONTOUR_WIDTH * 4); ++i)
-      CTexture[i] = 0;
-    CTexture[3 + CONTOUR_WIDTH / 2] = 0xff;
-    CTexture[7 + CONTOUR_WIDTH / 2] = 0xff;
-    CTexture[11 + CONTOUR_WIDTH / 2] = 0xff;
-
-    opengl::scoped::bool_setter<GL_TEXTURE_2D, GL_TRUE> const texture_2d;
-    gl.genTextures(1, &Contour);
-    gl.bindTexture(GL_TEXTURE_2D, Contour);
-
-    gl.texImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, CONTOUR_WIDTH, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
-    gl.generateMipmap (GL_TEXTURE_2D);
-
-    opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
-    gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-    gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
-
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  }
-}
-
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   : mt(maintile)
   , use_big_alphamap(bigAlpha)
@@ -584,23 +541,6 @@ void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
   }
 }
 
-void MapChunk::drawContour()
-{
-  gl.color4f(1, 1, 1, 1);
-  opengl::scoped::texture_setter<0, GL_TRUE> const texture;
-  opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  opengl::scoped::bool_setter<GL_ALPHA_TEST, GL_FALSE> const alpha_test;
-  if (Contour == 0)
-    GenerateContourMap();
-  gl.bindTexture(GL_TEXTURE_2D, Contour);
-
-  opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
-  gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
-
-  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-}
 
 void MapChunk::draw ( math::frustum const& frustum
                     , opengl::scoped::use_program& mcnk_shader
@@ -656,6 +596,7 @@ void MapChunk::draw ( math::frustum const& frustum
 
   bool impassible = draw_chunk_flag_overlay && (Flags & FLAG_IMPASS);
   mcnk_shader.uniform ("draw_impassible_flag", (int)impassible);
+  mcnk_shader.uniform ("draw_terrain_height_contour", (int)draw_contour);
 
   if (draw_areaid_overlay)
   {
