@@ -487,60 +487,6 @@ bool MapChunk::is_visible ( const float& cull_distance
       && (((camera - vcenter).length() - chunk_radius) < cull_distance);
 }
 
-void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
-                         , math::frustum const& frustum
-                         , const float& cull_distance
-                         , const math::vector_3d& camera
-                         , bool draw_hole_lines
-                         )
-{
-  if (!is_visible (cull_distance, frustum, camera))
-    return;
-
-  opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
-  gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-  gl.lineWidth (1.5);
-
-  line_shader.attrib ("position", vertices, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-  if ((px != 15) && (py != 0))
-  {
-    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
-  }
-  else if ((px == 15) && (py == 0))
-  {
-    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
-  }
-  else if (px == 15)
-  {
-    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
-  }
-  else if (py == 0)
-  {
-    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
-  }
-
-  if (draw_hole_lines)
-  {
-    // Draw hole lines if view_subchunk_lines is true
-    line_shader.uniform ("color", math::vector_4d (0.f, 0.f, 1.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
-  }
-}
-
 
 void MapChunk::draw ( math::frustum const& frustum
                     , opengl::scoped::use_program& mcnk_shader

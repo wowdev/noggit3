@@ -105,12 +105,6 @@ public:
   //! \todo only this function should be public, all others should be called from it
 
   void intersect (math::ray const&, selection_result*);
-  void drawLines ( opengl::scoped::use_program&
-                 , math::frustum const& frustum
-                 , const float& cull_distance
-                 , const math::vector_3d& camera
-                 , bool draw_hole_lines
-                 );
   void drawTextures (int animtime);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
 

@@ -74,12 +74,6 @@ public:
             , int animtime
             );
   void intersect (math::ray const&, selection_result*) const;
-  void drawLines ( opengl::scoped::use_program& line_shader
-                 , math::frustum const& frustum
-                 , const float& cull_distance
-                 , const math::vector_3d& camera
-                 , bool draw_hole_lines
-                 );
   void drawWater ( opengl::scoped::use_program& water_shader
                  , math::vector_3d water_color_light
                  , math::vector_3d water_color_dark
