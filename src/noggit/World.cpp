@@ -613,6 +613,7 @@ uniform bool cant_paint;
 uniform bool draw_areaid_overlay;
 uniform vec4 areaid_color;
 uniform bool draw_impassible_flag;
+uniform bool draw_terrain_height_contour;
 
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -625,6 +626,8 @@ varying vec2 vary_texcoord;
 varying vec2 vary_alphacoord;
 varying vec3 vary_normal;
 varying vec3 vary_mccv;
+
+const float contour_height_delta = 4.0;
 
 vec4 blend_by_alpha (in vec4 source, in vec4 dest)
 {
@@ -680,6 +683,19 @@ void main()
     {
       gl_FragColor = blend_by_alpha (cursor_color, gl_FragColor);
     }    
+  }
+
+  if (draw_terrain_height_contour)
+  {
+    float h = abs (mod (vary_position.y, contour_height_delta));
+    if(h > contour_height_delta * 0.5)
+    {
+      h = (contour_height_delta - h);
+    }
+    if(h <= 0.25)
+    {
+      gl_FragColor = vec4(gl_FragColor.rgb * (h / 0.25), 1);
+    }
   }
 }
 )code"
