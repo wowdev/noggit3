@@ -654,6 +654,8 @@ vec4 texture_blend()
 
 void main()
 {
+  vec3 fw = fwidth(vary_position.xyz);
+
   gl_FragColor = texture_blend();
   if(has_mccv)
   {
@@ -678,28 +680,20 @@ void main()
 
   if (draw_terrain_height_contour)
   {
-    float h = abs (mod (vary_position.y, contour_height_delta));
-    if(h > contour_height_delta * 0.5)
-    {
-      h = (contour_height_delta - h);
-    }
-    if(h <= 0.25)
-    {
-      gl_FragColor = vec4(gl_FragColor.rgb * (h / 0.25), 1);
-    }
+    float f  = abs(fract(vary_position.y*0.25) - 0.5);
+    float df = abs(fw.y * 0.25);
+    float alpha  = smoothstep(-1.5*df, 1.5*df, f);
+
+    gl_FragColor = vec4(gl_FragColor.rgb * alpha, 1);
   }
 
   if (draw_cursor_circle)
   {
-    float cursor_dist = abs (distance (vary_position.xz, cursor_position.xz));
-    float diff = min( abs(cursor_dist - outer_cursor_radius)
-                    , abs(cursor_dist - (outer_cursor_radius * inner_cursor_ratio))
-                    );
+    float diff = length(vary_position.xz - cursor_position.xz);
+    diff = min(abs(diff - outer_cursor_radius), abs(diff - outer_cursor_radius * inner_cursor_ratio));
+    float alpha = 1 - smoothstep(0, length(fw.xz), diff);
 
-    if(diff <= 0.2)
-    {
-      gl_FragColor = blend_by_alpha (vec4(cursor_color.rgb, (0.2 - diff) / 0.2), gl_FragColor);
-    }  
+    gl_FragColor = blend_by_alpha (vec4(cursor_color.rgb, alpha), gl_FragColor);
   }
 }
 )code"
@@ -725,7 +719,6 @@ void main()
     {
       mcnk_shader.uniform ("draw_cursor_circle", 0);
     }   
-    
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
