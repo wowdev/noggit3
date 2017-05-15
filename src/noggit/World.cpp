@@ -661,7 +661,14 @@ float contour_alpha(float unit_size, float pos, float line_width)
 {
   float f = abs(fract((pos + unit_size*0.5) / unit_size) - 0.5);
   float df = abs(line_width / unit_size);
-  return 1 - smoothstep(0, df, f);
+  return smoothstep(0, df, f);
+}
+
+float contour_alpha(float unit_size, vec2 pos, vec2 line_width)
+{
+  return 1 - min( contour_alpha(unit_size, pos.x, line_width.x)
+                , contour_alpha(unit_size, pos.y, line_width.y)
+                );
 }
 
 void main()
@@ -696,11 +703,7 @@ void main()
 
   if (draw_terrain_height_contour)
   {
-    float f  = abs(fract(vary_position.y*0.25) - 0.5);
-    float df = abs(fw.y * 0.25);
-    float alpha  = smoothstep(-1.5*df, 1.5*df, f);
-
-    gl_FragColor = vec4(gl_FragColor.rgb * alpha, 1);
+    gl_FragColor = vec4(gl_FragColor.rgb * contour_alpha(4, vary_position.y, fw.y), 1);
   }
 
   if(draw_lines)
@@ -708,23 +711,17 @@ void main()
     vec4 color = vec4(0, 0, 0, 0);
     if(is_border_chunk)
     {
-      color.a = max( contour_alpha(TILESIZE, vary_position.x, fw.x * 1.5)
-                   , contour_alpha(TILESIZE, vary_position.z, fw.z * 1.5)
-                   );
+      color.a = contour_alpha(TILESIZE, vary_position.xz, fw.xz * 1.5);
       color.g = color.a > 0 ? 0.8 : 0;
     }
     if(color.a == 0)
     {
-      color.a = max( contour_alpha(CHUNKSIZE, vary_position.x, fw.x)
-                   , contour_alpha(CHUNKSIZE, vary_position.z, fw.z)
-                   );
+      color.a = contour_alpha(CHUNKSIZE, vary_position.xz, fw.xz);
       color.r = color.a > 0 ? 0.8 : 0;
     }
     if(draw_hole_lines && color.a == 0)
     {
-      color.a = max( contour_alpha(HOLESIZE, vary_position.x, fw.x * 0.75)
-                   , contour_alpha(HOLESIZE, vary_position.z, fw.z * 0.75)
-                   );
+      color.a = contour_alpha(HOLESIZE, vary_position.xz, fw.xz * 0.75);
       color.b = 0.8;
     }
 
