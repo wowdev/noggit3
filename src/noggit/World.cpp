@@ -615,6 +615,7 @@ uniform vec4 areaid_color;
 uniform bool draw_impassible_flag;
 uniform bool draw_terrain_height_contour;
 uniform bool draw_lines;
+uniform bool draw_hole_lines;
 uniform bool is_border_chunk;
 
 uniform bool draw_cursor_circle;
@@ -631,7 +632,7 @@ varying vec3 vary_mccv;
 
 const float TILESIZE  = 533.33333;
 const float CHUNKSIZE = TILESIZE / 16;
-const float UNITSIZE  = CHUNKSIZE / 8.0;
+const float HOLESIZE  = CHUNKSIZE * 0.25;
 
 vec4 blend_by_alpha (in vec4 source, in vec4 dest)
 {
@@ -710,17 +711,21 @@ void main()
       color.a = max( contour_alpha(TILESIZE, vary_position.x, fw.x * 1.5)
                    , contour_alpha(TILESIZE, vary_position.z, fw.z * 1.5)
                    );
+      color.g = color.a > 0 ? 0.8 : 0;
     }
     if(color.a == 0)
     {
       color.a = max( contour_alpha(CHUNKSIZE, vary_position.x, fw.x)
                    , contour_alpha(CHUNKSIZE, vary_position.z, fw.z)
                    );
-      color.r = 0.8;
+      color.r = color.a > 0 ? 0.8 : 0;
     }
-    else // adt border
+    if(draw_hole_lines && color.a == 0)
     {
-      color.g = 0.8;
+      color.a = max( contour_alpha(HOLESIZE, vary_position.x, fw.x * 0.75)
+                   , contour_alpha(HOLESIZE, vary_position.z, fw.z * 0.75)
+                   );
+      color.b = 0.8;
     }
 
     gl_FragColor = blend_by_alpha (color, gl_FragColor);
@@ -746,6 +751,7 @@ void main()
     mcnk_shader.attrib("texcoord", detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     mcnk_shader.attrib("alphacoord", alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
+    mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
     if (cursor_type == 4)
     {
       mcnk_shader.uniform ("draw_cursor_circle", 1);
