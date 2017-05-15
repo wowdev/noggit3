@@ -1971,7 +1971,7 @@ void MapView::tick (float dt)
 
   if (!_last_frame_durations.empty())
   {
-    while (_last_frame_durations.size() > 10)
+    while (_last_frame_durations.size() > 60)
     {
       _last_frame_durations.pop_front();
     }
