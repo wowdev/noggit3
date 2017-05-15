@@ -615,6 +615,7 @@ uniform vec4 areaid_color;
 uniform bool draw_impassible_flag;
 uniform bool draw_terrain_height_contour;
 uniform bool draw_lines;
+uniform bool is_border_chunk;
 
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -628,9 +629,9 @@ varying vec2 vary_alphacoord;
 varying vec3 vary_normal;
 varying vec3 vary_mccv;
 
-const float TILESIZE = 533.33333f;
-const float CHUNKSIZE = ((TILESIZE) / 16.0f);
-const float UNITSIZE = (CHUNKSIZE / 8.0f);
+const float TILESIZE  = 533.33333;
+const float CHUNKSIZE = TILESIZE / 16;
+const float UNITSIZE  = CHUNKSIZE / 8.0;
 
 vec4 blend_by_alpha (in vec4 source, in vec4 dest)
 {
@@ -653,6 +654,13 @@ vec4 texture_blend()
   vec3 t3 = texture2D(tex3, vary_texcoord).rgb;
 
   return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1);
+}
+
+float contour_alpha(float unit_size, float pos, float line_width)
+{
+  float f = abs(fract((pos + unit_size*0.5) / unit_size) - 0.5);
+  float df = abs(line_width / unit_size);
+  return 1 - smoothstep(0, df, f);
 }
 
 void main()
@@ -696,13 +704,26 @@ void main()
 
   if(draw_lines)
   {
-    float fx = abs(fract((vary_position.x + CHUNKSIZE/2) / CHUNKSIZE) - 0.5);
-    float dfx = abs(fw.x / CHUNKSIZE);
-    float fz = abs(fract((vary_position.z + CHUNKSIZE/2) / CHUNKSIZE) - 0.5);
-    float dfz = abs(fw.z / CHUNKSIZE);
-    float alpha = 1 - min(smoothstep(0, dfx, fx), smoothstep(0, dfz, fz));
+    vec4 color = vec4(0, 0, 0, 0);
+    if(is_border_chunk)
+    {
+      color.a = max( contour_alpha(TILESIZE, vary_position.x, fw.x * 1.5)
+                   , contour_alpha(TILESIZE, vary_position.z, fw.z * 1.5)
+                   );
+    }
+    if(color.a == 0)
+    {
+      color.a = max( contour_alpha(CHUNKSIZE, vary_position.x, fw.x)
+                   , contour_alpha(CHUNKSIZE, vary_position.z, fw.z)
+                   );
+      color.r = 0.8;
+    }
+    else // adt border
+    {
+      color.g = 0.8;
+    }
 
-    gl_FragColor = blend_by_alpha (vec4(0.8, 0, 0, alpha), gl_FragColor);
+    gl_FragColor = blend_by_alpha (color, gl_FragColor);
   }
 
   if (draw_cursor_circle)
