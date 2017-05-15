@@ -543,6 +543,8 @@ void MapChunk::draw ( math::frustum const& frustum
   bool impassible = draw_chunk_flag_overlay && (Flags & FLAG_IMPASS);
   mcnk_shader.uniform ("draw_impassible_flag", (int)impassible);
   mcnk_shader.uniform ("draw_terrain_height_contour", (int)draw_contour);
+  bool is_border_chunk = (px % 15) == 0 || (py % 15) == 0;
+  mcnk_shader.uniform ("is_border_chunk", (int)is_border_chunk);
 
   if (draw_areaid_overlay)
   {
