@@ -563,7 +563,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
-    opengl::program const mcnk_program
+    static opengl::program const mcnk_program
     { { GL_VERTEX_SHADER
       , R"code(
 #version 110
@@ -617,6 +617,7 @@ uniform bool draw_terrain_height_contour;
 uniform bool draw_lines;
 uniform bool draw_hole_lines;
 uniform bool is_border_chunk;
+uniform bool draw_wireframe;
 
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -633,6 +634,7 @@ varying vec3 vary_mccv;
 const float TILESIZE  = 533.33333;
 const float CHUNKSIZE = TILESIZE / 16;
 const float HOLESIZE  = CHUNKSIZE * 0.25;
+const float UNITSIZE = HOLESIZE * 0.5;
 
 vec4 blend_by_alpha (in vec4 source, in vec4 dest)
 {
@@ -706,6 +708,7 @@ void main()
     gl_FragColor = vec4(gl_FragColor.rgb * contour_alpha(4, vary_position.y, fw.y), 1);
   }
 
+  bool lines_drawn = false;
   if(draw_lines)
   {
     vec4 color = vec4(0, 0, 0, 0);
@@ -723,6 +726,26 @@ void main()
     {
       color.a = contour_alpha(HOLESIZE, vary_position.xz, fw.xz * 0.75);
       color.b = 0.8;
+    }
+    
+    lines_drawn = color.a > 0;
+    gl_FragColor = blend_by_alpha (color, gl_FragColor);
+  }
+
+  if(draw_wireframe && !lines_drawn && length(vary_position.xz - cursor_position.xz) < max(2 * UNITSIZE, 1.5 * outer_cursor_radius))
+  {
+    vec4 color = vec4(1, 1, 1, 0);
+    
+    color.a = contour_alpha(UNITSIZE, vary_position.xz, fw.xz * 0.5) * 0.5;
+
+    if(color.a == 0)
+    {
+      float xmod = mod(vary_position.x, UNITSIZE);
+      float zmod = mod(vary_position.z, UNITSIZE);
+      float d = length(fw.xz) * 0.5;
+      float diff1 = abs(xmod - zmod), diff2 = abs(xmod - UNITSIZE + zmod);
+
+      color.a = (1 - min(smoothstep(0, d, diff1), smoothstep(0, d, diff2))) * 0.5;
     }
 
     gl_FragColor = blend_by_alpha (color, gl_FragColor);
@@ -749,6 +772,8 @@ void main()
     mcnk_shader.attrib("alphacoord", alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
+    mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
+
     if (cursor_type == 4)
     {
       mcnk_shader.uniform ("draw_cursor_circle", 1);
