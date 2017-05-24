@@ -632,7 +632,7 @@ varying vec3 vary_normal;
 varying vec3 vary_mccv;
 
 const float TILESIZE  = 533.33333;
-const float CHUNKSIZE = TILESIZE / 16;
+const float CHUNKSIZE = TILESIZE / 16.0;
 const float HOLESIZE  = CHUNKSIZE * 0.25;
 const float UNITSIZE = HOLESIZE * 0.5;
 
@@ -663,14 +663,14 @@ float contour_alpha(float unit_size, float pos, float line_width)
 {
   float f = abs(fract((pos + unit_size*0.5) / unit_size) - 0.5);
   float df = abs(line_width / unit_size);
-  return smoothstep(0, df, f);
+  return smoothstep(0.0, df, f);
 }
 
 float contour_alpha(float unit_size, vec2 pos, vec2 line_width)
 {
-  return 1 - min( contour_alpha(unit_size, pos.x, line_width.x)
-                , contour_alpha(unit_size, pos.y, line_width.y)
-                );
+  return 1.0 - min( contour_alpha(unit_size, pos.x, line_width.x)
+                  , contour_alpha(unit_size, pos.y, line_width.y)
+                  );
 }
 
 void main()
@@ -686,7 +686,7 @@ void main()
 
   if(cant_paint)
   {
-    gl_FragColor *= vec4(1, 0, 0, 1);
+    gl_FragColor *= vec4(1.0, 0.0, 0.0, 1.0);
   }
 
   if(draw_areaid_overlay)
@@ -705,47 +705,47 @@ void main()
 
   if (draw_terrain_height_contour)
   {
-    gl_FragColor = vec4(gl_FragColor.rgb * contour_alpha(4, vary_position.y, fw.y), 1);
+    gl_FragColor = vec4(gl_FragColor.rgb * contour_alpha(4.0, vary_position.y, fw.y), 1.0);
   }
 
   bool lines_drawn = false;
   if(draw_lines)
   {
-    vec4 color = vec4(0, 0, 0, 0);
+    vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
     if(is_border_chunk)
     {
       color.a = contour_alpha(TILESIZE, vary_position.xz, fw.xz * 1.5);
-      color.g = color.a > 0 ? 0.8 : 0;
+      color.g = color.a > 0.0 ? 0.8 : 0.0;
     }
-    if(color.a == 0)
+    if(color.a == 0.0)
     {
       color.a = contour_alpha(CHUNKSIZE, vary_position.xz, fw.xz);
-      color.r = color.a > 0 ? 0.8 : 0;
+      color.r = color.a > 0.0 ? 0.8 : 0.0;
     }
-    if(draw_hole_lines && color.a == 0)
+    if(draw_hole_lines && color.a == 0.0)
     {
       color.a = contour_alpha(HOLESIZE, vary_position.xz, fw.xz * 0.75);
       color.b = 0.8;
     }
     
-    lines_drawn = color.a > 0;
+    lines_drawn = color.a > 0.0;
     gl_FragColor = blend_by_alpha (color, gl_FragColor);
   }
 
-  if(draw_wireframe && !lines_drawn && length(vary_position.xz - cursor_position.xz) < max(2 * UNITSIZE, 1.5 * outer_cursor_radius))
+  if(draw_wireframe && !lines_drawn && length(vary_position.xz - cursor_position.xz) < max(2.0 * UNITSIZE, 1.5 * outer_cursor_radius))
   {
-    vec4 color = vec4(1, 1, 1, 0);
+    vec4 color = vec4(1.0, 1.0, 1.0, 0.0);
     
     color.a = contour_alpha(UNITSIZE, vary_position.xz, fw.xz * 0.5) * 0.5;
 
-    if(color.a == 0)
+    if(color.a == 0.0)
     {
       float xmod = mod(vary_position.x, UNITSIZE);
       float zmod = mod(vary_position.z, UNITSIZE);
       float d = length(fw.xz) * 0.5;
       float diff1 = abs(xmod - zmod), diff2 = abs(xmod - UNITSIZE + zmod);
 
-      color.a = (1 - min(smoothstep(0, d, diff1), smoothstep(0, d, diff2))) * 0.5;
+      color.a = (1.0 - min(smoothstep(0.0, d, diff1), smoothstep(0.0, d, diff2))) * 0.5;
     }
 
     gl_FragColor = blend_by_alpha (color, gl_FragColor);
@@ -755,7 +755,7 @@ void main()
   {
     float diff = length(vary_position.xz - cursor_position.xz);
     diff = min(abs(diff - outer_cursor_radius), abs(diff - outer_cursor_radius * inner_cursor_ratio));
-    float alpha = 1 - smoothstep(0, length(fw.xz), diff);
+    float alpha = 1.0 - smoothstep(0.0, length(fw.xz), diff);
 
     gl_FragColor = blend_by_alpha (vec4(cursor_color.rgb, alpha), gl_FragColor);
   }
