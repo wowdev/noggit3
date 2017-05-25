@@ -82,9 +82,10 @@ namespace noggit
                                  , math::degrees camera_pitch
                                  , math::degrees camera_yaw
                                  , uid_fix_mode uid_fix
+                                 , bool from_bookmark
                                  )
     {
-      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix));
+      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
       setCentralWidget (mapview);
     }
 
@@ -180,6 +181,8 @@ namespace noggit
                                enterMapAt ( entry.pos
                                           , math::degrees (entry.camera_pitch)
                                           , math::degrees (entry.camera_yaw)
+                                          , uid_fix_mode::none
+                                          , true
                                           );
 
                                return;
@@ -254,7 +257,9 @@ namespace noggit
       while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.camera_yaw >> b.camera_pitch >> areaID)
       {
         if (mapID == -1)
+        {
           continue;
+        }
 
         std::stringstream temp;
         temp << MapDB::getMapName(mapID) << ": " << AreaDB::getAreaName(areaID);
