@@ -251,7 +251,7 @@ namespace noggit
       }
 
       std::string basename;
-      int areaID;
+      std::size_t areaID;
       BookmarkEntry b;
       int mapID = -1;
       while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.camera_yaw >> b.camera_pitch >> areaID)
