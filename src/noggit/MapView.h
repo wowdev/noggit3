@@ -163,6 +163,7 @@ private:
   editing_mode saveterrainMode = terrainMode;
 
   uid_fix_mode _uid_fix;
+  bool _from_bookmark;
 
   bool Saving = false;
 
@@ -181,6 +182,7 @@ public:
           , noggit::ui::main_window*
           , std::unique_ptr<World>
           , uid_fix_mode uid_fix = uid_fix_mode::none
+          , bool from_bookmark = false
           );
   ~MapView();
 

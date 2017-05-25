@@ -1213,10 +1213,12 @@ MapView::MapView( math::degrees camera_yaw0
                 , noggit::ui::main_window* main_window
                 , std::unique_ptr<World> world
                 , uid_fix_mode uid_fix
+                , bool from_bookmark
                 )
   : _camera (camera_pos, camera_yaw0, camera_pitch0)
   , mTimespeed(0.0f)
   , _uid_fix (uid_fix)
+  , _from_bookmark (from_bookmark)
   , _main_window (main_window)
   , _world (std::move (world))
   , _status_position (new QLabel (this))
@@ -1368,9 +1370,12 @@ MapView::MapView( math::degrees camera_yaw0
 
     createGUI();
 
-  set_editing_mode (editing_mode::ground);
+    set_editing_mode (editing_mode::ground);
 
-    move_camera_with_auto_height (_camera.position);
+    if (!_from_bookmark)
+    {
+      move_camera_with_auto_height (_camera.position);
+    }    
 
     gl.enableClientState (GL_VERTEX_ARRAY);
     gl.enableClientState (GL_NORMAL_ARRAY);

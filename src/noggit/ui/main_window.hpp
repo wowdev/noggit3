@@ -27,6 +27,7 @@ namespace noggit
                       , math::degrees camera_pitch
                       , math::degrees camera_yaw
                       , uid_fix_mode uid_fix = uid_fix_mode::none
+                      , bool from_bookmark = false
                       );
 
       void createBookmarkList();
