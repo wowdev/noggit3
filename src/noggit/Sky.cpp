@@ -294,7 +294,7 @@ bool Skies::drawSky ( const math::vector_3d &pos
     gl.scalef(sc, sc, sc);
     opengl::texture::enable_texture();
     stars->trans = night_intensity;
-    stars->draw (draw_fog, animtime);
+    stars->draw (draw_fog, animtime, true);
   }
 
   return true;

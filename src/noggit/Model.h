@@ -153,7 +153,7 @@ public:
    Model(const std::string& name);
   ~Model();
 
-  void draw (bool draw_fog, int animtime);
+  void draw (bool draw_fog, int animtime, bool draw_particles);
   void drawTileMode();
 
   std::vector<float> intersect (math::ray const&, int animtime);

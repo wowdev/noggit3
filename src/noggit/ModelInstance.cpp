@@ -60,7 +60,8 @@ void ModelInstance::draw ( math::frustum const& frustum
                          , int animtime
                          )
 {
-  if(((pos - camera).length() - model->rad * scale) >= cull_distance)
+  float dist = (pos - camera).length() - model->rad * scale;
+  if(dist >= cull_distance)
     return;
 
   if (!frustum.intersectsSphere(pos, model->rad * scale))
@@ -87,7 +88,8 @@ void ModelInstance::draw ( math::frustum const& frustum
                                  , TransformCoordsForModel(model->header.VertexBoxMax)
                                  ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
   }
-  model->draw (draw_fog, animtime);
+  //! \todo add toggle draw particles and set customizable distance
+  model->draw (draw_fog, animtime, dist < 50.0f);
 
   if (is_current_selection || force_box)
   {
@@ -218,7 +220,8 @@ void ModelInstance::draw_wmo ( const math::vector_3d& ofs
   gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
   gl.scalef(scale, -scale, -scale);
 
-  model->draw (draw_fog, animtime);
+  //! \todo draw particles from wmo's doodads ?
+  model->draw (draw_fog, animtime, false);
 }
 
 void ModelInstance::resetDirection(){

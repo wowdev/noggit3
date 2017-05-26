@@ -921,7 +921,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 }
 
 
-void Model::draw (bool draw_fog, int animtime)
+void Model::draw (bool draw_fog, int animtime, bool draw_particles)
 {
   if (!finishedLoading())
     return;
@@ -981,12 +981,21 @@ void Model::draw (bool draw_fog, int animtime)
 
   lightsOff(GL_LIGHT4);
 
-  // draw particle systems & _ribbons
-  for (size_t i = 0; i < header.nParticleEmitters; ++i)
-    _particles[i].draw();
 
-  for (size_t i = 0; i < header.nRibbonEmitters; ++i)
-    _ribbons[i].draw();
+  // draw particle systems & ribbons
+  if (draw_particles)
+  {
+    for (auto& particle : _particles)
+    {
+      particle.draw();
+    }
+
+    for (auto& ribbon : _ribbons)
+    {
+      ribbon.draw();
+    }
+  }
+  
 }
 
 std::vector<float> Model::intersect (math::ray const& ray, int animtime)
