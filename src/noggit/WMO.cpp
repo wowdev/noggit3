@@ -461,7 +461,7 @@ bool WMO::drawSkybox ( math::vector_3d pCamera
     gl.translatef(o.x, o.y, o.z);
     const float sc = 2.0f;
     gl.scalef(sc, sc, sc);
-    skybox.get()->draw (draw_fog, animtime);
+    skybox.get()->draw (draw_fog, animtime, true);
     gl.enable(GL_DEPTH_TEST);
 
     return true;
