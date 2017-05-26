@@ -36,8 +36,6 @@ void Model::finishLoading()
     return;
   }
 
-  //LogDebug << "Loading model \"" << _filename << "\"." << std::endl;
-
   memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
 
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
@@ -47,8 +45,6 @@ void Model::finishLoading()
 
   rad = header.VertexBoxRadius;
 
-  header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
-  header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   if (header.nGlobalSequences)
   {
     _global_sequences.resize (header.nGlobalSequences);
@@ -58,8 +54,10 @@ void Model::finishLoading()
   //! \todo  This takes a biiiiiit long. Have a look at this.
   initCommon(f);
 
-  if(animated)
-    initAnimated(f);
+  if (animated)
+  {
+    initAnimated (f);
+  }
 
   f.close();
 
@@ -103,11 +101,17 @@ bool Model::isAnimated(const MPQFile& f)
     }
   }
 
-  if (animGeometry) animBones = true;
-  else {
-    for (size_t i = 0; i<header.nBones; ++i) {
+  if (animGeometry || header.nParticleEmitters || header.nRibbonEmitters || header.nLights || header.nCameras)
+  {
+    animBones = true;
+  }
+  else
+  {
+    for (size_t i = 0; i<header.nBones; ++i)
+    {
       ModelBoneDef const& bb = bo[i];
-      if (bb.translation.type || bb.rotation.type || bb.scaling.type) {
+      if (bb.translation.type || bb.rotation.type || bb.scaling.type)
+      {
         animBones = true;
         break;
       }
@@ -116,37 +120,34 @@ bool Model::isAnimated(const MPQFile& f)
 
   animTextures = header.nTexAnims > 0;
 
-  bool animMisc = header.nCameras>0 || // why waste time, pretty much all models with cameras need animation
-    header.nLights>0 || // same here
-    header.nParticleEmitters>0 ||
-    header.nRibbonEmitters>0;
-
-  if (animMisc) animBones = true;
-
   // animated colors
-  if (header.nColors) {
+  if (header.nColors)
+  {
     ModelColorDef const* cols = reinterpret_cast<ModelColorDef const*>(f.getBuffer() + header.ofsColors);
-    for (size_t i = 0; i<header.nColors; ++i) {
-      if (cols[i].color.type != 0 || cols[i].opacity.type != 0) {
-        animMisc = true;
-        break;
+    for (size_t i = 0; i<header.nColors; ++i)
+    {
+      if (cols[i].color.type != 0 || cols[i].opacity.type != 0)
+      {
+        return true;
       }
     }
   }
 
   // animated opacity
-  if (header.nTransparency && !animMisc) {
+  if (header.nTransparency)
+  {
     ModelTransDef const* trs = reinterpret_cast<ModelTransDef const*>(f.getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i<header.nTransparency; ++i) {
-      if (trs[i].trans.type != 0) {
-        animMisc = true;
-        break;
+    for (size_t i = 0; i<header.nTransparency; ++i)
+    {
+      if (trs[i].trans.type != 0)
+      {
+        return true;
       }
     }
   }
 
   // guess not...
-  return animGeometry || animTextures || animMisc;
+  return animGeometry || animTextures || animBones;
 }
 
 
@@ -394,13 +395,15 @@ void Model::initAnimated(const MPQFile& f)
     }
   }
 
-  if (animBones) {
-    // init bones...
-    ModelBoneDef const* mb = reinterpret_cast<ModelBoneDef const*>(f.getBuffer() + header.ofsBones);
-    for (size_t i = 0; i<header.nBones; ++i) {
-      bones.emplace_back(f, mb[i], _global_sequences.data(), animation_files);
+  if (animBones)
+  {
+    ModelBoneDef const* mb = reinterpret_cast<ModelBoneDef const*>(f.getBuffer () + header.ofsBones);
+    for (size_t i = 0; i<header.nBones; ++i)
+    {
+      bones.emplace_back (f, mb[i], _global_sequences.data(), animation_files);
     }
-  }
+    calcBones (anim, 0, 0);
+  }  
 
   if (animTextures) {
     ModelTexAnimDef const* ta = reinterpret_cast<ModelTexAnimDef const*>(f.getBuffer() + header.ofsTexAnims);
@@ -467,7 +470,7 @@ void Model::animate(int _anim, int animtime_)
   _global_animtime = animtime_;
 
   if (animBones) {
-    calcBones(anim, t, _global_animtime);
+    //calcBones(anim, t, _global_animtime);
   }
 
   if (animGeometry) {
@@ -1043,7 +1046,11 @@ void Model::upload()
 
 void Model::updateEmitters(float dt)
 {
-  for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-    _particles[i].update(dt);
+  if (finished)
+  {
+    for (size_t i = 0; i<header.nParticleEmitters; ++i)
+    {
+      _particles[i].update (dt);
+    }
   }
 }

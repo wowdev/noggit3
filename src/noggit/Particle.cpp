@@ -17,8 +17,8 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 
 ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals)
   : model (model_)
-  , emitter ( mta.EmitterType == 1 ? std::unique_ptr<ParticleEmitter> (std::make_unique<PlaneParticleEmitter> (this))
-            : mta.EmitterType == 2 ? std::unique_ptr<ParticleEmitter> (std::make_unique<SphereParticleEmitter> (this))
+  , emitter ( mta.EmitterType == 1 ? std::unique_ptr<ParticleEmitter> (std::make_unique<PlaneParticleEmitter>())
+            : mta.EmitterType == 2 ? std::unique_ptr<ParticleEmitter> (std::make_unique<SphereParticleEmitter>())
             : throw std::logic_error ("unimplemented emitter type")
             )
   , speed (mta.EmissionSpeed, f, globals)
@@ -35,7 +35,7 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
   , mid (0.5)
   , slowdown (mta.p.slowdown)
   , pos (fixCoordSystem(mta.pos))
-  , _texture (model->_textures[mta.texture])
+  , _texture (model->_textureFilenames[mta.texture])
   , blend (mta.blend)
   , order (mta.ParticleType > 0 ? -1 : 0)
   , type (mta.ParticleType)
@@ -129,7 +129,7 @@ void ParticleSystem::update(float dt)
       //rem = 0;
       if (en) {
         for (int i = 0; i<tospawn; ++i) {
-          Particle p = emitter->newParticle(manim, mtime, manimtime, w, l, spd, var, spr, spr2);
+          Particle p = emitter->newParticle(this, manim, mtime, manimtime, w, l, spd, var, spr, spr2);
           // sanity check:
           //if (particles.size() < MAX_PARTICLES) // No need to check this every loop iteration. Already checked above.
           particles.push_back(p);
@@ -157,9 +157,13 @@ void ParticleSystem::update(float dt)
 
     // kill off old particles
     if (rlife >= 1.0f)
-      particles.erase(it);
-
-    ++it;
+    {
+      it = particles.erase (it);
+    }
+    else
+    {
+      ++it;
+    }
   }
 }
 
@@ -449,7 +453,7 @@ namespace
   }
 }
 
-Particle PlaneParticleEmitter::newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float /*spr2*/)
+Particle PlaneParticleEmitter::newParticle(ParticleSystem* sys, int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float /*spr2*/)
 {
   // Model Flags - *shrug* gotta write this down somewhere.
   // 0x1 =
@@ -558,7 +562,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, int animtime, flo
   return p;
 }
 
-Particle SphereParticleEmitter::newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2)
+Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
   math::vector_3d dir;
@@ -674,7 +678,7 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
   , length (mta.res * seglen)
    // just use the first texture for now; most models I've checked only had one
   , tpos (fixCoordSystem(mta.pos))
-  , _texture (model->_textures[*reinterpret_cast<uint32_t const*> (f.getBuffer() + mta.ofsTextures)])
+  , _texture (model->_textureFilenames[*reinterpret_cast<uint32_t const*> (f.getBuffer() + mta.ofsTextures)])
    //! \todo  figure out actual correct way to calculate length
    // in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
    // in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)

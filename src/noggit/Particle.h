@@ -27,24 +27,22 @@ struct Particle {
 typedef std::list<Particle> ParticleList;
 
 class ParticleEmitter {
-protected:
-  ParticleSystem *sys;
 public:
-  explicit ParticleEmitter(ParticleSystem *psys) : sys(psys) {}
+  explicit ParticleEmitter() {}
   virtual ~ParticleEmitter() {}
-  virtual Particle newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2) = 0;
+  virtual Particle newParticle(ParticleSystem* sys, int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2) = 0;
 };
 
 class PlaneParticleEmitter : public ParticleEmitter {
 public:
-  explicit PlaneParticleEmitter(ParticleSystem *_sys) : ParticleEmitter(_sys) {}
-  Particle newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2);
+  explicit PlaneParticleEmitter() {}
+  Particle newParticle(ParticleSystem* sys, int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 class SphereParticleEmitter : public ParticleEmitter {
 public:
-  explicit SphereParticleEmitter(ParticleSystem *_sys) : ParticleEmitter(_sys) {}
-  Particle newParticle(int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2);
+  explicit SphereParticleEmitter() {}
+  Particle newParticle(ParticleSystem* sys, int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 struct TexCoordSet {
