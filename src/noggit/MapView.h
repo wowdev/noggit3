@@ -189,7 +189,7 @@ public:
   void tick (float dt);
 
   void insert_object_at_selection_position (std::string);
-  void selectModel(selection_type entry);
+  void selectModel(std::string const& model);
 
   void set_editing_mode (editing_mode);
 

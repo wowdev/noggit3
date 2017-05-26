@@ -38,16 +38,7 @@ namespace noggit
       connect ( _list, &QListWidget::itemDoubleClicked
               , [mapview] (QListWidgetItem* item)
                 {
-                  if (item->text().endsWith (".m2"))
-                  {
-                    auto mi (new ModelInstance (item->text().toStdString()));
-                    mi->scale = 1.0f;
-                    mapview->selectModel(mi);
-                  }
-                  else if (item->text().endsWith (".wmo"))
-                  {
-                    mapview->selectModel (new WMOInstance (item->text().toStdString()));
-                  }
+                  mapview->selectModel (item->text ().toStdString());
                 }
               );
     }

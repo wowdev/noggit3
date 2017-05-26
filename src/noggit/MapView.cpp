@@ -40,6 +40,7 @@
 
 #include "revision.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 
 #include <QtCore/QTimer>
@@ -2721,9 +2722,21 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   checkWaterSave(); // ????? \todo Move to somewhere more appropriate.
 }
 
-void MapView::selectModel(selection_type entry)
+void MapView::selectModel(std::string const& model)
 {
-  objectEditor->copy(entry);
+  makeCurrent ();
+  opengl::context::scoped_setter const _ (::gl, context ());
+  
+  if (boost::ends_with (model, ".m2"))
+  {
+    auto mi (new ModelInstance (model));
+    mi->scale = 1.0f;
+    objectEditor->copy (mi);
+  }
+  else if (boost::ends_with (model, ".wmo"))
+  {
+    objectEditor->copy (new WMOInstance (model));
+  }
 }
 
 void MapView::mousePressEvent (QMouseEvent* event)
