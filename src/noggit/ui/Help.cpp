@@ -32,6 +32,7 @@ namespace noggit
         "  I - Invert mouse up and down\n"
         "  Q, E - Move vertically up, down\n"
         "  A, D, W, S - Move left, right, forward, backward\n"
+		"  Home (pos1) - Move position to the cursor\n"
         "  SHIFT+ C - Switch cursor type\n"
         "  CTRL + ALT + C - Toggle cursor options\n"
         "  M - Show map\n"
