@@ -2480,6 +2480,11 @@ void MapView::keyPressEvent (QKeyEvent *event)
   {
     keys = -1;
   }
+  if (event->key() == Qt::Key_Home)
+  {
+	  _camera.position = math::vector_3d(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z); ;
+	  _minimap->update();
+  }
 }
 
 void MapView::keyReleaseEvent (QKeyEvent* event)
@@ -2661,7 +2666,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if (leftMouse && _mod_alt_down)
   {
-    switch (terrainMode)
+	switch (terrainMode)
     {
     case editing_mode::ground:
       terrainTool->changeRadius(relative_movement.dx() / XSENS);
