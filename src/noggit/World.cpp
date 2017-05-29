@@ -619,6 +619,12 @@ uniform bool draw_hole_lines;
 uniform bool is_border_chunk;
 uniform bool draw_wireframe;
 
+uniform vec3 camera;
+uniform bool draw_fog;
+uniform vec4 fog_color;
+uniform float fog_start;
+uniform float fog_end;
+
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
 uniform float outer_cursor_radius;
@@ -673,8 +679,23 @@ float contour_alpha(float unit_size, vec2 pos, vec2 line_width)
                   );
 }
 
+float dist_3d(vec3 a, vec3 b)
+{
+  float x = a.x - b.x;
+  float y = a.y - b.y;
+  float z = a.z - b.z;
+  return sqrt(x*x + y*y + z*z);
+}
+
 void main()
 {
+  float dist_from_camera = dist_3d(camera, vary_position.xyz);
+
+  if(draw_fog && dist_from_camera >= fog_end)
+  {
+    gl_FragColor = fog_color;
+    return;
+  } 
   vec3 fw = fwidth(vary_position.xyz);
 
   gl_FragColor = texture_blend();
@@ -732,6 +753,13 @@ void main()
     gl_FragColor = blend_by_alpha (color, gl_FragColor);
   }
 
+  if(draw_fog && dist_from_camera >= fog_end * fog_start)
+  {
+    float start = fog_end * fog_start;
+    float alpha = (dist_from_camera - start) / (fog_end - start);
+    gl_FragColor = blend_by_alpha (vec4(fog_color.rgb, alpha), gl_FragColor);
+  }
+
   if(draw_wireframe && !lines_drawn && length(vary_position.xz - cursor_position.xz) < max(2.0 * UNITSIZE, 1.5 * outer_cursor_radius))
   {
     vec4 color = vec4(1.0, 1.0, 1.0, 0.0);
@@ -773,6 +801,12 @@ void main()
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
     mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
+    mcnk_shader.uniform ("draw_fog", (int)draw_fog);
+    mcnk_shader.uniform ("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));
+    // !\ todo use light dbcs values
+    mcnk_shader.uniform ("fog_end", fogdistance);
+    mcnk_shader.uniform ("fog_start", 0.5f);
+    mcnk_shader.uniform ("camera", camera_pos);
 
     if (cursor_type == 4)
     {
