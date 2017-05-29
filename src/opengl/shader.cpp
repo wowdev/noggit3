@@ -87,27 +87,27 @@ namespace opengl
 
     void use_program::uniform (std::string const& name, GLint value)
     {
-      gl.uniform1i (_program.uniform_location (name), value);
+      gl.uniform1i (uniform_location (name), value);
     }
     void use_program::uniform (std::string const& name, GLfloat value)
     {
-      gl.uniform1f (_program.uniform_location (name), value);
+      gl.uniform1f (uniform_location (name), value);
     }
     void use_program::uniform (std::string const& name, std::vector<int> const& value)
     {
-      gl.uniform1iv (_program.uniform_location(name), value.size(), value.data());
+      gl.uniform1iv (uniform_location(name), value.size(), value.data());
     }
     void use_program::uniform (std::string const& name, math::vector_3d const& value)
     {
-      gl.uniform3fv (_program.uniform_location (name), 1, value);
+      gl.uniform3fv (uniform_location (name), 1, value);
     }
     void use_program::uniform (std::string const& name, math::vector_4d const& value)
     {
-      gl.uniform4fv (_program.uniform_location (name), 1, value);
+      gl.uniform4fv (uniform_location (name), 1, value);
     }
     void use_program::uniform (std::string const& name, math::matrix_4x4 const& value)
     {
-      gl.uniformMatrix4fv (_program.uniform_location (name), 1, GL_FALSE, value);
+      gl.uniformMatrix4fv (uniform_location (name), 1, GL_FALSE, value);
     }
 
     void use_program::sampler (std::string const& name, GLenum texture_slot, texture* tex)
@@ -119,46 +119,76 @@ namespace opengl
 
     void use_program::attrib (std::string const& name, std::vector<float> const& data)
     {
-      GLuint const location (_program.attrib_location (name));
+      GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 1, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (std::string const& name, std::vector<math::vector_2d> const& data)
     {
-      GLuint const location (_program.attrib_location (name));
+      GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 2, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (std::string const& name, std::vector<math::vector_3d> const& data)
     {
-      GLuint const location (_program.attrib_location (name));
+      GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (std::string const& name, math::vector_3d const* data)
     {
-      GLuint const location (_program.attrib_location (name));
+      GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data);
     }
     void use_program::attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data)
     {
-      GLuint const location (_program.attrib_location (name));
+      GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
     }
     void use_program::attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data)
     {
-      GLuint const location (_program.attrib_location (name));
+      GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
+    }
+
+    GLuint use_program::uniform_location (std::string const& name)
+    {
+      auto it = _uniforms.find (name);
+      if (it != _uniforms.end())
+      {
+        return it->second;
+      }
+      else
+      {
+        GLuint loc = _program.uniform_location (name);
+        _uniforms[name] = loc;
+        return loc;
+      }
+    }
+
+    GLuint use_program::attrib_location (std::string const& name)
+    {
+      auto it = _attribs.find (name);
+      if (it != _attribs.end())
+      {
+        return it->second;
+      }
+      else
+      {
+        GLuint loc = _program.attrib_location (name);
+        _attribs[name] = loc;
+        return loc;
+      }
     }
   }
 }

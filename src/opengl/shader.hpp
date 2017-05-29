@@ -6,6 +6,7 @@
 #include <opengl/types.hpp>
 
 #include <initializer_list>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -85,6 +86,11 @@ namespace opengl
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
 
     private:
+      GLuint uniform_location (std::string const& name);
+      GLuint attrib_location (std::string const& name);
+
+      std::map<std::string, GLuint> _uniforms;
+      std::map<std::string, GLuint> _attribs;
       program const& _program;
       std::set<GLuint> _enabled_vertex_attrib_arrays;
     };
