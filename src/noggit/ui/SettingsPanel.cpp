@@ -2,7 +2,6 @@
 
 #include <noggit/ui/SettingsPanel.h>
 
-#include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
 #include <util/qt/overload.hpp>
 
@@ -56,62 +55,48 @@ namespace noggit
   {
     settings::settings()
       : QDialog (nullptr)
+      , _settings (new QSettings (this))
     {
       setWindowTitle ("Settings");
 
       auto layout (new QFormLayout (this));
 
       auto browse_row
-        ( [&] (util::file_line_edit** line, char const* title, std::string* var, util::file_line_edit::mode mode)
+        ( [&] (util::file_line_edit** line, char const* title, QString const& key, util::file_line_edit::mode mode)
           {
             layout->addRow
               ( title
               , *line = new util::file_line_edit (mode, title, this)
               );
             connect ( (*line)->actual, &QLineEdit::textChanged
-                    , [var] (QString value)
+                    , [&, key] (QString value)
                       {
-                        *var = value.toStdString();
+                        _settings->setValue (key, value);
                       }
                     );
           }
         );
 
-      browse_row (&gamePathField, "Game Path", &Settings::getInstance()->gamePath, util::file_line_edit::directories);
-      browse_row (&projectPathField, "Project Path", &Settings::getInstance()->projectPath, util::file_line_edit::directories);
-      browse_row (&wodPathField, "WoD Save Path", &Settings::getInstance()->wodSavePath, util::file_line_edit::directories);
-      browse_row (&importPathField, "Import Path", &Settings::getInstance()->importFile, util::file_line_edit::files);
-      browse_row (&wmvLogPathField, "WMV Log Path", &Settings::getInstance()->wmvLogFile, util::file_line_edit::files);
+
+      browse_row (&gamePathField, "Game Path", "project/game_path", util::file_line_edit::directories);
+      browse_row (&projectPathField, "Project Path", "project/path", util::file_line_edit::directories);
+      browse_row (&wodPathField, "WoD Save Path", "project/wod_save_path", util::file_line_edit::directories);
+      browse_row (&importPathField, "Import Path", "project/import_file", util::file_line_edit::files);
+      browse_row (&wmvLogPathField, "WMV Log Path", "project/wod_save_path", util::file_line_edit::files);
 
       layout->addRow ( "View Distance"
                      , viewDistanceField = new QDoubleSpinBox
                      );
-      viewDistanceField->setRange (0.f, 1048576.f);
-      connect ( viewDistanceField, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [] (double val)
-                {
-                  Settings::getInstance()->mapDrawDistance = val;
-                }
-              );
+      viewDistanceField->setRange (0.f, 1048576.f);      
 
       layout->addRow ( "FarZ"
                      , farZField = new QDoubleSpinBox
                      );
       farZField->setRange (0.f, 1048576.f);
-      connect ( farZField, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [] (double val)
-                {
-                  Settings::getInstance()->FarZ = val;
-                }
-              );
+
 
       layout->addRow ("Tablet support", tabletModeCheck = new QCheckBox ("enabled", this));
-      connect ( tabletModeCheck, &QCheckBox::toggled
-              , [] (bool enabled)
-                {
-                  Settings::getInstance()->tabletMode = enabled;
-                }
-              );
+
 
       auto warning (new QWidget (this));
       new QHBoxLayout (warning);
@@ -134,7 +119,7 @@ namespace noggit
               , [this]
                 {
                   hide();
-                  Settings::getInstance()->saveToDisk();
+                  save_changes();
                 }
               );
 
@@ -142,21 +127,33 @@ namespace noggit
               , [this]
                 {
                   hide();
-                  Settings::getInstance()->readFromDisk();
+                  discard_changes();
                 }
               );
     }
 
-    void settings::readInValues()
+    void settings::discard_changes()
     {
-      gamePathField->actual->setText (QString::fromStdString (Settings::getInstance()->gamePath));
-      projectPathField->actual->setText (QString::fromStdString (Settings::getInstance()->projectPath));
-      wodPathField->actual->setText (QString::fromStdString (Settings::getInstance()->wodSavePath));
-      importPathField->actual->setText (QString::fromStdString (Settings::getInstance()->importFile));
-      wmvLogPathField->actual->setText (QString::fromStdString (Settings::getInstance()->wmvLogFile));
-      viewDistanceField->setValue (Settings::getInstance()->mapDrawDistance);
-      farZField->setValue (Settings::getInstance()->FarZ);
-      tabletModeCheck->setChecked (Settings::getInstance()->tabletMode);
+      gamePathField->actual->setText (_settings->value ("project/game_path").toString());
+      projectPathField->actual->setText (_settings->value ("project/path").toString ());
+      wodPathField->actual->setText (_settings->value ("project/wod_save_path").toString ());
+      importPathField->actual->setText (_settings->value ("project/import_file").toString ());
+      wmvLogPathField->actual->setText (_settings->value ("project/wmv_log_file").toString ());
+      viewDistanceField->setValue (_settings->value ("view_distance", 500.f).toFloat());
+      farZField->setValue (_settings->value ("farZ", 2048.f).toFloat());
+      tabletModeCheck->setChecked (_settings->value ("tablet/enabled", false).toBool());
+    }
+
+    void settings::save_changes()
+    {
+      _settings->setValue ("project/game_path", gamePathField->actual->text());
+      _settings->setValue ("project/path", projectPathField->actual->text());
+      _settings->setValue ("project/wod_save_path", wodPathField->actual->text());
+      _settings->setValue ("project/import_file", importPathField->actual->text());
+      _settings->setValue ("project/wmv_log_file", wmvLogPathField->actual->text());
+      _settings->setValue ("farZ", viewDistanceField->value());
+      _settings->setValue ("view_distance", farZField->value());
+      _settings->setValue ("tablet/enabled", tabletModeCheck->isChecked());
     }
   }
 }

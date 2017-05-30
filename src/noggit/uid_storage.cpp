@@ -2,87 +2,25 @@
 
 #include <noggit/uid_storage.hpp>
 
-#include <noggit/Log.h>
-
 #include <boost/filesystem.hpp>
 
+#include <QTCore/QSettings>
 
-uid_storage::uid_storage()
+
+bool uid_storage::hasMaxUIDStored(uint32_t mapID)
 {
-  // create the file if not exists
-  if (!boost::filesystem::exists("uid.txt"))
-  {
-    std::ofstream fs;
-    fs.open("uid.txt", std::ios::out);
-    fs << "# UID storage file" << std::endl;
-    fs << "# map_id,max_id" << std::endl;
-    fs.close();
-  }
-  _uidFile = ConfigFile("uid.txt", ",");
+  QSettings settings;
+  return settings.value ("project/uids/" + mapID, -1).toUInt () != -1;
 }
 
-uid_storage* uid_storage::instance = nullptr;
-
-uid_storage* uid_storage::getInstance()
+uint32_t uid_storage::getMaxUID(uint32_t mapID)
 {
-  if (!instance)
-  {
-    instance = new uid_storage();
-  }
-  return instance;
+  QSettings settings;
+  return settings.value ("project/uids/" + mapID, 0).toUInt();
 }
 
-inline std::string to_str(std::size_t v)
+void uid_storage::saveMaxUID(uint32_t mapID, uint32_t uid)
 {
-  std::stringstream ss;
-  ss << v;
-  return ss.str();
-}
-
-bool uid_storage::hasMaxUIDStored(std::size_t mapID) const
-{
-  return _uidFile.keyExists(to_str(mapID));
-}
-
-uint32_t uid_storage::getMaxUID(std::size_t mapID) const
-{
-  if (!hasMaxUIDStored(mapID))
-  {
-    return 0;
-  }
-
-  return _uidFile.read<uint32_t>(to_str(mapID));
-}
-
-void uid_storage::saveMaxUID(std::size_t mapID, uint32_t uid)
-{
-  _uidFile.add<uint32_t>(to_str(mapID), uid);
-  save();
-}
-
-void uid_storage::save()
-{
-  // create the file if not exists
-  std::ofstream fs;
-
-  if (!boost::filesystem::exists("uid.txt"))
-  {
-    fs.open("uid.txt", std::ios::out);
-  }
-  else
-  {
-    fs.open("uid.txt", std::ios::trunc);
-  }
-
-  if (!fs.is_open())
-  {
-    LogError << "Could not open uid.txt" << std::endl;
-    return;
-  }
-
-  fs << "# UID storage file" << std::endl;
-  fs << "# map_id,max_id" << std::endl;
-  fs << _uidFile;
-
-  fs.close();
+  QSettings settings;
+  settings.setValue ("project/uids/" + mapID, uid);
 }

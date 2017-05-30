@@ -5,7 +5,6 @@
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
-#include <noggit/Project.h>
 #include <noggit/World.h>
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
@@ -538,7 +537,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 #ifdef USE_MYSQL_UID_STORAGE
 uint32_t MapIndex::getHighestGUIDFromDB() const
 {
-	return mysql::getGUIDFromDB (*Settings::getInstance()->mysql, _map_id);
+	return mysql::getGUIDFromDB (_map_id);
 }
 
 uint32_t MapIndex::newGUIDDB()
@@ -547,7 +546,7 @@ uint32_t MapIndex::newGUIDDB()
   highGUIDDB = std::max(highestGUID, highestGUIDDB);
   highGUIDDB = ++highestGUIDDB;
   highestGUID = highGUIDDB; // update local max uid too
-  mysql::updateUIDinDB(*Settings::getInstance()->mysql, _map_id, highGUIDDB);  // it's neccesary to update the uid in database after every place, other then in the file uid storage system, because of cloudworking
+  mysql::updateUIDinDB(_map_id, highGUIDDB);  // it's neccesary to update the uid in database after every place, other then in the file uid storage system, because of cloudworking
   return highGUIDDB;
 }
 #endif
@@ -872,23 +871,23 @@ void MapIndex::saveMaxUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
   if (Settings::getInstance()->mysql) {
-  if (mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, _map_id))
+  if (mysql::hasMaxUIDStoredDB(_map_id))
   {
-	  mysql::updateUIDinDB(*Settings::getInstance()->mysql, _map_id, highestGUID);
+	  mysql::updateUIDinDB(_map_id, highestGUID);
   }
   else
   {
-	  mysql::insertUIDinDB(*Settings::getInstance()->mysql, _map_id, highestGUID);
+	  mysql::insertUIDinDB(_map_id, highestGUID);
   }
   }
   else
   {
     // save the max UID on the disc
-    uid_storage::getInstance()->saveMaxUID (_map_id, highestGUID);
+    uid_storage::saveMaxUID (_map_id, highestGUID);
   }
 #else
   // save the max UID on the disc
-  uid_storage::getInstance()->saveMaxUID (_map_id, highestGUID);
+  uid_storage::saveMaxUID (_map_id, highestGUID);
 #endif
 }
 
@@ -896,13 +895,13 @@ void MapIndex::loadMaxUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
 if (Settings::getInstance()->mysql) {
-  highestGUID = mysql::getGUIDFromDB(*Settings::getInstance()->mysql, map_id);
+  highestGUID = mysql::getGUIDFromDB(map_id);
 }
 else
 {
-  highestGUID = uid_storage::getInstance()->getMaxUID (_map_id);
+  highestGUID = uid_storage::getMaxUID (_map_id);
 }
 #else
-  highestGUID = uid_storage::getInstance()->getMaxUID (_map_id);
+  highestGUID = uid_storage::getMaxUID (_map_id);
 #endif
 }

@@ -3,11 +3,12 @@
 #include <noggit/AsyncLoader.h> // AsyncLoader
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
-#include <noggit/Project.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
+
+#include <QtCore/QSettings>
 
 #include <algorithm>
 #include <cstdint>
@@ -270,7 +271,8 @@ std::string MPQFile::getDiskPath(const std::string &pFilename)
 {
   std::string filename(pFilename);
   std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
-  std::string diskpath = Project::getInstance()->getPath().append(filename);
+  QSettings settings;
+  std::string diskpath = settings.value("project/path").toString().toStdString().append(filename);
 
   size_t found = diskpath.find("\\");
   while (found != std::string::npos)
@@ -335,47 +337,6 @@ bool MPQFile::existsInMPQ(const std::string &pFilename)
       return true;
 
   return false;
-}
-
-void MPQFile::save(std::string const& filename)  //save to MPQ
-{
-  //! \todo Get MPQ to save to via dialog or use development.MPQ.
-  //! \todo Create MPQ nicer, if not existing.
-  //! \todo Use a pointer to the archive instead of searching it by filename.
-  //! \todo Format this code properly.
-  HANDLE mpq_a;
-  if (modmpqpath == "")//create new user's mods MPQ
-  {
-    std::string newmodmpq = Project::getInstance()->getPath().append("Data\\patch-9.MPQ");
-    SFileCreateArchive(newmodmpq.c_str(), MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES, 0x40, &mpq_a);
-    //! \note Is locale setting needed? LOCALE_NEUTRAL is windows only.
-    SFileSetFileLocale(mpq_a, 0); // 0 = LOCALE_NEUTRAL.
-    SFileAddFileEx(mpq_a, "shaders\\terrain1.fs", "myworld", MPQ_FILE_COMPRESS, MPQ_COMPRESSION_ZLIB, 0);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld". Last nullptrs for newer version of StormLib
-    SFileCompactArchive(mpq_a, nullptr, false); //last nullptrs for newer version of StormLib
-    SFileCloseArchive(mpq_a);
-    modmpqpath = newmodmpq;
-  }
-  else
-    MPQArchive::unloadMPQ(modmpqpath);
-
-  SFileOpenArchive(modmpqpath.c_str(), 0, 0, &mpq_a);
-  SFileSetLocale(0);
-  std::string nameInMPQ = filename;
-  nameInMPQ.erase(0, strlen(Project::getInstance()->getPath().c_str()));
-  size_t found = nameInMPQ.find("/");
-  while (found != std::string::npos)//fixing path to file
-  {
-    nameInMPQ.replace(found, 1, "\\");
-    found = nameInMPQ.find("/");
-  }
-  if (SFileAddFileEx(mpq_a, filename.c_str(), nameInMPQ.c_str(), MPQ_FILE_COMPRESS | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, MPQ_COMPRESSION_ZLIB, 0)) //last nullptr for newer version of StormLib
-  {
-    LogDebug << "Added file " << fname.c_str() << " to archive \n";
-  }
-  else LogDebug << "Error " << GetLastError() << " on adding file to archive! Report this message \n";
-  SFileCompactArchive(mpq_a, nullptr, false);//recompact our archive to avoid fragmentation. Last nullptrs for newer version of StormLib
-  SFileCloseArchive(mpq_a);
-  new MPQArchive(modmpqpath, true);//now load edited archive to memory again
 }
 
 size_t MPQFile::read(void* dest, size_t bytes)

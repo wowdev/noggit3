@@ -1,17 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/Native.hpp>
-
 #include <noggit/AsyncLoader.h>
-#include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
 #include <noggit/MapView.h>
 #include <noggit/Model.h>
 #include <noggit/ModelManager.h> // ModelManager::report()
-#include <noggit/Project.h>    // This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
-#include <noggit/Settings.h>    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
 #include <noggit/TextureManager.h> // TextureManager::report()
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/errorHandling.h>
@@ -30,12 +25,14 @@
 #include <list>
 #include <string>
 #include <vector>
-
+#include <QtCore/QSettings>
 #include <QtCore/QTimer>
 #include <QtGui/QOffscreenSurface>
 #include <QtOpenGL/QGLFormat>
+#include <QTCore/QDir>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QFileDialog>
 
 #include "revision.h"
 
@@ -95,8 +92,8 @@ void Noggit::parseArgs(int argc, char *argv[])
       doAntiAliasing = false;
     }
   }
-
-  if (Settings::getInstance()->noAntiAliasing())
+  QSettings settings;
+  if (!settings.value("antialiasing", true).toBool())
   {
     doAntiAliasing = false;
   }
@@ -192,6 +189,41 @@ void Noggit::loadMPQs()
   }
 }
 
+bool is_valid_game_path (const QDir& path)
+{
+  if (!path.exists ())
+  {
+    LogError << "Path \"" << qPrintable (path.absolutePath ())
+      << "\" does not exist." << std::endl;
+    return false;
+  }
+
+  QStringList locales;
+  locales << "enGB" << "enUS" << "deDE" << "koKR" << "frFR"
+    << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
+  QString found_locale ("****");
+
+  foreach (const QString& locale, locales)
+  {
+    if (path.exists (("Data/" + locale)))
+    {
+      found_locale = locale;
+      break;
+    }
+  }
+
+  if (found_locale == "****")
+  {
+    LogError << "Path \"" << qPrintable (path.absolutePath ())
+      << "\" does not contain a locale directory "
+      << "(invalid installation or no installation at all)."
+      << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 Noggit::Noggit(int argc, char *argv[])
   : fullscreen(false)
   , doAntiAliasing(true)
@@ -204,27 +236,31 @@ Noggit::Noggit(int argc, char *argv[])
   parseArgs(argc, argv);
 
   srand(::time(nullptr));
-  wowpath = Settings::getInstance()->gamePath;
+  QSettings settings;
+  QDir path = settings.value ("project/game_path").toString();
 
-  if (wowpath == "")
+  while (!is_valid_game_path (path))
   {
-    LogError << "Empty wow path" << std::endl;
-    throw std::runtime_error ("empty wow path");
+    path = QFileDialog::getExistingDirectory (nullptr, "Open WoW Directory", "/", QFileDialog::ShowDirsOnly);
+    if (path.absolutePath () == "")
+    {
+      LogError << "Could not auto-detect game path "
+        << "and user canceled the dialog." << std::endl;
+      throw std::runtime_error ("no folder chosen");
+    }
   }
 
-  boost::filesystem::path data_path = wowpath / "Data";
-
-  if (!boost::filesystem::exists(data_path))
-  {
-    LogError << "Could not find data directory: " << data_path << std::endl;
-    throw std::runtime_error ("could not find data directory: " + data_path.string());
-  }
+  wowpath = path.absolutePath().toStdString();
 
   Log << "Game path: " << wowpath << std::endl;
 
-  if (Project::getInstance()->getPath() == "")
-    Project::getInstance()->setPath(wowpath.string());
-  Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
+  std::string project_path = settings.value ("project/path", path.absolutePath()).toString().toStdString();
+  settings.setValue ("project/path", QString::fromStdString (project_path));
+
+  Log << "Project path: " << project_path << std::endl;
+
+  settings.setValue ("project/game_path", path.absolutePath());
+  settings.setValue ("project/path", QString::fromStdString(project_path));
 
   loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   OpenDBs();
@@ -286,6 +322,8 @@ int main(int argc, char *argv[])
   noggit::RegisterErrorHandlers();
 
   QApplication qapp (argc, argv);
+  qapp.setApplicationName ("Noggit");
+  qapp.setOrganizationName ("Noggit");
 
   Noggit app (argc, argv);
 

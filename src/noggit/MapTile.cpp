@@ -6,7 +6,6 @@
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Settings.h>
 #include <noggit/TileWater.hpp>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
@@ -16,6 +15,8 @@
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+
+#include <QtCore/QSettings>
 
 #include <algorithm>
 #include <cassert>
@@ -512,11 +513,11 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
             // if wod output path is set creat also wod map files and save them in this alternate path.
   bool wodSave = false;
-  std::string wodSavePath = "";
-  if (Settings::getInstance()->wodSavePath != "")
+  QSettings settings;
+  std::string wodSavePath = settings.value("project/wod_save_path").toString().toStdString();
+  if (wodSavePath != "")
   {
     wodSave = true;
-    wodSavePath = Settings::getInstance()->wodSavePath;
     LogDebug << "WOD Save path is set to : " << wodSavePath << std::endl;
   }
 

@@ -4,7 +4,6 @@
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
 #include <noggit/World.h>
-#include <noggit/Settings.h>
 #include <noggit/ui/About.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/SettingsPanel.h>
@@ -24,6 +23,8 @@
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
+
+  #include <QtCore/QSettings>
 #endif
 
 #include "revision.h"
@@ -53,7 +54,7 @@ namespace noggit
                        , []
                          {
                            auto window (new settings());
-                           window->readInValues();
+                           window->discard_changes();
                            window->show();
                          }
                        );
@@ -200,8 +201,9 @@ namespace noggit
         , [this] (::math::vector_3d const& pos)
           {
 #ifdef USE_MYSQL_UID_STORAGE
-            if ( Settings::getInstance()->mysql
-               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, _world->getMapID())
+            QSettings settings;
+            if (settings.value("project/mysql/enabled", false).toBool())
+               && mysql::hasMaxUIDStoredDB (_world->getMapID())
                )
             {
               _world->mapIndex.loadMaxUID();
@@ -209,7 +211,7 @@ namespace noggit
             }
             else
 #endif
-            if (uid_storage::getInstance()->hasMaxUIDStored (_world->getMapID()))
+            if (uid_storage::hasMaxUIDStored (_world->getMapID()))
             {
               _world->mapIndex.loadMaxUID();
               enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));

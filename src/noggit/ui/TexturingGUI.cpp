@@ -12,11 +12,11 @@
 #include <noggit/DBC.h>
 #include <noggit/Misc.h>
 #include <noggit/MPQ.h>
-#include <noggit/Project.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 
 #include <unordered_set>
 
+#include <QtCore/QSettings>
 #include <QtCore/QSortFilterProxyModel>
 #include <QtGui/QStandardItemModel>
 #include <QtWidgets/QCheckBox>
@@ -94,8 +94,9 @@ namespace noggit
       }
 
       {
+        QSettings settings;
         auto const prefix
-          (boost::filesystem::path (Project::getInstance()->getPath()));
+          (boost::filesystem::path (settings.value("project/path").toString().toStdString()));
         auto const prefix_size (prefix.string().length());
 
         if (boost::filesystem::exists (prefix))

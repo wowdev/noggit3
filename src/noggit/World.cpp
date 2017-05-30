@@ -6,15 +6,12 @@
 #include <math/frustum.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/ChunkWater.hpp>
-#include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Project.h>
-#include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
 #include <noggit/TileWater.hpp>// tile water
 #include <noggit/WMOInstance.h> // WMOInstance
@@ -30,6 +27,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
+
+#include <QtCore/QSettings>
 
 #include <algorithm>
 #include <cassert>
@@ -426,7 +425,8 @@ void World::setupFog (bool draw_fog)
   }
   else {
     gl.disable(GL_FOG);
-    culldistance = Settings::getInstance()->mapDrawDistance;
+    QSettings settings;
+    culldistance = settings.value ("view_distance", 500.f).toFloat();
   }
 }
 
@@ -1707,14 +1707,16 @@ void World::addM2 ( std::string const& filename
   newModelis.scale = scale;
   newModelis.dir = rotation;
 
-  if (Settings::getInstance()->random_rotation)
+  QSettings settings;
+
+  if (settings.value("model/random_rotation", false).toBool())
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
     newModelis.dir.y += misc::randfloat(min, max);
   }
 
-  if (Settings::getInstance()->random_tilt)
+  if (settings.value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
@@ -1722,7 +1724,7 @@ void World::addM2 ( std::string const& filename
     newModelis.dir.z += misc::randfloat(min, max);
   }
 
-  if (Settings::getInstance()->random_size)
+  if (settings.value ("model/random_size", false).toBool ())
   {
     float min = paste_params->minScale;
     float max = paste_params->maxScale;

@@ -70,7 +70,6 @@ public:
   void seek(size_t offset);
   void seekRelative(size_t offset);
   void close();
-  void save(std::string const& filename);
   bool isExternal() const
   {
     return External;
