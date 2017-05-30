@@ -8,7 +8,6 @@
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
-#include <noggit/Settings.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/ui/ModelImport.h>
@@ -38,6 +37,7 @@ namespace noggit
                                  )
             : QWidget(nullptr)
             , rotationEditor (new rotation_editor())
+            , _settings (new QSettings (this))
             , _copy_model_stats (true)
             , selected()
             , pasteMode(PASTE_ON_TERRAIN)
@@ -55,11 +55,11 @@ namespace noggit
       auto scale_layout (new QFormLayout (scale_group));
 
       rotation_group->setCheckable(true);
-      rotation_group->setChecked(Settings::getInstance()->random_rotation);
+      rotation_group->setChecked(_settings->value ("model/random_rotation", false).toBool());
       tilt_group->setCheckable(true);
-      tilt_group->setChecked(Settings::getInstance()->random_tilt);
+      tilt_group->setChecked(_settings->value ("model/random_tilt", false).toBool());
       scale_group->setCheckable(true);
-      scale_group->setChecked(Settings::getInstance()->random_size);
+      scale_group->setChecked(_settings->value ("model/random_size", false).toBool());
 
       QCheckBox *copyAttributesCheck = new QCheckBox("Copy rotation,\ntilt, and scale", this);
 
@@ -152,19 +152,22 @@ namespace noggit
       layout->addRow(importBox);
       layout->addRow (_filename);
 
-      connect (rotation_group, &QGroupBox::toggled, [] (int s)
+      connect (rotation_group, &QGroupBox::toggled, [&] (int s)
       {
-        Settings::getInstance()->random_rotation = s;
+        _settings->setValue ("model/random_rotation", s);
+        _settings->sync();
       });
 
-      connect (tilt_group, &QGroupBox::toggled, [] (int s)
+      connect (tilt_group, &QGroupBox::toggled, [&] (int s)
       {
-        Settings::getInstance()->random_tilt = s;
+        _settings->setValue ("model/random_tilt", s);
+        _settings->sync();
       });
 
-      connect (scale_group, &QGroupBox::toggled, [] (int s)
+      connect (scale_group, &QGroupBox::toggled, [&] (int s)
       {
-        Settings::getInstance()->random_size = s;
+        _settings->setValue ("model/random_size", s);
+        _settings->sync();
       });
 
       rotRangeStart->setValue(paste_params->minRotation);
@@ -391,7 +394,7 @@ namespace noggit
         path = boost::get<selected_model_type> (*world->GetCurrentSelection())->model->_filename;
       }
 
-      std::ofstream stream(Settings::getInstance()->importFile, std::ios_base::app);
+      std::ofstream stream(_settings->value("project/import_file" , "import.txt").toString().toStdString(), std::ios_base::app);
       stream << path << std::endl;
       stream.close();
 

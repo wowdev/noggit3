@@ -2,14 +2,13 @@
 
 #pragma once
 
-#include <noggit/Settings.h>
-
-#include <cstdint>
+#include <cinttypes>
+#include <cstddef>
 
 namespace mysql
 {
-  bool hasMaxUIDStoredDB(Settings::mysql_connection_info const& info, std::size_t mapID);
-  std::uint32_t getGUIDFromDB(Settings::mysql_connection_info const& info, std::size_t mapID);
-  void insertUIDinDB(Settings::mysql_connection_info const& info, std::size_t mapID, std::uint32_t NewUID);
-  void updateUIDinDB (Settings::mysql_connection_info const& info, std::size_t mapID, std::uint32_t NewUID);
+  bool hasMaxUIDStoredDB(std::size_t mapID);
+  std::uint32_t getGUIDFromDB(std::size_t mapID);
+  void insertUIDinDB(std::size_t mapID, std::uint32_t NewUID);
+  void updateUIDinDB (std::size_t mapID, std::uint32_t NewUID);
 };

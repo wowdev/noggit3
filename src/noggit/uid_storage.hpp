@@ -2,24 +2,12 @@
 
 #pragma once
 
-#include <noggit/ConfigFile.h>
+#include <cstdint>
 
 class uid_storage
 {
 public:
-  static uid_storage* getInstance();
-
-  bool hasMaxUIDStored(std::size_t mapID) const;
-  uint32_t getMaxUID(std::size_t mapID) const;
-
-  void saveMaxUID(std::size_t mapID, uint32_t uid);
-
-  // save the uids on the disc
-  void save();
-
-private:
-  ConfigFile _uidFile;
-
-	uid_storage();
-	static uid_storage* instance;
+  static bool hasMaxUIDStored(uint32_t mapID);
+  static uint32_t getMaxUID (uint32_t mapID);
+  static void saveMaxUID(uint32_t mapID, uint32_t uid);
 };

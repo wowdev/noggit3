@@ -1,15 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Brush.h> // brush
-#include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Project.h>
-#include <noggit/Settings.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
@@ -189,7 +186,7 @@ void MapView::insert_last_m2_from_wmv()
     return;
   }
 
-  std::string wmv_log_file (Settings::getInstance()->wmvLogFile);
+  std::string wmv_log_file (_settings->value ("wmv_log_path").toString().toStdString());
   std::string lastModel;
   std::string line;
   std::ifstream fileReader(wmv_log_file.c_str());
@@ -254,7 +251,7 @@ void MapView::insert_last_wmo_from_wmv()
     return;
   }
 
-  std::string wmv_log_file (Settings::getInstance()->wmvLogFile);
+  std::string wmv_log_file (_settings->value ("wmv_log_path").toString().toStdString());
   std::string lastWMO;
   std::string line;
   std::ifstream fileReader(wmv_log_file.c_str());
@@ -1220,6 +1217,7 @@ MapView::MapView( math::degrees camera_yaw0
   , mTimespeed(0.0f)
   , _uid_fix (uid_fix)
   , _from_bookmark (from_bookmark)
+  , _settings (new QSettings (this))
   , _main_window (main_window)
   , _world (std::move (world))
   , _status_position (new QLabel (this))
@@ -1288,23 +1286,12 @@ MapView::MapView( math::degrees camera_yaw0
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
-  // load cursor settings
-  if (boost::filesystem::exists("noggit.conf"))
-  {
-    ConfigFile myConfigfile = ConfigFile("noggit.conf");
-    if (myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor") && myConfigfile.keyExists("BlueColor") && myConfigfile.keyExists("AlphaColor"))
-    {
-      cursor_color.x = myConfigfile.read<float>("RedColor");
-      cursor_color.y = myConfigfile.read<float>("GreenColor");
-      cursor_color.z = myConfigfile.read<float>("BlueColor");
-      cursor_color.w = myConfigfile.read<float>("AlphaColor");
-    }
+  cursor_type.set (_settings->value ("cursor/default_type", 4).toInt());
+  cursor_color.x = _settings->value ("cursor/color/r", 1).toFloat();
+  cursor_color.y = _settings->value ("cursor/color/g", 1).toFloat();
+  cursor_color.z = _settings->value ("cursor/color/b", 1).toFloat();
+  cursor_color.w = _settings->value ("cursor/color/a", 1).toFloat();
 
-    if (myConfigfile.keyExists("CursorType"))
-    {
-      cursor_type.set (myConfigfile.read<int>("CursorType"));
-    }
-  }
 
   setFocusPolicy (Qt::StrongFocus);
   setMouseTracking (true);
@@ -1450,7 +1437,7 @@ MapView::~MapView()
 void MapView::tick (float dt)
 {
 #ifdef _WIN32
-  if (_tablet_active && Settings::getInstance()->tabletMode)
+  if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
   {
     PACKET pkt;
     while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
@@ -1484,7 +1471,7 @@ void MapView::tick (float dt)
   }
 
 #ifdef _WIN32
-  if (_tablet_active && Settings::getInstance()->tabletMode)
+  if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
   {
     switch (terrainMode)
     {
@@ -1966,7 +1953,7 @@ void MapView::tick (float dt)
              << std::setw (2) << (time % 60);
 
 #ifdef _WIN32
-    if (_tablet_active && Settings::getInstance()->tabletMode)
+    if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
     {
       timestrs << ", Pres: " << _tablet_pressure;
     }
@@ -2114,7 +2101,7 @@ selection_result MapView::intersect_result(bool terrain_only)
     ( ( ( math::perspective ( _camera.fov()
                             , aspect_ratio()
                             , 1.f
-                            , Settings::getInstance()->FarZ
+                            , _settings->value ("farZ", 2048).toFloat()
                             )
         * math::look_at ( _camera.position
                         , _camera.look_at()
@@ -2314,7 +2301,7 @@ void MapView::displayViewMode_3D()
   gl.matrixMode (GL_PROJECTION);
   gl.loadIdentity();
   opengl::matrix::perspective
-    (_camera.fov(), aspect_ratio(), 1.f, Settings::getInstance()->FarZ);
+    (_camera.fov(), aspect_ratio(), 1.f, _settings->value ("farZ", 2048).toFloat());
   gl.matrixMode (GL_MODELVIEW);
   gl.loadIdentity();
   opengl::matrix::look_at

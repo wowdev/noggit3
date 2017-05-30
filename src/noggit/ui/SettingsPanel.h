@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <QtCore/QSettings>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDoubleSpinBox>
@@ -41,9 +42,11 @@ namespace noggit
 
       QCheckBox* tabletModeCheck;
 
+      QSettings* _settings;
     public:
       settings();
-      void readInValues();
+      void discard_changes();
+      void save_changes();
     };
   }
 }

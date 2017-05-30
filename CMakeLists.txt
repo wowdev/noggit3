@@ -157,7 +157,6 @@ set ( noggit_root_sources
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
       src/noggit/ChunkWater.cpp
-      src/noggit/ConfigFile.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
       src/noggit/Log.cpp
@@ -170,8 +169,6 @@ set ( noggit_root_sources
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
       src/noggit/Particle.cpp
-      src/noggit/Project.cpp
-      src/noggit/Settings.cpp
       src/noggit/Sky.cpp
       src/noggit/TextureManager.cpp
       src/noggit/TileWater.cpp
@@ -190,14 +187,6 @@ set ( noggit_root_sources
       src/noggit/uid_storage.cpp
       src/noggit/wmo_liquid.cpp
     )
-
-if(APPLE)
-  list (APPEND noggit_root_sources src/noggit/NativeMac.mm)
-elseif(UNIX)
-  list (APPEND noggit_root_sources src/noggit/NativeLinux.cpp)
-elseif(WIN32)
-  list (APPEND noggit_root_sources src/noggit/NativeWindows.cpp)
-endif()
 
 set ( noggit_ui_sources
       src/noggit/ui/About.cpp
@@ -254,7 +243,6 @@ set ( noggit_root_headers
       src/noggit/Brush.h
       src/noggit/camera.hpp
       src/noggit/ChunkWater.hpp
-      src/noggit/ConfigFile.h
       src/noggit/DBC.h
       src/noggit/DBCFile.h
       src/noggit/Log.h
@@ -268,11 +256,8 @@ set ( noggit_root_headers
       src/noggit/ModelHeaders.h
       src/noggit/ModelInstance.h
       src/noggit/ModelManager.h
-      src/noggit/Native.hpp
       src/noggit/Particle.h
-      src/noggit/Project.h
       src/noggit/Selection.h
-      src/noggit/Settings.h
       src/noggit/Sky.h
       src/noggit/TextureManager.h
       src/noggit/TileWater.hpp

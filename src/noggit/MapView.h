@@ -14,6 +14,7 @@
 
 #include <boost/optional.hpp>
 
+#include <QtCore/QSettings>
 #include <QtCore/QTime>
 #include <QtCore/QTimer>
 #include <QtWidgets/QDockWidget>
@@ -170,6 +171,8 @@ private:
   noggit::ui::toolbar* _toolbar;
 
   void prompt_save_current();
+
+  QSettings* _settings;
 
 public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);

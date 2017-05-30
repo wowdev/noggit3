@@ -5,7 +5,6 @@
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/ModelInstance.h>
-#include <noggit/Settings.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 

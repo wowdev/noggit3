@@ -5,7 +5,6 @@
 #include <noggit/MapView.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/Settings.h>
 #include <noggit/WMOInstance.h>
 
 #include <string>
@@ -47,7 +46,9 @@ namespace noggit
     {
       _list->clear();
 
-      std::ifstream fileReader (Settings::getInstance()->importFile);
+      QSettings settings;
+
+      std::ifstream fileReader (settings.value ("project/import_file", "import.txt").toString().toStdString());
       std::string const filter
         (mpq::normalized_filename (_textBox->text().toStdString()));
 

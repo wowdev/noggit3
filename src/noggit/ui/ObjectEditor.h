@@ -8,6 +8,7 @@
 
 #include <QLabel>
 #include <QWidget>
+#include <QSettings>
 
 #include <boost/optional.hpp>
 
@@ -67,6 +68,8 @@ namespace noggit
       model_import *modelImport;
       rotation_editor* rotationEditor;
     private:
+      QSettings* _settings;
+
       QButtonGroup* pasteModeGroup;
       QLabel* _filename;
 
