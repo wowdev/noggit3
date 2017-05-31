@@ -181,8 +181,8 @@ namespace noggit
       _settings->setValue ("project/wod_save_path", wodPathField->actual->text());
       _settings->setValue ("project/import_file", importPathField->actual->text());
       _settings->setValue ("project/wmv_log_file", wmvLogPathField->actual->text());
-      _settings->setValue ("farZ", viewDistanceField->value());
-      _settings->setValue ("view_distance", farZField->value());
+      _settings->setValue ("farZ", farZField->value());
+      _settings->setValue ("view_distance", viewDistanceField->value());
       _settings->setValue ("tablet/enabled", tabletModeCheck->isChecked());
 
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
