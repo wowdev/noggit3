@@ -426,7 +426,7 @@ void World::setupFog (bool draw_fog)
   else {
     gl.disable(GL_FOG);
     QSettings settings;
-    culldistance = settings.value ("view_distance", 500.f).toFloat();
+    culldistance = settings.value ("view_distance", 1000.f).toFloat();
   }
 }
 

@@ -5,12 +5,14 @@
 #include <noggit/TextureManager.h>
 #include <util/qt/overload.hpp>
 
+
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
+
 
 #include <algorithm>
 
@@ -82,7 +84,29 @@ namespace noggit
       browse_row (&projectPathField, "Project Path", "project/path", util::file_line_edit::directories);
       browse_row (&wodPathField, "WoD Save Path", "project/wod_save_path", util::file_line_edit::directories);
       browse_row (&importPathField, "Import Path", "project/import_file", util::file_line_edit::files);
-      browse_row (&wmvLogPathField, "WMV Log Path", "project/wod_save_path", util::file_line_edit::files);
+      browse_row (&wmvLogPathField, "WMV Log Path", "project/wod_save_path", util::file_line_edit::files);      
+
+      _mysql_box = new QGroupBox ("MySQL (uid storage)", this);
+      _mysql_box->setToolTip ("Store the maps' max model unique id (uid) in a mysql database to sync your uids with different computers/users to avoid duplications");
+      auto mysql_layout (new QFormLayout (_mysql_box));
+
+#ifdef USE_MYSQL_UID_STORAGE
+      mysql_box->setCheckable (true);
+#else
+      mysql_layout->addRow (new QLabel ("Warning /!\\"));
+      mysql_layout->addRow (new QLabel ("Your noggit wasn't build with mysql, you can't use this feature"));
+#endif
+
+      _mysql_server_field = new QLineEdit (_settings->value ("project/mysql/server").toString (), this);
+      _mysql_user_field = new QLineEdit (_settings->value ("project/mysql/user").toString (), this);
+      _mysql_pwd_field = new QLineEdit (_settings->value ("project/mysql/pwd").toString (), this);
+      _mysql_db_field = new QLineEdit (_settings->value ("project/mysql/db").toString (), this);
+
+      mysql_layout->addRow ("Server", _mysql_server_field);
+      mysql_layout->addRow ("User", _mysql_user_field);
+      mysql_layout->addRow ("Password", _mysql_pwd_field);
+      mysql_layout->addRow ("Database", _mysql_db_field);
+      layout->addRow (_mysql_box);
 
       layout->addRow ( "View Distance"
                      , viewDistanceField = new QDoubleSpinBox
@@ -136,12 +160,18 @@ namespace noggit
     {
       gamePathField->actual->setText (_settings->value ("project/game_path").toString());
       projectPathField->actual->setText (_settings->value ("project/path").toString ());
-      wodPathField->actual->setText (_settings->value ("project/wod_save_path").toString ());
-      importPathField->actual->setText (_settings->value ("project/import_file").toString ());
-      wmvLogPathField->actual->setText (_settings->value ("project/wmv_log_file").toString ());
-      viewDistanceField->setValue (_settings->value ("view_distance", 500.f).toFloat());
+      wodPathField->actual->setText (_settings->value ("project/wod_save_path").toString());
+      importPathField->actual->setText (_settings->value ("project/import_file").toString());
+      wmvLogPathField->actual->setText (_settings->value ("project/wmv_log_file").toString());
+      viewDistanceField->setValue (_settings->value ("view_distance", 1000.f).toFloat());
       farZField->setValue (_settings->value ("farZ", 2048.f).toFloat());
       tabletModeCheck->setChecked (_settings->value ("tablet/enabled", false).toBool());
+
+      _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
+      _mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
+      _mysql_user_field->setText(_settings->value ("project/mysql/user").toString());
+      _mysql_pwd_field->setText (_settings->value ("project/mysql/pwd").toString());
+      _mysql_db_field->setText (_settings->value ("project/mysql/db").toString());
     }
 
     void settings::save_changes()
@@ -154,6 +184,12 @@ namespace noggit
       _settings->setValue ("farZ", viewDistanceField->value());
       _settings->setValue ("view_distance", farZField->value());
       _settings->setValue ("tablet/enabled", tabletModeCheck->isChecked());
+
+      _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
+      _settings->setValue ("project/mysql/server", _mysql_server_field->text());
+      _settings->setValue ("project/mysql/user", _mysql_user_field->text());
+      _settings->setValue ("project/mysql/pwd", _mysql_pwd_field->text());
+      _settings->setValue ("project/mysql/db", _mysql_db_field->text());
     }
   }
 }
