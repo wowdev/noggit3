@@ -6,6 +6,7 @@
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QWidget>
 
@@ -41,6 +42,12 @@ namespace noggit
       QDoubleSpinBox* farZField;
 
       QCheckBox* tabletModeCheck;
+
+      QGroupBox* _mysql_box;
+      QLineEdit* _mysql_server_field;
+      QLineEdit* _mysql_user_field;
+      QLineEdit* _mysql_pwd_field;
+      QLineEdit* _mysql_db_field;
 
       QSettings* _settings;
     public:
