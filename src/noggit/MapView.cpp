@@ -1447,6 +1447,10 @@ MapView::~MapView()
 
 void MapView::tick (float dt)
 {
+	_mod_shift_down = QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+	_mod_ctrl_down = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
+	_mod_alt_down = QApplication::keyboardModifiers().testFlag(Qt::AltModifier);
+
 #ifdef _WIN32
   if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
   {
@@ -2377,15 +2381,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
     }
   }
 
-  if (event->key() == Qt::Key_Shift)
-    _mod_shift_down = true;
-
-  if (event->key() == Qt::Key_Alt)
-    _mod_alt_down = true;
-
-  if (event->key() == Qt::Key_Control)
-    _mod_ctrl_down = true;
-
   if (event->key() == Qt::Key_Space)
     _mod_space_down = true;
 
@@ -2488,15 +2483,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
 
 void MapView::keyReleaseEvent (QKeyEvent* event)
 {
-  if (event->key() == Qt::Key_Shift)
-    _mod_shift_down = false;
-
-  if (event->key() == Qt::Key_Alt)
-    _mod_alt_down = false;
-
-  if (event->key() == Qt::Key_Control)
-    _mod_ctrl_down = false;
-
   if (event->key() == Qt::Key_Space)
     _mod_space_down = false;
 
