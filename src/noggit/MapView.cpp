@@ -1227,9 +1227,15 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_fps (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
+  , _time_and_navigation_dock (new QDockWidget(this))
   , _cursor_switcher (new noggit::ui::cursor_switcher (this, cursor_color, cursor_type))
   , _keybindings (new noggit::ui::help)
 {
+  _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+  _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+  _main_window->setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+  _main_window->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
           , &QObject::destroyed
@@ -1281,8 +1287,13 @@ MapView::MapView( math::degrees camera_yaw0
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
   _minimap_dock->setVisible (false);
 
+  _time_and_navigation_dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _time_and_navigation_dock);
+  _time_and_navigation_dock->setVisible(true);
+
   connect (this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
   connect (this, &QObject::destroyed, _minimap, &QObject::deleteLater);
+  connect(this, &QObject::destroyed, _time_and_navigation_dock, &QObject::deleteLater);
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
@@ -1430,7 +1441,7 @@ MapView::~MapView()
   //! \ todo: fix the crash when deleting the texture picker
   TexturePicker->hide();
   _minimap->hide();
-
+  _time_and_navigation_dock->hide();
   _world.reset();
 }
 
