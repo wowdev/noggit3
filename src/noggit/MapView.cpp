@@ -1045,6 +1045,15 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
+  addHotkey(Qt::Key_R
+	  , MOD_space
+	  , [&]
+  {
+	  texturingTool->toggle_brush_level_min_max();
+  }
+  , [&] { return terrainMode == editing_mode::paint; }
+  );
+
   addHotkey ( Qt::Key_H
             , MOD_shift
             , [&]

@@ -141,6 +141,7 @@ namespace noggit
         "  ALT + right mouse + horizontal movement - change hardness\n"
         "  SPACE + left mouse + mouse move - change pressure\n"
         "  SPACE + mouse wheel - change strength (gradient)\n"
+		"  SPACE + R - Toggle min and max strength (gradient)\n"
         "  T - toggle spray brush\n"
         "  ALT + mouse wheel - change spray radius\n"
         "  SHIFT + mouse wheel - change spray pressure\n"
