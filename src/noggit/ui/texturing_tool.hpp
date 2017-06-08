@@ -48,6 +48,7 @@ namespace noggit
       void change_hardness (float change);
       void change_pressure (float change);
       void change_brush_level (float change);
+	  void toggle_brush_level_min_max();
       void change_spray_size (float change);
       void change_spray_pressure (float change);
 

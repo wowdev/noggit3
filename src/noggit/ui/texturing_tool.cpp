@@ -394,6 +394,13 @@ namespace noggit
       }
     }
 
+	void texturing_tool::toggle_brush_level_min_max()
+	{
+		if(_brush_level_spin->value() > _brush_level_spin->minimum())
+			_brush_level_spin->setValue(_brush_level_spin->minimum());
+		else _brush_level_spin->setValue(_brush_level_spin->maximum());
+	}
+
     void texturing_tool::change_spray_size(float change)
     {
       if (_texturing_mode == texturing_mode::paint)
