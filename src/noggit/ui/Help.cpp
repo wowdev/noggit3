@@ -185,6 +185,7 @@ namespace noggit
         "  PageDown - Set object to Groundlevel\n"
         "  CTRL + C or C - Copy object to clipboard\n"
         "  CTRL + V or V - Paste object on mouse position\n"
+	    "  CTRL + B - Duplicate selected object to mouse position\n"
         "  SHIFT + V - Insert last M2 from WMV\n"
         "  ALT + V - Insert last WMO from WMV\n"
         "  T - Toggle between paste modes\n"

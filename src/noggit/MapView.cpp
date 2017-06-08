@@ -865,6 +865,14 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
+  addHotkey(Qt::Key_B
+	  , MOD_ctrl
+	  , [this] {
+	  objectEditor->copy(*_world->GetCurrentSelection());
+	  objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
+  }
+  );
+
   ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
 
   ADD_ACTION (view_menu, "decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
