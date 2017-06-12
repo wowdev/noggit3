@@ -5,6 +5,7 @@
 
 #include <qt-color-widgets/color_selector.hpp>
 
+#include <QtCore/QSettings>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>
@@ -48,6 +49,8 @@ namespace noggit
                  {
                    QSignalBlocker const blocker(&cursor_type);
                    cursor_type.set(id);
+                   QSettings settings;
+                   settings.setValue ("cursor/default_type", id);
                  }
               );
 
@@ -56,7 +59,7 @@ namespace noggit
               , [group] (unsigned int id)
                 {
                   QSignalBlocker const blocker(group);
-                  group->button(id)->setChecked (true);
+                  group->button(id)->setChecked (true);                  
                 }
               );
 
@@ -73,6 +76,12 @@ namespace noggit
                   color.y = new_color.greenF();
                   color.z = new_color.blueF();
                   color.w = new_color.alphaF();
+                  QSettings settings;
+                  settings.setValue ("cursor/color/r", color.x);
+                  settings.setValue ("cursor/color/g", color.y);
+                  settings.setValue ("cursor/color/b", color.z);
+                  settings.setValue ("cursor/color/a", color.w);
+                  
                 }
               );
 
