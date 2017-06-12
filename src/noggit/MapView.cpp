@@ -1245,7 +1245,6 @@ MapView::MapView( math::degrees camera_yaw0
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
   , _time_and_navigation_dock (new QDockWidget(this))
-  , _cursor_switcher (new noggit::ui::cursor_switcher (this, cursor_color, cursor_type))
   , _keybindings (new noggit::ui::help)
 {
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -1320,6 +1319,12 @@ MapView::MapView( math::degrees camera_yaw0
   cursor_color.z = _settings->value ("cursor/color/b", 1).toFloat();
   cursor_color.w = _settings->value ("cursor/color/a", 1).toFloat();
 
+  _cursor_switcher.reset(new noggit::ui::cursor_switcher (this, cursor_color, cursor_type));
+
+  connect (&cursor_type, &noggit::unsigned_int_property::changed, [&] (unsigned int type)
+  {
+    _settings->setValue ("cursor/default_type", type);
+  });
 
   setFocusPolicy (Qt::StrongFocus);
   setMouseTracking (true);
