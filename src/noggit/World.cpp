@@ -758,6 +758,7 @@ void main()
     float start = fog_end * fog_start;
     float alpha = (dist_from_camera - start) / (fog_end - start);
     gl_FragColor = blend_by_alpha (vec4(fog_color.rgb, alpha), gl_FragColor);
+    gl_FragColor.a = 1.0;
   }
 
   if(draw_wireframe && !lines_drawn && length(vary_position.xz - cursor_position.xz) < max(2.0 * UNITSIZE, 1.5 * outer_cursor_radius))
