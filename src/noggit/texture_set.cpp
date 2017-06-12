@@ -144,8 +144,10 @@ void TextureSet::eraseTextures()
 
 void TextureSet::eraseTexture(size_t id)
 {
-  if (id > 3)
+  if (id >= nTextures)
+  {
     return;
+  }    
 
   // shift textures above
   for (size_t i = id; i < nTextures - 1; i++)
@@ -469,7 +471,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   bool erased = false;
 
   // stop after k=0 because k is unsigned
-  for (size_t k = 3; k < 4; --k)
+  for (size_t k = nTextures - 1; k < 4; --k)
   {  
     if (!texVisible[k])
     {
