@@ -941,8 +941,7 @@ void main()
 
   if (draw_mfbo)
   {
-    //! \todo don't compile on every frame
-    opengl::program const program
+    static opengl::program const program
       { { GL_VERTEX_SHADER
         , R"code(
 #version 110
@@ -1083,14 +1082,17 @@ void main()
   {
     liquid_render liquid_renderer;
 
-    opengl::scoped::use_program water_shader {liquid_renderer.shader_program()};
+    opengl::scoped::use_program water_shader { liquid_renderer.shader_program()};
 
     water_shader.uniform ("model_view", opengl::matrix::model_view());
     water_shader.uniform ("projection", opengl::matrix::projection());
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
-      tile->drawWater ( water_shader
+      tile->drawWater ( frustum
+                      , culldistance
+                      , camera_pos
+                      , water_shader
                       , skies->colorSet[OCEAN_COLOR_LIGHT]
                       , skies->colorSet[OCEAN_COLOR_DARK]
                       , animtime

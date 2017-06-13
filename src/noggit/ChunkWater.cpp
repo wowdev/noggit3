@@ -9,6 +9,8 @@
 ChunkWater::ChunkWater(float x, float z)
   : xbase(x)
   , zbase(z)
+  , vmin(x, 0.f, z)
+  , vmax(x + CHUNKSIZE, 0.f, z + CHUNKSIZE)
 {
 }
 
@@ -152,13 +154,21 @@ void ChunkWater::setType(int type, size_t layer)
   }
 }
 
-void ChunkWater::draw ( opengl::scoped::use_program& water_shader
+void ChunkWater::draw ( math::frustum const& frustum
+                      , const float& cull_distance
+                      , const math::vector_3d& camera
+                      , opengl::scoped::use_program& water_shader
                       , math::vector_3d water_color_light
                       , math::vector_3d water_color_dark
                       , int animtime
                       , int layer
                       )
 {
+  if (!is_visible (cull_distance, frustum, camera))
+  {
+    return;
+  }
+
   if (layer == -1)
   {
     for (liquid_layer& layer : _layers)
@@ -177,12 +187,27 @@ void ChunkWater::draw ( opengl::scoped::use_program& water_shader
   }
 }
 
+bool ChunkWater::is_visible ( const float& cull_distance
+                            , const math::frustum& frustum
+                            , const math::vector_3d& camera
+                            ) const
+{
+  static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
+
+  return frustum.intersects (vmin, vmax)
+    && (((camera - vcenter).length () - chunk_radius) < cull_distance);
+}
+
 void ChunkWater::update_layers()
 {
   for (liquid_layer& layer : _layers)
   {
     layer.updateRender();
+    vmin.y = std::min (vmin.y, layer.min());
+    vmax.y = std::max (vmax.y, layer.max());
   }
+
+  vcenter = (vmin + vmax) * 0.5f;
 }
 
 bool ChunkWater::hasData(size_t layer) const

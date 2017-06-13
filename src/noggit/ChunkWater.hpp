@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <math/frustum.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/liquid_layer.hpp>
@@ -16,17 +17,26 @@ class MapChunk;
 class ChunkWater
 {
 public:
+  ChunkWater() = delete;
   ChunkWater(float x, float z);
 
   void fromFile(MPQFile &f, size_t basePos);
   void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
-  void draw ( opengl::scoped::use_program& water_shader
+  void draw ( math::frustum const& frustum
+            , const float& cull_distance
+            , const math::vector_3d& camera
+            , opengl::scoped::use_program& water_shader
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
             , int animtime
             , int layer
             );
+
+  bool is_visible (const float& cull_distance
+                  , const math::frustum& frustum
+                  , const math::vector_3d& camera
+                  ) const;
 
   void autoGen(MapChunk* chunk, float factor);
   void CropWater(MapChunk* chunkTerrain);
@@ -53,6 +63,8 @@ public:
   float xbase, zbase;
 
 private:
+  math::vector_3d vmin, vmax, vcenter;
+
   // remove empty layers
   void cleanup();
   // update every layer's render
