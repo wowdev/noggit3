@@ -14,6 +14,8 @@
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
 
+#include <QtCore/QSettings>
+
 #include <map>
 #include <string>
 #include <unordered_set>
@@ -286,4 +288,6 @@ private:
   std::unique_ptr<noggit::map_horizon::render> _horizon_render;
 
   bool _display_initialized = false;
+
+  QSettings* _settings;
 };

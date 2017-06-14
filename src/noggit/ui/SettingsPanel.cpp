@@ -12,6 +12,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QRadioButton>
 
 
 #include <algorithm>
@@ -97,16 +98,46 @@ namespace noggit
       mysql_layout->addRow (new QLabel ("Your noggit wasn't build with mysql, you can't use this feature"));
 #endif
 
-      _mysql_server_field = new QLineEdit (_settings->value ("project/mysql/server").toString (), this);
-      _mysql_user_field = new QLineEdit (_settings->value ("project/mysql/user").toString (), this);
-      _mysql_pwd_field = new QLineEdit (_settings->value ("project/mysql/pwd").toString (), this);
-      _mysql_db_field = new QLineEdit (_settings->value ("project/mysql/db").toString (), this);
+      _mysql_server_field = new QLineEdit (_settings->value ("project/mysql/server").toString(), this);
+      _mysql_user_field = new QLineEdit (_settings->value ("project/mysql/user").toString(), this);
+      _mysql_pwd_field = new QLineEdit (_settings->value ("project/mysql/pwd").toString(), this);
+      _mysql_db_field = new QLineEdit (_settings->value ("project/mysql/db").toString(), this);
 
       mysql_layout->addRow ("Server", _mysql_server_field);
       mysql_layout->addRow ("User", _mysql_user_field);
       mysql_layout->addRow ("Password", _mysql_pwd_field);
       mysql_layout->addRow ("Database", _mysql_db_field);
       layout->addRow (_mysql_box);
+
+      auto wireframe_box (new QGroupBox ("Wireframe", this));
+      auto wireframe_layout (new QFormLayout (wireframe_box));
+
+      _wireframe_type_group = new QButtonGroup (wireframe_box);
+
+      auto radio_wire_full (new QRadioButton ("Full wireframe"));
+      auto radio_wire_cursor (new QRadioButton ("Around cursor"));
+
+      _wireframe_type_group->addButton (radio_wire_full, 0);
+      _wireframe_type_group->addButton (radio_wire_cursor, 1);     
+
+      wireframe_layout->addRow (new QLabel ("Type:"));
+      wireframe_layout->addRow (radio_wire_full);
+      wireframe_layout->addRow (radio_wire_cursor);
+
+      _wireframe_radius = new QDoubleSpinBox (wireframe_box);
+      _wireframe_radius->setRange (1.0, 100.0);
+
+      wireframe_layout->addRow ("Radius", _wireframe_radius);
+      wireframe_layout->addRow (new QLabel ("(real radius = cursor radius * wireframe radius)"));
+
+      _wireframe_width = new QDoubleSpinBox (wireframe_box);
+      _wireframe_width->setRange (0.0, 10.0);
+      _wireframe_width->setSingleStep(0.1);
+      wireframe_layout->addRow ("Width", _wireframe_width);
+
+      wireframe_layout->addRow ("Color", _wireframe_color = new color_widgets::ColorSelector (wireframe_box));
+
+      layout->addRow (wireframe_box);
 
       layout->addRow ( "View Distance"
                      , viewDistanceField = new QDoubleSpinBox
@@ -159,7 +190,7 @@ namespace noggit
     void settings::discard_changes()
     {
       gamePathField->actual->setText (_settings->value ("project/game_path").toString());
-      projectPathField->actual->setText (_settings->value ("project/path").toString ());
+      projectPathField->actual->setText (_settings->value ("project/path").toString());
       wodPathField->actual->setText (_settings->value ("project/wod_save_path").toString());
       importPathField->actual->setText (_settings->value ("project/import_file").toString());
       wmvLogPathField->actual->setText (_settings->value ("project/wmv_log_file").toString());
@@ -172,6 +203,11 @@ namespace noggit
       _mysql_user_field->setText(_settings->value ("project/mysql/user").toString());
       _mysql_pwd_field->setText (_settings->value ("project/mysql/pwd").toString());
       _mysql_db_field->setText (_settings->value ("project/mysql/db").toString());
+
+      _wireframe_type_group->button (_settings->value ("wireframe/type", 0).toInt())->toggle();
+      _wireframe_radius->setValue (_settings->value ("wireframe/radius", 1.5f).toFloat());
+      _wireframe_width->setValue (_settings->value ("wireframe/width", 1.f).toFloat());
+      _wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());
     }
 
     void settings::save_changes()
@@ -190,6 +226,12 @@ namespace noggit
       _settings->setValue ("project/mysql/user", _mysql_user_field->text());
       _settings->setValue ("project/mysql/pwd", _mysql_pwd_field->text());
       _settings->setValue ("project/mysql/db", _mysql_db_field->text());
+
+      _settings->setValue ("wireframe/type", _wireframe_type_group->checkedId());
+      _settings->setValue ("wireframe/radius", _wireframe_radius->value());
+      _settings->setValue ("wireframe/width", _wireframe_width->value());
+      _settings->setValue ("wireframe/color", _wireframe_color->color());
+      
     }
   }
 }

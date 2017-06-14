@@ -28,8 +28,6 @@
 #include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
 
-#include <QtCore/QSettings>
-
 #include <algorithm>
 #include <cassert>
 #include <ctime>
@@ -271,6 +269,7 @@ World::World(const std::string& name, int map_id)
   , culldistance(fogdistance)
   , skies(nullptr)
   , outdoorLightStats(OutdoorLightStats())
+  , _settings (new QSettings())
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
@@ -425,8 +424,7 @@ void World::setupFog (bool draw_fog)
   }
   else {
     gl.disable(GL_FOG);
-    QSettings settings;
-    culldistance = settings.value ("view_distance", 1000.f).toFloat();
+    culldistance = _settings->value ("view_distance", 1000.f).toFloat();
   }
 }
 
@@ -617,7 +615,12 @@ uniform bool draw_terrain_height_contour;
 uniform bool draw_lines;
 uniform bool draw_hole_lines;
 uniform bool is_border_chunk;
+
 uniform bool draw_wireframe;
+uniform int wireframe_type;
+uniform float wireframe_radius;
+uniform float wireframe_width;
+uniform vec4 wireframe_color;
 
 uniform vec3 camera;
 uniform bool draw_fog;
@@ -761,23 +764,35 @@ void main()
     gl_FragColor.a = 1.0;
   }
 
-  if(draw_wireframe && !lines_drawn && length(vary_position.xz - cursor_position.xz) < max(2.0 * UNITSIZE, 1.5 * outer_cursor_radius))
+  if(draw_wireframe && !lines_drawn)
   {
-    vec4 color = vec4(1.0, 1.0, 1.0, 0.0);
-    
-    color.a = contour_alpha(UNITSIZE, vary_position.xz, fw.xz * 0.5) * 0.5;
+    // true by default => type 0
+	  bool draw_wire = true;
+	
+	  if(wireframe_type == 1)
+	  {
+		  draw_wire = (length(vary_position.xz - cursor_position.xz) < max(2.0 * UNITSIZE, wireframe_radius * outer_cursor_radius));
+	  }
+	
+	  if(draw_wire)
+	  {
+		  float alpha = 0.0;
 
-    if(color.a == 0.0)
-    {
-      float xmod = mod(vary_position.x, UNITSIZE);
-      float zmod = mod(vary_position.z, UNITSIZE);
-      float d = length(fw.xz) * 0.5;
-      float diff1 = abs(xmod - zmod), diff2 = abs(xmod - UNITSIZE + zmod);
+		  alpha = contour_alpha(UNITSIZE, vary_position.xz, fw.xz * wireframe_width);
 
-      color.a = (1.0 - min(smoothstep(0.0, d, diff1), smoothstep(0.0, d, diff2))) * 0.5;
-    }
+		  float xmod = mod(vary_position.x, UNITSIZE);
+		  float zmod = mod(vary_position.z, UNITSIZE);
+		  float d = length(fw.xz) * wireframe_width;
+		  float diff = min( min(abs(xmod - zmod), abs(xmod - UNITSIZE + zmod))
+                      , min(abs(zmod - xmod), abs(zmod + UNITSIZE - zmod))
+                      );        
 
-    gl_FragColor = blend_by_alpha (color, gl_FragColor);
+		  alpha = max(alpha, 1.0 - smoothstep(0.0, d, diff));
+
+      vec4 color = vec4(wireframe_color.rgb, alpha * wireframe_color.a);
+
+		  gl_FragColor = blend_by_alpha (color, gl_FragColor);
+	  }	
   }
 
   if (draw_cursor_circle)
@@ -801,7 +816,17 @@ void main()
     mcnk_shader.attrib("alphacoord", alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
+
     mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
+    mcnk_shader.uniform ("wireframe_type", _settings->value("wireframe/type", 0).toInt()); 
+    mcnk_shader.uniform ("wireframe_radius", _settings->value("wireframe/radius", 1.5f).toFloat());
+    mcnk_shader.uniform ("wireframe_width", _settings->value ("wireframe/width", 1.f).toFloat());
+    
+    // !\ todo store the color somewhere ?
+    QColor c = _settings->value("wireframe/color").value<QColor>();
+    math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+    mcnk_shader.uniform ("wireframe_color", wireframe_color);
+    
     mcnk_shader.uniform ("draw_fog", (int)draw_fog);
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));
     // !\ todo use light dbcs values
@@ -1710,16 +1735,14 @@ void World::addM2 ( std::string const& filename
   newModelis.scale = scale;
   newModelis.dir = rotation;
 
-  QSettings settings;
-
-  if (settings.value("model/random_rotation", false).toBool())
+  if (_settings->value("model/random_rotation", false).toBool())
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
     newModelis.dir.y += misc::randfloat(min, max);
   }
 
-  if (settings.value ("model/random_tilt", false).toBool ())
+  if (_settings->value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
@@ -1727,7 +1750,7 @@ void World::addM2 ( std::string const& filename
     newModelis.dir.z += misc::randfloat(min, max);
   }
 
-  if (settings.value ("model/random_size", false).toBool ())
+  if (_settings->value ("model/random_size", false).toBool ())
   {
     float min = paste_params->minScale;
     float max = paste_params->maxScale;
