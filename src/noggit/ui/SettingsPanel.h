@@ -2,7 +2,10 @@
 
 #pragma once
 
+#include <qt-color-widgets/color_selector.hpp>
+
 #include <QtCore/QSettings>
+#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDoubleSpinBox>
@@ -48,6 +51,11 @@ namespace noggit
       QLineEdit* _mysql_user_field;
       QLineEdit* _mysql_pwd_field;
       QLineEdit* _mysql_db_field;
+
+      QButtonGroup* _wireframe_type_group;
+      QDoubleSpinBox* _wireframe_radius;
+      QDoubleSpinBox* _wireframe_width;
+      color_widgets::ColorSelector* _wireframe_color;
 
       QSettings* _settings;
     public:
