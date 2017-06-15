@@ -621,6 +621,7 @@ uniform int wireframe_type;
 uniform float wireframe_radius;
 uniform float wireframe_width;
 uniform vec4 wireframe_color;
+uniform bool rainbow_wireframe;
 
 uniform vec3 camera;
 uniform bool draw_fog;
@@ -768,10 +769,11 @@ void main()
   {
     // true by default => type 0
 	  bool draw_wire = true;
+    float real_wireframe_radius = max(outer_cursor_radius * wireframe_radius,2.0 * UNITSIZE); 
 	
 	  if(wireframe_type == 1)
 	  {
-		  draw_wire = (length(vary_position.xz - cursor_position.xz) < max(2.0 * UNITSIZE, wireframe_radius * outer_cursor_radius));
+		  draw_wire = (length(vary_position.xz - cursor_position.xz) < real_wireframe_radius);
 	  }
 	
 	  if(draw_wire)
@@ -788,8 +790,21 @@ void main()
                       );        
 
 		  alpha = max(alpha, 1.0 - smoothstep(0.0, d, diff));
+      vec4 color;
+ 
+      if(rainbow_wireframe)
+      {
+        float pct = (vary_position.x - cursor_position.x + real_wireframe_radius) / (2 * real_wireframe_radius);          
+        float red = (1 - smoothstep(0.2, 0.4, pct)) + smoothstep(0.8, 1.0, pct);
+        float green = (pct < 0.6 ? smoothstep(0.0, 0.2, pct) : (1 - smoothstep(0.6, 0.8, pct)));
+        float blue = smoothstep(0.4, 0.6, pct);
 
-      vec4 color = vec4(wireframe_color.rgb, alpha * wireframe_color.a);
+        color = vec4(red, green, blue, alpha);
+      }
+      else
+      {
+        color = vec4(wireframe_color.rgb, alpha * wireframe_color.a);
+      }      
 
 		  gl_FragColor = blend_by_alpha (color, gl_FragColor);
 	  }	
@@ -820,12 +835,12 @@ void main()
     mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
     mcnk_shader.uniform ("wireframe_type", _settings->value("wireframe/type", 0).toInt()); 
     mcnk_shader.uniform ("wireframe_radius", _settings->value("wireframe/radius", 1.5f).toFloat());
-    mcnk_shader.uniform ("wireframe_width", _settings->value ("wireframe/width", 1.f).toFloat());
-    
+    mcnk_shader.uniform ("wireframe_width", _settings->value ("wireframe/width", 1.f).toFloat());   
     // !\ todo store the color somewhere ?
     QColor c = _settings->value("wireframe/color").value<QColor>();
     math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
     mcnk_shader.uniform ("wireframe_color", wireframe_color);
+    mcnk_shader.uniform ("rainbow_wireframe", _settings->value("wireframe/rainbow", 0).toInt());
     
     mcnk_shader.uniform ("draw_fog", (int)draw_fog);
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));

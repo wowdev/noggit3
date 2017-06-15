@@ -137,7 +137,10 @@ namespace noggit
 
       wireframe_layout->addRow ("Color", _wireframe_color = new color_widgets::ColorSelector (wireframe_box));
 
+      wireframe_layout->addRow ("Rainbow !", _wireframe_rainbow_cb = new QCheckBox(wireframe_box));
+
       layout->addRow (wireframe_box);
+
 
       layout->addRow ( "View Distance"
                      , viewDistanceField = new QDoubleSpinBox
@@ -208,6 +211,7 @@ namespace noggit
       _wireframe_radius->setValue (_settings->value ("wireframe/radius", 1.5f).toFloat());
       _wireframe_width->setValue (_settings->value ("wireframe/width", 1.f).toFloat());
       _wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());
+      _wireframe_rainbow_cb->setChecked (_settings->value ("wireframe/rainbow", 0).toInt());
     }
 
     void settings::save_changes()
@@ -231,7 +235,7 @@ namespace noggit
       _settings->setValue ("wireframe/radius", _wireframe_radius->value());
       _settings->setValue ("wireframe/width", _wireframe_width->value());
       _settings->setValue ("wireframe/color", _wireframe_color->color());
-      
+      _settings->setValue ("wireframe/rainbow", (int)_wireframe_rainbow_cb->isChecked());
     }
   }
 }
