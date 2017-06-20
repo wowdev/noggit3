@@ -569,7 +569,6 @@ void World::draw ( math::vector_3d const& cursor_pos
 attribute vec4 position;
 attribute vec3 normal;
 attribute vec2 texcoord;
-attribute vec2 alphacoord;
 attribute vec3 mccv;
 
 uniform mat4 model_view;
@@ -577,7 +576,6 @@ uniform mat4 projection;
 
 varying vec4 vary_position;
 varying vec2 vary_texcoord;
-varying vec2 vary_alphacoord;
 varying vec3 vary_normal;
 varying vec3 vary_mccv;
 
@@ -588,7 +586,6 @@ void main()
   vary_normal = normalize (gl_NormalMatrix * normal);
   vary_position = position;
   vary_texcoord = texcoord;
-  vary_alphacoord = alphacoord;
   vary_mccv = mccv;
 }
 )code"
@@ -637,7 +634,6 @@ uniform vec4 cursor_color;
 
 varying vec4 vary_position;
 varying vec2 vary_texcoord;
-varying vec2 vary_alphacoord;
 varying vec3 vary_normal;
 varying vec3 vary_mccv;
 
@@ -656,7 +652,7 @@ vec4 texture_blend()
   if(layer_count == 0)
     return vec4 (1.0, 1.0, 1.0, 1.0);
 
-  vec3 alpha = texture2D (alphamap, vary_alphacoord).rgb;
+  vec3 alpha = texture2D (alphamap, vary_texcoord / 8).rgb;
   float a0 = alpha.r;  
   float a1 = alpha.g;
   float a2 = alpha.b;
@@ -724,7 +720,7 @@ void main()
     gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), gl_FragColor);
   }
   
-  float shadow_alpha = texture2D (shadow_map, vary_alphacoord).a;
+  float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8).a;
 
   gl_FragColor = vec4 (gl_FragColor.rgb * (1.0 - shadow_alpha), 1.0);
 
@@ -828,7 +824,7 @@ void main()
     mcnk_shader.uniform("model_view", opengl::matrix::model_view());
     mcnk_shader.uniform("projection", opengl::matrix::projection());
     mcnk_shader.attrib("texcoord", detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-    mcnk_shader.attrib("alphacoord", alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
 
