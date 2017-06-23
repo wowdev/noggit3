@@ -415,8 +415,16 @@ void Model::initAnimated(const MPQFile& f)
   // particle systems
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef const* pdefs = reinterpret_cast<ModelParticleEmitterDef const*>(f.getBuffer() + header.ofsParticleEmitters);
-    for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-      _particles.emplace_back (this, f, pdefs[i], _global_sequences.data());
+    for (size_t i = 0; i<header.nParticleEmitters; ++i) 
+    {
+      try
+      {
+        _particles.emplace_back (this, f, pdefs[i], _global_sequences.data());
+      }
+      catch (std::logic_error error)
+      {
+        LogError << "Loading particles for '" << _filename << "' " << error.what() << std::endl;
+      }      
     }
   }
 
@@ -512,10 +520,11 @@ void Model::animate(int _anim, int animtime_)
     }
   }
 
-  for (size_t i = 0; i<header.nParticleEmitters; ++i) {
+  for (auto& particle : _particles)
+  {
     // random time distribution for teh win ..?
-    int pt = (t + static_cast<int>(tmax*_particles[i].tofs)) % tmax;
-    _particles[i].setup(anim, pt, _global_animtime);
+    int pt = (t + static_cast<int>(tmax*particle.tofs)) % tmax;
+    particle.setup(anim, pt, _global_animtime);
   }
 
   for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
@@ -1057,9 +1066,9 @@ void Model::updateEmitters(float dt)
 {
   if (finished)
   {
-    for (size_t i = 0; i<header.nParticleEmitters; ++i)
+    for (auto& particle : _particles)
     {
-      _particles[i].update (dt);
+      particle.update (dt);
     }
   }
 }

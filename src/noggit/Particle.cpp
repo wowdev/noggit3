@@ -19,7 +19,7 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
   : model (model_)
   , emitter ( mta.EmitterType == 1 ? std::unique_ptr<ParticleEmitter> (std::make_unique<PlaneParticleEmitter>())
             : mta.EmitterType == 2 ? std::unique_ptr<ParticleEmitter> (std::make_unique<SphereParticleEmitter>())
-            : throw std::logic_error ("unimplemented emitter type")
+            : throw std::logic_error ("unimplemented emitter type: " + std::to_string(mta.EmitterType))
             )
   , speed (mta.EmissionSpeed, f, globals)
   , variation (mta.SpeedVariation, f, globals)
