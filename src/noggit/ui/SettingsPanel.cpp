@@ -85,7 +85,7 @@ namespace noggit
       browse_row (&projectPathField, "Project Path", "project/path", util::file_line_edit::directories);
       browse_row (&wodPathField, "WoD Save Path", "project/wod_save_path", util::file_line_edit::directories);
       browse_row (&importPathField, "Import Path", "project/import_file", util::file_line_edit::files);
-      browse_row (&wmvLogPathField, "WMV Log Path", "project/wod_save_path", util::file_line_edit::files);      
+      browse_row (&wmvLogPathField, "WMV Log Path", "project/wmv_log_file", util::file_line_edit::files);      
 
       _mysql_box = new QGroupBox ("MySQL (uid storage)", this);
       _mysql_box->setToolTip ("Store the maps' max model unique id (uid) in a mysql database to sync your uids with different computers/users to avoid duplications");
