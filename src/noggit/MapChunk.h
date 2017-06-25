@@ -56,6 +56,10 @@ private:
   int indexNoLoD(int x, int y);
   int indexLoD(int x, int y);
 
+  std::vector<math::vector_3d> _intersect_points;
+
+  void update_intersect_points();
+
 public:
   MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha);
 

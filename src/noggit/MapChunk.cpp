@@ -94,6 +94,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     vmax.x = xbase + 8 * UNITSIZE;
     vmax.z = zbase + 8 * UNITSIZE;
 
+    update_intersect_points();
+
     // use absolute y pos in vertices
     ybase = 0.0f;
     header.ypos = 0.0f;
@@ -349,6 +351,20 @@ int MapChunk::indexNoLoD(int x, int y)
   return x * 8 + x * 9 + y;
 }
 
+void MapChunk::update_intersect_points()
+{
+  _intersect_points.clear();
+
+  _intersect_points.emplace_back (vmin.x, vmin.y, vmin.z);
+  _intersect_points.emplace_back (vmin.x, vmin.y, vmax.z);
+  _intersect_points.emplace_back (vmin.x, vmax.y, vmin.z);
+  _intersect_points.emplace_back (vmin.x, vmax.y, vmax.z);
+  _intersect_points.emplace_back (vmax.x, vmin.y, vmin.z);
+  _intersect_points.emplace_back (vmax.x, vmin.y, vmax.z);
+  _intersect_points.emplace_back (vmax.x, vmax.y, vmin.z);
+  _intersect_points.emplace_back (vmax.x, vmax.y, vmax.z);
+}
+
 void MapChunk::initStrip()
 {
   strip_with_holes.clear();
@@ -437,6 +453,8 @@ void MapChunk::clearHeight()
   vmin.y = 0.0f;
   vmax.y = 0.0f;
 
+  update_intersect_points();
+
   gl.bufferData<GL_ARRAY_BUFFER>
     (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
 
@@ -449,7 +467,7 @@ bool MapChunk::is_visible ( const float& cull_distance
 {
   static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
 
-  return frustum.intersects (vmin, vmax)
+  return frustum.intersects (_intersect_points)
       && (((camera - vcenter).length() - chunk_radius) < cull_distance);
 }
 
@@ -555,6 +573,8 @@ void MapChunk::updateVerticesData()
     vmin.y = std::min(vmin.y, mVertices[i].y);
     vmax.y = std::max(vmax.y, mVertices[i].y);
   }
+
+  update_intersect_points();
 
   gl.bufferData<GL_ARRAY_BUFFER>(vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
 }
