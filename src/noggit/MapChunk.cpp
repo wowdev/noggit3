@@ -507,12 +507,17 @@ void MapChunk::draw ( math::frustum const& frustum
     mcnk_shader.uniform("alphamap", 1);
   }
 
-  for (int i = 1; i < _texture_set.num(); ++i)
+  switch (_texture_set.num())
   {
-    std::stringstream ss;
-    ss << "tex" << i;    
-    mcnk_shader.uniform(ss.str(), 1 + i);
-    _texture_set.bindTexture(i, i + 1);
+  case 4:
+    mcnk_shader.uniform("tex3", 4);
+    _texture_set.bindTexture(3, 4);
+  case 3:
+    mcnk_shader.uniform("tex2", 3);
+    _texture_set.bindTexture(2, 3);
+  case 2:
+    mcnk_shader.uniform("tex1", 2);
+    _texture_set.bindTexture(1, 2);
   }
 
   opengl::texture::set_active_texture(5);
