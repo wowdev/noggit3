@@ -1405,46 +1405,40 @@ MapView::MapView( math::degrees camera_yaw0
 
   void MapView::paintGL()
   {
+    opengl::context::scoped_setter const _ (::gl, context());
+    const qreal now(_startup_time.elapsed() / 1000.0);
+
+    _last_frame_durations.emplace_back (now - _last_update);
+
+    tick (now - _last_update);
+    _last_update = now;
+
+    gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
+    if (Saving)
     {
-      makeCurrent();
-      opengl::context::scoped_setter const _ (::gl, context());
-      const qreal now(_startup_time.elapsed() / 1000.0);
+      gl.matrixMode (GL_PROJECTION);
+      gl.loadIdentity();
+      gl.ortho
+        (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
+      gl.matrixMode (GL_MODELVIEW);
+      gl.loadIdentity();
 
-      _last_frame_durations.emplace_back (now - _last_update);
-
-      tick (now - _last_update);
-      _last_update = now;
+      _world->saveMap (width(), height());
+      Saving = false;
     }
 
+
+    switch (mViewMode)
     {
-      makeCurrent();
-      opengl::context::scoped_setter const _ (::gl, context());
-      gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    case eViewMode_2D:
+      displayViewMode_2D();
+      break;
 
-      //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
-      if (Saving)
-      {
-        gl.matrixMode (GL_PROJECTION);
-        gl.loadIdentity();
-        gl.ortho
-          (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
-        gl.matrixMode (GL_MODELVIEW);
-        gl.loadIdentity();
-
-        _world->saveMap (width(), height());
-        Saving = false;
-      }
-
-      switch (mViewMode)
-      {
-      case eViewMode_2D:
-        displayViewMode_2D();
-        break;
-
-      case eViewMode_3D:
-        displayViewMode_3D();
-        break;
-      }
+    case eViewMode_3D:
+      displayViewMode_3D();
+      break;
     }
   }
 
