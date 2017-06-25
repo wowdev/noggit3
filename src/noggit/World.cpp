@@ -652,7 +652,7 @@ vec4 texture_blend()
   if(layer_count == 0)
     return vec4 (1.0, 1.0, 1.0, 1.0);
 
-  vec3 alpha = texture2D (alphamap, vary_texcoord / 8).rgb;
+  vec3 alpha = texture2D (alphamap, vary_texcoord / 8.0).rgb;
   float a0 = alpha.r;  
   float a1 = alpha.g;
   float a2 = alpha.b;
@@ -662,7 +662,7 @@ vec4 texture_blend()
   vec3 t2 = texture2D(tex2, vary_texcoord).rgb;
   vec3 t3 = texture2D(tex3, vary_texcoord).rgb;
 
-  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1);
+  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
 }
 
 float contour_alpha(float unit_size, float pos, float line_width)
@@ -702,7 +702,7 @@ void main()
 
   if(has_mccv)
   {
-    gl_FragColor = vec4(gl_FragColor.rgb * vary_mccv, 1);
+    gl_FragColor = vec4(gl_FragColor.rgb * vary_mccv, 1.0);
   }
 
   if(cant_paint)
@@ -720,7 +720,7 @@ void main()
     gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), gl_FragColor);
   }
   
-  float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8).a;
+  float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8.0).a;
 
   gl_FragColor = vec4 (gl_FragColor.rgb * (1.0 - shadow_alpha), 1.0);
 
@@ -765,7 +765,7 @@ void main()
   {
     // true by default => type 0
 	  bool draw_wire = true;
-    float real_wireframe_radius = max(outer_cursor_radius * wireframe_radius,2.0 * UNITSIZE); 
+    float real_wireframe_radius = max(outer_cursor_radius * wireframe_radius, 2.0 * UNITSIZE); 
 	
 	  if(wireframe_type == 1)
 	  {
@@ -790,9 +790,9 @@ void main()
  
       if(rainbow_wireframe)
       {
-        float pct = (vary_position.x - cursor_position.x + real_wireframe_radius) / (2 * real_wireframe_radius);          
-        float red = (1 - smoothstep(0.2, 0.4, pct)) + smoothstep(0.8, 1.0, pct);
-        float green = (pct < 0.6 ? smoothstep(0.0, 0.2, pct) : (1 - smoothstep(0.6, 0.8, pct)));
+        float pct = (vary_position.x - cursor_position.x + real_wireframe_radius) / (2.0 * real_wireframe_radius);          
+        float red = (1.0 - smoothstep(0.2, 0.4, pct)) + smoothstep(0.8, 1.0, pct);
+        float green = (pct < 0.6 ? smoothstep(0.0, 0.2, pct) : (1.0 - smoothstep(0.6, 0.8, pct)));
         float blue = smoothstep(0.4, 0.6, pct);
 
         color = vec4(red, green, blue, alpha);
