@@ -168,12 +168,10 @@ namespace opengl
       {
         return it->second;
       }
-      else
-      {
-        GLuint loc = _program.uniform_location (name);
-        _uniforms[name] = loc;
-        return loc;
-      }
+
+      GLuint loc = _program.uniform_location (name);
+      _uniforms[name] = loc;
+      return loc;
     }
 
     GLuint use_program::attrib_location (std::string const& name)
