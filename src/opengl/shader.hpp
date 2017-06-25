@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace math
 {
@@ -48,8 +49,8 @@ namespace opengl
     program& operator= (program&&) = delete;
 
   private:
-    GLuint uniform_location (std::string const& name) const;
-    GLuint attrib_location (std::string const& name) const;
+    inline GLuint uniform_location (std::string const& name) const;
+    inline GLuint attrib_location (std::string const& name) const;
 
     friend struct scoped::use_program;
 
@@ -89,8 +90,9 @@ namespace opengl
       GLuint uniform_location (std::string const& name);
       GLuint attrib_location (std::string const& name);
 
-      std::map<std::string, GLuint> _uniforms;
-      std::map<std::string, GLuint> _attribs;
+      std::unordered_map<std::string, GLuint> _uniforms;
+      std::unordered_map<std::string, GLuint> _attribs;
+
       program const& _program;
       std::set<GLuint> _enabled_vertex_attrib_arrays;
     };
