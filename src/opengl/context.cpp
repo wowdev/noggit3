@@ -44,15 +44,15 @@ namespace opengl
       {
         if (!_current_context)
         {
-          throw std::runtime_error (_function + ": called without active OpenGL context: no context at all");
+          throw std::runtime_error (std::string(_function) + ": called without active OpenGL context: no context at all");
         }
         if (!_current_context->isValid())
         {
-          throw std::runtime_error (_function + ": called without active OpenGL context: invalid");
+          throw std::runtime_error (std::string(_function) + ": called without active OpenGL context: invalid");
         }
         if (QOpenGLContext::currentContext() != _current_context)
         {
-          throw std::runtime_error (_function + ": called without active OpenGL context: not current context");
+          throw std::runtime_error (std::string(_function) + ": called without active OpenGL context: not current context");
         }
       }
       verify_context_and_check_for_gl_errors (QOpenGLContext* current_context, char const* function)
@@ -65,7 +65,7 @@ namespace opengl
         Functions* f (_current_context->versionFunctions<Functions>());
         if (!f)
         {
-          throw std::runtime_error (_function + ": requires OpenGL functions for version " + typeid (Functions).name());
+          throw std::runtime_error (std::string(_function) + ": requires OpenGL functions for version " + typeid (Functions).name());
         }
         return f;
       }
@@ -74,7 +74,7 @@ namespace opengl
       {
         if (!_current_context->hasExtension (extension_traits<Extension>::name))
         {
-          throw std::runtime_error (_function + ": requires OpenGL extension " + extension_traits<Extension>::name);
+          throw std::runtime_error (std::string(_function) + ": requires OpenGL extension " + extension_traits<Extension>::name);
         }
         std::unique_ptr<Extension> functions (new Extension());
         functions->initializeOpenGLFunctions();
@@ -82,7 +82,7 @@ namespace opengl
       }
 
       QOpenGLContext* _current_context;
-      std::string _function;
+      char const* _function;
       static std::string no_extra_info() { return {}; }
       std::function<std::string()> _extra_info;
 
@@ -123,7 +123,7 @@ namespace opengl
         {
           errors += _extra_info();
 #ifndef NOGGIT_DO_NOT_THROW_ON_OPENGL_ERRORS
-          LogError << _function + ":" + errors << "\n";
+          LogError << _function << ":" + errors << "\n";
 #else
           throw std::runtime_error (_function + ":" + errors);
 #endif
