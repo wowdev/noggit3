@@ -500,40 +500,25 @@ void MapChunk::draw ( math::frustum const& frustum
 
   if (_texture_set.num())
   {
-    _texture_set.bindTexture(0, 0);
-    mcnk_shader.uniform("tex0", 0);
-
+    _texture_set.bindTexture(0, 0); // tex0
     _texture_set.bind_alpha(1);
-    mcnk_shader.uniform("alphamap", 1);
-  }
 
-  switch (_texture_set.num())
-  {
-  case 4:
-    mcnk_shader.uniform("tex3", 4);
-    _texture_set.bindTexture(3, 4);
-  case 3:
-    mcnk_shader.uniform("tex2", 3);
-    _texture_set.bindTexture(2, 3);
-  case 2:
-    mcnk_shader.uniform("tex1", 2);
-    _texture_set.bindTexture(1, 2);
+    switch (_texture_set.num())
+    {
+    case 4: _texture_set.bindTexture(3, 4); // tex3
+    case 3: _texture_set.bindTexture(2, 3); // tex2
+    case 2: _texture_set.bindTexture(1, 2); // tex1
+    }
   }
 
   opengl::texture::set_active_texture(5);
   shadow.bind();
-  mcnk_shader.uniform("shadow_map", 5);
-
-  mcnk_shader.uniform("has_mccv", (int)hasMCCV);
+  
   mcnk_shader.uniform("layer_count", (int)_texture_set.num());
   mcnk_shader.uniform("cant_paint", (int)cantPaint);
-  mcnk_shader.uniform("draw_areaid_overlay", (int)draw_areaid_overlay);
-
+  
   bool impassible = draw_chunk_flag_overlay && (Flags & FLAG_IMPASS);
   mcnk_shader.uniform ("draw_impassible_flag", (int)impassible);
-  mcnk_shader.uniform ("draw_terrain_height_contour", (int)draw_contour);
-  bool is_border_chunk = (px % 15) == 0 || (py % 15) == 0;
-  mcnk_shader.uniform ("is_border_chunk", (int)is_border_chunk);
 
   if (draw_areaid_overlay)
   {

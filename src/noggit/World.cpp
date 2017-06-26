@@ -611,7 +611,6 @@ uniform bool draw_impassible_flag;
 uniform bool draw_terrain_height_contour;
 uniform bool draw_lines;
 uniform bool draw_hole_lines;
-uniform bool is_border_chunk;
 
 uniform bool draw_wireframe;
 uniform int wireframe_type;
@@ -699,11 +698,7 @@ void main()
   vec3 fw = fwidth(vary_position.xyz);
 
   gl_FragColor = texture_blend();
-
-  if(has_mccv)
-  {
-    gl_FragColor = vec4(gl_FragColor.rgb * vary_mccv, 1.0);
-  }
+  gl_FragColor.rgb *= vary_mccv;
 
   if(cant_paint)
   {
@@ -733,11 +728,10 @@ void main()
   if(draw_lines)
   {
     vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
-    if(is_border_chunk)
-    {
-      color.a = contour_alpha(TILESIZE, vary_position.xz, fw.xz * 1.5);
-      color.g = color.a > 0.0 ? 0.8 : 0.0;
-    }
+
+    color.a = contour_alpha(TILESIZE, vary_position.xz, fw.xz * 1.5);
+    color.g = color.a > 0.0 ? 0.8 : 0.0;
+
     if(color.a == 0.0)
     {
       color.a = contour_alpha(CHUNKSIZE, vary_position.xz, fw.xz);
@@ -827,6 +821,8 @@ void main()
     
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
+    mcnk_shader.uniform("draw_areaid_overlay", (int)draw_areaid_overlay);
+    mcnk_shader.uniform ("draw_terrain_height_contour", (int)draw_contour);
 
     mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
     mcnk_shader.uniform ("wireframe_type", _settings->value("wireframe/type", 0).toInt()); 
@@ -856,7 +852,14 @@ void main()
     else
     {
       mcnk_shader.uniform ("draw_cursor_circle", 0);
-    }   
+    }
+
+    mcnk_shader.uniform("tex0", 0);
+    mcnk_shader.uniform("alphamap", 1);
+    mcnk_shader.uniform("tex1", 2);
+    mcnk_shader.uniform("tex2", 3);
+    mcnk_shader.uniform("tex3", 4);
+    mcnk_shader.uniform("shadow_map", 5);
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
