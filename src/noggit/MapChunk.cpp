@@ -187,6 +187,15 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       mccv[i] = math::vector_3d((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
     }
   }
+  else
+  {
+    math::vector_3d mccv_default(1.f, 1.f, 1.f);
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      mccv[i] = mccv_default;
+    }
+  }
+
 
   // create vertex buffers
   gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
