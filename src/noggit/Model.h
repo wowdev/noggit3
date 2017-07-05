@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <math/frustum.hpp>
 #include <math/matrix_4x4.hpp>
 #include <math/quaternion.hpp>
 #include <math/ray.hpp>
@@ -157,7 +158,15 @@ public:
 
   void draw (bool draw_fog, int animtime, bool draw_particles);
   void draw (opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles);
-  void draw (std::vector<ModelInstance*> instances, opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles);
+  void draw ( std::vector<ModelInstance*> instances
+            , opengl::scoped::use_program& m2_shader
+            , math::frustum const& frustum
+            , const float& cull_distance
+            , const math::vector_3d& camera
+            , bool draw_fog
+            , int animtime
+            , bool draw_particles
+            );
   void drawTileMode();
 
   std::vector<float> intersect (math::ray const&, int animtime);

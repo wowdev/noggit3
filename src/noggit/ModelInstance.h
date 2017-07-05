@@ -106,6 +106,7 @@ public:
   void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]) const;
+  bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
 
   void recalcExtents();
 };

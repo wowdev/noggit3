@@ -1030,7 +1030,15 @@ void Model::draw (opengl::scoped::use_program& m2_shader, bool draw_fog, int ani
   }
 }
 
-void Model::draw (std::vector<ModelInstance*> instances, opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles)
+void Model::draw ( std::vector<ModelInstance*> instances
+                 , opengl::scoped::use_program& m2_shader
+                 , math::frustum const& frustum
+                 , const float& cull_distance
+                 , const math::vector_3d& camera
+                 , bool draw_fog
+                 , int animtime
+                 , bool draw_particles
+                 )
 {
   if (!finishedLoading())
     return;
@@ -1044,7 +1052,10 @@ void Model::draw (std::vector<ModelInstance*> instances, opengl::scoped::use_pro
 
   for (ModelInstance* mi : instances)
   {
-    transform_matrix.push_back(mi->transform_matrix().transposed());
+    if (mi->is_visible(frustum, cull_distance, camera))
+    {
+      transform_matrix.push_back(mi->transform_matrix().transposed());
+    }    
   }
 
   gl.bindVertexArray(_vao);
