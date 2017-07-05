@@ -61,17 +61,15 @@ void ModelInstance::draw ( opengl::scoped::use_program& m2_shader
                          , int animtime
                          )
 {
-  float dist = (pos - camera).length() - model->rad * scale;
-  if(dist >= cull_distance)
+  if (is_visible(frustum, cull_distance, camera))
+  {
     return;
-
-  if (!frustum.intersectsSphere(pos, model->rad * scale))
-    return;
+  }  
 
   m2_shader.uniform("transform", transform_matrix().transposed());
 
   //! \todo add toggle draw particles and set customizable distance
-  model->draw (m2_shader, draw_fog, animtime, dist < 50.0f);
+  model->draw (m2_shader, draw_fog, animtime, false);
   
 }
 
@@ -85,16 +83,12 @@ void ModelInstance::draw ( math::frustum const& frustum
                          , int animtime
                          )
 {
-  float dist = (pos - camera).length() - model->rad * scale;
-  if(dist >= cull_distance)
+  if (is_visible(frustum, cull_distance, camera))
+  {
     return;
-
-  if (!frustum.intersectsSphere(pos, model->rad * scale))
-    return;
+  }    
 
   opengl::scoped::matrix_pusher const matrix;
-
-
 
   gl.multMatrixf (transform_matrix().transposed());
 
@@ -105,7 +99,7 @@ void ModelInstance::draw ( math::frustum const& frustum
                                  ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
   }
   //! \todo add toggle draw particles and set customizable distance
-  model->draw (draw_fog, animtime, dist < 50.0f);
+  model->draw (draw_fog, animtime, false);
 
   if (is_current_selection || force_box)
   {
@@ -252,6 +246,15 @@ void ModelInstance::resetDirection(){
 bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const
 {
   return misc::rectOverlap(extents, rect);
+}
+
+bool ModelInstance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const
+{
+  float dist = (pos - camera).length() - model->rad * scale;
+  if(dist >= cull_distance)
+    return false;
+
+  return frustum.intersectsSphere(pos, model->rad * scale);
 }
 
 void ModelInstance::recalcExtents()

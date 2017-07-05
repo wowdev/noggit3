@@ -1110,7 +1110,7 @@ void main()
 
     for (auto& it : models)
     {
-      it.second[0]->model->draw(it.second, m2_shader, false, 0, false);
+      it.second[0]->model->draw(it.second, m2_shader,frustum, culldistance, camera_pos, false, 0, false);
     }
   }
 
