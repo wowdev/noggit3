@@ -73,7 +73,9 @@ Model::~Model()
   _textures.clear();
   _textureFilenames.clear();
 
-  gl.deleteBuffers (1, &_vertices_buffer);
+  gl.deleteBuffers (1, &_vao);
+  gl.deleteBuffers (1, &_transform_buffer);
+  gl.deleteBuffers (1, &_vertices_buffer);  
 }
 
 
@@ -1045,30 +1047,15 @@ void Model::draw (std::vector<ModelInstance*> instances, opengl::scoped::use_pro
     transform_matrix.push_back(mi->transform_matrix().transposed());
   }
 
-  GLuint vao;
-  gl.genVertexArrays(1, &vao);
-  gl.bindVertexArray(vao);
-
-  GLuint position_vbo;
+  gl.bindVertexArray(_vao);
 
   {
-    gl.genBuffers( 1, &position_vbo);
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const pos_binder (position_vbo);
-
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     gl.bufferData(GL_ARRAY_BUFFER, transform_matrix.size() * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
-
-    
-    //m2_shader.attrib("transform", transform_matrix.data(), 1);
-
-    GLuint transform = m2_shader.attrib_location("transform");
-
-    for (GLuint i = 0; i < 4; ++i)
-    {
-      gl.enableVertexAttribArray (transform + i);
-      gl.vertexAttribPointer (transform + i, 4, GL_FLOAT, GL_FALSE, sizeof(math::matrix_4x4), reinterpret_cast<void*> (i * sizeof (::math::vector_4d)));
-      gl.vertexAttribDivisor(transform + i, 1);
-    }
+    m2_shader.attrib_mat4("transform", 0);
+    m2_shader.attrip_divisor("transform", 1, 4);
   }
+  
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), 0);
@@ -1083,11 +1070,9 @@ void Model::draw (std::vector<ModelInstance*> instances, opengl::scoped::use_pro
       gl.drawElementsInstanced(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart, transform_matrix.size());
       p.deinit();
     }
-  }  
+  }
 
   gl.bindVertexArray(0);
-  gl.deleteVertexArray(1, &vao);
-  gl.deleteBuffers(1, &position_vbo);
 }
 
 
@@ -1135,7 +1120,9 @@ void Model::upload()
   for (std::string texture : _textureFilenames)
     _textures.emplace_back(texture);
 
-  gl.genBuffers (1, &_vertices_buffer);
+  gl.genVertexArrays (1, &_vao);
+  gl.genBuffers (1, &_transform_buffer);
+  gl.genBuffers (1, &_vertices_buffer);  
 
   if (!animGeometry)
   {

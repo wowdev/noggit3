@@ -172,6 +172,26 @@ namespace opengl
       scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
     }
+    void use_program::attrib_mat4 (std::string const& name, math::vector_4d const* data)
+    {
+      GLuint const location (attrib_location (name));
+
+      for (GLuint i = 0; i < 4; ++i)
+      {
+        gl.enableVertexAttribArray (location + i);
+        _enabled_vertex_attrib_arrays.emplace (location + i);
+        gl.vertexAttribPointer (location + i, 4, GL_FLOAT, GL_FALSE, sizeof(math::matrix_4x4), data + i);
+      }   
+    }
+
+    void use_program::attrip_divisor(std::string const& name, GLuint divisor, GLsizei range)
+    {
+      GLuint const location (attrib_location (name));
+      for (GLuint i = 0; i < range; ++i)
+      {
+        gl.vertexAttribDivisor(location + i, divisor);
+      }
+    }
 
     GLuint use_program::uniform_location (std::string const& name)
     {
