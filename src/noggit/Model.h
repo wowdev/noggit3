@@ -213,6 +213,8 @@ private:
   // ===============================
   // Geometry
   // ===============================
+  GLuint _vao;
+  GLuint _transform_buffer;
   GLuint _vertices_buffer;
 
   std::vector<model_vertex> _vertices;
