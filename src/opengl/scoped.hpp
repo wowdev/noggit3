@@ -156,6 +156,27 @@ namespace opengl
       GLint _old_mode;
     };
 
+    class vao_binder
+    {
+    public:
+      vao_binder(GLuint vao)
+      {
+        gl.getIntegerv(GL_VERTEX_ARRAY_BINDING, &_old);
+        gl.bindVertexArray(vao);
+      }
+      ~vao_binder()
+      {
+        gl.bindVertexArray(_old);
+      }
+
+      vao_binder (vao_binder const&) = delete;
+      vao_binder (vao_binder&&) = delete;
+      vao_binder& operator= (vao_binder const&) = delete;
+      vao_binder& operator= (vao_binder&&) = delete;
+    private:
+      GLint _old;
+    };
+
     template<GLenum type>
       struct buffer_binder
     {
