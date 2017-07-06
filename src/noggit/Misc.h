@@ -31,6 +31,7 @@ namespace misc
   // used for angled tools, get the height a point (pos) should be given an origin, angle and orientation
   float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation);
   void extract_v3d_min_max(math::vector_3d const& point, math::vector_3d& min, math::vector_3d& max);
+  std::vector<math::vector_3d> intersection_points(math::vector_3d const& vmin, math::vector_3d const& vmax);
 
   struct random_color : math::vector_4d
   {

@@ -63,6 +63,8 @@ public:
   float xbase, zbase;
 
 private:
+  std::vector<math::vector_3d> _intersect_points;
+
   math::vector_3d vmin, vmax, vcenter;
 
   // remove empty layers

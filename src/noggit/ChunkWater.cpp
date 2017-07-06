@@ -194,7 +194,7 @@ bool ChunkWater::is_visible ( const float& cull_distance
 {
   static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
 
-  return frustum.intersects (vmin, vmax)
+  return frustum.intersects (_intersect_points)
     && (((camera - vcenter).length () - chunk_radius) < cull_distance);
 }
 
@@ -208,6 +208,9 @@ void ChunkWater::update_layers()
   }
 
   vcenter = (vmin + vmax) * 0.5f;
+
+  _intersect_points.clear();
+  _intersect_points = misc::intersection_points(vmin, vmax);
 }
 
 bool ChunkWater::hasData(size_t layer) const
