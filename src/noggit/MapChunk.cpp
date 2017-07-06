@@ -363,15 +363,7 @@ int MapChunk::indexNoLoD(int x, int y)
 void MapChunk::update_intersect_points()
 {
   _intersect_points.clear();
-
-  _intersect_points.emplace_back (vmin.x, vmin.y, vmin.z);
-  _intersect_points.emplace_back (vmin.x, vmin.y, vmax.z);
-  _intersect_points.emplace_back (vmin.x, vmax.y, vmin.z);
-  _intersect_points.emplace_back (vmin.x, vmax.y, vmax.z);
-  _intersect_points.emplace_back (vmax.x, vmin.y, vmin.z);
-  _intersect_points.emplace_back (vmax.x, vmin.y, vmax.z);
-  _intersect_points.emplace_back (vmax.x, vmax.y, vmin.z);
-  _intersect_points.emplace_back (vmax.x, vmax.y, vmax.z);
+  _intersect_points = misc::intersection_points(vmin, vmax);
 }
 
 void MapChunk::initStrip()

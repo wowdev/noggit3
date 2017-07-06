@@ -103,6 +103,22 @@ namespace misc
     min.z = std::min(min.z, point.z);
     max.z = std::max(max.z, point.z);
   }
+
+  std::vector<math::vector_3d> intersection_points(math::vector_3d const& vmin, math::vector_3d const& vmax)
+  {
+    std::vector<math::vector_3d> points;
+
+    points.emplace_back (vmin.x, vmin.y, vmin.z);
+    points.emplace_back (vmin.x, vmin.y, vmax.z);
+    points.emplace_back (vmin.x, vmax.y, vmin.z);
+    points.emplace_back (vmin.x, vmax.y, vmax.z);
+    points.emplace_back (vmax.x, vmin.y, vmin.z);
+    points.emplace_back (vmax.x, vmin.y, vmax.z);
+    points.emplace_back (vmax.x, vmax.y, vmin.z);
+    points.emplace_back (vmax.x, vmax.y, vmax.z);
+
+    return points;
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)
