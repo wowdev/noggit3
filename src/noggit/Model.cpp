@@ -1058,7 +1058,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
     }    
   }
 
-  gl.bindVertexArray(_vao);
+  opengl::scoped::vao_binder const _ (_vao);
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
@@ -1082,8 +1082,6 @@ void Model::draw ( std::vector<ModelInstance*> instances
       p.deinit();
     }
   }
-
-  gl.bindVertexArray(0);
 }
 
 
