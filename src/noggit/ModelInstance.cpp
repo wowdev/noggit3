@@ -66,7 +66,7 @@ void ModelInstance::draw ( opengl::scoped::use_program& m2_shader
     return;
   }  
 
-  m2_shader.uniform("transform", transform_matrix().transposed());
+  m2_shader.uniform("transform", _transform_mat_transposed);
 
   //! \todo add toggle draw particles and set customizable distance
   model->draw (m2_shader, draw_fog, animtime, false);
@@ -90,7 +90,7 @@ void ModelInstance::draw ( math::frustum const& frustum
 
   opengl::scoped::matrix_pusher const matrix;
 
-  gl.multMatrixf (transform_matrix().transposed());
+  gl.multMatrixf (_transform_mat_transposed);
 
   if (all_boxes)
   {
@@ -159,9 +159,9 @@ void ModelInstance::draw ( math::frustum const& frustum
   }
 }
 
-math::matrix_4x4 ModelInstance::transform_matrix() const
+void ModelInstance::update_transform_matrix()
 {
-  return (math::matrix_4x4 (math::matrix_4x4::translation, pos)
+  math::matrix_4x4 mat (math::matrix_4x4 (math::matrix_4x4::translation, pos)
           * math::matrix_4x4 (math::matrix_4x4::rotation_yzx
                               , { math::degrees (-dir.z)
                               , math::degrees (dir.y - 90.0f)
@@ -170,6 +170,9 @@ math::matrix_4x4 ModelInstance::transform_matrix() const
           )
           * math::matrix_4x4 (math::matrix_4x4::scale, scale)
           );
+
+  _transform_mat_inverted = mat.inverted();
+  _transform_mat_transposed = mat.transposed();
 }
 
 //! \todo  Get this drawn on the 2D view.
@@ -196,8 +199,7 @@ void ModelInstance::intersect ( math::ray const& ray
                               , int animtime
                               )
 {
-  math::matrix_4x4 const model_matrix (transform_matrix());
-  math::ray subray (model_matrix.inverted(), ray);
+  math::ray subray (_transform_mat_inverted, ray);
 
   if ( !subray.intersect_bounds ( fixCoordSystem (model->header.VertexBoxMin)
                                 , fixCoordSystem (model->header.VertexBoxMax)
@@ -259,9 +261,11 @@ bool ModelInstance::is_visible(math::frustum const& frustum, const float& cull_d
 
 void ModelInstance::recalcExtents()
 {
+  update_transform_matrix();
+
   math::vector_3d min (math::vector_3d::max()), vertex_box_min (min);
   math::vector_3d max (math::vector_3d::min()), vertex_box_max (max);;
-  math::matrix_4x4 rot (transform_matrix());
+  math::matrix_4x4 rot (_transform_mat_transposed.transposed());
 
   math::vector_3d bounds[8 * 2];
   math::vector_3d *ptr = bounds;
