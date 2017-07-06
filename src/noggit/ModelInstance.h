@@ -101,7 +101,7 @@ public:
                 , int animtime
                 );
 
-  math::matrix_4x4 transform_matrix() const;
+  math::matrix_4x4 const& transform_matrix_transposed() const { return _transform_mat_transposed; }
 
   void resetDirection();
 
@@ -109,4 +109,10 @@ public:
   bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
 
   void recalcExtents();
+
+private:
+  void update_transform_matrix();
+
+  math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
+  math::matrix_4x4 _transform_mat_inverted = math::matrix_4x4::uninitialized;
 };

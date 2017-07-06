@@ -1059,7 +1059,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
   {
     if (mi->is_visible(frustum, cull_distance, camera))
     {
-      transform_matrix.push_back(mi->transform_matrix().transposed());
+      transform_matrix.push_back(mi->transform_matrix_transposed());
     }    
   }
 

@@ -2206,5 +2206,7 @@ void World::update_models_by_filename()
   for (auto& it : mModelInstances)
   {
     _models_by_filename[it.second.model->_filename].push_back(&it.second);
+    // to make sure the transform matrix are up to date
+    it.second.recalcExtents();
   }
 }
