@@ -1101,14 +1101,7 @@ void main()
 
     opengl::texture::enable_texture(0);
 
-    std::map<std::string, std::vector<ModelInstance*>> models;
-
-    for (auto& it : mModelInstances)
-    {
-      models[it.second.model->_filename].push_back(&it.second);
-    }
-
-    for (auto& it : models)
+    for (auto& it : _models_by_filename)
     {
       it.second[0]->model->draw(it.second, m2_shader,frustum, culldistance, camera_pos, false, 0, false);
     }
@@ -1280,6 +1273,8 @@ void World::clearAllModelsOnADT(tile_index const& tile)
   {
     deleteModelInstance(uid);
   }
+
+  update_models_by_filename();
 }
 
 void World::CropWaterADT(const tile_index& pos)
@@ -1768,6 +1763,8 @@ void World::delete_duplicate_model_and_wmo_instances()
     deleteModelInstance(uid);
   }
 
+  update_models_by_filename();
+
   Log << "Deleted " << wmos_to_remove.size() << " duplicate WMOs" << std::endl;
   Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
 }
@@ -1810,7 +1807,8 @@ void World::addM2 ( std::string const& filename
 
   newModelis.recalcExtents();
   updateTilesModel(&newModelis);
-  mModelInstances.emplace(newModelis.uid, newModelis);
+  
+  _models_by_filename[filename].push_back(&(mModelInstances.emplace(newModelis.uid, newModelis).first->second));
 }
 
 void World::addWMO ( std::string const& filename
@@ -2199,4 +2197,14 @@ std::set<MapChunk*>& World::vertexBorderChunks()
     }
   }
   return _vertex_border_chunks;
+}
+
+void World::update_models_by_filename()
+{
+  _models_by_filename.clear();
+  
+  for (auto& it : mModelInstances)
+  {
+    _models_by_filename[it.second.model->_filename].push_back(&it.second);
+  }
 }
