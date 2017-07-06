@@ -1048,6 +1048,11 @@ void Model::draw ( std::vector<ModelInstance*> instances
     return;
   }
 
+  if (_current_vertices.empty())
+  {
+    return;
+  }
+
   std::vector<math::matrix_4x4> transform_matrix;
 
   for (ModelInstance* mi : instances)
@@ -1056,6 +1061,11 @@ void Model::draw ( std::vector<ModelInstance*> instances
     {
       transform_matrix.push_back(mi->transform_matrix().transposed());
     }    
+  }
+
+  if (transform_matrix.empty())
+  {
+    return;
   }
 
   opengl::scoped::vao_binder const _ (_vao);
@@ -1082,6 +1092,11 @@ void Model::draw ( std::vector<ModelInstance*> instances
       p.deinit();
     }
   }
+
+  GLfloat czero[4] = { 0, 0, 0, 1 };
+  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
+  gl.color4f(1, 1, 1, 1);
+  gl.depthMask(GL_TRUE);
 }
 
 
