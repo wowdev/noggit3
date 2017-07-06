@@ -269,6 +269,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
     {
       world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
     }
+
+    world->update_models_by_filename();
   }
 
   // - Load chunks ---------------------------------------

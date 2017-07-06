@@ -80,7 +80,7 @@ public:
   //! \todo  Get these managed? ._.
   std::map<int, ModelInstance> mModelInstances;
   std::map<int, WMOInstance> mWMOInstances;
-
+  
   OutdoorLightStats outdoorLightStats;
 
   explicit World(const std::string& name, int map_id);
@@ -272,7 +272,10 @@ public:
 
   void recalc_norms (MapChunk*) const;
 
+  void update_models_by_filename();
 private:
+  std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
+
   void getSelection();
 
   std::set<MapChunk*>& vertexBorderChunks();
