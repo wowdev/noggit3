@@ -186,7 +186,7 @@ void Model::initCommon(const MPQFile& f)
   {
     _vertices[i].position = fixCoordSystem (vertices[i].pos);
     _vertices[i].normal = fixCoordSystem (vertices[i].normal);
-    _vertices[i].texcoords = vertices[i].texcoords;
+    memcpy(_vertices[i].texcoords, vertices[i].texcoords, 2 * sizeof(::math::vector_2d));
 
     memcpy (_vertices_parameters[i].bones, vertices[i].bones, 4 * sizeof (uint8_t));
     memcpy (_vertices_parameters[i].weights, vertices[i].weights, 4 * sizeof (uint8_t));
@@ -510,7 +510,7 @@ void Model::animate(int _anim, int animtime_)
 
       _current_vertices[i].position = v;
       _current_vertices[i].normal = n.normalize();
-      _current_vertices[i].texcoords = vertex.texcoords;
+      memcpy(_current_vertices[i].texcoords, vertex.texcoords, 2 * sizeof(::math::vector_2d));
     }
 
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
@@ -1048,9 +1048,10 @@ void Model::draw ( std::vector<ModelInstance*> instances
     return;
   }
 
-  if (_current_vertices.empty())
+  if (animated && (!animcalc || mPerInstanceAnimation))
   {
-    return;
+    animate(0, animtime);
+    animcalc = true;
   }
 
   std::vector<math::matrix_4x4> transform_matrix;
@@ -1092,6 +1093,9 @@ void Model::draw ( std::vector<ModelInstance*> instances
       p.deinit();
     }
   }
+
+  gl.alphaFunc(GL_GREATER, 0.0f);
+  gl.disable(GL_ALPHA_TEST);
 
   GLfloat czero[4] = { 0, 0, 0, 1 };
   gl.materialfv(GL_FRONT, GL_EMISSION, czero);

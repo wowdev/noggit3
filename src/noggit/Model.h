@@ -141,7 +141,7 @@ struct model_vertex
 {
   ::math::vector_3d position;
   ::math::vector_3d normal;
-  ::math::vector_2d texcoords;
+  ::math::vector_2d texcoords[2];
 };
 
 struct model_vertex_parameter

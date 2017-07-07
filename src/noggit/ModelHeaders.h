@@ -161,8 +161,7 @@ struct ModelVertex {
   uint8_t weights[4];
   uint8_t bones[4];
   math::vector_3d normal;
-  math::vector_2d texcoords;
-  int unk1, unk2; // always 0,0 so this is probably unused
+  math::vector_2d texcoords[2];
 };
 
 struct ModelView {
