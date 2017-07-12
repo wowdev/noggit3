@@ -184,7 +184,7 @@ bool TextureSet::canPaintTexture(scoped_blp_texture_reference texture)
     return nTextures < 4;
   }
 
-  return false;
+  return true;
 }
 
 const std::string& TextureSet::filename(size_t id)
