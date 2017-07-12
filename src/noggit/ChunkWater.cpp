@@ -95,10 +95,13 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
 {
   MH2O_Header header;
-  header.nLayers = _layers.size();
+
+  // remove empty layers
+  cleanup();
 
   if (hasData(0))
   {
+    header.nLayers = _layers.size();
     header.ofsRenderMask = current_pos - base_pos;
     adt.Insert(current_pos, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render));
     current_pos += sizeof(MH2O_Render);
