@@ -557,7 +557,8 @@ std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
     {
       for (int i = 0; i < nTextures - 1; ++i)
       {
-        amaps.emplace_back(alphamaps[i]->compress());
+        const uint8_t* alphamap = alphamaps[i]->getAlpha();
+        amaps.emplace_back(alphamap, alphamap + 4096);
       }
     }
     else
