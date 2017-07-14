@@ -15,12 +15,22 @@ Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFix
 {
   createNew();
 
-  if(flags & 0x200 )
-    readCompressed(f);
-  else if(mBigAlpha)
-    readBigAlpha(f);
+  if (mBigAlpha)
+  {
+    // can only compress big alpha
+    if (flags & 0x200)
+    {
+      readCompressed(f);
+    }
+    else
+    {
+      readBigAlpha(f);
+    }    
+  }    
   else
+  {
     readNotCompressed(f, doNotFixAlpha);
+  }    
 
   genTexture();
 }
