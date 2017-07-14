@@ -1129,11 +1129,8 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
     else
     {
       lLayer->flags |= FLAG_USE_ALPHA;
-      // always compress big alpha
-      if (use_big_alphamap)
-      {
-        lLayer->flags |= FLAG_ALPHA_COMPRESSED;
-      }
+      //! \todo find out why compression fuck up textures ingame
+      lLayer->flags &= ~FLAG_ALPHA_COMPRESSED;
 
       lMCAL_Size += alphamaps[j - 1].size();
     }
