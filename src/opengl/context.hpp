@@ -159,6 +159,7 @@ namespace opengl
     GLvoid* mapBuffer (GLenum target, GLenum access);
     GLboolean unmapBuffer (GLenum);
     void drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices);
+    void drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount);
     void drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices);
 
     void vertexPointer (GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);

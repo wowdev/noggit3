@@ -12,6 +12,7 @@
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
+#include <opengl/shader.fwd.hpp>
 
 #include <string>
 #include <vector>
@@ -154,6 +155,7 @@ public:
   ~Model();
 
   void draw (bool draw_fog, int animtime, bool draw_particles);
+  void draw (opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles);
   void drawTileMode();
 
   std::vector<float> intersect (math::ray const&, int animtime);

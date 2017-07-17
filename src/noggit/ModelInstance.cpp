@@ -7,6 +7,7 @@
 #include <noggit/ModelInstance.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 namespace
 {
@@ -47,6 +48,42 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
 	scale = d->scale / 1024.0f;
 
   recalcExtents();
+}
+
+void ModelInstance::draw ( opengl::scoped::use_program& m2_shader
+                         , math::frustum const& frustum
+                         , const float& cull_distance
+                         , const math::vector_3d& camera
+                         , bool force_box
+                         , bool all_boxes
+                         , bool draw_fog
+                         , bool is_current_selection
+                         , int animtime
+                         )
+{
+  float dist = (pos - camera).length() - model->rad * scale;
+  if(dist >= cull_distance)
+    return;
+
+  if (!frustum.intersectsSphere(pos, model->rad * scale))
+    return;
+
+  math::matrix_4x4 const model_matrix
+  ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+   * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
+                       , { math::degrees (-dir.z)
+                       , math::degrees (dir.y - 90.0f)
+                       , math::degrees (dir.x)
+                       }
+   )
+   * math::matrix_4x4 (math::matrix_4x4::scale, scale)
+  );
+
+  m2_shader.uniform("transform", model_matrix.transposed());
+
+  //! \todo add toggle draw particles and set customizable distance
+  model->draw (m2_shader, draw_fog, animtime, dist < 50.0f);
+  
 }
 
 void ModelInstance::draw ( math::frustum const& frustum
