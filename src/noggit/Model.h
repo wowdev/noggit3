@@ -19,6 +19,7 @@
 
 class Bone;
 class Model;
+class ModelInstance;
 class ParticleSystem;
 class RibbonEmitter;
 
@@ -156,6 +157,7 @@ public:
 
   void draw (bool draw_fog, int animtime, bool draw_particles);
   void draw (opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles);
+  void draw (std::vector<ModelInstance*> instances, opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles);
   void drawTileMode();
 
   std::vector<float> intersect (math::ray const&, int animtime);
@@ -244,3 +246,4 @@ private:
 
   friend struct ModelRenderPass;
 };
+

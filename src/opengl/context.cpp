@@ -14,6 +14,7 @@
 #include <QtGui/QOpenGLFunctions_1_4>
 #include <QtGui/QOpenGLFunctions_1_5>
 #include <QtGui/QOpenGLFunctions_3_1>
+#include <QtGui/QOpenGLFunctions_3_3_Core>
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 
 #include <functional>
@@ -109,7 +110,7 @@ namespace opengl
           case GL_STACK_OVERFLOW: errors += " GL_STACK_OVERFLOW"; break;
           case GL_STACK_UNDERFLOW: errors += " GL_STACK_UNDERFLOW"; break;
           case GL_TABLE_TOO_LARGE: errors += " GL_TABLE_TOO_LARGE"; break;
-          default: errors += " UNKNOWN_ERROR"; break;
+          default: errors += " UNKNOWN_ERROR (" + std::to_string(error) + ")"; break;
           }
 
           ++error_count;
@@ -507,6 +508,21 @@ namespace opengl
     return _current_context->functions()->glTexParameterfv (target, pname, params);
   }
 
+  void context::genVertexArrays (GLuint count, GLuint* arrays)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glGenVertexArrays(count, arrays);
+  }
+  void context::deleteVertexArray (GLuint count, GLuint* arrays)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glDeleteVertexArrays(count, arrays);
+  }
+  void context::bindVertexArray (GLenum array)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glBindVertexArray(array);
+  }
   void context::genBuffers (GLuint count, GLuint* buffers)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
@@ -859,6 +875,11 @@ namespace opengl
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glVertexAttribPointer (index, size, type, normalized, stride, pointer);
+  }
+  void context::vertexAttribDivisor (GLuint index, GLuint divisor)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glVertexAttribDivisor(index, divisor);
   }
   void context::enableVertexAttribArray (GLuint index)
   {

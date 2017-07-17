@@ -152,6 +152,10 @@ namespace opengl
     void texParameteriv (GLenum target, GLenum pname, GLint const* params);
     void texParameterfv (GLenum target, GLenum pname, GLfloat const* params);
 
+    void genVertexArrays (GLuint, GLuint*);
+    void deleteVertexArray (GLuint, GLuint*);
+    void bindVertexArray (GLenum);
+
     void genBuffers (GLuint, GLuint*);
     void deleteBuffers (GLuint, GLuint*);
     void bindBuffer (GLenum, GLuint);
@@ -224,6 +228,7 @@ namespace opengl
 
     GLint getAttribLocation (GLuint program, GLchar const* name);
     void vertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid const* pointer);
+    void vertexAttribDivisor (GLuint index, GLuint divisor);
     void enableVertexAttribArray (GLuint index);
     void disableVertexAttribArray (GLuint index);
 

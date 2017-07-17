@@ -68,18 +68,7 @@ void ModelInstance::draw ( opengl::scoped::use_program& m2_shader
   if (!frustum.intersectsSphere(pos, model->rad * scale))
     return;
 
-  math::matrix_4x4 const model_matrix
-  ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-   * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                       , math::degrees (dir.y - 90.0f)
-                       , math::degrees (dir.x)
-                       }
-   )
-   * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-  );
-
-  m2_shader.uniform("transform", model_matrix.transposed());
+  m2_shader.uniform("transform", transform_matrix().transposed());
 
   //! \todo add toggle draw particles and set customizable distance
   model->draw (m2_shader, draw_fog, animtime, dist < 50.0f);
@@ -105,18 +94,9 @@ void ModelInstance::draw ( math::frustum const& frustum
 
   opengl::scoped::matrix_pusher const matrix;
 
-  math::matrix_4x4 const model_matrix
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-    );
 
-  gl.multMatrixf (model_matrix.transposed());
+
+  gl.multMatrixf (transform_matrix().transposed());
 
   if (all_boxes)
   {
@@ -185,6 +165,19 @@ void ModelInstance::draw ( math::frustum const& frustum
   }
 }
 
+math::matrix_4x4 ModelInstance::transform_matrix() const
+{
+  return (math::matrix_4x4 (math::matrix_4x4::translation, pos)
+          * math::matrix_4x4 (math::matrix_4x4::rotation_yzx
+                              , { math::degrees (-dir.z)
+                              , math::degrees (dir.y - 90.0f)
+                              , math::degrees (dir.x)
+                              }
+          )
+          * math::matrix_4x4 (math::matrix_4x4::scale, scale)
+          );
+}
+
 //! \todo  Get this drawn on the 2D view.
 /*void ModelInstance::drawMapTile()
 {
@@ -209,17 +202,7 @@ void ModelInstance::intersect ( math::ray const& ray
                               , int animtime
                               )
 {
-  math::matrix_4x4 const model_matrix
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-    );
-
+  math::matrix_4x4 const model_matrix (transform_matrix());
   math::ray subray (model_matrix.inverted(), ray);
 
   if ( !subray.intersect_bounds ( fixCoordSystem (model->header.VertexBoxMin)
@@ -275,16 +258,7 @@ void ModelInstance::recalcExtents()
 {
   math::vector_3d min (math::vector_3d::max()), vertex_box_min (min);
   math::vector_3d max (math::vector_3d::min()), vertex_box_max (max);;
-  math::matrix_4x4 rot
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-    );
+  math::matrix_4x4 rot (transform_matrix());
 
   math::vector_3d bounds[8 * 2];
   math::vector_3d *ptr = bounds;

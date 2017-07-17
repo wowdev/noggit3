@@ -83,13 +83,14 @@ namespace opengl
       void attrib (std::string const& name, std::vector<math::vector_2d> const&);
       void attrib (std::string const& name, std::vector<math::vector_3d> const&);
       void attrib (std::string const& name, math::vector_3d const*);
+      void attrib (std::string const& name, math::matrix_4x4 const*, GLuint divisor = 0);
       void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
 
-    private:
+    
       GLuint uniform_location (std::string const& name);
       GLuint attrib_location (std::string const& name);
-
+    private:
       std::unordered_map<std::string, GLuint> _uniforms;
       std::unordered_map<std::string, GLuint> _attribs;
 
