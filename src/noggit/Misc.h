@@ -32,6 +32,8 @@ namespace misc
   float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation);
   void extract_v3d_min_max(math::vector_3d const& point, math::vector_3d& min, math::vector_3d& max);
   std::vector<math::vector_3d> intersection_points(math::vector_3d const& vmin, math::vector_3d const& vmax);
+  std::vector<math::vector_3d> box_points(math::vector_3d const& box_min, math::vector_3d const& box_max);
+  math::vector_3d transform_model_box_coords(math::vector_3d const& pos);
 
   struct random_color : math::vector_4d
   {

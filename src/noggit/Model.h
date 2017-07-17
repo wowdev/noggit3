@@ -166,7 +166,10 @@ public:
             , bool draw_fog
             , int animtime
             , bool draw_particles
+            , bool all_boxes
+            , std::unordered_map<Model*, std::size_t>& visible_model_count
             );
+  void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
   void drawTileMode();
 
   std::vector<float> intersect (math::ray const&, int animtime);
@@ -219,12 +222,17 @@ private:
 
   bool _finished_upload;
 
+  std::vector<math::vector_3d> _vertex_box_points;
+
   // ===============================
   // Geometry
   // ===============================
   GLuint _vao;
   GLuint _transform_buffer;
   GLuint _vertices_buffer;
+
+  GLuint _box_vao;
+  GLuint _box_vbo;
 
   std::vector<model_vertex> _vertices;
   std::vector<model_vertex> _current_vertices;
