@@ -1058,18 +1058,17 @@ void main()
     static opengl::program const m2_program
     { { GL_VERTEX_SHADER
       , R"code(
-#version 130
+#version 330 core
 
 in vec4 pos;
-in vec3 normal;
 in vec2 texcoord;
+in mat4 transform;
 
 out vec2 uv;
 
 uniform mat4 model_view;
 uniform mat4 projection;
 
-uniform mat4 transform;
 
 void main()
 {
@@ -1080,9 +1079,8 @@ void main()
       }
       ,{ GL_FRAGMENT_SHADER
       , R"code(
-#version 130
+#version 330 core
 
-in vec3 normal;
 in vec2 uv;
 
 uniform sampler2D tex;
@@ -1103,27 +1101,18 @@ void main()
 
     opengl::texture::enable_texture(0);
 
-    for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
+    std::map<std::string, std::vector<ModelInstance*>> models;
+
+    for (auto& it : mModelInstances)
     {
-      bool const is_hidden (hidden_models.count (it->second.model.get()));
-      if (!is_hidden)
-      {
-        it->second.draw ( m2_shader
-                        , frustum
-                        , culldistance
-                        , camera_pos
-                        , is_hidden
-                        , draw_models_with_box
-                        , draw_fog
-                        , IsSelection (eEntry_Model) && boost::get<selected_model_type> (*GetCurrentSelection())->uid == it->second.uid
-                        , animtime
-                        );
-      }
+      models[it.second.model->_filename].push_back(&it.second);
+    }
+
+    for (auto& it : models)
+    {
+      it.second[0]->model->draw(it.second, m2_shader, false, 0, false);
     }
   }
-
-
-
 
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())

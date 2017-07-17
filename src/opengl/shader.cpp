@@ -145,6 +145,18 @@ namespace opengl
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data);
     }
+    void use_program::attrib (std::string const& name, math::matrix_4x4 const* data, GLuint divisor)
+    {
+      GLuint const location (attrib_location (name));
+
+      for (GLuint i = 0; i < 4; ++i)
+      {
+        gl.enableVertexAttribArray (location + i);
+        _enabled_vertex_attrib_arrays.emplace (location + i);
+        gl.vertexAttribPointer (location + i, 4, GL_FLOAT, GL_FALSE, sizeof(math::matrix_4x4), data + sizeof(float)*4*i);
+        gl.vertexAttribDivisor(location + i, divisor);
+      }      
+    }
     void use_program::attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data)
     {
       GLuint const location (attrib_location (name));

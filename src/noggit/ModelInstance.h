@@ -101,6 +101,8 @@ public:
                 , int animtime
                 );
 
+  math::matrix_4x4 transform_matrix() const;
+
   void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]) const;
