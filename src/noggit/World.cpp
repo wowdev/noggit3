@@ -1057,11 +1057,14 @@ void main()
     if (draw_model_animations)
     {
       ModelManager::resetAnim();
-    }      
+    }
 
-    static opengl::program const m2_program
-    { { GL_VERTEX_SHADER
-      , R"code(
+    std::unordered_map<Model*, std::size_t> visible_model_count;
+
+    {
+      static opengl::program const m2_program
+      { { GL_VERTEX_SHADER
+        , R"code(
 #version 330 core
 
 in vec4 pos;
@@ -1080,9 +1083,9 @@ void main()
   uv = texcoord;
 }
 )code"
-      }
-      ,{ GL_FRAGMENT_SHADER
-      , R"code(
+        }
+        ,{ GL_FRAGMENT_SHADER
+        , R"code(
 #version 330 core
 
 in vec2 uv;
@@ -1095,20 +1098,67 @@ void main()
 }
 
 )code"
+        }
+      };
+      opengl::scoped::use_program m2_shader{ m2_program };
+
+      m2_shader.uniform ("model_view", opengl::matrix::model_view());
+      m2_shader.uniform ("projection", opengl::matrix::projection());
+      m2_shader.uniform("tex", 0);
+
+      opengl::texture::enable_texture(0);
+
+      for (auto& it : _models_by_filename)
+      {
+        it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, 0, false, draw_models_with_box, visible_model_count);
       }
-    };
-    opengl::scoped::use_program m2_shader{ m2_program };
-
-    m2_shader.uniform ("model_view", opengl::matrix::model_view());
-    m2_shader.uniform ("projection", opengl::matrix::projection());
-    m2_shader.uniform("tex", 0);
-
-    opengl::texture::enable_texture(0);
-
-    for (auto& it : _models_by_filename)
-    {
-      it.second[0]->model->draw(it.second, m2_shader,frustum, culldistance, camera_pos, false, 0, false);
     }
+    
+    if(draw_models_with_box)
+    {
+      static opengl::program const program
+      { { GL_VERTEX_SHADER
+        , R"code(
+#version 330 core
+
+in mat4 transform;
+in vec4 position;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+void main()
+{
+  gl_Position = projection * model_view * transform * position;
+}
+)code"
+        }
+        , { GL_FRAGMENT_SHADER
+        , R"code(
+#version 330 core
+
+void main()
+{
+  gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+}
+)code"
+        }
+      };
+
+      opengl::scoped::use_program m2_box_shader{ program };
+
+      m2_box_shader.uniform ("model_view", opengl::matrix::model_view());
+      m2_box_shader.uniform ("projection", opengl::matrix::projection());
+
+      opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+      gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+      gl.lineWidth (1.0f);
+
+      for (auto& it : visible_model_count)
+      {
+        it.first->draw_box(m2_box_shader, it.second);
+      }
+    }    
   }
 
   // WMOs / map objects

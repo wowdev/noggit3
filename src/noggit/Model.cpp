@@ -40,6 +40,11 @@ void Model::finishLoading()
 
   memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
 
+
+  _vertex_box_points = misc::box_points ( misc::transform_model_box_coords(header.VertexBoxMin)
+                                        , misc::transform_model_box_coords(header.VertexBoxMax)
+                                        );
+
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
@@ -73,9 +78,12 @@ Model::~Model()
   _textures.clear();
   _textureFilenames.clear();
 
-  gl.deleteBuffers (1, &_vao);
+  gl.deleteVertexArray (1, &_vao);
   gl.deleteBuffers (1, &_transform_buffer);
-  gl.deleteBuffers (1, &_vertices_buffer);  
+  gl.deleteBuffers (1, &_vertices_buffer);
+
+  gl.deleteVertexArray (1, &_box_vao);
+  gl.deleteBuffers (1, &_box_vbo);
 }
 
 
@@ -1038,6 +1046,8 @@ void Model::draw ( std::vector<ModelInstance*> instances
                  , bool draw_fog
                  , int animtime
                  , bool draw_particles
+                 , bool all_boxes
+                 , std::unordered_map<Model*, std::size_t>& visible_model_count
                  )
 {
   if (!finishedLoading())
@@ -1067,6 +1077,12 @@ void Model::draw ( std::vector<ModelInstance*> instances
   if (transform_matrix.empty())
   {
     return;
+  }
+
+  // store the model count to draw the bounding boxes later
+  if (all_boxes)
+  {
+    visible_model_count.emplace(this, transform_matrix.size());
   }
 
   opengl::scoped::vao_binder const _ (_vao);
@@ -1101,6 +1117,26 @@ void Model::draw ( std::vector<ModelInstance*> instances
   gl.materialfv(GL_FRONT, GL_EMISSION, czero);
   gl.color4f(1, 1, 1, 1);
   gl.depthMask(GL_TRUE);
+}
+
+void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)
+{
+  static std::vector<uint16_t> const indices ({5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7});
+
+  opengl::scoped::vao_binder const _ (_box_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+    m2_box_shader.attrib_mat4("transform", 0);
+    m2_box_shader.attrip_divisor("transform", 1, 4);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
+    m2_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), GL_UNSIGNED_SHORT, indices.data(), box_count);
 }
 
 
@@ -1150,12 +1186,20 @@ void Model::upload()
 
   gl.genVertexArrays (1, &_vao);
   gl.genBuffers (1, &_transform_buffer);
-  gl.genBuffers (1, &_vertices_buffer);  
+  gl.genBuffers (1, &_vertices_buffer);
+
+  gl.genVertexArrays (1, &_box_vao);
+  gl.genBuffers (1, &_box_vbo);
 
   if (!animGeometry)
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STATIC_DRAW);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
+    gl.bufferData (GL_ARRAY_BUFFER, _vertex_box_points.size() * sizeof (math::vector_3d), _vertex_box_points.data(), GL_STATIC_DRAW);
   }
 
   _finished_upload = true;

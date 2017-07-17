@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/vector_4d.hpp>
+#include <noggit/Misc.h>
 #include <opengl/context.hpp>
 #include <opengl/matrix.hpp>
 #include <opengl/primitives.hpp>
@@ -45,17 +46,8 @@ void main()
                    }
                  }
     {
-      std::vector<math::vector_3d> positions;
-      positions.reserve (8);
-      positions.emplace_back (max_point.x, max_point.y, max_point.z);
-      positions.emplace_back (max_point.x, max_point.y, min_point.z);
-      positions.emplace_back (max_point.x, min_point.y, max_point.z);
-      positions.emplace_back (max_point.x, min_point.y, min_point.z);
-      positions.emplace_back (min_point.x, max_point.y, max_point.z);
-      positions.emplace_back (min_point.x, max_point.y, min_point.z);
-      positions.emplace_back (min_point.x, min_point.y, max_point.z);
-      positions.emplace_back (min_point.x, min_point.y, min_point.z);
-
+      std::vector<math::vector_3d> positions (misc::box_points (min_point, max_point));
+      
       static std::array<unsigned char, 16> const indices
         {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
 

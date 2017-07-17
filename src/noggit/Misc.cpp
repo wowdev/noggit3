@@ -119,6 +119,27 @@ namespace misc
 
     return points;
   }
+
+  std::vector<math::vector_3d> box_points(math::vector_3d const& box_min, math::vector_3d const& box_max)
+  {
+    std::vector<math::vector_3d> points;
+
+    points.emplace_back (box_max.x, box_max.y, box_max.z);
+    points.emplace_back (box_max.x, box_max.y, box_min.z);
+    points.emplace_back (box_max.x, box_min.y, box_max.z);
+    points.emplace_back (box_max.x, box_min.y, box_min.z);
+    points.emplace_back (box_min.x, box_max.y, box_max.z);
+    points.emplace_back (box_min.x, box_max.y, box_min.z);
+    points.emplace_back (box_min.x, box_min.y, box_max.z);
+    points.emplace_back (box_min.x, box_min.y, box_min.z);
+
+    return points;
+  }
+
+  math::vector_3d transform_model_box_coords(math::vector_3d const& pos)
+  {
+    return {pos.x, pos.z, -pos.y};
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)
