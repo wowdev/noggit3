@@ -424,7 +424,9 @@ void World::setupFog (bool draw_fog)
   }
   else {
     gl.disable(GL_FOG);
-    culldistance = _settings->value ("view_distance", 1000.f).toFloat();
+    //! \todo: store that value somewhere and update it when there's a setting change
+    static float cull_dist = _settings->value ("view_distance", 1000.f).toFloat();
+    culldistance = cull_dist;
   }
 }
 
@@ -1053,7 +1055,9 @@ void main()
   if (draw_models)
   {
     if (draw_model_animations)
+    {
       ModelManager::resetAnim();
+    }      
 
     static opengl::program const m2_program
     { { GL_VERTEX_SHADER
