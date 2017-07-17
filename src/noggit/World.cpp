@@ -1055,13 +1055,61 @@ void main()
     if (draw_model_animations)
       ModelManager::resetAnim();
 
-    gl.enable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
+    static opengl::program const m2_program
+    { { GL_VERTEX_SHADER
+      , R"code(
+#version 130
+
+in vec4 pos;
+in vec3 normal;
+in vec2 texcoord;
+
+out vec2 uv;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+uniform mat4 transform;
+
+void main()
+{
+  gl_Position = projection * model_view * transform * pos;
+  uv = texcoord;
+}
+)code"
+      }
+      ,{ GL_FRAGMENT_SHADER
+      , R"code(
+#version 130
+
+in vec3 normal;
+in vec2 uv;
+
+uniform sampler2D tex;
+
+void main()
+{
+  gl_FragColor = texture(tex, uv);
+}
+
+)code"
+      }
+    };
+    opengl::scoped::use_program m2_shader{ m2_program };
+
+    m2_shader.uniform ("model_view", opengl::matrix::model_view());
+    m2_shader.uniform ("projection", opengl::matrix::projection());
+    m2_shader.uniform("tex", 0);
+
+    opengl::texture::enable_texture(0);
+
     for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
     {
       bool const is_hidden (hidden_models.count (it->second.model.get()));
       if (!is_hidden)
       {
-        it->second.draw ( frustum
+        it->second.draw ( m2_shader
+                        , frustum
                         , culldistance
                         , camera_pos
                         , is_hidden

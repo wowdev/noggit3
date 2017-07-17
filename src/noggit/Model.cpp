@@ -6,6 +6,7 @@
 #include <noggit/World.h>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -962,21 +963,14 @@ void Model::draw (bool draw_fog, int animtime, bool draw_particles)
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl.alphaFunc(GL_GREATER, 0.3f);
 
-  for (size_t i = 0; i < _passes.size(); ++i)
-  {
-    ModelRenderPass& p = _passes[i];
-
+  for (ModelRenderPass& p : _passes)
+  { 
     // we don't want to render completely transparent parts
     if (p.init(this))
     {
-      //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-      // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
-      // I can't notice a difference but I guess it can't hurt
       gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
-
       p.deinit();
     }
-
   }
   // done with all render ops
 
@@ -1006,6 +1000,33 @@ void Model::draw (bool draw_fog, int animtime, bool draw_particles)
   }
   
 }
+
+void Model::draw (opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles)
+{
+  if (!finishedLoading())
+    return;
+
+  if (!_finished_upload) {
+    upload();
+    return;
+  }
+
+  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+  m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), 0);
+  m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+  m2_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
+  
+
+  for (ModelRenderPass& p : _passes)
+  {  
+    if (p.init(this))
+    {
+      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
+      p.deinit();
+    }
+  }
+}
+
 
 std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 {

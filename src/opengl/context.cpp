@@ -13,6 +13,7 @@
 #include <QtGui/QOpenGLFunctions_1_3>
 #include <QtGui/QOpenGLFunctions_1_4>
 #include <QtGui/QOpenGLFunctions_1_5>
+#include <QtGui/QOpenGLFunctions_3_1>
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 
 #include <functional>
@@ -540,6 +541,11 @@ namespace opengl
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glDrawElements (mode, count, type, indices);
+  }
+  void context::drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _.version_functions<QOpenGLFunctions_3_1>()->glDrawElementsInstanced (mode, count, type, indices, instancecount);
   }
   void context::drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices)
   {
