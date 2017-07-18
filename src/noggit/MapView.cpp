@@ -1994,13 +1994,11 @@ void MapView::tick (float dt)
     _status_time->setText (QString::fromStdString (timestrs.str()));
   }
 
-  if (!_last_frame_durations.empty())
-  {
-    while (_last_frame_durations.size() > 60)
-    {
-      _last_frame_durations.pop_front();
-    }
+  _last_fps_update += dt;
 
+  // update fps every sec
+  if (_last_fps_update > 1.f && !_last_frame_durations.empty())
+  {
     auto avg_frame_duration
       ( std::accumulate ( _last_frame_durations.begin()
                         , _last_frame_durations.end()
@@ -2009,6 +2007,9 @@ void MapView::tick (float dt)
       / qreal (_last_frame_durations.size())
       );
     _status_fps->setText ("FPS: " + QString::number (int (1. / avg_frame_duration)));
+
+    _last_frame_durations.clear();
+    _last_fps_update = 0.f;
   }
 
   guiWater->updatePos (_camera.position);
