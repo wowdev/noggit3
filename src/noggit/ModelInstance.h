@@ -88,6 +88,9 @@ public:
             , bool is_current_selection
             , int animtime
             );
+
+  void draw_box (bool is_current_selection);
+
   void drawMapTile();
   //  void drawHighlight();
   void intersect ( math::ray const&
