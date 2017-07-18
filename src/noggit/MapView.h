@@ -224,6 +224,8 @@ private:
   qreal _last_update = 0.f;
   std::list<qreal> _last_frame_durations;
 
+  float _last_fps_update = 0.f;
+
   QTimer _update_every_event_loop;
 
   virtual void initializeGL() override;
