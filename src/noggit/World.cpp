@@ -888,15 +888,17 @@ void main()
     }
   }
 
+  opengl::texture::disable_texture(1);
+  opengl::texture::disable_texture(0);
+
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
   {
     gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-    gl.disable(GL_CULL_FACE);
-    //gl.depthMask(false);
-    //gl.disable(GL_DEPTH_TEST);
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
 
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
     {
@@ -954,28 +956,27 @@ void main()
       render_line(cursor_pos, pos);
     }
 
-
-    gl.enable(GL_CULL_FACE);
-    gl.enable(GL_DEPTH_TEST);
-    //GlDepthMask(true);
     gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
   }
 
-  if ( terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex )
+  if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
   {
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
+    opengl::scoped::bool_setter<GL_FOG, GL_FALSE> fog;
+    opengl::scoped::bool_setter<GL_BLEND, GL_FALSE> blend;
+
     float size = (vertexCenter() - camera_pos).length();
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
-    gl.color3f(1.0f, 0.0f, 0.0f);
-    gl.begin(GL_POINTS);
+    gl.color4f(1.0f, 0.0f, 0.0f, 1.0f);
 
+    gl.begin(GL_POINTS);
     for (math::vector_3d const* pos : _vertices_selected)
     {
       gl.vertex3f(pos->x, pos->y + 0.1f, pos->z);
     }
     gl.end();
 
-    gl.color3f(0.0f, 0.0f, 1.0f);
+    gl.color4f(0.0f, 0.0f, 1.0f, 1.0f);
     render_sphere(vertexCenter(), 2.0f, cursor_color);
     gl.color3f(1.0f, 1.0f, 1.0f);
   }
