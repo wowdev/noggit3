@@ -104,11 +104,8 @@ void ModelInstance::draw_box (bool is_current_selection)
   opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
   opengl::scoped::bool_setter<GL_FOG, GL_FALSE> fog;
   opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> color_material;
-
-  opengl::texture::set_active_texture(0);
-  opengl::texture::disable_texture();
-  opengl::texture::set_active_texture(1);
-  opengl::texture::disable_texture();
+  opengl::texture::disable_texture(1);
+  opengl::texture::disable_texture(0);
 
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

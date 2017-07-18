@@ -100,20 +100,16 @@ void WMOInstance::draw ( math::frustum const& frustum
     gl.disable(GL_LIGHTING);
 
     gl.disable(GL_COLOR_MATERIAL);
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
+    opengl::texture::disable_texture(0);
+    opengl::texture::disable_texture(1);
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
     opengl::primitives::wire_box (extents[0], extents[1]).draw (color, 1.0f);
 
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (0);
-    opengl::texture::enable_texture();
+    opengl::texture::disable_texture(1);
+    opengl::texture::enable_texture(0);
 
     gl.enable(GL_LIGHTING);
   }

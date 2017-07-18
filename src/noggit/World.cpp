@@ -1023,10 +1023,8 @@ void main()
     }
   }
 
-  opengl::texture::set_active_texture (1);
-  opengl::texture::disable_texture();
-  opengl::texture::set_active_texture (0);
-  opengl::texture::enable_texture();
+  opengl::texture::disable_texture(0);
+  opengl::texture::disable_texture(1);
 
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_BLEND);
@@ -1170,6 +1168,9 @@ void main()
       }
     }
   }
+
+  opengl::texture::disable_texture(1);
+  opengl::texture::enable_texture(0);
 
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
