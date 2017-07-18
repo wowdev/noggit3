@@ -376,10 +376,8 @@ void WMO::draw ( int doodadset
     gl.disable(GL_LIGHTING);
 
     gl.disable(GL_COLOR_MATERIAL);
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
+    opengl::texture::disable_texture(1);
+    opengl::texture::disable_texture(0);
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -409,10 +407,8 @@ void WMO::draw ( int doodadset
     gl.vertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
     gl.end();*/
 
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (0);
-    opengl::texture::enable_texture();
+    opengl::texture::disable_texture(1);
+    opengl::texture::enable_texture(0);
 
     gl.enable(GL_LIGHTING);
   }

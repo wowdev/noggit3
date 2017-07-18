@@ -2230,10 +2230,9 @@ void MapView::displayViewMode_2D()
     gl.translatef(-_camera.position.x / CHUNKSIZE, -_camera.position.z / CHUNKSIZE, 0);
 
     gl.color4f(1.0f, 1.0f, 1.0f, 0.5f);
-    opengl::texture::set_active_texture(1);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture(0);
-    opengl::texture::enable_texture();
+    
+    opengl::texture::disable_texture(1);
+    opengl::texture::enable_texture(0);
 
     opengl::texture brush_texture;
 

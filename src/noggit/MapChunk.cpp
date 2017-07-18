@@ -270,17 +270,12 @@ void MapChunk::drawTextures (int animtime)
     _texture_set.bindTexture(0, 0);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
+    opengl::texture::disable_texture(1);
   }
   else
   {
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
+    opengl::texture::disable_texture(1);
+    opengl::texture::disable_texture(0);
   }
 
   _texture_set.startAnim(0, animtime);
@@ -332,11 +327,8 @@ void MapChunk::drawTextures (int animtime)
     _texture_set.stopAnim(i);
   }
 
-  opengl::texture::set_active_texture (0);
-  opengl::texture::disable_texture();
-
-  opengl::texture::set_active_texture (1);
-  opengl::texture::disable_texture();
+  opengl::texture::disable_texture(1);
+  opengl::texture::disable_texture(0);
 
   gl.vertexPointer (minimap, 3, GL_FLOAT, 0, 0);
   gl.colorPointer (minishadows, 4, GL_FLOAT, 0, 0);
