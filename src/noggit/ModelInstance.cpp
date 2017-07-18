@@ -80,74 +80,72 @@ void ModelInstance::draw ( math::frustum const& frustum
     return;
   }    
 
+  {
+    opengl::scoped::matrix_pusher const matrix;
+
+    gl.multMatrixf (_transform_mat_transposed);
+
+    //! \todo add toggle draw particles and set customizable distance
+    model->draw (draw_fog, animtime, false);
+  }
+
+  if (is_current_selection || all_boxes)
+  {
+    draw_box(is_current_selection);
+  }
+}
+
+void ModelInstance::draw_box (bool is_current_selection)
+{
   opengl::scoped::matrix_pusher const matrix;
 
   gl.multMatrixf (_transform_mat_transposed);
 
-  if (all_boxes)
+  opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
+  opengl::scoped::bool_setter<GL_FOG, GL_FALSE> fog;
+  opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> color_material;
+
+  opengl::texture::set_active_texture(0);
+  opengl::texture::disable_texture();
+  opengl::texture::set_active_texture(1);
+  opengl::texture::disable_texture();
+
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  if (is_current_selection)
+  {
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.BoundingBoxMin)
+                                 , misc::transform_model_box_coords(model->header.BoundingBoxMax)
+                                 ).draw ({ 1.0f, 1.0f, 0.0f, 1.0f }, 1.0f);
+
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.VertexBoxMin)
+                                 , misc::transform_model_box_coords(model->header.VertexBoxMax)
+                                 ).draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
+
+    gl.color4fv(math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f));
+    gl.begin(GL_LINES);
+    gl.vertex3f(0.0f, 0.0f, 0.0f);
+    gl.vertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
+    gl.end();
+
+    gl.color4fv(math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f));
+    gl.begin(GL_LINES);
+    gl.vertex3f(0.0f, 0.0f, 0.0f);
+    gl.vertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
+    gl.end();
+
+    gl.color4fv(math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f));
+    gl.begin(GL_LINES);
+    gl.vertex3f(0.0f, 0.0f, 0.0f);
+    gl.vertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
+    gl.end();
+  }
+  else
   {
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.VertexBoxMin)
                                  , misc::transform_model_box_coords(model->header.VertexBoxMax)
                                  ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
-  }
-  //! \todo add toggle draw particles and set customizable distance
-  model->draw (draw_fog, animtime, false);
-
-  if (is_current_selection || force_box)
-  {
-    if (draw_fog)
-      gl.disable(GL_FOG);
-
-    gl.disable(GL_LIGHTING);
-
-    gl.disable(GL_COLOR_MATERIAL);
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(1.0f, 1.0f, 0.0f, 1.0f);
-
-    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.BoundingBoxMin)
-                                 , misc::transform_model_box_coords(model->header.BoundingBoxMax)
-                                 ).draw (color, 1.0f);
-
-    if (is_current_selection)
-    {
-      opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.VertexBoxMin)
-                                   , misc::transform_model_box_coords(model->header.VertexBoxMax)
-                                   ).draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
-
-      gl.color4fv(math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f));
-      gl.begin(GL_LINES);
-      gl.vertex3f(0.0f, 0.0f, 0.0f);
-      gl.vertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
-      gl.end();
-
-      gl.color4fv(math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f));
-      gl.begin(GL_LINES);
-      gl.vertex3f(0.0f, 0.0f, 0.0f);
-      gl.vertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
-      gl.end();
-
-      gl.color4fv(math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f));
-      gl.begin(GL_LINES);
-      gl.vertex3f(0.0f, 0.0f, 0.0f);
-      gl.vertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
-      gl.end();
-    }
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (0);
-    opengl::texture::enable_texture();
-
-    gl.enable(GL_LIGHTING);
-
-    if (draw_fog)
-      gl.enable(GL_FOG);
   }
 }
 

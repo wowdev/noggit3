@@ -1158,7 +1158,16 @@ void main()
       {
         it.first->draw_box(m2_box_shader, it.second);
       }
-    }    
+    }
+
+    if (IsSelection (eEntry_Model))
+    {
+      auto model = boost::get<selected_model_type> (*GetCurrentSelection());
+      if (model->is_visible(frustum, culldistance, camera_pos))
+      {
+        model->draw_box(true);
+      }
+    }
   }
 
   // WMOs / map objects
