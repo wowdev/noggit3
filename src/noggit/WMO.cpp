@@ -355,6 +355,7 @@ void WMO::draw ( int doodadset
                         , ofs
                         , angle
                         , frustum
+                        , camera
                         , draw_fog
                         , setup_outdoor_lights
                         , setup_fog
@@ -1103,6 +1104,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
                            , const math::vector_3d& ofs
                            , math::degrees const angle
                            , math::frustum const& frustum
+                           , math::vector_3d const& camera
                            , bool draw_fog
                            , std::function<void (bool)> setup_outdoor_lights
                            , std::function<void (bool)> setup_fog
@@ -1133,6 +1135,11 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
       )
     {
       ModelInstance& mi = wmo->modelis[dd];
+
+      if (mi.cull_by_size_category(camera))
+      {
+        continue;
+      }
 
       if (!outdoorLights) {
         WMOLight::setupOnce(GL_LIGHT2, wmo->model_nearest_light_vector[dd], mi.lcol);

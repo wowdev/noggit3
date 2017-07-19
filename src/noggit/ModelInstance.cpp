@@ -28,6 +28,8 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
   f->read(&scale, 4);
   f->read(&uid, 4);
   lcol = math::vector_3d(((uid & 0xff0000) >> 16) / 255.0f, ((uid & 0x00ff00) >> 8) / 255.0f, (uid & 0x0000ff) / 255.0f);
+
+  recalcExtents();
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
@@ -112,36 +114,36 @@ void ModelInstance::draw_box (bool is_current_selection)
 
   if (is_current_selection)
   {
-    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.BoundingBoxMin)
-                                 , misc::transform_model_box_coords(model->header.BoundingBoxMax)
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.collision_box_min)
+                                 , misc::transform_model_box_coords(model->header.collision_box_max)
                                  ).draw ({ 1.0f, 1.0f, 0.0f, 1.0f }, 1.0f);
 
-    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.VertexBoxMin)
-                                 , misc::transform_model_box_coords(model->header.VertexBoxMax)
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
+                                 , misc::transform_model_box_coords(model->header.bounding_box_max)
                                  ).draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
     gl.color4fv(math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f));
     gl.begin(GL_LINES);
     gl.vertex3f(0.0f, 0.0f, 0.0f);
-    gl.vertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
+    gl.vertex3f(model->header.bounding_box_max.x + model->header.bounding_box_max.x / 5.0f, 0.0f, 0.0f);
     gl.end();
 
     gl.color4fv(math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f));
     gl.begin(GL_LINES);
     gl.vertex3f(0.0f, 0.0f, 0.0f);
-    gl.vertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
+    gl.vertex3f(0.0f, model->header.bounding_box_max.z + model->header.bounding_box_max.z / 5.0f, 0.0f);
     gl.end();
 
     gl.color4fv(math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f));
     gl.begin(GL_LINES);
     gl.vertex3f(0.0f, 0.0f, 0.0f);
-    gl.vertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
+    gl.vertex3f(0.0f, 0.0f, model->header.bounding_box_max.y + model->header.bounding_box_max.y / 5.0f);
     gl.end();
   }
   else
   {
-    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.VertexBoxMin)
-                                 , misc::transform_model_box_coords(model->header.VertexBoxMax)
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
+                                 , misc::transform_model_box_coords(model->header.bounding_box_max)
                                  ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
   }
 }
@@ -188,8 +190,8 @@ void ModelInstance::intersect ( math::ray const& ray
 {
   math::ray subray (_transform_mat_inverted, ray);
 
-  if ( !subray.intersect_bounds ( fixCoordSystem (model->header.VertexBoxMin)
-                                , fixCoordSystem (model->header.VertexBoxMax)
+  if ( !subray.intersect_bounds ( fixCoordSystem (model->header.bounding_box_min)
+                                , fixCoordSystem (model->header.bounding_box_max)
                                 )
      )
   {
@@ -243,7 +245,40 @@ bool ModelInstance::is_visible(math::frustum const& frustum, const float& cull_d
   if(dist >= cull_distance)
     return false;
 
+  if (size_cat < 1.f && dist > 30.f)
+  {
+    return false;
+  }
+  else if (size_cat < 4.f && dist > 150.f)
+  {
+    return false;
+  }
+  else if (size_cat < 25.f && dist > 300.f)
+  {
+    return false;
+  }
+  
   return frustum.intersectsSphere(pos, model->rad * scale);
+}
+
+bool ModelInstance::cull_by_size_category(const math::vector_3d& camera) const
+{
+  float dist = (pos - camera).length() - model->rad * scale;
+
+  if (size_cat < 1.f && dist > 30.f)
+  {
+    return true;
+  }
+  else if (size_cat < 4.f && dist > 150.f)
+  {
+    return true;
+  }
+  else if (size_cat < 25.f && dist > 300.f)
+  {
+    return true;
+  }
+
+  return false;
 }
 
 void ModelInstance::recalcExtents()
@@ -257,23 +292,23 @@ void ModelInstance::recalcExtents()
   math::vector_3d bounds[8 * 2];
   math::vector_3d *ptr = bounds;
 
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_max.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_max.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_min.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_min.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_min.y, model->header.collision_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_max.y, model->header.collision_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_max.y, model->header.collision_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_min.y, model->header.collision_box_max.z));
 
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_max.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_max.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_min.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_min.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_min.y, model->header.bounding_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_max.y, model->header.bounding_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_max.y, model->header.bounding_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_min.y, model->header.bounding_box_max.z));
 
 
   for (int i = 0; i < 8 * 2; ++i)
