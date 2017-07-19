@@ -110,6 +110,7 @@ public:
 
   bool isInsideRect(math::vector_3d rect[2]) const;
   bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
+  bool cull_by_size_category(const math::vector_3d& camera) const;
 
   void recalcExtents();
 

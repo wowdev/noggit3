@@ -64,13 +64,12 @@ struct ModelHeader {
   uint32_t nTexAnimLookup;
   uint32_t ofsTexAnimLookup;
 
-  //not sure about these :/
-  math::vector_3d VertexBoxMin;//?
-  math::vector_3d VertexBoxMax;//?
-  float VertexBoxRadius;
-  math::vector_3d BoundingBoxMin;//?
-  math::vector_3d BoundingBoxMax;//?
-  float BoundingBoxRadius;
+  math::vector_3d bounding_box_min;
+  math::vector_3d bounding_box_max;
+  float bounding_box_radius;
+  math::vector_3d collision_box_min;
+  math::vector_3d collision_box_max;
+  float collision_box_radius;
 
   uint32_t nBoundingTriangles;
   uint32_t ofsBoundingTriangles;

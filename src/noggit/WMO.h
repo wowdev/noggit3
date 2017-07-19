@@ -69,6 +69,7 @@ public:
                    , const math::vector_3d& ofs
                    , math::degrees const
                    , math::frustum const&
+                   , math::vector_3d const&
                    , bool draw_fog
                    , std::function<void (bool)> setup_outdoor_lights
                    , std::function<void (bool)> setup_fog

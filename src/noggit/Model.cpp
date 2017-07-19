@@ -41,8 +41,8 @@ void Model::finishLoading()
   memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
 
 
-  _vertex_box_points = misc::box_points ( misc::transform_model_box_coords(header.VertexBoxMin)
-                                        , misc::transform_model_box_coords(header.VertexBoxMax)
+  _vertex_box_points = misc::box_points ( misc::transform_model_box_coords(header.bounding_box_min)
+                                        , misc::transform_model_box_coords(header.bounding_box_max)
                                         );
 
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
@@ -50,7 +50,7 @@ void Model::finishLoading()
   trans = 1.0f;
   anim = 0;
 
-  rad = header.VertexBoxRadius;
+  rad = header.bounding_box_radius;
 
   if (header.nGlobalSequences)
   {
