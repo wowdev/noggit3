@@ -21,9 +21,9 @@ namespace noggit
       , posVect(nullptr)
       , scale(nullptr)
       , _selection(false)
-      , _wmoInstance(nullptr)
+      , _entry(boost::none)
     {
-      setWindowTitle("Rotation Editor");
+      setWindowTitle("Pos/Rotation Editor");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
 
       auto layout (new QFormLayout (this));
@@ -74,21 +74,21 @@ namespace noggit
               , [&] (double v)
                 {
                   rotationVect->x = v;
-                  maybe_updateWMO();
+                  update_model();
                 }
               );
       connect ( _rotation_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   rotationVect->z = v;
-                  maybe_updateWMO();
+                  update_model();
                 }
               );
       connect ( _rotation_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   rotationVect->y = v;
-                  maybe_updateWMO();
+				          update_model();
                 }
               );
 
@@ -96,21 +96,21 @@ namespace noggit
               , [&] (double v)
                 {
                   posVect->x = v;
-                  maybe_updateWMO();
+				          update_model();
                 }
               );
       connect ( _position_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   posVect->z = v;
-                  maybe_updateWMO();
+				          update_model();
                 }
               );
       connect ( _position_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
                   posVect->y = v;
-                  maybe_updateWMO();
+				          update_model();
                 }
               );
 
@@ -118,6 +118,7 @@ namespace noggit
               , [&] (double v)
                 {
                   *scale = v;
+				          update_model();
                 }
               );
     }
@@ -125,23 +126,22 @@ namespace noggit
     void rotation_editor::select(selection_type entry)
     {
       _selection = true;
+	    _entry = entry;
 
       if (entry.which() == eEntry_Model)
       {
         rotationVect = &(boost::get<selected_model_type> (entry)->dir);
         posVect = &(boost::get<selected_model_type> (entry)->pos);
-        scale = &(boost::get<selected_model_type> (entry)->scale);
-        _wmoInstance = nullptr;
+        scale = &(boost::get<selected_model_type> (entry)->scale);        
       }
       else if (entry.which() == eEntry_WMO)
       {
-        _wmoInstance = boost::get<selected_wmo_type> (entry);
-        rotationVect = &(_wmoInstance->dir);
-        posVect = &(_wmoInstance->pos);
+		    rotationVect = &(boost::get<selected_wmo_type> (entry)->dir);
+		    posVect = &(boost::get<selected_wmo_type> (entry)->pos);
       }
       else
       {
-        _wmoInstance = nullptr;
+		    _entry.reset();
         _selection = false;
         rotationVect = nullptr;
         posVect = nullptr;
@@ -153,7 +153,7 @@ namespace noggit
 
     void rotation_editor::updateValues()
     {
-      if (_selection)
+      if (_entry)
       {
         QSignalBlocker const block_rotation_x (_rotation_x);
         QSignalBlocker const block_rotation_y (_rotation_y);
@@ -177,12 +177,15 @@ namespace noggit
         _position_y->setEnabled (true);
         _position_z->setEnabled (true);
 
-        if (!_wmoInstance)
+        if (_entry && _entry.get().which() == eEntry_Model)
         {
           _scale->setValue (*scale);
+          _scale->setEnabled (true);
         }
-
-        _scale->setEnabled (!_wmoInstance);
+        else
+        {
+          _scale->setEnabled (false);
+        }
       }
       else
       {
@@ -196,11 +199,19 @@ namespace noggit
       }
     }
 
-    void rotation_editor::maybe_updateWMO()
+    void rotation_editor::update_model()
     {
-      if (_wmoInstance)
+      if (_entry)
       {
-        _wmoInstance->recalcExtents();
+        switch (_entry.get().which())
+        {
+        case eEntry_Model:
+          boost::get<selected_model_type> (_entry.get())->recalcExtents();
+          break;
+        case eEntry_WMO:
+          boost::get<selected_wmo_type> (_entry.get())->recalcExtents();
+          break;
+        }
       }
     }
   }
