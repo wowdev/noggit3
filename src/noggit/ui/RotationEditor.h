@@ -4,11 +4,11 @@
 
 #include <noggit/Selection.h>
 
+#include <boost/optional.hpp>
+
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QWidget>
 #include <QDockWidget>
-
-class WMOInstance;
 
 namespace noggit
 {
@@ -26,13 +26,13 @@ namespace noggit
       bool hasFocus() const {return false;}
 
     private:
-      void maybe_updateWMO();
+      void update_model();
       math::vector_3d* rotationVect;
       math::vector_3d* posVect;
       float* scale;
 
       bool _selection;
-      WMOInstance* _wmoInstance;
+	  boost::optional<selection_type> _entry;
 
       QDoubleSpinBox* _rotation_x;
       QDoubleSpinBox* _rotation_z;

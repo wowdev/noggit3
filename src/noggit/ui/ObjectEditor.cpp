@@ -131,7 +131,7 @@ namespace noggit
       paste_layout->addRow(cameraButton);
       paste_layout->addRow(cursorPosCheck);
 
-      QPushButton *rotEditorButton = new QPushButton("Rotation Editor", this);
+      QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
       QPushButton *visToggleButton = new QPushButton("Toggle Visibility", this);
       QPushButton *clearListButton = new QPushButton("Clear List", this);
 
