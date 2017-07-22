@@ -236,6 +236,8 @@ namespace noggit
       _settings->setValue ("wireframe/width", _wireframe_width->value());
       _settings->setValue ("wireframe/color", _wireframe_color->color());
       _settings->setValue ("wireframe/rainbow", (int)_wireframe_rainbow_cb->isChecked());
+
+	  _settings->sync();
     }
   }
 }
