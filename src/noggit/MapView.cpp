@@ -150,6 +150,7 @@ void MapView::SnapSelectedObjectToGround()
     math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
     _world->GetVertex(wmo->pos.x, wmo->pos.z, &t);
     wmo->pos.y = t.y;
+	  wmo->recalcExtents();
     _world->updateTilesWMO(wmo);
   }
   else if (_world->IsSelection(eEntry_Model))
@@ -158,6 +159,7 @@ void MapView::SnapSelectedObjectToGround()
     math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
     _world->GetVertex(m2->pos.x, m2->pos.z, &t);
     m2->pos.y = t.y;
+	  m2->recalcExtents();
     _world->updateTilesModel(m2);
   }
 }
