@@ -34,6 +34,8 @@ namespace misc
   std::vector<math::vector_3d> intersection_points(math::vector_3d const& vmin, math::vector_3d const& vmax);
   std::vector<math::vector_3d> box_points(math::vector_3d const& box_min, math::vector_3d const& box_max);
   math::vector_3d transform_model_box_coords(math::vector_3d const& pos);
+  // normalize the filename used in adts since TC extractors don't accept /
+  std::string normalize_adt_filename(std::string filename);
 
   struct random_color : math::vector_4d
   {

@@ -754,7 +754,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   for (auto it = lModels.begin(); it != lModels.end(); ++it)
   {
     it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize;
-    lADTFile.Insert(lCurrentPosition, it->first.size() + 1, it->first.c_str());
+    lADTFile.Insert(lCurrentPosition, it->first.size() + 1, misc::normalize_adt_filename(it->first).c_str());
     lCurrentPosition += it->first.size() + 1;
     lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize += it->first.size() + 1;
     LogDebug << "Added model \"" << it->first << "\"." << std::endl;
@@ -813,7 +813,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   for (auto& object : lObjects)
   {
     object.second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize;
-    lADTFile.Insert(lCurrentPosition, object.first.size() + 1, object.first.c_str());
+    lADTFile.Insert(lCurrentPosition, object.first.size() + 1, misc::normalize_adt_filename(object.first).c_str());
     lCurrentPosition += object.first.size() + 1;
     lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize += object.first.size() + 1;
     LogDebug << "Added object \"" << object.first << "\"." << std::endl;
