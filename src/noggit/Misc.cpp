@@ -140,6 +140,18 @@ namespace misc
   {
     return {pos.x, pos.z, -pos.y};
   }
+
+  std::string normalize_adt_filename(std::string filename)
+  {
+    std::transform (filename.begin(), filename.end(), filename.begin(), ::toupper);
+    std::transform ( filename.begin(), filename.end(), filename.begin()
+                   , [](char c)
+                     {
+                       return c == '/' ? '\\' : c;
+                     }
+                   );
+    return filename;
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)
