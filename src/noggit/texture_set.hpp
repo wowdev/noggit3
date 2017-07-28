@@ -56,6 +56,8 @@ public:
 
   void bind_alpha(std::size_t id);
 
+  std::vector<uint8_t> lod_texture_map();
+
 private:
   void alphas_to_big_alpha(uint8_t* dest);
   void alphas_to_old_alpha(uint8_t* dest);

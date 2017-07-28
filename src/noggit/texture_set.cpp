@@ -839,3 +839,47 @@ void TextureSet::update_alpha_tex()
     }
   }
 }
+
+std::vector<uint8_t> TextureSet::lod_texture_map()
+{
+  std::vector<uint8_t> lod;
+
+  for (int z = 0; z < 8; ++z)
+  {
+    for (int x = 0; x < 8; ++x)
+    {
+      std::vector<float> alpha_sum;
+
+      for (size_t layer = 1; layer < nTextures; ++layer)
+      {
+        alpha_sum.push_back(0.f);
+        const uint8_t* alpha = getAlpha(layer - 1);
+
+        for (int pz = z * 8; pz < (z + 1) * 8; ++pz)
+        {
+          for (int px = x * 8; px < (x + 1) * 8; ++px)
+          {
+            alpha_sum[layer - 1] += alpha[pz * 64 + px];
+          }
+        }
+      }
+
+      float sum_base = 8*8*1.f - std::accumulate(alpha_sum.begin(), alpha_sum.end(), 0.f);
+      alpha_sum.insert(alpha_sum.begin(), sum_base);
+
+      int winning_layer = 0;
+
+      for (int layer = 1; layer < nTextures; ++layer)
+      {
+        if (alpha_sum[winning_layer] < alpha_sum[layer])
+        {
+          winning_layer = layer;
+        }
+      }
+
+      lod.push_back(winning_layer);
+    }    
+  }
+
+  return lod;
+}
