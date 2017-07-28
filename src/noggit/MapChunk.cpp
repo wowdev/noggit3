@@ -971,51 +971,14 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   static const size_t minimum_value_to_overwrite(128);
 
-  for (size_t y(0); y < 8; ++y)
+  std::vector<uint8_t> lod_texture_map = _texture_set.lod_texture_map();
+
+  for (int i = 0; i < lod_texture_map.size(); ++i)
   {
-    for (size_t x(0); x < 8; ++x)
-    {
-      size_t winning_layer(0);
-      std::map<std::size_t, float> alpha_visibility;
+    const size_t array_index((i) / 4);
+    const size_t bit_index(((i) % 4) * 2);
 
-      for (size_t j(0); j < 8; ++j)
-      {
-        for (size_t i(0); i < 8; ++i)
-        {
-          float alphas[4] = { 255.f, 0.f, 0.f, 0.f };
-
-          for (size_t layer(1); layer < _texture_set.num(); ++layer)
-          {            
-            float a = static_cast<float>(_texture_set.getAlpha(layer - 1, (y * 8 + j) * 64 + (x * 8 + i)));
-            alphas[layer] = a;
-            a /= 255.f;
-
-            for (size_t n = 0; n < layer; n++)
-            {
-              alphas[n] = (alphas[n] * (1.f - a));
-            }              
-          }
-
-          for (int k = 0; k < 4; ++k)
-          {
-            alpha_visibility[k] += alphas[k];
-          }
-        }
-      }
-
-      for (std::size_t i = 1; i < 4; ++i)
-      {
-        if (alpha_visibility[i] > alpha_visibility[winning_layer])
-        {
-          winning_layer = i;
-        }
-      }
-
-      const size_t array_index((y * 8 + x) / 4);
-      const size_t bit_index(((y * 8 + x) % 4) * 2);
-
-      lMCNK_header->low_quality_texture_map[array_index] |= ((winning_layer & 3) << bit_index);
-    }
+    lMCNK_header->low_quality_texture_map[array_index] |= ((lod_texture_map[i] & 3) << bit_index);
   }
 
   lCurrentPosition += 8 + 0x80;
