@@ -896,7 +896,7 @@ void MapIndex::loadMaxUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
 if (Settings::getInstance()->mysql) {
-  highestGUID = mysql::getGUIDFromDB(*Settings::getInstance()->mysql, map_id);
+  highestGUID = mysql::getGUIDFromDB(*Settings::getInstance()->mysql, _map_id);
 }
 else
 {
