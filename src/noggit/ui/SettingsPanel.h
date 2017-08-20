@@ -45,6 +45,7 @@ namespace noggit
       QDoubleSpinBox* farZField;
 
       QCheckBox* tabletModeCheck;
+      QCheckBox* _vsync_cb;
 
       QGroupBox* _mysql_box;
       QLineEdit* _mysql_server_field;
