@@ -1090,8 +1090,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     gl.bufferData(GL_ARRAY_BUFFER, transform_matrix.size() * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
-    m2_shader.attrib_mat4("transform", 0);
-    m2_shader.attrip_divisor("transform", 1, 4);
+    m2_shader.attrib("transform", 0, 1);
   }
   
   {
@@ -1127,8 +1126,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-    m2_box_shader.attrib_mat4("transform", 0);
-    m2_box_shader.attrip_divisor("transform", 1, 4);
+    m2_box_shader.attrib("transform", 0, 1);
   }
 
   {

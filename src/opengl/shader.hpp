@@ -87,9 +87,7 @@ namespace opengl
       void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
 
-      void attrib_mat4 (std::string const& name, math::vector_4d const* data);
-
-      void attrip_divisor(std::string const& name, GLuint divisor, GLsizei range = 1);
+      void attrib_divisor(std::string const& name, GLuint divisor, GLsizei range = 1);
 
     private:
       GLuint uniform_location (std::string const& name);
