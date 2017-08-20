@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/CursorSwitcher.h>
+#include <noggit/tool_enums.hpp>
 #include <util/qt/overload.hpp>
 
 #include <qt-color-widgets/color_selector.hpp>
@@ -35,11 +36,11 @@ namespace noggit
 
       auto group (new QButtonGroup (this));
 
-      group->addButton (butt_disk, 1);
-      group->addButton (butt_sphere, 2);
-      group->addButton (butt_triangle, 3);
-      group->addButton (butt_terrain_disk, 4);
-      group->addButton (butt_none, 0);
+      group->addButton (butt_disk, static_cast<int>(cursor_mode::disk));
+      group->addButton (butt_sphere, static_cast<int>(cursor_mode::sphere));
+      group->addButton (butt_triangle, static_cast<int>(cursor_mode::triangle));
+      group->addButton (butt_terrain_disk, static_cast<int>(cursor_mode::terrain));
+      group->addButton (butt_none, static_cast<int>(cursor_mode::none));
 
       group->button (cursor_type.get())->setChecked (true);
 

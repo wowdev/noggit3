@@ -837,7 +837,7 @@ void MapView::createGUI()
             , MOD_shift
             , [this]
               {
-                cursor_type.set ((cursor_type.get() + 1) % 5);
+                cursor_type.set ((cursor_type.get() + 1) % static_cast<unsigned int>(cursor_mode::mode_count));
               }
             , [this] { return terrainMode != editing_mode::object; }
             );
@@ -1316,7 +1316,7 @@ MapView::MapView( math::degrees camera_yaw0
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
-  cursor_type.set (_settings->value ("cursor/default_type", 4).toInt());
+  cursor_type.set (_settings->value ("cursor/default_type", static_cast<unsigned int>(cursor_mode::terrain)).toUInt());
   cursor_color.x = _settings->value ("cursor/color/r", 1).toFloat();
   cursor_color.y = _settings->value ("cursor/color/g", 1).toFloat();
   cursor_color.z = _settings->value ("cursor/color/b", 1).toFloat();
