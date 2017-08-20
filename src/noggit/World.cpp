@@ -563,9 +563,10 @@ void World::draw ( math::vector_3d const& cursor_pos
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
-    static opengl::program const mcnk_program
-    { { GL_VERTEX_SHADER
-      , R"code(
+    if (!_mcnk_program)
+    {
+      _mcnk_program.reset(new opengl::program({ { GL_VERTEX_SHADER
+        , R"code(
 #version 110
 
 attribute vec4 position;
@@ -591,9 +592,9 @@ void main()
   vary_mccv = mccv;
 }
 )code"
-      }
-      , { GL_FRAGMENT_SHADER
-      , R"code(
+        }
+        ,{ GL_FRAGMENT_SHADER
+        , R"code(
 #version 110
 
 uniform mat4 model_view;
@@ -812,10 +813,11 @@ void main()
   }
 }
 )code"
-      }
-    };
-
-    opengl::scoped::use_program mcnk_shader{ mcnk_program };
+        }
+      } ));
+    }
+    
+    opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
     mcnk_shader.uniform("model_view", opengl::matrix::model_view());
     mcnk_shader.uniform("projection", opengl::matrix::projection());
@@ -983,8 +985,9 @@ void main()
 
   if (draw_mfbo)
   {
-    static opengl::program const program
-      { { GL_VERTEX_SHADER
+    if (!_mfbo_program)
+    {
+      _mfbo_program.reset(new opengl::program({ { GL_VERTEX_SHADER
         , R"code(
 #version 110
 
@@ -999,7 +1002,7 @@ void main()
 }
 )code"
         }
-      , { GL_FRAGMENT_SHADER
+        ,{ GL_FRAGMENT_SHADER
         , R"code(
 #version 110
 
@@ -1011,8 +1014,9 @@ void main()
 }
 )code"
         }
-      };
-    opengl::scoped::use_program mfbo_shader {program};
+      }));
+    }
+    opengl::scoped::use_program mfbo_shader { *_mfbo_program.get() };
 
     mfbo_shader.uniform ("model_view", opengl::matrix::model_view());
     mfbo_shader.uniform ("projection", opengl::matrix::projection());
@@ -1061,9 +1065,10 @@ void main()
     std::unordered_map<Model*, std::size_t> visible_model_count;
 
     {
-      static opengl::program const m2_program
-      { { GL_VERTEX_SHADER
-        , R"code(
+      if (!_m2_program)
+      {
+        _m2_program.reset(new opengl::program({ { GL_VERTEX_SHADER
+          , R"code(
 #version 330 core
 
 in vec4 pos;
@@ -1082,9 +1087,9 @@ void main()
   uv = texcoord;
 }
 )code"
-        }
-        ,{ GL_FRAGMENT_SHADER
-        , R"code(
+          }
+          ,{ GL_FRAGMENT_SHADER
+          , R"code(
 #version 330 core
 
 in vec2 uv;
@@ -1097,9 +1102,10 @@ void main()
 }
 
 )code"
-        }
-      };
-      opengl::scoped::use_program m2_shader{ m2_program };
+          }
+        }));
+      }
+      opengl::scoped::use_program m2_shader{ *_m2_program.get() };
 
       m2_shader.uniform ("model_view", opengl::matrix::model_view());
       m2_shader.uniform ("projection", opengl::matrix::projection());
@@ -1115,9 +1121,10 @@ void main()
     
     if(draw_models_with_box)
     {
-      static opengl::program const program
-      { { GL_VERTEX_SHADER
-        , R"code(
+      if (!_m2_box_program)
+      {
+        _m2_box_program.reset(new opengl::program({ { GL_VERTEX_SHADER
+          , R"code(
 #version 330 core
 
 in mat4 transform;
@@ -1131,9 +1138,9 @@ void main()
   gl_Position = projection * model_view * transform * position;
 }
 )code"
-        }
-        , { GL_FRAGMENT_SHADER
-        , R"code(
+          }
+          ,{ GL_FRAGMENT_SHADER
+          , R"code(
 #version 330 core
 
 void main()
@@ -1141,10 +1148,11 @@ void main()
   gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
 }
 )code"
-        }
-      };
+          }
+        }));
+      }
 
-      opengl::scoped::use_program m2_box_shader{ program };
+      opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
       m2_box_shader.uniform ("model_view", opengl::matrix::model_view());
       m2_box_shader.uniform ("projection", opengl::matrix::projection());

@@ -13,6 +13,9 @@
 #include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <opengl/shader.fwd.hpp>
+
+#include <boost/optional/optional.hpp>
 
 #include <QtCore/QSettings>
 
@@ -293,4 +296,10 @@ private:
   bool _display_initialized = false;
 
   QSettings* _settings;
+
+
+  std::unique_ptr<opengl::program> _mcnk_program;
+  std::unique_ptr<opengl::program> _mfbo_program;
+  std::unique_ptr<opengl::program> _m2_program;
+  std::unique_ptr<opengl::program> _m2_box_program;
 };
