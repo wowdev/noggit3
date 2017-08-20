@@ -493,14 +493,11 @@ void MapChunk::draw ( math::frustum const& frustum
 
   if (_texture_set.num())
   {
-    _texture_set.bindTexture(0, 0); // tex0
-    _texture_set.bind_alpha(1);
+    _texture_set.bind_alpha(0);
 
-    switch (_texture_set.num())
+    for (int i = 0; i < _texture_set.num(); ++i)
     {
-    case 4: _texture_set.bindTexture(3, 4); // tex3
-    case 3: _texture_set.bindTexture(2, 3); // tex2
-    case 2: _texture_set.bindTexture(1, 2); // tex1
+      _texture_set.bindTexture(i, i + 1);
     }
   }
 

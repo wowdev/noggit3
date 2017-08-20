@@ -856,8 +856,8 @@ void main()
       mcnk_shader.uniform ("draw_cursor_circle", 0);
     }
 
-    mcnk_shader.uniform("tex0", 0);
-    mcnk_shader.uniform("alphamap", 1);
+    mcnk_shader.uniform("alphamap", 0);
+    mcnk_shader.uniform("tex0", 1);
     mcnk_shader.uniform("tex1", 2);
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
