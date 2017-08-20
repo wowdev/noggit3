@@ -142,6 +142,9 @@ namespace noggit
       layout->addRow (wireframe_box);
 
 
+      layout->addRow ("VSync", _vsync_cb = new QCheckBox ("enabled", this));
+      _vsync_cb->setToolTip("Require restart");
+
       layout->addRow ( "View Distance"
                      , viewDistanceField = new QDoubleSpinBox
                      );
@@ -154,7 +157,6 @@ namespace noggit
 
 
       layout->addRow ("Tablet support", tabletModeCheck = new QCheckBox ("enabled", this));
-
 
       auto warning (new QWidget (this));
       new QHBoxLayout (warning);
@@ -200,6 +202,7 @@ namespace noggit
       viewDistanceField->setValue (_settings->value ("view_distance", 1000.f).toFloat());
       farZField->setValue (_settings->value ("farZ", 2048.f).toFloat());
       tabletModeCheck->setChecked (_settings->value ("tablet/enabled", false).toBool());
+      _vsync_cb->setChecked (_settings->value ("vsync", false).toBool());
 
       _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
       _mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
@@ -224,6 +227,7 @@ namespace noggit
       _settings->setValue ("farZ", farZField->value());
       _settings->setValue ("view_distance", viewDistanceField->value());
       _settings->setValue ("tablet/enabled", tabletModeCheck->isChecked());
+      _settings->setValue ("vsync", _vsync_cb->isChecked());
 
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
       _settings->setValue ("project/mysql/server", _mysql_server_field->text());
