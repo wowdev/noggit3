@@ -195,7 +195,7 @@ bool ChunkWater::is_visible ( const float& cull_distance
                             , const math::vector_3d& camera
                             ) const
 {
-  static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
+  static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f);
 
   return frustum.intersects (_intersect_points)
     && (((camera - vcenter).length () - chunk_radius) < cull_distance);

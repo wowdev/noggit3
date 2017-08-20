@@ -147,7 +147,7 @@ ENDIF( NOGGIT_LOGTOCONSOLE )
 # Disable opengl error log
 OPTION(NOGGIT_OPENGL_ERROR_CHECK "Enable OpenGL error check ?" ON)
 IF(NOT NOGGIT_OPENGL_ERROR_CHECK )
-  MESSAGE( STATUS "And writing log to console instead of log.txt" )
+  MESSAGE( STATUS "OpenGL error check disabled." )
   ADD_DEFINITIONS( -DNOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS )
 ENDIF()
 
