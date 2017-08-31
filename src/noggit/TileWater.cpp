@@ -103,7 +103,6 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
   }
 
   SetChunkHeader(lADTFile, ofsW - 8, 'MH2O', lCurrentPosition - ofsW);
-  lCurrentPosition += 8;
 }
 
 bool TileWater::hasData(size_t layer)
