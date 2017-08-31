@@ -37,7 +37,6 @@ namespace noggit
     {
     private:
       util::file_line_edit* gamePathField;
-      util::file_line_edit* wodPathField;
       util::file_line_edit* projectPathField;
       util::file_line_edit* importPathField;
       util::file_line_edit* wmvLogPathField;

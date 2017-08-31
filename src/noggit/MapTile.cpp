@@ -516,23 +516,10 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 {
 
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
-  LogDebug << "CHANGED FLAG " << changed << std::endl;
+
   int lID;  // This is a global counting variable. Do not store something in here you need later.
-
-            // if wod output path is set creat also wod map files and save them in this alternate path.
-  bool wodSave = false;
-  QSettings settings;
-  std::string wodSavePath = settings.value("project/wod_save_path").toString().toStdString();
-  if (wodSavePath != "")
-  {
-    wodSave = true;
-    LogDebug << "WOD Save path is set to : " << wodSavePath << std::endl;
-  }
-
   std::vector<WMOInstance> lObjectInstances;
   std::vector<ModelInstance> lModelInstances;
-
-  // Collect some information we need later.
 
   // Check which doodads and WMOs are on this ADT.
   math::vector_3d lTileExtents[2];
@@ -608,50 +595,15 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   // Now write the file.
   sExtendableArray lADTFile;
 
-
-  // Create the other files for wod saving
-  int lADTRootFileCurrentPosition = 0;
-  sExtendableArray lADTRootFile;
-  int lADTObjFileCurrentPosition = 0;
-  sExtendableArray lADTObjFile;
-  int lADTTexFileCurrentPosition = 0;
-  sExtendableArray lADTTexFile;
-
-
-
-
   int lCurrentPosition = 0;
 
   // MVER
   lADTFile.Extend(8 + 0x4);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MVER', 4);
 
-  if (wodSave)
-  {
-    // WOD ALL
-    lADTRootFile.Extend(8 + 0x4);
-    SetChunkHeader(lADTRootFile, lADTRootFileCurrentPosition, 'MVER', 4);
-    lADTObjFile.Extend(8 + 0x4);
-    SetChunkHeader(lADTObjFile, lADTObjFileCurrentPosition, 'MVER', 4);
-    lADTTexFile.Extend(8 + 0x4);
-    SetChunkHeader(lADTTexFile, lADTTexFileCurrentPosition, 'MVER', 4);
-  }
-
   // MVER data
   *(lADTFile.GetPointer<int>(8)) = 18;
   lCurrentPosition += 8 + 0x4;
-
-  if (wodSave)
-  {
-    // WOD ALL
-    *(lADTRootFile.GetPointer<int>(8)) = 18;
-    lADTRootFileCurrentPosition += 8 + 0x4;
-    *(lADTObjFile.GetPointer<int>(8)) = 18;
-    lADTObjFileCurrentPosition += 8 + 0x4;
-    *(lADTTexFile.GetPointer<int>(8)) = 18;
-    lADTTexFileCurrentPosition += 8 + 0x4;
-  }
-
 
   // MHDR
   int lMHDR_Position = lCurrentPosition;
@@ -663,17 +615,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lCurrentPosition += 8 + 0x40;
 
 
-  if (wodSave)
-  {
-    // WOD ROOT
-    int ROOT_lMHDR_Position = lADTRootFileCurrentPosition;
-    lADTRootFile.Extend(8 + 0x40);
-    SetChunkHeader(lADTRootFile, lADTRootFileCurrentPosition, 'MHDR', 0x40);
-    lADTRootFile.GetPointer<MHDR>(ROOT_lMHDR_Position + 8)->flags = mFlags;
-    lADTRootFileCurrentPosition += 8 + 0x40;
-  }
-
-
   // MCIN
   int lMCIN_Position = lCurrentPosition;
 
@@ -683,10 +624,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   lCurrentPosition += 8 + 256 * 0x10;
 
-  // MCIN dont exist in wod so no save
-
-  // MAMP TODO:need implementation for WOD here!!!!!
-
   // MTEX
   int lMTEX_Position = lCurrentPosition;
   lADTFile.Extend(8 + 0);  // We don't yet know how big this will be.
@@ -694,19 +631,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtex = lCurrentPosition - 0x14;
 
   lCurrentPosition += 8 + 0;
-
-  int TEX_lMTEX_Position = 0;
-  if (wodSave)
-  {
-    // WOD TEX
-    TEX_lMTEX_Position = lADTTexFileCurrentPosition;
-    lADTTexFile.Extend(8 + 0);  // We don't yet know how big this will be.
-    SetChunkHeader(lADTTexFile, lADTTexFileCurrentPosition, 'MTEX');
-    lADTTexFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtex = lADTTexFileCurrentPosition - 0x14;
-
-    lADTTexFileCurrentPosition += 8 + 0;
-  }
-
 
   // MTEX data
   for (auto const& texture : lTextures)
@@ -716,18 +640,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     lCurrentPosition += texture.first.size() + 1;
     lADTFile.GetPointer<sChunkHeader>(lMTEX_Position)->mSize += texture.first.size() + 1;
     LogDebug << "Added texture \"" << texture.first << "\"." << std::endl;
-
-    if (wodSave)
-    {
-      // WOD TEX
-      lADTTexFile.Insert(lADTTexFileCurrentPosition, texture.first.size() + 1, texture.first.c_str());
-      lADTTexFileCurrentPosition += texture.first.size() + 1;
-      lADTTexFile.GetPointer<sChunkHeader>(TEX_lMTEX_Position)->mSize += texture.first.size() + 1;
-    }
   }
-
-
-
 
   // MMDX
   int lMMDX_Position = lCurrentPosition;
@@ -737,19 +650,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   lCurrentPosition += 8 + 0;
 
-
-  int OBJ_lMMDX_Position (lADTObjFileCurrentPosition);
-  if (wodSave)
-  {
-    // WOD OBJ
-    lADTObjFile.Extend(8 + 0);  // We don't yet know how big this will be.
-    SetChunkHeader(lADTObjFile, lADTObjFileCurrentPosition, 'MMDX');
-    lADTRootFile.GetPointer<MHDR>(OBJ_lMMDX_Position + 8)->mmdx = lADTObjFileCurrentPosition - 0x14; //ISTHISRIGHT ???MHDR is in root so I set the mmdx value there not in obj
-
-    lADTObjFileCurrentPosition += 8 + 0;
-  }
-
-
   // MMDX data
   for (auto it = lModels.begin(); it != lModels.end(); ++it)
   {
@@ -758,17 +658,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     lCurrentPosition += it->first.size() + 1;
     lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize += it->first.size() + 1;
     LogDebug << "Added model \"" << it->first << "\"." << std::endl;
-
-    if (wodSave)
-    {
-      // WOD OBJ
-      it->second.filenamePosition = lADTObjFile.GetPointer<sChunkHeader>(OBJ_lMMDX_Position)->mSize;
-      lADTObjFile.Insert(lADTObjFileCurrentPosition, it->first.size() + 1, it->first.c_str());
-      lADTObjFileCurrentPosition += it->first.size() + 1;
-      lADTObjFile.GetPointer<sChunkHeader>(OBJ_lMMDX_Position)->mSize += it->first.size() + 1;
-    }
-
-
   }
 
   // MMID
@@ -778,30 +667,19 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   SetChunkHeader(lADTFile, lCurrentPosition, 'MMID', lMMID_Size);
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mmid = lCurrentPosition - 0x14;
 
-  if (wodSave)
-  {
-    // WOD OBJ
-    lADTObjFile.Extend(8 + lMMID_Size);
-    SetChunkHeader(lADTObjFile, lADTObjFileCurrentPosition, 'MMID', lMMID_Size);
-    lADTRootFile.GetPointer<MHDR>(lMHDR_Position + 8)->mmid = lADTObjFileCurrentPosition - 0x14;
-  }
-
   // MMID data
   // WMO model names
   int * lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
-  int * OBJlMMID_Data = lADTObjFile.GetPointer<int>(lADTObjFileCurrentPosition + 8); // WOD OBJ
 
   lID = 0;
   for (auto const& model : lModels)
   {
     lMMID_Data[lID] = model.second.filenamePosition;
-    if (wodSave) OBJlMMID_Data[lID] = model.second.filenamePosition; // WOD OBJ
     lID++;
   }
   lCurrentPosition += 8 + lMMID_Size;
-  if (wodSave) lADTObjFileCurrentPosition += 8 + lMMID_Size; // WOD OBJ
-
-                                                             // MWMO
+  
+  // MWMO
   int lMWMO_Position = lCurrentPosition;
   lADTFile.Extend(8 + 0);  // We don't yet know how big this will be.
   SetChunkHeader(lADTFile, lCurrentPosition, 'MWMO');
@@ -986,50 +864,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     MPQFile f(mFilename);
     f.setBuffer(lADTFile.data);
     f.SaveFile();
-  }
-
-  // save wod files
-  if (wodSave)
-  {
-    // ADT root file
-    MPQFile f1 (mFilename, wodSavePath);
-    f1.setBuffer(lADTRootFile.data);
-    f1.SaveFile();
-    f1.close();
-
-    // both tex files
-    std::stringstream texFilename1;
-    texFilename1 << mFilename.substr(0, mFilename.size() - 4) << "_tex0.adt";
-    std::stringstream texFilename2;
-    texFilename2 << mFilename.substr(0, mFilename.size() - 4) << "_tex1.adt";
-
-
-    MPQFile f2 (texFilename1.str(), wodSavePath);
-    f2.setBuffer(lADTTexFile.data);
-    f2.SaveFile();
-    f2.close();
-
-    MPQFile f3 (texFilename2.str(), wodSavePath);
-    f3.setBuffer(lADTTexFile.data);
-    f3.SaveFile();
-    f3.close();
-
-    // both obj files
-    std::stringstream objFilename1;
-    objFilename1 << mFilename.substr(0, mFilename.size() - 4) << "_obj0.adt";
-    std::stringstream objFilename2;
-    objFilename2 << mFilename.substr(0, mFilename.size() - 4) << "_obj1.adt";
-
-
-    MPQFile f4 (objFilename1.str(), wodSavePath);
-    f4.setBuffer(lADTObjFile.data);
-    f4.SaveFile();
-    f4.close();
-
-    MPQFile f5 (objFilename2.str(), wodSavePath);
-    f5.setBuffer(lADTObjFile.data);
-    f5.SaveFile();
-    f5.close();
   }
 
   lObjectInstances.clear();

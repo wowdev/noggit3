@@ -83,7 +83,6 @@ namespace noggit
 
       browse_row (&gamePathField, "Game Path", "project/game_path", util::file_line_edit::directories);
       browse_row (&projectPathField, "Project Path", "project/path", util::file_line_edit::directories);
-      browse_row (&wodPathField, "WoD Save Path", "project/wod_save_path", util::file_line_edit::directories);
       browse_row (&importPathField, "Import Path", "project/import_file", util::file_line_edit::files);
       browse_row (&wmvLogPathField, "WMV Log Path", "project/wmv_log_file", util::file_line_edit::files);      
 
@@ -196,7 +195,6 @@ namespace noggit
     {
       gamePathField->actual->setText (_settings->value ("project/game_path").toString());
       projectPathField->actual->setText (_settings->value ("project/path").toString());
-      wodPathField->actual->setText (_settings->value ("project/wod_save_path").toString());
       importPathField->actual->setText (_settings->value ("project/import_file").toString());
       wmvLogPathField->actual->setText (_settings->value ("project/wmv_log_file").toString());
       viewDistanceField->setValue (_settings->value ("view_distance", 1000.f).toFloat());
@@ -221,7 +219,6 @@ namespace noggit
     {
       _settings->setValue ("project/game_path", gamePathField->actual->text());
       _settings->setValue ("project/path", projectPathField->actual->text());
-      _settings->setValue ("project/wod_save_path", wodPathField->actual->text());
       _settings->setValue ("project/import_file", importPathField->actual->text());
       _settings->setValue ("project/wmv_log_file", wmvLogPathField->actual->text());
       _settings->setValue ("farZ", farZField->value());
