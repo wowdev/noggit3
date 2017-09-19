@@ -28,17 +28,22 @@ Further following libraries are required for MySQL GUID Storage builts:
 * install boost via https://sourceforge.net/projects/boost/files/boost-binaries/ (be sure to use the right version and compiler version. cmake may not support the latest version) to <boost-install>
 * install Qt via https://www.qt.io/download-open-source/#section-2 to <Qt-install>
 * download stormlib from https://github.com/ladislav-zezula/StormLib
- * open CMake GUI
- * configure, generate (save the cache entry CMAKE_INSTALL_PREFIX path somewhere, set it to a empty folder if not present)
+ * [stormlib] open CMake GUI
+ * configure, generate stormlib (save the cache entry CMAKE_INSTALL_PREFIX path somewhere, set it to a empty folder if not present)
  * open solution with visual studio
- * build ALL_BUILD, then INSTALL
-* open CMake GUI
+ * build ALL_BUILD, then INSTALL, do it for both release and debug
+* [noggit] open CMake GUI
  * set cache entry CMAKE_PREFIX_PATH (path) to <Qt-install>;<stormlib-build>, e.g. C:/Qt/5.6/msvc2015;<Stormlib's CMAKE_INSTALL_PREFIX path>
- * set cache entry BOOST_ROOT (path) to <boost-install>, e.g. C:/local/boost_1_60_0
+ * set cache entry BOOST_ROOT (path) to <boost-install>, e.g. C:/local/boost_1_60_0 
+ * put the lib in BOOST_ROOT/lib so that cmake finds them automatically or set BOOST_LIBRARYDIR to where your lib are (.dll and .lib)
  * set cache entry CMAKE_INSTALL_PREFIX (path) to a empty destination, e.g. C:/Users/loerwald/Documents/noggitinstall
  * configure, generate
  * open solution with visual studio
  * build ALL_BUILD
+ 
+ To launch noggit you will need the following dll from qt (Qt/X.X/msvcXXXX/bin):
+  * release: Qt5Core, Qt5OpenGL, Qt5Widgets, Qt5Gui
+  * debug: Qt5Cored, Qt5OpenGLd, Qt5Widgetsd, Qt5Guid 
 
 # DEVELOPMENT #
 Feel   free   to   ask   the   owner  of   the   official   repository
