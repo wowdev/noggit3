@@ -206,61 +206,6 @@ MPQFile::MPQFile(const std::string& pFilename)
     return;
   }
 }
-/*
-* Alternate constructor to save the file to an outside path
-*/
-MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSavePath)
-  : eof(true)
-  , pointer(0)
-  , External(false)
-{
-  LogDebug << "MPGFILE 1 alternateSavePath: " << alternateSavePath << std::endl;
-  boost::mutex::scoped_lock lock(gMPQFileMutex);
-
-  if (pFilename.empty())
-    throw std::runtime_error("MPQFile: filename empty");
-
-  if(alternateSavePath.empty())if (!exists(pFilename))
-    return;
-
-  LogDebug << "WEITER!!! " << std::endl;
-
-  fname = getAlternateDiskPath(pFilename, alternateSavePath);
-
-
-  std::ifstream input(fname.c_str(), std::ios_base::binary | std::ios_base::in);
-  if (input.is_open())
-  {
-    External = true;
-    eof = false;
-
-    input.seekg(0, std::ios::end);
-    buffer.resize (input.tellg());
-    input.seekg(0, std::ios::beg);
-
-    input.read(buffer.data(), buffer.size());
-
-    input.close();
-    return;
-  }
-
-  std::string filename(getMPQPath(pFilename));
-
-  for (ArchivesMap::reverse_iterator i = _openArchives.rbegin(); i != _openArchives.rend(); ++i)
-  {
-    HANDLE fileHandle;
-
-    if (!i->second->openFile(filename, &fileHandle))
-      continue;
-
-    eof = false;
-    buffer.resize (SFileGetFileSize(fileHandle, nullptr));
-    SFileReadFile(fileHandle, buffer.data(), buffer.size(), nullptr, nullptr); //last nullptrs for newer version of StormLib
-    SFileCloseFile(fileHandle);
-
-    return;
-  }
-}
 
 MPQFile::~MPQFile()
 {
@@ -281,24 +226,6 @@ std::string MPQFile::getDiskPath(const std::string &pFilename)
     found = diskpath.find("\\");
   }
 
-  return diskpath;
-}
-
-std::string MPQFile::getAlternateDiskPath(const std::string &pFilename, const std::string &pDiscpath)
-{
-  std::string filename(pFilename);
-  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
-  std::string diskpath = pDiscpath;
-  diskpath.append(filename);
-
-  size_t found = diskpath.find("\\");
-  while (found != std::string::npos)
-  {
-    diskpath.replace(found, 1, "/");
-    found = diskpath.find("\\");
-  }
-
-  LogDebug << "Alternate disc patch: " << diskpath << std::endl;
   return diskpath;
 }
 
