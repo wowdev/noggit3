@@ -966,8 +966,6 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   memset(lMCNK_header->low_quality_texture_map, 0, 0x10);
 
-  static const size_t minimum_value_to_overwrite(128);
-
   std::vector<uint8_t> lod_texture_map = _texture_set.lod_texture_map();
 
   for (int i = 0; i < lod_texture_map.size(); ++i)
@@ -1179,8 +1177,6 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   }
 
   // MCAL
-  size_t lMaps = _texture_set.num() ? _texture_set.num() - 1U : 0U;
-
   lADTFile.Extend(8 + lMCAL_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCAL', lMCAL_Size);
 

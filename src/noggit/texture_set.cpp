@@ -514,7 +514,6 @@ bool TextureSet::is_animated(std::size_t id) const
 
 void TextureSet::change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add)
 {
-  int tex_level = -1;
   for (size_t i = 0; i < nTextures; ++i)
   {
     if (textures[i] == tex)
