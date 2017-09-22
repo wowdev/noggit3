@@ -28,11 +28,11 @@ namespace noggit
       , _show_unpaintable_chunks(true)
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
-      , _texturing_mode(texturing_mode::paint)
       , _anim_prop(true)
       , _anim_speed_prop(1)
       , _anim_rotation_prop(4)
       , _overbright_prop(false)
+      , _texturing_mode(texturing_mode::paint)
     {
       auto layout (new QFormLayout (this));
 
