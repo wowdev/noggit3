@@ -175,9 +175,9 @@ private:
   QSettings* _settings;
 
 public:
-  math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
-  math::vector_4d shader_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
-  noggit::unsigned_int_property cursor_type = static_cast<unsigned int>(cursor_mode::terrain);
+  math::vector_4d cursor_color;
+  math::vector_4d shader_color;
+  noggit::unsigned_int_property cursor_type;
 
   MapView ( math::degrees ah0
           , math::degrees av0
