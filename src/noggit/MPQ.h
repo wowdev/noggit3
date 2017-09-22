@@ -58,7 +58,6 @@ class MPQFile
 
 public:
   explicit MPQFile(const std::string& pFilename);  // filenames are not case sensitive, the are if u dont use a filesystem which is kinda shitty...
-  explicit MPQFile(const std::string& pFilename, const std::string& alternateSavePath);  // filenames are not case sensitive, the are if u dont use a filesystem which is kinda shitty...
 
   ~MPQFile();
   size_t read(void* dest, size_t bytes);
@@ -96,7 +95,6 @@ public:
 
 private:
   static std::string getDiskPath(const std::string& pFilename);
-  static std::string getAlternateDiskPath(const std::string& pFilename, const std::string& pDiscpath);
   static std::string getMPQPath(const std::string& pFilename);
 };
 
