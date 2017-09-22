@@ -20,7 +20,7 @@ namespace math
     static struct zero_t {} zero;
     matrix_4x4 (zero_t)
     {
-      std::fill (_data, _data + 16, 0);
+      std::fill (_data, _data + 16, 0.f);
     }
 
     static struct unit_t {} unit;
