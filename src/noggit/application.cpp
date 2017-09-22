@@ -189,39 +189,42 @@ void Noggit::loadMPQs()
   }
 }
 
-bool is_valid_game_path (const QDir& path)
+namespace
 {
-  if (!path.exists ())
+  bool is_valid_game_path (const QDir& path)
   {
-    LogError << "Path \"" << qPrintable (path.absolutePath ())
-      << "\" does not exist." << std::endl;
-    return false;
-  }
-
-  QStringList locales;
-  locales << "enGB" << "enUS" << "deDE" << "koKR" << "frFR"
-    << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
-  QString found_locale ("****");
-
-  foreach (const QString& locale, locales)
-  {
-    if (path.exists (("Data/" + locale)))
+    if (!path.exists ())
     {
-      found_locale = locale;
-      break;
+      LogError << "Path \"" << qPrintable (path.absolutePath ())
+        << "\" does not exist." << std::endl;
+      return false;
     }
-  }
 
-  if (found_locale == "****")
-  {
-    LogError << "Path \"" << qPrintable (path.absolutePath ())
-      << "\" does not contain a locale directory "
-      << "(invalid installation or no installation at all)."
-      << std::endl;
-    return false;
-  }
+    QStringList locales;
+    locales << "enGB" << "enUS" << "deDE" << "koKR" << "frFR"
+      << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
+    QString found_locale ("****");
 
-  return true;
+    foreach (const QString& locale, locales)
+    {
+      if (path.exists (("Data/" + locale)))
+      {
+        found_locale = locale;
+        break;
+      }
+    }
+
+    if (found_locale == "****")
+    {
+      LogError << "Path \"" << qPrintable (path.absolutePath ())
+        << "\" does not contain a locale directory "
+        << "(invalid installation or no installation at all)."
+        << std::endl;
+      return false;
+    }
+
+    return true;
+  }
 }
 
 Noggit::Noggit(int argc, char *argv[])
