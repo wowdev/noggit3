@@ -4,7 +4,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <QTCore/QSettings>
+#include <QtCore/QSettings>
 
 
 bool uid_storage::hasMaxUIDStored(uint32_t mapID)

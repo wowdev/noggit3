@@ -29,7 +29,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QOffscreenSurface>
 #include <QtOpenGL/QGLFormat>
-#include <QTCore/QDir>
+#include <QtCore/QDir>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QFileDialog>
