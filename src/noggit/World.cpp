@@ -634,6 +634,10 @@ uniform float outer_cursor_radius;
 uniform float inner_cursor_ratio;
 uniform vec4 cursor_color;
 
+uniform vec3 light_dir;
+uniform vec3 diffuse_color;
+uniform vec3 ambient_color;
+
 varying vec4 vary_position;
 varying vec2 vary_texcoord;
 varying vec3 vary_normal;
@@ -703,11 +707,15 @@ void main()
   gl_FragColor = texture_blend();
   gl_FragColor.rgb *= vary_mccv;
 
+  // diffuse + ambient lighting  
+  gl_FragColor.rgb *= vec3(clamp (diffuse_color * max(dot(vary_normal, light_dir), 0.0), 0.0, 1.0)) + ambient_color;
+
+
   if(cant_paint)
   {
     gl_FragColor *= vec4(1.0, 0.0, 0.0, 1.0);
   }
-
+  
   if(draw_areaid_overlay)
   {
     gl_FragColor = gl_FragColor * 0.3 + areaid_color;
@@ -844,6 +852,16 @@ void main()
     mcnk_shader.uniform ("fog_end", fogdistance);
     mcnk_shader.uniform ("fog_start", 0.5f);
     mcnk_shader.uniform ("camera", camera_pos);
+
+    
+    math::vector_3d dd = outdoorLightStats.dayDir;
+    math::vector_3d diffuse_color(skies->colorSet[LIGHT_GLOBAL_DIFFUSE]);    
+    math::vector_3d ambient_color(skies->colorSet[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);  
+
+    mcnk_shader.uniform("light_dir", math::vector_3d(-dd.x, -dd.z, dd.y));
+    mcnk_shader.uniform("diffuse_color", diffuse_color);
+    mcnk_shader.uniform("ambient_color", ambient_color);
+    
 
     if (cursor_type == 4)
     {
