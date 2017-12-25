@@ -206,6 +206,10 @@ namespace opengl
       else
       {
         GLuint loc = _program.attrib_location (name);
+        if (loc == -1)
+        {
+          throw std::invalid_argument ("attribute " + name + " does not exist in shader\n");
+        }
         _attribs[name] = loc;
         return loc;
       }
