@@ -243,6 +243,10 @@ set ( external_sources
       src/external/wacom/Utils.cpp
     )
 
+set ( util_sources
+      src/util/exception_to_string.cpp
+    )
+
 set ( noggit_root_headers
       src/noggit/Animated.h
       src/noggit/AsyncLoader.h
@@ -379,6 +383,7 @@ source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
 source_group("math"  FILES ${math_sources} ${math_headers})
 source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
+source_group("util"  FILES ${util_sources})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
@@ -392,6 +397,7 @@ ADD_EXECUTABLE ( noggit
                   ${external_sources}
                   ${mysql_sources}
                   ${os_sources}
+                  ${util_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
