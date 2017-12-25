@@ -13,6 +13,7 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/ui/main_window.hpp>
 #include <opengl/context.hpp>
+#include <util/exception_to_string.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
@@ -31,8 +32,9 @@
 #include <QtOpenGL/QGLFormat>
 #include <QtCore/QDir>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QLabel>
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMessageBox>
 
 #include "revision.h"
 
@@ -311,6 +313,43 @@ Noggit::Noggit(int argc, char *argv[])
   }  
 }
 
+namespace
+{
+  void terminate_handler()
+  {
+    std::string const reason
+      {util::exception_to_string (std::current_exception())};
+
+    if (qApp)
+    {
+      QMessageBox::critical ( nullptr
+                            , "std::terminate"
+                            , QString::fromStdString (reason)
+                            , QMessageBox::Close
+                            , QMessageBox::Close
+                            );
+    }
+
+    LogError << "std::terminate: " << reason << "\n";
+  }
+
+  struct application_with_exception_printer_on_notify : QApplication
+  {
+    using QApplication::QApplication;
+
+    virtual bool notify (QObject* object, QEvent* event) override
+    {
+      try
+      {
+        return QApplication::notify (object, event);
+      }
+      catch (...)
+      {
+        std::terminate();
+      }
+    }
+  };
+}
 
 #ifdef _WIN32
 int main(int argc, char *argv[]);
@@ -323,8 +362,9 @@ int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 int main(int argc, char *argv[])
 {
   noggit::RegisterErrorHandlers();
+  std::set_terminate (terminate_handler);
 
-  QApplication qapp (argc, argv);
+  application_with_exception_printer_on_notify qapp (argc, argv);
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
