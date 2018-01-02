@@ -21,6 +21,7 @@ namespace noggit
                                      )
       : QWidget (parent)
       , _texture_to_swap()
+      , _radius(15.f)
     {
       setWindowTitle ("Swap");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -39,6 +40,27 @@ namespace noggit
       layout->addRow(select);
       layout->addRow(swap_adt);
 
+      _brush_mode_group = new QGroupBox("Brush mode", this);
+      _brush_mode_group->setCheckable(true);
+      _brush_mode_group->setChecked(false);
+      layout->addRow(_brush_mode_group);
+
+      auto brush_content (new QWidget(_brush_mode_group));
+      auto brush_layout (new QFormLayout(brush_content));
+      _brush_mode_group->setLayout(brush_layout);
+
+      _radius_spin = new QDoubleSpinBox(brush_content);
+      _radius_spin->setRange (0.f, 100.f);
+      _radius_spin->setDecimals (2);
+      _radius_spin->setValue (_radius);
+      brush_layout->addRow ("Radius:", _radius_spin);
+
+      _radius_slider = new QSlider (Qt::Orientation::Horizontal, brush_content);
+      _radius_slider->setRange (0, 100);
+      _radius_slider->setSliderPosition (_radius);
+      brush_layout->addRow (_radius_slider);      
+      
+
       connect(select, &QPushButton::clicked, [this, texture_display]() {
         _texture_to_swap = *selected_texture::get();
         if (_texture_to_swap)
@@ -53,6 +75,30 @@ namespace noggit
           world->swapTexture (*camera_pos, _texture_to_swap.get());
         }
       });
+
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&](double v)
+                {
+                  QSignalBlocker const blocker (_radius_slider);
+                  _radius = v;
+                  _radius_slider->setSliderPosition ((int)std::round (v));
+
+                }
+              );
+
+      connect ( _radius_slider, &QSlider::valueChanged
+              , [&](int v)
+                {
+                  QSignalBlocker const blocker (_radius_spin);
+                  _radius = v;
+                  _radius_spin->setValue(v);
+                }
+              );
+    }
+
+    void texture_swapper::change_radius(float change)
+    {
+      _radius_spin->setValue(_radius + change);
     }
   }
 }

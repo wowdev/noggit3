@@ -352,6 +352,10 @@ namespace noggit
       {
         _spray_mode_group->setChecked(!_spray_mode_group->isChecked());
       }
+      else if (_texturing_mode == texturing_mode::swap)
+      {
+        _texture_switcher->toggle_brush_mode();
+      }
     }
 
     void texturing_tool::change_radius(float change)
@@ -359,6 +363,10 @@ namespace noggit
       if (_texturing_mode == texturing_mode::paint)
       {
         _radius_spin->setValue(_texture_brush.getRadius() + change);
+      }
+      else if (_texturing_mode == texturing_mode::swap)
+      {
+        _texture_switcher->change_radius(change);
       }
     }
 
@@ -420,7 +428,21 @@ namespace noggit
     float texturing_tool::brush_radius() const
     {
       // show only a dot when using the anim / swap mode
-      return (_texturing_mode == texturing_mode::paint ? _texture_brush.getRadius() : 0.0f);
+      switch (_texturing_mode)
+      {
+        case texturing_mode::paint: return _texture_brush.getRadius();
+        case texturing_mode::swap: return (_texture_switcher->brush_mode() ? _texture_switcher->radius() : 0.f);
+        default: return 0.f;
+      }
+    }
+
+    float texturing_tool::hardness() const
+    { 
+      switch (_texturing_mode)
+      {
+        case texturing_mode::paint: return _hardness;
+        default: return 0.f;
+      }
     }
 
     bool texturing_tool::show_unpaintable_chunks() const
@@ -437,7 +459,14 @@ namespace noggit
         auto to_swap (_texture_switcher->texture_to_swap());
         if (to_swap)
         {
-          world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
+          if (_texture_switcher->brush_mode())
+          {
+            world->replaceTexture(pos, _texture_switcher->radius(), to_swap.get(), texture);
+          }
+          else
+          {
+            world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
+          }          
         }
       }
       else if (_texturing_mode == texturing_mode::paint)

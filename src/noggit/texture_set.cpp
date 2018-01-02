@@ -492,6 +492,91 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   return changed;
 }
 
+bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture)
+{
+  float dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
+
+  if (dist > radius)
+  {
+    return false;
+  }
+
+  bool changed = false;
+  int old_tex_level = -1, new_tex_level = -1;
+  float x_pos, z_pos = zbase;
+
+  for (int i=0; i<nTextures; ++i)
+  {
+    if (textures[i] == old_texture)
+    {
+      old_tex_level = i;
+    }
+    if (textures[i] == new_texture)
+    {
+      new_tex_level = i;
+    }
+  }
+
+  if (old_tex_level == -1 || (new_tex_level == -1 && nTextures == 4 && !eraseUnusedTextures()))
+  {
+    return false;
+  }
+
+  if (new_tex_level == -1)
+  {
+    new_tex_level = addTexture(new_texture);
+  }
+
+  for (int j = 0; j < 64; j++)
+  {
+    x_pos = xbase;
+    for (int i = 0; i < 64; ++i)
+    {
+      dist = misc::dist(x, z, x_pos + TEXDETAILSIZE / 2.0f, z_pos + TEXDETAILSIZE / 2.0f);
+      int alpha_offset = j * 64 + i;
+
+      if (dist <= radius)
+      {
+        if(old_tex_level == 0)
+        {
+          uint8_t base_alpha = 255.0f, new_tex_alpha = alphamaps[new_tex_level - 1]->getAlpha(alpha_offset);
+          for (int n = 0; n < nTextures - 1; ++n)
+          {
+            base_alpha -= alphamaps[n]->getAlpha(alpha_offset);
+          }
+
+          alphamaps[new_tex_level - 1]->setAlpha(alpha_offset, base_alpha + new_tex_alpha);
+        }
+        else
+        {
+          if (new_tex_level != 0)
+          {
+            uint8_t old_tex_alpha = alphamaps[old_tex_level - 1]->getAlpha(alpha_offset);
+            uint8_t new_tex_alpha = alphamaps[new_tex_level - 1]->getAlpha(alpha_offset);
+
+            alphamaps[new_tex_level - 1]->setAlpha(alpha_offset, old_tex_alpha + new_tex_alpha);
+          }
+
+          alphamaps[old_tex_level - 1]->setAlpha(alpha_offset, 0);
+        }
+
+        changed = true;
+      }
+
+      x_pos += TEXDETAILSIZE;
+    }
+
+    z_pos += TEXDETAILSIZE;
+  }
+
+  if (changed)
+  {
+    generate_alpha_tex();
+  }
+
+  return changed;
+}
+
 size_t TextureSet::num()
 {
   return nTextures;

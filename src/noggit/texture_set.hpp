@@ -31,6 +31,7 @@ public:
   void swapTexture(int id1, int id2);
   void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
   bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture);
   bool canPaintTexture(scoped_blp_texture_reference texture);
 
   const std::string& filename(size_t id);
