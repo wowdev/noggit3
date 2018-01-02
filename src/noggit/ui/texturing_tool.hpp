@@ -37,7 +37,7 @@ namespace noggit
       texturing_tool (const math::vector_3d* camera_pos, World*);
 
       float brush_radius() const;
-      float hardness() const { return _hardness; }
+      float hardness() const;
       bool show_unpaintable_chunks() const;
 
       void set_brush_level (float level);

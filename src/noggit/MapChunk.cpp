@@ -875,6 +875,11 @@ bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float stre
   return _texture_set.paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
 }
 
+bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture)
+{
+  return _texture_set.replaceTexture(xbase, zbase, pos.x, pos.z, radius, old_texture, new_texture);
+}
+
 bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
 {
   return _texture_set.canPaintTexture(texture);

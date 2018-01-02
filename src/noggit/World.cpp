@@ -1624,6 +1624,17 @@ bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strengt
   return succ;
 }
 
+bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture)
+{
+  return for_all_chunks_in_range
+    ( pos, radius
+      , [&](MapChunk* chunk)
+      {
+        return chunk->replaceTexture(pos, radius, old_texture, new_texture);
+      }
+    );
+}
+
 void World::eraseTextures(math::vector_3d const& pos)
 {
   for_chunk_at(pos, [](MapChunk* chunk) {chunk->eraseTextures();});

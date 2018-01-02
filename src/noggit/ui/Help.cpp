@@ -148,6 +148,8 @@ namespace noggit
         "\n"
         "Swap:\n"
         "  SHIFT + left mouse - swap textures\n"
+        "  ALT + left mouse + horizontal movement - change radius\n"
+        "  T - toggle brush swapper\n"
         "\n"
         "Anim:\n"
         "  F - set animation of the current texture on the chunk\n"
