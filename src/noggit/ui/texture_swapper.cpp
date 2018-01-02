@@ -62,7 +62,7 @@ namespace noggit
       
 
       connect(select, &QPushButton::clicked, [this, texture_display]() {
-        _texture_to_swap = *selected_texture::get();
+        _texture_to_swap = selected_texture::get();
         if (_texture_to_swap)
         {
           texture_display->set_texture(_texture_to_swap.get()->filename());
