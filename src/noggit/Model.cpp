@@ -40,6 +40,28 @@ void Model::finishLoading()
 
   memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
 
+  // blend mode override
+  if (header.Flags & 8)
+  {
+    unsigned int ofs_blend_override, n_blend_override;
+    uint16_t blend;
+
+    f.seek(sizeof(ModelHeader));
+    
+    f.read(&ofs_blend_override, 4);
+    f.read(&n_blend_override, 4);
+
+    f.seek(ofs_blend_override);    
+
+    for (int i = 0; i < n_blend_override; ++i)
+    {
+      f.read(&blend, 2);
+      blend_override.push_back(blend);
+    }
+
+    f.seek(0);
+  }
+
 
   _vertex_box_points = misc::box_points ( misc::transform_model_box_coords(header.bounding_box_min)
                                         , misc::transform_model_box_coords(header.bounding_box_max)
