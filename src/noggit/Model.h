@@ -199,6 +199,7 @@ public:
   boost::optional<ModelCamera> cam;
   std::vector<Bone> bones;
   ModelHeader header;
+  std::vector<uint16_t> blend_override;
 
   float rad;
   float trans;
