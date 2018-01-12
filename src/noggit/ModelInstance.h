@@ -69,30 +69,8 @@ public:
     return *this;
   }
 
-  void draw ( opengl::scoped::use_program& m2_shader
-            , math::frustum const& frustum
-            , const float& cull_distance
-            , const math::vector_3d& camera
-            , bool force_box
-            , bool all_boxes
-            , bool draw_fog
-            , bool is_current_selection
-            , int animtime
-            );
-  void draw ( math::frustum const& frustum
-            , const float& cull_distance
-            , const math::vector_3d& camera
-            , bool force_box
-            , bool all_boxes
-            , bool draw_fog
-            , bool is_current_selection
-            , int animtime
-            );
-
   void draw_box (bool is_current_selection);
 
-  void drawMapTile();
-  //  void drawHighlight();
   void intersect ( math::ray const&
                  , selection_result*
                  , int animtime
