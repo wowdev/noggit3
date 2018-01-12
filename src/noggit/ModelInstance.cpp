@@ -44,59 +44,6 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
   recalcExtents();
 }
 
-void ModelInstance::draw ( opengl::scoped::use_program& m2_shader
-                         , math::frustum const& frustum
-                         , const float& cull_distance
-                         , const math::vector_3d& camera
-                         , bool force_box
-                         , bool all_boxes
-                         , bool draw_fog
-                         , bool is_current_selection
-                         , int animtime
-                         )
-{
-  if (is_visible(frustum, cull_distance, camera))
-  {
-    return;
-  }  
-
-  m2_shader.uniform("transform", _transform_mat_transposed);
-
-  //! \todo add toggle draw particles and set customizable distance
-  model->draw (m2_shader, draw_fog, animtime, false);
-  
-}
-
-void ModelInstance::draw ( math::frustum const& frustum
-                         , const float& cull_distance
-                         , const math::vector_3d& camera
-                         , bool force_box
-                         , bool all_boxes
-                         , bool draw_fog
-                         , bool is_current_selection
-                         , int animtime
-                         )
-{
-  if (is_visible(frustum, cull_distance, camera))
-  {
-    return;
-  }    
-
-  {
-    opengl::scoped::matrix_pusher const matrix;
-
-    gl.multMatrixf (_transform_mat_transposed);
-
-    //! \todo add toggle draw particles and set customizable distance
-    model->draw (draw_fog, animtime, false);
-  }
-
-  if (is_current_selection || all_boxes)
-  {
-    draw_box(is_current_selection);
-  }
-}
-
 void ModelInstance::draw_box (bool is_current_selection)
 {
   opengl::scoped::matrix_pusher const matrix;

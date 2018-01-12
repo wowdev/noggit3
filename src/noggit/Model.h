@@ -85,32 +85,75 @@ enum BlendModes {
   BM_MODULATE2
 };
 
-struct ModelRenderPass {
-  uint16_t indexStart, indexCount, vertexStart, vertexEnd;
-  int tex;
-  bool usetex2, useenvmap, cull, trans, unlit, nozwrite, billboard;
-  float p;
+#define MODEL_PIXEL_SHADER_COUNT 35
 
-  int16_t texanim, color, opacity, blendmode, order;
+enum class ModelPixelShader : uint16_t
+{
+  Combiners_Opaque,
+  Combiners_Mod,
+  Combiners_Opaque_Mod,
+  Combiners_Opaque_Mod2x,
+  Combiners_Opaque_Mod2xNA,
+  Combiners_Opaque_Opaque,
+  Combiners_Mod_Mod,
+  Combiners_Mod_Mod2x,
+  Combiners_Mod_Add,
+  Combiners_Mod_Mod2xNA,
+  Combiners_Mod_AddNA,
+  Combiners_Mod_Opaque,
+  Combiners_Opaque_Mod2xNA_Alpha,
+  Combiners_Opaque_AddAlpha,
+  Combiners_Opaque_AddAlpha_Alpha,
+  Combiners_Opaque_Mod2xNA_Alpha_Add,
+  Combiners_Mod_AddAlpha,
+  Combiners_Mod_AddAlpha_Alpha,
+  Combiners_Opaque_Alpha_Alpha,
+  Combiners_Opaque_Mod2xNA_Alpha_3s,
+  Combiners_Opaque_AddAlpha_Wgt,
+  Combiners_Mod_Add_Alpha,
+  Combiners_Opaque_ModNA_Alpha,
+  Combiners_Mod_AddAlpha_Wgt,
+  Combiners_Opaque_Mod_Add_Wgt,
+  Combiners_Opaque_Mod2xNA_Alpha_UnshAlpha,
+  Combiners_Mod_Dual_Crossfade,
+  Combiners_Opaque_Mod2xNA_Alpha_Alpha,
+  Combiners_Mod_Masked_Dual_Crossfade,
+  Combiners_Opaque_Alpha,
+  Guild,
+  Guild_NoBorder,
+  Guild_Opaque,
+  Combiners_Mod_Depth,
+  Illum
+};
 
-  // Geoset ID
-  int geoset;
 
-  // texture wrapping
-  bool swrap, twrap;
+struct ModelRenderPass : ModelTexUnit
+{
+  ModelRenderPass(ModelTexUnit const& tex_unit, Model* m);
 
-  // colours
-  math::vector_4d ocol, ecol;
+  float ordering_thingy = 0.f;
+  uint16_t index_start = 0, index_count = 0, vertex_start = 0, vertex_end = 0;
+  uint16_t blend_mode = 0;
+  ModelPixelShader pixel_shader = ModelPixelShader::Combiners_Opaque;
 
-  bool init(Model *m);
-  void deinit();
+  bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m);
+  void after_draw();
+  void bind_texture(size_t index, Model* m);
 
   bool operator< (const ModelRenderPass &m) const
   {
-    //return !trans;
-    if (order<m.order) return true;
-    else if (order>m.order) return false;
-    else return blendmode == m.blendmode ? (p<m.p) : blendmode < m.blendmode;
+    if (priority_plane < m.priority_plane)
+    {
+      return true;
+    }
+    else if (priority_plane > m.priority_plane) 
+    { 
+      return false; 
+    }
+    else
+    {
+      return blend_mode == m.blend_mode ? (ordering_thingy < m.ordering_thingy) : blend_mode < m.blend_mode;
+    }
   }
 };
 
@@ -157,7 +200,6 @@ public:
   ~Model();
 
   void draw (bool draw_fog, int animtime, bool draw_particles);
-  void draw (opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles);
   void draw ( std::vector<ModelInstance*> instances
             , opengl::scoped::use_program& m2_shader
             , math::frustum const& frustum
@@ -191,6 +233,7 @@ public:
   std::map<std::size_t, scoped_blp_texture_reference> _replaceTextures;
   std::vector<int> _specialTextures;
   std::vector<bool> _useReplaceTextures;
+  std::vector<uint16_t> _texture_unit_lookup;
 
   // ===============================
   // Misc ?
@@ -212,6 +255,10 @@ private:
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
+
+  void fix_shader_id_blend_override();
+  void fix_shader_id_layer();
+  void compute_pixel_shader_ids();
 
   void animate(int anim, int animtime);
   void calcBones(int anim, int time, int animtime);
@@ -242,7 +289,8 @@ private:
 
   std::vector<model_vertex_parameter> _vertices_parameters;
 
-  std::vector<ModelRenderPass> _passes;
+  //std::vector<ModelRenderPass> _passes;
+  std::vector<ModelRenderPass> _render_passes;
 
   // ===============================
   // Animation
@@ -250,18 +298,21 @@ private:
   bool animated;
   bool animGeometry, animTextures, animBones;
 
+  std::vector<ModelRenderFlags> _render_flags;
   std::vector<ParticleSystem> _particles;
   std::vector<RibbonEmitter> _ribbons;
 
   std::vector<ModelAnimation> _animations;
   std::vector<int> _global_sequences;
   std::vector<TextureAnim> _texture_animations;
+  std::vector<uint16_t> _texture_lookup;
 
   // ===============================
   // Material
   // ===============================
   std::vector<ModelColor> _colors;
   std::vector<ModelTransparency> _transparency;
+  std::vector<int16_t> _transparency_lookup;
   std::vector<ModelLight> _lights;
 
   friend struct ModelRenderPass;

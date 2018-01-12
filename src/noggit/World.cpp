@@ -1090,10 +1090,12 @@ void main()
 #version 330 core
 
 in vec4 pos;
-in vec2 texcoord;
+in vec2 texcoord1;
+in vec2 texcoord2;
 in mat4 transform;
 
-out vec2 uv;
+out vec2 uv1;
+out vec2 uv2;
 
 uniform mat4 model_view;
 uniform mat4 projection;
@@ -1102,7 +1104,8 @@ uniform mat4 projection;
 void main()
 {
   gl_Position = projection * model_view * transform * pos;
-  uv = texcoord;
+  uv1 = texcoord1;
+  uv2 = texcoord2;
 }
 )code"
           }
@@ -1110,13 +1113,22 @@ void main()
           , R"code(
 #version 330 core
 
-in vec2 uv;
+in vec2 uv1;
+in vec2 uv2;
 
-uniform sampler2D tex;
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+
+uniform float alpha_test;
 
 void main()
 {
-  gl_FragColor = texture(tex, uv);
+  gl_FragColor = texture(tex1, uv1);
+
+  if(gl_FragColor.a < alpha_test)
+  {
+    discard;
+  }
 }
 
 )code"
@@ -1127,7 +1139,8 @@ void main()
 
       m2_shader.uniform ("model_view", opengl::matrix::model_view());
       m2_shader.uniform ("projection", opengl::matrix::projection());
-      m2_shader.uniform("tex", 0);
+      m2_shader.uniform("tex1", 0);
+      //m2_shader.uniform("tex2", 2);
 
       opengl::texture::enable_texture(0);
 
@@ -1135,6 +1148,9 @@ void main()
       {
         it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, 0, false, draw_models_with_box, visible_model_count);
       }
+
+      opengl::texture::disable_texture(1);
+      opengl::texture::disable_texture(0);
     }
     
     if(draw_models_with_box)

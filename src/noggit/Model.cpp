@@ -43,13 +43,13 @@ void Model::finishLoading()
   // blend mode override
   if (header.Flags & 8)
   {
-    unsigned int ofs_blend_override, n_blend_override;
+    uint32_t ofs_blend_override, n_blend_override;
     uint16_t blend;
 
     f.seek(sizeof(ModelHeader));
     
-    f.read(&ofs_blend_override, 4);
     f.read(&n_blend_override, 4);
+    f.read(&ofs_blend_override, 4);
 
     f.seek(ofs_blend_override);    
 
@@ -268,8 +268,11 @@ void Model::initCommon(const MPQFile& f)
       _colors.emplace_back (f, colorDefs[i], _global_sequences.data());
     }
   }
+
   // init transparency
   int16_t const* transLookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTransparencyLookup);
+  _transparency_lookup = std::vector<int16_t>(transLookup, transLookup + header.nTransparencyLookup);
+
   if (header.nTransparency) {
     ModelTransDef const* trDefs = reinterpret_cast<ModelTransDef const*>(f.getBuffer() + header.ofsTransparency);
     for (size_t i = 0; i < header.nTransparency; ++i)
@@ -293,115 +296,485 @@ void Model::initCommon(const MPQFile& f)
     }
     ModelView const* view = reinterpret_cast<ModelView const*>(g.getBuffer());
 
-    uint16_t const* indexLookup = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofsIndex);
-    uint16_t const* triangles = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofsTris);
+    uint16_t const* indexLookup = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofs_index);
+    uint16_t const* triangles = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofs_triangle);
 
-    _indices.resize (view->nTris);
+    _indices.resize (view->n_triangle);
 
     for (size_t i (0); i < _indices.size(); ++i) {
       _indices[i] = indexLookup[triangles[i]];
     }
 
     // render ops
-    ModelGeoset const* ops = reinterpret_cast<ModelGeoset const*>(g.getBuffer() + view->ofsSub);
-    ModelTexUnit const* tex = reinterpret_cast<ModelTexUnit const*>(g.getBuffer() + view->ofsTex);
-    ModelRenderFlags const* renderFlags = reinterpret_cast<ModelRenderFlags const*>(f.getBuffer() + header.ofsTexFlags);
+    ModelGeoset const* model_geosets = reinterpret_cast<ModelGeoset const*>(g.getBuffer() + view->ofs_submesh);
+    ModelTexUnit const* texture_unit = reinterpret_cast<ModelTexUnit const*>(g.getBuffer() + view->ofs_texture_unit);
+    
     uint16_t const* texlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexLookup);
-    uint16_t const* texanimlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexAnimLookup);
-    int16_t const* texunitlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexUnitLookup);
+    _texture_lookup = std::vector<uint16_t>(texlookup, texlookup + header.nTexLookup);
 
-    showGeosets.resize (view->nSub);
-    for (size_t i = 0; i<view->nSub; ++i) {
+    uint16_t const* texanimlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexAnimLookup);
+
+
+    int16_t const* texunitlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexUnitLookup);
+    _texture_unit_lookup = std::vector<uint16_t>(texunitlookup, texunitlookup + header.nTexUnitLookup);
+
+    showGeosets.resize (view->n_submesh);
+    for (size_t i = 0; i<view->n_submesh; ++i) 
+    {
       showGeosets[i] = true;
     }
 
-    for (size_t j = 0; j<view->nTex; j++) {
-      ModelRenderPass pass;
+    
+    ModelRenderFlags const* renderFlags = reinterpret_cast<ModelRenderFlags const*>(f.getBuffer() + header.ofsRenderFlags);
+    _render_flags = std::vector<ModelRenderFlags>(renderFlags, renderFlags + header.nRenderFlags);
 
-      pass.usetex2 = false;
-      pass.useenvmap = false;
-      pass.cull = false;
-      pass.trans = false;
-      pass.unlit = false;
-      pass.nozwrite = false;
-      pass.billboard = false;
+    for (size_t j = 0; j<view->n_texture_unit; j++) 
+    {
+      size_t geoset = texture_unit[j].submesh;
 
-      size_t geoset = tex[j].op;
+      ModelRenderPass new_pass(texture_unit[j], this);
+      new_pass.ordering_thingy = model_geosets[geoset].BoundingBox[0].x;
 
-      pass.geoset = geoset;
-
-      pass.indexStart = ops[geoset].istart;
-      pass.indexCount = ops[geoset].icount;
-      pass.vertexStart = ops[geoset].vstart;
-      pass.vertexEnd = pass.vertexStart + ops[geoset].vcount;
-
-      pass.order = tex[j].shading;
-
-      //TextureID texid = textures[texlookup[tex[j].textureid]];
-      //pass.texture = texid;
-      pass.tex = texlookup[tex[j].textureid];
-
-      //! \todo figure out these flags properly -_-
-      ModelRenderFlags const& rf = renderFlags[tex[j].flagsIndex];
-
-
-      pass.blendmode = rf.blend;
-      pass.color = tex[j].colorIndex;
-      pass.opacity = transLookup[tex[j].transid];
-
-      enum RenderFlags
-      {
-        RENDERFLAGS_UNLIT = 1,
-        RENDERFLAGS_UNsGED = 2,
-        RENDERFLAGS_TWOSIDED = 4,
-        RENDERFLAGS_BILLBOARD = 8,
-        RENDERFLAGS_ZBUFFERED = 16
-      };
-
-      pass.unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
-      pass.cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0 && rf.blend == 0;
-
-      pass.billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
-
-      pass.useenvmap = (texunitlookup[tex[j].texunit] == -1) && pass.billboard && rf.blend>2;
-      pass.nozwrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
-
-      //! \todo Work out the correct way to get the true/false of transparency
-      pass.trans = (pass.blendmode>0) && (pass.opacity>0);  // Transparency - not the correct way to get transparency
-
-      pass.p = ops[geoset].BoundingBox[0].x;
-
-      // Texture flags
-      enum TextureFlags {
-        TEXTURE_WRAPX = 1,
-        TEXTURE_WRAPY
-      };
-
-      pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
-      pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
-
-      static const int TEXTUREUNIT_STATIC = 16;
-
-      if (animTextures) {
-        if (tex[j].flags & TEXTUREUNIT_STATIC) {
-          pass.texanim = -1; // no texture animation
-        }
-        else {
-          pass.texanim = texanimlookup[tex[j].texanimid];
-        }
-      }
-      else {
-        pass.texanim = -1; // no texture animation
-      }
-
-      _passes.push_back(pass);
+      new_pass.index_start = model_geosets[geoset].istart;
+      new_pass.index_count = model_geosets[geoset].icount;
+      new_pass.vertex_start = model_geosets[geoset].vstart;
+      new_pass.vertex_end = new_pass.vertex_start + model_geosets[geoset].vcount;
+      
+      _render_passes.push_back(new_pass);
     }
+
     g.close();
+
+    fix_shader_id_blend_override();
+    fix_shader_id_layer();
+    compute_pixel_shader_ids();
+    
     // transparent parts come later
-    std::sort(_passes.begin(), _passes.end());
+    std::sort(_render_passes.begin(), _render_passes.end());
+  }  
+}
+
+void Model::fix_shader_id_blend_override()
+{
+  for (auto& pass : _render_passes)
+  {
+    int shader = 0;
+    bool blend_mode_override = (header.Flags & 8);
+
+    if (!blend_mode_override)
+    {
+      shader = _render_flags[pass.renderflag_index].blend ? 1 : 0;
+
+      if (pass.texture_count > 2)
+      {
+        shader |= 8;
+      }
+
+      shader <<= 4;
+
+      if (pass.texture_count == 1)
+      {
+        shader |= 0x4000;
+      }
+    }
+    else
+    {
+      uint16_t runtime_shader_val[2] = { 0, 0 };
+
+      for (int i = 0; i < pass.texture_count; ++i)
+      {
+        uint16_t override_blend = blend_override[pass.shader_id + i];
+        uint16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index + i];
+
+        if (i == 0 && _render_flags[pass.renderflag_index].blend == 0)
+        {
+          override_blend = 0;
+        }
+
+        runtime_shader_val[i] = override_blend;
+
+        if (texture_unit_lookup == -1)
+        {
+          runtime_shader_val[i] |= 0x8;
+        }
+
+        if (texture_unit_lookup == 1 && i + 1 == pass.texture_count)
+        {
+          shader |= 0x4000;
+        }        
+      }
+
+      shader |= (runtime_shader_val[1] & 0xFFFF) | ((runtime_shader_val[0] << 4) & 0xFFFF);
+    }
+
+    pass.shader_id = shader;
+  }
+}
+
+void Model::fix_shader_id_layer()
+{
+  ModelRenderPass* first_pass = nullptr;
+  bool need_reducing = false;
+  uint16_t previous_render_flag = -1, some_flags = 0;
+
+  for (auto& pass : _render_passes)
+  {
+    if (pass.renderflag_index == previous_render_flag)
+    {
+      need_reducing = true;
+      continue;
+    }
+
+    previous_render_flag = pass.renderflag_index;
+
+    uint8_t lower_bits = pass.shader_id & 0x7;
+
+    if (pass.material_layer == 0)
+    {
+      if (pass.texture_count >= 1 && _render_flags[pass.renderflag_index].blend == 0)
+      {
+        pass.shader_id &= 0xFF8F;
+      }
+
+      first_pass = &pass;
+    }
+
+    if ((some_flags & 0xFF) == 1)
+    {
+      if ( (_render_flags[pass.renderflag_index].blend == 1 || _render_flags[pass.renderflag_index].blend == 2) 
+        && pass.texture_count == 1 
+        && (((_render_flags[pass.renderflag_index].flags & 0xFF) ^ (_render_flags[first_pass->renderflag_index].flags & 0xFF)) & 1) == 0
+        && pass.texture_combo_index == first_pass->texture_combo_index
+         )
+      {
+        if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+        {
+          pass.shader_id = 0x8000;
+          first_pass->shader_id = 0x8001;
+
+          some_flags = (some_flags & 0xFF00) | 3;
+        }
+      }
+
+      some_flags = (some_flags & 0xFF00);
+    }
+
+    if ((some_flags & 0xFF) < 2) 
+    {
+      if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 2) && ((lower_bits == 4) || (lower_bits == 6))) 
+      {
+        if ((_texture_unit_lookup[pass.texture_coord_combo_index] == 0) && (_texture_unit_lookup[pass.texture_coord_combo_index + 1] > 2))
+        {
+          some_flags = (some_flags & 0xFF00) | 1;
+        }
+      }
+    }
+  
+    if ((some_flags >> 8) != 0) 
+    {
+      if ((some_flags >> 8) == 1) 
+      {
+        if ((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6) || (pass.texture_count != 1) || (_texture_unit_lookup[pass.texture_coord_combo_index] <= 2))
+        {
+          some_flags &= 0xFF00;
+        }
+        else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+        {
+          pass.shader_id = 0x8000;
+          first_pass->shader_id = _render_flags[pass.renderflag_index].blend != 4 ? 0xE : 0x8002;
+
+          //TODO: Implement packing of textures (see https://wowdev.wiki/M2/.skin/WotLK_shader_selection )
+
+          some_flags = (some_flags & 0xFF) | (2 << 8);
+          continue;
+        }
+      }
+      else 
+      {
+        if ((some_flags >> 8) != 2) 
+        {
+          continue;
+        }
+
+        if  ( (_render_flags[pass.renderflag_index].blend != 2) && (_render_flags[pass.renderflag_index].blend != 1)
+           || (pass.texture_count != 1)
+           || ((((_render_flags[pass.renderflag_index].flags & 0xFF) ^ (_render_flags[first_pass->renderflag_index].flags & 0xFF)) & 1) == 0)
+           || ((pass.texture_combo_index & 0xff) != (first_pass->texture_combo_index & 0xff))
+            ) 
+        {
+          some_flags &= 0xFF00;
+        }
+        else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index]) 
+        {
+          pass.shader_id = 0x8000;
+          first_pass->shader_id = ((first_pass->shader_id == 0x8002 ? 2 : 0) - 0x7FFF) & 0xFFFF;
+          some_flags = (some_flags & 0xFF) | (3 << 8);
+          continue;
+        }
+      }
+      some_flags = (some_flags & 0xFF);
+    }
+
+    if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 1) && (_texture_unit_lookup[pass.texture_coord_combo_index] == 0)) 
+    {
+      some_flags = (some_flags & 0xFF) | (1 << 8);
+    }
   }
 
-  // zomg done
+  if (need_reducing)
+  {
+    previous_render_flag = -1;
+    for (int i = 0; i < _render_passes.size(); ++i) 
+    {
+      auto& pass = _render_passes[i];
+      uint16_t renderflag_index = pass.renderflag_index;
+
+      if (renderflag_index == previous_render_flag) 
+      {
+        pass.shader_id = _render_passes[i - 1].shader_id;
+        pass.texture_count = _render_passes[i - 1].texture_count;
+        pass.texture_combo_index = _render_passes[i - 1].texture_combo_index;
+        pass.texture_coord_combo_index = _render_passes[i - 1].texture_coord_combo_index;
+      }
+      else 
+      {
+        previous_render_flag = renderflag_index;
+      }
+    }
+  }
+}
+
+
+ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
+  : ModelTexUnit(tex_unit)
+  , blend_mode(m->_render_flags[renderflag_index].blend)
+{
+}
+
+enum RenderFlags
+{
+  RENDERFLAGS_UNLIT = 1,
+  RENDERFLAGS_UNFOGGED = 2,
+  RENDERFLAGS_TWOSIDED = 4,
+  RENDERFLAGS_BILLBOARD = 8,
+  RENDERFLAGS_ZBUFFERED = 16
+};
+
+bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m)
+{
+  if (!m->showGeosets[submesh])
+  {
+    return false;
+  }
+
+  // COLOUR
+  // Get the colour and transparency and check that we should even render
+  math::vector_4d opacity_color = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans); // ??
+  math::vector_4d emissive_color = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
+
+  auto const& renderflag(m->_render_flags[renderflag_index]);
+
+  // emissive colors
+  if (color_index != -1 && m->_colors[color_index].color.uses(0))
+  {
+    ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->animtime, m->_global_animtime));
+    if (m->_colors[color_index].opacity.uses (m->anim))
+    {
+      opacity_color.w = m->_colors[color_index].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
+    }
+
+    if (renderflag.flags & RENDERFLAGS_UNLIT)
+    {
+      opacity_color.x = c.x; opacity_color.y = c.y; opacity_color.z = c.z;
+    }
+    else
+    {
+      opacity_color.x = opacity_color.y = opacity_color.z = 0;
+    }
+
+    emissive_color = math::vector_4d(c, opacity_color.w);
+    gl.materialfv(GL_FRONT, GL_EMISSION, emissive_color);
+  }
+
+  // opacity
+  if (transparency_combo_index != -1)
+  {
+    if (m->_transparency[transparency_combo_index].trans.uses (0))
+    {
+      opacity_color.w = opacity_color.w * m->_transparency[transparency_combo_index].trans.getValue (0, m->animtime, m->_global_animtime);;
+    }
+  }
+
+  // exit and return false before affecting the opengl render state
+  if (!((opacity_color.w > 0) && (color_index == -1 || emissive_color.w > 0)))
+  {
+    return false;
+  }
+  
+  switch (renderflag.blend)
+  {
+  default:
+  case BM_OPAQUE:
+    gl.disable(GL_BLEND);
+    m2_shader.uniform("alpha_test", -1.f);    
+    break;
+  case BM_TRANSPARENT:
+    gl.disable(GL_BLEND);
+    m2_shader.uniform("alpha_test", (224.f / 255.f) * opacity_color.w);
+    break;
+  case BM_ALPHA_BLEND:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    m2_shader.uniform("alpha_test", -1.f);
+    break;
+  case BM_ADDITIVE:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+    m2_shader.uniform("alpha_test", -1.f);
+    break;
+  case BM_ADDITIVE_ALPHA:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_DST_COLOR, GL_ZERO);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * opacity_color.w);
+    break;
+  case BM_MODULATE:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * opacity_color.w);
+    break;
+  case BM_MODULATE2:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_DST_COLOR, GL_ONE);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * opacity_color.w);
+    break;
+  }
+
+  if (renderflag.flags & RENDERFLAGS_TWOSIDED)
+  {
+    gl.disable(GL_CULL_FACE);
+  }
+  else
+  {
+    gl.enable(GL_CULL_FACE);
+  }
+
+  if (renderflag.flags & RENDERFLAGS_ZBUFFERED)
+  {
+    gl.depthMask(GL_FALSE);
+  }
+  else
+  {
+    gl.depthMask(GL_TRUE);
+  }
+
+  if (texture_count > 1)
+  {
+    //bind_texture(1, m);
+  }
+
+  bind_texture(0, m);
+
+
+  return true;
+}
+void ModelRenderPass::after_draw()
+{
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void ModelRenderPass::bind_texture(size_t index, Model* m)
+{
+  opengl::texture::enable_texture(index);
+
+  int tex = m->_texture_lookup[texture_combo_index + index];
+
+  if (m->_specialTextures[tex] == -1)
+  {
+    m->_textures[tex]->bind();
+  }
+  else
+  {
+    m->_replaceTextures.at (m->_specialTextures[tex])->bind();
+  }    
+}
+
+
+ModelPixelShader model_pixel_shader[] =
+{
+  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha,
+  ModelPixelShader::Combiners_Opaque_AddAlpha,
+  ModelPixelShader::Combiners_Opaque_AddAlpha_Alpha,
+  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_Add,
+  ModelPixelShader::Combiners_Mod_AddAlpha,
+  ModelPixelShader::Combiners_Opaque_AddAlpha,
+  ModelPixelShader::Combiners_Mod_AddAlpha,
+  ModelPixelShader::Combiners_Mod_AddAlpha_Alpha,
+  ModelPixelShader::Combiners_Opaque_Alpha_Alpha,
+  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_3s,
+  ModelPixelShader::Combiners_Opaque_AddAlpha_Wgt,
+  ModelPixelShader::Combiners_Mod_Add_Alpha,
+  ModelPixelShader::Combiners_Opaque_ModNA_Alpha,
+  ModelPixelShader::Combiners_Mod_AddAlpha_Wgt,
+  ModelPixelShader::Combiners_Mod_AddAlpha_Wgt,
+  ModelPixelShader::Combiners_Opaque_AddAlpha_Wgt,
+  ModelPixelShader::Combiners_Opaque_Mod_Add_Wgt,
+  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_UnshAlpha,
+  ModelPixelShader::Combiners_Mod_Dual_Crossfade,
+  ModelPixelShader::Combiners_Mod_Depth,
+  ModelPixelShader::Combiners_Mod_AddAlpha_Alpha,
+  ModelPixelShader::Combiners_Mod_Mod,
+  ModelPixelShader::Combiners_Mod_Masked_Dual_Crossfade,
+  ModelPixelShader::Combiners_Opaque_Alpha,
+  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_UnshAlpha,
+  ModelPixelShader::Combiners_Mod_Depth
+};
+
+// https://wowdev.wiki/M2/.skin#Pixel_shaders
+ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
+{
+  if (shader_id & 0x8000)
+  {
+    uint16_t const shaderID (shader_id & (~0x8000));
+    assert (shaderID < MODEL_PIXEL_SHADER_COUNT);
+    return model_pixel_shader[shaderID];
+  }
+  else
+  {
+    if (texture_count == 1)
+    {
+      return shader_id & 0x70 ? ModelPixelShader::Combiners_Mod : ModelPixelShader::Combiners_Opaque;
+    }
+    else
+    {
+      const uint16_t lower (shader_id & 7);
+      if (shader_id & 0x70)
+      {
+        return lower == 0 ? ModelPixelShader::Combiners_Mod_Opaque
+          : lower == 3 ? ModelPixelShader::Combiners_Mod_Add
+          : lower == 4 ? ModelPixelShader::Combiners_Mod_Mod2x
+          : lower == 6 ? ModelPixelShader::Combiners_Mod_Mod2xNA
+          : lower == 7 ? ModelPixelShader::Combiners_Mod_AddNA
+          : ModelPixelShader::Combiners_Mod_Mod;
+      }
+      else
+      {
+        return lower == 0 ? ModelPixelShader::Combiners_Opaque_Opaque
+          : lower == 3 ? ModelPixelShader::Combiners_Opaque_AddAlpha
+          : lower == 4 ? ModelPixelShader::Combiners_Opaque_Mod2x
+          : lower == 6 ? ModelPixelShader::Combiners_Opaque_Mod2xNA
+          : lower == 7 ? ModelPixelShader::Combiners_Opaque_AddAlpha
+          : ModelPixelShader::Combiners_Opaque_Mod;
+      }
+    }
+  }
+}
+
+void Model::compute_pixel_shader_ids()
+{
+  for (auto& pass : _render_passes)
+  {
+    pass.pixel_shader = M2GetPixelShaderID(pass.texture_count, pass.shader_id);
+  }
 }
 
 void Model::initAnimated(const MPQFile& f)
@@ -570,186 +943,6 @@ void Model::animate(int _anim, int animtime_)
       _texture_animations[i].calc(anim, t, animtime);
     }
   }
-}
-
-bool ModelRenderPass::init(Model *m)
-{
-  // May aswell check that we're going to render the geoset before doing all this crap.
-  if (m->showGeosets[geoset]) {
-
-    // COLOUR
-    // Get the colour and transparency and check that we should even render
-    ocol = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans);
-    ecol = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
-
-    //if (m->trans == 1.0f)
-    //  return false;
-
-    // emissive colors
-    if (color!=-1 && m->_colors[color].color.uses(0))
-    {
-      ::math::vector_3d c (m->_colors[color].color.getValue (0, m->animtime, m->_global_animtime));
-      if (m->_colors[color].opacity.uses (m->anim))
-      {
-        ocol.w = m->_colors[color].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
-      }
-
-      if (unlit) {
-        ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
-      }
-      else {
-        ocol.x = ocol.y = ocol.z = 0;
-      }
-
-      ecol = math::vector_4d(c, ocol.w);
-      gl.materialfv(GL_FRONT, GL_EMISSION, ecol);
-    }
-
-    // opacity
-    if (opacity!=-1)
-    {
-      if (m->_transparency[opacity].trans.uses (0))
-      {
-        ocol.w = ocol.w * m->_transparency[opacity].trans.getValue (0, m->animtime, m->_global_animtime);
-      }
-    }
-
-    // exit and return false before affecting the opengl render state
-    if (!((ocol.w > 0) && (color == -1 || ecol.w > 0)))
-      return false;
-
-    // TEXTURE
-    if (m->_specialTextures[tex] == -1)
-      m->_textures[tex]->bind();
-    else
-      m->_replaceTextures.at (m->_specialTextures[tex])->bind();
-
-    //! \todo Add proper support for multi-texturing.
-
-    // blend mode
-    switch (blendmode) {
-    case BM_OPAQUE:  // 0
-      break;
-    case BM_TRANSPARENT: // 1
-      gl.enable(GL_ALPHA_TEST);
-      gl.alphaFunc(GL_GEQUAL, 0.7f);
-      break;
-    case BM_ALPHA_BLEND: // 2
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    case BM_ADDITIVE: // 3
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_COLOR, GL_ONE);
-      break;
-    case BM_ADDITIVE_ALPHA: // 4
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-      break;
-    case BM_MODULATE: // 5
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-      break;
-    case BM_MODULATE2: // 6
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-      break;
-    default:
-      LogError << "Unknown blendmode: " << blendmode << std::endl;
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    //if (cull)
-    //  gl.enable(GL_CULL_FACE);
-
-    // Texture wrapping around the geometry
-    if (swrap)
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    if (twrap)
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    // no writing to the depth buffer.
-    if (nozwrite)
-      gl.depthMask(GL_FALSE);
-
-    if (unlit) {
-      gl.disable(GL_LIGHTING);
-    }
-
-    // Environmental mapping, material, and effects
-    if (useenvmap) {
-      // Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
-      // This is now set in InitGL(); - no need to call it every render.
-      gl.materialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
-
-      // env mapping
-      gl.enable(GL_TEXTURE_GEN_S);
-      gl.enable(GL_TEXTURE_GEN_T);
-
-      const GLint maptype = GL_SPHERE_MAP;
-      //const GLint maptype = GL_REFLECTION_MAP_;
-
-      gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
-      gl.texGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
-    }
-
-    if (texanim != -1) {
-      gl.matrixMode(GL_TEXTURE);
-      gl.pushMatrix();
-
-      m->_texture_animations[texanim].setup(texanim);
-    }
-
-    // color
-    gl.color4fv(ocol);
-    //gl.materialfv(GL_FRONT, GL_SPECULAR, ocol);
-
-    // don't use lighting on the surface
-    if (unlit)
-      gl.disable(GL_LIGHTING);
-
-    if (blendmode <= 1 && ocol.w<1.0f)
-      gl.enable(GL_BLEND);
-
-    return true;
-  }
-
-  return false;
-}
-
-void ModelRenderPass::deinit()
-{
-  switch (blendmode) {
-  case BM_OPAQUE:
-    break;
-  case BM_TRANSPARENT:
-    break;
-  case BM_ALPHA_BLEND:
-    //gl.depthMask(GL_TRUE);
-    break;
-  default:
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // default blend func
-  }
-  if (nozwrite) {
-    gl.depthMask(GL_TRUE);
-  }
-  if (texanim != -1) {
-    gl.popMatrix();
-    gl.matrixMode(GL_MODELVIEW);
-  }
-  if (unlit) {
-    gl.enable(GL_LIGHTING);
-  }
-  if (useenvmap) {
-    gl.disable(GL_TEXTURE_GEN_S);
-    gl.disable(GL_TEXTURE_GEN_T);
-  }
-  if (usetex2) {
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (0);
-  }
-  //gl.color4f(1,1,1,1); //???
 }
 
 void TextureAnim::calc(int anim, int time, int animtime)
@@ -966,6 +1159,8 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 
 void Model::draw (bool draw_fog, int animtime, bool draw_particles)
 {
+  return;
+
   if (!finishedLoading())
     return;
 
@@ -996,14 +1191,14 @@ void Model::draw (bool draw_fog, int animtime, bool draw_particles)
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl.alphaFunc(GL_GREATER, 0.3f);
 
-  for (ModelRenderPass& p : _passes)
+  for (ModelRenderPass& p : _render_passes)
   { 
     // we don't want to render completely transparent parts
-    if (p.init(this))
+    /*if (p.prepare_draw(m2_shader, this))
     {
-      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
-      p.deinit();
-    }
+      gl.drawRangeElements(GL_TRIANGLES, p.vertex_start, p.vertex_end, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start);
+      p.after_draw();
+    }*/
   }
   // done with all render ops
 
@@ -1034,32 +1229,6 @@ void Model::draw (bool draw_fog, int animtime, bool draw_particles)
   
 }
 
-void Model::draw (opengl::scoped::use_program& m2_shader, bool draw_fog, int animtime, bool draw_particles)
-{
-  if (!finishedLoading())
-    return;
-
-  if (!_finished_upload) {
-    upload();
-    return;
-  }
-
-  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-  m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), 0);
-  m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-  m2_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
-  
-
-  for (ModelRenderPass& p : _passes)
-  {  
-    if (p.init(this))
-    {
-      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
-      p.deinit();
-    }
-  }
-}
-
 void Model::draw ( std::vector<ModelInstance*> instances
                  , opengl::scoped::use_program& m2_shader
                  , math::frustum const& frustum
@@ -1073,9 +1242,12 @@ void Model::draw ( std::vector<ModelInstance*> instances
                  )
 {
   if (!finishedLoading())
+  {
     return;
+  }
 
-  if (!_finished_upload) {
+  if (!_finished_upload) 
+  {
     upload();
     return;
   }
@@ -1119,20 +1291,26 @@ void Model::draw ( std::vector<ModelInstance*> instances
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), 0);
     //m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    m2_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
+    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
+    //m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d) + sizeof(::math::vector_2d)));
   }
 
-  for (ModelRenderPass& p : _passes)
+  for (ModelRenderPass& p : _render_passes)
   {
-    if (p.init(this))
+    if (p.prepare_draw(m2_shader, this))
     {
-      gl.drawElementsInstanced(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart, transform_matrix.size());
-      p.deinit();
+      //m2_shader.uniform("pixel_shader", static_cast<GLint>(p.pixel_shader));
+     // m2_shader.uniform("texture_count", static_cast<GLint>(p.texture_count));
+
+      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start, transform_matrix.size());
+      p.after_draw();
     }
   }
 
+  gl.disable(GL_BLEND);
   gl.alphaFunc(GL_GREATER, 0.0f);
   gl.disable(GL_ALPHA_TEST);
+  gl.enable(GL_CULL_FACE);
 
   GLfloat czero[4] = { 0, 0, 0, 1 };
   gl.materialfv(GL_FRONT, GL_EMISSION, czero);
@@ -1170,9 +1348,9 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
     animcalc = true;
   }
 
-  for (auto&& pass : _passes)
+  for (auto&& pass : _render_passes)
   {
-    for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
+    for (size_t i (pass.index_start); i < pass.index_start + pass.index_count; i += 3)
     {
       if ( auto distance
           = ray.intersect_triangle( _current_vertices[_indices[i + 0]].position,
