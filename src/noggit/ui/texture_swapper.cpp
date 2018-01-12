@@ -6,6 +6,7 @@
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
