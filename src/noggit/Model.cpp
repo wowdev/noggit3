@@ -439,11 +439,13 @@ void Model::fix_shader_id_layer()
       first_pass = &pass;
     }
 
+    bool xor_unlit = ((_render_flags[pass.renderflag_index].flags.unlit ^ _render_flags[first_pass->renderflag_index].flags.unlit) & 1) == 0;
+
     if ((some_flags & 0xFF) == 1)
     {
       if ( (_render_flags[pass.renderflag_index].blend == 1 || _render_flags[pass.renderflag_index].blend == 2) 
         && pass.texture_count == 1 
-        && (((_render_flags[pass.renderflag_index].flags & 0xFF) ^ (_render_flags[first_pass->renderflag_index].flags & 0xFF)) & 1) == 0
+        && xor_unlit
         && pass.texture_combo_index == first_pass->texture_combo_index
          )
       {
@@ -498,7 +500,7 @@ void Model::fix_shader_id_layer()
 
         if  ( (_render_flags[pass.renderflag_index].blend != 2) && (_render_flags[pass.renderflag_index].blend != 1)
            || (pass.texture_count != 1)
-           || ((((_render_flags[pass.renderflag_index].flags & 0xFF) ^ (_render_flags[first_pass->renderflag_index].flags & 0xFF)) & 1) == 0)
+           || xor_unlit
            || ((pass.texture_combo_index & 0xff) != (first_pass->texture_combo_index & 0xff))
             ) 
         {
@@ -583,7 +585,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
       opacity_color.w = m->_colors[color_index].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
     }
 
-    if (renderflag.flags & RENDERFLAGS_UNLIT)
+    if (renderflag.flags.unlit)
     {
       opacity_color.x = c.x; opacity_color.y = c.y; opacity_color.z = c.z;
     }
@@ -649,7 +651,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     break;
   }
 
-  if (renderflag.flags & RENDERFLAGS_TWOSIDED)
+  if (renderflag.flags.two_sided)
   {
     gl.disable(GL_CULL_FACE);
   }
@@ -658,7 +660,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     gl.enable(GL_CULL_FACE);
   }
 
-  if (renderflag.flags & RENDERFLAGS_ZBUFFERED)
+  if (renderflag.flags.z_buffered)
   {
     gl.depthMask(GL_FALSE);
   }
