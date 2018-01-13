@@ -358,21 +358,31 @@ void Model::fix_shader_id_blend_override()
 {
   for (auto& pass : _render_passes)
   {
+    if (pass.shader_id & 0x8000)
+    {
+      continue; 
+    }
+
     int shader = 0;
     bool blend_mode_override = (header.Flags & 8);
 
     if (!blend_mode_override)
     {
-      shader = _render_flags[pass.renderflag_index].blend ? 1 : 0;
+      uint16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];     
 
-      if (pass.texture_count > 2)
+      if (_render_flags[pass.renderflag_index].blend)
       {
-        shader |= 8;
-      }
+        shader = 1;
+
+        if (texture_unit_lookup == -1)
+        {
+          shader |= 0x8;
+        }
+      }      
 
       shader <<= 4;
 
-      if (pass.texture_count == 1)
+      if (texture_unit_lookup == 1)
       {
         shader |= 0x4000;
       }
@@ -413,6 +423,22 @@ void Model::fix_shader_id_blend_override()
 
 void Model::fix_shader_id_layer()
 {
+  int non_layered_count = 0;
+
+  for (auto const& pass : _render_passes)
+  {
+    if (pass.material_layer <= 0)
+    {
+      non_layered_count++;
+    }
+  }
+
+  if (non_layered_count == _render_passes.size())
+  {
+    return;
+  }
+
+
   ModelRenderPass* first_pass = nullptr;
   bool need_reducing = false;
   uint16_t previous_render_flag = -1, some_flags = 0;
@@ -672,6 +698,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
 
   return true;
 }
+
 void ModelRenderPass::after_draw()
 {
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -681,7 +708,7 @@ void ModelRenderPass::bind_texture(size_t index, Model* m)
 {
   opengl::texture::enable_texture(index);
 
-  int tex = m->_texture_lookup[texture_combo_index + index];
+  uint16_t tex = m->_texture_lookup[texture_combo_index + index];
 
   if (m->_specialTextures[tex] == -1)
   {
@@ -694,138 +721,157 @@ void ModelRenderPass::bind_texture(size_t index, Model* m)
 }
 
 // https://wowdev.wiki/M2/.skin#Pixel_shaders
-ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
+ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
 {
-  uint16_t v4 = (shader_id >> 4) & 7;
-  uint16_t v5 = shader_id & 7;
-  uint16_t v6 = (shader_id >> 4) & 8;
-  uint16_t v7 = shader_id & 8;
+  uint16_t layer_1_op = (shader_id >> 4) & 7;
+  uint16_t layer_2_op = shader_id & 7;
+  uint16_t layer_1_env_map = (shader_id >> 4) & 8;
+  uint16_t layer_2_env_map = shader_id & 8;
 
-  ModelPixelShader pixel_shader;
-  if (!(shader_id & 0x8000))
+  ModelPixelShader pixel_shader = ModelPixelShader::Invalid_Shader;
+
+  if (texture_count == 1)
   {
-    if (texture_count == 1)
+    switch (layer_1_op)
     {
-      switch (v4)
+    case 0:
+      pixel_shader = ModelPixelShader::Combiners_Opaque;
+      break;
+    case 2:
+      pixel_shader = ModelPixelShader::Combiners_Decal;
+      break;
+    case 3:
+      pixel_shader = ModelPixelShader::Combiners_Add;
+      break;
+    case 4:
+      pixel_shader = ModelPixelShader::Combiners_Mod2x;
+      break;
+    case 5:
+      pixel_shader = ModelPixelShader::Combiners_Fade;
+      break;
+    default:
+      pixel_shader = ModelPixelShader::Combiners_Mod;
+      break;
+    }
+  }
+  else
+  {
+    if (!layer_1_op)
+    {
+      switch (layer_2_op)
       {
       case 0:
-        pixel_shader = ModelPixelShader::Combiners_Opaque;
-        break;
-      case 2:
-        pixel_shader = ModelPixelShader::Combiners_Decal;
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Opaque;
         break;
       case 3:
-        pixel_shader = ModelPixelShader::Combiners_Add;
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Add;
         break;
       case 4:
-        pixel_shader = ModelPixelShader::Combiners_Mod2x;
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2x;
         break;
-      case 5:
-        pixel_shader = ModelPixelShader::Combiners_Fade;
+      case 6:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA;
+        break;
+      case 7:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_AddNA;
         break;
       default:
-        pixel_shader = ModelPixelShader::Combiners_Mod;
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Mod;
         break;
       }
     }
-    else
+    else if (layer_1_op == 1)
     {
-      if (!v4)
+      switch (layer_2_op)
       {
-        switch (v5)
-        {
-        case 0:
-          pixel_shader = ModelPixelShader::Combiners_Opaque_Opaque;
-          break;
-        case 3:
-          pixel_shader = ModelPixelShader::Combiners_Opaque_Add;
-          break;
-        case 4:
-          pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2x;
-          break;
-        case 6:
-          pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA;
-          break;
-        case 7:
-          pixel_shader = ModelPixelShader::Combiners_Opaque_AddNA;
-          break;
-        default:
-          pixel_shader = ModelPixelShader::Combiners_Opaque_Mod;
-          break;
-        }
-      }
-      else if (v4 == 1) 
-      {
-        switch (v5)
-        {
-        case 0:
-          pixel_shader = ModelPixelShader::Combiners_Mod_Opaque;
-          break;
-        case 3:
-          pixel_shader = ModelPixelShader::Combiners_Mod_Add;
-          break;
-        case 4:
-          pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
-          break;
-        case 6:
-          pixel_shader = ModelPixelShader::Combiners_Mod_Mod2xNA;
-          break;
-        case 7:
-          pixel_shader = ModelPixelShader::Combiners_Mod_AddNA;
-          break;
-        default:
-          pixel_shader = ModelPixelShader::Combiners_Mod_Mod;
-          break;
+      case 0:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Opaque;
+        break;
+      case 3:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Add;
+        break;
+      case 4:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
+        break;
+      case 6:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Mod2xNA;
+        break;
+      case 7:
+        pixel_shader = ModelPixelShader::Combiners_Mod_AddNA;
+        break;
+      default:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Mod;
+        break;
 
-        }
       }
-      else if (v4 == 3) 
+    }
+    else if (layer_1_op == 3)
+    {
+      if (layer_2_op == 1)
       {
-        if (v5 == 1)
-        {
-          pixel_shader = ModelPixelShader::Combiners_Add_Mod;
-        }
-        else
-        {
-          pixel_shader = ModelPixelShader::Invalid_Shader;
-        }
+        pixel_shader = ModelPixelShader::Combiners_Add_Mod;
       }
-      else if (v4 != 4) 
+      else
       {
         pixel_shader = ModelPixelShader::Invalid_Shader;
       }
-      else if (v5 == 1) 
+    }
+    else if (layer_1_op != 4)
+    {
+      pixel_shader = ModelPixelShader::Invalid_Shader;
+    }
+    else if (layer_2_op == 1)
+    {
+      pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
+    }
+    else
+    {
+      if (layer_2_op != 4)
       {
-        pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
+        pixel_shader = ModelPixelShader::Invalid_Shader;
       }
-      else 
+      else
       {
-        if (v5 != 4)
-        {
-          pixel_shader = ModelPixelShader::Invalid_Shader;
-        }
-        else
-        {
-          pixel_shader = ModelPixelShader::Combiners_Mod2x_Mod2x;
-        }        
+        pixel_shader = ModelPixelShader::Combiners_Mod2x_Mod2x;
       }
     }
   }
-  switch (shader_id & 0x7FFF) 
+ 
+
+  return pixel_shader;
+}
+
+ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
+{
+  ModelPixelShader pixel_shader;
+
+  if (!(shader_id & 0x8000))
   {
-  case 0:
-    return ModelPixelShader::Invalid_Shader;
-  case 1:
-    pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha;
-    break;
-  case 2:
-    pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha;
-    break;
-  case 3:
-    pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha_Alpha;
-    break;
-  default:
-    break;
+    pixel_shader = GetPixelShader(texture_count, shader_id);
+
+    if (pixel_shader == ModelPixelShader::Invalid_Shader)
+    {
+      pixel_shader = GetPixelShader(texture_count, 0x11);
+    }
+  }
+  else
+  {
+    switch (shader_id & 0x7FFF)
+    {
+    case 0:
+      return ModelPixelShader::Invalid_Shader;
+    case 1:
+      pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha;
+      break;
+    case 2:
+      pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha;
+      break;
+    case 3:
+      pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha_Alpha;
+      break;
+    default:
+      break;
+    }  
   }
 
   return pixel_shader;
@@ -1354,16 +1400,13 @@ void Model::draw ( std::vector<ModelInstance*> instances
     m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), 0);
     //m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
     m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
-    //m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d) + sizeof(::math::vector_2d)));
+    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d) + sizeof(::math::vector_2d)));
   }
 
   for (ModelRenderPass& p : _render_passes)
   {
     if (p.prepare_draw(m2_shader, this))
     {
-      //m2_shader.uniform("pixel_shader", static_cast<GLint>(p.pixel_shader));
-     // m2_shader.uniform("texture_count", static_cast<GLint>(p.texture_count));
-
       gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start, transform_matrix.size());
       p.after_draw();
     }
