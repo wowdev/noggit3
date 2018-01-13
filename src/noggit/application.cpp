@@ -315,7 +315,7 @@ Noggit::Noggit(int argc, char *argv[])
 
 namespace
 {
-  void terminate_handler()
+  void noggit_terminate_handler()
   {
     std::string const reason
       {util::exception_to_string (std::current_exception())};
@@ -362,7 +362,7 @@ int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 int main(int argc, char *argv[])
 {
   noggit::RegisterErrorHandlers();
-  std::set_terminate (terminate_handler);
+  std::set_terminate (noggit_terminate_handler);
 
   application_with_exception_printer_on_notify qapp (argc, argv);
   qapp.setApplicationName ("Noggit");
