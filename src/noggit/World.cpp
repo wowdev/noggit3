@@ -1144,7 +1144,7 @@ void main()
   } 
   else if (pixel_shader == 1) // Combiners_Decal
   { 
-      color.rgb = (mesh_color.rgb - texture1.rgb) * mesh_color.a + texture1.rgb;
+      color.rgb = mix(mesh_color.rgb, texture1.rgb, mesh_color.a);
       color.a = mesh_color.a;
   } 
   else if (pixel_shader == 2) // Combiners_Add
@@ -1158,7 +1158,7 @@ void main()
   } 
   else if (pixel_shader == 4) // Combiners_Fade
   { 
-      color.rgb = (texture1.rgb - mesh_color.rgb) * mesh_color.a + mesh_color.rgb;
+      color.rgb = mix(texture1.rgb, mesh_color.rgb, mesh_color.a);
       color.a = mesh_color.a;
   } 
   else if (pixel_shader == 5) // Combiners_Mod
