@@ -630,40 +630,40 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     return false;
   }
   
-  switch (renderflag.blend)
+  switch (static_cast<M2Blend>(renderflag.blend))
   {
   default:
-  case BM_OPAQUE:
+  case M2Blend::Opaque:
     gl.disable(GL_BLEND);
     m2_shader.uniform("alpha_test", -1.f);    
     break;
-  case BM_TRANSPARENT:
+  case M2Blend::Alpha_Key:
     gl.disable(GL_BLEND);
     m2_shader.uniform("alpha_test", (224.f / 255.f) * mesh_color.w);
     break;
-  case BM_ALPHA_BLEND:
+  case M2Blend::Alpha:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    m2_shader.uniform("alpha_test", -1.f);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
     break;
-  case BM_ADDITIVE:
+  case M2Blend::No_Add_Alpha:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_ONE, GL_ONE);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    break;
+  case M2Blend::Add:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-    m2_shader.uniform("alpha_test", -1.f);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
     break;
-  case BM_ADDITIVE_ALPHA:
+  case M2Blend::Mod:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_ZERO);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
     break;
-  case BM_MODULATE:
+  case M2Blend::Mod2x:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
-    break;
-  case BM_MODULATE2:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_DST_COLOR, GL_ONE);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
     break;
   }

@@ -74,18 +74,17 @@ struct ModelTransparency {
   ModelTransparency(const MPQFile& f, const ModelTransDef &mtd, int *global);
 };
 
-// copied from the .mdl docs? this might be completely wrong
-enum BlendModes {
-  BM_OPAQUE,
-  BM_TRANSPARENT,
-  BM_ALPHA_BLEND,
-  BM_ADDITIVE,
-  BM_ADDITIVE_ALPHA,
-  BM_MODULATE,
-  BM_MODULATE2
-};
 
-#define MODEL_PIXEL_SHADER_COUNT 35
+enum class M2Blend : uint16_t
+{
+  Opaque,
+  Alpha_Key,
+  Alpha,
+  No_Add_Alpha,
+  Add,
+  Mod,
+  Mod2x
+};
 
 enum class ModelPixelShader : uint16_t
 {
