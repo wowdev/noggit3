@@ -114,6 +114,14 @@ enum class ModelPixelShader : uint16_t
   Invalid_Shader,
 };
 
+enum class texture_coord_type
+{
+  environment = -1,
+  t1,
+  t2,
+  none
+};
+
 
 struct ModelRenderPass : ModelTexUnit
 {
@@ -121,12 +129,14 @@ struct ModelRenderPass : ModelTexUnit
 
   float ordering_thingy = 0.f;
   uint16_t index_start = 0, index_count = 0, vertex_start = 0, vertex_end = 0;
-  uint16_t blend_mode = 0;
+  uint16_t blend_mode = 0, texture_unit_lookup = 0;
+  texture_coord_type uvs[2];
   ModelPixelShader pixel_shader = ModelPixelShader::Combiners_Opaque;
+
 
   bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m);
   void after_draw();
-  void bind_texture(size_t index, Model* m);
+  void bind_texture(size_t index, Model* m);  
 
   bool operator< (const ModelRenderPass &m) const
   {
@@ -143,6 +153,9 @@ struct ModelRenderPass : ModelTexUnit
       return blend_mode == m.blend_mode ? (ordering_thingy < m.ordering_thingy) : blend_mode < m.blend_mode;
     }
   }
+
+private:
+  void init_uv_types(Model* m);
 };
 
 struct ModelCamera {

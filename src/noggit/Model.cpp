@@ -332,15 +332,15 @@ void Model::initCommon(const MPQFile& f)
     {
       size_t geoset = texture_unit[j].submesh;
 
-      ModelRenderPass new_pass(texture_unit[j], this);
-      new_pass.ordering_thingy = model_geosets[geoset].BoundingBox[0].x;
+      ModelRenderPass pass(texture_unit[j], this);
+      pass.ordering_thingy = model_geosets[geoset].BoundingBox[0].x;
 
-      new_pass.index_start = model_geosets[geoset].istart;
-      new_pass.index_count = model_geosets[geoset].icount;
-      new_pass.vertex_start = model_geosets[geoset].vstart;
-      new_pass.vertex_end = new_pass.vertex_start + model_geosets[geoset].vcount;
-      
-      _render_passes.push_back(new_pass);
+      pass.index_start = model_geosets[geoset].istart;
+      pass.index_count = model_geosets[geoset].icount;
+      pass.vertex_start = model_geosets[geoset].vstart;
+      pass.vertex_end = pass.vertex_start + model_geosets[geoset].vcount;   
+
+      _render_passes.push_back(pass);
     }
 
     g.close();
@@ -577,6 +577,7 @@ ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
   : ModelTexUnit(tex_unit)
   , blend_mode(m->_render_flags[renderflag_index].blend)
 {
+  init_uv_types(m);
 }
 
 bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m)
@@ -686,6 +687,12 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     gl.depthMask(GL_TRUE);
   }
 
+  if (m->_texture_unit_lookup[texture_coord_combo_index] == -1)
+  {
+    gl.enable(GL_TEXTURE_GEN_S);
+    gl.enable(GL_TEXTURE_GEN_T);
+  }
+
   if (texture_count > 1)
   {
     bind_texture(1, m);
@@ -720,19 +727,30 @@ void ModelRenderPass::bind_texture(size_t index, Model* m)
   }    
 }
 
-// https://wowdev.wiki/M2/.skin#Pixel_shaders
+void ModelRenderPass::init_uv_types(Model* m)
+{
+  uvs[0] = texture_coord_type::none;
+  uvs[1] = texture_coord_type::none;
+
+  for (int i = 0; i < texture_count; ++i)
+  {
+    uvs[i] = static_cast<texture_coord_type>(m->_texture_unit_lookup[texture_coord_combo_index + i]);
+  }
+}
+
+// https://wowdev.wiki/M2/.skin/WotLK_shader_selection
 ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
 {
-  uint16_t layer_1_op = (shader_id >> 4) & 7;
-  uint16_t layer_2_op = shader_id & 7;
-  uint16_t layer_1_env_map = (shader_id >> 4) & 8;
-  uint16_t layer_2_env_map = shader_id & 8;
+  uint16_t texture1_fragment_mode = (shader_id >> 4) & 7;
+  uint16_t texture2_fragment_mode = shader_id & 7;
+  uint16_t texture1_env_map = (shader_id >> 4) & 8;
+  uint16_t texture2_env_map = shader_id & 8;
 
   ModelPixelShader pixel_shader = ModelPixelShader::Invalid_Shader;
 
   if (texture_count == 1)
   {
-    switch (layer_1_op)
+    switch (texture1_fragment_mode)
     {
     case 0:
       pixel_shader = ModelPixelShader::Combiners_Opaque;
@@ -756,9 +774,9 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
   }
   else
   {
-    if (!layer_1_op)
+    if (!texture1_fragment_mode)
     {
-      switch (layer_2_op)
+      switch (texture2_fragment_mode)
       {
       case 0:
         pixel_shader = ModelPixelShader::Combiners_Opaque_Opaque;
@@ -780,9 +798,9 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
         break;
       }
     }
-    else if (layer_1_op == 1)
+    else if (texture1_fragment_mode == 1)
     {
-      switch (layer_2_op)
+      switch (texture2_fragment_mode)
       {
       case 0:
         pixel_shader = ModelPixelShader::Combiners_Mod_Opaque;
@@ -805,9 +823,9 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
 
       }
     }
-    else if (layer_1_op == 3)
+    else if (texture1_fragment_mode == 3)
     {
-      if (layer_2_op == 1)
+      if (texture2_fragment_mode == 1)
       {
         pixel_shader = ModelPixelShader::Combiners_Add_Mod;
       }
@@ -816,17 +834,17 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
         pixel_shader = ModelPixelShader::Invalid_Shader;
       }
     }
-    else if (layer_1_op != 4)
+    else if (texture1_fragment_mode != 4)
     {
       pixel_shader = ModelPixelShader::Invalid_Shader;
     }
-    else if (layer_2_op == 1)
+    else if (texture2_fragment_mode == 1)
     {
       pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
     }
     else
     {
-      if (layer_2_op != 4)
+      if (texture2_fragment_mode != 4)
       {
         pixel_shader = ModelPixelShader::Invalid_Shader;
       }
