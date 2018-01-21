@@ -209,22 +209,17 @@ void Model::initCommon(const MPQFile& f)
   // vertices, normals, texcoords
   ModelVertex const* vertices = reinterpret_cast<ModelVertex const*> (f.getBuffer() + header.ofsVertices);
 
-  _vertices.resize (header.nVertices);
-  _vertices_parameters.resize (header.nVertices);
+  _vertices = std::vector<ModelVertex>(vertices, vertices + header.nVertices);
 
-  for (size_t i (0); i < header.nVertices; ++i)
+  for (auto& v : _vertices)
   {
-    _vertices[i].position = fixCoordSystem (vertices[i].pos);
-    _vertices[i].normal = fixCoordSystem (vertices[i].normal);
-    memcpy(_vertices[i].texcoords, vertices[i].texcoords, 2 * sizeof(::math::vector_2d));
-
-    memcpy (_vertices_parameters[i].bones, vertices[i].bones, 4 * sizeof (uint8_t));
-    memcpy (_vertices_parameters[i].weights, vertices[i].weights, 4 * sizeof (uint8_t));
+    v.position = fixCoordSystem(v.position);
+    v.normal = fixCoordSystem(v.normal);
   }
-
+ 
   if (!animGeometry)
   {
-    _current_vertices.swap (_vertices);
+    _current_vertices.swap(_vertices);
   }
 
   // textures
@@ -1014,39 +1009,36 @@ void Model::animate(int _anim, int animtime_)
   _global_animtime = animtime_;
 
   if (animBones) {
-    //calcBones(anim, t, _global_animtime);
+    calcBones(anim, t, _global_animtime);
   }
 
-  if (animGeometry) {
+  if (animGeometry) 
+  {
     // transform vertices
-    _current_vertices.resize (header.nVertices);
+    _current_vertices = _vertices;
 
-    for (size_t i (0); i < header.nVertices; ++i)
+    for (auto& vertex : _current_vertices)
     {
-      model_vertex const& vertex (_vertices[i]);
-      model_vertex_parameter const& param (_vertices_parameters[i]);
-
-      ::math::vector_3d v(0,0,0), n(0,0,0);
+      ::math::vector_3d v(0, 0, 0), n(0, 0, 0);
 
       for (size_t b (0); b < 4; ++b)
       {
-        if (param.weights[b] <= 0)
+        if (vertex.weights[b] <= 0)
           continue;
 
-        ::math::vector_3d tv = bones[param.bones[b]].mat * vertex.position;
-        ::math::vector_3d tn = bones[param.bones[b]].mrot * vertex.normal;
+        ::math::vector_3d tv = bones[vertex.bones[b]].mat * vertex.position;
+        ::math::vector_3d tn = bones[vertex.bones[b]].mrot * vertex.normal;
 
-        v += tv * (static_cast<float> (param.weights[b]) / 255.0f);
-        n += tn * (static_cast<float> (param.weights[b]) / 255.0f);
+        v += tv * (static_cast<float> (vertex.weights[b]) / 255.0f);
+        n += tn * (static_cast<float> (vertex.weights[b]) / 255.0f);
       }
 
-      _current_vertices[i].position = v;
-      _current_vertices[i].normal = n.normalize();
-      memcpy(_current_vertices[i].texcoords, vertex.texcoords, 2 * sizeof(::math::vector_2d));
+      vertex.position = v;
+      vertex.normal = n.normalized();
     }
 
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STREAM_DRAW);
+    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STREAM_DRAW);
   }
 
   for (size_t i=0; i<header.nLights; ++i) {
@@ -1290,58 +1282,6 @@ void Model::draw (bool draw_fog, int animtime, bool draw_particles)
 {
   return;
 
-  if (!finishedLoading())
-    return;
-
-  if (!_finished_upload) {
-    upload();
-    return;
-  }
-
-  if (draw_fog)
-    gl.enable(GL_FOG);
-  else
-    gl.disable(GL_FOG);
-
-  if (animated && (!animcalc || mPerInstanceAnimation))
-  {
-    animate(0, animtime);
-    animcalc = true;
-  }
-
-  lightsOn(GL_LIGHT4);
-
-  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
-  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-  gl.vertexPointer (3, GL_FLOAT, sizeof (model_vertex), 0);
-  gl.normalPointer (GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-  gl.texCoordPointer (2, GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
-
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.alphaFunc(GL_GREATER, 0.3f);
-
-  for (ModelRenderPass& p : _render_passes)
-  { 
-    // we don't want to render completely transparent parts
-    /*if (p.prepare_draw(m2_shader, this))
-    {
-      gl.drawRangeElements(GL_TRIANGLES, p.vertex_start, p.vertex_end, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start);
-      p.after_draw();
-    }*/
-  }
-  // done with all render ops
-
-  gl.alphaFunc(GL_GREATER, 0.0f);
-  gl.disable(GL_ALPHA_TEST);
-
-  GLfloat czero[4] = { 0, 0, 0, 1 };
-  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
-  gl.color4f(1, 1, 1, 1);
-  gl.depthMask(GL_TRUE);
-
-  lightsOff(GL_LIGHT4);
-
-
   // draw particle systems & ribbons
   if (draw_particles)
   {
@@ -1418,10 +1358,12 @@ void Model::draw ( std::vector<ModelInstance*> instances
   
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), 0);
-    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
-    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d) + sizeof(::math::vector_2d)));
+    m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
+    //m2_shader.attrib("bones_weight",  4, GL_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    //m2_shader.attrib("bones_indices", 4, GL_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
+    m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
+    m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
   }
 
   for (ModelRenderPass& p : _render_passes)
@@ -1521,7 +1463,7 @@ void Model::upload()
   if (!animGeometry)
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STATIC_DRAW);
+    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STATIC_DRAW);
   }
 
   {
