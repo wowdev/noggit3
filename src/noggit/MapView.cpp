@@ -187,7 +187,7 @@ void MapView::insert_last_m2_from_wmv()
   if (!_world->HasSelection())
   {
     return;
-  }
+  }  
 
   std::string wmv_log_file (_settings->value ("project/wmv_log_file").toString().toStdString());
   std::string lastModel;
@@ -242,6 +242,8 @@ void MapView::insert_last_m2_from_wmv()
     }
     else
     {
+      makeCurrent();
+      opengl::context::scoped_setter const _ (::gl, context());
       _world->addM2(lastModel, selectionPosition, 1.f, {0.f, 0.f, 0.f}, &_object_paste_params);
     }
   }
@@ -303,6 +305,8 @@ void MapView::insert_last_wmo_from_wmv()
     }
     else
     {
+      makeCurrent();
+      opengl::context::scoped_setter const _ (::gl, context());
       _world->addWMO(lastWMO, selectionPosition, {0.f, 0.f, 0.f});
     }
   }
