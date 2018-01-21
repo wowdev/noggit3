@@ -127,6 +127,11 @@ namespace math
       return *this * (1.0f / length());
     }
 
+    inline T dot(const vector_3d_base<T>& v) const
+    {
+      return x*v.x + y*v.y + z*v.z;
+    }
+
     inline operator T*()
     {
       return _data;
