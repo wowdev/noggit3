@@ -189,7 +189,7 @@ void MapView::insert_last_m2_from_wmv()
     return;
   }
 
-  std::string wmv_log_file (_settings->value ("wmv_log_path").toString().toStdString());
+  std::string wmv_log_file (_settings->value ("project/wmv_log_file").toString().toStdString());
   std::string lastModel;
   std::string line;
   std::ifstream fileReader(wmv_log_file.c_str());
@@ -254,7 +254,7 @@ void MapView::insert_last_wmo_from_wmv()
     return;
   }
 
-  std::string wmv_log_file (_settings->value ("wmv_log_path").toString().toStdString());
+  std::string wmv_log_file (_settings->value ("project/wmv_log_file").toString().toStdString());
   std::string lastWMO;
   std::string line;
   std::ifstream fileReader(wmv_log_file.c_str());
