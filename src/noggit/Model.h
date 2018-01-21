@@ -114,9 +114,9 @@ enum class ModelPixelShader : uint16_t
   Invalid_Shader,
 };
 
-enum class texture_coord_type
+enum class texture_unit_lookup : int
 {
-  environment = -1,
+  environment = 0,
   t1,
   t2,
   none
@@ -129,8 +129,8 @@ struct ModelRenderPass : ModelTexUnit
 
   float ordering_thingy = 0.f;
   uint16_t index_start = 0, index_count = 0, vertex_start = 0, vertex_end = 0;
-  uint16_t blend_mode = 0, texture_unit_lookup = 0;
-  texture_coord_type uvs[2];
+  uint16_t blend_mode = 0;
+  texture_unit_lookup tu_lookups[2];
   ModelPixelShader pixel_shader = ModelPixelShader::Combiners_Opaque;
 
 
@@ -234,7 +234,7 @@ public:
   std::map<std::size_t, scoped_blp_texture_reference> _replaceTextures;
   std::vector<int> _specialTextures;
   std::vector<bool> _useReplaceTextures;
-  std::vector<uint16_t> _texture_unit_lookup;
+  std::vector<int16_t> _texture_unit_lookup;
 
   // ===============================
   // Misc ?

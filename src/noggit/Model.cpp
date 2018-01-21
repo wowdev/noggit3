@@ -316,7 +316,7 @@ void Model::initCommon(const MPQFile& f)
 
 
     int16_t const* texunitlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexUnitLookup);
-    _texture_unit_lookup = std::vector<uint16_t>(texunitlookup, texunitlookup + header.nTexUnitLookup);
+    _texture_unit_lookup = std::vector<int16_t>(texunitlookup, texunitlookup + header.nTexUnitLookup);
 
     showGeosets.resize (view->n_submesh);
     for (size_t i = 0; i<view->n_submesh; ++i) 
@@ -685,13 +685,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   else
   {
     gl.depthMask(GL_TRUE);
-  }
-
-  if (m->_texture_unit_lookup[texture_coord_combo_index] == -1)
-  {
-    gl.enable(GL_TEXTURE_GEN_S);
-    gl.enable(GL_TEXTURE_GEN_T);
-  }
+  }  
 
   if (texture_count > 1)
   {
@@ -700,6 +694,10 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
 
   bind_texture(0, m);
 
+  GLint tu1 = static_cast<GLint>(tu_lookups[0]), tu2 = static_cast<GLint>(tu_lookups[1]);
+
+  m2_shader.uniform("tex_unit_lookup_1", tu1);
+  m2_shader.uniform("tex_unit_lookup_2", tu2);
   m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader));
   m2_shader.uniform("mesh_color", mesh_color);
 
@@ -716,7 +714,7 @@ void ModelRenderPass::bind_texture(size_t index, Model* m)
   opengl::texture::enable_texture(index);
 
   uint16_t tex = m->_texture_lookup[texture_combo_index + index];
-
+  
   if (m->_specialTextures[tex] == -1)
   {
     m->_textures[tex]->bind();
@@ -729,12 +727,17 @@ void ModelRenderPass::bind_texture(size_t index, Model* m)
 
 void ModelRenderPass::init_uv_types(Model* m)
 {
-  uvs[0] = texture_coord_type::none;
-  uvs[1] = texture_coord_type::none;
+  tu_lookups[0] = texture_unit_lookup::none;
+  tu_lookups[1] = texture_unit_lookup::none;
 
   for (int i = 0; i < texture_count; ++i)
   {
-    uvs[i] = static_cast<texture_coord_type>(m->_texture_unit_lookup[texture_coord_combo_index + i]);
+    switch (m->_texture_unit_lookup[texture_coord_combo_index + i])
+    {
+      case (int16_t)(-1): tu_lookups[i] = texture_unit_lookup::environment; break;
+      case 0: tu_lookups[i] = texture_unit_lookup::t1; break;
+      case 1: tu_lookups[i] = texture_unit_lookup::t2; break;
+    }
   }
 }
 
@@ -1416,7 +1419,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), 0);
-    //m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
     m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
     m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d) + sizeof(::math::vector_2d)));
   }
@@ -1439,6 +1442,9 @@ void Model::draw ( std::vector<ModelInstance*> instances
   gl.materialfv(GL_FRONT, GL_EMISSION, czero);
   gl.color4f(1, 1, 1, 1);
   gl.depthMask(GL_TRUE);
+
+  gl.disable(GL_TEXTURE_GEN_S);
+  gl.disable(GL_TEXTURE_GEN_T);
 }
 
 void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)

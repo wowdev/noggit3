@@ -1084,12 +1084,13 @@ void main()
 
     {
       if (!_m2_program)
-      {
+      { 
         _m2_program.reset(new opengl::program({ { GL_VERTEX_SHADER
           , R"code(
 #version 330 core
 
 in vec4 pos;
+in vec3 normal;
 in vec2 texcoord1;
 in vec2 texcoord2;
 in mat4 transform;
@@ -1100,13 +1101,50 @@ out vec2 uv2;
 uniform mat4 model_view;
 uniform mat4 projection;
 
+uniform int tex_unit_lookup_1;
+uniform int tex_unit_lookup_2;
+
+// code from https://wowdev.wiki/M2/.skin#Environment_mapping
+vec2 sphere_map(vec3 vert, vec3 norm)
+{
+  vec3 normPos = -(normalize(vert));
+  vec3 temp = (normPos - (norm * (2.0 * dot(normPos, norm))));
+  temp = vec3(temp.x, temp.y, temp.z + 1.0);
+ 
+  return ((normalize(temp).xy * 0.5) + vec2(0.5));
+}
+
+vec2 get_texture_uv(int tex_unit_lookup, vec3 vert, vec3 norm)
+{
+  if(tex_unit_lookup == 0)
+  {
+    return sphere_map(vert, norm);
+  }
+  else if(tex_unit_lookup == 1)
+  {
+    return texcoord1;
+  }
+  else if(tex_unit_lookup == 2)
+  {
+    return texcoord2;
+  }
+  else
+  {
+    return vec2(0.0);
+  }
+}
 
 void main()
 {
-  gl_Position = projection * model_view * transform * pos;
+  mat4 camera_mat = model_view * transform;
 
-  uv1 = texcoord1;
-  uv2 = texcoord2;
+  vec4 vertex = camera_mat * pos;
+  vec3 norm = mat3(camera_mat) * normal;
+
+  uv1 = get_texture_uv(tex_unit_lookup_1, vertex.xyz, norm);
+  uv2 = get_texture_uv(tex_unit_lookup_2, vertex.xyz, norm);
+
+  gl_Position = projection * vertex;
 }
 )code"
           }
