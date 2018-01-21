@@ -181,19 +181,6 @@ struct ModelLight {
   void setup(int time, opengl::light l, int animtime);
 };
 
-struct model_vertex
-{
-  ::math::vector_3d position;
-  ::math::vector_3d normal;
-  ::math::vector_2d texcoords[2];
-};
-
-struct model_vertex_parameter
-{
-  uint8_t weights[4];
-  uint8_t bones[4];
-};
-
 class Model : public AsyncObject
 {
 public:
@@ -213,7 +200,6 @@ public:
             , std::unordered_map<Model*, std::size_t>& visible_model_count
             );
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
-  void drawTileMode();
 
   std::vector<float> intersect (math::ray const&, int animtime);
 
@@ -283,14 +269,11 @@ private:
   GLuint _box_vao;
   GLuint _box_vbo;
 
-  std::vector<model_vertex> _vertices;
-  std::vector<model_vertex> _current_vertices;
+  std::vector<ModelVertex> _vertices;
+  std::vector<ModelVertex> _current_vertices;
 
   std::vector<uint16_t> _indices;
 
-  std::vector<model_vertex_parameter> _vertices_parameters;
-
-  //std::vector<ModelRenderPass> _passes;
   std::vector<ModelRenderPass> _render_passes;
 
   // ===============================

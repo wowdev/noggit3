@@ -156,7 +156,7 @@ struct ModelTexAnimDef {
 };
 
 struct ModelVertex {
-  math::vector_3d pos;
+  math::vector_3d position;
   uint8_t weights[4];
   uint8_t bones[4];
   math::vector_3d normal;
