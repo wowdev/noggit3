@@ -92,6 +92,21 @@ namespace noggit
     position += right * sign * move_speed * dt;
   }
 
+  math::matrix_4x4 camera::view_matrix() const
+  {
+    math::vector_3d up (0.0f, 1.0f, 0.0f);
+    math::vector_3d const dir ((position - look_at()).normalized());
+    math::vector_3d const right ((dir % up).normalized());
+    up = dir % right;
+
+    return math::matrix_4x4(
+        right.x, up.x, dir.x, 0.f,
+        right.y, up.y, dir.y, 0.f,
+        right.z, up.z, dir.z, 0.f,
+        -right.dot(position), -up.dot(position), -dir.dot(position), 1.f
+      );
+  }
+
   void camera::move_vertical (float sign, float dt)
   {
     math::vector_3d const up (0.0f, 1.0f, 0.0f);

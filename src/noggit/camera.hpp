@@ -28,6 +28,8 @@ namespace noggit
     math::vector_3d look_at() const;
     math::vector_3d direction() const;
 
+    math::matrix_4x4 view_matrix() const;
+
     void move_forward (float sign, float dt);
     void move_horizontal (float sign, float dt);
     void move_vertical (float sign, float dt);
