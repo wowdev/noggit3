@@ -1104,6 +1104,9 @@ uniform mat4 projection;
 uniform int tex_unit_lookup_1;
 uniform int tex_unit_lookup_2;
 
+uniform mat4 tex_matrix_1;
+uniform mat4 tex_matrix_2;
+
 // code from https://wowdev.wiki/M2/.skin#Environment_mapping
 vec2 sphere_map(vec3 vert, vec3 norm)
 {
@@ -1122,11 +1125,11 @@ vec2 get_texture_uv(int tex_unit_lookup, vec3 vert, vec3 norm)
   }
   else if(tex_unit_lookup == 1)
   {
-    return texcoord1;
+    return (transpose(tex_matrix_1) * vec4(texcoord1, 0.0, 1.0)).xy;
   }
   else if(tex_unit_lookup == 2)
   {
-    return texcoord2;
+    return (transpose(tex_matrix_2) * vec4(texcoord2, 0.0, 1.0)).xy;
   }
   else
   {

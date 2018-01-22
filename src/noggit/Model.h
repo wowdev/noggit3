@@ -66,14 +66,15 @@ public:
 
 
 class TextureAnim {
-  Animation::M2Value<math::vector_3d> trans, rot, scale;
+  Animation::M2Value<math::vector_3d> trans;
+  Animation::M2Value<math::quaternion, math::packed_quaternion> rot;
+  Animation::M2Value<math::vector_3d> scale;
 
 public:
-  math::vector_3d tval, rval, sval;
+  math::matrix_4x4 mat;
 
   void calc(int anim, int time, int animtime);
   TextureAnim(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
-  void setup(int anim);
 };
 
 struct ModelColor {
@@ -304,6 +305,7 @@ private:
   std::vector<ModelAnimation> _animations;
   std::vector<int> _global_sequences;
   std::vector<TextureAnim> _texture_animations;
+  std::vector<int16_t> _texture_animation_lookups;
   std::vector<uint16_t> _texture_lookup;
 
   // ===============================

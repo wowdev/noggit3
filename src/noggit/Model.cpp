@@ -314,8 +314,8 @@ void Model::initCommon(const MPQFile& f)
     uint16_t const* texlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexLookup);
     _texture_lookup = std::vector<uint16_t>(texlookup, texlookup + header.nTexLookup);
 
-    uint16_t const* texanimlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexAnimLookup);
-
+    int16_t const* texanimlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexAnimLookup);
+    _texture_animation_lookups = std::vector<int16_t>(texanimlookup, texanimlookup + header.nTexAnimLookup);
 
     int16_t const* texunitlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexUnitLookup);
     _texture_unit_lookup = std::vector<int16_t>(texunitlookup, texunitlookup + header.nTexUnitLookup);
@@ -700,6 +700,33 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
 
   m2_shader.uniform("tex_unit_lookup_1", tu1);
   m2_shader.uniform("tex_unit_lookup_2", tu2);
+
+  int16_t tex_anim_lookup = m->_texture_animation_lookups[animation_combo_index];
+  math::matrix_4x4 unit(math::matrix_4x4::unit);
+
+  if (tex_anim_lookup != -1)
+  {
+    m2_shader.uniform("tex_matrix_1", m->_texture_animations[tex_anim_lookup].mat);
+    if (texture_count > 1)
+    {
+      tex_anim_lookup = m->_texture_animation_lookups[animation_combo_index + 1];
+      if (tex_anim_lookup != -1)
+      {
+        m2_shader.uniform("tex_matrix_2", m->_texture_animations[tex_anim_lookup].mat);
+      }
+      else
+      {
+        m2_shader.uniform("tex_matrix_2", unit);
+      }
+    }
+  }
+  else
+  {
+    m2_shader.uniform("tex_matrix_1", unit);
+    m2_shader.uniform("tex_matrix_2", unit);
+  }
+  
+  
   m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader));
   m2_shader.uniform("mesh_color", mesh_color);
 
@@ -943,7 +970,8 @@ void Model::initAnimated(const MPQFile& f)
     calcBones (anim, 0, 0);
   }  
 
-  if (animTextures) {
+  if (animTextures) 
+  {
     ModelTexAnimDef const* ta = reinterpret_cast<ModelTexAnimDef const*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i=0; i<header.nTexAnims; ++i) {
       _texture_animations.emplace_back (f, ta[i], _global_sequences.data());
@@ -1049,12 +1077,13 @@ void Model::animate(int _anim, int animtime_)
     gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STREAM_DRAW);
   }
 
-  for (size_t i=0; i<header.nLights; ++i) {
+  for (size_t i=0; i<header.nLights; ++i) 
+  {
     if (_lights[i].parent>=0) {
       _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
       _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
     }
-  }
+  }  
 
   for (auto& particle : _particles)
   {
@@ -1063,41 +1092,31 @@ void Model::animate(int _anim, int animtime_)
     particle.setup(anim, pt, _global_animtime);
   }
 
-  for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
+  for (size_t i = 0; i<header.nRibbonEmitters; ++i) 
+  {
     _ribbons[i].setup(anim, t, _global_animtime);
   }
 
-  if (animTextures) {
-    for (size_t i=0; i<header.nTexAnims; ++i) {
-      _texture_animations[i].calc(anim, t, animtime);
-    }
+  for (auto& tex_anim : _texture_animations)
+  {
+    tex_anim.calc(anim, t, animtime);
   }
 }
 
 void TextureAnim::calc(int anim, int time, int animtime)
 {
-  if (trans.uses(anim)) {
-    tval = trans.getValue(anim, time, animtime);
+  mat = math::matrix_4x4::unit;
+  if (trans.uses(anim)) 
+  {  
+    mat *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue(anim, time, animtime));
   }
-  if (rot.uses(anim)) {
-    rval = rot.getValue(anim, time, animtime);
+  if (rot.uses(anim)) 
+  {
+    mat *= math::matrix_4x4 (math::matrix_4x4::rotation, rot.getValue(anim, time, animtime));
   }
-  if (scale.uses(anim)) {
-    sval = scale.getValue(anim, time, animtime);
-  }
-}
-
-void TextureAnim::setup(int anim)
-{
-  gl.loadIdentity();
-  if (trans.uses(anim)) {
-    gl.translatef(tval.x, tval.y, tval.z);
-  }
-  if (rot.uses(anim)) {
-    gl.rotatef(rval.x, 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
-  }
-  if (scale.uses(anim)) {
-    gl.scalef(sval.x, sval.y, sval.z);
+  if (scale.uses(anim)) 
+  {
+    mat *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue(anim, time, animtime));
   }
 }
 
@@ -1185,6 +1204,7 @@ TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *glo
   : trans (mta.trans, f, global)
   , rot (mta.rot, f, global)
   , scale (mta.scale, f, global)
+  , mat (math::matrix_4x4::uninitialized)
 {}
 
 Bone::Bone( const MPQFile& f,
@@ -1392,9 +1412,6 @@ void Model::draw ( std::vector<ModelInstance*> instances
   gl.materialfv(GL_FRONT, GL_EMISSION, czero);
   gl.color4f(1, 1, 1, 1);
   gl.depthMask(GL_TRUE);
-
-  gl.disable(GL_TEXTURE_GEN_S);
-  gl.disable(GL_TEXTURE_GEN_T);
 }
 
 void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)
