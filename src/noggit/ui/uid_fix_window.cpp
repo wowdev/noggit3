@@ -17,6 +17,7 @@ namespace noggit
                                    )
       : QDialog (nullptr)
     {
+      setWindowIcon (QIcon (":/icon"));
       new QVBoxLayout (this);
 
       layout()->addWidget

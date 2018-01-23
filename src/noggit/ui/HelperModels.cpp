@@ -18,6 +18,7 @@ namespace noggit
     helper_models::helper_models(MapView *mapview)
       : QWidget (nullptr)
     {
+      setWindowIcon (QIcon (":/icon"));
       auto layout (new QVBoxLayout (this));
       auto top_layout (new QHBoxLayout (nullptr));
       layout->addLayout (top_layout);

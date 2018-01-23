@@ -60,6 +60,7 @@ namespace noggit
       : QDialog (nullptr)
       , _settings (new QSettings (this))
     {
+      setWindowIcon (QIcon (":/icon"));
       setWindowTitle ("Settings");
 
       auto layout (new QFormLayout (this));
