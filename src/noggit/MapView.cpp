@@ -786,7 +786,7 @@ void MapView::createGUI()
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "http://modcraft.superparanoid.de"
+                                 , "https://bitbucket.org/berndloerwald/noggit3/"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL

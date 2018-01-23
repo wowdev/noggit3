@@ -4,6 +4,6 @@
         <file>FontAwesome.otf</file>
     </qresource>
     <qresource prefix="/">
-        <file alias="icon">../media/noggit.ico</file>
+        <file alias="icon">../media/noggit_icon.png</file>
     </qresource>
 </RCC>

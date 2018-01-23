@@ -19,6 +19,7 @@ namespace noggit
     model_import::model_import (MapView* mapview)
       : QWidget (nullptr)
     {
+      setWindowIcon (QIcon (":/icon"));
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
       auto layout (new QFormLayout (this));
 
