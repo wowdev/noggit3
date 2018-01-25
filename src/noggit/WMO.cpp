@@ -317,6 +317,7 @@ void WMO::draw ( int doodadset
                , bool draw_fog
                , math::vector_3d water_color_light
                , math::vector_3d water_color_dark
+               , liquid_render& render
                , int animtime
                , std::function<void (bool)> setup_outdoor_lights
                , bool world_has_skies
@@ -365,6 +366,7 @@ void WMO::draw ( int doodadset
 
     group.drawLiquid ( water_color_light
                      , water_color_dark
+                     , render
                      , draw_fog
                      , animtime
                      , setup_outdoor_lights
@@ -1157,6 +1159,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
 
 void WMOGroup::drawLiquid ( math::vector_3d water_color_light
                           , math::vector_3d water_color_dark
+                          , liquid_render& render
                           , bool draw_fog
                           , int animtime
                           , std::function<void (bool)> setup_outdoor_lights
@@ -1184,7 +1187,7 @@ void WMOGroup::drawLiquid ( math::vector_3d water_color_light
     gl.disable(GL_ALPHA_TEST);
     gl.depthMask(GL_TRUE);
     gl.color4f(1, 1, 1, 1);
-    lq->draw (water_color_light, water_color_dark, animtime);
+    lq->draw (water_color_light, water_color_dark, render, animtime);
     gl.disable(GL_LIGHT2);
   }
 }

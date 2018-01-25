@@ -15,53 +15,72 @@
 #include <algorithm>
 #include <string>
 
-void liquid_render::draw ( std::function<void (opengl::scoped::use_program&)> actual
-                         , math::vector_3d water_color_light
-                         , math::vector_3d water_color_dark
-                         , int animtime
-                         )
+void liquid_render::draw_wmo ( std::function<void (opengl::scoped::use_program&)> actual
+                             , math::vector_3d water_color_light
+                             , math::vector_3d water_color_dark
+                             , int liquid_id
+                             , int animtime
+                             )
 {
   opengl::scoped::use_program water_shader {program};
 
-  prepare_draw (water_shader, water_color_light, water_color_dark, animtime);
+  water_shader.uniform ("model_view", opengl::matrix::model_view());
+  water_shader.uniform ("projection", opengl::matrix::projection());
 
+  water_shader.uniform ("color_light", water_color_light);
+  water_shader.uniform ("color_dark",  water_color_dark);
+
+  prepare_draw (water_shader, liquid_id, animtime);
   actual (water_shader);
 }
 
 void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
-                                 , math::vector_3d water_color_light
-                                 , math::vector_3d water_color_dark
+                                 , int liquid_id
                                  , int animtime
                                  )
 {
-  water_shader.uniform ("model_view", opengl::matrix::model_view());
-  water_shader.uniform ("projection", opengl::matrix::projection());
 
-  water_shader.uniform ("color_light", {water_color_light, 0.7f});
-  water_shader.uniform ("color_dark", {water_color_dark, 0.9f});
-
-  water_shader.sampler
-    ( "texture"
-    , GL_TEXTURE0
-    , _textures[static_cast<std::size_t> (animtime / 60.0f) % _textures.size()].get()
-    );
-}
-
-liquid_render::liquid_render(bool transparency, std::string const& filename)
-  : _transparency(transparency)
-{
-  if (filename != "")
+  if (_current_anim_time != animtime || liquid_id != _current_liquid_id)
   {
-    setTextures(filename);
+    _current_anim_time = animtime;
+    _current_liquid_id = liquid_id;
+
+    if (_textures_by_liquid_id[liquid_id].empty())
+    {
+      add_liquid_id(liquid_id);
+    }
+
+    auto const& textures = _textures_by_liquid_id[liquid_id];
+
+    water_shader.sampler
+    ("texture"
+      , GL_TEXTURE0
+      , textures[static_cast<std::size_t> (animtime / 60.0f) % textures.size()].get()
+    );
   }
+  
 }
 
-void liquid_render::setTextures(std::string const& filename)
+void liquid_render::add_liquid_id(int liquid_id)
 {
-  _textures.clear();
+  auto& textures = _textures_by_liquid_id[liquid_id];
+  textures.clear();
+
+  std::string filename;
+  try
+  {
+    DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(liquid_id);
+    filename = lLiquidTypeRow.getString(LiquidTypeDB::TextureFilenames - 1);
+  }
+  catch (...)
+  {
+    // Fallback, when there is no information.
+    filename = "XTextures\\river\\lake_a.%d.blp";
+  }
 
   for (int i = 1; i <= 30; ++i)
   {
-    _textures.emplace_back(boost::str(boost::format(filename) % i));
+    textures.emplace_back(boost::str(boost::format(filename) % i));
   }
 }
+

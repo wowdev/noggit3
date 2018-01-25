@@ -60,6 +60,7 @@ public:
            );
   void drawLiquid ( math::vector_3d water_color_light
                   , math::vector_3d water_color_dark
+                  , liquid_render& render
                   , bool draw_fog
                   , int animtime
                   , std::function<void (bool)> setup_outdoor_lights
@@ -172,6 +173,7 @@ public:
             , bool draw_fog
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , liquid_render& render
             , int animtime
             , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies

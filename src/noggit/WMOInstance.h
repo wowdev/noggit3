@@ -71,6 +71,7 @@ public:
             , bool draw_fog
             , math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , liquid_render& render
             , boost::optional<selection_type> selection
             , int animtime
             , std::function<void (bool)> setup_outdoor_lights
