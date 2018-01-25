@@ -119,12 +119,19 @@ bool Model::isAnimated(const MPQFile& f)
   mPerInstanceAnimation = false;
 
   ModelVertex const* verts = reinterpret_cast<ModelVertex const*>(f.getBuffer() + header.ofsVertices);
-  for (size_t i = 0; i<header.nVertices && !animGeometry; ++i) {
-    for (size_t b = 0; b<4; b++) {
-      if (verts[i].weights[b]>0) {
+  for (size_t i = 0; i<header.nVertices && !animGeometry; ++i) 
+  {
+    for (size_t b = 0; b<4; b++) 
+    {
+      if (verts[i].weights[b]>0) 
+      {
         ModelBoneDef const& bb = bo[verts[i].bones[b]];
-        if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & 8)) {
-          if (bb.flags & 8) {
+        bool billboard = (bb.flags & (0x78)); // billboard | billboard_lock_[xyz]
+
+        if ((bb.flags & 0x200) || billboard) 
+        {
+          if (billboard) 
+          {
             // if we have billboarding, the model will need per-instance animation
             mPerInstanceAnimation = true;
           }
@@ -1008,7 +1015,8 @@ void Model::animate(int _anim, int animtime_)
   animtime = t;
   _global_animtime = animtime_;
 
-  if (animBones) {
+  if (animBones) 
+  {
     calcBones(anim, t, _global_animtime);
   }
 
@@ -1179,12 +1187,6 @@ TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *glo
   , scale (mta.scale, f, global)
 {}
 
-namespace
-{
-  //! \todo other billboard types
-  static const int MODELBONE_BILLBOARD = 8;
-}
-
 Bone::Bone( const MPQFile& f,
             const ModelBoneDef &b,
             int *global,
@@ -1194,8 +1196,9 @@ Bone::Bone( const MPQFile& f,
   , scale (b.scaling, f, global, animation_files)
   , pivot (fixCoordSystem (b.pivot))
   , parent (b.parent)
-  , billboard (b.flags & MODELBONE_BILLBOARD)
 {
+  memcpy(&flags, &b.flags, sizeof(uint32_t));
+
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
   scale.apply(fixCoordSystem2);
@@ -1208,7 +1211,12 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
   math::matrix_4x4 m {math::matrix_4x4::unit};
   math::quaternion q;
 
-  if (rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard)
+  if ( flags.transformed
+    || flags.billboard 
+    || flags.cylindrical_billboard_lock_x 
+    || flags.cylindrical_billboard_lock_y 
+    || flags.cylindrical_billboard_lock_z
+      )
   {
     m = {math::matrix_4x4::translation, pivot};
 
@@ -1227,7 +1235,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
       m *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue (anim, time, animtime));
     }
 
-    if (billboard)
+    if (flags.billboard)
     {
       float modelview[16];
       gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
@@ -1359,8 +1367,8 @@ void Model::draw ( std::vector<ModelInstance*> instances
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
-    //m2_shader.attrib("bones_weight",  4, GL_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    //m2_shader.attrib("bones_indices", 4, GL_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
     m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
     m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
     m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
