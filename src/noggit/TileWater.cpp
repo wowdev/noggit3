@@ -35,9 +35,8 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
 void TileWater::draw ( math::frustum const& frustum
                      , const float& cull_distance
                      , const math::vector_3d& camera
+                     , liquid_render& render
                      , opengl::scoped::use_program& water_shader
-                     , math::vector_3d water_color_light
-                     , math::vector_3d water_color_dark
                      , int animtime
                      , int layer
                      )
@@ -49,9 +48,8 @@ void TileWater::draw ( math::frustum const& frustum
       chunks[z][x]->draw ( frustum
                          , cull_distance
                          , camera
-                         , water_shader
-                         , water_color_light
-                         , water_color_dark
+                         , render
+                         , water_shader                         
                          , animtime
                          , layer
                          );

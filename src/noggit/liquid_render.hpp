@@ -14,20 +14,17 @@
 class liquid_render
 {
 public:
-  liquid_render(bool transparency = true, std::string const& filename = "");
-  void draw ( std::function<void (opengl::scoped::use_program&)>
-            , math::vector_3d water_color_light
-            , math::vector_3d water_color_dark
-            , int animtime
-            );
+  liquid_render() = default;
+  void draw_wmo ( std::function<void (opengl::scoped::use_program&)>
+                , math::vector_3d water_color_light
+                , math::vector_3d water_color_dark
+                , int liquid_id
+                , int animtime
+                );
   void prepare_draw ( opengl::scoped::use_program& water_shader
-                    , math::vector_3d water_color_light
-                    , math::vector_3d water_color_dark
+                    , int liquid_id
                     , int animtime
                     );
-
-  void setTextures(std::string const& filename);
-  void setTransparency(bool b) { _transparency = b; }
 
   opengl::program const& shader_program() const
   {
@@ -35,6 +32,11 @@ public:
   }
 
 private:
+  void add_liquid_id(int liquid);
+
+  int _current_liquid_id = -1;
+  int _current_anim_time = 0;
+
   opengl::program const program
     { { GL_VERTEX_SHADER
       , R"code(
@@ -83,8 +85,5 @@ void main()
       }
     };
 
-
-  bool _transparency;
-
-  std::vector<scoped_blp_texture_reference> _textures;
+  std::map<int, std::vector<scoped_blp_texture_reference>> _textures_by_liquid_id;
 };

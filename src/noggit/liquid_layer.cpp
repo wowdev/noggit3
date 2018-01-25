@@ -22,7 +22,6 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
   , _subchunks(0)
   , pos(base)
   , texRepeats(4.0f)
-  , _render()
 {
   for (int z = 0; z < 9; ++z)
   {
@@ -47,7 +46,6 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
   , _subchunks(0)
   , pos(base)
   , texRepeats(4.0f)
-  , _render()
 {
   int offset = 0;
   for (int z = 0; z < info.height; ++z)
@@ -203,7 +201,6 @@ void liquid_layer::changeLiquidID(int id)
   try
   {
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(_liquid_id);
-    _render.setTextures(lLiquidTypeRow.getString(LiquidTypeDB::TextureFilenames - 1));
 
     // !\ todo: handle lava (type == 2) that use uv_mapping
     switch (lLiquidTypeRow.getInt(LiquidTypeDB::Type))
@@ -220,8 +217,6 @@ void liquid_layer::changeLiquidID(int id)
   }
   catch (...)
   {
-    // Fallback, when there is no information.
-    _render.setTextures("XTextures\\river\\lake_a.%d.blp");
   }
 }
 
@@ -275,14 +270,12 @@ void liquid_layer::updateRender()
     );
 }
 
-void liquid_layer::draw ( opengl::scoped::use_program& water_shader
-                        , math::vector_3d water_color_light
-                        , math::vector_3d water_color_dark
+void liquid_layer::draw ( liquid_render& render
+                        , opengl::scoped::use_program& water_shader
                         , int animtime
                         )
 {
-  _render.prepare_draw
-    (water_shader, water_color_light, water_color_dark, animtime);
+  render.prepare_draw (water_shader, _liquid_id, animtime);
 
   water_shader.attrib ("position", vertices);
   water_shader.attrib ("tex_coord", tex_coords);

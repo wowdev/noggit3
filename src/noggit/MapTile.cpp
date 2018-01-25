@@ -384,9 +384,8 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 void MapTile::drawWater ( math::frustum const& frustum
                         , const float& cull_distance
                         , const math::vector_3d& camera
+                        , liquid_render& render
                         , opengl::scoped::use_program& water_shader
-                        , math::vector_3d water_color_light
-                        , math::vector_3d water_color_dark
                         , int animtime
                         , int layer
                         )
@@ -402,9 +401,8 @@ void MapTile::drawWater ( math::frustum const& frustum
   Water.draw ( frustum
              , cull_distance
              , camera
+             , render
              , water_shader
-             , water_color_light
-             , water_color_dark
              , animtime
              , layer
              );

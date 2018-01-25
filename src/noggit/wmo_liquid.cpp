@@ -22,7 +22,6 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   , texRepeats(4.0f)
   , xtiles(header.A)
   , ytiles(header.B)
-  , render(new liquid_render())
 {
   int flag = initGeometry (f);
   std::string texture;
@@ -47,9 +46,6 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
     texture = "XTextures\\river\\lake_a.%d.blp";
     mTransparency = true;
   }
-
-  render->setTransparency(mTransparency);
-  render->setTextures(texture);
 }
 
 int wmo_liquid::initGeometry(MPQFile* f)

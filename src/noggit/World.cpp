@@ -1379,6 +1379,8 @@ void main()
   opengl::texture::disable_texture(1);
   opengl::texture::enable_texture(0);
 
+  static liquid_render liquid_renderer;
+
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
@@ -1400,6 +1402,7 @@ void main()
                         , draw_fog
                         , skies->colorSet[RIVER_COLOR_LIGHT]
                         , skies->colorSet[RIVER_COLOR_DARK]
+                        , liquid_renderer
                         , mCurrentSelection
                         , animtime
                         , [this] (bool on) { return outdoorLights (on); }
@@ -1421,21 +1424,21 @@ void main()
 
   if (draw_water)
   {
-    liquid_render liquid_renderer;
-
-    opengl::scoped::use_program water_shader { liquid_renderer.shader_program()};
+    opengl::scoped::use_program water_shader{ liquid_renderer.shader_program() };
 
     water_shader.uniform ("model_view", opengl::matrix::model_view());
     water_shader.uniform ("projection", opengl::matrix::projection());
+
+    water_shader.uniform ("color_light", { skies->colorSet[OCEAN_COLOR_LIGHT], 0.7f });
+    water_shader.uniform ("color_dark", { skies->colorSet[OCEAN_COLOR_DARK], 0.9f });
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawWater ( frustum
                       , culldistance
                       , camera_pos
+                      , liquid_renderer
                       , water_shader
-                      , skies->colorSet[OCEAN_COLOR_LIGHT]
-                      , skies->colorSet[OCEAN_COLOR_DARK]
                       , animtime
                       , water_layer
                       );

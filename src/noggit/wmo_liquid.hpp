@@ -50,14 +50,16 @@ public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
   void draw ( math::vector_3d water_color_light
             , math::vector_3d water_color_dark
+            , liquid_render& render
             , int animtime
             )
   {
-    render->draw ( [&] (opengl::scoped::use_program& shader) { draw_actual (shader); }
-                 , water_color_light
-                 , water_color_dark
-                 , animtime
-                 );
+    render.draw_wmo ( [&] (opengl::scoped::use_program& shader) { draw_actual (shader); }
+                , water_color_light
+                , water_color_dark
+                , 13          //! \ todo: find how to get the real liquid id
+                , animtime
+                );
   }
 
 private:
@@ -67,8 +69,6 @@ private:
   float texRepeats;
   bool mTransparency;
   int xtiles, ytiles;
-
-  std::unique_ptr<liquid_render> render;
 
   std::vector<float> depths;
   std::vector<math::vector_2d> tex_coords;
