@@ -553,25 +553,16 @@ ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
 {
 }
 
-enum RenderFlags
-{
-  RENDERFLAGS_UNLIT = 1,
-  RENDERFLAGS_UNFOGGED = 2,
-  RENDERFLAGS_TWOSIDED = 4,
-  RENDERFLAGS_BILLBOARD = 8,
-  RENDERFLAGS_ZBUFFERED = 16
-};
-
 bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m)
 {
-  if (!m->showGeosets[submesh])
+  if (!m->showGeosets[submesh] || pixel_shader == ModelPixelShader::Invalid_Shader)
   {
     return false;
   }
 
   // COLOUR
   // Get the colour and transparency and check that we should even render
-  math::vector_4d opacity_color = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans); // ??
+  math::vector_4d mesh_color = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans); // ??
   math::vector_4d emissive_color = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
 
   auto const& renderflag(m->_render_flags[renderflag_index]);
@@ -582,19 +573,19 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->animtime, m->_global_animtime));
     if (m->_colors[color_index].opacity.uses (m->anim))
     {
-      opacity_color.w = m->_colors[color_index].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
+      mesh_color.w = m->_colors[color_index].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
     }
 
     if (renderflag.flags.unlit)
     {
-      opacity_color.x = c.x; opacity_color.y = c.y; opacity_color.z = c.z;
+      mesh_color.x = c.x; mesh_color.y = c.y; mesh_color.z = c.z;
     }
     else
     {
-      opacity_color.x = opacity_color.y = opacity_color.z = 0;
+      mesh_color.x = mesh_color.y = mesh_color.z = 0;
     }
 
-    emissive_color = math::vector_4d(c, opacity_color.w);
+    emissive_color = math::vector_4d(c, mesh_color.w);
     gl.materialfv(GL_FRONT, GL_EMISSION, emissive_color);
   }
 
@@ -603,12 +594,12 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   {
     if (m->_transparency[transparency_combo_index].trans.uses (0))
     {
-      opacity_color.w = opacity_color.w * m->_transparency[transparency_combo_index].trans.getValue (0, m->animtime, m->_global_animtime);;
+      mesh_color.w = mesh_color.w * m->_transparency[transparency_combo_index].trans.getValue (0, m->animtime, m->_global_animtime);;
     }
   }
 
   // exit and return false before affecting the opengl render state
-  if (!((opacity_color.w > 0) && (color_index == -1 || emissive_color.w > 0)))
+  if (!((mesh_color.w > 0) && (color_index == -1 || emissive_color.w > 0)))
   {
     return false;
   }
@@ -622,7 +613,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     break;
   case BM_TRANSPARENT:
     gl.disable(GL_BLEND);
-    m2_shader.uniform("alpha_test", (224.f / 255.f) * opacity_color.w);
+    m2_shader.uniform("alpha_test", (224.f / 255.f) * mesh_color.w);
     break;
   case BM_ALPHA_BLEND:
     gl.enable(GL_BLEND);
@@ -637,17 +628,17 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   case BM_ADDITIVE_ALPHA:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_ZERO);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * opacity_color.w);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
     break;
   case BM_MODULATE:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * opacity_color.w);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
     break;
   case BM_MODULATE2:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_ONE);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * opacity_color.w);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
     break;
   }
 
@@ -671,11 +662,13 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
 
   if (texture_count > 1)
   {
-    //bind_texture(1, m);
+    bind_texture(1, m);
   }
 
   bind_texture(0, m);
 
+  m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader));
+  m2_shader.uniform("mesh_color", mesh_color);
 
   return true;
 }
@@ -700,75 +693,142 @@ void ModelRenderPass::bind_texture(size_t index, Model* m)
   }    
 }
 
-
-ModelPixelShader model_pixel_shader[] =
-{
-  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha,
-  ModelPixelShader::Combiners_Opaque_AddAlpha,
-  ModelPixelShader::Combiners_Opaque_AddAlpha_Alpha,
-  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_Add,
-  ModelPixelShader::Combiners_Mod_AddAlpha,
-  ModelPixelShader::Combiners_Opaque_AddAlpha,
-  ModelPixelShader::Combiners_Mod_AddAlpha,
-  ModelPixelShader::Combiners_Mod_AddAlpha_Alpha,
-  ModelPixelShader::Combiners_Opaque_Alpha_Alpha,
-  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_3s,
-  ModelPixelShader::Combiners_Opaque_AddAlpha_Wgt,
-  ModelPixelShader::Combiners_Mod_Add_Alpha,
-  ModelPixelShader::Combiners_Opaque_ModNA_Alpha,
-  ModelPixelShader::Combiners_Mod_AddAlpha_Wgt,
-  ModelPixelShader::Combiners_Mod_AddAlpha_Wgt,
-  ModelPixelShader::Combiners_Opaque_AddAlpha_Wgt,
-  ModelPixelShader::Combiners_Opaque_Mod_Add_Wgt,
-  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_UnshAlpha,
-  ModelPixelShader::Combiners_Mod_Dual_Crossfade,
-  ModelPixelShader::Combiners_Mod_Depth,
-  ModelPixelShader::Combiners_Mod_AddAlpha_Alpha,
-  ModelPixelShader::Combiners_Mod_Mod,
-  ModelPixelShader::Combiners_Mod_Masked_Dual_Crossfade,
-  ModelPixelShader::Combiners_Opaque_Alpha,
-  ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha_UnshAlpha,
-  ModelPixelShader::Combiners_Mod_Depth
-};
-
 // https://wowdev.wiki/M2/.skin#Pixel_shaders
 ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
 {
-  if (shader_id & 0x8000)
-  {
-    uint16_t const shaderID (shader_id & (~0x8000));
-    assert (shaderID < MODEL_PIXEL_SHADER_COUNT);
-    return model_pixel_shader[shaderID];
-  }
-  else
+  uint16_t v4 = (shader_id >> 4) & 7;
+  uint16_t v5 = shader_id & 7;
+  uint16_t v6 = (shader_id >> 4) & 8;
+  uint16_t v7 = shader_id & 8;
+
+  ModelPixelShader pixel_shader;
+  if (!(shader_id & 0x8000))
   {
     if (texture_count == 1)
     {
-      return shader_id & 0x70 ? ModelPixelShader::Combiners_Mod : ModelPixelShader::Combiners_Opaque;
+      switch (v4)
+      {
+      case 0:
+        pixel_shader = ModelPixelShader::Combiners_Opaque;
+        break;
+      case 2:
+        pixel_shader = ModelPixelShader::Combiners_Decal;
+        break;
+      case 3:
+        pixel_shader = ModelPixelShader::Combiners_Add;
+        break;
+      case 4:
+        pixel_shader = ModelPixelShader::Combiners_Mod2x;
+        break;
+      case 5:
+        pixel_shader = ModelPixelShader::Combiners_Fade;
+        break;
+      default:
+        pixel_shader = ModelPixelShader::Combiners_Mod;
+        break;
+      }
     }
     else
     {
-      const uint16_t lower (shader_id & 7);
-      if (shader_id & 0x70)
+      if (!v4)
       {
-        return lower == 0 ? ModelPixelShader::Combiners_Mod_Opaque
-          : lower == 3 ? ModelPixelShader::Combiners_Mod_Add
-          : lower == 4 ? ModelPixelShader::Combiners_Mod_Mod2x
-          : lower == 6 ? ModelPixelShader::Combiners_Mod_Mod2xNA
-          : lower == 7 ? ModelPixelShader::Combiners_Mod_AddNA
-          : ModelPixelShader::Combiners_Mod_Mod;
+        switch (v5)
+        {
+        case 0:
+          pixel_shader = ModelPixelShader::Combiners_Opaque_Opaque;
+          break;
+        case 3:
+          pixel_shader = ModelPixelShader::Combiners_Opaque_Add;
+          break;
+        case 4:
+          pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2x;
+          break;
+        case 6:
+          pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA;
+          break;
+        case 7:
+          pixel_shader = ModelPixelShader::Combiners_Opaque_AddNA;
+          break;
+        default:
+          pixel_shader = ModelPixelShader::Combiners_Opaque_Mod;
+          break;
+        }
       }
-      else
+      else if (v4 == 1) 
       {
-        return lower == 0 ? ModelPixelShader::Combiners_Opaque_Opaque
-          : lower == 3 ? ModelPixelShader::Combiners_Opaque_AddAlpha
-          : lower == 4 ? ModelPixelShader::Combiners_Opaque_Mod2x
-          : lower == 6 ? ModelPixelShader::Combiners_Opaque_Mod2xNA
-          : lower == 7 ? ModelPixelShader::Combiners_Opaque_AddAlpha
-          : ModelPixelShader::Combiners_Opaque_Mod;
+        switch (v5)
+        {
+        case 0:
+          pixel_shader = ModelPixelShader::Combiners_Mod_Opaque;
+          break;
+        case 3:
+          pixel_shader = ModelPixelShader::Combiners_Mod_Add;
+          break;
+        case 4:
+          pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
+          break;
+        case 6:
+          pixel_shader = ModelPixelShader::Combiners_Mod_Mod2xNA;
+          break;
+        case 7:
+          pixel_shader = ModelPixelShader::Combiners_Mod_AddNA;
+          break;
+        default:
+          pixel_shader = ModelPixelShader::Combiners_Mod_Mod;
+          break;
+
+        }
+      }
+      else if (v4 == 3) 
+      {
+        if (v5 == 1)
+        {
+          pixel_shader = ModelPixelShader::Combiners_Add_Mod;
+        }
+        else
+        {
+          pixel_shader = ModelPixelShader::Invalid_Shader;
+        }
+      }
+      else if (v4 != 4) 
+      {
+        pixel_shader = ModelPixelShader::Invalid_Shader;
+      }
+      else if (v5 == 1) 
+      {
+        pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
+      }
+      else 
+      {
+        if (v5 != 4)
+        {
+          pixel_shader = ModelPixelShader::Invalid_Shader;
+        }
+        else
+        {
+          pixel_shader = ModelPixelShader::Combiners_Mod2x_Mod2x;
+        }        
       }
     }
   }
+  switch (shader_id & 0x7FFF) 
+  {
+  case 0:
+    return ModelPixelShader::Invalid_Shader;
+  case 1:
+    pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha;
+    break;
+  case 2:
+    pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha;
+    break;
+  case 3:
+    pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha_Alpha;
+    break;
+  default:
+    break;
+  }
+
+  return pixel_shader;
 }
 
 void Model::compute_pixel_shader_ids()
