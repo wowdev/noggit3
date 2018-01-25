@@ -1308,7 +1308,7 @@ void main()
 
       for (auto& it : _models_by_filename)
       {
-        it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, 0, false, draw_models_with_box, visible_model_count);
+        it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
       }
 
       opengl::texture::disable_texture(1);

@@ -35,7 +35,22 @@ public:
   math::vector_3d pivot;
   int parent;
 
-  bool billboard;
+  typedef struct
+  {
+    uint32_t flag_0x1 : 1;
+    uint32_t flag_0x2 : 1;
+    uint32_t flag_0x4 : 1;
+    uint32_t billboard : 1;
+    uint32_t cylindrical_billboard_lock_x : 1;
+    uint32_t cylindrical_billboard_lock_y : 1;
+    uint32_t cylindrical_billboard_lock_z : 1;
+    uint32_t flag_0x80 : 1;
+    uint32_t flag_0x100 : 1;
+    uint32_t transformed : 1;
+    uint32_t unused : 20;
+  } bone_flags;
+
+  bone_flags flags;
   math::matrix_4x4 mat = math::matrix_4x4::uninitialized;
   math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
 
