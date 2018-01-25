@@ -80,7 +80,14 @@ void liquid_render::add_liquid_id(int liquid_id)
 
   for (int i = 1; i <= 30; ++i)
   {
-    textures.emplace_back(boost::str(boost::format(filename) % i));
+    try 
+    {
+      textures.emplace_back(boost::str(boost::format(filename) % i));
+    }
+    catch (...)
+    {
+      break;
+    }    
   }
 }
 
