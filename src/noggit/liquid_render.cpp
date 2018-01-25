@@ -67,10 +67,20 @@ void liquid_render::add_liquid_id(int liquid_id)
   textures.clear();
 
   std::string filename;
+
   try
   {
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(liquid_id);
-    filename = lLiquidTypeRow.getString(LiquidTypeDB::TextureFilenames - 1);
+
+    // fix to now crash when using procedural water (id 100)
+    if (lLiquidTypeRow.getInt(LiquidTypeDB::ShaderType) == 3)
+    {
+      filename = "XTextures\\river\\lake_a.%d.blp";
+    }
+    else
+    {
+      filename = lLiquidTypeRow.getString(LiquidTypeDB::TextureFilenames);
+    }
   }
   catch (...)
   {

@@ -163,8 +163,8 @@ public:
   static const size_t ID = 0;        // uint
   static const size_t Name = 1;      // string
   static const size_t Type = 3;      // uint
-  static const size_t ShaderType = 15;  // uint
-  static const size_t TextureFilenames = 16;    // string[8]
+  static const size_t ShaderType = 14;  // uint
+  static const size_t TextureFilenames = 15;    // string[8]
 
   static int getLiquidType(int pID);
   static std::string getLiquidName(int pID);
