@@ -489,11 +489,13 @@ void Model::fix_shader_id_layer()
       some_flags = (some_flags & 0xFF00);
     }
 
+    int16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];
+
     if ((some_flags & 0xFF) < 2) 
     {
       if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 2) && ((lower_bits == 4) || (lower_bits == 6))) 
       {
-        if ((_texture_unit_lookup[pass.texture_coord_combo_index] == 0) && (_texture_unit_lookup[pass.texture_coord_combo_index + 1] > 2))
+        if (texture_unit_lookup == 0 && (_texture_unit_lookup[pass.texture_coord_combo_index + 1] == -1))
         {
           some_flags = (some_flags & 0xFF00) | 1;
         }
@@ -504,7 +506,7 @@ void Model::fix_shader_id_layer()
     {
       if ((some_flags >> 8) == 1) 
       {
-        if ((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6) || (pass.texture_count != 1) || (_texture_unit_lookup[pass.texture_coord_combo_index] <= 2))
+        if ((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6) || (pass.texture_count != 1) || (texture_unit_lookup >= 0))
         {
           some_flags &= 0xFF00;
         }
@@ -516,6 +518,9 @@ void Model::fix_shader_id_layer()
           //TODO: Implement packing of textures (see https://wowdev.wiki/M2/.skin/WotLK_shader_selection )
 
           some_flags = (some_flags & 0xFF) | (2 << 8);
+
+          first_pass->texture_count = 2;
+
           continue;
         }
       }
@@ -545,7 +550,7 @@ void Model::fix_shader_id_layer()
       some_flags = (some_flags & 0xFF);
     }
 
-    if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 1) && (_texture_unit_lookup[pass.texture_coord_combo_index] == 0)) 
+    if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 1) && (texture_unit_lookup == 0))
     {
       some_flags = (some_flags & 0xFF) | (1 << 8);
     }
