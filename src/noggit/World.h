@@ -280,8 +280,6 @@ public:
 private:
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
 
-  void getSelection();
-
   std::set<MapChunk*>& vertexBorderChunks();
 
   std::set<MapTile*> _vertex_tiles;
