@@ -192,7 +192,11 @@ namespace opengl
       }
 
       GLuint loc = _program.uniform_location (name);
-      _uniforms[name] = loc;
+      if (loc == -1)
+      {
+        throw std::invalid_argument ("uniform " + name + " does not exist in shader\n");
+      }
+      _uniforms[name] = loc;      
       return loc;
     }
 
