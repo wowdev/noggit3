@@ -95,10 +95,7 @@ void Noggit::parseArgs(int argc, char *argv[])
     }
   }
   QSettings settings;
-  if (!settings.value("antialiasing", true).toBool())
-  {
-    doAntiAliasing = false;
-  }
+  doAntiAliasing = settings.value("antialiasing", true).toBool();
 }
 
 void Noggit::loadMPQs()
