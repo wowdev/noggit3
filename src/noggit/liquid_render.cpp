@@ -16,8 +16,10 @@
 #include <string>
 
 void liquid_render::draw_wmo ( std::function<void (opengl::scoped::use_program&)> actual
-                             , math::vector_3d water_color_light
-                             , math::vector_3d water_color_dark
+                             , math::vector_4d const& ocean_color_light
+                             , math::vector_4d const& ocean_color_dark
+                             , math::vector_4d const& river_color_light
+                             , math::vector_4d const& river_color_dark
                              , int liquid_id
                              , int animtime
                              )
@@ -27,8 +29,10 @@ void liquid_render::draw_wmo ( std::function<void (opengl::scoped::use_program&)
   water_shader.uniform ("model_view", opengl::matrix::model_view());
   water_shader.uniform ("projection", opengl::matrix::projection());
 
-  water_shader.uniform ("color_light", water_color_light);
-  water_shader.uniform ("color_dark",  water_color_dark);
+  water_shader.uniform ("ocean_color_light", ocean_color_light);
+  water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
+  water_shader.uniform ("river_color_light", river_color_light);
+  water_shader.uniform ("river_color_dark",  river_color_dark);
 
   prepare_draw (water_shader, liquid_id, animtime);
   actual (water_shader);
@@ -51,6 +55,7 @@ void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
     }
 
     auto const& textures = _textures_by_liquid_id[liquid_id];
+    water_shader.uniform("type", _liquid_id_types[liquid_id]);
 
     water_shader.sampler
     ("texture"
@@ -71,6 +76,8 @@ void liquid_render::add_liquid_id(int liquid_id)
   try
   {
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(liquid_id);
+
+    _liquid_id_types[liquid_id] = lLiquidTypeRow.getInt(LiquidTypeDB::Type);
 
     // fix to now crash when using procedural water (id 100)
     if (lLiquidTypeRow.getInt(LiquidTypeDB::ShaderType) == 3)

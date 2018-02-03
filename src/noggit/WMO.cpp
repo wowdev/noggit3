@@ -303,9 +303,6 @@ void WMO::upload()
   _finished_upload = true;
 }
 
-// model.cpp
-void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth);
-
 void WMO::draw ( int doodadset
                , const math::vector_3d &ofs
                , math::degrees const angle
@@ -315,8 +312,10 @@ void WMO::draw ( int doodadset
                , const math::vector_3d& camera
                , bool draw_doodads
                , bool draw_fog
-               , math::vector_3d water_color_light
-               , math::vector_3d water_color_dark
+               , math::vector_4d const& ocean_color_light
+               , math::vector_4d const& ocean_color_dark
+               , math::vector_4d const& river_color_light
+               , math::vector_4d const& river_color_dark
                , liquid_render& render
                , int animtime
                , std::function<void (bool)> setup_outdoor_lights
@@ -364,8 +363,10 @@ void WMO::draw ( int doodadset
                         );
     }
 
-    group.drawLiquid ( water_color_light
-                     , water_color_dark
+    group.drawLiquid ( ocean_color_light
+                     , ocean_color_dark
+                     , river_color_light
+                     , river_color_dark
                      , render
                      , draw_fog
                      , animtime
@@ -1157,8 +1158,10 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
 
 }
 
-void WMOGroup::drawLiquid ( math::vector_3d water_color_light
-                          , math::vector_3d water_color_dark
+void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
+                          , math::vector_4d const& ocean_color_dark
+                          , math::vector_4d const& river_color_light
+                          , math::vector_4d const& river_color_dark
                           , liquid_render& render
                           , bool draw_fog
                           , int animtime
@@ -1187,7 +1190,13 @@ void WMOGroup::drawLiquid ( math::vector_3d water_color_light
     gl.disable(GL_ALPHA_TEST);
     gl.depthMask(GL_TRUE);
     gl.color4f(1, 1, 1, 1);
-    lq->draw (water_color_light, water_color_dark, render, animtime);
+    lq->draw ( ocean_color_light
+             , ocean_color_dark
+             , river_color_light
+             , river_color_dark
+             , render
+             , animtime
+             );
     gl.disable(GL_LIGHT2);
   }
 }

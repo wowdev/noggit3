@@ -1386,6 +1386,12 @@ void main()
 
   static liquid_render liquid_renderer;
 
+  // todo: find the correct alpha values
+  math::vector_4d ocean_color_light(skies->colorSet[OCEAN_COLOR_LIGHT], 0.7f);
+  math::vector_4d ocean_color_dark (skies->colorSet[OCEAN_COLOR_DARK], 0.9f);
+  math::vector_4d river_color_light(skies->colorSet[RIVER_COLOR_LIGHT], 0.7f);
+  math::vector_4d river_color_dark (skies->colorSet[RIVER_COLOR_DARK], 0.9f);
+
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
@@ -1405,8 +1411,10 @@ void main()
                         , is_hidden
                         , draw_wmo_doodads
                         , draw_fog
-                        , skies->colorSet[RIVER_COLOR_LIGHT]
-                        , skies->colorSet[RIVER_COLOR_DARK]
+                        , ocean_color_light
+                        , ocean_color_dark
+                        , river_color_light
+                        , river_color_dark
                         , liquid_renderer
                         , mCurrentSelection
                         , animtime
@@ -1436,8 +1444,10 @@ void main()
     water_shader.uniform ("model_view", opengl::matrix::model_view());
     water_shader.uniform ("projection", opengl::matrix::projection());
 
-    water_shader.uniform ("color_light", { skies->colorSet[OCEAN_COLOR_LIGHT], 0.7f });
-    water_shader.uniform ("color_dark", { skies->colorSet[OCEAN_COLOR_DARK], 0.9f });
+    water_shader.uniform ("ocean_color_light", ocean_color_light);
+    water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
+    water_shader.uniform ("river_color_light", river_color_light);
+    water_shader.uniform ("river_color_dark",  river_color_dark);
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {

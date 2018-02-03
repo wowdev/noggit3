@@ -58,8 +58,10 @@ public:
            , bool world_has_skies
            , std::function<void (bool)> setup_fog
            );
-  void drawLiquid ( math::vector_3d water_color_light
-                  , math::vector_3d water_color_dark
+  void drawLiquid ( math::vector_4d const& ocean_color_light
+                  , math::vector_4d const& ocean_color_dark
+                  , math::vector_4d const& river_color_light
+                  , math::vector_4d const& river_color_dark
                   , liquid_render& render
                   , bool draw_fog
                   , int animtime
@@ -171,8 +173,10 @@ public:
             , const math::vector_3d& camera
             , bool draw_doodads
             , bool draw_fog
-            , math::vector_3d water_color_light
-            , math::vector_3d water_color_dark
+            , math::vector_4d const& ocean_color_light
+            , math::vector_4d const& ocean_color_dark
+            , math::vector_4d const& river_color_light
+            , math::vector_4d const& river_color_dark
             , liquid_render& render
             , int animtime
             , std::function<void (bool)> setup_outdoor_lights

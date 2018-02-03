@@ -16,8 +16,10 @@ class liquid_render
 public:
   liquid_render() = default;
   void draw_wmo ( std::function<void (opengl::scoped::use_program&)>
-                , math::vector_3d water_color_light
-                , math::vector_3d water_color_dark
+                , math::vector_4d const& ocean_color_light
+                , math::vector_4d const& ocean_color_dark
+                , math::vector_4d const& river_color_light
+                , math::vector_4d const& river_color_dark
                 , int liquid_id
                 , int animtime
                 );
@@ -66,9 +68,13 @@ void main()
 #version 110
 
 uniform sampler2D texture;
-uniform vec4 color_light;
-uniform vec4 color_dark;
+uniform vec4 ocean_color_light;
+uniform vec4 ocean_color_dark;
+uniform vec4 river_color_light;
+uniform vec4 river_color_dark;
 uniform float tex_repeat;
+
+uniform int type;
 
 varying float depth_;
 varying vec2 tex_coord_;
@@ -76,14 +82,26 @@ varying vec2 tex_coord_;
 void main()
 {
   vec4 texel = texture2D (texture, tex_coord_ / tex_repeat);
-  vec4 lerp = mix (color_dark, color_light, depth_);
-  vec4 tResult = clamp (texel + lerp, 0.0, 1.0); //clamp shouldn't be needed
-  vec4 oColor = clamp (texel + tResult, 0.0, 1.0);
-  gl_FragColor = vec4 (oColor.rgb, lerp.a);
+  // lava || slime
+  if(type == 2 || type == 3)
+  {
+    gl_FragColor = texel;
+  }
+  else
+  {
+    vec4 lerp = (type == 1)
+              ? mix (ocean_color_dark, ocean_color_light, depth_) 
+              : mix (river_color_dark, river_color_light, depth_);
+              
+    vec4 tResult = clamp (texel + lerp, 0.0, 1.0); //clamp shouldn't be needed
+    vec4 oColor = clamp (texel + tResult, 0.0, 1.0);
+    gl_FragColor = vec4 (oColor.rgb, lerp.a);
+  }  
 }
 )code"
       }
     };
 
+  std::map<int, int> _liquid_id_types;
   std::map<int, std::vector<scoped_blp_texture_reference>> _textures_by_liquid_id;
 };
