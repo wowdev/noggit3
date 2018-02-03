@@ -52,8 +52,10 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , bool force_box
                        , bool draw_doodads
                        , bool draw_fog
-                       , math::vector_3d water_color_light
-                       , math::vector_3d water_color_dark
+                       , math::vector_4d const& ocean_color_light
+                       , math::vector_4d const& ocean_color_dark
+                       , math::vector_4d const& river_color_light
+                       , math::vector_4d const& river_color_dark
                        , liquid_render& render
                        , boost::optional<selection_type> selection
                        , int animtime
@@ -87,8 +89,10 @@ void WMOInstance::draw ( math::frustum const& frustum
               , camera
               , draw_doodads
               , draw_fog
-              , water_color_light
-              , water_color_dark
+              , ocean_color_light
+              , ocean_color_dark
+              , river_color_light
+              , river_color_dark
               , render
               , animtime
               , setup_outdoor_lights

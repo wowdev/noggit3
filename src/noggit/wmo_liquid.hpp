@@ -48,15 +48,19 @@ class wmo_liquid
 {
 public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
-  void draw ( math::vector_3d water_color_light
-            , math::vector_3d water_color_dark
+  void draw ( math::vector_4d const& ocean_color_light
+            , math::vector_4d const& ocean_color_dark
+            , math::vector_4d const& river_color_light
+            , math::vector_4d const& river_color_dark
             , liquid_render& render
             , int animtime
             )
   {
     render.draw_wmo ( [&] (opengl::scoped::use_program& shader) { draw_actual (shader); }
-                , water_color_light
-                , water_color_dark
+                , ocean_color_light
+                , ocean_color_dark
+                , river_color_light
+                , river_color_dark
                 , 13          //! \ todo: find how to get the real liquid id
                 , animtime
                 );
