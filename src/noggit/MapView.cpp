@@ -177,7 +177,7 @@ void MapView::DeleteSelectedObject()
   else if (_world->IsSelection(eEntry_Model))
   {
     _world->deleteModelInstance(boost::get<selected_model_type> (*_world->GetCurrentSelection())->uid);
-    _world->update_models_by_filename();
+    _world->need_model_updates = true;
   }
 }
 

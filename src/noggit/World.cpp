@@ -1080,6 +1080,11 @@ void main()
       ModelManager::resetAnim();
     }
 
+    if (need_model_updates)
+    {
+      update_models_by_filename();
+    }
+
     std::unordered_map<Model*, std::size_t> visible_model_count;
 
     {
@@ -2495,4 +2500,6 @@ void World::update_models_by_filename()
     // to make sure the transform matrix are up to date
     it.second.recalcExtents();
   }
+
+  need_model_updates = false;
 }

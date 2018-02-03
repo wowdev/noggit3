@@ -276,8 +276,10 @@ public:
 
   void recalc_norms (MapChunk*) const;
 
-  void update_models_by_filename();
+  bool need_model_updates = false;
+  
 private:
+  void update_models_by_filename();
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
 
   std::set<MapChunk*>& vertexBorderChunks();
