@@ -411,9 +411,6 @@ void MapTile::drawWater ( math::frustum const& frustum
   gl.enable(GL_COLOR_MATERIAL);
 }
 
-bool MapTile::canWaterSave() {
-  return true;
-}
 
 void MapTile::getAlpha(size_t id, unsigned char *amap)
 {

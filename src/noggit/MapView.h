@@ -60,7 +60,6 @@ namespace noggit
     class texturing_tool;
     class toolbar;    
     class water;
-    class water_save_warning;
     class zone_id_browser;
     struct main_window;
     struct tileset_chooser;
@@ -116,8 +115,6 @@ private:
   void createGUI();
 
   float mTimespeed;
-
-  void checkWaterSave();
 
   void ResetSelectedObjectRotation();
   void SnapSelectedObjectToGround();
@@ -298,6 +295,5 @@ private:
   noggit::ui::texturing_tool* texturingTool;
   QDockWidget* _texturing;
 
-  noggit::ui::water_save_warning *waterSaveWarning;
   noggit::ui::helper_models *HelperModels;
 };

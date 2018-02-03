@@ -24,7 +24,6 @@
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/Toolbar.h> // noggit::ui::toolbar
 #include <noggit/ui/Water.h>
-#include <noggit/ui/WaterSaveWarning.h>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/main_window.hpp>
 #include <noggit/ui/minimap_widget.hpp>
@@ -1217,10 +1216,6 @@ void MapView::createGUI()
   addHotkey (Qt::Key_7, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 7; }, [this] { return _world->IsSelection(eEntry_WMO); });
   addHotkey (Qt::Key_8, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 8; }, [this] { return _world->IsSelection(eEntry_WMO); });
   addHotkey (Qt::Key_9, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 9; }, [this] { return _world->IsSelection(eEntry_WMO); });
-
-  // Water unable to save warning
-  waterSaveWarning = new noggit::ui::water_save_warning;
-  waterSaveWarning->hide();
 
   // modelimport
   objectEditor->modelImport = new noggit::ui::model_import(this);
@@ -2728,8 +2723,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   }
 
   _last_mouse_pos = event->pos();
-
-  checkWaterSave(); // ????? \todo Move to somewhere more appropriate.
 }
 
 void MapView::selectModel(std::string const& model)
@@ -2904,20 +2897,6 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   case Qt::MiddleButton:
     MoveObj = false;
     break;
-  }
-}
-
-void MapView::checkWaterSave()
-{
-  tile_index const current (_camera.position);
-
-  if (!_world->mapIndex.hasTile (current) || _world->canWaterSave(current))
-  {
-    waterSaveWarning->hide();
-  }
-  else
-  {
-    waterSaveWarning->show();
   }
 }
 

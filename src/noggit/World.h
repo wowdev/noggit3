@@ -247,7 +247,6 @@ public:
                   , bool override_liquid_id
                   , float opacity_factor
                   );
-  bool canWaterSave(const tile_index& tile);
   void CropWaterADT(const tile_index& pos);
   void setWaterType(const tile_index& pos, int type, int layer);
   int getWaterType(const tile_index& tile, int layer);
