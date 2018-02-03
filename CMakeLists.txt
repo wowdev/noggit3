@@ -215,7 +215,6 @@ set ( noggit_ui_sources
       src/noggit/ui/Toolbar.cpp
       src/noggit/ui/SettingsPanel.cpp
       src/noggit/ui/Water.cpp
-      src/noggit/ui/WaterSaveWarning.cpp
       src/noggit/ui/ZoneIDBrowser.cpp
       src/noggit/ui/main_window.cpp
       src/noggit/ui/minimap_widget.cpp
@@ -309,7 +308,6 @@ set ( noggit_ui_headers
       src/noggit/ui/Toolbar.h
       src/noggit/ui/SettingsPanel.h
       src/noggit/ui/Water.h
-      src/noggit/ui/WaterSaveWarning.h
       src/noggit/ui/ZoneIDBrowser.h
       src/noggit/ui/main_window.hpp
       src/noggit/ui/minimap_widget.hpp

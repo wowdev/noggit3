@@ -2231,12 +2231,6 @@ void World::paintLiquid( math::vector_3d const& pos
   });
 }
 
-bool World::canWaterSave(const tile_index& tile)
-{
-  MapTile* mt = mapIndex.getTile(tile);
-  return !!mt && mt->canWaterSave();
-}
-
 void World::setWaterType(const tile_index& pos, int type, int layer)
 {
   for_tile_at ( pos

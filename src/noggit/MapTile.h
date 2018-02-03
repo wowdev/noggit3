@@ -97,8 +97,6 @@ public:
 
   bool isTile(int pX, int pZ);
 
-  bool canWaterSave();
-
   void getAlpha(size_t id, unsigned char *amap);
 
   TileWater Water;
