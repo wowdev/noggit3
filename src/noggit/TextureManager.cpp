@@ -160,10 +160,15 @@ blp_texture::blp_texture(const std::string& filenameArg)
 
   bind();
 
-  MPQFile f(_filename);
-  if (f.isEof())
+  bool exists = MPQFile::exists(_filename);
+  if (!exists)
   {
     LogError << "file not found: '" << _filename << "'" << std::endl;
+  }
+  
+  MPQFile f(exists ? _filename : "textures/shanecube.blp");
+  if (f.isEof())
+  {
     throw std::runtime_error ("bad filename");
   }
 
