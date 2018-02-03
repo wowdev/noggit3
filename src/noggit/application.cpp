@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
   noggit::RegisterErrorHandlers();
   std::set_terminate (noggit_terminate_handler);
 
-  application_with_exception_printer_on_notify qapp (argc, argv);
+  QApplication qapp (argc, argv);
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
