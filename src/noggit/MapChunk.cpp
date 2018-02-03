@@ -358,10 +358,37 @@ void MapChunk::update_intersect_points()
   _intersect_points = misc::intersection_points(vmin, vmax);
 }
 
+int MapChunk::get_lod_level(math::vector_3d const& camera_pos) const
+{
+  float dist = (camera_pos - vcenter).length();
+
+  if (dist < 500.f)
+  {
+    return -1;
+  }
+  else if (dist < 1000.f)
+  {
+    return 0;
+  }
+  else if (dist < 2000.f)
+  {
+    return 1;
+  }
+  else if (dist < 4000.f)
+  {
+    return 2;
+  }
+  else
+  {
+    return 3;
+  }
+}
+
 void MapChunk::initStrip()
 {
   strip_with_holes.clear();
   strip_without_holes.clear();
+  strip_lods.clear();
 
   for (int x = 0; x<8; ++x)
   {
@@ -383,6 +410,21 @@ void MapChunk::initStrip()
       if (isHole(x / 2, y / 2))
         continue;
 
+      // todo: better hole check ?
+      for (int lod_level = 0; lod_level < 4; ++lod_level)
+      {
+        int n = 1 << lod_level;
+        if ((x % n) == 0 && (y % n) == 0)
+        {
+          strip_lods[lod_level].emplace_back (indexNoLoD(y, x)); //0
+          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x)); //17
+          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x + n)); //18
+          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x + n)); //18
+          strip_lods[lod_level].emplace_back (indexNoLoD(y, x + n)); //1
+          strip_lods[lod_level].emplace_back (indexNoLoD(y, x)); //0
+        }
+      }
+
       strip_with_holes.emplace_back (indexLoD(y, x)); //9
       strip_with_holes.emplace_back (indexNoLoD(y, x)); //0
       strip_with_holes.emplace_back (indexNoLoD(y + 1, x)); //17
@@ -398,8 +440,16 @@ void MapChunk::initStrip()
     }
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
-  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
+  }
+
+  for (int lod_level = 0; lod_level < 4; ++lod_level)
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (lod_indices[lod_level]);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_lods[lod_level].size() * sizeof (StripType), strip_lods[lod_level].data(), GL_STATIC_DRAW);
+  }
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
@@ -489,7 +539,9 @@ void MapChunk::draw ( math::frustum const& frustum
                  && show_unpaintable_chunks
                  && draw_paintability_overlay;
   
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(indices);
+  int lod_level = get_lod_level(camera);
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(lod_level == -1 ? indices : lod_indices[lod_level]);
 
   if (_texture_set.num())
   {
@@ -519,7 +571,9 @@ void MapChunk::draw ( math::frustum const& frustum
   mcnk_shader.attrib("normal", mNormals);
   mcnk_shader.attrib("mccv", mccv);
 
-  gl.drawElements(GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
+  auto& strip = lod_level == -1 ? strip_with_holes : strip_lods[lod_level];
+
+  gl.drawElements(GL_TRIANGLES, strip.size(), GL_UNSIGNED_SHORT, nullptr);
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)

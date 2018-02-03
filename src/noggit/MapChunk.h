@@ -43,6 +43,7 @@ private:
 
   std::vector<StripType> strip_with_holes;
   std::vector<StripType> strip_without_holes;
+  std::map<int, std::vector<StripType>> strip_lods;
 
   math::vector_3d mNormals[mapbufsize];
   math::vector_3d mMinimap[mapbufsize];
@@ -58,6 +59,8 @@ private:
 
   void update_intersect_points();
 
+  // -1 = no lod
+  int get_lod_level(math::vector_3d const& camera_pos) const;
 public:
   MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha);
 
@@ -79,6 +82,8 @@ public:
   GLuint const& normals = _buffers[1];
   GLuint const& indices = _buffers[2];
   GLuint const& mccvEntry = _buffers[3];
+
+  opengl::scoped::buffers<4> lod_indices;
 
   GLuint minimap, minishadows;
 
