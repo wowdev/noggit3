@@ -45,7 +45,6 @@ public:
 
 private:
   void initPath(char *argv[]);
-  void parseArgs(int argc, char *argv[]);
   void loadMPQs();
 
   std::unique_ptr<noggit::ui::main_window> main_window;
@@ -78,24 +77,6 @@ void Noggit::initPath(char *argv[])
   {
     LogError << ex.what() << std::endl;
   }
-}
-
-void Noggit::parseArgs(int argc, char *argv[])
-{
-  // handle starting parameters
-  for (int i(1); i < argc; ++i)
-  {
-    if (!strcmp(argv[i], "-f") || !strcmp(argv[i], "-fullscreen"))
-    {
-      fullscreen = true;
-    }
-    else if (!strcmp(argv[i], "-na") || !strcmp(argv[i], "-noAntiAliasing"))
-    {
-      doAntiAliasing = false;
-    }
-  }
-  QSettings settings;
-  doAntiAliasing = settings.value("antialiasing", true).toBool();
 }
 
 void Noggit::loadMPQs()
@@ -235,10 +216,13 @@ Noggit::Noggit(int argc, char *argv[])
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
-  parseArgs(argc, argv);
+
+  QSettings settings;
+  doAntiAliasing = settings.value("antialiasing", false).toBool();
+  fullscreen = settings.value("fullscreen", false).toBool();
+  
 
   srand(::time(nullptr));
-  QSettings settings;
   QDir path = settings.value ("project/game_path").toString();
 
   while (!is_valid_game_path (path))

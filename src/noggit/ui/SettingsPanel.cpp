@@ -136,14 +136,15 @@ namespace noggit
       wireframe_layout->addRow ("Width", _wireframe_width);
 
       wireframe_layout->addRow ("Color", _wireframe_color = new color_widgets::ColorSelector (wireframe_box));
-
-      wireframe_layout->addRow ("Rainbow !", _wireframe_rainbow_cb = new QCheckBox(wireframe_box));
-
       layout->addRow (wireframe_box);
 
-
-      layout->addRow ("VSync", _vsync_cb = new QCheckBox ("enabled", this));
+      
+      layout->addRow ("VSync", _vsync_cb = new QCheckBox (this));
+      layout->addRow ("Anti Aliasing", _anti_aliasing_cb = new QCheckBox(this));
+      layout->addRow ("Fullscreen", _fullscreen_cb = new QCheckBox(this));
       _vsync_cb->setToolTip("Require restart");
+      _anti_aliasing_cb->setToolTip("Require restart");
+      _fullscreen_cb->setToolTip("Require restart");
 
       layout->addRow ( "View Distance"
                      , viewDistanceField = new QDoubleSpinBox
@@ -190,6 +191,9 @@ namespace noggit
                   discard_changes();
                 }
               );
+
+      // load the values in the fields
+      discard_changes();
     }
 
     void settings::discard_changes()
@@ -202,6 +206,8 @@ namespace noggit
       farZField->setValue (_settings->value ("farZ", 2048.f).toFloat());
       tabletModeCheck->setChecked (_settings->value ("tablet/enabled", false).toBool());
       _vsync_cb->setChecked (_settings->value ("vsync", false).toBool());
+      _anti_aliasing_cb->setChecked (_settings->value ("anti_aliasing", false).toBool());
+      _fullscreen_cb->setChecked (_settings->value ("fullscreen", false).toBool());
 
       _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
       _mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
@@ -213,7 +219,7 @@ namespace noggit
       _wireframe_radius->setValue (_settings->value ("wireframe/radius", 1.5f).toFloat());
       _wireframe_width->setValue (_settings->value ("wireframe/width", 1.f).toFloat());
       _wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());
-      _wireframe_rainbow_cb->setChecked (_settings->value ("wireframe/rainbow", 0).toInt());
+      
     }
 
     void settings::save_changes()
@@ -226,6 +232,8 @@ namespace noggit
       _settings->setValue ("view_distance", viewDistanceField->value());
       _settings->setValue ("tablet/enabled", tabletModeCheck->isChecked());
       _settings->setValue ("vsync", _vsync_cb->isChecked());
+      _settings->setValue ("anti_aliasing", _anti_aliasing_cb->isChecked());
+      _settings->setValue ("fullscreen", _fullscreen_cb->isChecked());
 
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
       _settings->setValue ("project/mysql/server", _mysql_server_field->text());
@@ -236,8 +244,7 @@ namespace noggit
       _settings->setValue ("wireframe/type", _wireframe_type_group->checkedId());
       _settings->setValue ("wireframe/radius", _wireframe_radius->value());
       _settings->setValue ("wireframe/width", _wireframe_width->value());
-      _settings->setValue ("wireframe/color", _wireframe_color->color());
-      _settings->setValue ("wireframe/rainbow", (int)_wireframe_rainbow_cb->isChecked());
+      _settings->setValue ("wireframe/color", _wireframe_color->color());      
 
 	  _settings->sync();
     }

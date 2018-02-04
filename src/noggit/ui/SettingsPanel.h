@@ -56,7 +56,8 @@ namespace noggit
       QDoubleSpinBox* _wireframe_radius;
       QDoubleSpinBox* _wireframe_width;
       color_widgets::ColorSelector* _wireframe_color;
-      QCheckBox* _wireframe_rainbow_cb;
+      QCheckBox* _anti_aliasing_cb;
+      QCheckBox* _fullscreen_cb;
 
       QSettings* _settings;
     public:
