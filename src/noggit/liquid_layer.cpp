@@ -27,6 +27,7 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
   {
     for (int x = 0; x < 9; ++x)
     {
+      _tex_coords.emplace_back(x, z);
       _depth.emplace_back(1.0f);
       _vertices.emplace_back(pos.x + UNITSIZE * x
         , height
@@ -61,9 +62,10 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
   {
     for (int x = 0; x < 9; ++x)
     {
+      _tex_coords.emplace_back(x, z);
       _depth.emplace_back(heightmask.mTransparency[z][x]/255.0f);
       _vertices.emplace_back( pos.x + UNITSIZE * x
-                            , heightmask.mHeightValues[z][x]
+                            , std::min(_maximum, heightmask.mHeightValues[z][x]) // fix some lod problems
                             , pos.z + UNITSIZE * z
                             );
     }
@@ -80,6 +82,7 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , _subchunks(other._subchunks)
   , _vertices(other._vertices)
   , _depth(other._depth)
+  , _tex_coords(other._tex_coords)
   , pos(other.pos)
   , texRepeats(other.texRepeats)
 {
@@ -95,6 +98,7 @@ liquid_layer& liquid_layer::operator=(liquid_layer const& other)
   _subchunks = other._subchunks;
   _vertices = other._vertices;
   _depth = other._depth;
+  _tex_coords = other._tex_coords;
   pos = other.pos;
   texRepeats = other.texRepeats;
 
@@ -222,67 +226,60 @@ void liquid_layer::changeLiquidID(int id)
 
 void liquid_layer::updateRender()
 {
-  depths.clear();
-  tex_coords.clear();
-  indices.clear();
-  vertices.clear();
+  _indices_by_lod.clear();
 
-  std::uint16_t index (0);
-
-  for (int j = 0; j < 8; ++j)
+  for (int z = 0; z < 8; ++z)
   {
-    for (int i = 0; i < 8; ++i)
+    for (int x = 0; x < 8; ++x)
     {
-      if (!hasSubchunk(i, j))
+      size_t p = z * 9 + x;
+      
+      for (int lod_level = 0; lod_level < lod_count; ++lod_level)
       {
-        continue;
-      }
-
-      size_t p = j * 9 + i;
-
-      depths.emplace_back (1.f - _depth[p]);
-      tex_coords.emplace_back (i + 0.f, j + 0.f);
-      vertices.emplace_back (_vertices[p]);
-      indices.emplace_back (index++);
-
-      depths.emplace_back (1.f - _depth[p + 9]);
-      tex_coords.emplace_back (i + 0.f, j + 1.f);
-      vertices.emplace_back (_vertices[p + 9]);
-      indices.emplace_back (index++);
-
-      depths.emplace_back (1.f - _depth[p + 10]);
-      tex_coords.emplace_back (i + 1.f, j + 1.f);
-      vertices.emplace_back (_vertices[p + 10]);
-      indices.emplace_back (index++);
-
-      depths.emplace_back (1.f - _depth[p + 1]);
-      tex_coords.emplace_back (i + 1.f, j + 0.f);
-      vertices.emplace_back (_vertices[p + 1]);
-      indices.emplace_back (index++);
+        int n = 1 << lod_level;
+        if ((z % n) == 0 && (x % n) == 0)
+        {
+          if (hasSubchunk(x, z, n))
+          {
+            _indices_by_lod[lod_level].emplace_back (p);
+            _indices_by_lod[lod_level].emplace_back (p + n * 9);
+            _indices_by_lod[lod_level].emplace_back (p + n * 9 + n);
+            _indices_by_lod[lod_level].emplace_back (p + n);
+          }                    
+        }
+        else
+        {
+          break;
+        }
+      }      
     }
   }
 
-  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>
-    ( _index_buffer[0]
-    , indices.size() * sizeof (*indices.data())
-    , indices.data()
-    , GL_STATIC_DRAW
-    );
+  for (int i = 0; i < lod_count; ++i)
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_index_buffer[i]);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices_by_lod[i].size() * sizeof (uint16_t), _indices_by_lod[i].data(), GL_STATIC_DRAW);
+  }  
 }
 
 void liquid_layer::draw ( liquid_render& render
                         , opengl::scoped::use_program& water_shader
+                        , math::vector_3d const& camera
                         , int animtime
                         )
 {
+  int lod_level = get_lod_level(camera);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(_index_buffer[lod_level]);
+
   render.prepare_draw (water_shader, _liquid_id, animtime);
 
-  water_shader.attrib ("position", vertices);
-  water_shader.attrib ("tex_coord", tex_coords);
-  water_shader.attrib ("depth", depths);
+  water_shader.attrib ("position", _vertices);
+  water_shader.attrib ("tex_coord", _tex_coords);
+  water_shader.attrib ("depth", _depth);
   water_shader.uniform ("tex_repeat", texRepeats);
 
-  gl.drawElements (GL_QUADS, _index_buffer[0], indices.size(), GL_UNSIGNED_SHORT, nullptr);
+  
+  gl.drawElements (GL_QUADS, _indices_by_lod[lod_level].size(), GL_UNSIGNED_SHORT, nullptr);
 }
 
 void liquid_layer::crop(MapChunk* chunk)
@@ -332,9 +329,19 @@ void liquid_layer::update_opacity(MapChunk* chunk, float factor)
   }
 }
 
-bool liquid_layer::hasSubchunk(int x, int z) const
+bool liquid_layer::hasSubchunk(int x, int z, int size) const
 {
-  return (_subchunks >> (z * 8 + x)) & 1;
+  for (int pz = z; pz < z + size; ++pz)
+  {
+    for (int px = x; px < x + size; ++px)
+    {
+      if ((_subchunks >> (pz * 8 + px)) & 1)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void liquid_layer::setSubchunk(int x, int z, bool water)
@@ -461,4 +468,27 @@ void liquid_layer::update_vertex_opacity(int x, int z, MapChunk* chunk, float fa
 {
   float diff = _vertices[z * 9 + x].y - chunk->mVertices[z * 17 + x].y;
   _depth[z * 9 + x] = diff < 0.0f ? 0.0f : (std::min(1.0f, std::max(0.0f, (diff + 1.0f) * factor)));
+}
+
+int liquid_layer::get_lod_level(math::vector_3d const& camera_pos) const
+{
+  //            center vertex       - camera_pos
+  float dist = (_vertices[5 * 9 + 4] - camera_pos).length();
+
+  if (dist < 1000.f)
+  {
+    return 0;
+  }
+  else if (dist < 2000.f)
+  {
+    return 1;
+  }
+  else if (dist < 4000.f)
+  {
+    return 2;
+  }
+  else
+  {
+    return 3;
+  }
 }

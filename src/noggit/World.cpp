@@ -1429,6 +1429,8 @@ void main()
 
   if (draw_water)
   {
+    // draw the water on both sides
+    gl.disable(GL_CULL_FACE);
     opengl::scoped::use_program water_shader{ liquid_renderer.shader_program() };
 
     water_shader.uniform ("model_view", opengl::matrix::model_view());
@@ -1448,6 +1450,8 @@ void main()
                       , water_layer
                       );
     }
+
+    gl.enable(GL_CULL_FACE);
   }
 }
 
