@@ -26,6 +26,7 @@ public:
 
   void draw ( liquid_render& render
             , opengl::scoped::use_program& water_shader
+            , math::vector_3d const& camera
             , int animtime
             );
   void updateRender();
@@ -39,7 +40,7 @@ public:
   float max() const { return _maximum; }
   int liquidID() const { return _liquid_id; }
 
-  bool hasSubchunk(int x, int z) const;
+  bool hasSubchunk(int x, int z, int size = 1) const;
   void setSubchunk(int x, int z, bool water);
 
   bool empty() const { return !_subchunks; }
@@ -63,13 +64,11 @@ public:
 private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
+  int get_lod_level(math::vector_3d const& camera_pos) const;
 
-  opengl::scoped::buffers<1> _index_buffer;
-  std::vector<float> depths;
-  std::vector<math::vector_2d> tex_coords;
-  std::vector<math::vector_3d> vertices;
-  std::vector<std::uint16_t> indices;
-  void draw_actual (opengl::scoped::use_program&);
+  static int const lod_count = 4;
+
+  opengl::scoped::buffers<lod_count> _index_buffer;
 
   int _liquid_id;
   int _liquid_vertex_format;
@@ -78,6 +77,8 @@ private:
   std::uint64_t _subchunks;
   std::vector<math::vector_3d> _vertices;
   std::vector<float> _depth;
+  std::vector<math::vector_2d> _tex_coords;
+  std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
 
 private:
   math::vector_3d pos;

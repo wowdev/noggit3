@@ -175,12 +175,12 @@ void ChunkWater::draw ( math::frustum const& frustum
   {
     for (liquid_layer& layer : _layers)
     {
-      layer.draw (render, water_shader, animtime);
+      layer.draw (render, water_shader, camera, animtime);
     }
   }
   else if (layer < _layers.size())
   {
-    _layers[layer].draw (render, water_shader, animtime);
+    _layers[layer].draw (render, water_shader, camera, animtime);
   }
 }
 
