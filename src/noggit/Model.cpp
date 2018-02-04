@@ -350,6 +350,11 @@ void Model::initCommon(const MPQFile& f)
     fix_shader_id_blend_override();
     fix_shader_id_layer();
     compute_pixel_shader_ids();
+
+    for (auto& pass : _render_passes)
+    {
+      pass.init_uv_types(this);
+    }
     
     // transparent parts come later
     std::sort(_render_passes.begin(), _render_passes.end());
@@ -435,146 +440,172 @@ void Model::fix_shader_id_layer()
     }
   }
 
-  if (non_layered_count == _render_passes.size())
+  if (non_layered_count < _render_passes.size())
   {
-    return;
+    std::vector<ModelRenderPass> passes;
+
+    ModelRenderPass* first_pass = nullptr;
+    bool need_reducing = false;
+    uint16_t previous_render_flag = -1, some_flags = 0;
+
+    for (auto& pass : _render_passes)
+    {
+      if (pass.renderflag_index == previous_render_flag)
+      {
+        need_reducing = true;
+        continue;
+      }
+
+      previous_render_flag = pass.renderflag_index;
+
+      uint8_t lower_bits = pass.shader_id & 0x7;
+
+      if (pass.material_layer == 0)
+      {
+        if (pass.texture_count >= 1 && _render_flags[pass.renderflag_index].blend == 0)
+        {
+          pass.shader_id &= 0xFF8F;
+        }
+
+        first_pass = &pass;
+      }
+
+      bool xor_unlit = ((_render_flags[pass.renderflag_index].flags.unlit ^ _render_flags[first_pass->renderflag_index].flags.unlit) & 1) == 0;
+
+      if ((some_flags & 0xFF) == 1)
+      {
+        if ((_render_flags[pass.renderflag_index].blend == 1 || _render_flags[pass.renderflag_index].blend == 2)
+          && pass.texture_count == 1
+          && xor_unlit
+          && pass.texture_combo_index == first_pass->texture_combo_index
+          )
+        {
+          if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+          {
+            pass.shader_id = 0x8000;
+            first_pass->shader_id = 0x8001;
+
+            some_flags = (some_flags & 0xFF00) | 3;
+
+            // current pass removed (not needed)
+            continue;
+          }
+        }
+
+        some_flags = (some_flags & 0xFF00);
+      }
+
+      int16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];
+
+      if ((some_flags & 0xFF) < 2)
+      {
+        if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 2) && ((lower_bits == 4) || (lower_bits == 6)))
+        {
+          if (texture_unit_lookup == 0 && (_texture_unit_lookup[pass.texture_coord_combo_index + 1] == -1))
+          {
+            some_flags = (some_flags & 0xFF00) | 1;
+          }
+        }
+      }
+
+      if ((some_flags >> 8) != 0)
+      {
+        if ((some_flags >> 8) == 1)
+        {
+          if ((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6) || (pass.texture_count != 1) || (texture_unit_lookup >= 0))
+          {
+            some_flags &= 0xFF00;
+          }
+          else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+          {
+            pass.shader_id = 0x8000;
+            first_pass->shader_id = _render_flags[pass.renderflag_index].blend != 4 ? 0xE : 0x8002;
+
+            some_flags = (some_flags & 0xFF) | (2 << 8);
+
+            first_pass->texture_count = 2;
+
+            first_pass->textures[1] = pass.texture_combo_index;
+            first_pass->uv_animations[1] = pass.animation_combo_index;
+
+            // current pass removed (merged with the previous one)
+            continue;
+          }
+        }
+        else
+        {
+          if ((some_flags >> 8) != 2)
+          {
+            continue;
+          }
+
+          if ((_render_flags[pass.renderflag_index].blend != 2) && (_render_flags[pass.renderflag_index].blend != 1)
+            || (pass.texture_count != 1)
+            || xor_unlit
+            || ((pass.texture_combo_index & 0xff) != (first_pass->texture_combo_index & 0xff))
+            )
+          {
+            some_flags &= 0xFF00;
+          }
+          else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+          {
+            // current pass ignored/removed
+            pass.shader_id = 0x8000;
+            first_pass->shader_id = ((first_pass->shader_id == 0x8002 ? 2 : 0) - 0x7FFF) & 0xFFFF;
+            some_flags = (some_flags & 0xFF) | (3 << 8);
+            continue;
+          }
+        }
+        some_flags = (some_flags & 0xFF);
+      }
+
+      if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 1) && (texture_unit_lookup == 0))
+      {
+        some_flags = (some_flags & 0xFF) | (1 << 8);
+      }
+
+      // setup texture and anim lookup indices
+      pass.textures[0] = pass.texture_combo_index;
+      pass.textures[1] = pass.texture_count > 1 ? pass.texture_combo_index + 1 : 0;
+      pass.uv_animations[0] = pass.animation_combo_index;
+      pass.uv_animations[1] = pass.texture_count > 1 ? pass.animation_combo_index + 1 : 0;
+
+      passes.push_back(pass);
+    }
+
+    if (need_reducing)
+    {
+      previous_render_flag = -1;
+      for (int i = 0; i < passes.size(); ++i)
+      {
+        auto& pass = _render_passes[i];
+        uint16_t renderflag_index = pass.renderflag_index;
+
+        if (renderflag_index == previous_render_flag)
+        {
+          pass.shader_id = _render_passes[i - 1].shader_id;
+          pass.texture_count = _render_passes[i - 1].texture_count;
+          pass.texture_combo_index = _render_passes[i - 1].texture_combo_index;
+          pass.texture_coord_combo_index = _render_passes[i - 1].texture_coord_combo_index;
+        }
+        else
+        {
+          previous_render_flag = renderflag_index;
+        }
+      }
+    }
+
+    _render_passes = passes;
   }
-
-
-  ModelRenderPass* first_pass = nullptr;
-  bool need_reducing = false;
-  uint16_t previous_render_flag = -1, some_flags = 0;
-
-  for (auto& pass : _render_passes)
+  // no layering, just setting some infos
+  else
   {
-    if (pass.renderflag_index == previous_render_flag)
+    for (auto& pass : _render_passes)
     {
-      need_reducing = true;
-      continue;
-    }
-
-    previous_render_flag = pass.renderflag_index;
-
-    uint8_t lower_bits = pass.shader_id & 0x7;
-
-    if (pass.material_layer == 0)
-    {
-      if (pass.texture_count >= 1 && _render_flags[pass.renderflag_index].blend == 0)
-      {
-        pass.shader_id &= 0xFF8F;
-      }
-
-      first_pass = &pass;
-    }
-
-    bool xor_unlit = ((_render_flags[pass.renderflag_index].flags.unlit ^ _render_flags[first_pass->renderflag_index].flags.unlit) & 1) == 0;
-
-    if ((some_flags & 0xFF) == 1)
-    {
-      if ( (_render_flags[pass.renderflag_index].blend == 1 || _render_flags[pass.renderflag_index].blend == 2) 
-        && pass.texture_count == 1 
-        && xor_unlit
-        && pass.texture_combo_index == first_pass->texture_combo_index
-         )
-      {
-        if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
-        {
-          pass.shader_id = 0x8000;
-          first_pass->shader_id = 0x8001;
-
-          some_flags = (some_flags & 0xFF00) | 3;
-        }
-      }
-
-      some_flags = (some_flags & 0xFF00);
-    }
-
-    int16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];
-
-    if ((some_flags & 0xFF) < 2) 
-    {
-      if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 2) && ((lower_bits == 4) || (lower_bits == 6))) 
-      {
-        if (texture_unit_lookup == 0 && (_texture_unit_lookup[pass.texture_coord_combo_index + 1] == -1))
-        {
-          some_flags = (some_flags & 0xFF00) | 1;
-        }
-      }
-    }
-  
-    if ((some_flags >> 8) != 0) 
-    {
-      if ((some_flags >> 8) == 1) 
-      {
-        if ((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6) || (pass.texture_count != 1) || (texture_unit_lookup >= 0))
-        {
-          some_flags &= 0xFF00;
-        }
-        else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
-        {
-          pass.shader_id = 0x8000;
-          first_pass->shader_id = _render_flags[pass.renderflag_index].blend != 4 ? 0xE : 0x8002;
-
-          //TODO: Implement packing of textures (see https://wowdev.wiki/M2/.skin/WotLK_shader_selection )
-
-          some_flags = (some_flags & 0xFF) | (2 << 8);
-
-          first_pass->texture_count = 2;
-
-          continue;
-        }
-      }
-      else 
-      {
-        if ((some_flags >> 8) != 2) 
-        {
-          continue;
-        }
-
-        if  ( (_render_flags[pass.renderflag_index].blend != 2) && (_render_flags[pass.renderflag_index].blend != 1)
-           || (pass.texture_count != 1)
-           || xor_unlit
-           || ((pass.texture_combo_index & 0xff) != (first_pass->texture_combo_index & 0xff))
-            ) 
-        {
-          some_flags &= 0xFF00;
-        }
-        else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index]) 
-        {
-          pass.shader_id = 0x8000;
-          first_pass->shader_id = ((first_pass->shader_id == 0x8002 ? 2 : 0) - 0x7FFF) & 0xFFFF;
-          some_flags = (some_flags & 0xFF) | (3 << 8);
-          continue;
-        }
-      }
-      some_flags = (some_flags & 0xFF);
-    }
-
-    if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 1) && (texture_unit_lookup == 0))
-    {
-      some_flags = (some_flags & 0xFF) | (1 << 8);
-    }
-  }
-
-  if (need_reducing)
-  {
-    previous_render_flag = -1;
-    for (int i = 0; i < _render_passes.size(); ++i) 
-    {
-      auto& pass = _render_passes[i];
-      uint16_t renderflag_index = pass.renderflag_index;
-
-      if (renderflag_index == previous_render_flag) 
-      {
-        pass.shader_id = _render_passes[i - 1].shader_id;
-        pass.texture_count = _render_passes[i - 1].texture_count;
-        pass.texture_combo_index = _render_passes[i - 1].texture_combo_index;
-        pass.texture_coord_combo_index = _render_passes[i - 1].texture_coord_combo_index;
-      }
-      else 
-      {
-        previous_render_flag = renderflag_index;
-      }
+      pass.textures[0] = pass.texture_combo_index;
+      pass.textures[1] = pass.texture_count > 1 ? pass.texture_combo_index + 1 : 0;
+      pass.uv_animations[0] = pass.animation_combo_index;
+      pass.uv_animations[1] = pass.texture_count > 1 ? pass.animation_combo_index + 1 : 0;
     }
   }
 }
@@ -584,7 +615,6 @@ ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
   : ModelTexUnit(tex_unit)
   , blend_mode(m->_render_flags[renderflag_index].blend)
 {
-  init_uv_types(m);
 }
 
 bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m)
@@ -706,7 +736,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   m2_shader.uniform("tex_unit_lookup_1", tu1);
   m2_shader.uniform("tex_unit_lookup_2", tu2);
 
-  int16_t tex_anim_lookup = m->_texture_animation_lookups[animation_combo_index];
+  int16_t tex_anim_lookup = m->_texture_animation_lookups[uv_animations[0]];
   math::matrix_4x4 unit(math::matrix_4x4::unit);
 
   if (tex_anim_lookup != -1)
@@ -714,16 +744,16 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     m2_shader.uniform("tex_matrix_1", m->_texture_animations[tex_anim_lookup].mat);
     if (texture_count > 1)
     {
-      tex_anim_lookup = m->_texture_animation_lookups[animation_combo_index + 1];
+      tex_anim_lookup = m->_texture_animation_lookups[uv_animations[1]];
       if (tex_anim_lookup != -1)
       {
         m2_shader.uniform("tex_matrix_2", m->_texture_animations[tex_anim_lookup].mat);
-      }
-      else
-      {
-        m2_shader.uniform("tex_matrix_2", unit);
-      }
     }
+    else
+    {
+        m2_shader.uniform("tex_matrix_2", unit);
+    }
+  }
   }
   else
   {
@@ -731,7 +761,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     m2_shader.uniform("tex_matrix_2", unit);
   }
   
-  
+
   m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader));
   m2_shader.uniform("mesh_color", mesh_color);
 
@@ -747,7 +777,7 @@ void ModelRenderPass::bind_texture(size_t index, Model* m)
 {
   opengl::texture::enable_texture(index);
 
-  uint16_t tex = m->_texture_lookup[texture_combo_index + index];
+  uint16_t tex = m->_texture_lookup[textures[index]];
   
   if (m->_specialTextures[tex] == -1)
   {

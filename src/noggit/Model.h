@@ -147,12 +147,15 @@ struct ModelRenderPass : ModelTexUnit
   uint16_t index_start = 0, index_count = 0, vertex_start = 0, vertex_end = 0;
   uint16_t blend_mode = 0;
   texture_unit_lookup tu_lookups[2];
+  uint16_t textures[2];
+  uint16_t uv_animations[2];
   ModelPixelShader pixel_shader = ModelPixelShader::Combiners_Opaque;
 
 
   bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m);
   void after_draw();
-  void bind_texture(size_t index, Model* m);  
+  void bind_texture(size_t index, Model* m);
+  void init_uv_types(Model* m);
 
   bool operator< (const ModelRenderPass &m) const
   {
@@ -169,9 +172,6 @@ struct ModelRenderPass : ModelTexUnit
       return blend_mode == m.blend_mode ? (ordering_thingy < m.ordering_thingy) : blend_mode < m.blend_mode;
     }
   }
-
-private:
-  void init_uv_types(Model* m);
 };
 
 struct ModelCamera {
