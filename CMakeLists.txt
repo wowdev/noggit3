@@ -78,6 +78,8 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
 
+OPTION(USE_SQL "Enable sql uid save ? (require mysql installed)" OFF)
+
 macro(includePlattform SUFFIX)
   if(UNIX)
     if(APPLE)
@@ -107,27 +109,32 @@ FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test
 FIND_PACKAGE( StormLib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
-find_library(MYSQL_LIBRARY
-  NAMES libmysql
-  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql")
-find_library(MYSQLCPPCONN_LIBRARY
-  NAMES mysqlcppconn
-  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
-find_path (MYSQLCPPCONN_INCLUDE
-  NAMES cppconn/driver.h
-  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
 
-if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
-  add_definitions ( -DUSE_MYSQL_UID_STORAGE )
+if (USE_SQL)
+  find_library(MYSQL_LIBRARY
+    NAMES libmysql
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql")
+  find_library(MYSQLCPPCONN_LIBRARY
+    NAMES mysqlcppconn
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
+  find_path (MYSQLCPPCONN_INCLUDE
+    NAMES cppconn/driver.h
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
 
-  set ( mysql_sources
-        src/mysql/mysql.cpp
-      )
+  if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
+    add_definitions ( -DUSE_MYSQL_UID_STORAGE )
 
-  set ( mysql_headers
-        src/mysql/mysql.h
-      )
-  source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
+    set ( mysql_sources
+          src/mysql/mysql.cpp
+        )
+
+    set ( mysql_headers
+          src/mysql/mysql.h
+        )
+    source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
+  else()
+     message (SEND_ERROR "MySQL lib or connector not found")
+  endif()
 endif()
 
 add_subdirectory (src/external/qt-color-widgets)
