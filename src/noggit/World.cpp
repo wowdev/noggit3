@@ -569,7 +569,7 @@ void World::draw ( math::vector_3d const& cursor_pos
         , R"code(
 #version 110
 
-attribute vec4 position;
+attribute vec3 position;
 attribute vec3 normal;
 attribute vec2 texcoord;
 attribute vec3 mccv;
@@ -577,14 +577,14 @@ attribute vec3 mccv;
 uniform mat4 model_view;
 uniform mat4 projection;
 
-varying vec4 vary_position;
+varying vec3 vary_position;
 varying vec2 vary_texcoord;
 varying vec3 vary_normal;
 varying vec3 vary_mccv;
 
 void main()
 {
-  gl_Position = projection * model_view * position;
+  gl_Position = projection * model_view * vec4(position, 1.0);
   //! \todo gl_NormalMatrix deprecated
   vary_normal = normalize (gl_NormalMatrix * normal);
   vary_position = position;
@@ -638,7 +638,7 @@ uniform vec3 light_dir;
 uniform vec3 diffuse_color;
 uniform vec3 ambient_color;
 
-varying vec4 vary_position;
+varying vec3 vary_position;
 varying vec2 vary_texcoord;
 varying vec3 vary_normal;
 varying vec3 vary_mccv;
@@ -695,7 +695,7 @@ float dist_3d(vec3 a, vec3 b)
 
 void main()
 {
-  float dist_from_camera = dist_3d(camera, vary_position.xyz);
+  float dist_from_camera = dist_3d(camera, vary_position);
 
   if(draw_fog && dist_from_camera >= fog_end)
   {
