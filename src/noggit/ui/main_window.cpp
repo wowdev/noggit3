@@ -54,7 +54,6 @@ namespace noggit
                        , []
                          {
                            auto window (new settings());
-                           window->discard_changes();
                            window->show();
                          }
                        );
