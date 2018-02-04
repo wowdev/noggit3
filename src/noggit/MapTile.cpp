@@ -212,8 +212,12 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
       for (int x = 0; x < 3; x++)
       {
         int pos = x + y * 3;
-        mMinimumValues[pos] = {xPositions[x], static_cast<float> (mMinimum[pos]), yPositions[y]};
-        mMaximumValues[pos] = {xPositions[x], static_cast<float> (mMaximum[pos]), yPositions[y]};
+        // fix bug with old noggit version inverting values
+        float min = static_cast<float> (std::min(mMinimum[pos], mMaximum[pos]));
+        float max = static_cast<float> (std::max(mMinimum[pos], mMaximum[pos]));
+
+        mMinimumValues[pos] = {xPositions[x], min, yPositions[y]};
+        mMaximumValues[pos] = {xPositions[x], max, yPositions[y]};
       }
     }
   }
