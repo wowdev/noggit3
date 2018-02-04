@@ -2033,7 +2033,8 @@ void MapView::tick (float dt)
                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                      << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
                      << "\nscale: " << instance->scale
-                     << "\ntextures Used: " << instance->model->header.nTextures;
+                     << "\ntextures Used: " << instance->model->header.nTextures
+                     << "\nsize category: " << instance->size_cat;
 
           for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
           {
