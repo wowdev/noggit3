@@ -18,6 +18,7 @@ public:
   void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha);
 
   void startAnim(int id, int animtime);
+  math::vector_2d anim_uv_offset(int id, int animtime) const;
   void stopAnim(int id);
 
   void bindTexture(size_t id, size_t activeTexture);

@@ -550,6 +550,11 @@ void MapChunk::draw ( math::frustum const& frustum
     for (int i = 0; i < _texture_set.num(); ++i)
     {
       _texture_set.bindTexture(i, i + 1);
+
+      if (_texture_set.is_animated(i))
+      {
+        mcnk_shader.uniform("tex_anim_"+ std::to_string(i), _texture_set.anim_uv_offset(i, animtime));
+      }
     }
   }
 
@@ -574,6 +579,16 @@ void MapChunk::draw ( math::frustum const& frustum
   auto& strip = lod_level == -1 ? strip_with_holes : strip_lods[lod_level];
 
   gl.drawElements(GL_TRIANGLES, strip.size(), GL_UNSIGNED_SHORT, nullptr);
+
+  
+  for (int i = 0; i < _texture_set.num(); ++i)
+  {
+    if (_texture_set.is_animated(i))
+    {
+      mcnk_shader.uniform("tex_anim_" + std::to_string(i), math::vector_2d());
+    }
+  }
+  
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)

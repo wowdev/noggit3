@@ -72,6 +72,7 @@ namespace opengl
       void uniform (std::string const& name, std::vector<int> const&);
       void uniform (std::string const& name, GLint);
       void uniform (std::string const& name, GLfloat);
+      void uniform (std::string const& name, math::vector_2d const&);
       void uniform (std::string const& name, math::vector_3d const&);
       void uniform (std::string const& name, math::vector_4d const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);
