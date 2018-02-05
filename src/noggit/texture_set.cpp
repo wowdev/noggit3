@@ -702,20 +702,17 @@ void TextureSet::alphas_to_big_alpha(uint8_t* dest)
     memcpy(alpha(k), alphamaps[k]->getAlpha(), 4096);
   }
 
-  float alphas[3] = { 0.0f, 0.0f, 0.0f };
-
   for (int i = 0; i < 64 * 64; ++i)
   {
+    float a = 1.f;
+
     for (int k = nTextures - 2; k >= 0 ; --k)
     {
-      alphas[k] = static_cast<float>(*alpha(k, i));
+      float f = static_cast<float>(*alpha(k, i)) * a;
 
-      if (k < nTextures - 2)
-      {
-        alphas[k] *= (255.f - alphas[k + 1]) / 255.f;
-      }
+      a -= (f / 255.f);
 
-      *alpha(k, i) = static_cast<uint8_t>(std::round(alphas[k]));
+      *alpha(k, i) = static_cast<uint8_t>(std::round(f));
     }
   }
 }
@@ -761,16 +758,15 @@ void TextureSet::alphas_to_old_alpha(uint8_t* dest)
 
   for (int i = 0; i < 64 * 64; ++i)
   {
-    for (int k =  nTextures - 2; k > 0; --k)
+    float a = 1.f;
+
+    for (int k = nTextures - 2; k >= 0; --k)
     {
-      alphas[k] = static_cast<float>(*alpha(k, i));
+      float f = static_cast<float>(*alpha(k, i)) / a;
 
-      if (k < nTextures - 2)
-      {
-        alphas[k] *= 255.f / (255.f - alphas[k + 1]);
-      }
+      a -= (f / 255.f);
 
-      *alpha(k, i) = static_cast<uint8_t>(std::round(alphas[k]));
+      *alpha(k, i) = static_cast<uint8_t>(std::round(f));
     }
   }
 }
