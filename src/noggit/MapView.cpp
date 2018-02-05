@@ -602,7 +602,15 @@ void MapView::createGUI()
                     _world->clearHeight(_camera.position);
                   }
                 );
-
+  ADD_ACTION_NS ( assist_menu
+                , "Remove texture duplicates"
+                , [this]
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->removeTexDuplicateOnADT(_camera.position);
+                  }
+                );
   ADD_ACTION_NS ( assist_menu
                 , "Clear textures"
                 , [this]
