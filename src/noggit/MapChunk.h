@@ -72,7 +72,7 @@ public:
 
   float xbase, ybase, zbase;
 
-  unsigned int Flags;
+  mcnk_flags header_flags;
   bool use_big_alphamap;
 
   TextureSet _texture_set;
@@ -146,7 +146,6 @@ public:
   void setHole(math::vector_3d const& pos, bool big, bool add);
 
   void setFlag(bool value, uint32_t);
-  int getFlag();
 
   int getAreaID();
   void setAreaID(int ID);

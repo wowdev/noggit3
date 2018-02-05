@@ -43,7 +43,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     f->read(&header, 0x80);
 
-    Flags = header.flags;
+    header_flags.value = header.flags;
     areaID = header.areaid;
 
     zbase = header.zpos;
@@ -164,7 +164,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     assert(fourcc == 'MCAL');
 
-    _texture_set.initAlphamaps(f, header.nLayers, use_big_alphamap, (header.flags & FLAG_do_not_fix_alpha_map) == 0);
+    _texture_set.initAlphamaps(f, header.nLayers, use_big_alphamap, (header_flags.flags.do_not_fix_alpha_map) == 0);
   }
   // - MCCV ----------------------------------------------
   if(header.ofsMCCV)
@@ -175,8 +175,10 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     assert(fourcc == 'MCCV');
 
-    if (!(Flags & FLAG_MCCV))
-      Flags |= FLAG_MCCV;
+    if (!(header_flags.flags.has_mccv))
+    {
+      header_flags.flags.has_mccv = 1;
+    }
 
     hasMCCV = true;
 
@@ -195,7 +197,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       mccv[i] = mccv_default;
     }
   }
-
 
   // create vertex buffers
   gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
@@ -225,7 +226,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     }
   }
 
-  if ((Flags & 1) == 0)
+  if (!header_flags.flags.has_mcsh)
   {
     /** We have no shadow map (MCSH), so we got no shadows at all!  **
     ** This results in everything being black.. Yay. Lets fake it! **/
@@ -566,7 +567,7 @@ void MapChunk::draw ( math::frustum const& frustum
   
   if (draw_chunk_flag_overlay)
   {
-    mcnk_shader.uniform ("draw_impassible_flag", (int)(Flags & FLAG_IMPASS));
+    mcnk_shader.uniform ("draw_impassible_flag", (int)header_flags.flags.impass);
   }  
 
   if (draw_areaid_overlay)
@@ -758,7 +759,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
     }
 
     changed = true;
-    Flags |= FLAG_MCCV;
+    header_flags.flags.has_mccv = 1;
     hasMCCV = true;
   }
 
@@ -990,14 +991,13 @@ int MapChunk::getAreaID()
 void MapChunk::setFlag(bool changeto, uint32_t flag)
 {
   if (changeto)
-    this->Flags = this->Flags | (flag);
+  {
+    header_flags.value |= flag;
+  }
   else
-    this->Flags = this->Flags & ~(flag);
-}
-
-int MapChunk::getFlag()
-{
-  return this->Flags;
+  {
+    header_flags.value &= ~flag;
+  }
 }
 
 void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
@@ -1013,7 +1013,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
   MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
-  lMCNK_header->flags = Flags | FLAG_do_not_fix_alpha_map;
+  header_flags.flags.do_not_fix_alpha_map = 1;
+
+  lMCNK_header->flags = header_flags.value;
   lMCNK_header->holes = holes;
   lMCNK_header->areaid = areaID;
 
@@ -1230,7 +1232,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //        {
   //! \todo  Somehow determine if we need to write this or not?
   //! \todo  This sometime gets all shadows black.
-  if (Flags & 1)
+  if (header_flags.flags.has_mcsh)
   {
     int lMCSH_Size = 0x200;
     lADTFile.Extend(8 + lMCSH_Size);
@@ -1272,6 +1274,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //        }
 
   //! Don't write anything MCLQ related anymore...
+
 
   // MCSE
   int lMCSE_Size = 0;

@@ -4,16 +4,24 @@
 
 #include <cstdint>
 
-enum eMCNKFlags
+union mcnk_flags
 {
-  FLAG_SHADOW = 0x1,
-  FLAG_IMPASS = 0x2,
-  FLAG_LQ_RIVER = 0x4,
-  FLAG_LQ_OCEAN = 0x8,
-  FLAG_LQ_MAGMA = 0x10,
-  FLAG_LQ_SLIME = 0x20,
-  FLAG_MCCV = 0x40,
-  FLAG_do_not_fix_alpha_map = 0x8000
+  uint32_t value;
+  struct
+  {
+    uint32_t has_mcsh : 1;
+    uint32_t impass : 1;
+    uint32_t lq_river : 1;
+    uint32_t lq_ocean : 1;
+    uint32_t lq_magma : 1;
+    uint32_t lq_slime : 1;
+    uint32_t has_mccv : 1;
+    uint32_t unknown_0x80 : 1;
+    uint32_t : 7;
+    uint32_t do_not_fix_alpha_map : 1;
+    uint32_t high_res_holes : 1;
+    uint32_t : 15;
+  }flags;
 };
 
 enum eMPHDFlags
