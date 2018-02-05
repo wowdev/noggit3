@@ -50,7 +50,7 @@ public:
   void convertToBigAlpha();
   void convertToOldAlpha();
 
-  void mergeAlpha(size_t id1, size_t id2);
+  void merge_layers(size_t id1, size_t id2);
   bool removeDuplicate();
 
   scoped_blp_texture_reference texture(size_t id);

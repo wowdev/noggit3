@@ -788,59 +788,33 @@ void TextureSet::convertToOldAlpha()
   generate_alpha_tex();
 }
 
-void TextureSet::mergeAlpha(size_t id1, size_t id2)
+void TextureSet::merge_layers(size_t id1, size_t id2)
 {
   if (id1 >= nTextures || id2 >= nTextures || id1 == id2)
-    return;
-
-  uint8_t tab[3][64 * 64];
-
-  for (size_t k = 0; k < nTextures - 1; k++)
   {
-    memcpy(tab[k], alphamaps[k]->getAlpha(), 64 * 64);
+    throw std::invalid_argument("merge_layers: invalid layer id(s)");
   }
 
-  float alphas[3] = { 0.0f, 0.0f, 0.0f };
-  float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
-
-  for (int i = 0; i < 64 * 64; ++i)
+  if (id2 < id1)
   {
-    for (size_t k = 0; k < nTextures - 1; k++)
-    {
-      float f = static_cast<float>(tab[k][i]);
-      visibility[k + 1] = f;
-      for (size_t n = 0; n <= k; n++)
-        visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
-    }
-
-    visibility[id1] += visibility[id2];
-    visibility[id2] = 0;
-
-    for (int k = nTextures - 2; k >= 0; k--)
-    {
-      alphas[k] = visibility[k + 1];
-      for (int n = nTextures - 2; n > k; n--)
-      {
-        // prevent 0 division
-        if (alphas[n] == 255.0f)
-        {
-          alphas[k] = 0.0f;
-          break;
-        }
-        else
-          alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
-      }
-    }
-
-    for (size_t k = 0; k < nTextures - 1; k++)
-    {
-      tab[k][i] = static_cast<uint8_t>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
-    }
+    std::swap(id2, id1);
   }
 
-  for (size_t k = 0; k < nTextures - 1; k++)
+  // base alpha = 255 - sum_alpha(0..nTextures-1)
+  // works only when alphamap are in the big alpha format (always the case when editing)
+  if (id1 != 0)
   {
-    alphamaps[k]->setAlpha(tab[k]);
+    uint8_t tab[2][64 * 64];
+
+    memcpy(tab[0], alphamaps[id1 - 1]->getAlpha(), 64 * 64);
+    memcpy(tab[1], alphamaps[id2 - 1]->getAlpha(), 64 * 64);
+
+    for (int i = 0; i < 64 * 64; ++i)
+    {
+      tab[0][i] += tab[1][i];
+    }
+
+    alphamaps[id1-1]->setAlpha(tab[0]);
   }
 
   eraseTexture(id2);
@@ -857,8 +831,9 @@ bool TextureSet::removeDuplicate()
     {
       if (textures[i] == textures[j])
       {
-        mergeAlpha(i, j);
+        merge_layers(i, j);
         changed = true;
+        j--; // otherwise it skips the next texture
       }
     }
   }
