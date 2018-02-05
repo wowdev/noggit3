@@ -920,6 +920,11 @@ namespace opengl
     return _current_context->functions()->glUniform1iv(location, count, value);
   }
 
+  void context::uniform2fv (GLint location, GLsizei count, GLfloat const* value)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUniform2fv (location, count, value);
+  }
   void context::uniform3fv (GLint location, GLsizei count, GLfloat const* value)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);

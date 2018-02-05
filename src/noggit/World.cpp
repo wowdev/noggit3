@@ -604,6 +604,10 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
+uniform vec2 tex_anim_0;
+uniform vec2 tex_anim_1;
+uniform vec2 tex_anim_2;
+uniform vec2 tex_anim_3;
 uniform sampler2D alphamap;
 uniform int layer_count;
 uniform bool has_mccv;
@@ -663,10 +667,10 @@ vec4 texture_blend()
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  vec3 t0 = texture2D(tex0, vary_texcoord).rgb;
-  vec3 t1 = texture2D(tex1, vary_texcoord).rgb;
-  vec3 t2 = texture2D(tex2, vary_texcoord).rgb;
-  vec3 t3 = texture2D(tex3, vary_texcoord).rgb;
+  vec3 t0 = texture2D(tex0, vary_texcoord + tex_anim_0).rgb;
+  vec3 t1 = texture2D(tex1, vary_texcoord + tex_anim_1).rgb;
+  vec3 t2 = texture2D(tex2, vary_texcoord + tex_anim_2).rgb;
+  vec3 t3 = texture2D(tex3, vary_texcoord + tex_anim_3).rgb;
 
   return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
 }
@@ -882,6 +886,11 @@ void main()
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
     mcnk_shader.uniform("shadow_map", 5);
+
+    mcnk_shader.uniform("tex_anim_0", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_1", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_2", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {

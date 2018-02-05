@@ -213,16 +213,23 @@ void TextureSet::startAnim(int id, int animtime)
     opengl::texture::set_active_texture (0);
     gl.matrixMode(GL_TEXTURE);
     gl.pushMatrix();
-    
-    const int spd = (texFlags[id] >> 3) & 0x7;
-    const int dir = texFlags[id] & 0x7;
-    const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-    const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
-    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-    const int animspd = (const int)(200 * detail_size);
-    float f = ((static_cast<int>(animtime*(spd / 7.0f))) % animspd) / static_cast<float>(animspd);
-    gl.translatef(f*fdx, f*fdy, 0);
+
+    math::vector_2d translation = anim_uv_offset(id, animtime);
+
+    gl.translatef(translation.x, translation.y, 0);
   }
+}
+
+math::vector_2d TextureSet::anim_uv_offset(int id, int animtime) const
+{
+  const int spd = (texFlags[id] >> 3) & 0x7;
+  const int dir = texFlags[id] & 0x7;
+  const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+  const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
+  const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
+  const int animspd = (const int)(200 * detail_size);
+  float f = ((static_cast<int>(animtime*(spd / 7.0f))) % animspd) / static_cast<float>(animspd);
+  return { f*fdx, f*fdy };
 }
 
 void TextureSet::stopAnim(int id)

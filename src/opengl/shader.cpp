@@ -97,6 +97,10 @@ namespace opengl
     {
       gl.uniform1iv (uniform_location(name), value.size(), value.data());
     }
+    void use_program::uniform (std::string const& name, math::vector_2d const& value)
+    {
+      gl.uniform2fv (uniform_location (name), 1, value);
+    }
     void use_program::uniform (std::string const& name, math::vector_3d const& value)
     {
       gl.uniform3fv (uniform_location (name), 1, value);
