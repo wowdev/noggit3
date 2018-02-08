@@ -289,6 +289,11 @@ namespace noggit
       _angle_spin->setValue(_angle + change);
     }
 
+    void water::change_height(float change)
+    { 
+      _h_spin->setValue(_lock_pos.y + change);
+    }
+
     void water::paintLiquid (World* world, math::vector_3d const& pos, bool add)
     {
       world->paintLiquid ( pos

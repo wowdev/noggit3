@@ -37,7 +37,7 @@ namespace noggit
       void changeRadius(float change);
       void changeOrientation(float change);
       void changeAngle(float change);
-      void change_height(float change) { _lock_pos.y += change; }
+      void change_height(float change);
 
       void lockPos(math::vector_3d const& cursor_pos);
       void toggle_lock();
