@@ -1111,6 +1111,7 @@ in mat4 transform;
 
 out vec2 uv1;
 out vec2 uv2;
+out float camera_dist;
 
 uniform mat4 model_view;
 uniform mat4 projection;
@@ -1161,6 +1162,7 @@ void main()
   uv1 = get_texture_uv(tex_unit_lookup_1, vertex.xyz, norm);
   uv2 = get_texture_uv(tex_unit_lookup_2, vertex.xyz, norm);
 
+  camera_dist = -vertex.z;
   gl_Position = projection * vertex;
 }
 )code"
@@ -1171,13 +1173,26 @@ void main()
 
 in vec2 uv1;
 in vec2 uv2;
+in float camera_dist;
+
 uniform vec4 mesh_color;
 
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
+uniform vec4 fog_color;
+uniform float fog_start;
+uniform float fog_end;
+uniform int draw_fog;
+uniform int unfogged;
+
 uniform float alpha_test;
 uniform int pixel_shader;
+
+vec4 blend_by_alpha (in vec4 source, in vec4 dest)
+{
+  return source * source.w + dest * (1.0 - source.w);
+}
 
 void main()
 {
@@ -1307,6 +1322,13 @@ void main()
     discard;
   }
 
+  if(draw_fog == 1 && unfogged == 0 && camera_dist >= fog_end * fog_start)
+  {
+    float start = fog_end * fog_start;
+    float alpha = (camera_dist - start) / (fog_end - start);
+    color = blend_by_alpha (vec4(fog_color.rgb, alpha), color);
+  }
+
   gl_FragColor = color;
 }
 
@@ -1320,6 +1342,12 @@ void main()
       m2_shader.uniform ("projection", opengl::matrix::projection());
       m2_shader.uniform("tex1", 0);
       m2_shader.uniform("tex2", 1);
+
+      m2_shader.uniform ("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));
+      // !\ todo use light dbcs values
+      m2_shader.uniform ("fog_end", fogdistance);
+      m2_shader.uniform ("fog_start", 0.5f);
+      m2_shader.uniform ("draw_fog", (int)draw_fog);
 
       opengl::texture::enable_texture(0);
 
