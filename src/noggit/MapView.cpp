@@ -970,7 +970,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                texturingTool->toggle_spray();
+                texturingTool->toggle_tool();
               }
             , [&] { return terrainMode == editing_mode::paint; }
             );

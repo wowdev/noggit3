@@ -153,6 +153,7 @@ namespace noggit
         "\n"
         "Anim:\n"
         "  SHIFT + left mouse - update animation\n"
+        "  T - switch between add/remove animation mode\n"
       ));
 
       auto water_widget (new QWidget (this));
