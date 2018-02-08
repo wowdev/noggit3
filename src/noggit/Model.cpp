@@ -722,7 +722,9 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   else
   {
     gl.depthMask(GL_TRUE);
-  }  
+  }
+
+  m2_shader.uniform("unfogged", (int)renderflag.flags.unfogged);
 
   if (texture_count > 1)
   {
