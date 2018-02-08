@@ -129,7 +129,7 @@ namespace noggit
       _lock_x->setDecimals(3);
       _lock_z->setRange(0.0, 34133.0);
       _lock_z->setDecimals(3);
-      _lock_h->setRange(0.0, 34133.0);
+      _lock_h->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
       _lock_h->setMinimumWidth(30);
 
       connect ( _type_button_box, qOverload<int> (&QButtonGroup::buttonClicked)
