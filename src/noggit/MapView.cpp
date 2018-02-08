@@ -2219,6 +2219,8 @@ void MapView::update_cursor_pos()
 
 void MapView::displayViewMode_2D()
 {
+  doSelection(true);
+
   gl.matrixMode (GL_PROJECTION);
   gl.loadIdentity();
   gl.ortho
