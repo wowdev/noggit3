@@ -52,8 +52,7 @@ namespace noggit
       void change_spray_size (float change);
       void change_spray_pressure (float change);
 
-      void paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);
-      void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);
+      void paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);      
 
       Brush const& texture_brush() const
       {
@@ -63,6 +62,8 @@ namespace noggit
       current_texture* _current_texture;
 
     private:
+      void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);
+
       // slider functions
       void update_brush_hardness();
       void set_radius (float radius);
@@ -107,6 +108,8 @@ namespace noggit
       QSlider* _spray_pressure_slider;
       QDoubleSpinBox* _spray_size_spin;
       QDoubleSpinBox* _spray_pressure_spin;
+
+      QGroupBox* _anim_group;
 
       texture_swapper* _texture_switcher;
     };
