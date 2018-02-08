@@ -152,8 +152,7 @@ namespace noggit
         "  T - toggle brush swapper\n"
         "\n"
         "Anim:\n"
-        "  F - set animation of the current texture on the chunk\n"
-        "  R - remove current texture animation on the chunk\n"
+        "  SHIFT + left mouse - update animation\n"
       ));
 
       auto water_widget (new QWidget (this));

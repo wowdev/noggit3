@@ -623,6 +623,16 @@ void TextureSet::change_texture_flag(scoped_blp_texture_reference tex, std::size
       {
         texFlags[i] &= ~flag;
       }
+
+      if (flag & FLAG_GLOW)
+      {
+        texFlags[i] |= FLAG_GLOW;
+      }
+      else
+      {
+        texFlags[i] &= ~FLAG_GLOW;
+      }
+
       break;
     }
   }
