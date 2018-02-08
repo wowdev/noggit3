@@ -174,17 +174,6 @@ struct ModelRenderPass : ModelTexUnit
   }
 };
 
-struct ModelCamera {
-
-  math::vector_3d pos, target;
-  float nearclip, farclip, fov;
-  Animation::M2Value<math::vector_3d> tPos, tTarget;
-  Animation::M2Value<float> rot;
-
-  ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global);
-  void setup (float aspect_ratio, int time, int animtime);
-};
-
 struct ModelLight {
   int type, parent;
   math::vector_3d pos, tpos, dir, tdir;
@@ -242,7 +231,6 @@ public:
   // Misc ?
   // ===============================
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
-  boost::optional<ModelCamera> cam;
   std::vector<Bone> bones;
   ModelHeader header;
   std::vector<uint16_t> blend_override;

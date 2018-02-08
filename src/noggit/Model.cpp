@@ -142,7 +142,7 @@ bool Model::isAnimated(const MPQFile& f)
     }
   }
 
-  if (animGeometry || header.nParticleEmitters || header.nRibbonEmitters || header.nLights || header.nCameras)
+  if (animGeometry || header.nParticleEmitters || header.nRibbonEmitters || header.nLights)
   {
     animBones = true;
   }
@@ -1042,12 +1042,6 @@ void Model::initAnimated(const MPQFile& f)
     }
   }
 
-  // just use the first camera, meh
-  if (header.nCameras>0) {
-    ModelCameraDef const* camDefs = reinterpret_cast<ModelCameraDef const*>(f.getBuffer() + header.ofsCameras);
-    cam = ModelCamera(f, camDefs[0], _global_sequences.data());
-  }
-
   // init lights
   if (header.nLights) {
     ModelLightDef const* lDefs = reinterpret_cast<ModelLightDef const*>(f.getBuffer() + header.ofsLights);
@@ -1158,34 +1152,6 @@ void TextureAnim::calc(int anim, int time, int animtime)
   {
     mat *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue(anim, time, animtime));
   }
-}
-
-ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global)
-  : pos (fixCoordSystem(mcd.pos))
-  , target (fixCoordSystem(mcd.target))
-  , nearclip (mcd.nearclip)
-  , farclip (mcd.farclip)
-  , fov (mcd.fov)
-  , tPos (mcd.transPos, f, global)
-  , tTarget (mcd.transTarget, f, global)
-  , rot (mcd.rot, f, global)
-{
-  tPos.apply(fixCoordSystem);
-  tTarget.apply(fixCoordSystem);
-}
-
-void ModelCamera::setup (float aspect_ratio, int time, int animtime)
-{
-  gl.matrixMode (GL_PROJECTION);
-  gl.loadIdentity();
-  opengl::matrix::perspective
-    (math::radians (fov * 0.6f), aspect_ratio, nearclip, farclip);
-  gl.matrixMode (GL_MODELVIEW);
-  gl.loadIdentity();
-  opengl::matrix::look_at ( pos + tPos.getValue( 0, time, animtime )
-                          , target + tTarget.getValue( 0, time, animtime )
-                          , {0.0f, 1.0f, 0.0f}
-                          );
 }
 
 ModelColor::ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global)
