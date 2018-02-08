@@ -329,7 +329,7 @@ namespace noggit
       update_brush_hardness();
       update_spray_brush();
       set_radius(15.0f);
-      toggle_spray(); // to disable
+      toggle_tool(); // to disable
     }
 
     void texturing_tool::update_brush_hardness()
@@ -353,7 +353,7 @@ namespace noggit
       }
     }
 
-    void texturing_tool::toggle_spray()
+    void texturing_tool::toggle_tool()
     {
       if (_texturing_mode == texturing_mode::paint)
       {
@@ -362,6 +362,10 @@ namespace noggit
       else if (_texturing_mode == texturing_mode::swap)
       {
         _texture_switcher->toggle_brush_mode();
+      }
+      else if (_texturing_mode == texturing_mode::anim)
+      {
+        _anim_group->setChecked(!_anim_group->isChecked());
       }
     }
 

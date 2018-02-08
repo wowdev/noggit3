@@ -42,7 +42,7 @@ namespace noggit
 
       void set_brush_level (float level);
 
-      void toggle_spray();
+      void toggle_tool();
 
       void change_radius (float change);
       void change_hardness (float change);
