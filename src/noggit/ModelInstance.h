@@ -13,6 +13,7 @@
 
 namespace math { class frustum; }
 class Model;
+class WMOInstance;
 
 class ModelInstance
 {
@@ -23,7 +24,6 @@ public:
   math::vector_3d pos;
   math::vector_3d dir;
 
-  math::quaternion _wmo_orientation;
 
   //! \todo  Get this out and do somehow else.
   unsigned int uid;
@@ -34,10 +34,7 @@ public:
   // longest side of an AABB transformed model's bounding box from the M2 header
   float size_cat;
 
-  math::vector_3d lcol;
-
   explicit ModelInstance(std::string const& filename);
-  explicit ModelInstance(std::string const& filename, MPQFile* f);
   explicit ModelInstance(std::string const& filename, ENTRY_MDDF const*d);
 
   ModelInstance(ModelInstance const& other) = default;
@@ -47,11 +44,9 @@ public:
     : model (std::move (other.model))
     , pos (other.pos)
     , dir (other.dir)
-    , _wmo_orientation (other._wmo_orientation)
     , uid (other.uid)
     , scale (other.scale)
     , size_cat (other.size_cat)
-    , lcol (other.lcol)
   {
     std::swap (extents, other.extents);
   }
@@ -61,11 +56,9 @@ public:
     std::swap (extents, other.extents);
     std::swap (pos, other.pos);
     std::swap (dir, other.dir);
-    std::swap (_wmo_orientation, other._wmo_orientation);
     std::swap (uid, other.uid);
     std::swap (scale, other.scale);
     std::swap (size_cat, other.size_cat);
-    std::swap (lcol, other.lcol);
     return *this;
   }
 
@@ -75,12 +68,7 @@ public:
                  , selection_result*
                  , int animtime
                  );
-  void draw_wmo ( const math::vector_3d& ofs
-                , const math::degrees
-                , math::frustum const&
-                , bool draw_fog
-                , int animtime
-                );
+  
 
   math::matrix_4x4 const& transform_matrix_transposed() const { return _transform_mat_transposed; }
 
@@ -92,9 +80,49 @@ public:
 
   void recalcExtents();
 
-private:
+protected:
   void update_transform_matrix();
 
   math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
   math::matrix_4x4 _transform_mat_inverted = math::matrix_4x4::uninitialized;
+};
+
+class wmo_doodad_instance : public ModelInstance
+{
+public:
+  math::quaternion wmo_orientation;
+  math::vector_3d light_color;
+
+  explicit wmo_doodad_instance(std::string const& filename, MPQFile* f);
+
+  wmo_doodad_instance(wmo_doodad_instance const& other) = default;
+  wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = default;
+
+  wmo_doodad_instance (wmo_doodad_instance&& other)
+    : ModelInstance (other)
+    , wmo_orientation (other.wmo_orientation)
+    , light_color (other.light_color)
+  {
+    std::swap (extents, other.extents);
+  }
+  wmo_doodad_instance& operator= (wmo_doodad_instance&& other)
+  {
+    std::swap (model, other.model);
+    std::swap (extents, other.extents);
+    std::swap (pos, other.pos);
+    std::swap (dir, other.dir);
+    std::swap (wmo_orientation, other.wmo_orientation);
+    std::swap (uid, other.uid);
+    std::swap (scale, other.scale);
+    std::swap (size_cat, other.size_cat);
+    std::swap (light_color, other.light_color);
+    return *this;
+  }
+
+  void draw_wmo ( const math::vector_3d& ofs
+                , const math::degrees
+                , math::frustum const&
+                , bool draw_fog
+                , int animtime
+                );
 };

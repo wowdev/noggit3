@@ -14,8 +14,8 @@ ModelInstance::ModelInstance(std::string const& filename)
 {
 }
 
-ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
-  : model (filename)
+wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f)
+  : ModelInstance (filename)
 {
   float ff[4];
 
@@ -23,11 +23,22 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
   pos = math::vector_3d(ff[0], ff[2], -ff[1]);
 
   f->read(ff, 16);
-  _wmo_orientation = math::quaternion (-ff[3], ff[1], ff[2], ff[0]);
+  wmo_orientation = math::quaternion (-ff[3], ff[1], ff[2], ff[0]);
 
   f->read(&scale, 4);
-  f->read(&uid, 4);
-  lcol = math::vector_3d(((uid & 0xff0000) >> 16) / 255.0f, ((uid & 0x00ff00) >> 8) / 255.0f, (uid & 0x0000ff) / 255.0f);
+
+  union 
+  {
+    uint32_t packed;
+    struct
+    {
+      uint8_t b, g, r, a;
+    }bgra;
+  } color;
+
+  f->read(&color.packed, 4);
+
+  light_color = math::vector_3d(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
 
   recalcExtents();
 }
@@ -154,7 +165,7 @@ void ModelInstance::intersect ( math::ray const& ray
 }
 
 
-void ModelInstance::draw_wmo ( const math::vector_3d& ofs
+void wmo_doodad_instance::draw_wmo ( const math::vector_3d& ofs
                              , const math::degrees rotation
                              , math::frustum const& frustum
                              , bool draw_fog
@@ -168,7 +179,7 @@ void ModelInstance::draw_wmo ( const math::vector_3d& ofs
   opengl::scoped::matrix_pusher const matrix;
 
   gl.translatef(pos.x, pos.y, pos.z);
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, wmo_orientation));
   gl.scalef(scale, -scale, -scale);
 
   //! \todo draw particles from wmo's doodads ?
