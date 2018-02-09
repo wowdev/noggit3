@@ -36,7 +36,7 @@ namespace noggit
                                  , object_paste_params* paste_params
                                  )
             : QWidget(nullptr)
-            , rotationEditor (new rotation_editor())
+            , rotationEditor (new rotation_editor(mapView))
             , _settings (new QSettings (this))
             , _copy_model_stats (true)
             , selected()

@@ -409,7 +409,7 @@ void MapView::createGUI()
   connect (this, &QObject::destroyed, _object, &QObject::deleteLater);
 
 
-  TexturePalette = new noggit::ui::tileset_chooser;
+  TexturePalette = new noggit::ui::tileset_chooser(this);
   
   connect (this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
   connect ( texturingTool->_current_texture, &noggit::ui::current_texture::clicked
@@ -1211,6 +1211,7 @@ void MapView::createGUI()
 
   // helper models
   HelperModels = new noggit::ui::helper_models(this);
+  HelperModels->hide();
 }
 
 MapView::MapView( math::degrees camera_yaw0

@@ -16,7 +16,7 @@ namespace noggit
   namespace ui
   {
     helper_models::helper_models(MapView *mapview)
-      : QWidget (nullptr)
+      : QWidget (mapview, Qt::Tool | Qt::WindowStaysOnTopHint)
     {
       setWindowIcon (QIcon (":/icon"));
       auto layout (new QVBoxLayout (this));

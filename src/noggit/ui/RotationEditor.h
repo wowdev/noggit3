@@ -17,7 +17,7 @@ namespace noggit
     class rotation_editor : public QWidget
     {
     public:
-      rotation_editor();
+      rotation_editor(QWidget* parent);
 
       void select(selection_type entry);
       void updateValues();
