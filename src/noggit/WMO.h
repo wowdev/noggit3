@@ -127,7 +127,7 @@ struct WMOLight {
   void init(MPQFile* f);
   void setup(GLint light);
 
-  static void setupOnce(GLint light, math::vector_3d dir, math::vector_3d lcol);
+  static void setupOnce(GLint light, math::vector_3d dir, math::vector_3d light_color);
 };
 
 struct WMOPV {
@@ -209,7 +209,7 @@ public:
   math::vector_3d extents[2];
   std::vector<std::string> textures;
   std::vector<std::string> models;
-  std::vector<ModelInstance> modelis;
+  std::vector<wmo_doodad_instance> modelis;
   std::vector<math::vector_3d> model_nearest_light_vector;
 
   std::vector<WMOLight> lights;

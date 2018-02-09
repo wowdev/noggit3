@@ -266,7 +266,7 @@ void WMO::finishLoading ()
     size_t after_entry (f.getPos() + 0x28);
     f.read (&x, sizeof (x));
 
-    modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+    modelis.emplace_back(ddnames + x.name_offset, &f);
     model_nearest_light_vector.emplace_back();
 
     f.seek (after_entry);
@@ -515,14 +515,14 @@ void WMOLight::setup(GLint light)
   gl.enable(light);
 }
 
-void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d lcol)
+void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d light_color)
 {
   math::vector_4d position(dir, 0);
   //math::vector_4d position(0,1,0,0);
 
-  math::vector_4d ambient = math::vector_4d(lcol * 0.3f, 1);
+  math::vector_4d ambient = math::vector_4d(light_color * 0.3f, 1);
   //math::vector_4d ambient = math::vector_4d(0.101961f, 0.062776f, 0, 1);
-  math::vector_4d diffuse = math::vector_4d(lcol, 1);
+  math::vector_4d diffuse = math::vector_4d(light_color, 1);
   //math::vector_4d diffuse = math::vector_4d(0.439216f, 0.266667f, 0, 1);
 
   gl.lightfv(light, GL_AMBIENT, ambient);
@@ -1137,7 +1137,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
       && dd < wmo->modelis.size()
       )
     {
-      ModelInstance& mi = wmo->modelis[dd];
+      wmo_doodad_instance& mi = wmo->modelis[dd];
 
       if (mi.cull_by_size_category(camera))
       {
@@ -1145,7 +1145,7 @@ void WMOGroup::drawDoodads ( unsigned int doodadset
       }
 
       if (!outdoorLights) {
-        WMOLight::setupOnce(GL_LIGHT2, wmo->model_nearest_light_vector[dd], mi.lcol);
+        WMOLight::setupOnce(GL_LIGHT2, wmo->model_nearest_light_vector[dd], mi.light_color);
       }
       setupFog (draw_fog, setup_fog);
       wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog, animtime);
