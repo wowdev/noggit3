@@ -15,8 +15,8 @@ namespace noggit
 {
   namespace ui
   {
-    rotation_editor::rotation_editor()
-      : QWidget (nullptr)
+    rotation_editor::rotation_editor(QWidget* parent)
+      : QWidget (parent)
       , rotationVect(nullptr)
       , posVect(nullptr)
       , scale(nullptr)

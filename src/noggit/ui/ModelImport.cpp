@@ -17,10 +17,9 @@ namespace noggit
   namespace ui
   {
     model_import::model_import (MapView* mapview)
-      : QWidget (nullptr)
+      : QWidget (mapview, Qt::Tool | Qt::WindowStaysOnTopHint)
     {
       setWindowIcon (QIcon (":/icon"));
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
       auto layout (new QFormLayout (this));
 
       layout->addRow ("Filter", _textBox = new QLineEdit (this));

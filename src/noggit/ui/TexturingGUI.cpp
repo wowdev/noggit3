@@ -60,7 +60,7 @@ namespace noggit
     };
 
     tileset_chooser::tileset_chooser (QWidget* parent)
-      : widget (parent)
+      : widget (parent, Qt::Window)
     {
       setWindowTitle ("Texture palette");
       setWindowIcon (QIcon (":/icon"));
