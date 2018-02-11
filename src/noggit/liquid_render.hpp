@@ -90,8 +90,8 @@ void main()
   else
   {
     vec4 lerp = (type == 1)
-              ? mix (ocean_color_dark, ocean_color_light, depth_) 
-              : mix (river_color_dark, river_color_light, depth_);
+              ? mix (ocean_color_light, ocean_color_dark, depth_) 
+              : mix (river_color_light, river_color_dark, depth_);
               
     vec4 tResult = clamp (texel + lerp, 0.0, 1.0); //clamp shouldn't be needed
     vec4 oColor = clamp (texel + tResult, 0.0, 1.0);
