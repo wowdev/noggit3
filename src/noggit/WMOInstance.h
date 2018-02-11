@@ -22,11 +22,19 @@ public:
   unsigned int mUniqueID;
   uint16_t mFlags;
   uint16_t mUnknown;
-  uint16_t mNameset;
-  uint16_t doodadset;
+  uint16_t mNameset; 
+
+  uint16_t doodadset() const { return _doodadset; }
+  void change_doodadset(uint16_t doodad_set);
+
+private:
+  void update_doodads();
+  
+  uint16_t _doodadset;
+
+  std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
 
 public:
-  WMOInstance(std::string const& filename, MPQFile* _file);
   WMOInstance(std::string const& filename, ENTRY_MODF const* d);
   explicit WMOInstance(std::string const& filename);
 
@@ -36,16 +44,15 @@ public:
   WMOInstance (WMOInstance&& other)
     : wmo (std::move (other.wmo))
     , pos (other.pos)
-    // , extents (other.extents)
     , dir (other.dir)
     , mUniqueID (other.mUniqueID)
     , mFlags (other.mFlags)
     , mUnknown (other.mUnknown)
     , mNameset (other.mNameset)
-    , doodadset (other.doodadset)
+    , _doodadset (other._doodadset)
+    , _doodads_per_group(other._doodads_per_group)
 
   {
-  //  std::move(std::begin(other.extents), std::end(other.extents), extents);
     std::swap (extents, other.extents);
   }
 
@@ -59,7 +66,8 @@ public:
     std::swap(mFlags, other.mFlags);
     std::swap(mUnknown, other.mUnknown);
     std::swap(mNameset, other.mNameset);
-    std::swap(doodadset, other.doodadset);
+    std::swap(_doodadset, other._doodadset);
+    std::swap(_doodads_per_group, other._doodads_per_group);
     return *this;
   }
 
@@ -86,4 +94,9 @@ public:
   void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]) const;
+
+  std::vector<wmo_doodad_instance*> get_visible_doodads( math::frustum const& frustum
+                                                       , const float& cull_distance
+                                                       , const math::vector_3d& camera
+                                                       );
 };

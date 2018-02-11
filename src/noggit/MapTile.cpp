@@ -792,7 +792,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     lMODF_Data[lID].extents[1][2] = object.extents[1].z;
 
     lMODF_Data[lID].flags = object.mFlags;
-    lMODF_Data[lID].doodadSet = object.doodadset;
+    lMODF_Data[lID].doodadSet = object.doodadset();
     lMODF_Data[lID].nameSet = object.mNameset;
     lMODF_Data[lID].unknown = object.mUnknown;
     lID++;
