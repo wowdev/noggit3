@@ -1501,7 +1501,10 @@ void main()
   if (draw_water)
   {
     // draw the water on both sides
-    gl.disable(GL_CULL_FACE);
+    opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
+    opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
+    opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
+
     opengl::scoped::use_program water_shader{ liquid_renderer.shader_program() };
 
     water_shader.uniform ("model_view", opengl::matrix::model_view());
@@ -1512,6 +1515,7 @@ void main()
     water_shader.uniform ("river_color_light", river_color_light);
     water_shader.uniform ("river_color_dark",  river_color_dark);
 
+    
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawWater ( frustum
@@ -1523,8 +1527,6 @@ void main()
                       , water_layer
                       );
     }
-
-    gl.enable(GL_CULL_FACE);
   }
 }
 

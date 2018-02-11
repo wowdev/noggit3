@@ -399,9 +399,6 @@ void MapTile::drawWater ( math::frustum const& frustum
     return; //no need to draw water on tile without water =)
   }
 
-  gl.disable(GL_COLOR_MATERIAL);
-  gl.disable(GL_LIGHTING);
-
   Water.draw ( frustum
              , cull_distance
              , camera
@@ -410,9 +407,6 @@ void MapTile::drawWater ( math::frustum const& frustum
              , animtime
              , layer
              );
-
-  gl.enable(GL_LIGHTING);
-  gl.enable(GL_COLOR_MATERIAL);
 }
 
 
