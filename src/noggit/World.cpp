@@ -1080,9 +1080,24 @@ void main()
     gl.lightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
   }
 
+  std::unordered_map<std::string, std::vector<ModelInstance*>> _wmo_doodads;
+
+  bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
+  if (draw_doodads_wmo)
+  {
+    for (auto& wmo : mWMOInstances)
+    {
+      auto& instance = wmo.second;
+
+      for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos))
+      {
+        _wmo_doodads[doodad->model->_filename].push_back(doodad);
+      }      
+    }
+  }
 
   // M2s / models
-  if (draw_models)
+  if (draw_models || draw_doodads_wmo)
   {
     if (draw_model_animations)
     {
@@ -1351,10 +1366,21 @@ void main()
 
       opengl::texture::enable_texture(0);
 
-      for (auto& it : _models_by_filename)
+      if (draw_models)
       {
-        it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
+        for (auto& it : _models_by_filename)
+        {
+          it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
+        }
       }
+      
+      if (draw_doodads_wmo)
+      {
+        for (auto& it : _wmo_doodads)
+        {
+          it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
+        }
+      }      
 
       opengl::texture::disable_texture(1);
       opengl::texture::disable_texture(0);

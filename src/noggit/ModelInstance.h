@@ -23,7 +23,7 @@ public:
 
   math::vector_3d pos;
   math::vector_3d dir;
-
+  math::vector_3d light_color = { 1.f, 1.f, 1.f };
 
   //! \todo  Get this out and do somehow else.
   unsigned int uid;
@@ -44,6 +44,7 @@ public:
     : model (std::move (other.model))
     , pos (other.pos)
     , dir (other.dir)
+    , light_color (other.light_color)
     , uid (other.uid)
     , scale (other.scale)
     , size_cat (other.size_cat)
@@ -56,6 +57,7 @@ public:
     std::swap (extents, other.extents);
     std::swap (pos, other.pos);
     std::swap (dir, other.dir);
+    std::swap (light_color, other.light_color);
     std::swap (uid, other.uid);
     std::swap (scale, other.scale);
     std::swap (size_cat, other.size_cat);
@@ -75,7 +77,7 @@ public:
   void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]) const;
-  bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
+  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
   bool cull_by_size_category(const math::vector_3d& camera) const;
 
   void recalcExtents();
@@ -90,8 +92,8 @@ protected:
 class wmo_doodad_instance : public ModelInstance
 {
 public:
-  math::quaternion wmo_orientation;
-  math::vector_3d light_color;
+  math::quaternion doodad_orientation;
+  math::vector_3d world_pos;
 
   explicit wmo_doodad_instance(std::string const& filename, MPQFile* f);
 
@@ -100,29 +102,20 @@ public:
 
   wmo_doodad_instance (wmo_doodad_instance&& other)
     : ModelInstance (other)
-    , wmo_orientation (other.wmo_orientation)
-    , light_color (other.light_color)
+    , doodad_orientation (other.doodad_orientation)
+    , world_pos (other.world_pos)
   {
     std::swap (extents, other.extents);
   }
   wmo_doodad_instance& operator= (wmo_doodad_instance&& other)
   {
-    std::swap (model, other.model);
-    std::swap (extents, other.extents);
-    std::swap (pos, other.pos);
-    std::swap (dir, other.dir);
-    std::swap (wmo_orientation, other.wmo_orientation);
-    std::swap (uid, other.uid);
-    std::swap (scale, other.scale);
-    std::swap (size_cat, other.size_cat);
-    std::swap (light_color, other.light_color);
+    ModelInstance::operator= (other);
+    std::swap (doodad_orientation, other.doodad_orientation);
+    std::swap (world_pos, other.world_pos);
     return *this;
   }
 
-  void draw_wmo ( const math::vector_3d& ofs
-                , const math::degrees
-                , math::frustum const&
-                , bool draw_fog
-                , int animtime
-                );
+  void update_transform_matrix_wmo(WMOInstance* wmo);
+
+  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
 };

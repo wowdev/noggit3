@@ -1195,16 +1195,16 @@ void MapView::createGUI()
   addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
   addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); });
 
-  addHotkey (Qt::Key_0, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 0; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_1, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 1; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_2, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 2; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_3, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 3; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_4, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 4; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_5, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 5; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_6, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 6; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_7, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 7; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_8, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 8; }, [this] { return _world->IsSelection(eEntry_WMO); });
-  addHotkey (Qt::Key_9, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->doodadset = 9; }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_0, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(0); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_1, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(1); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_2, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(2); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_3, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(3); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_4, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(4); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_5, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(5); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_6, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(6); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_7, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(7); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_8, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(8); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_9, MOD_ctrl, [this] { boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->change_doodadset(9); }, [this] { return _world->IsSelection(eEntry_WMO); });
 
   // modelimport
   objectEditor->modelImport = new noggit::ui::model_import(this);
@@ -2046,7 +2046,7 @@ void MapView::tick (float dt)
                      << "\nunique ID: " << instance->mUniqueID
                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                      << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                     << "\ndoodad set: " << instance->doodadset
+                     << "\ndoodad set: " << instance->doodadset()
                      << "\ntextures used: " << instance->wmo->textures.size();
 
 

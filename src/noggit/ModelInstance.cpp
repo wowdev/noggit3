@@ -5,6 +5,7 @@
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/ModelInstance.h>
+#include <noggit/WMOInstance.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
@@ -12,35 +13,6 @@
 ModelInstance::ModelInstance(std::string const& filename)
   : model (filename)
 {
-}
-
-wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f)
-  : ModelInstance (filename)
-{
-  float ff[4];
-
-  f->read(ff, 12);
-  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
-
-  f->read(ff, 16);
-  wmo_orientation = math::quaternion (-ff[3], ff[1], ff[2], ff[0]);
-
-  f->read(&scale, 4);
-
-  union 
-  {
-    uint32_t packed;
-    struct
-    {
-      uint8_t b, g, r, a;
-    }bgra;
-  } color;
-
-  f->read(&color.packed, 4);
-
-  light_color = math::vector_3d(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
-
-  recalcExtents();
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
@@ -122,25 +94,6 @@ void ModelInstance::update_transform_matrix()
   _transform_mat_transposed = mat.transposed();
 }
 
-//! \todo  Get this drawn on the 2D view.
-/*void ModelInstance::drawMapTile()
-{
-if(CheckUniques(uid))
-return;
-
-opengl::scoped::matrix_pusher const matrix;
-
-gl.translatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
-gl.rotatef(-90.0f, 1, 0, 0);
-gl.rotatef(dir.y - 90.0f, 0, 1, 0);
-gl.rotatef(-dir.x, 0, 0, 1);
-gl.rotatef(dir.z, 1, 0, 0);
-gl.scalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
-gl.scalef(sc,sc,sc);
-
-model->draw();
-}*/
-
 void ModelInstance::intersect ( math::ray const& ray
                               , selection_result* results
                               , int animtime
@@ -162,28 +115,6 @@ void ModelInstance::intersect ( math::ray const& ray
     //! so should be inverted by model_matrix?
     results->emplace_back (result * scale, selected_model_type (this));
   }
-}
-
-
-void wmo_doodad_instance::draw_wmo ( const math::vector_3d& ofs
-                             , const math::degrees rotation
-                             , math::frustum const& frustum
-                             , bool draw_fog
-                             , int animtime
-                             )
-{
-  math::vector_3d tpos(ofs + pos);
-  math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
-  if (!frustum.intersectsSphere(tpos, model->rad*scale)) return;
-
-  opengl::scoped::matrix_pusher const matrix;
-
-  gl.translatef(pos.x, pos.y, pos.z);
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, wmo_orientation));
-  gl.scalef(scale, -scale, -scale);
-
-  //! \todo draw particles from wmo's doodads ?
-  model->draw (draw_fog, animtime, false);
 }
 
 void ModelInstance::resetDirection(){
@@ -287,4 +218,85 @@ void ModelInstance::recalcExtents()
                                , vertex_box_max.z - vertex_box_min.z
                                )
                      );
+}
+
+wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f)
+  : ModelInstance (filename)
+{
+  float ff[4];
+
+  f->read(ff, 12);
+  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
+
+  f->read(ff, 16);
+  doodad_orientation = math::quaternion (-ff[0], -ff[2], ff[1], ff[3]);
+
+  f->read(&scale, 4);
+
+  union
+  {
+    uint32_t packed;
+    struct
+    {
+      uint8_t b, g, r, a;
+    }bgra;
+  } color;
+
+  f->read(&color.packed, 4);
+
+  light_color = math::vector_3d(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
+
+  recalcExtents();
+}
+
+void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
+{
+  world_pos = pos + wmo->pos;
+
+  math::matrix_4x4 m2_mat
+  (
+    math::matrix_4x4(math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 (math::matrix_4x4::rotation, doodad_orientation)
+    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
+  );
+
+  math::matrix_4x4 mat
+  (
+    math::matrix_4x4(math::matrix_4x4::translation, wmo->pos)
+    * math::matrix_4x4 (math::matrix_4x4::rotation_xyz
+      , { math::degrees (wmo->dir.z)
+      , math::degrees (wmo->dir.y - 90.0f)
+      , math::degrees (wmo->dir.x)
+      }
+    )
+    * m2_mat
+  );
+
+  _transform_mat_inverted = mat.inverted();
+  _transform_mat_transposed = mat.transposed();
+}
+
+bool wmo_doodad_instance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const
+{
+  float dist = (world_pos - camera).length() - model->rad * scale;
+
+  if (dist >= cull_distance)
+  {
+    return false;
+  }
+
+  if (size_cat < 1.f && dist > 30.f)
+  {
+    return false;
+  }
+  else if (size_cat < 4.f && dist > 150.f)
+  {
+    return false;
+  }
+  else if (size_cat < 25.f && dist > 300.f)
+  {
+    return false;
+  }
+
+  return frustum.intersectsSphere(world_pos, model->rad * scale);
 }

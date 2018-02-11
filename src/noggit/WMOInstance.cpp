@@ -3,24 +3,11 @@
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/Misc.h> // checkinside
+#include <noggit/ModelInstance.h>
 #include <noggit/WMO.h> // WMO
 #include <noggit/WMOInstance.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
-
-WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
-  : wmo(filename)
-{
-  _file->read(&mUniqueID, 4);
-  _file->read(&pos, 12);
-  _file->read(&dir, 12);
-  _file->read(&extents[0], 12);
-  _file->read(&extents[1], 12);
-  _file->read(&mFlags, 2);
-  _file->read(&doodadset, 2);
-  _file->read(&mNameset, 2);
-  _file->read(&mUnknown, 2);
-}
 
 WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
   : wmo(filename)
@@ -28,10 +15,12 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
   , dir(math::vector_3d(d->rot[0], d->rot[1], d->rot[2]))
   , mUniqueID(d->uniqueID), mFlags(d->flags)
   , mUnknown(d->unknown), mNameset(d->nameSet)
-  , doodadset(d->doodadSet)
+  , _doodadset(d->doodadSet)
 {
   extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
+
+  change_doodadset(_doodadset);
 }
 
 WMOInstance::WMOInstance(std::string const& filename)
@@ -42,8 +31,9 @@ WMOInstance::WMOInstance(std::string const& filename)
   , mFlags(0)
   , mUnknown(0)
   , mNameset(0)
-  , doodadset(0)
+  , _doodadset(0)
 {
+  change_doodadset(_doodadset);
 }
 
 void WMOInstance::draw ( math::frustum const& frustum
@@ -80,7 +70,7 @@ void WMOInstance::draw ( math::frustum const& frustum
     gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
     gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
-    wmo->draw ( doodadset
+    wmo->draw ( _doodadset
               , pos
               , math::degrees (roty)
               , is_selected
@@ -146,6 +136,8 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
 void WMOInstance::recalcExtents()
 {
+  update_doodads();
+
   math::vector_3d min (math::vector_3d::max());
   math::vector_3d max (math::vector_3d::min());
   math::matrix_4x4 rot
@@ -198,22 +190,50 @@ bool WMOInstance::isInsideRect(math::vector_3d rect[2]) const
   return misc::rectOverlap(extents, rect);
 }
 
-/*void WMOInstance::drawPortals()
+void WMOInstance::change_doodadset(uint16_t doodad_set)
 {
-  opengl::scoped::matrix_pusher const matrix;
+  _doodadset = doodad_set;
 
-gl.translatef( pos.x, pos.y, pos.z );
+  _doodads_per_group = wmo->doodads_per_group(_doodadset);
+  update_doodads();
+}
 
-const float roty = dir.y - 90.0f;
-
-gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
-gl.rotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-gl.rotatef( dir.z, 1.0f, 0.0f, 0.0f );
-
-wmo->drawPortals();
-}*/
+void WMOInstance::update_doodads()
+{
+  for (auto& group_doodads : _doodads_per_group)
+  {
+    for (auto& doodad : group_doodads.second)
+    {
+      doodad.update_transform_matrix_wmo(this);
+    }
+  }
+}
 
 void WMOInstance::resetDirection()
 {
   dir = math::vector_3d(0.0f, dir.y, 0.0f);
+  recalcExtents();
+
+}
+
+std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
+  ( math::frustum const& frustum
+  , const float& cull_distance
+  , const math::vector_3d& camera
+  )
+{
+  std::vector<wmo_doodad_instance*> doodads;
+
+  for (int i = 0; i < wmo->groups.size(); ++i)
+  {
+    if (wmo->groups[i].is_visible(pos, math::degrees (dir.y - 90.f), frustum, cull_distance, camera))
+    {
+      for (auto& doodad : _doodads_per_group[i])
+      {
+        doodads.push_back(&doodad);
+      }
+    }
+  }
+
+  return doodads;
 }

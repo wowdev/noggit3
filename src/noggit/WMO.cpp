@@ -338,6 +338,11 @@ void WMO::draw ( int doodadset
 
   for (auto& group : groups)
   {
+    if (!group.is_visible(ofs, angle, frustum, cull_distance, camera))
+    {
+      continue;
+    }
+
     group.draw ( ofs
                , angle
                , frustum
@@ -348,20 +353,6 @@ void WMO::draw ( int doodadset
                , world_has_skies
                , setup_fog
                );
-
-    if (draw_doodads)
-    {
-      group.drawDoodads ( doodadset
-                        , ofs
-                        , angle
-                        , frustum
-                        , camera
-                        , draw_fog
-                        , setup_outdoor_lights
-                        , setup_fog
-                        , animtime
-                        );
-    }
 
     group.drawLiquid ( ocean_color_light
                      , ocean_color_dark
@@ -468,6 +459,27 @@ bool WMO::drawSkybox ( math::vector_3d pCamera
   }
 
   return false;
+}
+
+std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint16_t doodadset) const
+{
+  std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads;
+
+  auto const& dset = doodadsets[doodadset];
+  uint32_t start = dset.start, end = start + dset.size;
+
+  for (int i = 0; i < groups.size(); ++i)
+  {
+    for (uint16_t ref : groups[i].doodad_ref())
+    {
+      if (ref >= start && ref < end)
+      {
+        doodads[i].push_back(modelis[ref]);
+      }
+    }
+  }
+
+  return doodads;
 }
 
 void WMOLight::init(MPQFile* f)
@@ -831,9 +843,9 @@ void WMOGroup::load()
 
     assert (fourcc == 'MODR');
 
-    ddr.resize (size / sizeof (int16_t));
+    _doodad_ref.resize (size / sizeof (int16_t));
 
-    f.read (ddr.data (), size);
+    f.read (_doodad_ref.data (), size);
   }
   // - MOBN ----------------------------------------------
   if (header.flags & 0x1)
@@ -978,7 +990,7 @@ void WMOGroup::load()
     float lenmin;
     int lmin;
 
-    for (auto doodad : ddr)
+    for (auto doodad : _doodad_ref)
     {
       lenmin = 999999.0f * 999999.0f;
       lmin = 0;
@@ -1006,6 +1018,27 @@ void WMOGroup::load()
   }
 }
 
+bool WMOGroup::is_visible( math::vector_3d const& ofs
+                         , math::degrees const& angle
+                         , math::frustum const& frustum
+                         , float const& cull_distance
+                         , math::vector_3d const& camera
+                         ) const
+{
+  math::vector_3d pos = center + ofs;
+
+  math::rotate(ofs.x, ofs.z, &pos.x, &pos.z, angle);
+
+  if (!frustum.intersectsSphere(pos, rad))
+  {
+    return false;
+  }
+
+  float dist = (pos - camera).length() - rad;
+
+  return (dist < cull_distance);
+}
+
 void WMOGroup::draw( const math::vector_3d& ofs
                    , const math::degrees angle
                    , math::frustum const& frustum
@@ -1017,18 +1050,13 @@ void WMOGroup::draw( const math::vector_3d& ofs
                    , std::function<void (bool)> setup_fog
                    )
 {
-  visible = false;
-  // view frustum culling
+  visible = is_visible(ofs, angle, frustum, cull_distance, camera);
 
-  math::vector_3d pos = center + ofs;
+  if (!visible)
+  {
+    return;
+  }
 
-  math::rotate(ofs.x, ofs.z, &pos.x, &pos.z, angle);
-
-  if (!frustum.intersectsSphere(pos, rad)) return;
-
-  float dist = (pos - camera).length() - rad;
-  if (dist >= cull_distance) return;
-  visible = true;
   setupFog (draw_fog, setup_fog);
 
   gl.vertexPointer (_vertices_buffer, 3, GL_FLOAT, 0, nullptr);
@@ -1103,61 +1131,6 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 }
 
-void WMOGroup::drawDoodads ( unsigned int doodadset
-                           , const math::vector_3d& ofs
-                           , math::degrees const angle
-                           , math::frustum const& frustum
-                           , math::vector_3d const& camera
-                           , bool draw_fog
-                           , std::function<void (bool)> setup_outdoor_lights
-                           , std::function<void (bool)> setup_fog
-                           , int animtime
-                           )
-{
-  if (!visible) return;
-  if (ddr.empty()) return;
-  if (doodadset >= wmo->doodadsets.size()) return;
-
-  setup_outdoor_lights (outdoorLights);
-  setupFog (draw_fog, setup_fog);
-
-  /*
-  float xr=0,xg=0,xb=0;
-  if (flags & 0x0040) xr = 1;
-  //if (flags & 0x0008) xg = 1;
-  if (flags & 0x8000) xb = 1;
-  gl.color4f(xr,xg,xb,1);
-  */
-
-  // draw doodads
-  gl.color4f(1, 1, 1, 1);
-  for (const auto& dd : ddr) {
-    if ( dd >= wmo->doodadsets[doodadset].start
-      && dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)
-      && dd < wmo->modelis.size()
-      )
-    {
-      wmo_doodad_instance& mi = wmo->modelis[dd];
-
-      if (mi.cull_by_size_category(camera))
-      {
-        continue;
-      }
-
-      if (!outdoorLights) {
-        WMOLight::setupOnce(GL_LIGHT2, wmo->model_nearest_light_vector[dd], mi.light_color);
-      }
-      setupFog (draw_fog, setup_fog);
-      wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog, animtime);
-    }
-  }
-
-  gl.disable(GL_LIGHT2);
-
-  gl.color4f(1, 1, 1, 1);
-
-}
-
 void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
                           , math::vector_4d const& ocean_color_dark
                           , math::vector_4d const& river_color_light
@@ -1169,8 +1142,6 @@ void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
                           , std::function<void (bool)> setup_fog
                           )
 {
-  if (!visible) return;
-
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) {

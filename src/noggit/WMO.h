@@ -68,20 +68,20 @@ public:
                   , std::function<void (bool)> setup_outdoor_lights
                   , std::function<void (bool)> setup_fog
                   );
-  void drawDoodads ( unsigned int doodadset
-                   , const math::vector_3d& ofs
-                   , math::degrees const
-                   , math::frustum const&
-                   , math::vector_3d const&
-                   , bool draw_fog
-                   , std::function<void (bool)> setup_outdoor_lights
-                   , std::function<void (bool)> setup_fog
-                   , int animtime
-                   );
 
   void setupFog (bool draw_fog, std::function<void (bool)> setup_fog);
 
   void intersect (math::ray const&, std::vector<float>* results) const;
+
+  // todo: portal culling
+  bool is_visible( math::vector_3d const& ofs
+                 , math::degrees const& angle
+                 , math::frustum const& frustum
+                 , float const& cull_distance
+                 , math::vector_3d const& camera
+                 ) const;
+
+  std::vector<uint16_t> doodad_ref() const { return _doodad_ref; }
 
   math::vector_3d BoundingBoxMin;
   math::vector_3d BoundingBoxMax;
@@ -101,7 +101,7 @@ private:
   float rad;
   int32_t num;
   int32_t fog;
-  std::vector<int16_t> ddr;
+  std::vector<uint16_t> _doodad_ref;
   std::unique_ptr<wmo_liquid> lq;
 
   std::vector<wmo_batch> _batches;
@@ -198,6 +198,8 @@ public:
   void upload();
 
   const std::string& filename() const;
+
+  std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;
 
   bool draw_group_boundingboxes;
 
