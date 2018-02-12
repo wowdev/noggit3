@@ -327,14 +327,19 @@ void WMO::draw ( int doodadset
     return;
 
   if (!_finished_upload) {
-    upload ();
+    upload();
     return;
   }
 
   if (draw_fog)
+  {
     gl.enable(GL_FOG);
+  }
   else
+  {
     gl.disable(GL_FOG);
+  }
+    
 
   for (auto& group : groups)
   {
@@ -368,12 +373,13 @@ void WMO::draw ( int doodadset
 
   if (boundingbox)
   {
-    gl.disable(GL_LIGHTING);
+    opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
+    opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
+    opengl::scoped::bool_setter<GL_BLEND, TRUE> const blend;
 
-    gl.disable(GL_COLOR_MATERIAL);
     opengl::texture::disable_texture(1);
     opengl::texture::disable_texture(0);
-    gl.enable(GL_BLEND);
+
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (auto& group : groups)
@@ -384,28 +390,10 @@ void WMO::draw ( int doodadset
                                  , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
                                  ).draw ({1.0f, 0.0f, 0.0f, 1.0f}, 2.0f);
 
-    /*gl.color4fv( math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-    gl.vertex3f( 0.0f, 0.0f, 0.0f );
-    gl.vertex3f( this->header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
-    gl.end();
-
-    gl.color4fv( math::vector_4d( 0.0f, 1.0f, 0.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-    gl.vertex3f( 0.0f, 0.0f, 0.0f );
-    gl.vertex3f( 0.0f, header.BoundingBoxMax.z + header.BoundingBoxMax.z / 5.0f, 0.0f );
-    gl.end();
-
-    gl.color4fv( math::vector_4d( 0.0f, 0.0f, 1.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-    gl.vertex3f( 0.0f, 0.0f, 0.0f );
-    gl.vertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
-    gl.end();*/
 
     opengl::texture::disable_texture(1);
     opengl::texture::enable_texture(0);
 
-    gl.enable(GL_LIGHTING);
   }
 }
 
@@ -1050,13 +1038,6 @@ void WMOGroup::draw( const math::vector_3d& ofs
                    , std::function<void (bool)> setup_fog
                    )
 {
-  visible = is_visible(ofs, angle, frustum, cull_distance, camera);
-
-  if (!visible)
-  {
-    return;
-  }
-
   setupFog (draw_fog, setup_fog);
 
   gl.vertexPointer (_vertices_buffer, 3, GL_FLOAT, 0, nullptr);
@@ -1144,12 +1125,16 @@ void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
 {
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
-  if (lq) {
+  if (lq) 
+  {
     setupFog (draw_fog, setup_fog);
-    if (outdoorLights) {
+
+    if (outdoorLights) 
+    {
       setup_outdoor_lights (true);
     }
-    else {
+    else 
+    {
       //! \todo  setup some kind of indoor lighting... ?
       setup_outdoor_lights (false);
       gl.enable(GL_LIGHT2);
@@ -1157,6 +1142,8 @@ void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
       gl.lightfv(GL_LIGHT2, GL_DIFFUSE, math::vector_4d(0.8f, 0.8f, 0.8f, 1));
       gl.lightfv(GL_LIGHT2, GL_POSITION, math::vector_4d(0, 1, 0, 0));
     }
+
+
     gl.disable(GL_BLEND);
     gl.disable(GL_ALPHA_TEST);
     gl.depthMask(GL_TRUE);
@@ -1168,6 +1155,8 @@ void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
              , render
              , animtime
              );
+
+
     gl.disable(GL_LIGHT2);
   }
 }

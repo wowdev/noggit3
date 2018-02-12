@@ -189,7 +189,6 @@ public:
                   , bool draw_fog
                   , int animtime
                   ) const;
-  //void drawPortals();
 
   std::vector<float> intersect (math::ray const&) const;
 
