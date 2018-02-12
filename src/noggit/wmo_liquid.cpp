@@ -6,7 +6,6 @@
 #include <noggit/wmo_liquid.hpp>
 #include <opengl/context.hpp>
 #include <opengl/matrix.hpp>
-#include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
 #include <boost/filesystem.hpp>
@@ -106,23 +105,49 @@ int wmo_liquid::initGeometry(MPQFile* f)
     }
   }
 
+  _indices_count = indices.size();
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_index_buffer[0]);
+  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER
+    , _indices_count * sizeof (indices[0])
+    , indices.data()
+    , GL_STATIC_DRAW
+  );
+
   return last_flag;
 }
 
-void wmo_liquid::draw_actual (opengl::scoped::use_program& water_shader)
+void wmo_liquid::draw ( math::vector_4d const& ocean_color_light
+          , math::vector_4d const& ocean_color_dark
+          , math::vector_4d const& river_color_light
+          , math::vector_4d const& river_color_dark
+          , liquid_render& render
+          , int animtime
+          )
 {
+  opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
+  opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
+  opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
+
+  opengl::scoped::use_program water_shader (render.shader_program());
+
+  water_shader.uniform ("model_view", opengl::matrix::model_view());
+  water_shader.uniform ("projection", opengl::matrix::projection());
+
+  water_shader.uniform ("ocean_color_light", ocean_color_light);
+  water_shader.uniform ("ocean_color_dark", ocean_color_dark);
+  water_shader.uniform ("river_color_light", river_color_light);
+  water_shader.uniform ("river_color_dark", river_color_dark);
+
+  render.prepare_draw (water_shader, 13, animtime, true);
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_index_buffer[0]);
+
   water_shader.attrib ("position", vertices);
   water_shader.attrib ("tex_coord", tex_coords);
   water_shader.attrib ("depth", depths);
   water_shader.uniform ("tex_repeat", texRepeats);
 
-  opengl::scoped::buffers<1> index_buffer;
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer[0]);
-  gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
-                , indices.size() * sizeof (indices[0])
-                , indices.data()
-                , GL_STATIC_DRAW
-                );
 
   gl.drawElements (GL_QUADS, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 }
