@@ -458,8 +458,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_model_animations
                  , bool draw_hole_lines
                  , bool draw_models_with_box
-                 , std::unordered_set<WMO*> const& hidden_map_objects
-                 , std::unordered_set<Model*> const& hidden_models
+                 , bool draw_hidden_models
                  , std::map<int, misc::random_color>& area_id_colors
                  , bool draw_fog
                  , eTerrainType ground_editing_brush
@@ -1089,7 +1088,7 @@ void main()
     {
       auto& instance = wmo.second;
 
-      for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos))
+      for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models))
       {
         _wmo_doodads[doodad->model->_filename].push_back(doodad);
       }      
@@ -1370,7 +1369,10 @@ void main()
       {
         for (auto& it : _models_by_filename)
         {
-          it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
+          if (draw_hidden_models || !it.second[0]->model->is_hidden())
+          {
+            it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
+          }
         }
       }
       
@@ -1386,7 +1388,7 @@ void main()
       opengl::texture::disable_texture(0);
     }
     
-    if(draw_models_with_box)
+    if(draw_models_with_box || (draw_hidden_models && !visible_model_count.empty()))
     {
       if (!_m2_box_program)
       {
@@ -1410,9 +1412,11 @@ void main()
           , R"code(
 #version 330 core
 
+uniform vec4 color;
+
 void main()
 {
-  gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+  gl_FragColor = color;
 }
 )code"
           }
@@ -1430,6 +1434,12 @@ void main()
 
       for (auto& it : visible_model_count)
       {
+
+        math::vector_4d color = it.first->is_hidden() 
+                              ? math::vector_4d(0.f, 0.f, 1.f, 1.f) 
+                              : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f);
+
+        m2_box_shader.uniform("color", color);
         it.first->draw_box(m2_box_shader, it.second);
       }
     }
@@ -1465,8 +1475,8 @@ void main()
 
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
-      bool const is_hidden (hidden_map_objects.count (it->second.wmo.get()));
-      if (!is_hidden)
+      bool is_hidden = it->second.wmo->is_hidden();
+      if (draw_hidden_models || !is_hidden)
       {
         it->second.draw ( frustum
                         , culldistance
@@ -1536,8 +1546,7 @@ selection_result World::intersect ( math::ray const& ray
                                   , bool draw_terrain
                                   , bool draw_wmo
                                   , bool draw_models
-                                  , std::unordered_set<WMO*> const& hidden_map_objects
-                                  , std::unordered_set<Model*> const& hidden_models
+                                  , bool draw_hidden_models
                                   )
 {
   selection_result results;
@@ -1555,9 +1564,8 @@ selection_result World::intersect ( math::ray const& ray
     if (draw_models)
     {
       for (auto&& model_instance : mModelInstances)
-      {
-        bool const is_hidden (hidden_models.count (model_instance.second.model.get()));
-        if (!is_hidden)
+      {        
+        if (draw_hidden_models || ! model_instance.second.model->is_hidden())
         {
           model_instance.second.intersect (ray, &results, animtime);
         }
@@ -1568,8 +1576,7 @@ selection_result World::intersect ( math::ray const& ray
     {
       for (auto&& wmo_instance : mWMOInstances)
       {
-        bool const is_hidden (hidden_map_objects.count (wmo_instance.second.wmo.get()));
-        if (!is_hidden)
+        if (draw_hidden_models || ! wmo_instance.second.wmo->is_hidden())
         {
           wmo_instance.second.intersect (ray, &results);
         }

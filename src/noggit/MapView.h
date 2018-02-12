@@ -40,9 +40,6 @@ enum eViewMode
   eViewMode_3D
 };
 
-class WMO;
-class Model;
-
 namespace noggit
 {
   class camera;
@@ -96,8 +93,6 @@ private:
   noggit::bool_toggle_property _draw_models_with_box = {false};
   noggit::bool_toggle_property _draw_fog = {false};
 public:
-  std::unordered_set<WMO*> _hidden_map_objects;
-  std::unordered_set<Model*> _hidden_models;
   noggit::bool_toggle_property _draw_hidden_models = {false};
 private:
   int _selected_area_id = -1;

@@ -246,8 +246,8 @@ namespace noggit
       });
 
       connect(clearListButton, &QPushButton::clicked, [=]() {
-          mapView->_hidden_map_objects.clear();
-          mapView->_hidden_models.clear();
+        ModelManager::clear_hidden_models();
+        WMOManager::clear_hidden_wmos();
       });
 
       connect(toTxt, &QPushButton::clicked, [=]() {

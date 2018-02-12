@@ -120,8 +120,7 @@ public:
             , bool draw_model_animations
             , bool draw_hole_lines
             , bool draw_models_with_box
-            , std::unordered_set<WMO*> const& hidden_map_objects
-            , std::unordered_set<Model*> const& hidden_models
+            , bool draw_hidden_models
             , std::map<int, misc::random_color>& area_id_colors
             , bool draw_fog
             , eTerrainType ground_editing_brush
@@ -140,8 +139,7 @@ public:
                              , bool draw_terrain
                              , bool draw_wmo
                              , bool draw_models
-                             , std::unordered_set<WMO*> const& hidden_map_objects
-                             , std::unordered_set<Model*> const& hidden_models
+                             , bool draw_hidden_models
                              );
   void drawTileMode ( float ah
                     , math::vector_3d const& camera_pos
