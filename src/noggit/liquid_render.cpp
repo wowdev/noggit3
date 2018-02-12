@@ -15,36 +15,15 @@
 #include <algorithm>
 #include <string>
 
-void liquid_render::draw_wmo ( std::function<void (opengl::scoped::use_program&)> actual
-                             , math::vector_4d const& ocean_color_light
-                             , math::vector_4d const& ocean_color_dark
-                             , math::vector_4d const& river_color_light
-                             , math::vector_4d const& river_color_dark
-                             , int liquid_id
-                             , int animtime
-                             )
-{
-  opengl::scoped::use_program water_shader {program};
-
-  water_shader.uniform ("model_view", opengl::matrix::model_view());
-  water_shader.uniform ("projection", opengl::matrix::projection());
-
-  water_shader.uniform ("ocean_color_light", ocean_color_light);
-  water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
-  water_shader.uniform ("river_color_light", river_color_light);
-  water_shader.uniform ("river_color_dark",  river_color_dark);
-
-  prepare_draw (water_shader, liquid_id, animtime);
-  actual (water_shader);
-}
 
 void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
                                  , int liquid_id
                                  , int animtime
+                                 , bool wmo
                                  )
 {
-
-  if (_current_anim_time != animtime || liquid_id != _current_liquid_id)
+  // always bind the texture again for wmo liquids since it got overriden previously by the wmo group texture
+  if (wmo || _current_anim_time != animtime || liquid_id != _current_liquid_id)
   {
     _current_anim_time = animtime;
     _current_liquid_id = liquid_id;
@@ -62,8 +41,7 @@ void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
       , GL_TEXTURE0
       , textures[static_cast<std::size_t> (animtime / 60.0f) % textures.size()].get()
     );
-  }
-  
+  }  
 }
 
 void liquid_render::add_liquid_id(int liquid_id)

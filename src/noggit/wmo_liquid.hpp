@@ -9,6 +9,7 @@
 #include <noggit/MPQ.h>
 #include <noggit/TextureManager.h>
 #include <noggit/liquid_render.hpp>
+#include <opengl/scoped.hpp>
 
 #include <boost/optional.hpp>
 
@@ -54,17 +55,8 @@ public:
             , math::vector_4d const& river_color_dark
             , liquid_render& render
             , int animtime
-            )
-  {
-    render.draw_wmo ( [&] (opengl::scoped::use_program& shader) { draw_actual (shader); }
-                , ocean_color_light
-                , ocean_color_dark
-                , river_color_light
-                , river_color_dark
-                , 13          //! \ todo: find how to get the real liquid id
-                , animtime
-                );
-  }
+            );
+  
 
 private:
   int initGeometry(MPQFile* f);
@@ -79,5 +71,6 @@ private:
   std::vector<math::vector_3d> vertices;
   std::vector<std::uint16_t> indices;
 
-  void draw_actual (opengl::scoped::use_program&);
+  int _indices_count;
+  opengl::scoped::buffers<1> _index_buffer;
 };

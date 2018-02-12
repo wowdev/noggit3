@@ -15,17 +15,10 @@ class liquid_render
 {
 public:
   liquid_render() = default;
-  void draw_wmo ( std::function<void (opengl::scoped::use_program&)>
-                , math::vector_4d const& ocean_color_light
-                , math::vector_4d const& ocean_color_dark
-                , math::vector_4d const& river_color_light
-                , math::vector_4d const& river_color_dark
-                , int liquid_id
-                , int animtime
-                );
   void prepare_draw ( opengl::scoped::use_program& water_shader
                     , int liquid_id
                     , int animtime
+                    , bool wmo = false
                     );
 
   opengl::program const& shader_program() const
