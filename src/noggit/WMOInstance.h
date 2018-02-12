@@ -96,7 +96,8 @@ public:
   bool isInsideRect(math::vector_3d rect[2]) const;
 
   std::vector<wmo_doodad_instance*> get_visible_doodads( math::frustum const& frustum
-                                                       , const float& cull_distance
-                                                       , const math::vector_3d& camera
+                                                       , float const& cull_distance
+                                                       , math::vector_3d const& camera
+                                                       , bool draw_hidden_models
                                                        );
 };

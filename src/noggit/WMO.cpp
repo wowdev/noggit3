@@ -1210,3 +1210,12 @@ void WMOManager::report()
           );
   LogDebug << output;
 }
+
+void WMOManager::clear_hidden_wmos()
+{
+  _.apply ( [&] (std::string const& key, WMO& wmo)
+            {
+              wmo.show();
+            }
+          );
+}

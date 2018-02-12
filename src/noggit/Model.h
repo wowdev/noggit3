@@ -212,6 +212,10 @@ public:
 
   virtual void finishLoading();
 
+  bool is_hidden() const { return _hidden; }
+  void toggle_visibility() { _hidden = !_hidden; }
+  void show() { _hidden = false ; }
+
   // ===============================
   // Toggles
   // ===============================
@@ -303,6 +307,8 @@ private:
   std::vector<ModelTransparency> _transparency;
   std::vector<int16_t> _transparency_lookup;
   std::vector<ModelLight> _lights;
+
+  bool _hidden = false;
 
   friend struct ModelRenderPass;
 };

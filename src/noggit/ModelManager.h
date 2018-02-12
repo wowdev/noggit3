@@ -16,6 +16,7 @@ class ModelManager
 public:
   static void resetAnim();
   static void updateEmitters(float dt);
+  static void clear_hidden_models();
 
   static void report();
 

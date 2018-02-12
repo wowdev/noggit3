@@ -218,22 +218,26 @@ void WMOInstance::resetDirection()
 
 std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
   ( math::frustum const& frustum
-  , const float& cull_distance
-  , const math::vector_3d& camera
+  , float const& cull_distance
+  , math::vector_3d const& camera
+  , bool draw_hidden_models
   )
 {
   std::vector<wmo_doodad_instance*> doodads;
 
-  for (int i = 0; i < wmo->groups.size(); ++i)
+  if (!wmo->is_hidden() || draw_hidden_models)
   {
-    if (wmo->groups[i].is_visible(pos, math::degrees (dir.y - 90.f), frustum, cull_distance, camera))
+    for (int i = 0; i < wmo->groups.size(); ++i)
     {
-      for (auto& doodad : _doodads_per_group[i])
+      if (wmo->groups[i].is_visible(pos, math::degrees (dir.y - 90.f), frustum, cull_distance, camera))
       {
-        doodads.push_back(&doodad);
+        for (auto& doodad : _doodads_per_group[i])
+        {
+          doodads.push_back(&doodad);
+        }
       }
     }
-  }
+  } 
 
   return doodads;
 }

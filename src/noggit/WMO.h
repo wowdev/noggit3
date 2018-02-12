@@ -220,13 +220,20 @@ public:
   std::vector<WMODoodadSet> doodadsets;
 
   boost::optional<scoped_model_reference> skybox;
+
+  bool is_hidden() const { return _hidden; }
+  void toggle_visibility() { _hidden = !_hidden; }
+  void show() { _hidden = false ; }
+
+private:
+  bool _hidden = false;
 };
 
 class WMOManager
 {
 public:
   static void report();
-
+  static void clear_hidden_wmos();
 private:
   friend struct scoped_wmo_reference;
   static noggit::multimap_with_normalized_key<WMO> _;
@@ -286,7 +293,7 @@ struct scoped_wmo_reference
     return _wmo;
   }
 
-private:
+private:  
   bool _valid;
 
   std::string _filename;

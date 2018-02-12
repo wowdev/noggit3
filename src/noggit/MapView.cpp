@@ -1021,29 +1021,11 @@ void MapView::createGUI()
                   auto selection = _world->GetCurrentSelection();
                   if (selection->which() == eEntry_Model)
                   {
-                    auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
-                    auto& hidden (_hidden_models);
-                    if (hidden.count (entity))
-                    {
-                      hidden.erase (entity);
-                    }
-                    else
-                    {
-                      hidden.emplace (entity);
-                    }
+                    boost::get<selected_model_type> (*selection)->model->toggle_visibility();
                   }
                   else if (selection->which() == eEntry_WMO)
                   {
-                    auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
-                    auto& hidden (_hidden_map_objects);
-                    if (hidden.count (entity))
-                    {
-                      hidden.erase (entity);
-                    }
-                    else
-                    {
-                      hidden.emplace (entity);
-                    }
+                    boost::get<selected_wmo_type> (*selection)->wmo->toggle_visibility();
                   }
                 }
               }
@@ -1072,8 +1054,8 @@ void MapView::createGUI()
             , MOD_shift
             , [&]
               {
-                _hidden_map_objects.clear();
-                _hidden_models.clear();
+                ModelManager::clear_hidden_models();
+                WMOManager::clear_hidden_wmos();
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
@@ -2151,8 +2133,7 @@ selection_result MapView::intersect_result(bool terrain_only)
                         , _draw_terrain.get()
                         , _draw_wmo.get()
                         , _draw_models.get()
-                        , _draw_hidden_models.get() ? std::unordered_set<WMO*>() : _hidden_map_objects
-                        , _draw_hidden_models.get() ? std::unordered_set<Model*>() : _hidden_models
+                        , _draw_hidden_models.get()
                         )
     );
 
@@ -2366,8 +2347,7 @@ void MapView::displayViewMode_3D()
                , _draw_model_animations.get()
                , _draw_hole_lines.get() || terrainMode == editing_mode::holes
                , _draw_models_with_box.get()
-               , _draw_hidden_models.get() ? std::unordered_set<WMO*>() : _hidden_map_objects
-               , _draw_hidden_models.get() ? std::unordered_set<Model*>() : _hidden_models
+               , _draw_hidden_models.get()
                , _area_id_colors
                , _draw_fog.get()
                , terrainTool->_edit_type

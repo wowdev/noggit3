@@ -1379,7 +1379,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
   }
 
   // store the model count to draw the bounding boxes later
-  if (all_boxes)
+  if (all_boxes || _hidden)
   {
     visible_model_count.emplace(this, transform_matrix.size());
   }
