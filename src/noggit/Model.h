@@ -141,6 +141,7 @@ enum class texture_unit_lookup : int
 
 struct ModelRenderPass : ModelTexUnit
 {
+  ModelRenderPass() = delete;
   ModelRenderPass(ModelTexUnit const& tex_unit, Model* m);
 
   float ordering_thingy = 0.f;
@@ -172,6 +173,14 @@ struct ModelRenderPass : ModelTexUnit
       return blend_mode == m.blend_mode ? (ordering_thingy < m.ordering_thingy) : blend_mode < m.blend_mode;
     }
   }
+};
+
+struct FakeGeometry
+{
+  FakeGeometry(Model* m);
+
+  std::vector<math::vector_3d> vertices;
+  std::vector<uint16_t> indices;
 };
 
 struct ModelLight {
@@ -283,6 +292,7 @@ private:
   std::vector<uint16_t> _indices;
 
   std::vector<ModelRenderPass> _render_passes;
+  boost::optional<FakeGeometry> _fake_geometry;
 
   // ===============================
   // Animation

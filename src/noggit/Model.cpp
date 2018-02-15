@@ -358,6 +358,12 @@ void Model::initCommon(const MPQFile& f)
     
     // transparent parts come later
     std::sort(_render_passes.begin(), _render_passes.end());
+
+    // add fake geometry for selection
+    if (_render_passes.empty())
+    {
+      _fake_geometry.emplace(this);
+    }
   }  
 }
 
@@ -811,6 +817,32 @@ void ModelRenderPass::init_uv_types(Model* m)
     }
   }
 }
+
+FakeGeometry::FakeGeometry(Model* m)
+{
+  math::vector_3d min = m->header.bounding_box_min, max = m->header.bounding_box_max;
+
+  vertices.emplace_back(min.x, max.y, min.z);
+  vertices.emplace_back(min.x, max.y, max.z);
+  vertices.emplace_back(max.x, max.y, max.z);
+  vertices.emplace_back(max.x, max.y, min.z);
+
+  vertices.emplace_back(min.x, min.y, min.z);
+  vertices.emplace_back(min.x, min.y, max.z);
+  vertices.emplace_back(max.x, min.y, max.z);
+  vertices.emplace_back(max.x, min.y, min.z);
+
+  indices =
+  {
+    0,1,2,  2,3,0,
+    0,4,5,  5,1,0,
+    0,3,7,  7,4,0,
+    1,5,6,  6,2,1,
+    2,6,7,  7,3,2,
+    5,6,7,  7,4,5
+  }; 
+}
+
 
 // https://wowdev.wiki/M2/.skin/WotLK_shader_selection
 ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
@@ -1450,6 +1482,25 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
   {
     animate (0, animtime);
     animcalc = true;
+  }
+
+  if (!!_fake_geometry)
+  {
+    auto& fake_geom = _fake_geometry.get();
+
+    for (size_t i = 0; i < fake_geom.indices.size(); i += 3)
+    {
+      if (auto distance
+        = ray.intersect_triangle(fake_geom.vertices[fake_geom.indices[i + 0]],
+          fake_geom.vertices[fake_geom.indices[i + 1]],
+          fake_geom.vertices[fake_geom.indices[i + 2]])
+        )
+      {
+        results.emplace_back (*distance);
+      }
+    }
+
+    return results;
   }
 
   for (auto&& pass : _render_passes)
