@@ -7,8 +7,9 @@
 #include <noggit/Selection.h>
 #include <noggit/WMOInstance.h>
 
-#include <string>
 #include <fstream>
+#include <regex>
+#include <string>
 
 #include <QtWidgets/QFormLayout>
 
@@ -67,7 +68,13 @@ namespace noggit
           continue;
         }
 
-        _list->addItem (QString::fromStdString (path));
+        std::regex regex("[^\.]+\.(m2|wmo)"), wmo_group(".*_[0-9]{3}\.wmo");
+        std::smatch match;
+
+        if (std::regex_search(path, match, regex) && !regex_match(path, wmo_group))
+        {
+          _list->addItem (QString::fromStdString (match.str(0)));
+        }        
       }
     }
   }
