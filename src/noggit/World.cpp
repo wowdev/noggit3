@@ -1437,7 +1437,11 @@ void main()
 
         math::vector_4d color = it.first->is_hidden() 
                               ? math::vector_4d(0.f, 0.f, 1.f, 1.f) 
-                              : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f);
+                              : ( it.first->use_fake_geometry() 
+                                ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
+                                : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
+                                )
+                              ;
 
         m2_box_shader.uniform("color", color);
         it.first->draw_box(m2_box_shader, it.second);

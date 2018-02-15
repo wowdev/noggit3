@@ -1484,7 +1484,7 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
     animcalc = true;
   }
 
-  if (!!_fake_geometry)
+  if (use_fake_geometry())
   {
     auto& fake_geom = _fake_geometry.get();
 

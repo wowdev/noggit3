@@ -225,6 +225,8 @@ public:
   void toggle_visibility() { _hidden = !_hidden; }
   void show() { _hidden = false ; }
 
+  bool use_fake_geometry() const { return !!_fake_geometry; }
+
   // ===============================
   // Toggles
   // ===============================
