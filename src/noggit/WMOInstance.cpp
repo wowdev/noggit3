@@ -192,6 +192,12 @@ bool WMOInstance::isInsideRect(math::vector_3d rect[2]) const
 
 void WMOInstance::change_doodadset(uint16_t doodad_set)
 {
+  // don't set an invalid doodad set
+  if (doodad_set >= wmo->doodadsets.size())
+  {
+    return;
+  }
+
   _doodadset = doodad_set;
 
   _doodads_per_group = wmo->doodads_per_group(_doodadset);
