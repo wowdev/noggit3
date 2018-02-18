@@ -33,6 +33,7 @@ namespace noggit
     {
       show();
       setPixmap (render_blp_to_pixmap (_filename, width(), height()));
+      setToolTip(QString::fromStdString(_filename));
     }
   }
 }
