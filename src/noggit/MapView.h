@@ -185,6 +185,7 @@ public:
 
   void insert_object_at_selection_position (std::string);
   void selectModel(std::string const& model);
+  void change_selected_wmo_doodadset(int set);
 
   void set_editing_mode (editing_mode);
 
