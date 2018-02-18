@@ -735,7 +735,7 @@ void main()
 
   if (draw_terrain_height_contour)
   {
-    gl_FragColor = vec4(gl_FragColor.rgb * contour_alpha(4.0, vary_position.y, fw.y), 1.0);
+    gl_FragColor = vec4(gl_FragColor.rgb * contour_alpha(4.0, vary_position.y+0.1, fw.y), 1.0);
   }
 
   bool lines_drawn = false;
