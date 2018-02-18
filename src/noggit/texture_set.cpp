@@ -907,40 +907,59 @@ std::vector<uint8_t> TextureSet::lod_texture_map()
 {
   std::vector<uint8_t> lod;
 
+  uint8_t alphas[64 * 64 * 3];
+  memset(alphas, 0, 64 * 64 * 3);
+
+  for (int i = 0; i < nTextures - 1; ++i)
+  {
+    memcpy(alphas + 4096 * i, alphamaps[i]->getAlpha(), 64 * 64);
+  }
+
   for (int z = 0; z < 8; ++z)
   {
     for (int x = 0; x < 8; ++x)
     {
-      std::vector<float> alpha_sum;
+      std::vector<int> dominant_square_count(nTextures);
 
-      for (size_t layer = 1; layer < nTextures; ++layer)
+      for (int pz = z * 8; pz < (z + 1) * 8; ++pz)
       {
-        alpha_sum.push_back(0.f);
-        const uint8_t* alpha = getAlpha(layer - 1);
-
-        for (int pz = z * 8; pz < (z + 1) * 8; ++pz)
+        for (int px = x * 8; px < (x + 1) * 8; ++px)
         {
-          for (int px = x * 8; px < (x + 1) * 8; ++px)
+          uint8_t base_alpha = 255;
+          int max_alpha = 0, winning_layer = 0;
+
+          for (int i = 0; i < nTextures - 1; ++i)
           {
-            alpha_sum[layer - 1] += alpha[pz * 64 + px];
+            uint8_t layer_alpha = alphas[i * 64 * 64 + 64 * pz + px];
+            base_alpha -= layer_alpha;
+
+            if (max_alpha < layer_alpha)
+            {
+              max_alpha = layer_alpha;
+              winning_layer = i + 1; // layer 0 has no alphamap
+            }
           }
+
+          if (base_alpha > max_alpha)
+          {
+            winning_layer = 0;
+          }
+
+          dominant_square_count[winning_layer]++;
         }
       }
 
-      float sum_base = 8*8*1.f - std::accumulate(alpha_sum.begin(), alpha_sum.end(), 0.f);
-      alpha_sum.insert(alpha_sum.begin(), sum_base);
+      int most_visible_layer = 0;
 
-      int winning_layer = 0;
-
-      for (int layer = 1; layer < nTextures; ++layer)
+      for (int i = 1; i < nTextures; ++i)
       {
-        if (alpha_sum[winning_layer] < alpha_sum[layer])
+        if (dominant_square_count[i] > dominant_square_count[most_visible_layer])
         {
-          winning_layer = layer;
+          most_visible_layer = i;
         }
       }
-
-      lod.push_back(winning_layer);
+      
+      lod.push_back(most_visible_layer);
     }    
   }
 
