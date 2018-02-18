@@ -453,6 +453,12 @@ std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint
 {
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads;
 
+  if (doodadset >= doodadsets.size())
+  {
+    LogError << "Invalid doodadset for instance of wmo " << filename() << std::endl;
+    return doodads;
+  }
+
   auto const& dset = doodadsets[doodadset];
   uint32_t start = dset.start, end = start + dset.size;
 
