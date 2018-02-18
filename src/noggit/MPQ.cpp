@@ -268,7 +268,7 @@ bool MPQFile::existsInMPQ(const std::string &pFilename)
 
 size_t MPQFile::read(void* dest, size_t bytes)
 {
-  if (eof)
+  if (eof || !bytes)
     return 0;
 
   size_t rpos = pointer + bytes;
