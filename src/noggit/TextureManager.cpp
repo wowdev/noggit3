@@ -169,7 +169,7 @@ blp_texture::blp_texture(const std::string& filenameArg)
   MPQFile f(exists ? _filename : "textures/shanecube.blp");
   if (f.isEof())
   {
-    throw std::runtime_error ("bad filename");
+    throw std::runtime_error ("File " + filenameArg + " does not exists");
   }
 
   char const* lData = f.getPointer();
