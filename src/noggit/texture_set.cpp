@@ -905,7 +905,12 @@ void TextureSet::update_alpha_tex()
 
 std::vector<uint8_t> TextureSet::lod_texture_map()
 {
-  std::vector<uint8_t> lod;
+  std::vector<uint8_t> lod(8*8);
+
+  if (!nTextures)
+  {
+    return lod;
+  }
 
   uint8_t alphas[64 * 64 * 3];
   memset(alphas, 0, 64 * 64 * 3);
@@ -959,7 +964,7 @@ std::vector<uint8_t> TextureSet::lod_texture_map()
         }
       }
       
-      lod.push_back(most_visible_layer);
+      lod[8*z+x] = most_visible_layer;
     }    
   }
 
