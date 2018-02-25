@@ -279,15 +279,20 @@ private:
 
   std::vector<math::vector_3d> _vertex_box_points;
 
+  // buffers;
+  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  opengl::scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
+
+  GLuint const& _vao = _vertex_arrays[0];
+  GLuint const& _transform_buffer = _buffers[0];
+  GLuint const& _vertices_buffer = _buffers[1];
+
+  GLuint const& _box_vao = _vertex_arrays[1];
+  GLuint const& _box_vbo = _buffers[2];
+
   // ===============================
   // Geometry
   // ===============================
-  GLuint _vao;
-  GLuint _transform_buffer;
-  GLuint _vertices_buffer;
-
-  GLuint _box_vao;
-  GLuint _box_vbo;
 
   std::vector<ModelVertex> _vertices;
   std::vector<ModelVertex> _current_vertices;

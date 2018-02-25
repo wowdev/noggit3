@@ -235,5 +235,65 @@ namespace opengl
     private:
       GLuint _buffers[count];
     };
+
+    template<std::size_t count>
+      struct deferred_upload_buffers
+    {
+      bool buffer_generated() const { return _buffer_generated; }
+
+      void upload()
+      {
+        gl.genBuffers (count, _buffers);
+        _buffer_generated = true;
+      }
+
+      deferred_upload_buffers() { }
+
+      ~deferred_upload_buffers()
+      {
+        gl.deleteBuffers (count, _buffers);
+      }
+
+      deferred_upload_buffers (deferred_upload_buffers const&) = delete;
+      deferred_upload_buffers (deferred_upload_buffers&&) = delete;
+      deferred_upload_buffers& operator= (deferred_upload_buffers const&) = delete;
+      deferred_upload_buffers& operator= (deferred_upload_buffers&&) = delete;
+
+      GLuint const& operator[] (std::size_t i) const { return _buffers[i]; }
+
+    private:
+      bool _buffer_generated = false;
+      GLuint _buffers[count];
+    };
+
+    template<std::size_t count>
+      struct deferred_upload_vertex_arrays
+    {
+      bool buffer_generated() const { return _buffer_generated; }
+
+      void upload()
+      {
+        gl.genVertexArrays (count, _vertex_arrays);
+        _buffer_generated = true;
+      }
+
+      deferred_upload_vertex_arrays() { }
+
+      ~deferred_upload_vertex_arrays()
+      {
+        gl.deleteVertexArray (count, _vertex_arrays);
+      }
+
+      deferred_upload_vertex_arrays (deferred_upload_vertex_arrays const&) = delete;
+      deferred_upload_vertex_arrays (deferred_upload_vertex_arrays&&) = delete;
+      deferred_upload_vertex_arrays& operator= (deferred_upload_vertex_arrays const&) = delete;
+      deferred_upload_vertex_arrays& operator= (deferred_upload_vertex_arrays&&) = delete;
+
+      GLuint const& operator[] (std::size_t i) const { return _vertex_arrays[i]; }
+
+    private:
+      bool _buffer_generated = false;
+      GLuint _vertex_arrays[count];
+    };
   }
 }

@@ -47,10 +47,6 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   }
 }
 
-wmo_liquid::~wmo_liquid()
-{
-  //gl.deleteBuffers(1, &_indices_buffer);
-}
 
 int wmo_liquid::initGeometry(MPQFile* f)
 {
@@ -117,7 +113,7 @@ int wmo_liquid::initGeometry(MPQFile* f)
 
 void wmo_liquid::upload()
 {
-  gl.genBuffers(1, &_indices_buffer);
+  _buffer.upload();
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER

@@ -97,13 +97,6 @@ Model::~Model()
 
   _textures.clear();
   _textureFilenames.clear();
-
-  gl.deleteVertexArray (1, &_vao);
-  gl.deleteBuffers (1, &_transform_buffer);
-  gl.deleteBuffers (1, &_vertices_buffer);
-
-  gl.deleteVertexArray (1, &_box_vao);
-  gl.deleteBuffers (1, &_box_vbo);
 }
 
 
@@ -1538,12 +1531,8 @@ void Model::upload()
   for (std::string texture : _textureFilenames)
     _textures.emplace_back(texture);
 
-  gl.genVertexArrays (1, &_vao);
-  gl.genBuffers (1, &_transform_buffer);
-  gl.genBuffers (1, &_vertices_buffer);
-
-  gl.genVertexArrays (1, &_box_vao);
-  gl.genBuffers (1, &_box_vbo);
+  _buffers.upload();
+  _vertex_arrays.upload();
 
   if (!animGeometry)
   {
