@@ -651,7 +651,7 @@ void WMOGroup::upload()
 {
   if (!!lq)
   {
-    lq.get().upload();
+    lq.get()->upload();
   }
 
   gl.genBuffers (1, &_vertices_buffer);
@@ -936,7 +936,7 @@ void WMOGroup::load()
     WMOLiquidHeader hlq;
     f.read(&hlq, 0x1E);
 
-    lq.emplace(&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
   }
   if (header.flags & 0x20000)
   {

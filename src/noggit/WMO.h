@@ -102,7 +102,7 @@ private:
   int32_t num;
   int32_t fog;
   std::vector<uint16_t> _doodad_ref;
-  boost::optional<wmo_liquid> lq;
+  std::unique_ptr<wmo_liquid> lq;
 
   std::vector<wmo_batch> _batches;
 
