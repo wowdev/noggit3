@@ -296,6 +296,8 @@ namespace noggit
       if (prompt.buttonRole (prompt.clickedButton()) == QMessageBox::AcceptRole)
       {
         setCentralWidget (_null_widget = new QWidget (this));
+        // update bookmark list
+        createBookmarkList();
       }
     }
   }
