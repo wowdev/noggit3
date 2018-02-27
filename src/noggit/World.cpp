@@ -1751,7 +1751,9 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
     return false;
   }
 
-  return mapIndex.getTile(tile)->GetVertex(x, z, V);
+  MapTile* adt = mapIndex.getTile(tile);
+
+  return adt->finishedLoading() ? adt->GetVertex(x, z, V) : false;
 }
 
 template<typename Fun>
@@ -1761,6 +1763,11 @@ template<typename Fun>
 
   for (MapTile* tile : mapIndex.tiles_in_range (pos, radius))
   {
+    if (!tile->finishedLoading())
+    {
+      continue;
+    }
+
     for (MapChunk* chunk : tile->chunks_in_range (pos, radius))
     {
       if (fun (chunk))
@@ -1982,7 +1989,7 @@ template<typename Fun>
   void World::for_tile_at(tile_index const& pos, Fun&& fun)
   {
     MapTile* tile(mapIndex.getTile(pos));
-    if (tile)
+    if (tile && tile->finishedLoading())
     {
       mapIndex.setChanged(tile);
       fun(tile);
