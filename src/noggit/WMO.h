@@ -102,7 +102,7 @@ private:
   int32_t num;
   int32_t fog;
   std::vector<uint16_t> _doodad_ref;
-  std::unique_ptr<wmo_liquid> lq;
+  boost::optional<wmo_liquid> lq;
 
   std::vector<wmo_batch> _batches;
 
@@ -236,7 +236,7 @@ public:
   static void clear_hidden_wmos();
 private:
   friend struct scoped_wmo_reference;
-  static noggit::multimap_with_normalized_key<WMO> _;
+  static noggit::async_object_multimap_with_normalized_key<WMO> _;
 };
 
 struct scoped_wmo_reference

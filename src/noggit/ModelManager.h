@@ -22,7 +22,7 @@ public:
 
 private:
   friend struct scoped_model_reference;
-  static noggit::multimap_with_normalized_key<Model> _;
+  static noggit::async_object_multimap_with_normalized_key<Model> _;
 };
 
 struct scoped_model_reference

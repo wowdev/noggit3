@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/frustum.hpp>
+#include <noggit/AsyncLoader.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/TextureManager.h> // TextureManager, Texture
@@ -27,8 +28,6 @@ WMO::WMO(const std::string& filenameArg)
   , _filename(filenameArg)
 {
   finished = false;
-
-  finishLoading();
 }
 
 void WMO::finishLoading ()
@@ -298,7 +297,7 @@ void WMO::upload()
     mat[i]._texture = textures[i];
 
   for (auto& group : groups)
-    group.upload ();
+    group.upload();
 
   _finished_upload = true;
 }
@@ -650,6 +649,11 @@ namespace
 
 void WMOGroup::upload()
 {
+  if (!!lq)
+  {
+    lq.get().upload();
+  }
+
   gl.genBuffers (1, &_vertices_buffer);
   gl.bufferData<GL_ARRAY_BUFFER> ( _vertices_buffer
                                  , _vertices.size() * sizeof (*_vertices.data())
@@ -932,7 +936,7 @@ void WMOGroup::load()
     WMOLiquidHeader hlq;
     f.read(&hlq, 0x1E);
 
-    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+    lq.emplace(&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
   }
   if (header.flags & 0x20000)
   {

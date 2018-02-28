@@ -49,6 +49,8 @@ class wmo_liquid
 {
 public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
+  ~wmo_liquid();
+
   void draw ( math::vector_4d const& ocean_color_light
             , math::vector_4d const& ocean_color_dark
             , math::vector_4d const& river_color_light
@@ -56,6 +58,8 @@ public:
             , liquid_render& render
             , int animtime
             );
+
+  void upload();
   
 
 private:
@@ -72,5 +76,5 @@ private:
   std::vector<std::uint16_t> indices;
 
   int _indices_count;
-  opengl::scoped::buffers<1> _index_buffer;
+  GLuint _indices_buffer;
 };

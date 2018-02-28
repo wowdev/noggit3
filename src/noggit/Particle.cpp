@@ -35,7 +35,7 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
   , mid (0.5)
   , slowdown (mta.p.slowdown)
   , pos (fixCoordSystem(mta.pos))
-  , _texture (model->_textureFilenames[mta.texture])
+  , _texture_id (mta.texture)
   , blend (mta.blend)
   , order (mta.ParticleType > 0 ? -1 : 0)
   , type (mta.ParticleType)
@@ -236,7 +236,7 @@ void ParticleSystem::draw()
   //gl.depthMask(GL_FALSE);
 
   //  gl.pushName(texture);
-  _texture->bind();
+  model->_textures[_texture_id]->bind();
 
   /*
   if (supportPointSprites && rows==1 && cols==1) {
@@ -678,11 +678,16 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
   , length (mta.res * seglen)
    // just use the first texture for now; most models I've checked only had one
   , tpos (fixCoordSystem(mta.pos))
-  , _texture (model->_textureFilenames[*reinterpret_cast<uint32_t const*> (f.getBuffer() + mta.ofsTextures)])
    //! \todo  figure out actual correct way to calculate length
    // in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
    // in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)
 {
+  uint16_t const* tex = reinterpret_cast<uint16_t const*> (f.getBuffer() + mta.ofsTextures);
+  _texture_ids = std::vector<uint16_t>(tex, tex + mta.nTextures);
+
+  uint16_t const* material = reinterpret_cast<uint16_t const*> (f.getBuffer() + mta.ofsMaterials);
+  _material_ids = std::vector<uint16_t>(material, material + mta.nMaterials);
+
    // create first segment
   segs.emplace_back(tpos, 0);
 }
@@ -755,7 +760,7 @@ void RibbonEmitter::draw()
   */
 
   //  gl.pushName(texture);
-  _texture->bind();
+  model->_textures[_texture_ids[0]]->bind();
   gl.enable(GL_BLEND);
   gl.disable(GL_LIGHTING);
   gl.disable(GL_ALPHA_TEST);
