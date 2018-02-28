@@ -199,6 +199,13 @@ struct ModelLight {
 class Model : public AsyncObject
 {
 public:
+  template<typename T>
+    static std::vector<T> M2Array(MPQFile const& f, uint32_t offset, uint32_t count)
+  {
+    T const* start = reinterpret_cast<T const*>(f.getBuffer() + offset);
+    return std::vector<T>(start, start + count);
+  }
+
    Model(const std::string& name);
   ~Model();
 

@@ -205,9 +205,7 @@ namespace
 void Model::initCommon(const MPQFile& f)
 {
   // vertices, normals, texcoords
-  ModelVertex const* vertices = reinterpret_cast<ModelVertex const*> (f.getBuffer() + header.ofsVertices);
-
-  _vertices = std::vector<ModelVertex>(vertices, vertices + header.nVertices);
+  _vertices = M2Array<ModelVertex>(f, header.ofsVertices, header.nVertices);
 
   for (auto& v : _vertices)
   {
@@ -263,8 +261,7 @@ void Model::initCommon(const MPQFile& f)
   }
 
   // init transparency
-  int16_t const* transLookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTransparencyLookup);
-  _transparency_lookup = std::vector<int16_t>(transLookup, transLookup + header.nTransparencyLookup);
+  _transparency_lookup = M2Array<int16_t>(f, header.ofsTransparencyLookup, header.nTransparencyLookup);
 
   if (header.nTransparency) {
     ModelTransDef const* trDefs = reinterpret_cast<ModelTransDef const*>(f.getBuffer() + header.ofsTransparency);
@@ -287,8 +284,8 @@ void Model::initCommon(const MPQFile& f)
       g.close();
       return;
     }
-    ModelView const* view = reinterpret_cast<ModelView const*>(g.getBuffer());
 
+    ModelView const* view = reinterpret_cast<ModelView const*>(g.getBuffer());
     uint16_t const* indexLookup = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofs_index);
     uint16_t const* triangles = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofs_triangle);
 
@@ -302,14 +299,9 @@ void Model::initCommon(const MPQFile& f)
     ModelGeoset const* model_geosets = reinterpret_cast<ModelGeoset const*>(g.getBuffer() + view->ofs_submesh);
     ModelTexUnit const* texture_unit = reinterpret_cast<ModelTexUnit const*>(g.getBuffer() + view->ofs_texture_unit);
     
-    uint16_t const* texlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexLookup);
-    _texture_lookup = std::vector<uint16_t>(texlookup, texlookup + header.nTexLookup);
-
-    int16_t const* texanimlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexAnimLookup);
-    _texture_animation_lookups = std::vector<int16_t>(texanimlookup, texanimlookup + header.nTexAnimLookup);
-
-    int16_t const* texunitlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexUnitLookup);
-    _texture_unit_lookup = std::vector<int16_t>(texunitlookup, texunitlookup + header.nTexUnitLookup);
+    _texture_lookup = M2Array<uint16_t>(f, header.ofsTexLookup, header.nTexLookup);
+    _texture_animation_lookups = M2Array<int16_t>(f, header.ofsTexAnimLookup, header.nTexAnimLookup);
+    _texture_unit_lookup = M2Array<int16_t>(f, header.ofsTexUnitLookup, header.nTexUnitLookup);
 
     showGeosets.resize (view->n_submesh);
     for (size_t i = 0; i<view->n_submesh; ++i) 
@@ -317,9 +309,7 @@ void Model::initCommon(const MPQFile& f)
       showGeosets[i] = true;
     }
 
-    
-    ModelRenderFlags const* renderFlags = reinterpret_cast<ModelRenderFlags const*>(f.getBuffer() + header.ofsRenderFlags);
-    _render_flags = std::vector<ModelRenderFlags>(renderFlags, renderFlags + header.nRenderFlags);
+    _render_flags = M2Array<ModelRenderFlags>(f, header.ofsRenderFlags, header.nRenderFlags);
 
     for (size_t j = 0; j<view->n_texture_unit; j++) 
     {
