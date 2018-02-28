@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/AsyncLoader.h>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
 #include <noggit/ModelInstance.h>
@@ -22,9 +23,6 @@ Model::Model(const std::string& filename)
   memset(&header, 0, sizeof(ModelHeader));
 
   finished = false;
-
-  //! \note hack: we currently would never load them otherwise
-  finishLoading();
 }
 
 void Model::finishLoading()
@@ -85,7 +83,7 @@ void Model::finishLoading()
 
   if (animated)
   {
-    initAnimated (f);
+    initAnimated(f);
   }
 
   f.close();
@@ -1036,12 +1034,11 @@ void Model::initAnimated(const MPQFile& f)
 
   if (animBones)
   {
-    ModelBoneDef const* mb = reinterpret_cast<ModelBoneDef const*>(f.getBuffer () + header.ofsBones);
+    ModelBoneDef const* mb = reinterpret_cast<ModelBoneDef const*>(f.getBuffer() + header.ofsBones);
     for (size_t i = 0; i<header.nBones; ++i)
     {
-      bones.emplace_back (f, mb[i], _global_sequences.data(), animation_files);
+      bones.emplace_back(f, mb[i], _global_sequences.data(), animation_files);
     }
-    calcBones (anim, 0, 0);
   }  
 
   if (animTextures) 
@@ -1052,6 +1049,7 @@ void Model::initAnimated(const MPQFile& f)
     }
   }
 
+  
   // particle systems
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef const* pdefs = reinterpret_cast<ModelParticleEmitterDef const*>(f.getBuffer() + header.ofsParticleEmitters);
@@ -1067,7 +1065,9 @@ void Model::initAnimated(const MPQFile& f)
       }      
     }
   }
+  
 
+  
   // ribbons
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef const* rdefs = reinterpret_cast<ModelRibbonEmitterDef const*>(f.getBuffer() + header.ofsRibbonEmitters);
@@ -1075,6 +1075,7 @@ void Model::initAnimated(const MPQFile& f)
       _ribbons.emplace_back(this, f, rdefs[i], _global_sequences.data());
     }
   }
+  
 
   // init lights
   if (header.nLights) {

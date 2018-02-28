@@ -47,6 +47,11 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   }
 }
 
+wmo_liquid::~wmo_liquid()
+{
+  //gl.deleteBuffers(1, &_indices_buffer);
+}
+
 int wmo_liquid::initGeometry(MPQFile* f)
 {
   LiquidVertex const* map = reinterpret_cast<LiquidVertex const*>(f->getPointer());
@@ -107,14 +112,19 @@ int wmo_liquid::initGeometry(MPQFile* f)
 
   _indices_count = indices.size();
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_index_buffer[0]);
+  return last_flag;
+}
+
+void wmo_liquid::upload()
+{
+  gl.genBuffers(1, &_indices_buffer);
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER
     , _indices_count * sizeof (indices[0])
     , indices.data()
     , GL_STATIC_DRAW
   );
-
-  return last_flag;
 }
 
 void wmo_liquid::draw ( math::vector_4d const& ocean_color_light
@@ -141,7 +151,7 @@ void wmo_liquid::draw ( math::vector_4d const& ocean_color_light
 
   render.prepare_draw (water_shader, 13, animtime, true);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_index_buffer[0]);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
 
   water_shader.attrib ("position", vertices);
   water_shader.attrib ("tex_coord", tex_coords);

@@ -37,7 +37,7 @@ std::unordered_set<std::string> gListfile;
 void MPQArchive::loadMPQ (AsyncLoader* loader, const std::string& filename, bool doListfile)
 {
   _openArchives.emplace_back (filename, std::make_unique<MPQArchive> (filename, doListfile));
-  loader->addObject(_openArchives.back().second.get());
+  loader->queue_for_load(_openArchives.back().second.get());
 }
 
 MPQArchive::MPQArchive(const std::string& filename, bool doListfile)

@@ -13,6 +13,7 @@
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
+#include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 
 #include <string>

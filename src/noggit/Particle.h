@@ -58,7 +58,7 @@ class ParticleSystem {
   float sizes[3];
   float mid, slowdown;
   math::vector_3d pos;
-  scoped_blp_texture_reference _texture;
+  uint16_t _texture_id;
   ParticleList particles;
   int blend, order, type;
   int manim, mtime;
@@ -117,7 +117,8 @@ class RibbonEmitter {
   math::vector_4d tcolor;
   float tabove, tbelow;
 
-  scoped_blp_texture_reference _texture;
+  std::vector<uint16_t> _texture_ids;
+  std::vector<uint16_t> _material_ids;
 
   std::list<RibbonSegment> segs;
 

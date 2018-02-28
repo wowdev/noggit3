@@ -326,8 +326,8 @@ struct ModelRibbonEmitterDef {
   math::vector_3d pos;
   int32_t nTextures;
   int32_t ofsTextures;
-  int32_t nUnknown;
-  int32_t ofsUnknown;
+  int32_t nMaterials;
+  int32_t ofsMaterials;
   AnimationBlock color;
   AnimationBlock opacity;
   AnimationBlock above;

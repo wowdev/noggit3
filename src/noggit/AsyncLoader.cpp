@@ -5,80 +5,86 @@
 
 #include <list>
 
-namespace
-{
-  bool isFinished(AsyncObject* object)
-  {
-    return object->finishedLoading();
-  }
-}
-
 void AsyncLoader::process()
 {
-  while (true)
+  AsyncObject* object;
+
+  while (!_stop)
   {
-    AsyncObject* object = nextObjectToLoad();
-    if (object)
+    {    
+      std::unique_lock<std::mutex> lock (_guard);
+
+      _state_changed.wait 
+      ( lock
+       , [&]
+      {
+        return !_to_load.empty() || _stop;
+      }
+      );
+
+      if (_stop)
+      {
+        return;
+      }
+
+      object = _to_load.front();
+      _currently_loading.emplace_back (object);
+      _to_load.pop_front();
+    }
+
+    try
     {
       object->finishLoading();
+
+      {
+        std::lock_guard<std::mutex> const lock (_guard);
+        _currently_loading.remove (object);
+        _state_changed.notify_all();
+      }
     }
-    else
+    catch (...)
     {
-      boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+      queue_for_load (object);
     }
   }
 }
 
-AsyncObject* AsyncLoader::nextObjectToLoad()
+void AsyncLoader::queue_for_load (AsyncObject* object)
 {
-  boost::mutex::scoped_lock lock(m_loadingMutex);
-
-  m_objects.remove_if(isFinished);
-
-  std::list<AsyncObject*>::iterator it = m_objects.begin();
-
-  if (it == m_objects.end())
+  std::lock_guard<std::mutex> const lock (_guard);
+  _to_load.push_back (object);
+  _state_changed.notify_one();
+}
+void AsyncLoader::ensure_deletable (AsyncObject* object)
+{
+  std::unique_lock<std::mutex> lock (_guard);
+  _state_changed.wait 
+  ( lock
+   , [&]
   {
-    return nullptr;
+    return std::find (_to_load.begin(), _to_load.end(), object) == _to_load.end()
+      && std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end()
+      ;
   }
-  else
+  );
+}
+
+AsyncLoader::AsyncLoader(int numThreads)
+  : _stop (false)
+{
+  for (int i = 0; i < numThreads; ++i)
   {
-    return *it;
-  }
-}
-
-void AsyncLoader::addObject(AsyncObject* _pObject)
-{
-  boost::mutex::scoped_lock lock(m_loadingMutex);
-  m_objects.push_back(_pObject);
-}
-
-void AsyncLoader::removeObject(AsyncObject* _pObject)
-{
-  boost::mutex::scoped_lock lock(m_loadingMutex);
-  m_objects.remove(_pObject);
-}
-
-void AsyncLoader::start(int _numThreads)
-{
-  for (int i = 0; i < _numThreads; ++i)
-  {
-    m_threads.add_thread(new boost::thread(&AsyncLoader::process, this));
+    _threads.emplace_back (&AsyncLoader::process, this);
   }
 }
 
 AsyncLoader::~AsyncLoader()
 {
-  stop();
-  join();
-}
+  _stop = true;
+  _state_changed.notify_all();
 
-void AsyncLoader::stop()
-{
-  m_threads.interrupt_all();
-}
-
-void AsyncLoader::join()
-{
-  m_threads.join_all();
+  for (auto& thread : _threads)
+  {
+    thread.join();
+  }
 }

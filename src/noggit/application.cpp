@@ -51,8 +51,6 @@ private:
 
   boost::filesystem::path wowpath;
 
-  std::unique_ptr<AsyncLoader> asyncLoader;
-
   bool fullscreen;
   bool doAntiAliasing;
 };
@@ -81,9 +79,6 @@ void Noggit::initPath(char *argv[])
 
 void Noggit::loadMPQs()
 {
-  asyncLoader = std::make_unique<AsyncLoader>();
-  asyncLoader->start(1);
-
   std::vector<std::string> archiveNames;
   archiveNames.push_back("common.MPQ");
   archiveNames.push_back("common-2.MPQ");
@@ -149,7 +144,7 @@ void Noggit::loadMPQs()
       {
         path.replace(location, 1, std::string(&j, 1));
         if (boost::filesystem::exists(path))
-          MPQArchive::loadMPQ (asyncLoader.get(), path, true);
+          MPQArchive::loadMPQ (&AsyncLoader::instance(), path, true);
       }
     }
     else if (path.find("{character}") != std::string::npos)
@@ -160,12 +155,12 @@ void Noggit::loadMPQs()
       {
         path.replace(location, 1, std::string(&c, 1));
         if (boost::filesystem::exists(path))
-          MPQArchive::loadMPQ (asyncLoader.get(), path, true);
+          MPQArchive::loadMPQ (&AsyncLoader::instance(), path, true);
       }
     }
     else
       if (boost::filesystem::exists(path))
-        MPQArchive::loadMPQ (asyncLoader.get(), path, true);
+        MPQArchive::loadMPQ (&AsyncLoader::instance(), path, true);
   }
 }
 

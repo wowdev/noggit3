@@ -7,7 +7,7 @@ class AsyncObject
 protected:
   bool finished;
 public:
-  virtual ~AsyncObject() {}
+  virtual ~AsyncObject() = default;
 
   virtual bool finishedLoading() const
   {
