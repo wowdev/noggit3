@@ -27,9 +27,9 @@ struct blp_texture : public opengl::texture, AsyncObject
   int height() const { return _height; }
 
   void bind();
+  void upload();
 
 private:
-  void upload();
   bool _uploaded = false;
 
   int _width;
