@@ -104,6 +104,7 @@ public:
     : ModelInstance (other)
     , doodad_orientation (other.doodad_orientation)
     , world_pos (other.world_pos)
+    , _need_matrix_update(other._need_matrix_update)
   {
     std::swap (extents, other.extents);
   }
@@ -112,10 +113,15 @@ public:
     ModelInstance::operator= (other);
     std::swap (doodad_orientation, other.doodad_orientation);
     std::swap (world_pos, other.world_pos);
+    std::swap (_need_matrix_update, other._need_matrix_update);
     return *this;
   }
 
+  bool need_matrix_update() const { return _need_matrix_update; }
   void update_transform_matrix_wmo(WMOInstance* wmo);
 
   virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
+
+private:
+  bool _need_matrix_update = true;
 };

@@ -33,7 +33,7 @@ private:
   uint16_t _doodadset;
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
-
+  bool _need_doodadset_update = true;
 public:
   WMOInstance(std::string const& filename, ENTRY_MODF const* d);
   explicit WMOInstance(std::string const& filename);
@@ -51,6 +51,7 @@ public:
     , mNameset (other.mNameset)
     , _doodadset (other._doodadset)
     , _doodads_per_group(other._doodads_per_group)
+    , _need_doodadset_update(other._need_doodadset_update)
 
   {
     std::swap (extents, other.extents);
@@ -68,6 +69,7 @@ public:
     std::swap(mNameset, other.mNameset);
     std::swap(_doodadset, other._doodadset);
     std::swap(_doodads_per_group, other._doodads_per_group);
+    std::swap(_need_doodadset_update, other._need_doodadset_update);
     return *this;
   }
 

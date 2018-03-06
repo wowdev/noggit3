@@ -245,12 +245,18 @@ wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f
   f->read(&color.packed, 4);
 
   light_color = math::vector_3d(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
-
-  recalcExtents();
 }
 
 void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 {
+  if (!model->finishedLoading())
+  {
+    return;
+  }
+
+  // to compute the size category (used in culling)
+  recalcExtents();
+
   world_pos = pos + wmo->pos;
 
   math::matrix_4x4 m2_mat
@@ -274,6 +280,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 
   _transform_mat_inverted = mat.inverted();
   _transform_mat_transposed = mat.transposed();
+  _need_matrix_update = false;
 }
 
 bool wmo_doodad_instance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const

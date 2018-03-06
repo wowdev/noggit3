@@ -1086,8 +1086,6 @@ void main()
   {
     for (auto& wmo : mWMOInstances)
     {
-      auto& instance = wmo.second;
-
       for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models))
       {
         _wmo_doodads[doodad->model->_filename].push_back(doodad);
