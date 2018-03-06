@@ -64,6 +64,11 @@ void blp_texture::bind()
 
 void blp_texture::upload()
 {
+  if (_uploaded)
+  {
+    return;
+  }
+
   int width = _width, height = _height;
 
   if (!_compression_format)
@@ -281,6 +286,7 @@ namespace noggit
     opengl::scoped::texture_setter<0, GL_TRUE> const texture0;
     blp_texture texture (blp_filename);
     texture.finishLoading();
+    texture.upload();
 
     width = width == -1 ? texture.width() : width;
     height = height == -1 ? texture.height() : height;
