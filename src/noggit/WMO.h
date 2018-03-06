@@ -44,7 +44,7 @@ class WMOGroup {
 public:
   WMOGroup(WMO *wmo, MPQFile* f, int num, char const* names);
 
-  void load ();
+  void load();
 
   void upload();
 

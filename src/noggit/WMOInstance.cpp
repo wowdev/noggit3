@@ -199,8 +199,8 @@ void WMOInstance::change_doodadset(uint16_t doodad_set)
   }
 
   _doodadset = doodad_set;
-
   _doodads_per_group = wmo->doodads_per_group(_doodadset);
+
   update_doodads();
 }
 
@@ -231,6 +231,17 @@ std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
 {
   std::vector<wmo_doodad_instance*> doodads;
 
+  if (!wmo->finishedLoading())
+  {
+    return doodads;
+  }
+
+  if (_need_doodadset_update)
+  {
+    change_doodadset(_doodadset);
+    _need_doodadset_update = false;
+  }
+
   if (!wmo->is_hidden() || draw_hidden_models)
   {
     for (int i = 0; i < wmo->groups.size(); ++i)
@@ -239,6 +250,11 @@ std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
       {
         for (auto& doodad : _doodads_per_group[i])
         {
+          if (doodad.need_matrix_update())
+          {
+            doodad.update_transform_matrix_wmo(this);
+          }
+
           doodads.push_back(&doodad);
         }
       }
