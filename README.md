@@ -25,11 +25,11 @@ Further following libraries are required for MySQL GUID Storage builts:
 
 * install msvc++
 * install cmake
-* install boost via https://sourceforge.net/projects/boost/files/boost-binaries/ (be sure to use the right version and compiler version. cmake may not support the latest version) to <boost-install>
-* install Qt via https://www.qt.io/download-open-source/#section-2 to <Qt-install>
-* download stormlib from https://github.com/ladislav-zezula/StormLib
+* install boost via https://sourceforge.net/projects/boost/files/boost-binaries/ (any version from the last years should work. be sure to pick the right compiler version! cmake may not support the latest version) to <boost-install>
+* install Qt5 via https://www.qt.io/download-open-source/#section-2 to <Qt-install>
+* download stormlib from https://github.com/ladislav-zezula/StormLib (any recent version)
  * [stormlib] open CMake GUI
- * configure, generate stormlib (save the cache entry CMAKE_INSTALL_PREFIX path somewhere, set it to a empty folder if not present)
+ * configure, generate stormlib (save the cache entry CMAKE_INSTALL_PREFIX path somewhere, set it to a empty folder if not present; no other things should need to be configured)
  * open solution with visual studio
  * build ALL_BUILD, then INSTALL, do it for both release and debug
 * [noggit] open CMake GUI
