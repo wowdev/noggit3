@@ -187,10 +187,6 @@ public:
 
 private:
 	uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
-#ifdef USE_MYSQL_UID_STORAGE
-  uint32_t getHighestGUIDFromDB() const;
-  uint32_t newGUIDDB();
-#endif
 
   const std::string basename;
 
@@ -215,9 +211,6 @@ private:
   int cz;
 
   uint32_t highestGUID;
-  uint32_t highestGUIDDB;
-  uint32_t highGUID;
-  uint32_t highGUIDDB;
 
   ENTRY_MODF wmoEntry;
   MPHD mphd;

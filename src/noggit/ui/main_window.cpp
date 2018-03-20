@@ -201,16 +201,14 @@ namespace noggit
           {
 #ifdef USE_MYSQL_UID_STORAGE
             QSettings settings;
-            if (settings.value("project/mysql/enabled", false).toBool())
-               && mysql::hasMaxUIDStoredDB (_world->getMapID())
+            bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
+
+            if ( (use_myqsl && mysql::hasMaxUIDStoredDB (_world->getMapID()))
+              || uid_storage::hasMaxUIDStored (_world->getMapID())
                )
-            {
-              _world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
-            }
-            else
-#endif
+#else
             if (uid_storage::hasMaxUIDStored (_world->getMapID()))
+#endif
             {
               _world->mapIndex.loadMaxUID();
               enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
