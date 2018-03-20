@@ -13,6 +13,8 @@
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
 
+#include <QtCore/QSettings>
+
 #include <boost/range/adaptor/map.hpp>
 
 #include <forward_list>
@@ -28,7 +30,6 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   , cx(-1)
   , cz(-1)
   , highestGUID(0)
-  , highestGUIDDB(0)
   , _world (world)
 {
 
@@ -539,35 +540,17 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
     return highGUID;
 }
 
-#ifdef USE_MYSQL_UID_STORAGE
-uint32_t MapIndex::getHighestGUIDFromDB() const
-{
-	return mysql::getGUIDFromDB (_map_id);
-}
-
-uint32_t MapIndex::newGUIDDB()
-{
-  highestGUIDDB = std::max(highestGUIDDB, getHighestGUIDFromDB());
-  highGUIDDB = std::max(highestGUID, highestGUIDDB);
-  highGUIDDB = ++highestGUIDDB;
-  highestGUID = highGUIDDB; // update local max uid too
-  mysql::updateUIDinDB(_map_id, highGUIDDB);  // it's neccesary to update the uid in database after every place, other then in the file uid storage system, because of cloudworking
-  return highGUIDDB;
-}
-#endif
-
 uint32_t MapIndex::newGUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  if (Settings::getInstance()->mysql) {
-    return newGUIDDB();
+  QSettings settings;
+
+  if (settings->value ("project/mysql/enabled", false).toBool())
+  {
+    mysql::updateUIDinDB(_map_id, highestGUID + 1); // update the highest uid in db, note that if the user don't save these uid won't be used (not really a problem tho) 
   }
-  else {
-  return ++highestGUID;
-  }
-#else
-  return ++highestGUID;
 #endif
+  return ++highestGUID;
 }
 
 inline bool floatEqual(float const& a, float const& b)
@@ -861,6 +844,7 @@ void MapIndex::fixUIDs (World* world)
     }
   }
 
+  // override the db highest uid if used
   saveMaxUID();
 }
 
@@ -880,44 +864,42 @@ void MapIndex::searchMaxUID()
       highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
     }
   }
+
   saveMaxUID();
 }
 
 void MapIndex::saveMaxUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  if (Settings::getInstance()->mysql) {
-  if (mysql::hasMaxUIDStoredDB(_map_id))
+  QSettings settings;
+
+  if (settings->value ("project/mysql/enabled", false).toBool())
   {
-	  mysql::updateUIDinDB(_map_id, highestGUID);
+    if (mysql::hasMaxUIDStoredDB(_map_id))
+    {
+	    mysql::updateUIDinDB(_map_id, highestGUID);
+    }
+    else
+    {
+	    mysql::insertUIDinDB(_map_id, highestGUID);
+    }
   }
-  else
-  {
-	  mysql::insertUIDinDB(_map_id, highestGUID);
-  }
-  }
-  else
-  {
-    // save the max UID on the disc
-    uid_storage::saveMaxUID (_map_id, highestGUID);
-  }
-#else
-  // save the max UID on the disc
-  uid_storage::saveMaxUID (_map_id, highestGUID);
 #endif
+  // save the max UID on the disk (always save to sync with the db if used
+  uid_storage::saveMaxUID (_map_id, highestGUID);
 }
 
 void MapIndex::loadMaxUID()
 {
+  highestGUID = uid_storage::getMaxUID (_map_id);
 #ifdef USE_MYSQL_UID_STORAGE
-if (Settings::getInstance()->mysql) {
-  highestGUID = mysql::getGUIDFromDB(map_id);
-}
-else
-{
-  highestGUID = uid_storage::getMaxUID (_map_id);
-}
-#else
-  highestGUID = uid_storage::getMaxUID (_map_id);
+  QSettings settings;
+
+  if (settings->value ("project/mysql/enabled", false).toBool())
+  {
+    highestGUID = std::max(mysql::getGUIDFromDB(map_id), highestGUID);
+    // save to make sure the db and disk uid are synced
+    saveMaxUID();
+  }
 #endif
 }
