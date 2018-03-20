@@ -7,20 +7,31 @@
 #include <QtCore/QSettings>
 
 
-bool uid_storage::hasMaxUIDStored(uint32_t mapID)
+QString uid_file_path()
 {
   QSettings settings;
-  return settings.value ("project/uids/" + QString::number(mapID), -1).toUInt () != -1;
+  QString str = settings.value ("project/path").toString();
+  if (!(str.endsWith('\\') || str.endsWith('/')))
+  {
+    str += "/";
+  }
+  return str + "/uid.ini";
+}
+
+bool uid_storage::hasMaxUIDStored(uint32_t mapID)
+{
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  return uid_file.value (QString::number(mapID), -1).toUInt () != -1;
 }
 
 uint32_t uid_storage::getMaxUID(uint32_t mapID)
 {
-  QSettings settings;
-  return settings.value ("project/uids/" + QString::number(mapID), 0).toUInt();
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  return uid_file.value (QString::number(mapID), 0).toUInt();
 }
 
 void uid_storage::saveMaxUID(uint32_t mapID, uint32_t uid)
 {
-  QSettings settings;
-  settings.setValue ("project/uids/" + QString::number(mapID), uid);
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  uid_file.setValue (QString::number(mapID), uid);
 }
