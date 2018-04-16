@@ -2,11 +2,13 @@
 
 #include <noggit/AsyncLoader.h>
 #include <noggit/AsyncObject.h>
+#include <noggit/errorHandling.h>
 
 #include <list>
 
 void AsyncLoader::process()
 {
+  noggit::RegisterErrorHandlers();
   AsyncObject* object;
 
   while (!_stop)
