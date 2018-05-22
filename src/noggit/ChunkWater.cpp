@@ -35,7 +35,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
   {
     MH2O_Information info;
     MH2O_HeightMask heightmask;
-    uint64_t infoMask = -1; // default = all water
+    uint64_t infoMask = 0xFFFFFFFFFFFFFFFF; // default = all water
 
     //info
     f.seek(basePos + header.ofsInformation + sizeof(MH2O_Information)* k);
@@ -44,8 +44,11 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     //mask
     if (info.ofsInfoMask > 0 && info.height > 0)
     {
+      size_t bitmask_size = static_cast<size_t>(std::ceil(info.height * info.width / 8.0f));
+
       f.seek(info.ofsInfoMask + basePos);
-      f.read(&infoMask, 8);
+      // only read the relevant data
+      f.read(&infoMask, bitmask_size);
     }
 
     // set default value
@@ -78,9 +81,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       {
         for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
         {
-
           f.read(&heightmask.mTransparency[w][h], sizeof(unsigned char));
-
         }
       }
     }
@@ -173,9 +174,9 @@ void ChunkWater::draw ( math::frustum const& frustum
 
   if (layer == -1)
   {
-    for (liquid_layer& layer : _layers)
+    for (liquid_layer& lq_layer : _layers)
     {
-      layer.draw (render, water_shader, camera, animtime);
+      lq_layer.draw (render, water_shader, camera, animtime);
     }
   }
   else if (layer < _layers.size())
