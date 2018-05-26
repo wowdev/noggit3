@@ -74,7 +74,8 @@ private:
   opengl::texture amap_gl_tex;
   size_t nTextures;
 
-  int tex[4];
+  // only used for loading
+  int tile_texture_id[4];
 
   unsigned int texFlags[4];
   unsigned int effectID[4];

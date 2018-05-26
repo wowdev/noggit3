@@ -21,12 +21,12 @@ void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
 
   for (size_t i = 0; i<nTextures; ++i) 
   {
-    f->read(&tex[i], 4);
+    f->read(&tile_texture_id[i], 4);
     f->read(&texFlags[i], 4);
     f->read(&MCALoffset[i], 4);
     f->read(&effectID[i], 4);
 
-    textures.emplace_back (maintile->mTextureFilenames[tex[i]]);
+    textures.emplace_back (maintile->mTextureFilenames[tile_texture_id[i]]);
   }
 }
 
