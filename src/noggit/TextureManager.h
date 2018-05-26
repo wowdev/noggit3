@@ -2,8 +2,11 @@
 
 #pragma once
 
+#include <noggit/AsyncObject.h>
 #include <noggit/multimap_with_normalized_key.hpp>
 #include <opengl/texture.hpp>
+
+#include <boost/optional.hpp>
 
 #include <map>
 #include <string>
@@ -11,23 +14,33 @@
 
 struct BLPHeader;
 
-struct blp_texture : public opengl::texture
+struct blp_texture : public opengl::texture, AsyncObject
 {
   blp_texture (std::string const& filename);
+  void finishLoading();
 
   void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
   void loadFromCompressedData(BLPHeader const* lHeader, char const* lData);
 
   const std::string& filename();
-  int width() const { return original_width; }
-  int height() const { return original_height; }
+  int width() const { return _width; }
+  int height() const { return _height; }
+
+  void bind();
 
 private:
-  int original_width;
-  int original_height;
+  void upload();
+  bool _uploaded = false;
+
   int _width;
   int _height;
+
   std::string _filename;
+
+private:
+  std::map<int, std::vector<uint32_t>> _data;
+  std::map<int, std::vector<uint8_t>> _compressed_data;
+  boost::optional<GLint> _compression_format;
 };
 
 struct scoped_blp_texture_reference;
@@ -38,7 +51,7 @@ public:
 
 private:
   friend struct scoped_blp_texture_reference;
-  static noggit::multimap_with_normalized_key<blp_texture> _;
+  static noggit::async_object_multimap_with_normalized_key<blp_texture> _;
 };
 
 struct scoped_blp_texture_reference
