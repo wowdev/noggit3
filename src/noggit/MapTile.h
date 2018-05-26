@@ -65,12 +65,9 @@ public:
             , const float& cull_distance
             , const math::vector_3d& camera
             , bool show_unpaintable_chunks
-            , bool draw_contour
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay
             , bool draw_areaid_overlay
-            , bool draw_wireframe_overlay
-            , int cursor_type
             , std::map<int, misc::random_color>& area_id_colors
             , boost::optional<selection_type> selection
             , int animtime
@@ -98,8 +95,6 @@ public:
 	void CropWater();
 
   bool isTile(int pX, int pZ);
-
-  void getAlpha(size_t id, unsigned char *amap);
 
   TileWater Water;
 private:

@@ -331,12 +331,9 @@ void MapTile::draw ( math::frustum const& frustum
                    , const float& cull_distance
                    , const math::vector_3d& camera
                    , bool show_unpaintable_chunks
-                   , bool draw_contour
                    , bool draw_paintability_overlay
                    , bool draw_chunk_flag_overlay
                    , bool draw_areaid_overlay
-                   , bool draw_wireframe_overlay
-                   , int cursor_type
                    , std::map<int, misc::random_color>& area_id_colors
                    , boost::optional<selection_type> selection
                    , int animtime
@@ -358,12 +355,9 @@ void MapTile::draw ( math::frustum const& frustum
                           , cull_distance
                           , camera
                           , show_unpaintable_chunks
-                          , draw_contour
                           , draw_paintability_overlay
                           , draw_chunk_flag_overlay
                           , draw_areaid_overlay
-                          , draw_wireframe_overlay
-                          , cursor_type
                           , area_id_colors
                           , selection
                           , animtime
@@ -424,35 +418,6 @@ void MapTile::drawWater ( math::frustum const& frustum
              , animtime
              , layer
              );
-}
-
-
-void MapTile::getAlpha(size_t id, unsigned char *amap)
-{
-  int index = 0;
-  int offsetIndex = 0;
-
-  for (size_t j = 0; j < 1024; ++j)
-  {
-    index = (int)j / 64;
-
-    for (int i = 0; i < 16; ++i)
-    {
-      if (mChunks[index][i]->_texture_set.num() > id + 1)
-      {
-        memcpy(amap + j * 1024 + i * 64, mChunks[index][i]->_texture_set.getAlpha(id) + offsetIndex * 64, 64);
-      }
-      else
-      {
-        memset(amap + j * 1024 + i * 64, 1, 64);
-      }
-    }
-
-    if (offsetIndex == 63)
-      offsetIndex = 0;
-    else
-      offsetIndex++;
-  }
 }
 
 // This is for the 2D mode only.

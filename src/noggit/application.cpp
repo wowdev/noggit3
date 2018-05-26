@@ -121,6 +121,7 @@ void Noggit::loadMPQs()
     //return -1;
   }
 
+
   //! \todo  This may be done faster. Maybe.
   for (size_t i(0); i < archiveNames.size(); ++i)
   {
@@ -326,14 +327,6 @@ namespace
     }
   };
 }
-
-#ifdef _WIN32
-int main(int argc, char *argv[]);
-int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-  return main(__argc, __argv);
-}
-#endif
 
 int main(int argc, char *argv[])
 {
