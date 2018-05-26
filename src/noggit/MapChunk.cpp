@@ -23,6 +23,7 @@
 
 static const float texDetail = 8.0f;
 static const float TEX_RANGE = 1.0f;
+
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   : mt(maintile)
   , use_big_alphamap(bigAlpha)
@@ -135,26 +136,30 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     assert(fourcc == 'MCSH');
 
+
+    uint8_t compressed_shadow_map[64 * 64 / 8];
+
     // shadow map 64 x 64
-    f->read(mShadowMap, 0x200);
+    f->read(compressed_shadow_map, 0x200);
     f->seekRelative(-0x200);
 
-    unsigned char sbuf[64 * 64], *p, c[8];
-    p = sbuf;
-    for (int j = 0; j<64; ++j) {
-      f->read(c, 8);
-      for (int i = 0; i<8; ++i) {
-        for (int b = 0x01; b != 0x100; b <<= 1) {
-          *p++ = (c[i] & b) ? 85 : 0;
-        }
+    uint8_t sbuf[64 * 64], *p, *c;
+    p = _shadow_map;
+    c = compressed_shadow_map;
+    for (int i = 0; i<64 * 8; ++i) 
+    {
+      for (int b = 0x01; b != 0x100; b <<= 1) 
+      {
+        *p++ = ((*c) & b) ? 85 : 0;
       }
-    }
-    shadow.bind();
-    gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      c++;
+    }    
+  }
+  else
+  {
+    /** We have no shadow map (MCSH), so we got no shadows at all!  **
+    ** This results in everything being black.. Yay. Lets fake it! **/
+    memset(_shadow_map, 0, 64 * 64);
   }
   // - MCAL ----------------------------------------------
   {
@@ -198,11 +203,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     }
   }
 
-  // create vertex buffers
-  gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
-
   initStrip();
 
   vcenter = (vmin + vmax) * 0.5f;
@@ -226,25 +226,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     }
   }
 
-  if (!header_flags.flags.has_mcsh)
-  {
-    /** We have no shadow map (MCSH), so we got no shadows at all!  **
-    ** This results in everything being black.. Yay. Lets fake it! **/
-    for (size_t i = 0; i < 512; ++i)
-      mShadowMap[i] = 0;
-
-    unsigned char sbuf[64 * 64];
-    for (size_t j = 0; j < 4096; ++j)
-      sbuf[j] = 0;
-
-    shadow.bind();
-    gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  }
-
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
   {
@@ -253,12 +234,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     mFakeShadows[j].w = ShadowAmount;
   }
-
-  gl.genBuffers(1, &minimap);
-  gl.genBuffers(1, &minishadows);
-
-  gl.bufferData<GL_ARRAY_BUFFER> (minimap, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
 
@@ -359,6 +334,49 @@ void MapChunk::update_intersect_points()
   _intersect_points = misc::intersection_points(vmin, vmax);
 }
 
+void MapChunk::upload()
+{
+  _buffers.upload();
+  lod_indices.upload();
+
+  shadow.bind();
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, _shadow_map);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  
+  // fill vertex buffers
+  gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
+
+  gl.bufferData<GL_ARRAY_BUFFER> (minimap, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+
+  update_indices_buffer();
+
+  _texture_set.upload();
+
+  _uploaded = true;
+}
+
+void MapChunk::update_indices_buffer()
+{
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
+  }
+
+  for (int lod_level = 0; lod_level < 4; ++lod_level)
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (lod_indices[lod_level]);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_lods[lod_level].size() * sizeof (StripType), strip_lods[lod_level].data(), GL_STATIC_DRAW);
+  }
+
+  _need_indice_buffer_update = false;
+}
+
 int MapChunk::get_lod_level(math::vector_3d const& camera_pos) const
 {
   float dist = (camera_pos - vcenter).length();
@@ -383,6 +401,21 @@ int MapChunk::get_lod_level(math::vector_3d const& camera_pos) const
   {
     return 3;
   }
+}
+
+std::vector<uint8_t> MapChunk::compressed_shadow_map() const
+{
+  std::vector<uint8_t> shadow_map(64 * 64 / 8);
+
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    if (_shadow_map[i])
+    {
+      shadow_map[i / 8] |= 1 << i % 8;
+    }
+  }
+
+  return shadow_map;
 }
 
 void MapChunk::initStrip()
@@ -441,16 +474,7 @@ void MapChunk::initStrip()
     }
   }
 
-  {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
-    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
-  }
-
-  for (int lod_level = 0; lod_level < 4; ++lod_level)
-  {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (lod_indices[lod_level]);
-    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_lods[lod_level].size() * sizeof (StripType), strip_lods[lod_level].data(), GL_STATIC_DRAW);
-  }
+  _need_indice_buffer_update = true;
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
@@ -534,6 +558,16 @@ void MapChunk::draw ( math::frustum const& frustum
 {
   if (!is_visible (cull_distance, frustum, camera))
     return;
+
+  if (!_uploaded)
+  {
+    upload();
+  }
+
+  if (_need_indice_buffer_update)
+  {
+    update_indices_buffer();
+  }
 
   bool cantPaint = noggit::ui::selected_texture::get()
                  && !canPaintTexture(*noggit::ui::selected_texture::get())
@@ -1243,7 +1277,8 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
     char * lLayer = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
-    memcpy(lLayer, mShadowMap, 0x200);
+    auto shadow_map = compressed_shadow_map();
+    memcpy(lLayer, shadow_map.data(), 0x200);
 
     lCurrentPosition += 8 + lMCSH_Size;
     lMCNK_Size += 8 + lMCSH_Size;

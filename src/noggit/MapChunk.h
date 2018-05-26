@@ -38,7 +38,7 @@ private:
 
   unsigned int areaID;
 
-  unsigned char mShadowMap[8 * 64];
+  uint8_t _shadow_map[64 * 64];
   opengl::texture shadow;
 
   std::vector<StripType> strip_with_holes;
@@ -49,6 +49,8 @@ private:
   math::vector_3d mMinimap[mapbufsize];
   math::vector_4d mFakeShadows[mapbufsize];
   math::vector_3d mccv[mapbufsize];
+
+  std::vector<uint8_t> compressed_shadow_map() const;
 
   void initStrip();
 
@@ -61,6 +63,22 @@ private:
 
   // -1 = no lod
   int get_lod_level(math::vector_3d const& camera_pos) const;
+
+  bool _uploaded = false;
+  bool _need_indice_buffer_update = true;
+
+  void upload();
+  void update_indices_buffer();
+
+  opengl::scoped::deferred_upload_buffers<6> _buffers;
+  GLuint const& vertices = _buffers[0];
+  GLuint const& normals = _buffers[1];
+  GLuint const& indices = _buffers[2];
+  GLuint const& mccvEntry = _buffers[3];
+  GLuint const& minimap = _buffers[4];
+  GLuint const& minishadows = _buffers[5];
+  opengl::scoped::deferred_upload_buffers<4> lod_indices;
+
 public:
   MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha);
 
@@ -75,17 +93,7 @@ public:
   mcnk_flags header_flags;
   bool use_big_alphamap;
 
-  TextureSet _texture_set;
-
-  opengl::scoped::buffers<4> _buffers;
-  GLuint const& vertices = _buffers[0];
-  GLuint const& normals = _buffers[1];
-  GLuint const& indices = _buffers[2];
-  GLuint const& mccvEntry = _buffers[3];
-
-  opengl::scoped::buffers<4> lod_indices;
-
-  GLuint minimap, minishadows;
+  TextureSet _texture_set;  
 
   math::vector_3d mVertices[mapbufsize];
 

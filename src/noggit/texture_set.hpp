@@ -48,7 +48,7 @@ public:
 
   std::vector<std::vector<uint8_t>> save_alpha(bool big_alphamap);
 
-  void convertToBigAlpha();
+  void convertToBigAlpha(bool loading = false);
   void convertToOldAlpha();
 
   void merge_layers(size_t id1, size_t id2);
@@ -60,10 +60,12 @@ public:
 
   std::vector<uint8_t> lod_texture_map();
 
+  void upload();
+
 private:
   void alphas_to_big_alpha(uint8_t* dest);
   void alphas_to_old_alpha(uint8_t* dest);
-  void generate_alpha_tex();
+  void generate_alpha_tex(bool update_tex = true);
   void update_alpha_tex();
 
   std::vector<scoped_blp_texture_reference> textures;

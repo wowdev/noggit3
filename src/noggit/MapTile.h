@@ -23,11 +23,13 @@ namespace math
 
 class World;
 
-class MapTile
+class MapTile : public AsyncObject
 {
 
 public:
 	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World*);
+
+  void finishLoading();
 
   //! \todo on destruction, unload ModelInstances and WMOInstances on this tile:
   // a) either keep up the information what tiles the instances are on at all times
@@ -119,6 +121,9 @@ private:
 
   std::unique_ptr<MapChunk> mChunks[16][16];
   std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
+
+  bool _load_models;
+  World* _world;
 
   friend class MapChunk;
   friend class TextureSet;

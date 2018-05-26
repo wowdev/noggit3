@@ -8,10 +8,10 @@
 Alphamap::Alphamap()
 {
   createNew();
-  genTexture();
+  upload();
 }
 
-Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha)
+Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha, bool upload_amap)
 {
   createNew();
 
@@ -30,9 +30,12 @@ Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFix
   else
   {
     readNotCompressed(f, doNotFixAlpha);
-  }    
+  }
 
-  genTexture();
+  if (upload_amap)
+  {
+    upload();
+  }
 }
 
 void Alphamap::readCompressed(MPQFile *f)
@@ -107,7 +110,7 @@ void Alphamap::loadTexture()
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap);
 }
 
-void Alphamap::genTexture()
+void Alphamap::upload()
 {
   loadTexture();
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

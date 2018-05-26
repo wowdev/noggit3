@@ -199,7 +199,7 @@ void ChunkWater::update_layers()
 {
   for (liquid_layer& layer : _layers)
   {
-    layer.updateRender();
+    layer.update_indices();
     vmin.y = std::min (vmin.y, layer.min());
     vmax.y = std::max (vmax.y, layer.max());
   }

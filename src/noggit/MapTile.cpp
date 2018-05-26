@@ -34,6 +34,13 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   , Water (this, xbase, zbase)
   , mBigAlpha(pBigAlpha)
   , mFilename(pFilename)
+  , _load_models(pLoadModels)
+  , _world(world)
+{
+  finished = false;
+}
+
+void MapTile::finishLoading()
 {
   MPQFile theFile(mFilename);
 
@@ -105,7 +112,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
     }
   }
 
-  if (pLoadModels)
+  if (_load_models)
   {
     // - MMDX ----------------------------------------------
 
@@ -216,8 +223,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
         float min = static_cast<float> (std::min(mMinimum[pos], mMaximum[pos]));
         float max = static_cast<float> (std::max(mMinimum[pos], mMaximum[pos]));
 
-        mMinimumValues[pos] = {xPositions[x], min, yPositions[y]};
-        mMaximumValues[pos] = {xPositions[x], max, yPositions[y]};
+        mMinimumValues[pos] = { xPositions[x], min, yPositions[y] };
+        mMaximumValues[pos] = { xPositions[x], max, yPositions[y] };
       }
     }
   }
@@ -257,24 +264,23 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
   //! \note We no longer pre load textures but the chunks themselves do.
 
-  if (pLoadModels)
+  if (_load_models)
   {
-
     // - Load WMOs -----------------------------------------
 
     for (auto const& object : lWMOInstances)
     {
-      world->mWMOInstances.emplace(object.uniqueID, WMOInstance(mWMOFilenames[object.nameID], &object));
+      _world->mWMOInstances.emplace(object.uniqueID, WMOInstance(mWMOFilenames[object.nameID], &object));
     }
 
     // - Load M2s ------------------------------------------
 
     for (auto const& model : lModelInstances)
     {
-      world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
+      _world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
     }
 
-    world->need_model_updates = true;
+    _world->need_model_updates = true;
   }
 
   // - Load chunks ---------------------------------------
@@ -290,6 +296,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   // - Really done. --------------------------------------
 
   LogDebug << "Done loading tile " << index.x << "," << index.z << "." << std::endl;
+  finished = true;
 }
 
 bool MapTile::isTile(int pX, int pZ)
@@ -335,6 +342,11 @@ void MapTile::draw ( math::frustum const& frustum
                    , int animtime
                    )
 {
+  if (!finished)
+  {
+    return;
+  }
+
   gl.color4f(1, 1, 1, 1);
 
   for (int j = 0; j<16; ++j)
@@ -362,6 +374,11 @@ void MapTile::draw ( math::frustum const& frustum
 
 void MapTile::intersect (math::ray const& ray, selection_result* results) const
 {
+  if (!finished)
+  {
+    return;
+  }
+
   for (size_t j (0); j < 16; ++j)
   {
     for (size_t i (0); i < 16; ++i)

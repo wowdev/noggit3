@@ -1532,6 +1532,11 @@ void main()
     
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
+      if (!tile->finishedLoading())
+      {
+        continue;
+      }
+
       tile->drawWater ( frustum
                       , culldistance
                       , camera_pos
@@ -1963,7 +1968,7 @@ template<typename Fun>
   auto World::for_maybe_chunk_at(math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
 {
   MapTile* tile (mapIndex.getTile (pos));
-  if (tile)
+  if (tile && tile->finishedLoading())
   {
     return fun (tile->getChunk ((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }

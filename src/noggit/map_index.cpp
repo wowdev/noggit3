@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/AsyncLoader.h>
 #include <noggit/MPQ.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapChunk.h>
@@ -309,7 +310,11 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
 
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, _world);
 
-  return mTiles[tile.z][tile.x].tile.get();
+  MapTile* adt = mTiles[tile.z][tile.x].tile.get();
+
+  AsyncLoader::instance().queue_for_load(adt);
+
+  return adt;
 }
 
 void MapIndex::reloadTile(const tile_index& tile)
@@ -762,6 +767,11 @@ void MapIndex::fixUIDs (World* world)
   {
     instance.uid = uid++;
 
+    if (!instance.model->finishedLoading())
+    {
+      AsyncLoader::instance().ensure_deletable(instance.model.get());
+    }
+
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
     std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
@@ -781,6 +791,11 @@ void MapIndex::fixUIDs (World* world)
   for (WMOInstance& instance : wmos)
   {
     instance.mUniqueID = uid++;
+
+    if (!instance.wmo->finishedLoading())
+    {
+      AsyncLoader::instance().ensure_deletable(instance.wmo.get());
+    }
 
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
@@ -819,6 +834,7 @@ void MapIndex::fixUIDs (World* world)
 
       // load the tile without the models
       MapTile tile(x, z, filename.str(), mBigAlpha, false, world);
+      tile.finishLoading();
 
       std::map<int, ModelInstance> modelInst;
       std::map<int, WMOInstance> wmoInst;

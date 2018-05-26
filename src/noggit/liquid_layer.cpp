@@ -74,6 +74,23 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
   changeLiquidID(_liquid_id);
 }
 
+liquid_layer::liquid_layer(liquid_layer&& other)
+  : _liquid_id(other._liquid_id)
+  , _liquid_vertex_format(other._liquid_vertex_format)
+  , _minimum(other._minimum)
+  , _maximum(other._maximum)
+  , _subchunks(other._subchunks)
+  , _vertices(other._vertices)
+  , _depth(other._depth)
+  , _tex_coords(other._tex_coords)
+  , pos(other.pos)
+  , texRepeats(other.texRepeats)
+  , _indices_by_lod(other._indices_by_lod)
+  , _need_buffer_update(true)
+{
+  changeLiquidID(_liquid_id);
+}
+
 liquid_layer::liquid_layer(liquid_layer const& other)
   : _liquid_id(other._liquid_id)
   , _liquid_vertex_format(other._liquid_vertex_format)
@@ -85,8 +102,33 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , _tex_coords(other._tex_coords)
   , pos(other.pos)
   , texRepeats(other.texRepeats)
+  , _indices_by_lod(other._indices_by_lod)
+  , _need_buffer_update(true)
 {
   changeLiquidID(_liquid_id);
+}
+
+liquid_layer& liquid_layer::operator= (liquid_layer&& other)
+{
+  std::swap(_liquid_id, other._liquid_id);
+  std::swap(_liquid_vertex_format, other._liquid_vertex_format);
+  std::swap(_minimum, other._minimum);
+  std::swap(_maximum, other._maximum);
+  std::swap(_subchunks, other._subchunks);
+  std::swap(_vertices, other._vertices);
+  std::swap(_depth, other._depth);
+  std::swap(_tex_coords, other._tex_coords);
+  std::swap(pos, other.pos);
+  std::swap(texRepeats, other.texRepeats);
+  std::swap(_indices_by_lod, other._indices_by_lod);
+
+  _need_buffer_update = true;
+  other._need_buffer_update = true;
+
+  changeLiquidID(_liquid_id);
+  other.changeLiquidID(other._liquid_id);
+
+  return *this;
 }
 
 liquid_layer& liquid_layer::operator=(liquid_layer const& other)
@@ -101,6 +143,8 @@ liquid_layer& liquid_layer::operator=(liquid_layer const& other)
   _tex_coords = other._tex_coords;
   pos = other.pos;
   texRepeats = other.texRepeats;
+  _indices_by_lod = other._indices_by_lod;
+  _need_buffer_update = true;
 
   return *this;
 }
@@ -224,7 +268,7 @@ void liquid_layer::changeLiquidID(int id)
   }
 }
 
-void liquid_layer::updateRender()
+void liquid_layer::update_indices()
 {
   _indices_by_lod.clear();
 
@@ -255,11 +299,23 @@ void liquid_layer::updateRender()
     }
   }
 
+  _need_buffer_update = true;
+}
+
+void liquid_layer::update_buffers()
+{
+  if (!_index_buffer.buffer_generated())
+  {
+    _index_buffer.upload();
+  }
+
   for (int i = 0; i < lod_count; ++i)
   {
     opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_index_buffer[i]);
     gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices_by_lod[i].size() * sizeof (uint16_t), _indices_by_lod[i].data(), GL_STATIC_DRAW);
-  }  
+  }
+
+  _need_buffer_update = false;
 }
 
 void liquid_layer::draw ( liquid_render& render
@@ -268,6 +324,11 @@ void liquid_layer::draw ( liquid_render& render
                         , int animtime
                         )
 {
+  if (_need_buffer_update)
+  {
+    update_buffers();
+  }
+
   int lod_level = get_lod_level(camera);
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(_index_buffer[lod_level]);
 
@@ -277,7 +338,6 @@ void liquid_layer::draw ( liquid_render& render
   water_shader.attrib ("tex_coord", _tex_coords);
   water_shader.attrib ("depth", _depth);
   water_shader.uniform ("tex_repeat", texRepeats);
-
   
   gl.drawElements (GL_QUADS, _indices_by_lod[lod_level].size(), GL_UNSIGNED_SHORT, nullptr);
 }

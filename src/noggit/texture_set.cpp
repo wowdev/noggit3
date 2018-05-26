@@ -25,6 +25,7 @@ void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
     f->read(&texFlags[i], 4);
     f->read(&MCALoffset[i], 4);
     f->read(&effectID[i], 4);
+
     textures.emplace_back (maintile->mTextureFilenames[tex[i]]);
   }
 }
@@ -38,17 +39,17 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
     if (texFlags[layer] & 0x100)
     {
       f->seek(MCALbase + MCALoffset[layer]);
-      alphamaps[layer - 1] = boost::in_place (f, texFlags[layer], mBigAlpha, doNotFixAlpha);
+      alphamaps[layer - 1] = boost::in_place (f, texFlags[layer], mBigAlpha, doNotFixAlpha, false);
     }
   }
 
   // always use big alpha for editing / rendering
   if (!mBigAlpha)
   {
-    convertToBigAlpha();
+    convertToBigAlpha(true);
   }
 
-  generate_alpha_tex();
+  generate_alpha_tex(false);
 }
 
 int TextureSet::addTexture(scoped_blp_texture_reference texture)
@@ -727,7 +728,7 @@ void TextureSet::alphas_to_big_alpha(uint8_t* dest)
   }
 }
 
-void TextureSet::convertToBigAlpha()
+void TextureSet::convertToBigAlpha(bool loading)
 {
   // nothing to do
   if (nTextures < 2)
@@ -744,7 +745,7 @@ void TextureSet::convertToBigAlpha()
     alphamaps[k]->setAlpha(tab + 4096 * k);
   }
 
-  generate_alpha_tex();
+  generate_alpha_tex(!loading);
 }
 
 // dest = tab [4096 * (nTextures - 1)]
@@ -861,7 +862,7 @@ void TextureSet::bind_alpha(std::size_t id)
 }
 
 
-void TextureSet::generate_alpha_tex()
+void TextureSet::generate_alpha_tex(bool update_tex)
 {
   alphamap_tex.resize(4096 * 3);
   memset(alphamap_tex.data(), 0, 4096 * 3);
@@ -881,7 +882,10 @@ void TextureSet::generate_alpha_tex()
     }
   }
 
-  update_alpha_tex();
+  if (update_tex)
+  {
+    update_alpha_tex();
+  }
 }
 
 void TextureSet::update_alpha_tex()
@@ -969,4 +973,20 @@ std::vector<uint8_t> TextureSet::lod_texture_map()
   }
 
   return lod;
+}
+
+void TextureSet::upload()
+{
+  // nothing to do
+  if (!nTextures)
+  {
+    return;
+  }
+
+  update_alpha_tex();
+
+  for (int i = 0; i < nTextures - 1; ++i)
+  {
+    alphamaps[i]->upload();
+  }
 }

@@ -251,7 +251,10 @@ namespace opengl
 
       ~deferred_upload_buffers()
       {
-        gl.deleteBuffers (count, _buffers);
+        if (_buffer_generated)
+        {
+          gl.deleteBuffers (count, _buffers);
+        }        
       }
 
       deferred_upload_buffers (deferred_upload_buffers const&) = delete;
@@ -281,7 +284,10 @@ namespace opengl
 
       ~deferred_upload_vertex_arrays()
       {
-        gl.deleteVertexArray (count, _vertex_arrays);
+        if (_buffer_generated)
+        {
+          gl.deleteVertexArray (count, _vertex_arrays);
+        }        
       }
 
       deferred_upload_vertex_arrays (deferred_upload_vertex_arrays const&) = delete;
