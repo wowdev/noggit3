@@ -9,7 +9,7 @@ namespace opengl
   texture::texture()
     : _id (0)
   {
-    gl.genTextures (1, &_id);
+    
   }
 
   texture::~texture()
@@ -32,8 +32,13 @@ namespace opengl
     return *this;
   }
 
-  void texture::bind() const
+  void texture::bind()
   {
+    if (!_created)
+    {
+      gl.genTextures (1, &_id);
+      _created = true;
+    }
     gl.bindTexture (GL_TEXTURE_2D, _id);
   }
 

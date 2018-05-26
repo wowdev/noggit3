@@ -15,11 +15,13 @@ class sExtendableArray;
 class liquid_layer
 {
 public:
-
+  liquid_layer() = delete;
   liquid_layer(math::vector_3d const& base, float height, int liquid_id);
   liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask);
   liquid_layer(liquid_layer const& other);
+  liquid_layer (liquid_layer&&);
 
+  liquid_layer& operator=(liquid_layer&&);
   liquid_layer& operator=(liquid_layer const& other);
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
@@ -29,7 +31,7 @@ public:
             , math::vector_3d const& camera
             , int animtime
             );
-  void updateRender();
+  void update_indices();
   void changeLiquidID(int id);
 
   void crop(MapChunk* chunk);
@@ -61,6 +63,7 @@ public:
 
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
+  void update_buffers();
 private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
@@ -68,7 +71,7 @@ private:
 
   static int const lod_count = 4;
 
-  opengl::scoped::buffers<lod_count> _index_buffer;
+  opengl::scoped::deferred_upload_buffers<lod_count> _index_buffer;
 
   int _liquid_id;
   int _liquid_vertex_format;
@@ -79,6 +82,8 @@ private:
   std::vector<float> _depth;
   std::vector<math::vector_2d> _tex_coords;
   std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
+
+  bool _need_buffer_update = true;
 
 private:
   math::vector_3d pos;

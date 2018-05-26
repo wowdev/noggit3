@@ -18,7 +18,12 @@ class ChunkWater
 {
 public:
   ChunkWater() = delete;
-  ChunkWater(float x, float z);
+  explicit ChunkWater(float x, float z);
+
+  ChunkWater (ChunkWater const&) = delete;
+  ChunkWater (ChunkWater&&) = delete;
+  ChunkWater& operator= (ChunkWater const&) = delete;
+  ChunkWater& operator= (ChunkWater&&) = delete;
 
   void fromFile(MPQFile &f, size_t basePos);
   void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);

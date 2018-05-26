@@ -10,10 +10,10 @@ class Alphamap
 {
 public:
   Alphamap();
-  Alphamap(MPQFile* f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha);
+  Alphamap(MPQFile* f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha, bool upload_amap = true);
 
   void loadTexture();
-
+  void upload();
   void bind();
 
   void setAlpha(size_t offset, unsigned char value);
@@ -29,10 +29,8 @@ private:
   void readBigAlpha(MPQFile *f);
   void readNotCompressed(MPQFile *f, bool doNotFixAlpha);
 
-  void createNew();
+  void createNew(); 
 
-  void genTexture();
-
-  unsigned char amap[64 * 64];
+  uint8_t amap[64 * 64];
   opengl::texture map;
 };

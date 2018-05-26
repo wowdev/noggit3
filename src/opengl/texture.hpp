@@ -17,7 +17,7 @@ namespace opengl
     texture& operator= (texture const&) = delete;
     texture& operator= (texture&&);
 
-    void bind() const;
+    void bind();
 
     static void enable_texture();
     static void enable_texture (size_t num);
@@ -29,5 +29,6 @@ namespace opengl
     typedef GLuint internal_type;
 
     internal_type _id;
+    bool _created = false;
   };
 }
