@@ -206,9 +206,9 @@ public:
 
   std::string _filename;
   std::vector<WMOGroup> groups;
-  std::vector<WMOMaterial> mat;
+  std::vector<WMOMaterial> materials;
   math::vector_3d extents[2];
-  std::vector<std::string> textures;
+  std::vector<scoped_blp_texture_reference> textures;
   std::vector<std::string> models;
   std::vector<wmo_doodad_instance> modelis;
   std::vector<math::vector_3d> model_nearest_light_vector;

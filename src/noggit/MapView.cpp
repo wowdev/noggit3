@@ -1910,18 +1910,19 @@ void MapView::tick (float dt)
 
   _status_position->setText (status);
 
-  auto lSelection = _world->GetCurrentSelection();
-  if (!lSelection)
+  auto current_selection = _world->GetCurrentSelection();
+
+  if (!current_selection)
   {
     _status_selection->setText ("");
   }
   else
   {
-    switch (lSelection->which())
+    switch (current_selection->which())
     {
     case eEntry_Model:
       {
-        auto instance (boost::get<selected_model_type> (*lSelection));
+        auto instance (boost::get<selected_model_type> (*current_selection));
         _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->uid)
@@ -1931,7 +1932,7 @@ void MapView::tick (float dt)
       }
     case eEntry_WMO:
       {
-        auto instance (boost::get<selected_wmo_type> (*lSelection));
+        auto instance (boost::get<selected_wmo_type> (*current_selection));
         _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->mUniqueID)
@@ -1941,7 +1942,7 @@ void MapView::tick (float dt)
       }
     case eEntry_MapChunk:
       {
-        auto chunk (boost::get<selected_chunk_type> (*lSelection).chunk);
+        auto chunk (boost::get<selected_chunk_type> (*current_selection).chunk);
         _status_selection->setText
           (QString ("%1, %2").arg (chunk->px).arg (chunk->py));
         break;
@@ -1988,108 +1989,105 @@ void MapView::tick (float dt)
 
   guiWater->updatePos (_camera.position);
 
+  std::stringstream detailInfo;
+  if (current_selection)
   {
-    auto lSelection = _world->GetCurrentSelection();
-    std::stringstream detailInfo;
-    if (lSelection)
+    switch (current_selection->which())
     {
-      switch (lSelection->which())
+    case eEntry_Model:
       {
-      case eEntry_Model:
+        auto instance (boost::get<selected_model_type> (*current_selection));
+        detailInfo << "filename: " << instance->model->_filename
+                    << "\nunique ID: " << instance->uid
+                    << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                    << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                    << "\nscale: " << instance->scale
+                    << "\ntextures Used: " << instance->model->header.nTextures
+                    << "\nsize category: " << instance->size_cat;
+
+        for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
         {
-          auto instance (boost::get<selected_model_type> (*lSelection));
-          detailInfo << "filename: " << instance->model->_filename
-                     << "\nunique ID: " << instance->uid
-                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
-                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                     << "\nscale: " << instance->scale
-                     << "\ntextures Used: " << instance->model->header.nTextures
-                     << "\nsize category: " << instance->size_cat;
-
-          for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
-          {
-            detailInfo << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename();
-          }
-          if (instance->model->header.nTextures > 25)
-          {
-            detailInfo << "\n and more.";
-          }
-
-          detailInfo << "\n";
-          break;
+          detailInfo << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename();
         }
-      case eEntry_WMO:
+        if (instance->model->header.nTextures > 25)
         {
-          auto instance (boost::get<selected_wmo_type> (*lSelection));
-          detailInfo << "filename: " << instance->wmo->_filename
-                     << "\nunique ID: " << instance->mUniqueID
-                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
-                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                     << "\ndoodad set: " << instance->doodadset()
-                     << "\ntextures used: " << instance->wmo->textures.size();
-
-
-          const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
-          for (unsigned int j = 0; j < texture_count; j++)
-          {
-            detailInfo << "\n " << (j + 1) << ": " << instance->wmo->textures[j];
-          }
-          if (instance->wmo->textures.size() > 25)
-          {
-            detailInfo << "\n and more.";
-          }
-
-          detailInfo << "\n";
-          break;
+          detailInfo << "\n and more.";
         }
-      case eEntry_MapChunk:
+
+        detailInfo << "\n";
+        break;
+      }
+    case eEntry_WMO:
+      {
+        auto instance (boost::get<selected_wmo_type> (*current_selection));
+        detailInfo << "filename: " << instance->wmo->_filename
+                    << "\nunique ID: " << instance->mUniqueID
+                    << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                    << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                    << "\ndoodad set: " << instance->doodadset()
+                    << "\ntextures used: " << instance->wmo->textures.size();
+
+
+        const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
+        for (unsigned int j = 0; j < texture_count; j++)
         {
-          auto chunk (boost::get<selected_chunk_type> (*lSelection).chunk);
-          mcnk_flags const& flags = chunk->header_flags;
-
-          detailInfo << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
-                     << ") of tile (" << chunk->mt->index.x << " " << chunk->mt->index.z << ")"
-                     << "\narea ID: " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
-                     << "\nflags: "
-                     << (flags.flags.has_mcsh ? "shadows " : "")
-                     << (flags.flags.impass   ? "impassable " : "")
-                     << (flags.flags.lq_river ? "river " : "")
-                     << (flags.flags.lq_ocean ? "ocean " : "")
-                     << (flags.flags.lq_magma ? "lava" : "")
-                     << (flags.flags.lq_slime ? "slime" : "")
-                     << "\ntextures used: " << chunk->_texture_set.num();
-
-          //! \todo get a list of textures and their flags as well as detail doodads.
-          /*
-            for( int q = 0; q < chunk->nTextures; q++ )
-            {
-            //s << " ";
-            //s "  Flags - " << chunk->texFlags[q] << " Effect ID - " << chunk->effectID[q] << std::endl;
-
-            if( chunk->effectID[q] != 0 )
-            for( int r = 0; r < 4; r++ )
-            {
-            const char *EffectModel = getGroundEffectDoodad( chunk->effectID[q], r );
-            if( EffectModel )
-            {
-            s << r << " - World\\NoDXT\\" << EffectModel << endl;
-            //freetype::shprint( app.getArial16(), 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
-            TextOffset += 20;
-            }
-            }
-
-            }
-          */
-
-          detailInfo << "\n";
-
-          break;
+          detailInfo << "\n " << (j + 1) << ": " << instance->wmo->textures[j]->filename();
         }
+        if (instance->wmo->textures.size() > 25)
+        {
+          detailInfo << "\n and more.";
+        }
+
+        detailInfo << "\n";
+        break;
+      }
+    case eEntry_MapChunk:
+      {
+        auto chunk (boost::get<selected_chunk_type> (*current_selection).chunk);
+        mcnk_flags const& flags = chunk->header_flags;
+
+        detailInfo << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
+                    << ") of tile (" << chunk->mt->index.x << " " << chunk->mt->index.z << ")"
+                    << "\narea ID: " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
+                    << "\nflags: "
+                    << (flags.flags.has_mcsh ? "shadows " : "")
+                    << (flags.flags.impass   ? "impassable " : "")
+                    << (flags.flags.lq_river ? "river " : "")
+                    << (flags.flags.lq_ocean ? "ocean " : "")
+                    << (flags.flags.lq_magma ? "lava" : "")
+                    << (flags.flags.lq_slime ? "slime" : "")
+                    << "\ntextures used: " << chunk->_texture_set.num();
+
+        //! \todo get a list of textures and their flags as well as detail doodads.
+        /*
+          for( int q = 0; q < chunk->nTextures; q++ )
+          {
+          //s << " ";
+          //s "  Flags - " << chunk->texFlags[q] << " Effect ID - " << chunk->effectID[q] << std::endl;
+
+          if( chunk->effectID[q] != 0 )
+          for( int r = 0; r < 4; r++ )
+          {
+          const char *EffectModel = getGroundEffectDoodad( chunk->effectID[q], r );
+          if( EffectModel )
+          {
+          s << r << " - World\\NoDXT\\" << EffectModel << endl;
+          //freetype::shprint( app.getArial16(), 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
+          TextOffset += 20;
+          }
+          }
+
+          }
+        */
+
+        detailInfo << "\n";
+
+        break;
       }
     }
-
-    guidetailInfos->setText(detailInfo.str());
   }
+
+  guidetailInfos->setText(detailInfo.str());
 }
 
 math::vector_4d MapView::normalized_device_coords (int x, int y) const

@@ -38,8 +38,6 @@ void WMO::finishLoading ()
     return;
   }
 
-  LogDebug << "Loading WMO \"" << _filename << "\"." << std::endl;
-
   uint32_t fourcc;
   uint32_t size;
 
@@ -100,14 +98,30 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOMT');
 
   std::size_t const num_materials (size / 0x40);
-  mat.resize (num_materials);
+  materials.resize (num_materials);
+
+  std::vector<int> texture_ofs;
 
   for (size_t i (0); i < num_materials; ++i)
   {
-    f.read (&mat[i], 0x40);
+    f.read (&materials[i], sizeof(WMOMaterial));
 
-    std::string const texpath (texbuf.data() + mat[i].nameStart);
-    textures.push_back (texpath);
+    auto& it = std::find(texture_ofs.begin(), texture_ofs.end(), materials[i].texture_offset_1);
+
+    // texture not loaded
+    if (it == texture_ofs.end())
+    {
+      materials[i].texture1 = textures.size();
+      texture_ofs.emplace_back(materials[i].texture_offset_1);
+      std::string const texpath (texbuf.data() + materials[i].texture_offset_1);
+      textures.emplace_back(texpath);
+    }
+    else
+    {
+      materials[i].texture1 = std::distance(texture_ofs.begin(), it);
+    }
+
+    // todo: load and use the 2nd texture if there's one
   }
 
   // - MOGN ----------------------------------------------
@@ -142,10 +156,8 @@ void WMO::finishLoading ()
   if (size > 4)
   {
     std::string path = std::string (reinterpret_cast<char const*>(f.getPointer ()));
-    if (path.length ())
+    if (path.length())
     {
-      LogDebug << "SKYBOX:" << std::endl;
-
       if (MPQFile::exists(path))
       {
         skybox = scoped_model_reference (path);
@@ -293,9 +305,6 @@ void WMO::finishLoading ()
 
 void WMO::upload()
 {
-  for (unsigned int i = 0; i < mat.size(); ++i)
-    mat[i]._texture = textures[i];
-
   for (auto& group : groups)
     group.upload();
 
@@ -936,7 +945,7 @@ void WMOGroup::load()
     WMOLiquidHeader hlq;
     f.read(&hlq, 0x1E);
 
-    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->materials[hlq.type], (flags & 0x2000) != 0);
   }
   if (header.flags & 0x20000)
   {
@@ -1079,10 +1088,10 @@ void WMOGroup::draw( const math::vector_3d& ofs
 
   for (wmo_batch& batch : _batches)
   {
-    WMOMaterial* mat (&wmo->mat.at (batch.texture));
+    WMOMaterial* mat (&wmo->materials.at (batch.texture));
     scoped_material_setter const material_setter (mat, _vertex_colors.size ());
 
-    mat->_texture.get()->bind();
+    wmo->textures[mat->texture1]->bind();
 
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
