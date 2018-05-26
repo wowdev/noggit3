@@ -3,7 +3,6 @@
 #include <noggit/ui/texture_swapper.hpp>
 
 #include <math/vector_3d.hpp>
-#include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
 #include <util/qt/overload.hpp>
@@ -29,15 +28,13 @@ namespace noggit
 
       auto layout (new QFormLayout (this));
 
-      auto texture_display (new noggit::ui::current_texture);
-      texture_display->set_texture("tileset\\generic\\black.blp");
-      
+      _texture_to_swap_display = new current_texture;
 
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
 
       layout->addRow(new QLabel("Texture to swap"));
-      layout->addRow(texture_display);
+      layout->addRow(_texture_to_swap_display);
       layout->addRow(select);
       layout->addRow(swap_adt);
 
@@ -61,12 +58,11 @@ namespace noggit
       _radius_slider->setSliderPosition (_radius);
       brush_layout->addRow (_radius_slider);      
       
-
-      connect(select, &QPushButton::clicked, [this, texture_display]() {
+      connect(select, &QPushButton::clicked, [&]() {
         _texture_to_swap = selected_texture::get();
         if (_texture_to_swap)
         {
-          texture_display->set_texture(_texture_to_swap.get()->filename());
+          _texture_to_swap_display->set_texture(_texture_to_swap.get()->filename());
         }
       });
 
