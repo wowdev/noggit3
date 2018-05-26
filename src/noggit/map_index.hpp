@@ -207,9 +207,6 @@ private:
 
   bool autoheight;
 
-  int cx;
-  int cz;
-
   uint32_t highestGUID;
 
   ENTRY_MODF wmoEntry;

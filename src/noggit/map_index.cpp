@@ -27,8 +27,6 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   , noadt(false)
   , changed(false)
   , _sort_models_by_size_class(false)
-  , cx(-1)
-  , cz(-1)
   , highestGUID(0)
   , _world (world)
 {
@@ -88,11 +86,11 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
       theFile.read(&mTiles[j][i].flags, 4);
       theFile.seekRelative(4);
 
-      std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
+      std::stringstream adt_filename;
+      adt_filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
       mTiles[j][i].tile = nullptr;
-      mTiles[j][i].onDisc = MPQFile::existsOnDisk(filename.str());
+      mTiles[j][i].onDisc = MPQFile::existsOnDisk(adt_filename.str());
 
 			if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
 			{
@@ -232,8 +230,8 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 
   noadt = false;
-  cx = tile.x;
-  cz = tile.z;
+  int cx = tile.x;
+  int cz = tile.z;
 
   for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
   {
@@ -796,7 +794,7 @@ void MapIndex::fixUIDs (World* world)
   }
 
   // save the current highest guid
-  highestGUID = uid - 1;
+  highestGUID = uid ? uid - 1 : 0;
 
   // load each tile without the models and
   // save them with the models from modelPerTile / wmoPerTile
@@ -841,6 +839,7 @@ void MapIndex::fixUIDs (World* world)
       // restore the original map in World
       std::swap(world->mModelInstances, modelInst);
       std::swap(world->mWMOInstances, wmoInst);
+      
     }
   }
 
