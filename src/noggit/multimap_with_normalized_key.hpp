@@ -56,6 +56,8 @@ namespace noggit
       std::string const normalized (_normalize (filename));
       if (--_counts.at (normalized) == 0)
       {
+        // always make sure an async object can be deleted before deleting it
+        AsyncLoader::instance().ensure_deletable(static_cast<AsyncObject*>(&_elements.at(normalized)));
         _elements.erase (normalized);
         _counts.erase (normalized);
       }
