@@ -898,12 +898,9 @@ void main()
                  , culldistance
                  , camera_pos
                  , show_unpaintable_chunks
-                 , draw_contour
                  , draw_paintability_overlay
                  , draw_chunk_flag_overlay
                  , draw_areaid_overlay
-                 , draw_wireframe
-                 , cursor_type
                  , area_id_colors
                  , mCurrentSelection
                  , animtime
