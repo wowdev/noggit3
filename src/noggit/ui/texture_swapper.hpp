@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
+#include <noggit/ui/CurrentTexture.h>
 #include <noggit/TextureManager.h>
 
 #include <QtWidgets/QDoubleSpinBox>
@@ -53,6 +54,8 @@ namespace noggit
       float _radius;
 
     private:
+      current_texture* _texture_to_swap_display;
+
       QGroupBox* _brush_mode_group;
       QSlider* _radius_slider;
       QDoubleSpinBox* _radius_spin;

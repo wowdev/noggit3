@@ -17,6 +17,7 @@ namespace noggit
     {
     private:
       std::string _filename;
+      bool _need_update;
 
       virtual void resizeEvent (QResizeEvent*) override
       {
