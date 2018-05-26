@@ -1325,10 +1325,7 @@ MapView::MapView( math::degrees camera_yaw0
     makeCurrent();
     opengl::context::scoped_setter const _ (::gl, context());
 
-    if (!_world->mapIndex.tileLoaded (pos))
-    {
-      _world->mapIndex.loadTile (pos);
-    }
+    AsyncLoader::instance().ensure_deletable(_world->mapIndex.loadTile(pos));
 
     _camera.position = pos;
     _camera.position.y = 0.0f;
