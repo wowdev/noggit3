@@ -19,19 +19,17 @@ struct WMOMaterial {
   int32_t flags;
   int32_t specular;
   int32_t transparent; // Blending: 0 for opaque, 1 for transparent
-  int32_t nameStart; // Start position for the first texture filename in the MOTX data block
+  int32_t texture_offset_1; // Start position for the first texture filename in the MOTX data block
   uint32_t col1; // color
   int32_t d3; // flag
-  int32_t nameEnd; // Start position for the second texture filename in the MOTX data block
+  int32_t texture_offset_2; // Start position for the second texture filename in the MOTX data block
   uint32_t col2; // color
   int32_t d4; // flag
   uint32_t col3;
   float f2;
   float diffColor[3];
-  uint32_t texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
+  uint32_t texture1; // this is the first texture object. of course only in RAM.
   uint32_t texture2; // this is the second texture object.
-  // read up to here -_-
-  boost::optional<scoped_blp_texture_reference> _texture;
 };
 
 struct WMOLiquidHeader {
