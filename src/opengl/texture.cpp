@@ -2,6 +2,7 @@
 
 #include <opengl/context.hpp>
 #include <opengl/texture.hpp>
+
 #include <utility>
 
 namespace opengl
@@ -14,7 +15,7 @@ namespace opengl
 
   texture::~texture()
   {
-    if (_id != -1)
+    if (_id > 0 && _id != -1)
     {
       gl.deleteTextures (1, &_id);
     }
@@ -34,10 +35,9 @@ namespace opengl
 
   void texture::bind()
   {
-    if (!_created)
+    if (_id == 0)
     {
       gl.genTextures (1, &_id);
-      _created = true;
     }
     gl.bindTexture (GL_TEXTURE_2D, _id);
   }

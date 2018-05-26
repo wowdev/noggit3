@@ -47,12 +47,67 @@ struct BLPHeader
 #include <boost/thread.hpp>
 #include <noggit/MPQ.h>
 
+void blp_texture::bind()
+{
+  opengl::texture::bind();
+
+  if (!finished)
+  {
+    return;
+  }
+
+  if (!_uploaded)
+  {
+    upload();
+  }
+}
+
+void blp_texture::upload()
+{
+  int width = _width, height = _height;
+
+  if (!_compression_format)
+  {
+    for (int i = 0; i < _data.size(); ++i)
+    {
+      width = std::max(1, width);
+      height = std::max(1, height);
+
+      gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
+
+      width >>= 1;
+      height >>= 1;
+    }
+
+    _data.clear();
+  }
+  else
+  {
+    for (int i = 0; i < _compressed_data.size(); ++i)
+    {
+      width = std::max(1, width);
+      height = std::max(1, height);
+
+      gl.compressedTexImage2D(GL_TEXTURE_2D, i, _compression_format.get(), width, height, 0, _compressed_data[i].size(), _compressed_data[i].data());
+
+      width >>= 1;
+      height >>= 1;
+    }
+
+    _compressed_data.clear();
+  }
+
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  _uploaded = true;
+}
+
 void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const* lData)
 {
   unsigned int const* pal = reinterpret_cast<unsigned int const*>(lData + sizeof(BLPHeader));
 
   unsigned char const* buf;
-  unsigned int *buf2 = new unsigned int[_width*_height];
   unsigned int *p;
   unsigned char const* c;
   unsigned char const* a;
@@ -60,22 +115,26 @@ void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const*
   int alphabits = lHeader->attr_1_alphadepth;
   bool hasalpha = alphabits != 0;
 
+  int width = _width, height = _height;
+
   for (int i = 0; i<16; ++i)
   {
-    _width = std::max(1, _width);
-    _height = std::max(1, _height);
+    width = std::max(1, width);
+    height = std::max(1, height);
 
     if (lHeader->offsets[i] && lHeader->sizes[i])
     {
       buf = reinterpret_cast<unsigned char const*>(&lData[lHeader->offsets[i]]);
 
+      std::vector<uint32_t> data(lHeader->sizes[i]);
+
       int cnt = 0;
-      p = buf2;
+      p = data.data();
       c = buf;
-      a = buf + _width*_height;
-      for (int y = 0; y<_height; y++)
+      a = buf + width*height;
+      for (int y = 0; y<height; y++)
       {
-        for (int x = 0; x<_width; x++)
+        for (int x = 0; x<width; x++)
         {
           unsigned int k = pal[*c++];
           k = ((k & 0x00FF0000) >> 16) | ((k & 0x0000FF00)) | ((k & 0x000000FF) << 16);
@@ -102,19 +161,16 @@ void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const*
         }
       }
 
-      gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
-
+      _data[i] = data;
     }
     else
     {
       return;
     }
 
-    _width >>= 1;
-    _height >>= 1;
+    width >>= 1;
+    height >>= 1;
   }
-
-  delete[] buf2;
 }
 
 void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* lData)
@@ -123,28 +179,30 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   const int alphatypes[] = { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT };
   const int blocksizes[] = { 8, 16, 0, 16 };
 
-  int lTempAlphatype = lHeader->attr_2_alphatype & 3;
-  GLint format = alphatypes[lTempAlphatype];
-  int blocksize = blocksizes[lTempAlphatype];
-  format = format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT ? (lHeader->attr_1_alphadepth == 1 ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT) : format;
+  int alpha_type = lHeader->attr_2_alphatype & 3;
+  GLint format = alphatypes[alpha_type];
+  _compression_format = format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT ? (lHeader->attr_1_alphadepth == 1 ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT) : format;
+
+  int width = _width, height = _height;
 
   // do every mipmap level
   for (int i = 0; i < 16; ++i)
   {
-    _width = std::max(1, _width);
-    _height = std::max(1, _height);
+    width = std::max(1, width);
+    height = std::max(1, height);
 
     if (lHeader->offsets[i] && lHeader->sizes[i])
     {
-      gl.compressedTexImage2D(GL_TEXTURE_2D, i, format, _width, _height, 0, ((_width + 3) / 4) * ((_height + 3) / 4) * blocksize, reinterpret_cast<char const*>(lData + lHeader->offsets[i]));
+      char const* start = lData + lHeader->offsets[i];
+      _compressed_data[i] = std::vector<uint8_t>(start, start + lHeader->sizes[i]);
     }
     else
     {
       return;
     }
 
-    _width >>= 1;
-    _height >>= 1;
+    width >>= 1;
+    height >>= 1;
   }
 }
 
@@ -154,28 +212,30 @@ const std::string& blp_texture::filename()
 }
 
 blp_texture::blp_texture(const std::string& filenameArg)
+  : _filename(filenameArg)
 {
-  //! \todo Unload if there already is a model loaded?
-  _filename = filenameArg;
+  finished = false;
+}
 
-  bind();
-
+void blp_texture::finishLoading()
+{
   bool exists = MPQFile::exists(_filename);
   if (!exists)
   {
     LogError << "file not found: '" << _filename << "'" << std::endl;
   }
-  
+
   MPQFile f(exists ? _filename : "textures/shanecube.blp");
   if (f.isEof())
   {
-    throw std::runtime_error ("File " + filenameArg + " does not exists");
+    finished = true;
+    throw std::runtime_error ("File " + _filename + " does not exists");
   }
 
   char const* lData = f.getPointer();
   BLPHeader const* lHeader = reinterpret_cast<BLPHeader const*>(lData);
-  _width = original_width = lHeader->resx;
-  _height = original_height = lHeader->resy;
+  _width = lHeader->resx;
+  _height = lHeader->resy;
 
   if (lHeader->attr_0_compression == 1)
   {
@@ -187,14 +247,12 @@ blp_texture::blp_texture(const std::string& filenameArg)
   }
   else
   {
+    finished = true;
     throw std::logic_error ("unimplemented BLP colorEncoding");
   }
 
-
   f.close();
-
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  finished = true;
 }
 
 namespace noggit
@@ -221,7 +279,8 @@ namespace noggit
     opengl::context::scoped_setter const context_set (::gl, &context);
 
     opengl::scoped::texture_setter<0, GL_TRUE> const texture0;
-    blp_texture const texture (blp_filename);
+    blp_texture texture (blp_filename);
+    texture.finishLoading();
 
     width = width == -1 ? texture.width() : width;
     height = height == -1 ? texture.height() : height;
