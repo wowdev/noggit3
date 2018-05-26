@@ -1459,7 +1459,10 @@ void main()
   opengl::texture::disable_texture(1);
   opengl::texture::enable_texture(0);
 
-  static liquid_render liquid_renderer;
+  if (!_liquid_render)
+  {
+    _liquid_render.emplace();
+  }
 
   // todo: find the correct alpha values
   math::vector_4d ocean_color_light(skies->colorSet[OCEAN_COLOR_LIGHT], 0.7f);
@@ -1490,7 +1493,7 @@ void main()
                         , ocean_color_dark
                         , river_color_light
                         , river_color_dark
-                        , liquid_renderer
+                        , _liquid_render.get()
                         , mCurrentSelection
                         , animtime
                         , [this] (bool on) { return outdoorLights (on); }
@@ -1517,7 +1520,7 @@ void main()
     opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
     opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
 
-    opengl::scoped::use_program water_shader{ liquid_renderer.shader_program() };
+    opengl::scoped::use_program water_shader{ _liquid_render->shader_program() };
 
     water_shader.uniform ("model_view", opengl::matrix::model_view());
     water_shader.uniform ("projection", opengl::matrix::projection());
@@ -1538,7 +1541,7 @@ void main()
       tile->drawWater ( frustum
                       , culldistance
                       , camera_pos
-                      , liquid_renderer
+                      , _liquid_render.get()
                       , water_shader
                       , animtime
                       , water_layer

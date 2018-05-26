@@ -300,4 +300,6 @@ private:
   std::unique_ptr<opengl::program> _mfbo_program;
   std::unique_ptr<opengl::program> _m2_program;
   std::unique_ptr<opengl::program> _m2_box_program;
+
+  boost::optional<liquid_render> _liquid_render = boost::none;
 };
