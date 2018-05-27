@@ -35,31 +35,53 @@ namespace noggit
     template<typename... Args>
       T* emplace (std::string const& filename, Args&&... args)
     {
-      boost::mutex::scoped_lock lock(_mutex);
       std::string const normalized (_normalize (filename));
-      if (_counts[normalized]++ == 0)
+      std::size_t count;
+
       {
-        T* obj = &_elements.emplace ( std::piecewise_construct
-                                  , std::forward_as_tuple (normalized)
-                                  , std::forward_as_tuple (normalized, args...)
-                                  ).first->second;
+        boost::mutex::scoped_lock lock(_mutex);
+        count = _counts[normalized]++;
+      }
+
+      if (count == 0)
+      {
+        T* obj;
+
+        {
+          boost::mutex::scoped_lock lock(_mutex);
+          obj = &_elements.emplace ( std::piecewise_construct
+                                   , std::forward_as_tuple (normalized)
+                                   , std::forward_as_tuple (normalized, args...)
+                                   ).first->second;
+        }        
 
         AsyncLoader::instance().queue_for_load(static_cast<AsyncObject*>(obj));
 
         return obj;
       }
+
       return &_elements.at (normalized);
     }
     void erase (std::string const& filename)
     {
-      boost::mutex::scoped_lock lock(_mutex);
+      std::size_t count;      
       std::string const normalized (_normalize (filename));
-      if (--_counts.at (normalized) == 0)
+
+      {
+        boost::mutex::scoped_lock lock(_mutex);
+        count = --_counts.at (normalized);
+      }
+
+      if (count == 0)
       {
         // always make sure an async object can be deleted before deleting it
         AsyncLoader::instance().ensure_deletable(static_cast<AsyncObject*>(&_elements.at(normalized)));
-        _elements.erase (normalized);
-        _counts.erase (normalized);
+
+        {
+          boost::mutex::scoped_lock lock(_mutex);
+          _elements.erase (normalized);
+          _counts.erase (normalized);
+        }
       }
     }
     void apply (std::function<void (std::string const&, T&)> fun)
