@@ -523,8 +523,11 @@ void MapChunk::clearHeight()
 
   update_intersect_points();
 
-  gl.bufferData<GL_ARRAY_BUFFER>
-    (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  if (_uploaded)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER>
+      (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  }  
 
 }
 
@@ -659,7 +662,10 @@ void MapChunk::updateVerticesData()
 
   update_intersect_points();
 
-  gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  if (_uploaded)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  }
 }
 
 void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)> height)
@@ -700,7 +706,6 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
     //! \todo: find out why recalculating normals without changing the terrain result in slightly different normals
     mNormals[i] = {-Norm.z, Norm.y, -Norm.x};
   }
-  gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
@@ -710,8 +715,12 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
 
     mFakeShadows[j].w = ShadowAmount;
   }
-
-  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  
+  if (_uploaded)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  }
 }
 
 bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
@@ -820,7 +829,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
       changed = true;
     }
   }
-  if (changed)
+  if (changed && _uploaded)
   {
     gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
   }
