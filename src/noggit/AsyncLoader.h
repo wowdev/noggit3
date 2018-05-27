@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include <noggit/AsyncObject.h>
+
 #include <atomic>
 #include <condition_variable>
 #include <list>
+#include <map>
 #include <memory>
 #include <thread>
-
-class AsyncObject;
 
 class AsyncLoader
 {
@@ -34,7 +35,7 @@ private:
   std::mutex _guard;
   std::condition_variable _state_changed;
   std::atomic<bool> _stop;
-  std::list<AsyncObject*> _to_load;
+  std::map<async_priority, std::list<AsyncObject*>> _to_load;
   std::list<AsyncObject*> _currently_loading;
   std::list<std::thread> _threads;
 };

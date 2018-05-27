@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/AsyncLoader.h>
-#include <noggit/AsyncObject.h>
 #include <noggit/errorHandling.h>
 
 #include <list>
@@ -18,9 +17,17 @@ void AsyncLoader::process()
 
       _state_changed.wait 
       ( lock
-       , [&]
+      , [&]
       {
-        return !_to_load.empty() || _stop;
+        for (auto const& to_load : _to_load)
+        {
+          if (!to_load.second.empty())
+          {
+            return true;
+          }
+        }
+        
+        return !!_stop;
       }
       );
 
@@ -29,9 +36,19 @@ void AsyncLoader::process()
         return;
       }
 
-      object = _to_load.front();
-      _currently_loading.emplace_back (object);
-      _to_load.pop_front();
+      for (auto& to_load : _to_load)
+      {
+        if (to_load.second.empty())
+        {
+          continue;
+        }
+
+        object = to_load.second.front();
+        _currently_loading.emplace_back (object);
+        to_load.second.pop_front();
+
+        break;
+      }
     }
 
     try
@@ -54,7 +71,7 @@ void AsyncLoader::process()
 void AsyncLoader::queue_for_load (AsyncObject* object)
 {
   std::lock_guard<std::mutex> const lock (_guard);
-  _to_load.push_back (object);
+  _to_load[object->loading_priority()].push_back (object);
   _state_changed.notify_one();
 }
 void AsyncLoader::ensure_deletable (AsyncObject* object)
@@ -64,7 +81,8 @@ void AsyncLoader::ensure_deletable (AsyncObject* object)
   ( lock
    , [&]
   {
-    return std::find (_to_load.begin(), _to_load.end(), object) == _to_load.end()
+    auto const& to_load = _to_load[object->loading_priority()];
+    return std::find (to_load.begin(), to_load.end(), object) == to_load.end()
       && std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end()
       ;
   }
@@ -74,6 +92,12 @@ void AsyncLoader::ensure_deletable (AsyncObject* object)
 AsyncLoader::AsyncLoader(int numThreads)
   : _stop (false)
 {
+  // to create the lists in the right order
+  for (auto priority : { async_priority::high, async_priority::medium, async_priority::low })
+  {
+    _to_load[priority].clear();
+  }
+
   for (int i = 0; i < numThreads; ++i)
   {
     _threads.emplace_back (&AsyncLoader::process, this);

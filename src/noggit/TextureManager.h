@@ -29,6 +29,11 @@ struct blp_texture : public opengl::texture, AsyncObject
   void bind();
   void upload();
 
+  virtual async_priority loading_priority() const
+  {
+    return async_priority::low;
+  }
+
 private:
   bool _uploaded = false;
 

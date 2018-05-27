@@ -96,6 +96,11 @@ public:
 
   bool isTile(int pX, int pZ);
 
+  virtual async_priority loading_priority() const
+  {
+    return async_priority::high;
+  }
+
   TileWater Water;
 private:
 
