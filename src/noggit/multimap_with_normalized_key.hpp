@@ -66,16 +66,25 @@ namespace noggit
     {
       std::size_t count;      
       std::string const normalized (_normalize (filename));
+      AsyncObject* obj = nullptr;
 
       {
         boost::mutex::scoped_lock lock(_mutex);
         count = --_counts.at (normalized);
+
+        if (count == 0)
+        {
+          obj = static_cast<AsyncObject*>(&_elements.at(normalized));
+        }
       }
 
-      if (count == 0)
+      if (obj)
       {
         // always make sure an async object can be deleted before deleting it
-        AsyncLoader::instance().ensure_deletable(static_cast<AsyncObject*>(&_elements.at(normalized)));
+        if (!obj->finishedLoading())
+        {
+          AsyncLoader::instance().ensure_deletable(obj);
+        }
 
         {
           boost::mutex::scoped_lock lock(_mutex);
