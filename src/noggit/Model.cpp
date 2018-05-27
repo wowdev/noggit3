@@ -41,23 +41,12 @@ void Model::finishLoading()
   // blend mode override
   if (header.Flags & 8)
   {
-    uint32_t ofs_blend_override, n_blend_override;
-    uint16_t blend;
+    // go to the end of the header (where the blend override data is)    
+    uint32_t const* blend_override_info = reinterpret_cast<uint32_t const*>(f.getBuffer() + sizeof(ModelHeader));
+    uint32_t n_blend_override = *blend_override_info++;
+    uint32_t ofs_blend_override = *blend_override_info;
 
-    f.seek(sizeof(ModelHeader));
-    
-    f.read(&n_blend_override, 4);
-    f.read(&ofs_blend_override, 4);
-
-    f.seek(ofs_blend_override);    
-
-    for (int i = 0; i < n_blend_override; ++i)
-    {
-      f.read(&blend, 2);
-      blend_override.push_back(blend);
-    }
-
-    f.seek(0);
+    blend_override = M2Array<uint16_t>(f, ofs_blend_override, n_blend_override);
   }
 
 
@@ -74,8 +63,7 @@ void Model::finishLoading()
 
   if (header.nGlobalSequences)
   {
-    _global_sequences.resize (header.nGlobalSequences);
-    memcpy(_global_sequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
+    _global_sequences = M2Array<int>(f, header.ofsGlobalSequences, header.nGlobalSequences);
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
