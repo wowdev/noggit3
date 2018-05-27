@@ -78,7 +78,7 @@ void blp_texture::upload()
       width = std::max(1, width);
       height = std::max(1, height);
 
-      gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
+      gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());   
 
       width >>= 1;
       height >>= 1;
@@ -90,14 +90,13 @@ void blp_texture::upload()
   {
     for (int i = 0; i < _compressed_data.size(); ++i)
     {
-      width = std::max(1, width);
-      height = std::max(1, height);
-
       gl.compressedTexImage2D(GL_TEXTURE_2D, i, _compression_format.get(), width, height, 0, _compressed_data[i].size(), _compressed_data[i].data());
 
       width >>= 1;
-      height >>= 1;
+      height >>= 1;      
     }
+
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _compressed_data.size() - 1);
 
     _compressed_data.clear();
   }
@@ -198,6 +197,11 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
 
     if (lHeader->offsets[i] && lHeader->sizes[i])
     {
+      if (i < 15 && lHeader->sizes[i] == lHeader->sizes[i + 1])
+      {
+        return;
+      }
+
       char const* start = lData + lHeader->offsets[i];
       _compressed_data[i] = std::vector<uint8_t>(start, start + lHeader->sizes[i]);
     }
