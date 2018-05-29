@@ -530,23 +530,11 @@ void liquid_layer::update_vertex_opacity(int x, int z, MapChunk* chunk, float fa
 
 int liquid_layer::get_lod_level(math::vector_3d const& camera_pos) const
 {
-  //            center vertex       - camera_pos
-  float dist = (_vertices[5 * 9 + 4] - camera_pos).length();
+  auto const& center_vertex (_vertices[5 * 9 + 4]);
+  auto const dist ((center_vertex - camera_pos).length());
 
-  if (dist < 1000.f)
-  {
-    return 0;
-  }
-  else if (dist < 2000.f)
-  {
-    return 1;
-  }
-  else if (dist < 4000.f)
-  {
-    return 2;
-  }
-  else
-  {
-    return 3;
-  }
+  return dist < 1000.f ? 0
+       : dist < 2000.f ? 1
+       : dist < 4000.f ? 2
+       : 3;
 }
