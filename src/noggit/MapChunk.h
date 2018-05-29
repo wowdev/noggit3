@@ -61,8 +61,7 @@ private:
 
   void update_intersect_points();
 
-  // -1 = no lod
-  int get_lod_level(math::vector_3d const& camera_pos) const;
+  boost::optional<int> get_lod_level(math::vector_3d const& camera_pos) const;
 
   bool _uploaded = false;
   bool _need_indice_buffer_update = true;
