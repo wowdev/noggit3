@@ -133,7 +133,7 @@ if (USE_SQL)
         )
     source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
   else()
-     message (SEND_ERROR "MySQL lib or connector not found")
+     message (FATAL_ERROR "MySQL lib or connector not found")
   endif()
 endif()
 
