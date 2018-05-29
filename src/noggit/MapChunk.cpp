@@ -377,13 +377,13 @@ void MapChunk::update_indices_buffer()
   _need_indice_buffer_update = false;
 }
 
-int MapChunk::get_lod_level(math::vector_3d const& camera_pos) const
+boost::optional<int> MapChunk::get_lod_level(math::vector_3d const& camera_pos) const
 {
   float dist = (camera_pos - vcenter).length();
 
   if (dist < 500.f)
   {
-    return -1;
+    return boost::none;
   }
   else if (dist < 1000.f)
   {
@@ -574,9 +574,9 @@ void MapChunk::draw ( math::frustum const& frustum
                  && show_unpaintable_chunks
                  && draw_paintability_overlay;
   
-  int lod_level = get_lod_level(camera);
+  boost::optional<int> lod_level = get_lod_level(camera);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(lod_level == -1 ? _indices_buffer : lod_indices[lod_level]);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(!lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
 
   if (_texture_set.num())
   {
@@ -613,7 +613,7 @@ void MapChunk::draw ( math::frustum const& frustum
   mcnk_shader.attrib("normal", mNormals);
   mcnk_shader.attrib("mccv", mccv);
 
-  auto& strip = lod_level == -1 ? strip_with_holes : strip_lods[lod_level];
+  auto& strip = !lod_level ? strip_with_holes : strip_lods[lod_level.get()];
 
   gl.drawElements(GL_TRIANGLES, strip.size(), GL_UNSIGNED_SHORT, nullptr);
 
