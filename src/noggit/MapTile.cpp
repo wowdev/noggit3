@@ -220,11 +220,10 @@ void MapTile::finishLoading()
       {
         int pos = x + y * 3;
         // fix bug with old noggit version inverting values
-        float min = static_cast<float> (std::min(mMinimum[pos], mMaximum[pos]));
-        float max = static_cast<float> (std::max(mMinimum[pos], mMaximum[pos]));
+        auto&& z{ std::minmax (mMinimum[pos], mMaximum[pos]) };
 
-        mMinimumValues[pos] = { xPositions[x], min, yPositions[y] };
-        mMaximumValues[pos] = { xPositions[x], max, yPositions[y] };
+        mMinimumValues[pos] = { xPositions[x], static_cast<float>(z.first), yPositions[y] };
+        mMaximumValues[pos] = { xPositions[x], static_cast<float>(z.second), yPositions[y] };
       }
     }
   }

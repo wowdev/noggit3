@@ -133,7 +133,7 @@ enum class ModelPixelShader : uint16_t
 
 enum class texture_unit_lookup : int
 {
-  environment = 0,
+  environment,
   t1,
   t2,
   none
