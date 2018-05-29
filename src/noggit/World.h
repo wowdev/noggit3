@@ -295,6 +295,7 @@ private:
 
   QSettings* _settings;
 
+  float _view_distance;
 
   std::unique_ptr<opengl::program> _mcnk_program;
   std::unique_ptr<opengl::program> _mfbo_program;

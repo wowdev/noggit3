@@ -270,6 +270,7 @@ World::World(const std::string& name, int map_id)
   , skies(nullptr)
   , outdoorLightStats(OutdoorLightStats())
   , _settings (new QSettings())
+  , _view_distance(_settings->value ("view_distance", 1000.f).toFloat())
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
@@ -403,8 +404,8 @@ void World::outdoorLights(bool on)
 
 void World::setupFog (bool draw_fog)
 {
-  if (draw_fog) {
-
+  if (draw_fog) 
+  {
     //float fogdist = 357.0f; // minimum draw distance in wow
     //float fogdist = 777.0f; // maximum draw distance in wow
 
@@ -422,11 +423,10 @@ void World::setupFog (bool draw_fog)
 
     gl.enable(GL_FOG);
   }
-  else {
+  else 
+  {
     gl.disable(GL_FOG);
-    //! \todo: store that value somewhere and update it when there's a setting change
-    static float cull_dist = _settings->value ("view_distance", 1000.f).toFloat();
-    culldistance = cull_dist;
+    culldistance = _view_distance;
   }
 }
 
