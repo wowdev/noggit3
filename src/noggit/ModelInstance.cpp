@@ -24,7 +24,14 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
 
-  recalcExtents();
+  if (model->finishedLoading())
+  {
+    recalcExtents();
+  }
+  else
+  {
+    _need_recalc_extents = true;
+  }
 }
 
 void ModelInstance::draw_box (bool is_current_selection)
@@ -125,11 +132,16 @@ void ModelInstance::resetDirection(){
 
 bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const
 {
-  return misc::rectOverlap(extents, rect);
+  return misc::rectOverlap(_extents.data(), rect);
 }
 
-bool ModelInstance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const
+bool ModelInstance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera)
 {
+  if (_need_recalc_extents && model->finishedLoading())
+  {
+    recalcExtents();
+  }
+
   float dist = (pos - camera).length() - model->rad * scale;
   if(dist >= cull_distance)
     return false;
@@ -150,28 +162,14 @@ bool ModelInstance::is_visible(math::frustum const& frustum, const float& cull_d
   return frustum.intersectsSphere(pos, model->rad * scale);
 }
 
-bool ModelInstance::cull_by_size_category(const math::vector_3d& camera) const
-{
-  float dist = (pos - camera).length() - model->rad * scale;
-
-  if (size_cat < 1.f && dist > 30.f)
-  {
-    return true;
-  }
-  else if (size_cat < 4.f && dist > 150.f)
-  {
-    return true;
-  }
-  else if (size_cat < 25.f && dist > 300.f)
-  {
-    return true;
-  }
-
-  return false;
-}
-
 void ModelInstance::recalcExtents()
 {
+  if (!model->finishedLoading())
+  {
+    _need_recalc_extents = true;
+    return;
+  }
+
   update_transform_matrix();
 
   math::vector_3d min (math::vector_3d::max()), vertex_box_min (min);
@@ -210,15 +208,28 @@ void ModelInstance::recalcExtents()
     }
   }
 
-  extents[0] = min;
-  extents[1] = max;
+  _extents[0] = min;
+  _extents[1] = max;
 
   size_cat = std::max( vertex_box_max.x - vertex_box_min.x
                      , std::max( vertex_box_max.y - vertex_box_min.y
                                , vertex_box_max.z - vertex_box_min.z
                                )
                      );
+
+  _need_recalc_extents = false;
 }
+
+std::vector<math::vector_3d> const& ModelInstance::extents()
+{
+  if (_need_recalc_extents && model->finishedLoading())
+  {
+    recalcExtents();
+  }
+
+  return _extents;
+}
+
 
 wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f)
   : ModelInstance (filename)
@@ -283,8 +294,13 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
   _need_matrix_update = false;
 }
 
-bool wmo_doodad_instance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const
+bool wmo_doodad_instance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera)
 {
+  if (_need_recalc_extents && model->finishedLoading())
+  {
+    recalcExtents();
+  }
+
   float dist = (world_pos - camera).length() - model->rad * scale;
 
   if (dist >= cull_distance)

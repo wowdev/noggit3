@@ -19,7 +19,6 @@ class ModelInstance
 {
 public:
   scoped_model_reference model;
-  math::vector_3d extents[2];
 
   math::vector_3d pos;
   math::vector_3d dir;
@@ -48,19 +47,21 @@ public:
     , uid (other.uid)
     , scale (other.scale)
     , size_cat (other.size_cat)
+    , _need_recalc_extents(other._need_recalc_extents)
+    , _extents(other._extents)
   {
-    std::swap (extents, other.extents);
   }
   ModelInstance& operator= (ModelInstance&& other)
   {
     std::swap (model, other.model);
-    std::swap (extents, other.extents);
     std::swap (pos, other.pos);
     std::swap (dir, other.dir);
     std::swap (light_color, other.light_color);
     std::swap (uid, other.uid);
     std::swap (scale, other.scale);
     std::swap (size_cat, other.size_cat);
+    std::swap (_need_recalc_extents, other._need_recalc_extents);
+    std::swap (_extents, other._extents);
     return *this;
   }
 
@@ -77,13 +78,16 @@ public:
   void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]) const;
-  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
-  bool cull_by_size_category(const math::vector_3d& camera) const;
+  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera);
 
   void recalcExtents();
+  std::vector<math::vector_3d> const& extents();
 
 protected:
-  void update_transform_matrix();
+  bool _need_recalc_extents = false;
+  std::vector<math::vector_3d> _extents = std::vector<math::vector_3d>(2);
+
+  virtual void update_transform_matrix();
 
   math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
   math::matrix_4x4 _transform_mat_inverted = math::matrix_4x4::uninitialized;
@@ -106,8 +110,8 @@ public:
     , world_pos (other.world_pos)
     , _need_matrix_update(other._need_matrix_update)
   {
-    std::swap (extents, other.extents);
   }
+
   wmo_doodad_instance& operator= (wmo_doodad_instance&& other)
   {
     ModelInstance::operator= (other);
@@ -120,7 +124,11 @@ public:
   bool need_matrix_update() const { return _need_matrix_update; }
   void update_transform_matrix_wmo(WMOInstance* wmo);
 
-  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera) const;
+  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera);
+
+protected:
+  // to avoid redefining recalcExtents
+  virtual void update_transform_matrix() { }
 
 private:
   bool _need_matrix_update = true;
