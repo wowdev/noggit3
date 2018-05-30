@@ -1358,7 +1358,6 @@ void Model::draw ( std::vector<ModelInstance*> instances
   if (!_finished_upload) 
   {
     upload();
-    return;
   }
 
   if (animated && (!animcalc || _per_instance_animation))
