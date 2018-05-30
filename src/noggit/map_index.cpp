@@ -774,11 +774,13 @@ void MapIndex::fixUIDs (World* world)
       AsyncLoader::instance().ensure_deletable(instance.model.get());
     }
 
+    auto const& extents(instance.extents());
+
     // to avoid going outside of bound
-    std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
-    std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
-    std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
-    std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
+    std::size_t sx = std::max((std::size_t)(extents[0].x / TILESIZE), (std::size_t)0);
+    std::size_t sz = std::max((std::size_t)(extents[0].z / TILESIZE), (std::size_t)0);
+    std::size_t ex = std::min((std::size_t)(extents[1].x / TILESIZE), (std::size_t)63);
+    std::size_t ez = std::min((std::size_t)(extents[1].z / TILESIZE), (std::size_t)63);
 
 
     for (std::size_t z = sz; z <= ez; ++z)

@@ -2197,6 +2197,8 @@ void World::addM2 ( std::string const& filename
     newModelis.scale = misc::randfloat(min, max);
   }
 
+  // to ensure the tiles are updated correctly
+  AsyncLoader::instance().ensure_deletable(newModelis.model.get());
   newModelis.recalcExtents();
   updateTilesModel(&newModelis);
   
@@ -2213,6 +2215,9 @@ void World::addWMO ( std::string const& filename
   newWMOis.mUniqueID = mapIndex.newGUID();
   newWMOis.pos = newPos;
   newWMOis.dir = rotation;
+
+  // to ensure the tiles are updated correctly
+  AsyncLoader::instance().ensure_deletable(newWMOis.wmo.get());
 
   // recalc the extends
   newWMOis.recalcExtents();
@@ -2255,7 +2260,9 @@ void World::updateTilesWMO(WMOInstance* wmo)
 
 void World::updateTilesModel(ModelInstance* m2)
 {
-  tile_index start(m2->extents[0]), end(m2->extents[1]);
+  auto const& extents(m2->extents());
+  tile_index start(extents[0]), end(extents[1]);
+
   for (int z = start.z; z <= end.z; ++z)
   {
     for (int x = start.x; x <= end.x; ++x)
