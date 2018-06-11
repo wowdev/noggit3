@@ -27,13 +27,13 @@
 #include <vector>
 
 MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World* world)
-  : index(tile_index(pX, pZ))
+  : AsyncObject(pFilename)
+  , index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , changed(0)
   , Water (this, xbase, zbase)
   , mBigAlpha(pBigAlpha)
-  , mFilename(pFilename)
   , _load_models(pLoadModels)
   , _world(world)
 {
@@ -42,9 +42,9 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
 void MapTile::finishLoading()
 {
-  MPQFile theFile(mFilename);
+  MPQFile theFile(filename);
 
-  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << mFilename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
+  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
 
   // - Parsing the file itself. --------------------------
 
@@ -489,7 +489,7 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 void MapTile::saveTile(bool saveAllModels, World* world)
 {
 
-  Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
+  Log << "Saving ADT \"" << filename << "\"." << std::endl;
 
   int lID;  // This is a global counting variable. Do not store something in here you need later.
   std::vector<WMOInstance> lObjectInstances;
@@ -529,9 +529,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (auto const& model : lModelInstances)
   {
-    if (lModels.find(model.model->_filename) == lModels.end())
+    if (lModels.find(model.model->filename) == lModels.end())
     {
-      lModels.emplace (model.model->_filename, nullyThing);
+      lModels.emplace (model.model->filename, nullyThing);
     }
   }
 
@@ -543,9 +543,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (auto const& object : lObjectInstances)
   {
-    if (lObjects.find(object.wmo->_filename) == lObjects.end())
+    if (lObjects.find(object.wmo->filename) == lObjects.end())
     {
-      lObjects.emplace (object.wmo->_filename, nullyThing);
+      lObjects.emplace (object.wmo->filename, nullyThing);
     }
   }
 
@@ -706,7 +706,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lID = 0;
   for (auto const& model : lModelInstances)
   {
-    auto filename_to_offset_and_name = lModels.find(model.model->_filename);
+    auto filename_to_offset_and_name = lModels.find(model.model->filename);
     if (filename_to_offset_and_name == lModels.end())
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -742,7 +742,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lID = 0;
   for (auto const& object : lObjectInstances)
   {
-    auto filename_to_offset_and_name = lObjects.find(object.wmo->_filename);
+    auto filename_to_offset_and_name = lObjects.find(object.wmo->filename);
     if (filename_to_offset_and_name == lObjects.end())
     {
       LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -835,7 +835,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
 
   {
-    MPQFile f(mFilename);
+    MPQFile f(filename);
     f.setBuffer(lADTFile.data);
     f.SaveFile();
   }

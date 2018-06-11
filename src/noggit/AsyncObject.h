@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <string>
+
 enum class async_priority : int
 {
   high,
@@ -13,7 +15,13 @@ class AsyncObject
 {
 protected:
   bool finished;
+
+  AsyncObject(std::string filename) : filename(filename) {}
+
 public:
+  std::string const filename;
+
+  AsyncObject() = delete;
   virtual ~AsyncObject() = default;
 
   virtual bool finishedLoading() const

@@ -221,7 +221,8 @@ const std::string& blp_texture::filename()
 }
 
 blp_texture::blp_texture(const std::string& filenameArg)
-  : _filename(filenameArg)
+  : AsyncObject(filenameArg)
+  , _filename(filenameArg)
 {
   finished = false;
 }

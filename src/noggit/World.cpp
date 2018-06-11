@@ -1085,7 +1085,7 @@ void main()
     {
       for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models))
       {
-        _wmo_doodads[doodad->model->_filename].push_back(doodad);
+        _wmo_doodads[doodad->model->filename].push_back(doodad);
       }      
     }
   }
@@ -2121,7 +2121,7 @@ void World::delete_duplicate_model_and_wmo_instances()
 
       if ( lhs->second.pos == rhs->second.pos
         && lhs->second.dir == rhs->second.dir
-        && lhs->second.wmo->_filename == rhs->second.wmo->_filename
+        && lhs->second.wmo->filename == rhs->second.wmo->filename
          )
       {
         wmos_to_remove.emplace(rhs->second.mUniqueID);
@@ -2138,7 +2138,7 @@ void World::delete_duplicate_model_and_wmo_instances()
       if ( lhs->second.pos == rhs->second.pos
         && lhs->second.dir == rhs->second.dir
         && lhs->second.scale == rhs->second.scale
-        && lhs->second.model->_filename == rhs->second.model->_filename
+        && lhs->second.model->filename == rhs->second.model->filename
         )
       {
         models_to_remove.emplace(rhs->second.uid);
@@ -2598,7 +2598,7 @@ void World::update_models_by_filename()
   
   for (auto& it : mModelInstances)
   {
-    _models_by_filename[it.second.model->_filename].push_back(&it.second);
+    _models_by_filename[it.second.model->filename].push_back(&it.second);
     // to make sure the transform matrix are up to date
     it.second.recalcExtents();
   }

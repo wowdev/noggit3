@@ -196,15 +196,12 @@ public:
 
   void upload();
 
-  const std::string& filename() const;
-
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;
 
   bool draw_group_boundingboxes;
 
   bool _finished_upload;
 
-  std::string _filename;
   std::vector<WMOGroup> groups;
   std::vector<WMOMaterial> materials;
   math::vector_3d extents[2];

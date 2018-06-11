@@ -117,8 +117,6 @@ private:
   std::vector<std::string> mModelFilenames;
   std::vector<std::string> mWMOFilenames;
 
-  std::string mFilename;
-
   std::unique_ptr<MapChunk> mChunks[16][16];
   std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
