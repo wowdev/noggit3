@@ -18,23 +18,19 @@
 #include <string>
 #include <vector>
 
-const std::string& WMO::filename() const
-{
-  return _filename;
-}
 
 WMO::WMO(const std::string& filenameArg)
-  : _finished_upload(false)
-  , _filename(filenameArg)
+  : AsyncObject(filenameArg)
+  , _finished_upload(false)
 {
   finished = false;
 }
 
 void WMO::finishLoading ()
 {
-  MPQFile f(_filename);
+  MPQFile f(filename);
   if (f.isEof()) {
-    LogError << "Error loading WMO \"" << _filename << "\"." << std::endl;
+    LogError << "Error loading WMO \"" << filename << "\"." << std::endl;
     return;
   }
 
@@ -417,7 +413,7 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
     group.intersect (ray, &results);
   }
 
-  std::cout << _filename << " " << results.size() << "\n";
+  std::cout << filename << " " << results.size() << "\n";
 
   return results;
 }
@@ -463,7 +459,7 @@ std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint
 
   if (doodadset >= doodadsets.size())
   {
-    LogError << "Invalid doodadset for instance of wmo " << filename() << std::endl;
+    LogError << "Invalid doodadset for instance of wmo " << filename << std::endl;
     return doodads;
   }
 
@@ -698,7 +694,7 @@ void WMOGroup::load()
   std::stringstream curNum;
   curNum << "_" << std::setw (3) << std::setfill ('0') << num;
 
-  std::string fname = wmo->filename ();
+  std::string fname = wmo->filename;
   fname.insert (fname.find (".wmo"), curNum.str ());
 
   MPQFile f(fname);

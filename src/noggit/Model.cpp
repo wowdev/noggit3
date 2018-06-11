@@ -17,7 +17,7 @@
 #include <string>
 
 Model::Model(const std::string& filename)
-  : _filename(filename)
+  : AsyncObject(filename)
   , _finished_upload(false)
 {
   memset(&header, 0, sizeof(ModelHeader));
@@ -27,11 +27,11 @@ Model::Model(const std::string& filename)
 
 void Model::finishLoading()
 {
-  MPQFile f(_filename);
+  MPQFile f(filename);
 
   if (f.isEof())
   {
-    LogError << "Error loading file \"" << _filename << "\". Aborting to load model." << std::endl;
+    LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
     finished = true;
     return;
   }
@@ -81,7 +81,7 @@ void Model::finishLoading()
 
 Model::~Model()
 {
-  LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
+  LogDebug << "Unloading model \"" << filename << "\"." << std::endl;
 
   _textures.clear();
   _textureFilenames.clear();
@@ -264,7 +264,7 @@ void Model::initCommon(const MPQFile& f)
 
   if (header.nViews > 0) {
     // indices - allocate space, too
-    std::string lodname = _filename.substr(0, _filename.length() - 3);
+    std::string lodname = filename.substr(0, filename.length() - 3);
     lodname.append("00.skin");
     MPQFile g(lodname.c_str());
     if (g.isEof()) {
@@ -773,7 +773,7 @@ void ModelRenderPass::init_uv_types(Model* m)
 
   if (m->_texture_unit_lookup.size() < texture_coord_combo_index + texture_count)
   {
-    throw std::out_of_range("model: texture_coord_combo_index out of range " + m->_filename);
+    throw std::out_of_range("model: texture_coord_combo_index out of range " + m->filename);
   }
 
   for (int i = 0; i < texture_count; ++i)
@@ -993,7 +993,7 @@ void Model::initAnimated(const MPQFile& f)
 
     for (size_t i = 0; i < header.nAnimations; ++i)
     {
-      std::string lodname = _filename.substr(0, _filename.length() - 3);
+      std::string lodname = filename.substr(0, filename.length() - 3);
       std::stringstream tempname;
       tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID << ".anim";
       if (MPQFile::exists(tempname.str()))
@@ -1032,7 +1032,7 @@ void Model::initAnimated(const MPQFile& f)
       }
       catch (std::logic_error error)
       {
-        LogError << "Loading particles for '" << _filename << "' " << error.what() << std::endl;
+        LogError << "Loading particles for '" << filename << "' " << error.what() << std::endl;
       }      
     }
   }

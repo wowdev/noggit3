@@ -316,7 +316,7 @@ namespace noggit
             rotation = boost::get<selected_model_type> (selected.get())->dir;
           }
 
-          world->addM2 ( boost::get<selected_model_type> (selected.get())->model->_filename
+          world->addM2 ( boost::get<selected_model_type> (selected.get())->model->filename
                        , pos
                        , scale
                        , rotation
@@ -332,7 +332,7 @@ namespace noggit
             rotation = boost::get<selected_wmo_type> (selected.get())->dir;
           }
 
-          world->addWMO(boost::get<selected_wmo_type> (selected.get())->wmo->_filename, pos, rotation);
+          world->addWMO(boost::get<selected_wmo_type> (selected.get())->wmo->filename, pos, rotation);
         }
       }
 
@@ -352,18 +352,18 @@ namespace noggit
     {
       if (entry.which() == eEntry_Model)
       {
-        auto clone = new ModelInstance(boost::get<selected_model_type> (entry)->model->_filename);
+        auto clone = new ModelInstance(boost::get<selected_model_type> (entry)->model->filename);
         clone->scale = boost::get<selected_model_type> (entry)->scale;
         clone->dir = boost::get<selected_model_type> (entry)->dir;
         selected = clone;
-        setModelName (boost::get<selected_model_type> (entry)->model->_filename);
+        setModelName (boost::get<selected_model_type> (entry)->model->filename);
       }
       else if (entry.which() == eEntry_WMO)
       {
-        auto clone = new WMOInstance(boost::get<selected_wmo_type> (entry)->wmo->_filename);
+        auto clone = new WMOInstance(boost::get<selected_wmo_type> (entry)->wmo->filename);
         clone->dir = boost::get<selected_wmo_type> (entry)->dir;
         selected = clone;
-        setModelName(boost::get<selected_wmo_type> (entry)->wmo->_filename);
+        setModelName(boost::get<selected_wmo_type> (entry)->wmo->filename);
       }
       else
       {
@@ -387,11 +387,11 @@ namespace noggit
 
       if (world->IsSelection(eEntry_WMO))
       {
-        path = boost::get<selected_wmo_type> (*world->GetCurrentSelection())->wmo->filename();
+        path = boost::get<selected_wmo_type> (*world->GetCurrentSelection())->wmo->filename;
       }
       else if (world->IsSelection(eEntry_Model))
       {
-        path = boost::get<selected_model_type> (*world->GetCurrentSelection())->model->_filename;
+        path = boost::get<selected_model_type> (*world->GetCurrentSelection())->model->filename;
       }
 
       std::ofstream stream(_settings->value("project/import_file" , "import.txt").toString().toStdString(), std::ios_base::app);

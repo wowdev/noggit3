@@ -1926,7 +1926,7 @@ void MapView::tick (float dt)
         _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->uid)
-          . arg (QString::fromStdString (instance->model->_filename))
+          . arg (QString::fromStdString (instance->model->filename))
           );
         break;
       }
@@ -1936,7 +1936,7 @@ void MapView::tick (float dt)
         _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->mUniqueID)
-          . arg (QString::fromStdString (instance->wmo->_filename))
+          . arg (QString::fromStdString (instance->wmo->filename))
           );
         break;
       }
@@ -1997,7 +1997,7 @@ void MapView::tick (float dt)
     case eEntry_Model:
       {
         auto instance (boost::get<selected_model_type> (*current_selection));
-        detailInfo << "filename: " << instance->model->_filename
+        detailInfo << "filename: " << instance->model->filename
                     << "\nunique ID: " << instance->uid
                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
@@ -2020,7 +2020,7 @@ void MapView::tick (float dt)
     case eEntry_WMO:
       {
         auto instance (boost::get<selected_wmo_type> (*current_selection));
-        detailInfo << "filename: " << instance->wmo->_filename
+        detailInfo << "filename: " << instance->wmo->filename
                     << "\nunique ID: " << instance->mUniqueID
                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z

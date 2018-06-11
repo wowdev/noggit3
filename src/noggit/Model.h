@@ -253,7 +253,6 @@ public:
   // ===============================
   // Misc ?
   // ===============================
-  std::string _filename; //! \todo ManagedItem already has a name. Use that?
   std::vector<Bone> bones;
   ModelHeader header;
   std::vector<uint16_t> blend_override;

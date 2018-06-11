@@ -25,7 +25,6 @@ public:
   MPQArchive(const std::string& filename, bool doListfile);
 
   ~MPQArchive();
-  std::string mpqname;
 
   bool hasFile(const std::string& filename) const;
   bool openFile(const std::string& filename, HANDLE* fileHandle) const;
