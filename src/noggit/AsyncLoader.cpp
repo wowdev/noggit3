@@ -63,7 +63,7 @@ void AsyncLoader::process()
     }
     catch (...)
     {
-      queue_for_load (object);
+      object->error_on_loading();
     }
   }
 }

@@ -21,8 +21,6 @@ Model::Model(const std::string& filename)
   , _finished_upload(false)
 {
   memset(&header, 0, sizeof(ModelHeader));
-
-  finished = false;
 }
 
 void Model::finishLoading()
@@ -1350,7 +1348,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
                  , std::unordered_map<Model*, std::size_t>& visible_model_count
                  )
 {
-  if (!finishedLoading())
+  if (!finishedLoading() || loading_failed())
   {
     return;
   }
@@ -1448,6 +1446,11 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 {
   std::vector<float> results;
+
+  if (!finishedLoading() || loading_failed())
+  {
+    return results;
+  }
 
   if (animated && (!animcalc || _per_instance_animation))
   {
