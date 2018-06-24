@@ -64,6 +64,11 @@ void AsyncLoader::process()
     catch (...)
     {
       object->error_on_loading();
+
+      if (object->is_required_when_saving())
+      {
+        _important_object_failed_loading = true;
+      }
     }
   }
 }

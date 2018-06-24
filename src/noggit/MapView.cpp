@@ -45,6 +45,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 
 #include <algorithm>
@@ -530,27 +531,10 @@ void MapView::createGUI()
 
 
 
-  ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { prompt_save_current(); });
-  ADD_ACTION ( file_menu
-             , "save changed tiles"
-             , QKeySequence::Save
-             , [this]
-               {
-                 makeCurrent();
-                 opengl::context::scoped_setter const _ (::gl, context());
-                 _world->mapIndex.saveChanged (_world.get());
-               }
-             );
-  ADD_ACTION ( file_menu
-             , "save all tiles"
-             , "Ctrl+Shift+A"
-             , [this]
-               {
-                 makeCurrent();
-                 opengl::context::scoped_setter const _ (::gl, context());
-                 _world->mapIndex.saveall (_world.get());
-               }
-             );
+  ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); });
+  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); });
+  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] { save(save_mode::all); });
+  
   ADD_ACTION ( file_menu
              , "reload tile"
              , "Shift+J"
@@ -1433,6 +1417,8 @@ MapView::~MapView()
   _minimap->hide();
   _time_and_navigation_dock->hide();
   _world.reset();
+
+  AsyncLoader::instance().reset_object_fail();
 }
 
 void MapView::tick (float dt)
@@ -2877,22 +2863,96 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   }
 }
 
-void MapView::prompt_save_current()
+void MapView::save(save_mode mode)
 {
-  if ( QMessageBox::warning
-         ( nullptr
-         , "Save (only) current map tile"
-         , "This can cause a collision bug when placing objects between two ADT borders!\n\n"
-           "If you often use this function, we recommend you to use the 'Save all' "
-           "function as often as possible to get the collisions right."
-         , QMessageBox::Save | QMessageBox::Cancel
-         , QMessageBox::Cancel
-         ) == QMessageBox::Save
+  bool save = true;
+
+  if (AsyncLoader::instance().important_object_failed_loading())
+  {
+    save = false;
+    QPushButton *yes, *no;
+
+    QMessageBox first_warning;
+    first_warning.setIcon(QMessageBox::Critical);
+    first_warning.setWindowIcon(QIcon (":/icon"));
+    first_warning.setWindowTitle("Some models couldn't be loaded");
+    first_warning.setText("Error:\nSome models could not be loaded and saving will cause collision and culling issues, would you still like to save ?");
+    // roles are swapped to force the user to pay attention and both are "accept" roles so that escape does nothing
+    no = first_warning.addButton("No", QMessageBox::ButtonRole::AcceptRole);
+    yes = first_warning.addButton("Yes", QMessageBox::ButtonRole::YesRole);
+    first_warning.setDefaultButton(no);
+
+    first_warning.exec();
+
+    if (first_warning.clickedButton() == yes)
+    {
+      QMessageBox second_warning;
+      second_warning.setIcon(QMessageBox::Warning);
+      second_warning.setWindowIcon(QIcon (":/icon"));
+      second_warning.setWindowTitle("Are you sure ?");
+      second_warning.setText( "If you save you will have to save again all the adt containing the defective/missing models once you've fixed said models to correct all the issues.\n"
+                              "By clicking yes you accept to bear all the consequences of your action and forfeit the right to complain to the developers about any culling and collision issues.\n\n"
+                              "So... do you REALLY want to save ?"
+                            );
+      no = second_warning.addButton("No", QMessageBox::ButtonRole::YesRole);
+      yes = second_warning.addButton("Yes", QMessageBox::ButtonRole::AcceptRole);
+      second_warning.setDefaultButton(no);
+
+      second_warning.exec();
+
+      if (second_warning.clickedButton() == yes)
+      {
+        save = true;
+      }
+    }
+  }
+
+  if ( mode == save_mode::current 
+    && save 
+    && (QMessageBox::warning
+          (nullptr
+          , "Save current map tile only"
+          , "This can cause a collision bug when placing objects between two ADT borders!\n\n"
+            "We recommend you to use the normal save function rather than "
+            "this one to get the collisions right."
+          , QMessageBox::Save | QMessageBox::Cancel
+          , QMessageBox::Cancel
+          ) == QMessageBox::Cancel
+       )
      )
+  {
+    save = false;
+  }
+
+  if (save)
   {
     makeCurrent();
     opengl::context::scoped_setter const _ (::gl, context());
-    _world->mapIndex.saveTile(tile_index(_camera.position), _world.get());
+
+    switch (mode)
+    {
+    case save_mode::current: _world->mapIndex.saveTile(tile_index(_camera.position), _world.get()); break;
+    case save_mode::changed: _world->mapIndex.saveChanged(_world.get()); break;
+    case save_mode::all:     _world->mapIndex.saveall(_world.get()); break;
+    }    
+
+    AsyncLoader::instance().reset_object_fail();
+
+    QMessageBox::information
+      (nullptr
+      , ""
+      , "Map saved"
+      , QMessageBox::Ok
+      );
+  }
+  else
+  {
+    QMessageBox::warning
+      ( nullptr
+      , "Map NOT saved"
+      , "The map wasn NOT saved, don't forget to save before leaving"
+      , QMessageBox::Ok
+      );
   }
 }
 

@@ -235,6 +235,11 @@ public:
 
   bool use_fake_geometry() const { return !!_fake_geometry; }
 
+  virtual bool is_required_when_saving() const
+  {
+    return true;
+  }
+
   // ===============================
   // Toggles
   // ===============================

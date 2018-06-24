@@ -45,6 +45,11 @@ public:
     finished = true;
   }
 
+  virtual bool is_required_when_saving() const
+  {
+    return false;
+  }
+
   virtual async_priority loading_priority() const
   {
     return async_priority::medium;

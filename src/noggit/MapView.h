@@ -63,6 +63,12 @@ namespace noggit
   }
 }
 
+enum class save_mode
+{
+  current,
+  changed,
+  all
+};
 
 class MapView : public QOpenGLWidget
 {
@@ -162,7 +168,7 @@ private:
 
   noggit::ui::toolbar* _toolbar;
 
-  void prompt_save_current();
+  void save(save_mode mode);
 
   QSettings* _settings;
 
