@@ -29,6 +29,9 @@ public:
   AsyncLoader(int numThreads);
   ~AsyncLoader();
 
+  bool important_object_failed_loading() const { return _important_object_failed_loading; }
+  void reset_object_fail() { _important_object_failed_loading = false; }
+
 private:
   void process();
 
@@ -38,4 +41,5 @@ private:
   std::map<async_priority, std::list<AsyncObject*>> _to_load;
   std::list<AsyncObject*> _currently_loading;
   std::list<std::thread> _threads;
+  bool _important_object_failed_loading = false;
 };

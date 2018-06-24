@@ -222,6 +222,11 @@ public:
   void toggle_visibility() { _hidden = !_hidden; }
   void show() { _hidden = false ; }
 
+  virtual bool is_required_when_saving() const
+  {
+    return true;
+  }
+
 private:
   bool _hidden = false;
 };
