@@ -23,7 +23,6 @@ WMO::WMO(const std::string& filenameArg)
   : AsyncObject(filenameArg)
   , _finished_upload(false)
 {
-  finished = false;
 }
 
 void WMO::finishLoading ()
@@ -327,10 +326,8 @@ void WMO::draw ( int doodadset
                , std::function<void (bool)> setup_fog
                )
 {
-  if (!finishedLoading ())
-    return;
-
-  if (!_finished_upload) {
+  if (!_finished_upload)
+  {
     upload();
     return;
   }
@@ -405,8 +402,10 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
 {
   std::vector<float> results;
 
-  if (!finishedLoading ())
+  if (!finishedLoading() || loading_failed())
+  {
     return results;
+  }
 
   for (auto& group : groups)
   {

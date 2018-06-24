@@ -170,6 +170,13 @@ void ModelInstance::recalcExtents()
     return;
   }
 
+  if (model->loading_failed())
+  {
+    _extents[0] = _extents[1] = pos;
+    _need_recalc_extents = false;
+    return;
+  }
+
   update_transform_matrix();
 
   math::vector_3d min (math::vector_3d::max()), vertex_box_min (min);

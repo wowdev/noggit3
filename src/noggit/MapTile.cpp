@@ -37,7 +37,6 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   , _load_models(pLoadModels)
   , _world(world)
 {
-  finished = false;
 }
 
 void MapTile::finishLoading()

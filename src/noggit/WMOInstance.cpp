@@ -54,6 +54,11 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , std::function<void (bool)> setup_fog
                        )
 {
+  if (!wmo->finishedLoading() || wmo->loading_failed())
+  {
+    return;
+  }
+
   bool const is_selected
     ( selection
     && boost::get<selected_wmo_type> (&*selection)
@@ -136,6 +141,12 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
 void WMOInstance::recalcExtents()
 {
+  // keep the old extents since they are saved in the adt
+  if (wmo->loading_failed())
+  {
+    return;
+  }
+
   update_doodads();
 
   math::vector_3d min (math::vector_3d::max());
@@ -231,7 +242,7 @@ std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
 {
   std::vector<wmo_doodad_instance*> doodads;
 
-  if (!wmo->finishedLoading())
+  if (!wmo->finishedLoading() || wmo->loading_failed())
   {
     return doodads;
   }

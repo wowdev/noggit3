@@ -4,6 +4,8 @@
 
 #include <string>
 
+#include <noggit/Log.h>
+
 enum class async_priority : int
 {
   high,
@@ -13,10 +15,12 @@ enum class async_priority : int
 
 class AsyncObject
 {
+private: 
+  bool _loading_failed;
 protected:
-  bool finished;
+  bool finished;  
 
-  AsyncObject(std::string filename) : filename(filename) {}
+  AsyncObject(std::string filename) : filename(filename), finished(false), _loading_failed(false) {}
 
 public:
   std::string const filename;
@@ -27,6 +31,18 @@ public:
   virtual bool finishedLoading() const
   {
     return finished;
+  }
+
+  bool loading_failed() const
+  {
+    return _loading_failed;
+  }
+
+  void error_on_loading()
+  {
+    LogError << filename << " could not be loaded" << std::endl;
+    _loading_failed = true;
+    finished = true;
   }
 
   virtual async_priority loading_priority() const

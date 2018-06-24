@@ -224,7 +224,6 @@ blp_texture::blp_texture(const std::string& filenameArg)
   : AsyncObject(filenameArg)
   , _filename(filenameArg)
 {
-  finished = false;
 }
 
 void blp_texture::finishLoading()
