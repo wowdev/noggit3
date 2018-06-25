@@ -487,7 +487,6 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 
 void MapTile::saveTile(bool saveAllModels, World* world)
 {
-
   Log << "Saving ADT \"" << filename << "\"." << std::endl;
 
   int lID;  // This is a global counting variable. Do not store something in here you need later.
@@ -502,14 +501,21 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (auto const& object : world->mWMOInstances)
   {
+    // no need to check if wmos are loaded since if they aren't their extents hasn't changed and thus can be saved as is
     if (saveAllModels || object.second.isInsideRect(lTileExtents))
     {
       lObjectInstances.emplace_back(object.second);
     }
   }
 
-  for (auto const& model : world->mModelInstances)
+  for (auto& model : world->mModelInstances)
   {
+    // todo: move that somewhere to not check for each time ?
+    if (!model.second.model->finishedLoading())
+    {
+      AsyncLoader::instance().ensure_deletable(model.second.model.get());
+      model.second.recalcExtents();
+    }
     if (saveAllModels || model.second.isInsideRect(lTileExtents))
     {
       lModelInstances.emplace_back(model.second);
