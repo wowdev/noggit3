@@ -1530,11 +1530,6 @@ void main()
     
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
-      if (!tile->finishedLoading())
-      {
-        continue;
-      }
-
       tile->drawWater ( frustum
                       , culldistance
                       , camera_pos
