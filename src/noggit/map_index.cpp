@@ -293,7 +293,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
     return nullptr;
   }
 
-  if (tileLoaded(tile))
+  if (tileLoaded(tile) || tileAwaitingLoading(tile))
   {
     return mTiles[tile.z][tile.x].tile.get();
   }
@@ -413,9 +413,14 @@ bool MapIndex::hasTile(const tile_index& tile) const
   return tile.is_valid() && (mTiles[tile.z][tile.x].flags & 1);
 }
 
+bool MapIndex::tileAwaitingLoading(const tile_index& tile) const
+{
+  return hasTile(tile) && mTiles[tile.z][tile.x].tile && !mTiles[tile.z][tile.x].tile->finishedLoading();
+}
+
 bool MapIndex::tileLoaded(const tile_index& tile) const
 {
-  return hasTile(tile) && mTiles[tile.z][tile.x].tile;
+  return hasTile(tile) && mTiles[tile.z][tile.x].tile && mTiles[tile.z][tile.x].tile->finishedLoading();
 }
 
 bool MapIndex::hasAdt()
@@ -435,22 +440,38 @@ MapTile* MapIndex::getTile(const tile_index& tile) const
 
 MapTile* MapIndex::getTileAbove(MapTile* tile) const
 {
-  if (tile->index.z == 0 || !tileLoaded({tile->index.x, tile->index.z - 1}))
+  tile_index above(tile->index.x, tile->index.z - 1);
+  if (tile->index.z == 0 || (!tileLoaded(above) && !tileAwaitingLoading(above)))
   {
     return nullptr;
   }
 
-  return mTiles[tile->index.z - 1][tile->index.x].tile.get();
+  MapTile* tile_above = mTiles[tile->index.z - 1][tile->index.x].tile.get();
+
+  if (!tile_above->finishedLoading())
+  {
+    AsyncLoader::instance().ensure_deletable(tile_above);
+  }
+
+  return tile_above;
 }
 
 MapTile* MapIndex::getTileLeft(MapTile* tile) const
 {
-  if (tile->index.x == 0 || !tileLoaded({tile->index.x - 1, tile->index.z}))
+  tile_index left(tile->index.x - 1, tile->index.z);
+  if (tile->index.x == 0 || (!tileLoaded(left) && !tileAwaitingLoading(left)))
   {
     return nullptr;
   }
 
-  return mTiles[tile->index.z][tile->index.x - 1].tile.get();
+  MapTile* tile_left = mTiles[tile->index.z][tile->index.x - 1].tile.get();
+
+  if (!tile_left->finishedLoading())
+  {
+    AsyncLoader::instance().ensure_deletable(tile_left);
+  }
+
+  return tile_left;
 }
 
 uint32_t MapIndex::getFlag(const tile_index& tile) const

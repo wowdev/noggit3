@@ -2007,12 +2007,13 @@ void World::convert_alphamap(bool to_big_alpha)
     {
       tile_index tile(x, z);
 
-      bool unload = !mapIndex.tileLoaded(tile);
-
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
 
       if (mTile)
       {
+        AsyncLoader::instance().ensure_deletable(mTile);
+
         mTile->convert_alphamap(to_big_alpha);
         mTile->saveTile (false, this);
         mapIndex.markOnDisc (tile, true);
