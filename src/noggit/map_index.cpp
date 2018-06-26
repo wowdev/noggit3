@@ -577,7 +577,7 @@ inline bool floatEqual(float const& a, float const& b)
   return std::abs(a - b) < 0.0001f;
 }
 
-void MapIndex::fixUIDs (World* world)
+uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_error)
 {
   // pre-cond: mTiles[z][x].flags are set
 
@@ -765,6 +765,8 @@ void MapIndex::fixUIDs (World* world)
   std::map<std::size_t, std::map<std::size_t, std::forward_list<ModelInstance*>>> modelPerTile;
   std::map<std::size_t, std::map<std::size_t, std::forward_list<WMOInstance*>>> wmoPerTile;
 
+  bool loading_error = false;
+
   for (ModelInstance& instance : models)
   {
     instance.uid = uid++;
@@ -773,6 +775,8 @@ void MapIndex::fixUIDs (World* world)
     {
       AsyncLoader::instance().ensure_deletable(instance.model.get());
     }
+
+    loading_error |= instance.model->loading_failed();
 
     auto const& extents(instance.extents());
 
@@ -801,6 +805,8 @@ void MapIndex::fixUIDs (World* world)
       AsyncLoader::instance().ensure_deletable(instance.wmo.get());
     }
 
+    // no need to check if the loading failed since the extents are stored inside the adt
+
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
     std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
@@ -814,6 +820,11 @@ void MapIndex::fixUIDs (World* world)
         wmoPerTile[z][x].push_front(&instance);
       }
     }
+  }
+
+  if (cancel_on_model_loading_error && loading_error)
+  {
+    return uid_fix_status::failed;
   }
 
   // save the current highest guid
@@ -868,6 +879,8 @@ void MapIndex::fixUIDs (World* world)
 
   // override the db highest uid if used
   saveMaxUID();
+
+  return loading_error ? uid_fix_status::done_with_errors : uid_fix_status::done;
 }
 
 void MapIndex::searchMaxUID()

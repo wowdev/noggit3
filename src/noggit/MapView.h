@@ -72,6 +72,7 @@ enum class save_mode
 
 class MapView : public QOpenGLWidget
 {
+  Q_OBJECT
 private:
   bool _mod_alt_down = false;
   bool _mod_ctrl_down = false;
@@ -161,6 +162,9 @@ private:
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
 
+  bool _uid_fix_failed = false;
+  void on_uid_fix_fail();
+
   uid_fix_mode _uid_fix;
   bool _from_bookmark;
 
@@ -171,6 +175,9 @@ private:
   void save(save_mode mode);
 
   QSettings* _settings;
+
+signals:
+  void uid_fix_failed();
 
 public:
   math::vector_4d cursor_color;

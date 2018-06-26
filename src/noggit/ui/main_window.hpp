@@ -20,6 +20,7 @@ namespace noggit
       main_window();
 
       void prompt_exit();
+      void prompt_uid_fix_failure();
 
     private:
       void loadMap (int mapID);

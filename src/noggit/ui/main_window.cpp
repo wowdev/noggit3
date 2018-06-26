@@ -86,6 +86,8 @@ namespace noggit
                                  )
     {
       auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
+      connect(mapview, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
+
       setCentralWidget (mapview);
     }
 
@@ -296,7 +298,22 @@ namespace noggit
         setCentralWidget (_null_widget = new QWidget (this));
         // update bookmark list
         createBookmarkList();
+
+        //!\ todo: rebuild/show the map selection menu
       }
+    }
+
+    void main_window::prompt_uid_fix_failure()
+    {
+      QMessageBox::critical
+        (nullptr
+          , "UID fix failed"
+          , "The UID fix couldn't be done because some models were missing or fucked up.\n"
+            "The models are listed in the log file."
+          , QMessageBox::Ok
+        );
+
+      //!\ todo: rebuild/show the map selection menu
     }
   }
 }
