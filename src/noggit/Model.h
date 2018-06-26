@@ -260,12 +260,14 @@ public:
 
   float rad;
   float trans;
-  bool animcalc;
-  bool mPerInstanceAnimation;
-  int anim, animtime;
-  int _global_animtime;
+  bool animcalc;  
 
 private:
+  bool _per_instance_animation;
+  int _animation;
+  int _anim_time;
+  int _global_animtime;
+
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
@@ -275,7 +277,7 @@ private:
   void compute_pixel_shader_ids();
 
   void animate(int anim, int animtime);
-  void calcBones(int anim, int time, int animtime);
+  void calcBones(int anim, int time, int animation_time);
 
   void lightsOn(opengl::light lbase);
   void lightsOff(opengl::light lbase);

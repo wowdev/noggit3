@@ -71,10 +71,10 @@ private:
   void update_indices_buffer();
 
   opengl::scoped::deferred_upload_buffers<6> _buffers;
-  GLuint const& vertices = _buffers[0];
-  GLuint const& normals = _buffers[1];
-  GLuint const& indices = _buffers[2];
-  GLuint const& mccvEntry = _buffers[3];
+  GLuint const& _vertices_vbo = _buffers[0];
+  GLuint const& _normals_vbo = _buffers[1];
+  GLuint const& _indices_buffer = _buffers[2];
+  GLuint const& _mccv_vbo = _buffers[3];
   GLuint const& minimap = _buffers[4];
   GLuint const& minishadows = _buffers[5];
   opengl::scoped::deferred_upload_buffers<4> lod_indices;
