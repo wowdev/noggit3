@@ -68,7 +68,7 @@ void Model::finishLoading()
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
-  anim = 0;
+  _animation = 0;
 
   rad = header.bounding_box_radius;
 
@@ -107,7 +107,7 @@ bool Model::isAnimated(const MPQFile& f)
 
   animGeometry = false;
   animBones = false;
-  mPerInstanceAnimation = false;
+  _per_instance_animation = false;
 
   ModelVertex const* verts = reinterpret_cast<ModelVertex const*>(f.getBuffer() + header.ofsVertices);
   for (size_t i = 0; i<header.nVertices && !animGeometry; ++i) 
@@ -124,7 +124,7 @@ bool Model::isAnimated(const MPQFile& f)
           if (billboard) 
           {
             // if we have billboarding, the model will need per-instance animation
-            mPerInstanceAnimation = true;
+            _per_instance_animation = true;
           }
           animGeometry = true;
           break;
@@ -621,10 +621,10 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   // emissive colors
   if (color_index != -1 && m->_colors[color_index].color.uses(0))
   {
-    ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->animtime, m->_global_animtime));
-    if (m->_colors[color_index].opacity.uses (m->anim))
+    ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->_anim_time, m->_global_animtime));
+    if (m->_colors[color_index].opacity.uses (m->_animation))
     {
-      mesh_color.w = m->_colors[color_index].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
+      mesh_color.w = m->_colors[color_index].opacity.getValue (m->_animation, m->_anim_time, m->_global_animtime);
     }
 
     if (renderflag.flags.unlit)
@@ -645,7 +645,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   {
     if (m->_transparency[transparency_combo_index].trans.uses (0))
     {
-      mesh_color.w = mesh_color.w * m->_transparency[transparency_combo_index].trans.getValue (0, m->animtime, m->_global_animtime);;
+      mesh_color.w = mesh_color.w * m->_transparency[transparency_combo_index].trans.getValue (0, m->_anim_time, m->_global_animtime);;
     }
   }
 
@@ -948,7 +948,7 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
 
 ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
 {
-  ModelPixelShader pixel_shader;
+  ModelPixelShader pixel_shader(ModelPixelShader::Invalid_Shader);
 
   if (!(shader_id & 0x8000))
   {
@@ -1070,21 +1070,21 @@ void Model::initAnimated(const MPQFile& f)
   animcalc = false;
 }
 
-void Model::calcBones(int _anim, int time, int animtime)
+void Model::calcBones(int _anim, int time, int animation_time)
 {
   for (size_t i = 0; i<header.nBones; ++i) {
     bones[i].calc = false;
   }
 
   for (size_t i = 0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones.data(), _anim, time, animtime);
+    bones[i].calcMatrix(bones.data(), _anim, time, animation_time);
   }
 }
 
 void Model::animate(int _anim, int animtime_)
 {
-  this->anim = _anim;
-  ModelAnimation &a = _animations[anim];
+  this->_animation = _anim;
+  ModelAnimation &a = _animations[_animation];
 
   if (_animations.empty())
     return;
@@ -1092,12 +1092,12 @@ void Model::animate(int _anim, int animtime_)
   int t = animtime_;
   int tmax = a.length;
   t %= tmax;
-  animtime = t;
+  _anim_time = t;
   _global_animtime = animtime_;
 
   if (animBones) 
   {
-    calcBones(anim, t, _global_animtime);
+    calcBones(_animation, t, _global_animtime);
   }
 
   if (animGeometry) 
@@ -1141,17 +1141,17 @@ void Model::animate(int _anim, int animtime_)
   {
     // random time distribution for teh win ..?
     int pt = (t + static_cast<int>(tmax*particle.tofs)) % tmax;
-    particle.setup(anim, pt, _global_animtime);
+    particle.setup(_animation, pt, _global_animtime);
   }
 
   for (size_t i = 0; i<header.nRibbonEmitters; ++i) 
   {
-    _ribbons[i].setup(anim, t, _global_animtime);
+    _ribbons[i].setup(_animation, t, _global_animtime);
   }
 
   for (auto& tex_anim : _texture_animations)
   {
-    tex_anim.calc(anim, t, animtime);
+    tex_anim.calc(_animation, t, _anim_time);
   }
 }
 
@@ -1373,7 +1373,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
     return;
   }
 
-  if (animated && (!animcalc || mPerInstanceAnimation))
+  if (animated && (!animcalc || _per_instance_animation))
   {
     animate(0, animtime);
     animcalc = true;
@@ -1462,7 +1462,7 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 {
   std::vector<float> results;
 
-  if (animated && (!animcalc || mPerInstanceAnimation))
+  if (animated && (!animcalc || _per_instance_animation))
   {
     animate (0, animtime);
     animcalc = true;
@@ -1508,7 +1508,7 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 void Model::lightsOn(opengl::light lbase)
 {
   // setup lights
-  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(animtime, l++, _global_animtime);
+  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(_anim_time, l++, _global_animtime);
 }
 
 void Model::lightsOff(opengl::light lbase)

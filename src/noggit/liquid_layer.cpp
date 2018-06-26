@@ -410,7 +410,7 @@ void liquid_layer::setSubchunk(int x, int z, bool water)
   _subchunks = water ? (_subchunks | v) : (_subchunks & ~v);
 }
 
-void liquid_layer::paintLiquid( math::vector_3d const& pos
+void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
                               , float radius
                               , bool add
                               , math::radians const& angle
@@ -425,7 +425,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
   bool ocean = _liquid_vertex_format == 2;
   math::vector_3d ref ( lock
                       ? origin
-                      : math::vector_3d (pos.x, pos.y + 1.0f, pos.z)
+                      : math::vector_3d (cursor_pos.x, cursor_pos.y + 1.0f, cursor_pos.z)
                       );
 
   // make sure the ocean layers are flat
@@ -447,14 +447,14 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
   {
     for (int x = 0; x < 8; ++x)
     {
-      if (misc::getShortestDist(pos, _vertices[id], UNITSIZE) <= radius)
+      if (misc::getShortestDist(cursor_pos, _vertices[id], UNITSIZE) <= radius)
       {
         if (add && !ocean)
         {
           for (int index : {id, id + 1, id + 9, id + 10})
           {
             bool no_subchunk = !hasSubchunk(x, z);
-            bool in_range = misc::dist(pos, _vertices[index]) <= radius;
+            bool in_range = misc::dist(cursor_pos, _vertices[index]) <= radius;
 
             if (no_subchunk || (in_range && override_height))
             {
@@ -480,8 +480,6 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
   {
     update_min_max();
   }
-
-
 }
 
 void liquid_layer::update_min_max()

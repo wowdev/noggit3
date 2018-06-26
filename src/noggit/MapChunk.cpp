@@ -143,7 +143,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     f->read(compressed_shadow_map, 0x200);
     f->seekRelative(-0x200);
 
-    uint8_t sbuf[64 * 64], *p, *c;
+    uint8_t *p, *c;
     p = _shadow_map;
     c = compressed_shadow_map;
     for (int i = 0; i<64 * 8; ++i) 
@@ -347,9 +347,9 @@ void MapChunk::upload()
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   
   // fill vertex buffers
-  gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
 
   gl.bufferData<GL_ARRAY_BUFFER> (minimap, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
@@ -364,7 +364,7 @@ void MapChunk::upload()
 void MapChunk::update_indices_buffer()
 {
   {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
     gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
   }
 
@@ -524,7 +524,7 @@ void MapChunk::clearHeight()
   update_intersect_points();
 
   gl.bufferData<GL_ARRAY_BUFFER>
-    (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
 
 }
 
@@ -576,7 +576,7 @@ void MapChunk::draw ( math::frustum const& frustum
   
   int lod_level = get_lod_level(camera);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(lod_level == -1 ? indices : lod_indices[lod_level]);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(lod_level == -1 ? _indices_buffer : lod_indices[lod_level]);
 
   if (_texture_set.num())
   {
@@ -662,7 +662,7 @@ void MapChunk::updateVerticesData()
 
   update_intersect_points();
 
-  gl.bufferData<GL_ARRAY_BUFFER>(vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
 }
 
 void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)> height)
@@ -703,7 +703,7 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
     //! \todo: find out why recalculating normals without changing the terrain result in slightly different normals
     mNormals[i] = {-Norm.z, Norm.y, -Norm.x};
   }
-  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
@@ -825,7 +825,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   }
   if (changed)
   {
-    gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
   }
   return changed;
 }
