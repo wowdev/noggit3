@@ -132,7 +132,7 @@ public:
   auto loaded_tiles()
   {
     return tiles<false>
-      ([] (tile_index const&, MapTile* tile) { return !!tile; });
+      ([] (tile_index const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
   }
 
   auto tiles_in_range (math::vector_3d const& pos, float radius)
