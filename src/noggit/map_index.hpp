@@ -16,6 +16,14 @@
 #include <sstream>
 #include <string>
 
+
+enum class uid_fix_status
+{
+  done,
+  done_with_errors,
+  failed
+};
+
 /*!
 \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
 */
@@ -181,7 +189,7 @@ public:
 
   uint32_t newGUID();
 
-  void fixUIDs (World*);
+  uid_fix_status fixUIDs (World*, bool);
   void searchMaxUID();
   void saveMaxUID();
   void loadMaxUID();

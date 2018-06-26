@@ -1329,6 +1329,14 @@ MapView::MapView( math::degrees camera_yaw0
     _minimap->update();
   }
 
+  void MapView::on_uid_fix_fail()
+  {
+    emit uid_fix_failed();
+
+    _uid_fix_failed = true;
+    deleteLater();
+  }
+
   void MapView::initializeGL()
   {
     opengl::context::scoped_setter const _ (::gl, context());
@@ -1340,9 +1348,19 @@ MapView::MapView( math::degrees camera_yaw0
     {
       _world->mapIndex.searchMaxUID();
     }
-    else if (_uid_fix == uid_fix_mode::fix_all)
+    else if (_uid_fix == uid_fix_mode::fix_all_fail_on_model_loading_error)
     {
-      _world->mapIndex.fixUIDs (_world.get());
+      auto result = _world->mapIndex.fixUIDs (_world.get(), true);
+
+      if (result == uid_fix_status::done_with_errors)
+      {
+        on_uid_fix_fail();
+        return;
+      }
+    }
+    else if (_uid_fix == uid_fix_mode::fix_all_fuckporting_edition)
+    {
+      _world->mapIndex.fixUIDs (_world.get(), false);
     }
 
     _uid_fix = uid_fix_mode::none;
@@ -1412,10 +1430,15 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  //! \ todo: fix the crash when deleting the texture picker
-  TexturePicker->hide();
-  _minimap->hide();
-  _time_and_navigation_dock->hide();
+  // the gui isn't created if the uid fix fail
+  if (!_uid_fix_failed)
+  {
+    //! \ todo: fix the crash when deleting the texture picker
+    TexturePicker->hide();
+    _minimap->hide();
+    _time_and_navigation_dock->hide();
+  }
+  
   _world.reset();
 
   AsyncLoader::instance().reset_object_fail();
