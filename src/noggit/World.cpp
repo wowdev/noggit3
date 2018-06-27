@@ -1662,79 +1662,6 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
   }
 }
 
-void World::drawTileMode ( float /*ah*/
-                         , math::vector_3d const& camera_pos
-                         , bool draw_lines
-                         , float zoom
-                         , float aspect_ratio
-                         )
-{
-  gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-  gl.enable(GL_BLEND);
-
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  opengl::scoped::matrix_pusher const matrix_outer;
-  gl.scalef(zoom, zoom, 1.0f);
-
-  {
-    opengl::scoped::matrix_pusher const matrix;
-    gl.translatef(-camera_pos.x / CHUNKSIZE, -camera_pos.z / CHUNKSIZE, 0);
-
-    float minX = camera_pos.x / CHUNKSIZE - 2.0f * aspect_ratio / zoom;
-    float maxX = camera_pos.x / CHUNKSIZE + 2.0f * aspect_ratio / zoom;
-    float minY = camera_pos.z / CHUNKSIZE - 2.0f / zoom;
-    float maxY = camera_pos.z / CHUNKSIZE + 2.0f / zoom;
-
-    gl.enableClientState(GL_COLOR_ARRAY);
-    gl.disableClientState(GL_NORMAL_ARRAY);
-    gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
-    gl.disable(GL_CULL_FACE);
-    gl.depthMask(GL_FALSE);
-
-    for (MapTile* tile : mapIndex.loaded_tiles())
-    {
-      tile->drawTextures (minX, minY, maxX, maxY, animtime);
-    }
-
-    gl.disableClientState(GL_COLOR_ARRAY);
-
-    gl.enableClientState(GL_NORMAL_ARRAY);
-    gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  }
-
-  if (draw_lines) {
-    gl.translatef((GLfloat)fmod(-camera_pos.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera_pos.z / CHUNKSIZE, 16), 0);
-    /*  for(int x=-32;x<=48;x++)
-    {
-    if(x%16==0)
-    gl.color4f(0.0f,1.0f,0.0f,0.5f);
-    else
-    gl.color4f(1.0f,0.0f,0.0f,0.5f);
-    gl.begin(GL_LINES);
-    gl.vertex3f(-32.0f,(float)x,-1);
-    gl.vertex3f(48.0f,(float)x,-1);
-    gl.vertex3f((float)x,-32.0f,-1);
-    gl.vertex3f((float)x,48.0f,-1);
-    gl.end();
-    }*/
-
-    for (float x = -32.0f; x <= 48.0f; x += 1.0f)
-    {
-      if (static_cast<int>(x) % 16)
-        gl.color4f(1.0f, 0.0f, 0.0f, 0.5f);
-      else
-        gl.color4f(0.0f, 1.0f, 0.0f, 0.5f);
-      gl.begin(GL_LINES);
-      gl.vertex3f(-32.0f, x, -1);
-      gl.vertex3f(48.0f, x, -1);
-      gl.vertex3f(x, -32.0f, -1);
-      gl.vertex3f(x, 48.0f, -1);
-      gl.end();
-    }
-  }
-}
-
 bool World::GetVertex(float x, float z, math::vector_3d *V) const
 {
   tile_index tile({x, 0, z});
@@ -2028,59 +1955,7 @@ void World::convert_alphamap(bool to_big_alpha)
 
 void World::saveMap (int width, int height)
 {
-  //! \todo  Output as BLP.
-  unsigned char image[256 * 256 * 3];
-  MapTile *ATile;
-  FILE *fid;
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.readBuffer(GL_BACK);
-
-  float minX = -64 * 16;
-  float maxX = 64 * 16;
-  float minY = -64 * 16;
-  float maxY = 64 * 16;
-
-  gl.enableClientState(GL_COLOR_ARRAY);
-  gl.disableClientState(GL_NORMAL_ARRAY);
-  gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
-
-  for (int y = 0; y<64; y++)
-  {
-    for (int x = 0; x<64; x++)
-    {
-      tile_index tile(x, y);
-
-      if (!mapIndex.hasTile(tile))
-      {
-        continue;
-      }
-
-      ATile = mapIndex.loadTile(tile);
-      gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-      opengl::scoped::matrix_pusher const matrix;
-      gl.scalef(0.08333333f, 0.08333333f, 1.0f);
-
-      //gl.translatef(-camera_pos.x/CHUNKSIZE,-camera_pos.z/CHUNKSIZE,0);
-      gl.translatef(x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f);
-
-
-      ATile->drawTextures (minX, minY, maxX, maxY, animtime);
-      gl.readPixels(width / 2 - 128, height / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-      std::stringstream ss;
-      ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
-      fid = fopen(ss.str().c_str(), "wb");
-      fwrite(image, 256 * 3, 256, fid);
-      fclose(fid);
-    }
-  }
-
-  gl.disableClientState(GL_COLOR_ARRAY);
-
-  gl.enableClientState(GL_NORMAL_ARRAY);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
+  throw std::exception("minimap saving not implemented");
 }
 
 void World::deleteModelInstance(int pUniqueID)

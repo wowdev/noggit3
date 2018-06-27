@@ -918,14 +918,14 @@ void MapView::createGUI()
              , Qt::Key_U
              , [this]
                {
-                 if (mViewMode == eViewMode_2D)
+                 if (_display_mode == display_mode::in_2D)
                  {
-                   mViewMode = eViewMode_3D;
+                   _display_mode = display_mode::in_3D;
                    set_editing_mode (saveterrainMode);
                  }
                  else
                  {
-                   mViewMode = eViewMode_2D;
+                   _display_mode = display_mode::in_2D;
                    saveterrainMode = terrainMode;
                    set_editing_mode (editing_mode::paint);
                  }
@@ -1295,7 +1295,7 @@ MapView::MapView( math::degrees camera_yaw0
   mousedir = -1.0f;
 
   look = false;
-  mViewMode = eViewMode_3D;
+  _display_mode = display_mode::in_3D;
 
   init_tablet();
 
@@ -1391,31 +1391,7 @@ MapView::MapView( math::degrees camera_yaw0
 
     gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
-    if (Saving)
-    {
-      gl.matrixMode (GL_PROJECTION);
-      gl.loadIdentity();
-      gl.ortho
-        (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
-      gl.matrixMode (GL_MODELVIEW);
-      gl.loadIdentity();
-
-      _world->saveMap (width(), height());
-      Saving = false;
-    }
-
-
-    switch (mViewMode)
-    {
-    case eViewMode_2D:
-      displayViewMode_2D();
-      break;
-
-    case eViewMode_3D:
-      displayViewMode_3D();
-      break;
-    }
+    draw_map();
   }
 
   void MapView::resizeGL (int width, int height)
@@ -1722,7 +1698,7 @@ void MapView::tick (float dt)
         switch (terrainMode)
         {
         case editing_mode::ground:
-          if (mViewMode == eViewMode_3D && !underMap)
+          if (_display_mode == display_mode::in_3D && !underMap)
           {
             if (_mod_shift_down)
             {
@@ -1735,7 +1711,7 @@ void MapView::tick (float dt)
           }
           break;
         case editing_mode::flatten_blur:
-          if (mViewMode == eViewMode_3D && !underMap)
+          if (_display_mode == display_mode::in_3D && !underMap)
           {
             if (_mod_shift_down)
             {
@@ -1751,10 +1727,10 @@ void MapView::tick (float dt)
           if (_mod_shift_down && _mod_ctrl_down && _mod_alt_down)
           {
             // clear chunk texture
-            if (mViewMode == eViewMode_3D && !underMap)
+            if (!underMap)
+            {
               _world->eraseTextures(_cursor_pos);
-            else if (mViewMode == eViewMode_2D)
-              _world->eraseTextures({CHUNKSIZE * 4.0f * aspect_ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z});
+            }
           }
           else if (_mod_ctrl_down)
           {
@@ -1763,40 +1739,27 @@ void MapView::tick (float dt)
           }
           else  if (_mod_shift_down && !!noggit::ui::selected_texture::get())
           {
-            if (mViewMode == eViewMode_3D && !underMap)
+            if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
             {
               texturingTool->paint (_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
-            }
-            else if (mViewMode == eViewMode_2D)
-            {
-              math::vector_3d pos( CHUNKSIZE * 4.0f * aspect_ratio() * ((float)_last_mouse_pos.x() / (float)width() - 0.5f ) / _2d_zoom
-                                  , 0.0f
-                                  , CHUNKSIZE * 4.0f * ((float)_last_mouse_pos.y() / (float)height() - 0.5f) / _2d_zoom
-                                  );
-
-              pos += _camera.position;
-              texturingTool->paint (_world.get(), pos, dt, *noggit::ui::selected_texture::get());
             }
           }
           break;
 
         case editing_mode::holes:
-          if (mViewMode == eViewMode_3D)
+          // no undermap check here, else it's impossible to remove holes
+          if (_mod_shift_down)
           {
-            // no undermap check here, else it's impossible to remove holes
-            if (_mod_shift_down)
-            {
-              auto pos (boost::get<selected_chunk_type> (*Selection).position);
-              _world->setHole(pos, _mod_alt_down, false);
-            }
-            else if (_mod_ctrl_down && !underMap)
-            {
-              _world->setHole(_cursor_pos, _mod_alt_down, true);
-            }
+            auto pos (boost::get<selected_chunk_type> (*Selection).position);
+            _world->setHole(pos, _mod_alt_down, false);
+          }
+          else if (_mod_ctrl_down && !underMap)
+          {
+            _world->setHole(_cursor_pos, _mod_alt_down, true);
           }
           break;
         case editing_mode::areaid:
-          if (mViewMode == eViewMode_3D && !underMap)
+          if (!underMap)
           {
             if (_mod_shift_down)
             {
@@ -1814,7 +1777,7 @@ void MapView::tick (float dt)
           }
           break;
         case editing_mode::flags:
-          if (mViewMode == eViewMode_3D && !underMap)
+          if (!underMap)
           {
             // todo: replace this
             if (_mod_shift_down)
@@ -1828,7 +1791,7 @@ void MapView::tick (float dt)
           }
           break;
         case editing_mode::water:
-          if (mViewMode == eViewMode_3D && !underMap)
+          if (_display_mode == display_mode::in_3D && !underMap)
           {
             if (_mod_shift_down)
             {
@@ -1841,7 +1804,7 @@ void MapView::tick (float dt)
           }
           break;
         case editing_mode::mccv:
-          if (mViewMode == eViewMode_3D && !underMap)
+          if (!underMap)
           {
             if (_mod_shift_down)
             {
@@ -1857,7 +1820,7 @@ void MapView::tick (float dt)
       }
     }
 
-    if (mViewMode != eViewMode_2D)
+    if (_display_mode != display_mode::in_2D)
     {
       if (turn)
       {
@@ -1875,28 +1838,28 @@ void MapView::tick (float dt)
       {
         _camera.move_horizontal(strafing, dt);
       }
-      if (updown)
-      {
-        _camera.move_vertical(updown, dt);
-      }
-      _minimap->update();
     }
     else
     {
       //! \todo this is total bullshit. there should be a seperate view and camera class for tilemode
       if (moving)
-        _camera.position.z -= dt * _camera.move_speed * moving / (_2d_zoom * 1.5f);
+      {
+        _camera.position.z -= dt * _camera.move_speed * moving;
+      }
       if (strafing)
-        _camera.position.x += dt * _camera.move_speed * strafing / (_2d_zoom * 1.5f);
-      if (updown)
-        _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
-
-      _2d_zoom = std::min(std::max(_2d_zoom, 0.1f), 2.0f);
+      {
+        _camera.position.x += dt * _camera.move_speed * strafing;
+      } 
+    }
+    
+    if (updown)
+    {
+      _camera.move_vertical(updown, dt);
     }
 
+    _minimap->update();
+
   _world->time += this->mTimespeed * dt;
-
-
   _world->animtime += dt * 1000.0f;
 
   _world->tick (dt);
@@ -2109,41 +2072,53 @@ float MapView::aspect_ratio() const
   return float (width()) / float (height());
 }
 
-selection_result MapView::intersect_result(bool terrain_only)
+math::ray MapView::intersect_ray() const
 {
-  // during rendering we multiply perspective * view
-  // so we need the same order here and then invert.
-  math::vector_3d const pos
-    ( ( ( math::perspective ( _camera.fov()
-                            , aspect_ratio()
-                            , 1.f
-                            , _settings->value ("farZ", 2048).toFloat()
-                            )
-        * math::look_at ( _camera.position
-                        , _camera.look_at()
-                        , { 0.0f, 1.0f, 0.0f }
-                        )
+  if (_display_mode == display_mode::in_3D)
+  {
+    // during rendering we multiply perspective * view
+    // so we need the same order here and then invert.
+    math::vector_3d const pos 
+    (
+      ( (opengl::matrix::projection().transposed()
+        * opengl::matrix::model_view().transposed()
         ).inverted()
-      * normalized_device_coords (_last_mouse_pos.x(), _last_mouse_pos.y())
+        * normalized_device_coords (_last_mouse_pos.x(), _last_mouse_pos.y())
       ).xyz_normalized_by_w()
     );
 
-  math::ray ray (_camera.position, pos - _camera.position);
-
-  selection_result results
-    ( _world->intersect ( ray
-                        , terrain_only
-                        , terrainMode == editing_mode::object
-                        , _draw_terrain.get()
-                        , _draw_wmo.get()
-                        , _draw_models.get()
-                        , _draw_hidden_models.get()
-                        )
+    return { _camera.position, pos - _camera.position };
+  }
+  else
+  {
+    math::vector_3d const pos 
+    (
+      _camera.position.x - (width()*0.5f) + _last_mouse_pos.x()
+      , _camera.position.y
+      , _camera.position.z - (height()*0.5f) + _last_mouse_pos.y()
     );
+    
+    return { pos, math::vector_3d(0.f, -1.f, 0.f) };
+  }
+}
+
+selection_result MapView::intersect_result(bool terrain_only)
+{
+  selection_result results
+  ( _world->intersect 
+    ( intersect_ray()
+    , terrain_only
+    , terrainMode == editing_mode::object
+    , _draw_terrain.get()
+    , _draw_wmo.get()
+    , _draw_models.get()
+    , _draw_hidden_models.get()
+    )
+  );
 
   std::sort ( results.begin()
             , results.end()
-            , [] (selection_entry const& lhs, selection_entry const& rhs)
+            , [](selection_entry const& lhs, selection_entry const& rhs)
               {
                 return lhs.first < rhs.first;
               }
@@ -2184,100 +2159,8 @@ void MapView::update_cursor_pos()
   }
 }
 
-void MapView::displayViewMode_2D()
+void MapView::draw_map()
 {
-  doSelection(true);
-
-  gl.matrixMode (GL_PROJECTION);
-  gl.loadIdentity();
-  gl.ortho
-    (-2.0f * aspect_ratio(), 2.0f * aspect_ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
-  gl.matrixMode (GL_MODELVIEW);
-  gl.loadIdentity();
-
-  _world->drawTileMode ( _camera.yaw()._
-                       , _camera.position
-                       , _draw_lines.get()
-                       , _2d_zoom
-                       , aspect_ratio()
-                       );
-
-
-  const float mX = (CHUNKSIZE * 4.0f * aspect_ratio() * (static_cast<float>(_last_mouse_pos.x()) / static_cast<float>(width()) - 0.5f) / _2d_zoom + _camera.position.x) / CHUNKSIZE;
-  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(_last_mouse_pos.y()) / static_cast<float>(height()) - 0.5f) / _2d_zoom + _camera.position.z) / CHUNKSIZE;
-
-  // draw brush
-  {
-    opengl::scoped::matrix_pusher const matrix;
-
-    gl.scalef(_2d_zoom, _2d_zoom, 1.0f);
-    gl.translatef(-_camera.position.x / CHUNKSIZE, -_camera.position.z / CHUNKSIZE, 0);
-
-    gl.color4f(1.0f, 1.0f, 1.0f, 0.5f);
-    
-    opengl::texture::disable_texture(1);
-    opengl::texture::enable_texture(0);
-
-    opengl::texture brush_texture;
-
-    {
-      char tex[256 * 256];
-
-      float const change = 2.0f / 256.0f;
-      float const hardness (texturingTool->texture_brush().getHardness());
-
-      float y = -1;
-      for (int j = 0; j < 256; j++)
-      {
-        float x = -1;
-        for (int i = 0; i < 256; ++i)
-        {
-          float dist = std::sqrt (x * x + y * y);
-          if (dist > 1)
-            tex[j * 256 + i] = 0;
-          else if (dist < hardness)
-            tex[j * 256 + i] = (unsigned char)255;
-          else
-            tex[j * 256 + i] = (unsigned char)(255.0f * (1 - (dist - hardness) / (1 - hardness)) + 0.5f);
-
-          x += change;
-        }
-        y += change;
-      }
-      brush_texture.bind();
-      gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 256, 256, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    }
-
-    const float tRadius = texturingTool->brush_radius() / CHUNKSIZE;// *_2d_zoom;
-    gl.begin(GL_QUADS);
-    gl.texCoord2f(0.0f, 0.0f);
-    gl.vertex3f(mX - tRadius, mY + tRadius, 0);
-    gl.texCoord2f(1.0f, 0.0f);
-    gl.vertex3f(mX + tRadius, mY + tRadius, 0);
-    gl.texCoord2f(1.0f, 1.0f);
-    gl.vertex3f(mX + tRadius, mY - tRadius, 0);
-    gl.texCoord2f(0.0f, 1.0f);
-    gl.vertex3f(mX - tRadius, mY - tRadius, 0);
-    gl.end();
-  }
-}
-
-void MapView::displayViewMode_3D()
-{
-  //! \note Select terrain below mouse, if no item selected or the item is map.
-  if (! ( _world->IsSelection(eEntry_Model) 
-       || _world->IsSelection(eEntry_WMO) 
-       || _locked_cursor_mode.get()
-        )
-     )
-  {
-    doSelection(true);
-  }
-
   //! \ todo: make the current tool return the radius
   float radius = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
   math::vector_3d ref_pos;
@@ -2314,14 +2197,45 @@ void MapView::displayViewMode_3D()
     break;
   }
 
-  gl.matrixMode (GL_PROJECTION);
-  gl.loadIdentity();
-  opengl::matrix::perspective
-    (_camera.fov(), aspect_ratio(), 1.f, _settings->value ("farZ", 2048).toFloat());
-  gl.matrixMode (GL_MODELVIEW);
-  gl.loadIdentity();
-  opengl::matrix::look_at
-    (_camera.position, _camera.look_at(), {0.0f, 1.0f, 0.0f});
+  float far_z = _settings->value ("farZ", 2048).toFloat();
+
+  if (_display_mode == display_mode::in_2D)
+  {
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
+
+    float half_width = width() * 0.5f;
+    float half_height = height() * 0.5f;
+
+    gl.ortho (-half_width, half_width, -half_height, half_height, -100.f, far_z);
+
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
+
+    math::vector_3d look_at(_camera.position);
+    look_at.y -= 1.f;
+    look_at.z -= 0.001f;
+    opengl::matrix::look_at (_camera.position, look_at, { 0.f,1.f, 0.f });
+  }
+  else
+  {
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
+    opengl::matrix::perspective (_camera.fov(), aspect_ratio(), 1.f,far_z);
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
+    opengl::matrix::look_at (_camera.position, _camera.look_at(), { 0.f, 1.f, 0.f });
+  }
+
+  //! \note Select terrain below mouse, if no item selected or the item is map.
+  if (!(_world->IsSelection(eEntry_Model)
+    || _world->IsSelection(eEntry_WMO)
+    || _locked_cursor_mode.get()
+    )
+    )
+  {
+    doSelection(true);
+  }
 
   _world->draw ( _cursor_pos
                , terrainMode == editing_mode::mccv ? shader_color : cursor_color
@@ -2690,13 +2604,13 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (mViewMode == eViewMode_2D && leftMouse && _mod_alt_down && _mod_shift_down)
+  if (_display_mode == display_mode::in_2D && leftMouse && _mod_alt_down && _mod_shift_down)
   {
     strafing = ((relative_movement.dx() / XSENS) / -1) * 5.0f;
     moving = (relative_movement.dy() / YSENS) * 5.0f;
   }
 
-  if (mViewMode == eViewMode_2D && rightMouse && _mod_shift_down)
+  if (_display_mode == display_mode::in_2D && rightMouse && _mod_shift_down)
   {
     updown = (relative_movement.dy() / YSENS);
   }
@@ -2766,7 +2680,7 @@ void MapView::mousePressEvent (QMouseEvent* event)
 
   if (leftMouse)
   {
-    if (mViewMode == eViewMode_3D)
+    if (_display_mode == display_mode::in_3D)
     {
       doSelection(false);
     }
@@ -2863,7 +2777,7 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   case Qt::LeftButton:
     leftMouse = false;
 
-    if (mViewMode == eViewMode_2D)
+    if (_display_mode == display_mode::in_2D)
     {
       strafing = 0;
       moving = 0;
@@ -2875,7 +2789,7 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
 
     look = false;
 
-    if (mViewMode == eViewMode_2D)
+    if (_display_mode == display_mode::in_2D)
       updown = 0;
 
     break;

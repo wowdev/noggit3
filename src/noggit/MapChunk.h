@@ -116,7 +116,6 @@ public:
   //! \todo only this function should be public, all others should be called from it
 
   void intersect (math::ray const&, selection_result*);
-  void drawTextures (int animtime);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
 
   ChunkWater* liquid_chunk() const;

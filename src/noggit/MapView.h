@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <math/ray.hpp>
 #include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Selection.h>
@@ -33,11 +34,10 @@
 class World;
 
 
-enum eViewMode
+enum display_mode
 {
-  eViewMode_Minimap,
-  eViewMode_2D,
-  eViewMode_3D
+  in_2D,
+  in_3D
 };
 
 namespace noggit
@@ -105,14 +105,14 @@ private:
   int _selected_area_id = -1;
   std::map<int, misc::random_color> _area_id_colors;
 
+  math::ray intersect_ray() const;
   selection_result intersect_result(bool terrain_only);
   void doSelection(bool selectTerrainOnly);
   void update_cursor_pos();
 
-  int mViewMode;
+  display_mode _display_mode;
 
-  void displayViewMode_2D();
-  void displayViewMode_3D();
+  void draw_map();
 
   void createGUI();
 
