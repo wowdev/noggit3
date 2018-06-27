@@ -81,12 +81,7 @@ public:
                  , int animtime
                  , int layer
                  );
-  void drawTextures ( float minX
-                    , float minY
-                    , float maxX
-                    , float maxY
-                    , int animtime
-                    );
+
   void drawMFBO (opengl::scoped::use_program&);
 
   bool GetVertex(float x, float z, math::vector_3d *V);

@@ -141,12 +141,6 @@ public:
                              , bool draw_models
                              , bool draw_hidden_models
                              );
-  void drawTileMode ( float ah
-                    , math::vector_3d const& camera_pos
-                    , bool draw_lines
-                    , float zoom
-                    , float aspect_ratio
-                    );
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
@@ -297,7 +291,7 @@ private:
 
   float _view_distance;
 
-  std::unique_ptr<opengl::program> _mcnk_program;
+  std::unique_ptr<opengl::program> _mcnk_program;;
   std::unique_ptr<opengl::program> _mfbo_program;
   std::unique_ptr<opengl::program> _m2_program;
   std::unique_ptr<opengl::program> _m2_box_program;
