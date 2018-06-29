@@ -629,9 +629,10 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   // opacity
   if (transparency_combo_index != -1)
   {
-    if (m->_transparency[transparency_combo_index].trans.uses (0))
+    auto& transparency (m->_transparency[m->_transparency_lookup[transparency_combo_index]].trans);
+    if (transparency.uses (0))
     {
-      mesh_color.w = mesh_color.w * m->_transparency[transparency_combo_index].trans.getValue (0, m->_anim_time, m->_global_animtime);;
+      mesh_color.w = mesh_color.w * transparency.getValue(0, m->_anim_time, m->_global_animtime);
     }
   }
 
