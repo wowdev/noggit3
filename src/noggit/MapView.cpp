@@ -1838,6 +1838,10 @@ void MapView::tick (float dt)
       {
         _camera.move_horizontal(strafing, dt);
       }
+      if (updown)
+      {
+        _camera.move_vertical(updown, dt);
+      }
     }
     else
     {
@@ -1849,13 +1853,13 @@ void MapView::tick (float dt)
       if (strafing)
       {
         _camera.position.x += dt * _camera.move_speed * strafing;
-      } 
-    }
-    
-    if (updown)
-    {
-      _camera.move_vertical(updown, dt);
-    }
+      }
+      if (updown)
+      {
+        _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
+        _2d_zoom = std::max(0.01f, _2d_zoom);
+      }
+    } 
 
     _minimap->update();
 
@@ -2074,6 +2078,8 @@ float MapView::aspect_ratio() const
 
 math::ray MapView::intersect_ray() const
 {
+  float mx = _last_mouse_pos.x(), mz = _last_mouse_pos.y();
+
   if (_display_mode == display_mode::in_3D)
   {
     // during rendering we multiply perspective * view
@@ -2083,7 +2089,7 @@ math::ray MapView::intersect_ray() const
       ( (opengl::matrix::projection().transposed()
         * opengl::matrix::model_view().transposed()
         ).inverted()
-        * normalized_device_coords (_last_mouse_pos.x(), _last_mouse_pos.y())
+        * normalized_device_coords (mx, mz)
       ).xyz_normalized_by_w()
     );
 
@@ -2091,11 +2097,10 @@ math::ray MapView::intersect_ray() const
   }
   else
   {
-    math::vector_3d const pos 
-    (
-      _camera.position.x - (width()*0.5f) + _last_mouse_pos.x()
-      , _camera.position.y
-      , _camera.position.z - (height()*0.5f) + _last_mouse_pos.y()
+    math::vector_3d const pos
+    ( _camera.position.x - (width() * 0.5f - mx) * _2d_zoom
+    , _camera.position.y
+    , _camera.position.z - (height() * 0.5f - mz) * _2d_zoom
     );
     
     return { pos, math::vector_3d(0.f, -1.f, 0.f) };
@@ -2204,10 +2209,10 @@ void MapView::draw_map()
     gl.matrixMode (GL_PROJECTION);
     gl.loadIdentity();
 
-    float half_width = width() * 0.5f;
-    float half_height = height() * 0.5f;
+    float half_width = width() * 0.5f * _2d_zoom;
+    float half_height = height() * 0.5f * _2d_zoom;
 
-    gl.ortho (-half_width, half_width, -half_height, half_height, -far_z*0.5f, far_z);
+    gl.ortho (-half_width, half_width, -half_height, half_height, -1.f, far_z);
 
     gl.matrixMode (GL_MODELVIEW);
     gl.loadIdentity();
