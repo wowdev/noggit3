@@ -345,9 +345,11 @@ void map_horizon::render::draw( MapIndex *index
     }
   }
 
-  static opengl::program const program
-      { { GL_VERTEX_SHADER
-        , R"code(
+  if (!_map_horizon_program)
+  {
+    _map_horizon_program.reset(new opengl::program
+    { { GL_VERTEX_SHADER
+      , R"code(
 #version 110
 
 attribute vec4 position;
@@ -360,9 +362,9 @@ void main()
   gl_Position = projection * model_view * position;
 }
 )code"
-        }
+    }
       , { GL_FRAGMENT_SHADER
-        , R"code(
+      , R"code(
 #version 110
 
 uniform vec3 color;
@@ -372,10 +374,12 @@ void main()
   gl_FragColor = vec4(color, 1.0);
 }
 )code"
-        }
-      };
+      }
+    });
+  }
+   
 
-  opengl::scoped::use_program shader {program};
+  opengl::scoped::use_program shader {*_map_horizon_program.get()};
 
   shader.uniform ("model_view", opengl::matrix::model_view());
   shader.uniform ("projection", opengl::matrix::projection());

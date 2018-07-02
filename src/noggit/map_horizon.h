@@ -8,6 +8,7 @@
 
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.fwd.hpp>
 
 #include <QtGui/QImage>
 
@@ -60,6 +61,7 @@ public:
     opengl::scoped::buffers<2> _buffers;
     GLuint const& _index_buffer = _buffers[0];
     GLuint const& _vertex_buffer = _buffers[1];
+    std::unique_ptr<opengl::program> _map_horizon_program;
   };
 
   class minimap : public opengl::texture
