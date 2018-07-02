@@ -860,7 +860,7 @@ void main()
 
     
     math::vector_3d dd = outdoorLightStats.dayDir;
-    math::vector_3d diffuse_color(skies->colorSet[LIGHT_GLOBAL_DIFFUSE]);    
+    math::vector_3d diffuse_color(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
     math::vector_3d ambient_color(skies->colorSet[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);  
 
     mcnk_shader.uniform("light_dir", math::vector_3d(-dd.x, -dd.z, dd.y));
@@ -1124,6 +1124,7 @@ in mat4 transform;
 out vec2 uv1;
 out vec2 uv2;
 out float camera_dist;
+out vec3 norm;
 
 uniform mat4 model_view;
 uniform mat4 projection;
@@ -1167,9 +1168,9 @@ vec2 get_texture_uv(int tex_unit_lookup, vec3 vert, vec3 norm)
 void main()
 {
   mat4 camera_mat = model_view * transform;
-
   vec4 vertex = camera_mat * pos;
-  vec3 norm = mat3(camera_mat) * normal;
+
+  norm = mat3(camera_mat) * normal;
 
   uv1 = get_texture_uv(tex_unit_lookup_1, vertex.xyz, norm);
   uv2 = get_texture_uv(tex_unit_lookup_2, vertex.xyz, norm);
@@ -1186,6 +1187,7 @@ void main()
 in vec2 uv1;
 in vec2 uv2;
 in float camera_dist;
+in vec3 norm;
 
 uniform vec4 mesh_color;
 
@@ -1197,6 +1199,11 @@ uniform float fog_start;
 uniform float fog_end;
 uniform int draw_fog;
 uniform int unfogged;
+uniform int unlit;
+
+uniform vec3 light_dir;
+uniform vec3 diffuse_color;
+uniform vec3 ambient_color;
 
 uniform float alpha_test;
 uniform int pixel_shader;
@@ -1334,6 +1341,12 @@ void main()
     discard;
   }
 
+  if(unlit == 0)
+  {
+    // diffuse + ambient lighting  
+    color.rgb *= vec3(clamp (diffuse_color * max(dot(norm, light_dir), 0.0), 0.0, 1.0)) + ambient_color;
+  }  
+
   if(draw_fog == 1 && unfogged == 0 && camera_dist >= fog_end * fog_start)
   {
     float start = fog_end * fog_start;
@@ -1360,6 +1373,14 @@ void main()
       m2_shader.uniform ("fog_end", fogdistance);
       m2_shader.uniform ("fog_start", 0.5f);
       m2_shader.uniform ("draw_fog", (int)draw_fog);
+
+      math::vector_3d dd = outdoorLightStats.dayDir;
+      math::vector_3d diffuse_color(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
+      math::vector_3d ambient_color(skies->colorSet[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
+
+      m2_shader.uniform("light_dir", math::vector_3d(-dd.x, -dd.z, dd.y));
+      m2_shader.uniform("diffuse_color", diffuse_color);
+      m2_shader.uniform("ambient_color", ambient_color);
 
       opengl::texture::enable_texture(0);
 

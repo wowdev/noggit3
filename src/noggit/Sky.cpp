@@ -367,12 +367,6 @@ void OutdoorLightStats::init(MPQFile* f)
   f->read(&fogColor.z, 4);
 
   time = (int)((h * 60 + m) * 2);
-
-  // HACK: make day & night intensity exclusive; set day intensity to 1.0
-  if (dayIntensity > 0) {
-    dayIntensity = 1.0f;
-    nightIntensity = 0.0f;
-  }
 }
 
 void OutdoorLightStats::interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r)

@@ -623,7 +623,6 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
     }
 
     emissive_color = math::vector_4d(c, mesh_color.w);
-    gl.materialfv(GL_FRONT, GL_EMISSION, emissive_color);
   }
 
   // opacity
@@ -699,6 +698,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   }
 
   m2_shader.uniform("unfogged", (int)renderflag.flags.unfogged);
+  m2_shader.uniform("unlit", (int)renderflag.flags.unlit);
 
   if (texture_count > 1)
   {
