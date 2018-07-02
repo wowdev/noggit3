@@ -4,8 +4,9 @@
 
 #include <math/frustum.hpp>
 #include <math/vector_3d.hpp>
-#include <noggit/MapHeaders.h>
 #include <noggit/liquid_layer.hpp>
+#include <noggit/MapHeaders.h>
+#include <noggit/tool_enums.hpp>
 
 #include <vector>
 #include <set>
@@ -35,11 +36,13 @@ public:
             , opengl::scoped::use_program& water_shader
             , int animtime
             , int layer
+            , display_mode display
             );
 
-  bool is_visible (const float& cull_distance
+  bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
                   , const math::vector_3d& camera
+                  , display_mode display
                   ) const;
 
   void autoGen(MapChunk* chunk, float factor);

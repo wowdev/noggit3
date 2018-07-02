@@ -8,8 +8,9 @@
 #include <noggit/MPQ.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h>
-#include <noggit/TextureManager.h>
 #include <noggit/multimap_with_normalized_key.hpp>
+#include <noggit/TextureManager.h>
+#include <noggit/tool_enums.hpp>
 #include <noggit/wmo_liquid.hpp>
 
 #include <boost/optional.hpp>
@@ -79,6 +80,7 @@ public:
                  , math::frustum const& frustum
                  , float const& cull_distance
                  , math::vector_3d const& camera
+                 , display_mode display
                  ) const;
 
   std::vector<uint16_t> doodad_ref() const { return _doodad_ref; }
@@ -182,6 +184,7 @@ public:
             , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies
             , std::function<void (bool)> setup_fog
+            , display_mode display
             );
   bool drawSkybox ( math::vector_3d pCamera
                   , math::vector_3d pLower

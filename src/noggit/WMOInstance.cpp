@@ -52,6 +52,7 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , std::function<void (bool)> setup_outdoor_lights
                        , bool world_has_skies
                        , std::function<void (bool)> setup_fog
+                       , display_mode display
                        )
 {
   if (!wmo->finishedLoading() || wmo->loading_failed())
@@ -93,6 +94,7 @@ void WMOInstance::draw ( math::frustum const& frustum
               , setup_outdoor_lights
               , world_has_skies
               , setup_fog
+              , display
               );
   }
 
@@ -238,6 +240,7 @@ std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
   , float const& cull_distance
   , math::vector_3d const& camera
   , bool draw_hidden_models
+  , display_mode display
   )
 {
   std::vector<wmo_doodad_instance*> doodads;
@@ -257,7 +260,7 @@ std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
   {
     for (int i = 0; i < wmo->groups.size(); ++i)
     {
-      if (wmo->groups[i].is_visible(pos, math::degrees (dir.y - 90.f), frustum, cull_distance, camera))
+      if (wmo->groups[i].is_visible(pos, math::degrees (dir.y - 90.f), frustum, cull_distance, camera, display))
       {
         for (auto& doodad : _doodads_per_group[i])
         {

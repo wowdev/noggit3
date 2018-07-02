@@ -293,7 +293,9 @@ void map_horizon::render::draw( MapIndex *index
                               , const math::vector_3d& color
                               , const float& cull_distance
                               , const math::frustum& frustum
-                              , const math::vector_3d& camera )
+                              , const math::vector_3d& camera 
+                              , display_mode display
+                              )
 {
   std::vector<uint32_t> indices;
 
@@ -320,7 +322,7 @@ void map_horizon::render::draw( MapIndex *index
         for (size_t i (0); i < 16; ++i)
         {
           // do not draw over visible chunks
-          if (index->tileLoaded ({y, x}) && index->getTile ({y, x})->getChunk (j, i)->is_visible (cull_distance, frustum, camera))
+          if (index->tileLoaded ({y, x}) && index->getTile ({y, x})->getChunk (j, i)->is_visible (cull_distance, frustum, camera, display))
             continue;
 
           indices.push_back (inner_index (batch, j, i));

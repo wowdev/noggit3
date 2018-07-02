@@ -463,6 +463,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_fog
                  , eTerrainType ground_editing_brush
                  , int water_layer
+                 , display_mode display
                  )
 {
   if (!_display_initialized)
@@ -524,8 +525,9 @@ void World::draw ( math::vector_3d const& cursor_pos
   setupFog (draw_fog);
 
   // Draw verylowres heightmap
-  if (draw_fog && draw_terrain) {
-    _horizon_render->draw (&mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
+  if (draw_fog && draw_terrain) 
+  {
+    _horizon_render->draw (&mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos, display);
   }
 
   // Draw height map
@@ -904,6 +906,7 @@ void main()
                  , area_id_colors
                  , mCurrentSelection
                  , animtime
+                 , display
                  );
     }
 
@@ -1083,10 +1086,10 @@ void main()
   {
     for (auto& wmo : mWMOInstances)
     {
-      for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models))
+      for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models, display))
       {
         _wmo_doodads[doodad->model->filename].push_back(doodad);
-      }      
+      }
     }
   }
 
@@ -1366,7 +1369,7 @@ void main()
         {
           if (draw_hidden_models || !it.second[0]->model->is_hidden())
           {
-            it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
+            it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
           }
         }
       }
@@ -1375,7 +1378,7 @@ void main()
       {
         for (auto& it : _wmo_doodads)
         {
-          it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count);
+          it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
         }
       }      
 
@@ -1446,7 +1449,7 @@ void main()
     if (IsSelection (eEntry_Model))
     {
       auto model = boost::get<selected_model_type> (*GetCurrentSelection());
-      if (model->is_visible(frustum, culldistance, camera_pos))
+      if (model->is_visible(frustum, culldistance, camera_pos, display))
       {
         model->draw_box(true);
       }
@@ -1496,6 +1499,7 @@ void main()
                         , [this] (bool on) { return outdoorLights (on); }
                         , skies->hasSkies()
                         , [this] (bool on) { return setupFog (on); }
+                        , display
                         );
       }
     }
@@ -1537,6 +1541,7 @@ void main()
                       , water_shader
                       , animtime
                       , water_layer
+                      , display
                       );
     }
   }

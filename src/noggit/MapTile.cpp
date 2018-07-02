@@ -335,6 +335,7 @@ void MapTile::draw ( math::frustum const& frustum
                    , std::map<int, misc::random_color>& area_id_colors
                    , boost::optional<selection_type> selection
                    , int animtime
+                   , display_mode display
                    )
 {
   if (!finished)
@@ -359,6 +360,7 @@ void MapTile::draw ( math::frustum const& frustum
                           , area_id_colors
                           , selection
                           , animtime
+                          , display
                           );
     }
   }
@@ -401,6 +403,7 @@ void MapTile::drawWater ( math::frustum const& frustum
                         , opengl::scoped::use_program& water_shader
                         , int animtime
                         , int layer
+                        , display_mode display
                         )
 {
   if (!Water.hasData(0))
@@ -415,6 +418,7 @@ void MapTile::drawWater ( math::frustum const& frustum
              , water_shader
              , animtime
              , layer
+             , display
              );
 }
 

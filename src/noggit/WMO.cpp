@@ -324,6 +324,7 @@ void WMO::draw ( int doodadset
                , std::function<void (bool)> setup_outdoor_lights
                , bool world_has_skies
                , std::function<void (bool)> setup_fog
+               , display_mode display
                )
 {
   if (!_finished_upload)
@@ -344,7 +345,7 @@ void WMO::draw ( int doodadset
 
   for (auto& group : groups)
   {
-    if (!group.is_visible(ofs, angle, frustum, cull_distance, camera))
+    if (!group.is_visible(ofs, angle, frustum, cull_distance, camera, display))
     {
       continue;
     }
@@ -1025,6 +1026,7 @@ bool WMOGroup::is_visible( math::vector_3d const& ofs
                          , math::frustum const& frustum
                          , float const& cull_distance
                          , math::vector_3d const& camera
+                         , display_mode display
                          ) const
 {
   math::vector_3d pos = center + ofs;
@@ -1036,7 +1038,9 @@ bool WMOGroup::is_visible( math::vector_3d const& ofs
     return false;
   }
 
-  float dist = (pos - camera).length() - rad;
+  float dist = display == display_mode::in_3D 
+             ? (pos - camera).length() - rad
+             : std::abs(pos.y - camera.y) - rad;
 
   return (dist < cull_distance);
 }

@@ -2207,7 +2207,7 @@ void MapView::draw_map()
     float half_width = width() * 0.5f;
     float half_height = height() * 0.5f;
 
-    gl.ortho (-half_width, half_width, -half_height, half_height, -100.f, far_z);
+    gl.ortho (-half_width, half_width, -half_height, half_height, -far_z*0.5f, far_z);
 
     gl.matrixMode (GL_MODELVIEW);
     gl.loadIdentity();
@@ -2270,6 +2270,7 @@ void MapView::draw_map()
                , _draw_fog.get()
                , terrainTool->_edit_type
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
+               , _display_mode
                );
 }
 

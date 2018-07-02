@@ -9,6 +9,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/texture_set.hpp>
+#include <noggit/tool_enums.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>
@@ -61,7 +62,9 @@ private:
 
   void update_intersect_points();
 
-  boost::optional<int> get_lod_level(math::vector_3d const& camera_pos) const;
+  boost::optional<int> get_lod_level( math::vector_3d const& camera_pos
+                                    , display_mode display
+                                    ) const;
 
   bool _uploaded = false;
   bool _need_indice_buffer_update = true;
@@ -99,6 +102,7 @@ public:
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
                   , const math::vector_3d& camera
+                  , display_mode display
                   ) const;
 
   void draw ( math::frustum const& frustum
@@ -112,6 +116,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , boost::optional<selection_type> selection
             , int animtime
+            , display_mode display
             );
   //! \todo only this function should be public, all others should be called from it
 

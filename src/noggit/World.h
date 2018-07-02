@@ -125,6 +125,7 @@ public:
             , bool draw_fog
             , eTerrainType ground_editing_brush
             , int water_layer
+            , display_mode display
             );
 
   void outdoorLights(bool on);

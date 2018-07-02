@@ -39,6 +39,7 @@ void TileWater::draw ( math::frustum const& frustum
                      , opengl::scoped::use_program& water_shader
                      , int animtime
                      , int layer
+                     , display_mode display
                      )
 {
   for (int z = 0; z < 16; ++z)
@@ -52,6 +53,7 @@ void TileWater::draw ( math::frustum const& frustum
                          , water_shader                         
                          , animtime
                          , layer
+                         , display
                          );
     }
   }

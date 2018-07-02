@@ -6,6 +6,7 @@
 #include <noggit/ChunkWater.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/MapHeaders.h>
+#include <noggit/tool_enums.hpp>
 
 #include <memory>
 
@@ -29,6 +30,7 @@ public:
             , opengl::scoped::use_program& water_shader
             , int animtime
             , int layer
+            , display_mode display
             );
   bool hasData(size_t layer);
   void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);
