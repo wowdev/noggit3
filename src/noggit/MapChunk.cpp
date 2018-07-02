@@ -295,9 +295,11 @@ void MapChunk::update_indices_buffer()
   _need_indice_buffer_update = false;
 }
 
-boost::optional<int> MapChunk::get_lod_level(math::vector_3d const& camera_pos) const
+boost::optional<int> MapChunk::get_lod_level(math::vector_3d const& camera_pos, display_mode display) const
 {
-  float dist = (camera_pos - vcenter).length();
+  float dist = display == display_mode::in_2D 
+             ? std::abs(camera_pos.y - vcenter.y)
+             : (camera_pos - vcenter).length();
 
   if (dist < 500.f)
   {
@@ -452,12 +454,17 @@ void MapChunk::clearHeight()
 bool MapChunk::is_visible ( const float& cull_distance
                           , const math::frustum& frustum
                           , const math::vector_3d& camera
+                          , display_mode display
                           ) const
 {
   static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
+  
+  float dist = display == display_mode::in_3D
+             ? (camera - vcenter).length() - chunk_radius
+             : std::abs(camera.y - vmax.y);
 
   return frustum.intersects (_intersect_points)
-      && (((camera - vcenter).length() - chunk_radius) < cull_distance);
+      && dist < cull_distance;
 }
 
 
@@ -472,9 +479,10 @@ void MapChunk::draw ( math::frustum const& frustum
                     , std::map<int, misc::random_color>& area_id_colors
                     , boost::optional<selection_type> selection
                     , int animtime
+                    , display_mode display
                     )
 {
-  if (!is_visible (cull_distance, frustum, camera))
+  if (!is_visible (cull_distance, frustum, camera, display))
     return;
 
   if (!_uploaded)
@@ -492,7 +500,7 @@ void MapChunk::draw ( math::frustum const& frustum
                  && show_unpaintable_chunks
                  && draw_paintability_overlay;
   
-  boost::optional<int> lod_level = get_lod_level(camera);
+  boost::optional<int> lod_level = get_lod_level(camera, display);
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(!lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
 

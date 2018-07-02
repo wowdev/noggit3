@@ -13,6 +13,7 @@
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
+#include <noggit/tool_enums.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 
@@ -220,6 +221,7 @@ public:
             , bool draw_particles
             , bool all_boxes
             , std::unordered_map<Model*, std::size_t>& visible_model_count
+            , display_mode display
             );
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
 

@@ -89,6 +89,7 @@ public:
             , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies
             , std::function<void (bool)> setup_fog
+            , display_mode display
             );
   void intersect (math::ray const&, selection_result*);
 
@@ -101,5 +102,6 @@ public:
                                                        , float const& cull_distance
                                                        , math::vector_3d const& camera
                                                        , bool draw_hidden_models
+                                                       , display_mode display
                                                        );
 };

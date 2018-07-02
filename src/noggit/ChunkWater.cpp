@@ -165,9 +165,10 @@ void ChunkWater::draw ( math::frustum const& frustum
                       , opengl::scoped::use_program& water_shader
                       , int animtime
                       , int layer
+                      , display_mode display
                       )
 {
-  if (!is_visible (cull_distance, frustum, camera))
+  if (!is_visible (cull_distance, frustum, camera, display))
   {
     return;
   }
@@ -188,12 +189,17 @@ void ChunkWater::draw ( math::frustum const& frustum
 bool ChunkWater::is_visible ( const float& cull_distance
                             , const math::frustum& frustum
                             , const math::vector_3d& camera
+                            , display_mode display
                             ) const
 {
   static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f);
 
+  float dist = display == display_mode::in_3D
+             ? (camera - vcenter).length() - chunk_radius
+             : std::abs(camera.y - vmax.y);
+
   return frustum.intersects (_intersect_points)
-    && (((camera - vcenter).length () - chunk_radius) < cull_distance);
+      && dist < cull_distance;
 }
 
 void ChunkWater::update_layers()

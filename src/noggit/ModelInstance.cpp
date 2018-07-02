@@ -135,16 +135,32 @@ bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const
   return misc::rectOverlap(_extents.data(), rect);
 }
 
-bool ModelInstance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera)
+bool ModelInstance::is_visible( math::frustum const& frustum
+                              , const float& cull_distance
+                              , const math::vector_3d& camera
+                              , display_mode display
+                              )
 {
   if (_need_recalc_extents && model->finishedLoading())
   {
     recalcExtents();
   }
 
-  float dist = (pos - camera).length() - model->rad * scale;
-  if(dist >= cull_distance)
+  float dist;
+  
+  if (display == display_mode::in_3D)
+  {
+    dist = (pos - camera).length() - model->rad * scale;
+  }
+  else
+  {
+    dist = std::abs(pos.y - camera.y) - model->rad * scale;
+  }
+
+  if (dist >= cull_distance)
+  {
     return false;
+  }
 
   if (size_cat < 1.f && dist > 30.f)
   {

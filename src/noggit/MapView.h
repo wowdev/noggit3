@@ -33,13 +33,6 @@
 
 class World;
 
-
-enum display_mode
-{
-  in_2D,
-  in_3D
-};
-
 namespace noggit
 {
   class camera;
@@ -79,7 +72,7 @@ private:
   bool _mod_shift_down = false;
   bool _mod_space_down = false;
 
-  float _2d_zoom = 0.25f;
+  float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
   bool look;

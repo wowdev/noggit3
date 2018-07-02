@@ -1347,6 +1347,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
                  , bool draw_particles
                  , bool all_boxes
                  , std::unordered_map<Model*, std::size_t>& visible_model_count
+                 , display_mode display
                  )
 {
   if (!finishedLoading() || loading_failed())
@@ -1369,7 +1370,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
 
   for (ModelInstance* mi : instances)
   {
-    if (mi->is_visible(frustum, cull_distance, camera))
+    if (mi->is_visible(frustum, cull_distance, camera, display))
     {
       transform_matrix.push_back(mi->transform_matrix_transposed());
     }    

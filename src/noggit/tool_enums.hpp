@@ -79,3 +79,9 @@ enum class cursor_mode : unsigned int
   terrain,
   mode_count
 };
+
+enum display_mode
+{
+  in_2D,
+  in_3D
+};

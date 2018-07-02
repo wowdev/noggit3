@@ -9,6 +9,7 @@
 #include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
 #include <noggit/tile_index.hpp>
+#include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
 
 namespace math { class frustum; }
@@ -78,7 +79,7 @@ public:
   void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]) const;
-  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera);
+  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera, display_mode display);
 
   void recalcExtents();
   std::vector<math::vector_3d> const& extents();

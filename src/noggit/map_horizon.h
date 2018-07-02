@@ -4,6 +4,8 @@
 
 #include <math/frustum.hpp>
 
+#include <noggit/tool_enums.hpp>
+
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
 
@@ -49,7 +51,9 @@ public:
              , const math::vector_3d& color
              , const float& cull_distance
              , const math::frustum& frustum
-             , const math::vector_3d& camera );
+             , const math::vector_3d& camera 
+             , display_mode display
+             );
 
     map_horizon_batch _batches[64][64];
 
