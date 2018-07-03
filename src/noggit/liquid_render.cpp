@@ -82,7 +82,13 @@ void liquid_render::add_liquid_id(int liquid_id)
     catch (...)
     {
       break;
-    }    
+    }
+  }
+
+  // make sure there's at least one texture
+  if (textures.empty())
+  {
+    textures.emplace_back ("textures/shanecube.blp");
   }
 }
 
