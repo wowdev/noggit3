@@ -47,6 +47,29 @@ namespace misc
                         )
     {}
   };
+
+  template<typename Range>
+    constexpr std::size_t max_element_index (Range const& range)
+  {
+    return std::distance (range.begin(), std::max_element (range.begin(), range.end()));
+  }
+
+  template<typename T, std::size_t Capacity>
+    struct max_capacity_stack_vector
+  {
+    max_capacity_stack_vector (std::size_t size, T init = T()) : _size (size)
+    {
+      std::fill (begin(), end(), init);
+    }
+
+    T const* begin() const { return _data; } T* begin() { return _data; }
+    T const* end() const { return _data + _size; } T* end() { return _data + _size; }
+    T& operator[] (std::size_t i) { return _data[i]; }
+
+  private:
+    T _data[Capacity];
+    std::size_t const _size;
+  };
 }
 
 //! \todo collect all lose functions/classes/structs for now, sort them later

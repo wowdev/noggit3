@@ -2032,7 +2032,7 @@ void MapView::tick (float dt)
                     << (flags.flags.lq_ocean ? "ocean " : "")
                     << (flags.flags.lq_magma ? "lava" : "")
                     << (flags.flags.lq_slime ? "slime" : "")
-                    << "\ntextures used: " << chunk->_texture_set.num();
+                    << "\ntextures used: " << chunk->texture_set->num();
 
         //! \todo get a list of textures and their flags as well as detail doodads.
         /*

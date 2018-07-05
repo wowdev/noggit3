@@ -541,9 +541,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (int i = 0; i < 16; ++i)
     for (int j = 0; j < 16; ++j)
-      for (size_t tex = 0; tex < mChunks[i][j]->_texture_set.num(); tex++)
-        if (lTextures.find(mChunks[i][j]->_texture_set.filename(tex)) == lTextures.end())
-          lTextures.emplace (mChunks[i][j]->_texture_set.filename(tex), -1);
+      for (size_t tex = 0; tex < mChunks[i][j]->texture_set->num(); tex++)
+        if (lTextures.find(mChunks[i][j]->texture_set->filename(tex)) == lTextures.end())
+          lTextures.emplace (mChunks[i][j]->texture_set->filename(tex), -1);
 
   lID = 0;
   for (auto& texture : lTextures)

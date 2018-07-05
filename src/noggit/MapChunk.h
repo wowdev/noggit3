@@ -15,6 +15,7 @@
 #include <noggit/Misc.h>
 
 #include <map>
+#include <memory>
 
 class MPQFile;
 namespace math
@@ -23,7 +24,6 @@ namespace math
   struct vector_4d;
 }
 class Brush;
-class Alphamap;
 class ChunkWater;
 class sExtendableArray;
 
@@ -95,7 +95,7 @@ public:
   mcnk_flags header_flags;
   bool use_big_alphamap;
 
-  TextureSet _texture_set;  
+  std::unique_ptr<TextureSet> texture_set;
 
   math::vector_3d mVertices[mapbufsize];
 

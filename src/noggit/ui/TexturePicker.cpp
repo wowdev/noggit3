@@ -93,12 +93,12 @@ namespace noggit
     void texture_picker::shiftSelectedTextureLeft()
     {
       auto&& selectedTexture = selected_texture::get();
-      TextureSet& ts = _chunk->_texture_set;
-      for (int i = 1; i < ts.num(); i++)
+      auto ts = _chunk->texture_set.get();
+      for (int i = 1; i < ts->num(); i++)
       {
-        if (ts.texture(i) == selectedTexture)
+        if (ts->texture(i) == selectedTexture)
         {
-          ts.swapTexture(i - 1, i);
+          ts->swapTexture(i - 1, i);
           update();
           return;
         }
@@ -108,12 +108,12 @@ namespace noggit
     void texture_picker::shiftSelectedTextureRight()
     {
       auto&& selectedTexture = selected_texture::get();
-      TextureSet& ts = _chunk->_texture_set;
-      for (int i = 0; i < ts.num() - 1; i++)
+      auto ts = _chunk->texture_set.get();
+      for (int i = 0; i < ts->num() - 1; i++)
       {
-        if (ts.texture(i) == selectedTexture)
+        if (ts->texture(i) == selectedTexture)
         {
-          ts.swapTexture(i, i + 1);
+          ts->swapTexture(i, i + 1);
           update();
           return;
         }
@@ -130,9 +130,9 @@ namespace noggit
       _textures.clear();
       size_t index = 0;
 
-      for (; index < _chunk->_texture_set.num(); ++index)
+      for (; index < _chunk->texture_set->num(); ++index)
       {
-        _textures.push_back(_chunk->_texture_set.texture(index));
+        _textures.push_back(_chunk->texture_set->texture(index));
         _labels[index]->set_texture(_textures[index]->filename());
         _labels[index]->show();
       }

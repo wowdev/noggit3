@@ -134,7 +134,7 @@ void Alphamap::setAlpha(unsigned char *pAmap)
   memcpy(amap, pAmap, 64*64);
 }
 
-unsigned char Alphamap::getAlpha(size_t offset)
+unsigned char Alphamap::getAlpha(size_t offset) const
 {
   return amap[offset];
 }
