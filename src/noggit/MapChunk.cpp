@@ -63,6 +63,9 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
     vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
+
+  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha, !header_flags.flags.do_not_fix_alpha_map);
+
   // - MCVT ----------------------------------------------
   {
     f->seek(base + header.ofsHeight);
@@ -117,16 +120,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       *ttn++ = math::vector_3d(nor[0] / 127.0f, nor[2] / 127.0f, nor[1] / 127.0f);
     }
   }
-  // - MCLY ----------------------------------------------
-  {
-    f->seek(base + header.ofsLayer);
-    f->read(&fourcc, 4);
-    f->read(&size, 4);
-
-    assert(fourcc == 'MCLY');
-
-    _texture_set.initTextures(f, mt, size);
-  }
   // - MCSH ----------------------------------------------
   if(header.ofsShadow && header.sizeShadow)
   {
@@ -160,16 +153,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     /** We have no shadow map (MCSH), so we got no shadows at all!  **
     ** This results in everything being black.. Yay. Lets fake it! **/
     memset(_shadow_map, 0, 64 * 64);
-  }
-  // - MCAL ----------------------------------------------
-  {
-    f->seek(base + header.ofsAlpha);
-    f->read(&fourcc, 4);
-    f->read(&size, 4);
-
-    assert(fourcc == 'MCAL');
-
-    _texture_set.initAlphamaps(f, header.nLayers, use_big_alphamap, (header_flags.flags.do_not_fix_alpha_map) == 0);
   }
   // - MCCV ----------------------------------------------
   if(header.ofsMCCV)
@@ -274,7 +257,7 @@ void MapChunk::upload()
 
   update_indices_buffer();
 
-  _texture_set.upload();
+  texture_set->upload();
 
   _uploaded = true;
 }
@@ -504,17 +487,17 @@ void MapChunk::draw ( math::frustum const& frustum
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(!lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
 
-  if (_texture_set.num())
+  if (texture_set->num())
   {
-    _texture_set.bind_alpha(0);
+    texture_set->bind_alpha(0);
 
-    for (int i = 0; i < _texture_set.num(); ++i)
+    for (int i = 0; i < texture_set->num(); ++i)
     {
-      _texture_set.bindTexture(i, i + 1);
+      texture_set->bindTexture(i, i + 1);
 
-      if (_texture_set.is_animated(i))
+      if (texture_set->is_animated(i))
       {
-        mcnk_shader.uniform("tex_anim_"+ std::to_string(i), _texture_set.anim_uv_offset(i, animtime));
+        mcnk_shader.uniform("tex_anim_"+ std::to_string(i), texture_set->anim_uv_offset(i, animtime));
       }
     }
   }
@@ -522,7 +505,7 @@ void MapChunk::draw ( math::frustum const& frustum
   opengl::texture::set_active_texture(5);
   shadow.bind();
   
-  mcnk_shader.uniform("layer_count", (int)_texture_set.num());
+  mcnk_shader.uniform("layer_count", (int)texture_set->num());
   mcnk_shader.uniform("cant_paint", (int)cantPaint);
   
   if (draw_chunk_flag_overlay)
@@ -544,9 +527,9 @@ void MapChunk::draw ( math::frustum const& frustum
   gl.drawElements(GL_TRIANGLES, strip.size(), GL_UNSIGNED_SHORT, nullptr);
 
   
-  for (int i = 0; i < _texture_set.num(); ++i)
+  for (int i = 0; i < texture_set->num(); ++i)
   {
-    if (_texture_set.is_animated(i))
+    if (texture_set->is_animated(i))
     {
       mcnk_shader.uniform("tex_anim_" + std::to_string(i), math::vector_2d());
     }
@@ -890,37 +873,37 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
 
 void MapChunk::eraseTextures()
 {
-  _texture_set.eraseTextures();
+  texture_set->eraseTextures();
 }
 
 void MapChunk::change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add)
 {
-  _texture_set.change_texture_flag(tex, flag, add);
+  texture_set->change_texture_flag(tex, flag, add);
 }
 
 int MapChunk::addTexture(scoped_blp_texture_reference texture)
 {
-  return _texture_set.addTexture(texture);
+  return texture_set->addTexture(texture);
 }
 
 void MapChunk::switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
 {
-  _texture_set.switchTexture(oldTexture, newTexture);
+  texture_set->switchTexture(oldTexture, newTexture);
 }
 
 bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
-  return _texture_set.paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
+  return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
 }
 
 bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture)
 {
-  return _texture_set.replaceTexture(xbase, zbase, pos.x, pos.z, radius, old_texture, new_texture);
+  return texture_set->replaceTexture(xbase, zbase, pos.x, pos.z, radius, old_texture, new_texture);
 }
 
 bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
 {
-  return _texture_set.canPaintTexture(texture);
+  return texture_set->canPaintTexture(texture);
 }
 
 bool MapChunk::isHole(int i, int j)
@@ -1010,7 +993,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   memset(lMCNK_header->low_quality_texture_map, 0, 0x10);
 
-  std::vector<uint8_t> lod_texture_map = _texture_set.lod_texture_map();
+  std::vector<uint8_t> lod_texture_map = texture_set->lod_texture_map();
 
   for (int i = 0; i < lod_texture_map.size(); ++i)
   {
@@ -1095,26 +1078,26 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   // MCLY
   //        {
-  size_t lMCLY_Size = _texture_set.num() * 0x10;
+  size_t lMCLY_Size = texture_set->num() * 0x10;
 
   lADTFile.Extend(8 + lMCLY_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size);
 
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = _texture_set.num();
+  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set->num();
 
-  std::vector<std::vector<uint8_t>> alphamaps = _texture_set.save_alpha(use_big_alphamap);
+  std::vector<std::vector<uint8_t>> alphamaps = texture_set->save_alpha(use_big_alphamap);
   int lMCAL_Size = 0; 
 
   // MCLY data
-  for (size_t j = 0; j < _texture_set.num(); ++j)
+  for (size_t j = 0; j < texture_set->num(); ++j)
   {
     ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * j);
 
-    lLayer->textureID = lTextures.find(_texture_set.filename(j))->second;
-    lLayer->flags = _texture_set.flag(j);
+    lLayer->textureID = lTextures.find(texture_set->filename(j))->second;
+    lLayer->flags = texture_set->flag(j);
     lLayer->ofsAlpha = lMCAL_Size;
-    lLayer->effectID = _texture_set.effect(j);
+    lLayer->effectID = texture_set->effect(j);
 
     if (j == 0)
     {

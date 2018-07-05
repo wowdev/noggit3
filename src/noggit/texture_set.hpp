@@ -14,8 +14,8 @@ class MapTile;
 class TextureSet
 {
 public:
-  void initTextures(MPQFile* f, MapTile *maintile, uint32_t size);
-  void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha);
+  TextureSet() = delete;
+  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool big_alphamap, bool do_not_fix_alpha);
 
   math::vector_2d anim_uv_offset(int id, int animtime) const;
 
@@ -66,11 +66,17 @@ private:
   void generate_alpha_tex(bool update_tex = true);
   void update_alpha_tex();
 
+  void update_lod_texture_map();
+
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
   std::vector<uint8_t> alphamap_tex;
   opengl::texture amap_gl_tex;
   size_t nTextures;
+
+  
+  std::vector<uint8_t> _lod_texture_map;
+  bool _need_lod_texture_map_update = false;
 
   // only used for loading
   int tile_texture_id[4];

@@ -14,42 +14,44 @@
 
 #include <boost/utility/in_place_factory.hpp>
 
-void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
+TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool big_alphamap, bool do_not_fix_alpha)
 {
-  // texture info
-  nTextures = size / 16U;
+  nTextures = header.nLayers;
+  _lod_texture_map = std::vector<uint8_t>(header.low_quality_texture_map, header.low_quality_texture_map + 16);
 
-  for (size_t i = 0; i<nTextures; ++i) 
+  if (nTextures)
   {
-    f->read(&tile_texture_id[i], 4);
-    f->read(&texFlags[i], 4);
-    f->read(&MCALoffset[i], 4);
-    f->read(&effectID[i], 4);
+    f->seek(base + header.ofsLayer + 8);
 
-    textures.emplace_back (maintile->mTextureFilenames[tile_texture_id[i]]);
-  }
-}
-
-void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha)
-{
-  unsigned int MCALbase = f->getPos();
-
-  for (unsigned int layer = 0; layer < nLayers; ++layer)
-  {
-    if (texFlags[layer] & 0x100)
+    for (size_t i = 0; i<nTextures; ++i)
     {
-      f->seek(MCALbase + MCALoffset[layer]);
-      alphamaps[layer - 1] = boost::in_place (f, texFlags[layer], mBigAlpha, doNotFixAlpha, false);
+      f->read (&tile_texture_id[i], 4);
+      f->read (&texFlags[i], 4);
+      f->read (&MCALoffset[i], 4);
+      f->read (&effectID[i], 4);
+
+      textures.emplace_back (tile->mTextureFilenames[tile_texture_id[i]]);
     }
-  }
 
-  // always use big alpha for editing / rendering
-  if (!mBigAlpha)
-  {
-    convertToBigAlpha(true);
-  }
+    size_t alpha_base = base + header.ofsAlpha + 8;
 
-  generate_alpha_tex(false);
+    for (unsigned int layer = 0; layer < nTextures; ++layer)
+    {
+      if (texFlags[layer] & 0x100)
+      {
+        f->seek (alpha_base + MCALoffset[layer]);
+        alphamaps[layer - 1] = boost::in_place (f, texFlags[layer], big_alphamap, do_not_fix_alpha, false);
+      }
+    }
+
+    // always use big alpha for editing / rendering
+    if (!big_alphamap)
+    {
+      convertToBigAlpha (true);
+    }
+
+    generate_alpha_tex (false);
+  }
 }
 
 int TextureSet::addTexture(scoped_blp_texture_reference texture)
@@ -883,72 +885,54 @@ void TextureSet::update_alpha_tex()
   }
 }
 
+namespace
+{
+  misc::max_capacity_stack_vector<std::size_t, 4> current_layer_values
+    (std::uint8_t nTextures, boost::optional<Alphamap> const* alphamaps, std::size_t pz, std::size_t px)
+  {
+    misc::max_capacity_stack_vector<std::size_t, 4> values (nTextures, 0xFF);
+    for (std::uint8_t i = 1; i < nTextures; ++i)
+    {
+      values[i] = alphamaps[i - 1].get().getAlpha(64 * pz + px);
+      values[0] -= values[i];
+    }
+    return values;
+  }
+}
+
 std::vector<uint8_t> TextureSet::lod_texture_map()
 {
-  std::vector<uint8_t> lod(8*8);
-
-  if (!nTextures)
+  if (_need_lod_texture_map_update)
   {
-    return lod;
+    update_lod_texture_map();
   }
 
-  uint8_t alphas[64 * 64 * 3];
-  memset(alphas, 0, 64 * 64 * 3);
+  return _lod_texture_map; 
+}
 
-  for (int i = 0; i < nTextures - 1; ++i)
-  {
-    memcpy(alphas + 4096 * i, alphamaps[i]->getAlpha(), 64 * 64);
-  }
+void TextureSet::update_lod_texture_map()
+{
+  std::vector<std::uint8_t> lod;
 
-  for (int z = 0; z < 8; ++z)
+  for (std::size_t z = 0; z < 8; ++z)
   {
-    for (int x = 0; x < 8; ++x)
+    for (std::size_t x = 0; x < 8; ++x)
     {
-      std::vector<int> dominant_square_count(nTextures);
+      misc::max_capacity_stack_vector<std::size_t, 4> dominant_square_count (nTextures);
 
-      for (int pz = z * 8; pz < (z + 1) * 8; ++pz)
+      for (std::size_t pz = z * 8; pz < (z + 1) * 8; ++pz)
       {
-        for (int px = x * 8; px < (x + 1) * 8; ++px)
+        for (std::size_t px = x * 8; px < (x + 1) * 8; ++px)
         {
-          uint8_t base_alpha = 255;
-          int max_alpha = 0, winning_layer = 0;
-
-          for (int i = 0; i < nTextures - 1; ++i)
-          {
-            uint8_t layer_alpha = alphas[i * 64 * 64 + 64 * pz + px];
-            base_alpha -= layer_alpha;
-
-            if (max_alpha < layer_alpha)
-            {
-              max_alpha = layer_alpha;
-              winning_layer = i + 1; // layer 0 has no alphamap
-            }
-          }
-
-          if (base_alpha > max_alpha)
-          {
-            winning_layer = 0;
-          }
-
-          dominant_square_count[winning_layer]++;
+          ++dominant_square_count[max_element_index (current_layer_values (nTextures, alphamaps.data(), pz, px))];
         }
       }
-
-      int most_visible_layer = 0;
-
-      for (int i = 1; i < nTextures; ++i)
-      {
-        if (dominant_square_count[i] > dominant_square_count[most_visible_layer])
-        {
-          most_visible_layer = i;
-        }
-      }
-      
-      lod[8*z+x] = most_visible_layer;
-    }    
+      lod.push_back (max_element_index (dominant_square_count));
+    }
   }
 
-  return lod;
+  _lod_texture_map = lod;
+  _need_lod_texture_map_update = false;
 }
 
 void TextureSet::upload()
