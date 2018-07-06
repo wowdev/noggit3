@@ -23,7 +23,8 @@ public:
   //! Ownership is _not_ transferred. Call ensure_deletable to ensure 
   //! that a previously enqueued object can be destroyed.
   void queue_for_load (AsyncObject*);
-  //! \todo Make part of ~AsyncObject?
+  
+  void ensure_loaded (AsyncObject*);
   void ensure_deletable (AsyncObject*);
 
   AsyncLoader(int numThreads);

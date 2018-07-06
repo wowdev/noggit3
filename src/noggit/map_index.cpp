@@ -450,7 +450,7 @@ MapTile* MapIndex::getTileAbove(MapTile* tile) const
 
   if (!tile_above->finishedLoading())
   {
-    AsyncLoader::instance().ensure_deletable(tile_above);
+    AsyncLoader::instance().ensure_loaded(tile_above);
   }
 
   return tile_above;
@@ -468,7 +468,7 @@ MapTile* MapIndex::getTileLeft(MapTile* tile) const
 
   if (!tile_left->finishedLoading())
   {
-    AsyncLoader::instance().ensure_deletable(tile_left);
+    AsyncLoader::instance().ensure_loaded(tile_left);
   }
 
   return tile_left;
@@ -773,7 +773,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
     if (!instance.model->finishedLoading())
     {
-      AsyncLoader::instance().ensure_deletable(instance.model.get());
+      AsyncLoader::instance().ensure_loaded(instance.model.get());
     }
 
     loading_error |= instance.model->loading_failed();
@@ -802,7 +802,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
     if (!instance.wmo->finishedLoading())
     {
-      AsyncLoader::instance().ensure_deletable(instance.wmo.get());
+      AsyncLoader::instance().ensure_loaded(instance.wmo.get());
     }
 
     // no need to check if the loading failed since the extents are stored inside the adt
