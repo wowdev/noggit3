@@ -799,14 +799,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
   for (WMOInstance& instance : wmos)
   {
     instance.mUniqueID = uid++;
-
-    if (!instance.wmo->finishedLoading())
-    {
-      AsyncLoader::instance().ensure_loaded(instance.wmo.get());
-    }
-
-    // no need to check if the loading failed since the extents are stored inside the adt
-
+    // no need to check if the loading is finished since the extents are stored inside the adt
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
     std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
