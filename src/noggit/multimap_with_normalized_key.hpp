@@ -36,31 +36,30 @@ namespace noggit
       T* emplace (std::string const& filename, Args&&... args)
     {
       std::string const normalized (_normalize (filename));
-      std::size_t count;
 
       {
-        boost::mutex::scoped_lock lock(_mutex);
-        count = _counts[normalized]++;
-      }
+        boost::mutex::scoped_lock const lock(_mutex);
 
-      if (count == 0)
-      {
-        T* obj;
-
+        if ([&] { return _counts[normalized]++; }())
         {
-          boost::mutex::scoped_lock lock(_mutex);
-          obj = &_elements.emplace ( std::piecewise_construct
-                                   , std::forward_as_tuple (normalized)
-                                   , std::forward_as_tuple (normalized, args...)
-                                   ).first->second;
-        }        
-
-        AsyncLoader::instance().queue_for_load(static_cast<AsyncObject*>(obj));
-
-        return obj;
+          return &_elements.at (normalized);
+        }
       }
+        
 
-      return &_elements.at (normalized);
+      T* const obj ( [&]
+                     {
+                       boost::mutex::scoped_lock const lock(_mutex);
+                       return &_elements.emplace ( std::piecewise_construct
+                                                 , std::forward_as_tuple (normalized)
+                                                 , std::forward_as_tuple (normalized, args...)
+                                                 ).first->second;
+                     }()
+                   );
+
+      AsyncLoader::instance().queue_for_load(static_cast<AsyncObject*>(obj));
+
+      return obj; 
     }
     void erase (std::string const& filename)
     {
