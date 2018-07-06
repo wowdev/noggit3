@@ -2,7 +2,6 @@
 
 #include <noggit/Brush.h>
 #include <noggit/Log.h>
-#include <noggit/MapHeaders.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
@@ -25,22 +24,19 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
 
     for (size_t i = 0; i<nTextures; ++i)
     {
-      f->read (&tile_texture_id[i], 4);
-      f->read (&texFlags[i], 4);
-      f->read (&MCALoffset[i], 4);
-      f->read (&effectID[i], 4);
+      f->read (&_layers_info[i], sizeof(ENTRY_MCLY));
 
-      textures.emplace_back (tile->mTextureFilenames[tile_texture_id[i]]);
+      textures.emplace_back (tile->mTextureFilenames[_layers_info[i].textureID]);
     }
 
     size_t alpha_base = base + header.ofsAlpha + 8;
 
     for (unsigned int layer = 0; layer < nTextures; ++layer)
     {
-      if (texFlags[layer] & 0x100)
+      if (_layers_info[layer].flags & 0x100)
       {
-        f->seek (alpha_base + MCALoffset[layer]);
-        alphamaps[layer - 1] = boost::in_place (f, texFlags[layer], big_alphamap, do_not_fix_alpha, false);
+        f->seek (alpha_base + _layers_info[layer].ofsAlpha);
+        alphamaps[layer - 1] = boost::in_place (f, _layers_info[layer].flags, big_alphamap, do_not_fix_alpha, false);
       }
     }
 
@@ -64,8 +60,7 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
     nTextures++;
 
     textures.emplace_back (texture);
-    texFlags[texLevel] = 0;
-    effectID[texLevel] = 0;
+    _layers_info[texLevel] = ENTRY_MCLY();
 
     if (texLevel)
     {
@@ -161,9 +156,7 @@ void TextureSet::eraseTexture(size_t id)
       std::swap (alphamaps[i - 1], alphamaps[i]);
     }
 
-    textures[i] = textures[i + 1];
-    texFlags[i] = texFlags[i + 1];
-    effectID[i] = effectID[i + 1];
+    _layers_info[i] = _layers_info[i + 1];
   }
 
   alphamaps[nTextures - 2] = boost::none;
@@ -211,8 +204,10 @@ void TextureSet::bindTexture(size_t id, size_t activeTexture)
 
 math::vector_2d TextureSet::anim_uv_offset(int id, int animtime) const
 {
-  const int spd = (texFlags[id] >> 3) & 0x7;
-  const int dir = texFlags[id] & 0x7;
+  uint32_t flags = _layers_info[id].flags;
+
+  const int spd = (flags >> 3) & 0x7;
+  const int dir = flags & 0x7;
   const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
   const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
   const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
@@ -570,17 +565,17 @@ size_t TextureSet::num()
 
 unsigned int TextureSet::flag(size_t id)
 {
-  return texFlags[id];
+  return _layers_info[id].flags;
 }
 
 unsigned int TextureSet::effect(size_t id)
 {
-  return effectID[id];
+  return _layers_info[id].effectID;
 }
 
 bool TextureSet::is_animated(std::size_t id) const
 {
-  return (id < nTextures ? (texFlags[id] & FLAG_ANIMATE) : false);
+  return (id < nTextures ? (_layers_info[id].flags & FLAG_ANIMATE) : false);
 }
 
 void TextureSet::change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add)
@@ -594,22 +589,22 @@ void TextureSet::change_texture_flag(scoped_blp_texture_reference tex, std::size
         // override the current speed/rotation
         if (flag & 0x3F)
         {
-          texFlags[i] &= ~0x3F;
+          _layers_info[i].flags &= ~0x3F;
         }
-        texFlags[i] |= flag;
+        _layers_info[i].flags |= flag;
       }
       else
       {
-        texFlags[i] &= ~flag;
+        _layers_info[i].flags &= ~flag;
       }
 
       if (flag & FLAG_GLOW)
       {
-        texFlags[i] |= FLAG_GLOW;
+        _layers_info[i].flags |= FLAG_GLOW;
       }
       else
       {
-        texFlags[i] &= ~FLAG_GLOW;
+        _layers_info[i].flags &= ~FLAG_GLOW;
       }
 
       break;
