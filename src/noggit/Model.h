@@ -129,7 +129,6 @@ enum class ModelPixelShader : uint16_t
   Combiners_Opaque_Mod2xNA_Alpha,
   Combiners_Opaque_AddAlpha,
   Combiners_Opaque_AddAlpha_Alpha,
-  Invalid_Shader,
 };
 
 enum class texture_unit_lookup : int
@@ -152,7 +151,7 @@ struct ModelRenderPass : ModelTexUnit
   texture_unit_lookup tu_lookups[2];
   uint16_t textures[2];
   uint16_t uv_animations[2];
-  ModelPixelShader pixel_shader = ModelPixelShader::Combiners_Opaque;
+  boost::optional<ModelPixelShader> pixel_shader;
 
 
   bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m);

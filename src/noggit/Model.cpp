@@ -592,7 +592,7 @@ ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
 
 bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m)
 {
-  if (!m->showGeosets[submesh] || pixel_shader == ModelPixelShader::Invalid_Shader)
+  if (!m->showGeosets[submesh] || !pixel_shader)
   {
     return false;
   }
@@ -738,7 +738,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   }
   
 
-  m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader));
+  m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader.get()));
   m2_shader.uniform("mesh_color", mesh_color);
 
   return true;
@@ -813,14 +813,14 @@ FakeGeometry::FakeGeometry(Model* m)
 
 
 // https://wowdev.wiki/M2/.skin/WotLK_shader_selection
-ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
+boost::optional<ModelPixelShader> GetPixelShader(uint16_t texture_count, uint16_t shader_id)
 {
   uint16_t texture1_fragment_mode = (shader_id >> 4) & 7;
   uint16_t texture2_fragment_mode = shader_id & 7;
   uint16_t texture1_env_map = (shader_id >> 4) & 8;
   uint16_t texture2_env_map = shader_id & 8;
 
-  ModelPixelShader pixel_shader = ModelPixelShader::Invalid_Shader;
+  boost::optional<ModelPixelShader> pixel_shader;
 
   if (texture_count == 1)
   {
@@ -894,7 +894,6 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
       default:
         pixel_shader = ModelPixelShader::Combiners_Mod_Mod;
         break;
-
       }
     }
     else if (texture1_fragment_mode == 3)
@@ -903,29 +902,14 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
       {
         pixel_shader = ModelPixelShader::Combiners_Add_Mod;
       }
-      else
-      {
-        pixel_shader = ModelPixelShader::Invalid_Shader;
-      }
     }
-    else if (texture1_fragment_mode != 4)
+    else if (texture1_fragment_mode == 4 && texture2_fragment_mode == 4)
     {
-      pixel_shader = ModelPixelShader::Invalid_Shader;
+      pixel_shader = ModelPixelShader::Combiners_Mod2x_Mod2x;
     }
     else if (texture2_fragment_mode == 1)
     {
       pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
-    }
-    else
-    {
-      if (texture2_fragment_mode != 4)
-      {
-        pixel_shader = ModelPixelShader::Invalid_Shader;
-      }
-      else
-      {
-        pixel_shader = ModelPixelShader::Combiners_Mod2x_Mod2x;
-      }
     }
   }
  
@@ -933,15 +917,15 @@ ModelPixelShader GetPixelShader(uint16_t texture_count, uint16_t shader_id)
   return pixel_shader;
 }
 
-ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
+boost::optional<ModelPixelShader> M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
 {
-  ModelPixelShader pixel_shader(ModelPixelShader::Invalid_Shader);
+  boost::optional<ModelPixelShader> pixel_shader;
 
   if (!(shader_id & 0x8000))
   {
     pixel_shader = GetPixelShader(texture_count, shader_id);
 
-    if (pixel_shader == ModelPixelShader::Invalid_Shader)
+    if (!pixel_shader)
     {
       pixel_shader = GetPixelShader(texture_count, 0x11);
     }
@@ -950,8 +934,6 @@ ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
   {
     switch (shader_id & 0x7FFF)
     {
-    case 0:
-      return ModelPixelShader::Invalid_Shader;
     case 1:
       pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha;
       break;
@@ -960,8 +942,6 @@ ModelPixelShader M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
       break;
     case 3:
       pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha_Alpha;
-      break;
-    default:
       break;
     }  
   }
