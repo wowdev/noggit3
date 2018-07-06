@@ -4,6 +4,7 @@
 
 #include <noggit/MPQ.h>
 #include <noggit/alphamap.hpp>
+#include <noggit/MapHeaders.h>
 
 #include <cstdint>
 #include <array>
@@ -78,10 +79,5 @@ private:
   std::vector<uint8_t> _lod_texture_map;
   bool _need_lod_texture_map_update = false;
 
-  // only used for loading
-  int tile_texture_id[4];
-
-  unsigned int texFlags[4];
-  unsigned int effectID[4];
-  unsigned int MCALoffset[4];
+  ENTRY_MCLY _layers_info[4];
 };
