@@ -17,7 +17,7 @@ namespace noggit
       policy.setHeightForWidth (true);
       setSizePolicy (policy);
       setMinimumSize(64, 64);
-      update_texture();
+      update_texture_if_needed();
     }
 
     int current_texture::heightForWidth (int width) const
@@ -29,10 +29,10 @@ namespace noggit
     {
       _filename = texture;
       _need_update = true;
-      update_texture();
+      update_texture_if_needed();
     }
 
-    void current_texture::update_texture()
+    void current_texture::update_texture_if_needed()
     {
       if (!_need_update)
       {

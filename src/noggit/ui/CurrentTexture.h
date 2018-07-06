@@ -21,9 +21,9 @@ namespace noggit
 
       virtual void resizeEvent (QResizeEvent*) override
       {
-        update_texture();
+        update_texture_if_needed();
       }
-      void update_texture();
+      void update_texture_if_needed();
 
       virtual int heightForWidth (int) const override;
 
