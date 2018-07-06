@@ -491,7 +491,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     // todo: move that somewhere to not check for each time ?
     if (!model.second.model->finishedLoading())
     {
-      AsyncLoader::instance().ensure_deletable(model.second.model.get());
+      AsyncLoader::instance().ensure_loaded(model.second.model.get());
       model.second.recalcExtents();
     }
     if (saveAllModels || model.second.isInsideRect(lTileExtents))

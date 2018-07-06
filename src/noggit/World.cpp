@@ -1960,7 +1960,7 @@ void World::convert_alphamap(bool to_big_alpha)
 
       if (mTile)
       {
-        AsyncLoader::instance().ensure_deletable(mTile);
+        AsyncLoader::instance().ensure_loaded(mTile);
 
         mTile->convert_alphamap(to_big_alpha);
         mTile->saveTile (false, this);
@@ -2094,7 +2094,7 @@ void World::addM2 ( std::string const& filename
   }
 
   // to ensure the tiles are updated correctly
-  AsyncLoader::instance().ensure_deletable(newModelis.model.get());
+  AsyncLoader::instance().ensure_loaded(newModelis.model.get());
   newModelis.recalcExtents();
   updateTilesModel(&newModelis);
   
@@ -2113,7 +2113,7 @@ void World::addWMO ( std::string const& filename
   newWMOis.dir = rotation;
 
   // to ensure the tiles are updated correctly
-  AsyncLoader::instance().ensure_deletable(newWMOis.wmo.get());
+  AsyncLoader::instance().ensure_loaded(newWMOis.wmo.get());
 
   // recalc the extends
   newWMOis.recalcExtents();

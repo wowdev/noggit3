@@ -79,18 +79,43 @@ void AsyncLoader::queue_for_load (AsyncObject* object)
   _to_load[object->loading_priority()].push_back (object);
   _state_changed.notify_one();
 }
-void AsyncLoader::ensure_deletable (AsyncObject* object)
+
+void AsyncLoader::ensure_loaded (AsyncObject* object)
 {
   std::unique_lock<std::mutex> lock (_guard);
   _state_changed.wait 
   ( lock
-   , [&]
-  {
-    auto const& to_load = _to_load[object->loading_priority()];
-    return std::find (to_load.begin(), to_load.end(), object) == to_load.end()
-      && std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end()
-      ;
-  }
+  , [&]
+    {
+      auto const& to_load = _to_load[object->loading_priority()];
+      return std::find (to_load.begin(), to_load.end(), object) == to_load.end()
+        && std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end()
+        ;
+    }
+  );
+}
+
+void AsyncLoader::ensure_deletable (AsyncObject* object)
+{
+  std::unique_lock<std::mutex> lock (_guard);
+  _state_changed.wait
+  ( lock
+  , [&]
+    {
+      auto& to_load = _to_load[object->loading_priority()];
+      auto const& it = std::find (to_load.begin(), to_load.end(), object);
+      
+      // don't load it if it's just to delete it afterward
+      if (it != to_load.end())
+      {
+        to_load.erase(it);
+        return true;
+      }
+      else
+      {
+        return std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end();
+      }
+    }
   );
 }
 
