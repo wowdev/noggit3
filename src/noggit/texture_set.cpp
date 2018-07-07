@@ -196,13 +196,6 @@ const std::string& TextureSet::filename(size_t id)
   return textures[id]->filename();
 }
 
-void TextureSet::bindAlphamap(size_t id, size_t activeTexture)
-{
-  opengl::texture::enable_texture (activeTexture);
-
-  alphamaps[id]->bind();
-}
-
 void TextureSet::bindTexture(size_t id, size_t activeTexture)
 {
   opengl::texture::enable_texture (activeTexture);
@@ -883,15 +876,6 @@ void TextureSet::update_alpha_tex()
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  // for the 2D view
-  if (nTextures)
-  {
-    for (int i = 0; i < nTextures - 1; ++i)
-    {
-      alphamaps[i]->loadTexture();
-    }
-  }
 }
 
 namespace
@@ -953,9 +937,4 @@ void TextureSet::upload()
   }
 
   update_alpha_tex();
-
-  for (int i = 0; i < nTextures - 1; ++i)
-  {
-    alphamaps[i]->upload();
-  }
 }
