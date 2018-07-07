@@ -59,6 +59,11 @@ public:
   std::vector<uint8_t> lod_texture_map();
 
 private:
+  int get_texture_index(scoped_blp_texture_reference texture, float target);
+  bool change_texture(int texture_id, size_t offset, float strenght, float pressure);
+
+  uint8_t sum_alpha(size_t offset) const;
+
   void alphas_to_big_alpha(uint8_t* dest);
   void alphas_to_old_alpha(uint8_t* dest);
 

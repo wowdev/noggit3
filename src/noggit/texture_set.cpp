@@ -75,6 +75,8 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
       alphamaps[texLevel - 1] = boost::in_place();
     }
   }
+  
+  _need_amap_update = true;
 
   return texLevel;
 }
@@ -117,14 +119,7 @@ void TextureSet::swapTexture(int id1, int id2)
       
       for (int i = 0; i < 4096; ++i)
       {
-        alpha[i] = 255 - std::accumulate( alphamaps.begin()
-                                        , alphamaps.begin() + (nTextures - 1)
-                                        , 0
-                                        , [&](uint8_t v, boost::optional<Alphamap> amap) 
-                                          {                                              
-                                            return v + amap->getAlpha(i);
-                                          }
-                                        );
+        alpha[i] = 255 - sum_alpha(i);
       }
 
       alphamaps[a2]->setAlpha(alpha);
@@ -260,6 +255,76 @@ bool TextureSet::eraseUnusedTextures()
   return false;
 }
 
+int TextureSet::get_texture_index(scoped_blp_texture_reference texture, float target)
+{
+  int tex_layer = -1;
+
+  for (int i = 0; i < nTextures; ++i)
+  {
+    if (textures[i] == texture)
+    {
+      return i;
+    }
+  }
+
+  // don't add a texture for nothing
+  if (target == 0)
+  {
+    return -1;
+  }
+
+  if (nTextures == 4 && !eraseUnusedTextures())
+  {
+    return -1;
+  }
+
+  return addTexture(texture);
+}
+
+// assume nTextures > 1
+bool TextureSet::change_texture(int texture_id, size_t offset, float strength, float pressure)
+{
+  auto set_alpha([&](int alpha_id, size_t offset, float value)
+  {
+    alphamaps[alpha_id]->setAlpha(offset, static_cast<uint8_t>(std::min(std::max(std::round(value), 0.0f), 255.0f)));
+  });
+
+  float current_alpha = texture_id ? alphamaps[texture_id - 1]->getAlpha(offset) : 255.f - sum_alpha(offset);
+  float sum_other_alphas = 255.f - current_alpha;
+  float alpha_change = (strength - current_alpha)* pressure;
+  float alpha_after_change = current_alpha + alpha_change;
+
+  if (current_alpha == strength)
+  {
+    return false;
+  }  
+
+  // round alpha_change to be able to get to the extremes easier
+  if (alpha_after_change < 1.f && alpha_change < 0.f)
+  {
+    alpha_change = -current_alpha;
+  }
+  else if (alpha_after_change > 254.f && alpha_change > 0.f)
+  {
+    alpha_change = (255.f - current_alpha);
+  }
+
+  for (int alpha_id = 0; alpha_id < nTextures - 1; ++alpha_id)
+  {
+    if (alpha_id + 1 == texture_id)
+    {
+      set_alpha(alpha_id, offset, current_alpha + alpha_change);
+    }
+    else
+    {
+      float a = alphamaps[alpha_id]->getAlpha(offset);
+      set_alpha(alpha_id, offset, a - (a / sum_other_alphas) * alpha_change);
+    }
+  }  
+
+  return true;
+}
+
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   bool changed = false;
@@ -285,48 +350,22 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     xbase += TEXDETAILSIZE;
   }
 
-  //xbase, zbase mapchunk pos
-  //x, y mouse pos
+  int tex_layer = get_texture_index(texture, strength);
+  
+  if (tex_layer == -1 || nTextures == 1)
+  {
+    return false;
+  }
 
-  int tex_layer = -1;
   radius = brush->getRadius();
-  dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
-  if (dist > radius)
+  if (misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE) > radius)
+  {
     return changed;
+  }
 
   //First Lets find out do we have the texture already
-  for (size_t i = 0; i<nTextures; ++i)
-    if (textures[i] == texture)
-      tex_layer = i;
-
-  if (tex_layer == -1 && strength == 0)
-  {
-    return false;
-  }
-
-  if ((tex_layer == -1) && (nTextures == 4) && !eraseUnusedTextures())
-  {
-    LogDebug << "paintTexture: No free texture slot" << std::endl;
-    return false;
-  }
-
-  //Only 1 layer and its that layer
-  if ((tex_layer != -1) && (nTextures == 1))
-    return true;
-
-  if (tex_layer == -1)
-  {
-    tex_layer = addTexture(texture);
-    if (tex_layer == 0)
-      return true;
-    if (tex_layer == -1)
-    {
-      LogDebug << "paintTexture: Unable to add texture." << std::endl;
-      return false;
-    }
-  }
-
+  
   zPos = zbase;
 
   for (int j = 0; j < 64; j++)
@@ -342,69 +381,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
         continue;
       }
 
-      float tPressure = pressure*brush->getValue(dist);
-      float visibility[4] = { 255.f, 0.f , 0.f, 0.f};
-
-      for (size_t k = 0; k < nTextures - 1; k++)
-      {
-        visibility[k + 1] = alphamaps[k]->getAlpha(i + j * 64);
-        visibility[0] -= visibility[k + 1];
-      }
-
-      // nothing to do
-      if (visibility[tex_layer] == strength)
-      {
-        continue;
-      }
-
-      // at this point we know for sure that the textures will be changed
-      changed = true;
-
-      // alpha delta
-      float diffA = (strength - visibility[tex_layer])* tPressure;
-
-      // visibility = 255 => all other at 0
-      if (visibility[tex_layer] + diffA >= 255.0f)
-      {
-        for (size_t k = 0; k < nTextures; k++)
-        {
-          visibility[k] = (k == tex_layer) ? 255.0f : 0.0f;
-        }
-      }
-      else
-      {
-        float other = 255.0f - visibility[tex_layer];
-
-        if (visibility[tex_layer] == 255.0f && diffA < 0.0f)
-        {
-          visibility[tex_layer] += diffA;
-          int idTex = (!tex_layer) ? 1 : tex_layer - 1; // nTexture > 1 else it'd have returned true at the beginning
-          visibility[idTex] -= diffA;
-        }
-        else
-        {
-          visibility[tex_layer] += diffA;
-
-          for (size_t k = 0; k < nTextures; k++)
-          {
-            if (k == tex_layer || visibility[k] == 0)
-            {
-              continue;
-            }
-
-            visibility[k] = visibility[k] - (diffA * (visibility[k] / other));
-          }
-        }
-      }
-
-      for (size_t k = 0; k < nTextures; k++)
-      {
-        if (k < nTextures - 1)
-        {
-          uint8_t value = static_cast<uint8_t>(std::min(std::max(std::round(visibility[k + 1]), 0.0f), 255.0f));
-          alphamaps[k]->setAlpha(i + j * 64, value);
-        }
-      }
+      changed |= change_texture(tex_layer, i + 64 * j, strength, pressure*brush->getValue(dist));
     }
     zPos += TEXDETAILSIZE;
   }
@@ -870,3 +847,19 @@ void TextureSet::update_lod_texture_map()
   _lod_texture_map = lod;
   _need_lod_texture_map_update = false;
 }
+
+uint8_t TextureSet::sum_alpha(size_t offset) const
+{
+  uint8_t sum = 0;
+
+  for (auto const& amap : alphamaps)
+  {
+    if (amap)
+    {
+      sum += amap->getAlpha(offset);
+    }
+  }
+
+  return sum;
+}
+
