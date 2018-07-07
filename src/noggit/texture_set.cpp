@@ -746,19 +746,25 @@ void TextureSet::alphas_to_old_alpha(uint8_t* dest)
     memcpy(alpha(k), alphamaps[k]->getAlpha(), 64 * 64);
   }
 
-  float alphas[3] = { 0.0f, 0.0f, 0.0f };
-
   for (int i = 0; i < 64 * 64; ++i)
   {
+    // a = remaining visibility
     float a = 1.f;
 
     for (int k = nTextures - 2; k >= 0; --k)
     {
-      float f = static_cast<float>(*alpha(k, i)) / a;
-
-      a -= (f / 255.f);
-
-      *alpha(k, i) = static_cast<uint8_t>(std::round(f));
+      if (a <= 0.f)
+      {
+        *alpha(k, i) = 0;
+      }
+      else
+      {
+        float current = static_cast<float>(*alpha(k, i));
+        *alpha(k, i) = static_cast<uint8_t>(std::round(current / a));
+        // current/255 = coef of visibility
+        // = what need to remove to the remaining visibility
+        a -= (current / 255.f);
+      }      
     }
   }
 }
