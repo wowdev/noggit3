@@ -16,7 +16,15 @@
 TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool big_alphamap, bool do_not_fix_alpha)
 {
   nTextures = header.nLayers;
-  _lod_texture_map = std::vector<uint8_t>(header.low_quality_texture_map, header.low_quality_texture_map + 16);
+  for (int i = 0; i < 64; ++i)
+  {
+    const size_t array_index(i / 4);
+    // it's a uint2 array so we need to read the bits as they come on the disk,
+    // this means reading the highest bits from the uint8 first
+    const size_t bit_index((3-((i) % 4)) * 2);
+
+    _lod_texture_map.push_back(((header.low_quality_texture_map[array_index]) >> (bit_index)) & 3);
+  }
 
   if (nTextures)
   {

@@ -997,8 +997,10 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   for (int i = 0; i < lod_texture_map.size(); ++i)
   {
-    const size_t array_index((i) / 4);
-    const size_t bit_index(((i) % 4) * 2);
+    const size_t array_index(i / 4);
+    // it's a uint2 array so we need to write the uint2 in the order they will be on disk,
+    // this means writing to the highest bits of the uint8 first
+    const size_t bit_index((3 - ((i) % 4)) * 2);
 
     lMCNK_header->low_quality_texture_map[array_index] |= ((lod_texture_map[i] & 3) << bit_index);
   }
