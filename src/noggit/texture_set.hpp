@@ -21,7 +21,6 @@ public:
   math::vector_2d anim_uv_offset(int id, int animtime) const;
 
   void bindTexture(size_t id, size_t activeTexture);
-  void bindAlphamap(size_t id, size_t activeTexture);
 
   int addTexture(scoped_blp_texture_reference texture);
   void eraseTexture(size_t id);

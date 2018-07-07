@@ -8,7 +8,6 @@
 Alphamap::Alphamap()
 {
   createNew();
-  upload();
 }
 
 Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha, bool upload_amap)
@@ -30,11 +29,6 @@ Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFix
   else
   {
     readNotCompressed(f, doNotFixAlpha);
-  }
-
-  if (upload_amap)
-  {
-    upload();
   }
 }
 
@@ -102,26 +96,6 @@ void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
 void Alphamap::createNew()
 {
   memset(amap, 0, 64 * 64);
-}
-
-void Alphamap::loadTexture()
-{
-  bind();
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap);
-}
-
-void Alphamap::upload()
-{
-  loadTexture();
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-void Alphamap::bind()
-{
-  map.bind();
 }
 
 void Alphamap::setAlpha(size_t offset, unsigned char value)
