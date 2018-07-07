@@ -164,9 +164,10 @@ void TextureSet::eraseTexture(size_t id)
   }
 
   alphamaps[nTextures - 2] = boost::none;
-  textures.pop_back();
-
+  textures.erase(textures.begin()+id);
   nTextures--;
+
+  _need_amap_update = true;
 }
 
 bool TextureSet::canPaintTexture(scoped_blp_texture_reference texture)
