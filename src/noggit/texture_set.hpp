@@ -58,22 +58,17 @@ public:
 
   std::vector<uint8_t> lod_texture_map();
 
-  void upload();
-
 private:
   void alphas_to_big_alpha(uint8_t* dest);
   void alphas_to_old_alpha(uint8_t* dest);
-  void generate_alpha_tex(bool update_tex = true);
-  void update_alpha_tex();
 
   void update_lod_texture_map();
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
-  std::vector<uint8_t> alphamap_tex;
   opengl::texture amap_gl_tex;
+  bool _need_amap_update = true;
   size_t nTextures;
-
   
   std::vector<uint8_t> _lod_texture_map;
   bool _need_lod_texture_map_update = false;

@@ -256,9 +256,6 @@ void MapChunk::upload()
   gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 
   update_indices_buffer();
-
-  texture_set->upload();
-
   _uploaded = true;
 }
 
