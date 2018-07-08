@@ -108,7 +108,7 @@ namespace noggit
 
       copy_layout->addRow(copyAttributesCheck);
 
-      QGroupBox *pasteBox = new QGroupBox(this);
+      QGroupBox *pasteBox = new QGroupBox("Paste Options", this);
       auto paste_layout = new QFormLayout (pasteBox);
       QRadioButton *terrainButton = new QRadioButton("Terrain");
       QRadioButton *selectionButton = new QRadioButton("Selection");
@@ -119,17 +119,20 @@ namespace noggit
       pasteModeGroup->addButton(selectionButton, 1);
       pasteModeGroup->addButton(cameraButton, 2);
 
-      auto cursorPosCheck ( new checkbox ( "Move model to\ncursor position"
-                                         , move_model_to_cursor_position
-                                         , this
-                                         )
-                          );
-
-      pasteBox->setTitle("Paste Options");
       paste_layout->addRow(terrainButton);
       paste_layout->addRow(selectionButton);
       paste_layout->addRow(cameraButton);
-      paste_layout->addRow(cursorPosCheck);
+
+      auto object_movement_box (new QGroupBox("Object Movement", this));
+      auto object_movement_layout = new QFormLayout (object_movement_box);
+
+      auto object_movement_cb ( new checkbox ( "Follow\nground cursor"
+                                             , move_model_to_cursor_position
+                                             , this
+                                             )
+                              );
+
+      object_movement_layout->addRow(object_movement_cb);
 
       QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
       QPushButton *visToggleButton = new QPushButton("Toggle Visibility", this);
@@ -146,6 +149,7 @@ namespace noggit
 
       layout->addRow(copyBox);
       layout->addRow(pasteBox);
+      layout->addRow(object_movement_box);
       layout->addRow(rotEditorButton);
       layout->addRow(visToggleButton);
       layout->addRow(clearListButton);
