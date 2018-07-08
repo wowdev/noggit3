@@ -10,7 +10,8 @@ enum class async_priority : int
 {
   high,
   medium,
-  low
+  low,
+  count
 };
 
 class AsyncObject
