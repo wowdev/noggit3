@@ -92,12 +92,11 @@ void blp_texture::upload()
     {
       gl.compressedTexImage2D(GL_TEXTURE_2D, i, _compression_format.get(), width, height, 0, _compressed_data[i].size(), _compressed_data[i].data());
 
-      width >>= 1;
-      height >>= 1;      
+      width = std::max(width >> 1, 1);
+      height = std::max(height >> 1, 1);
     }
 
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _compressed_data.size() - 1);
-
     _compressed_data.clear();
   }
 
@@ -187,21 +186,11 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   GLint format = alphatypes[alpha_type];
   _compression_format = format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT ? (lHeader->attr_1_alphadepth == 1 ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT) : format;
 
-  int width = _width, height = _height;
-
   // do every mipmap level
   for (int i = 0; i < 16; ++i)
   {
-    width = std::max(1, width);
-    height = std::max(1, height);
-
     if (lHeader->offsets[i] && lHeader->sizes[i])
     {
-      if (i < 15 && lHeader->sizes[i] == lHeader->sizes[i + 1])
-      {
-        return;
-      }
-
       char const* start = lData + lHeader->offsets[i];
       _compressed_data[i] = std::vector<uint8_t>(start, start + lHeader->sizes[i]);
     }
@@ -209,9 +198,6 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
     {
       return;
     }
-
-    width >>= 1;
-    height >>= 1;
   }
 }
 
