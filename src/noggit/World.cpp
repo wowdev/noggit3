@@ -841,6 +841,12 @@ void main()
     mcnk_shader.uniform("draw_areaid_overlay", (int)draw_areaid_overlay);
     mcnk_shader.uniform ("draw_terrain_height_contour", (int)draw_contour);
 
+    // the flag stays on if the last chunk drawn before leaving the editing tool has it
+    if (!draw_chunk_flag_overlay)
+    {
+      mcnk_shader.uniform ("draw_impassible_flag", 0);
+    }
+
     mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
     mcnk_shader.uniform ("wireframe_type", _settings->value("wireframe/type", 0).toInt()); 
     mcnk_shader.uniform ("wireframe_radius", _settings->value("wireframe/radius", 1.5f).toFloat());
