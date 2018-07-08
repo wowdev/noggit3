@@ -4,10 +4,10 @@
 
 #include <noggit/AsyncObject.h>
 
+#include <array>
 #include <atomic>
 #include <condition_variable>
 #include <list>
-#include <map>
 #include <memory>
 #include <thread>
 
@@ -39,7 +39,7 @@ private:
   std::mutex _guard;
   std::condition_variable _state_changed;
   std::atomic<bool> _stop;
-  std::map<async_priority, std::list<AsyncObject*>> _to_load;
+  std::array<std::list<AsyncObject*>, (size_t)async_priority::count> _to_load;
   std::list<AsyncObject*> _currently_loading;
   std::list<std::thread> _threads;
   bool _important_object_failed_loading = false;
