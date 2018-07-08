@@ -62,16 +62,14 @@ namespace noggit
       return obj; 
     }
     void erase (std::string const& filename)
-    {
-      std::size_t count;      
+    {    
       std::string const normalized (_normalize (filename));
       AsyncObject* obj = nullptr;
 
       {
         boost::mutex::scoped_lock lock(_mutex);
-        count = --_counts.at (normalized);
 
-        if (count == 0)
+        if (--_counts.at (normalized) == 0)
         {
           obj = static_cast<AsyncObject*>(&_elements.at(normalized));
         }
