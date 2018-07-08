@@ -100,9 +100,9 @@ void WMOInstance::draw ( math::frustum const& frustum
 
   if (force_box || is_selected)
   {
-    gl.disable(GL_LIGHTING);
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
+    opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> const color_mat;
 
-    gl.disable(GL_COLOR_MATERIAL);
     opengl::texture::disable_texture(0);
     opengl::texture::disable_texture(1);
     gl.enable(GL_BLEND);
@@ -113,8 +113,6 @@ void WMOInstance::draw ( math::frustum const& frustum
 
     opengl::texture::disable_texture(1);
     opengl::texture::enable_texture(0);
-
-    gl.enable(GL_LIGHTING);
   }
 }
 
