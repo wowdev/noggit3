@@ -75,13 +75,10 @@ void blp_texture::upload()
   {
     for (int i = 0; i < _data.size(); ++i)
     {
-      width = std::max(1, width);
-      height = std::max(1, height);
-
       gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());   
 
-      width >>= 1;
-      height >>= 1;
+      width = std::max(width >> 1, 1);
+      height = std::max(height >> 1, 1);
     }
 
     _data.clear();
@@ -186,18 +183,19 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   GLint format = alphatypes[alpha_type];
   _compression_format = format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT ? (lHeader->attr_1_alphadepth == 1 ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT) : format;
 
-  // do every mipmap level
-  for (int i = 0; i < 16; ++i)
+  int width = _width, height = _height;
+
+  for (int i = 0; i < 16 && lHeader->sizes[i]; ++i)
   {
-    if (lHeader->offsets[i] && lHeader->sizes[i])
-    {
-      char const* start = lData + lHeader->offsets[i];
-      _compressed_data[i] = std::vector<uint8_t>(start, start + lHeader->sizes[i]);
-    }
-    else
-    {
-      return;
-    }
+    // make sure the vector is of the right size, blizzard seems to fuck those up for some small mipmaps
+    int size = std::floor((width + 3) / 4) * std::floor((height + 3) / 4) * blocksizes[alpha_type];
+    _compressed_data[i].resize(size);
+
+    char const* start = lData + lHeader->offsets[i];
+    std::copy(start, start + lHeader->sizes[i], _compressed_data[i].begin());
+
+    width = std::max(width >> 1, 1);
+    height = std::max(height >> 1, 1);
   }
 }
 
