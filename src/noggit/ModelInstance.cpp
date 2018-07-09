@@ -150,11 +150,11 @@ bool ModelInstance::is_visible( math::frustum const& frustum
   
   if (display == display_mode::in_3D)
   {
-    dist = (pos - camera).length() - model->rad * scale;
+    dist = (get_pos() - camera).length() - model->rad * scale;
   }
   else
   {
-    dist = std::abs(pos.y - camera.y) - model->rad * scale;
+    dist = std::abs(get_pos().y - camera.y) - model->rad * scale;
   }
 
   if (dist >= cull_distance)
@@ -175,7 +175,7 @@ bool ModelInstance::is_visible( math::frustum const& frustum
     return false;
   }
   
-  return frustum.intersectsSphere(pos, model->rad * scale);
+  return frustum.intersectsSphere(get_pos(), model->rad * scale);
 }
 
 void ModelInstance::recalcExtents()
@@ -286,10 +286,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
   if (!model->finishedLoading())
   {
     return;
-  }
-
-  // to compute the size category (used in culling)
-  recalcExtents();
+  }  
 
   world_pos = pos + wmo->pos;
 
@@ -314,35 +311,9 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 
   _transform_mat_inverted = mat.inverted();
   _transform_mat_transposed = mat.transposed();
+
+  // to compute the size category (used in culling)
+  recalcExtents();
+
   _need_matrix_update = false;
-}
-
-bool wmo_doodad_instance::is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera)
-{
-  if (_need_recalc_extents && model->finishedLoading())
-  {
-    recalcExtents();
-  }
-
-  float dist = (world_pos - camera).length() - model->rad * scale;
-
-  if (dist >= cull_distance)
-  {
-    return false;
-  }
-
-  if (size_cat < 1.f && dist > 30.f)
-  {
-    return false;
-  }
-  else if (size_cat < 4.f && dist > 150.f)
-  {
-    return false;
-  }
-  else if (size_cat < 25.f && dist > 300.f)
-  {
-    return false;
-  }
-
-  return frustum.intersectsSphere(world_pos, model->rad * scale);
 }

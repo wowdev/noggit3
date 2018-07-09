@@ -203,6 +203,12 @@ bool WMOInstance::isInsideRect(math::vector_3d rect[2]) const
 
 void WMOInstance::change_doodadset(uint16_t doodad_set)
 {
+  if (!wmo->finishedLoading())
+  {
+    _need_doodadset_update = true;
+    return;
+  }
+
   // don't set an invalid doodad set
   if (doodad_set >= wmo->doodadsets.size())
   {
@@ -211,6 +217,7 @@ void WMOInstance::change_doodadset(uint16_t doodad_set)
 
   _doodadset = doodad_set;
   _doodads_per_group = wmo->doodads_per_group(_doodadset);
+  _need_doodadset_update = false;
 
   update_doodads();
 }
@@ -251,7 +258,6 @@ std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
   if (_need_doodadset_update)
   {
     change_doodadset(_doodadset);
-    _need_doodadset_update = false;
   }
 
   if (!wmo->is_hidden() || draw_hidden_models)
