@@ -95,6 +95,9 @@ void MapView::set_editing_mode (editing_mode mode)
   _areaid->hide();
   TexturePalette->hide();
 
+  MoveObj = false;
+  _world->ResetSelection();
+
   switch (mode)
   {
   case editing_mode::ground:
