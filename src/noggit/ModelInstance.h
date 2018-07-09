@@ -79,13 +79,15 @@ public:
   void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]) const;
-  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera, display_mode display);
+  bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera, display_mode display);
+
+  virtual math::vector_3d get_pos() const { return pos; }
 
   void recalcExtents();
   std::vector<math::vector_3d> const& extents();
 
 protected:
-  bool _need_recalc_extents = false;
+  bool _need_recalc_extents = true;
   std::vector<math::vector_3d> _extents = std::vector<math::vector_3d>(2);
 
   virtual void update_transform_matrix();
@@ -125,7 +127,7 @@ public:
   bool need_matrix_update() const { return _need_matrix_update; }
   void update_transform_matrix_wmo(WMOInstance* wmo);
 
-  virtual bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera);
+  virtual math::vector_3d get_pos() const { return world_pos; }
 
 protected:
   // to avoid redefining recalcExtents

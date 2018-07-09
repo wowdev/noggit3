@@ -1705,7 +1705,7 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
 
   MapTile* adt = mapIndex.getTile(tile);
 
-  return adt->finishedLoading() ? adt->GetVertex(x, z, V) : false;
+  return adt->finishedLoading() && adt->GetVertex(x, z, V);
 }
 
 template<typename Fun>
