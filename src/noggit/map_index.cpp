@@ -135,6 +135,8 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
 
 void MapIndex::saveall (World* world)
 {
+  saveMaxUID();
+
   for (MapTile* tile : loaded_tiles())
   {
     tile->saveTile (false, world);
