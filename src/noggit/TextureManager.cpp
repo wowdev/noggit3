@@ -122,7 +122,7 @@ void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const*
     width = std::max(1, width);
     height = std::max(1, height);
 
-    if (lHeader->offsets[i] && lHeader->sizes[i])
+    if (lHeader->offsets[i] > 0 && lHeader->sizes[i] > 0)
     {
       buf = reinterpret_cast<unsigned char const*>(&lData[lHeader->offsets[i]]);
 
@@ -185,8 +185,13 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
 
   int width = _width, height = _height;
 
-  for (int i = 0; i < 16 && lHeader->sizes[i]; ++i)
+  for (int i = 0; i < 16; ++i)
   {
+    if (lHeader->sizes[i] <= 0 || lHeader->offsets[i] <= 0)
+    {
+      return;
+    }
+
     // make sure the vector is of the right size, blizzard seems to fuck those up for some small mipmaps
     int size = std::floor((width + 3) / 4) * std::floor((height + 3) / 4) * blocksizes[alpha_type];
     _compressed_data[i].resize(size);
