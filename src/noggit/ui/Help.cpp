@@ -181,7 +181,7 @@ namespace noggit
         "  Hold middle mouse - move object\n"
         "  ALT + Hold middle mouse - scale M2\n"
         "  SHIFT / CTRL / ALT + Hold left mouse - rotate object\n"
-        "  0 - 9 - change doodads set of selected WMO\n"
+        "  CTRL + 0-9 - change doodads set of selected WMO\n"
         "  CTRL + R - Reset rotation\n"
         "  H - Toggle selected model/wmo visibility\n"
         "  SPACE + H - Hide/Show hidden model/wmo\n"
