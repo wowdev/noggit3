@@ -28,6 +28,8 @@
 #include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
 
+#include <QtWidgets/QMessageBox>
+
 #include <algorithm>
 #include <cassert>
 #include <ctime>
@@ -2063,6 +2065,19 @@ void World::delete_duplicate_model_and_wmo_instances()
   Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
 }
 
+void World::warning_if_uid_in_use(uint32_t uid)
+{
+  if(mModelInstances.find(uid) != mModelInstances.end() || mWMOInstances.find(uid) != mWMOInstances.end())
+  {
+    QMessageBox::critical( nullptr
+                         , "UID ALREADY IN USE"
+                         , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
+                           "uid.ini file if you're sharing the map between several mappers.\n"
+                           "Use 'Editor > Force uid check on next opening' to fix the issue."
+                         );
+  }
+}
+
 void World::addM2 ( std::string const& filename
                   , math::vector_3d newPos
                   , float scale
@@ -2103,6 +2118,8 @@ void World::addM2 ( std::string const& filename
   AsyncLoader::instance().ensure_loaded(newModelis.model.get());
   newModelis.recalcExtents();
   updateTilesModel(&newModelis, model_update::add);
+
+  warning_if_uid_in_use(newModelis.uid);
   
   _models_by_filename[filename].push_back(&(mModelInstances.emplace(newModelis.uid, newModelis).first->second));
 }
@@ -2124,6 +2141,8 @@ void World::addWMO ( std::string const& filename
   // recalc the extends
   newWMOis.recalcExtents();
   updateTilesWMO(&newWMOis, model_update::add);
+
+  warning_if_uid_in_use(newWMOis.mUniqueID);
 
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }

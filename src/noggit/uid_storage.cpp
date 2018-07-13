@@ -35,3 +35,9 @@ void uid_storage::saveMaxUID(uint32_t mapID, uint32_t uid)
   QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
   uid_file.setValue (QString::number(mapID), uid);
 }
+
+void uid_storage::remove_uid_for_map(uint32_t map_id)
+{
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  uid_file.remove(QString::number(map_id));
+}

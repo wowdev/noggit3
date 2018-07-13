@@ -151,6 +151,7 @@ private:
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
 
+  bool _force_uid_check = false;
   bool _uid_fix_failed = false;
   void on_uid_fix_fail();
 

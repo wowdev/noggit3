@@ -201,20 +201,31 @@ namespace noggit
         ( _minimap,  &minimap_widget::map_clicked
         , [this] (::math::vector_3d const& pos)
           {
-#ifdef USE_MYSQL_UID_STORAGE
             QSettings settings;
+#ifdef USE_MYSQL_UID_STORAGE
             bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
 
             if ( (use_myqsl && mysql::hasMaxUIDStoredDB (_world->getMapID()))
               || uid_storage::hasMaxUIDStored (_world->getMapID())
                )
-#else
-            if (uid_storage::hasMaxUIDStored (_world->getMapID()))
-#endif
             {
               _world->mapIndex.loadMaxUID();
               enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
             }
+#else
+            if (uid_storage::hasMaxUIDStored (_world->getMapID()))
+            {
+              if (settings.value("uid_startup_check", true).toBool())
+              {
+                enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), uid_fix_mode::max_uid);
+              }
+              else
+              {
+                _world->mapIndex.loadMaxUID();
+                enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
+              }
+            }
+#endif
             else
             {
               auto uidFixWindow (new uid_fix_window (pos, math::degrees (30.f), math::degrees (90.f)));
