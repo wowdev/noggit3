@@ -162,6 +162,8 @@ namespace noggit
       layout->addRow ("Adt unloading check interval (sec)", _adt_unload_check_interval = new QSpinBox(this));
       _adt_unload_check_interval->setMinimum(1);
 
+      layout->addRow ("Always check for max UID", _uid_cb = new QCheckBox(this));
+
       layout->addRow ("Tablet support", tabletModeCheck = new QCheckBox ("enabled", this));
 
       auto warning (new QWidget (this));
@@ -215,6 +217,7 @@ namespace noggit
       _fullscreen_cb->setChecked (_settings->value ("fullscreen", false).toBool());
       _adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
       _adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
+      _uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
 
       _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
       _mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
@@ -242,6 +245,7 @@ namespace noggit
       _settings->setValue ("fullscreen", _fullscreen_cb->isChecked());
       _settings->setValue ("unload_dist", _adt_unload_dist->value());
       _settings->setValue ("unload_interval", _adt_unload_check_interval->value());
+      _settings->setValue ("uid_startup_check", _uid_cb->isChecked());
 
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
       _settings->setValue ("project/mysql/server", _mysql_server_field->text());

@@ -11,6 +11,7 @@
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/map_index.hpp>
+#include <noggit/uid_storage.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/CursorSwitcher.h> // cursor_switcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
@@ -416,6 +417,8 @@ void MapView::createGUI()
                }
              );
 
+  file_menu->addSeparator();
+  ADD_ACTION_NS (file_menu, "Force uid check on next opening", [this] { _force_uid_check = true; });
   file_menu->addSeparator();
   ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
 
@@ -1266,6 +1269,11 @@ MapView::~MapView()
 {
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
+
+  if (_force_uid_check)
+  {
+    uid_storage::remove_uid_for_map(_world->getMapID());
+  }
 
   // the gui isn't created if the uid fix fail
   if (!_uid_fix_failed)
