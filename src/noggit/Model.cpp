@@ -77,14 +77,6 @@ void Model::finishLoading()
   finished = true;
 }
 
-Model::~Model()
-{
-  LogDebug << "Unloading model \"" << filename << "\"." << std::endl;
-
-  _textures.clear();
-  _textureFilenames.clear();
-}
-
 
 bool Model::isAnimated(const MPQFile& f)
 {

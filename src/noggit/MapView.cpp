@@ -131,17 +131,17 @@ void MapView::ResetSelectedObjectRotation()
   if (_world->IsSelection(eEntry_WMO))
   {
     WMOInstance* wmo = boost::get<selected_wmo_type> (*_world->GetCurrentSelection());
-    _world->updateTilesWMO(wmo);
+    _world->updateTilesWMO(wmo, model_update::remove);
     wmo->resetDirection();
-    _world->updateTilesWMO(wmo);
+    _world->updateTilesWMO(wmo, model_update::add);
   }
   else if (_world->IsSelection(eEntry_Model))
   {
     ModelInstance* m2 = boost::get<selected_model_type> (*_world->GetCurrentSelection());
-    _world->updateTilesModel(m2);
+    _world->updateTilesModel(m2, model_update::remove);
     m2->resetDirection();
     m2->recalcExtents();
-    _world->updateTilesModel(m2);
+    _world->updateTilesModel(m2, model_update::add);
   }
 }
 
@@ -154,7 +154,7 @@ void MapView::SnapSelectedObjectToGround()
     _world->GetVertex(wmo->pos.x, wmo->pos.z, &t);
     wmo->pos.y = t.y;
 	  wmo->recalcExtents();
-    _world->updateTilesWMO(wmo);
+    _world->updateTilesWMO(wmo, model_update::none);
   }
   else if (_world->IsSelection(eEntry_Model))
   {
@@ -163,7 +163,7 @@ void MapView::SnapSelectedObjectToGround()
     _world->GetVertex(m2->pos.x, m2->pos.z, &t);
     m2->pos.y = t.y;
 	  m2->recalcExtents();
-    _world->updateTilesModel(m2);
+    _world->updateTilesModel(m2, model_update::none);
   }
 }
 
@@ -962,17 +962,17 @@ void MapView::createGUI()
 
                   if (selection->which() == eEntry_Model)
                   {
-                    _world->updateTilesModel(boost::get<selected_model_type> (*selection));
+                    _world->updateTilesModel(boost::get<selected_model_type> (*selection), model_update::remove);
                     boost::get<selected_model_type> (*selection)->pos = _cursor_pos;
                     boost::get<selected_model_type> (*selection)->recalcExtents();
-                    _world->updateTilesModel(boost::get<selected_model_type> (*selection));
+                    _world->updateTilesModel(boost::get<selected_model_type> (*selection), model_update::add);
                   }
                   else if (selection->which() == eEntry_WMO)
                   {
-                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection), model_update::remove);
                     boost::get<selected_wmo_type> (*selection)->pos = _cursor_pos;
                     boost::get<selected_wmo_type> (*selection)->recalcExtents();
-                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection), model_update::add);
                   }
                 }
               }
@@ -1383,27 +1383,27 @@ void MapView::tick (float dt)
         // Move scale and rotate with numpad keys
         if (Selection->which() == eEntry_WMO)
         {
-          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::remove);
           boost::get<selected_wmo_type> (*Selection)->pos.x += keyx * moveratio;
           boost::get<selected_wmo_type> (*Selection)->pos.y += keyy * moveratio;
           boost::get<selected_wmo_type> (*Selection)->pos.z += keyz * moveratio;
           boost::get<selected_wmo_type> (*Selection)->dir.y += keyr * moveratio * 5;
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
-          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::add);
           objectEditor->rotationEditor->updateValues();
         }
 
         if (Selection->which() == eEntry_Model)
         {
-          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::remove);
           boost::get<selected_model_type> (*Selection)->pos.x += keyx * moveratio;
           boost::get<selected_model_type> (*Selection)->pos.y += keyy * moveratio;
           boost::get<selected_model_type> (*Selection)->pos.z += keyz * moveratio;
           boost::get<selected_model_type> (*Selection)->dir.y += keyr * moveratio * 5;
           boost::get<selected_model_type> (*Selection)->scale += keys * moveratio / 50;
           boost::get<selected_model_type> (*Selection)->recalcExtents();
-          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::add);
           objectEditor->rotationEditor->updateValues();
         }
       }
@@ -1425,7 +1425,7 @@ void MapView::tick (float dt)
         ObjPos.x = 80.0f;
         if (Selection->which() == eEntry_WMO)
         {
-          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::remove);
 
           if (_mod_shift_down)
           {
@@ -1446,12 +1446,12 @@ void MapView::tick (float dt)
           }
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
-          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::add);
           objectEditor->rotationEditor->updateValues();
         }
         else if (Selection->which() == eEntry_Model)
         {
-          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::remove);
           if (_mod_alt_down)
           {
             float ScaleAmount = pow(2.0f, mv * 4.0f);
@@ -1486,7 +1486,7 @@ void MapView::tick (float dt)
 
           objectEditor->rotationEditor->updateValues();
           boost::get<selected_model_type> (*Selection)->recalcExtents();
-          _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::add);
         }
       }
 
@@ -1522,7 +1522,7 @@ void MapView::tick (float dt)
 
         if (lModify && lTarget)
         {
-          _world->updateTilesEntry(*Selection);
+          _world->updateTilesEntry(*Selection, model_update::remove);
 
           *lTarget = *lTarget + rh + rv;
 
@@ -1536,12 +1536,12 @@ void MapView::tick (float dt)
           if (Selection->which() == eEntry_WMO)
           {
             boost::get<selected_wmo_type> (*Selection)->recalcExtents();
-            _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+            _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::add);
           }
           else if (Selection->which() == eEntry_Model)
           {
             boost::get<selected_model_type> (*Selection)->recalcExtents();
-            _world->updateTilesModel(boost::get<selected_model_type> (*Selection));
+            _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::add);
           }
         }
       }
@@ -2475,7 +2475,7 @@ void MapView::change_selected_wmo_doodadset(int set)
 {
   auto& wmo = boost::get<selected_wmo_type> (*_world->GetCurrentSelection());
   wmo->change_doodadset(set);
-  _world->updateTilesWMO(wmo);
+  _world->updateTilesWMO(wmo, model_update::none);
 }
 
 void MapView::mousePressEvent (QMouseEvent* event)

@@ -209,11 +209,13 @@ public:
               , math::vector_3d rotation
               );
 
+  void remove_models_if_needed(std::vector<uint32_t> const& uids, tile_index const& tile_unloading);
+
   void reload_tile(tile_index const& tile);
 
-  void updateTilesEntry(selection_type const& entry);
-  void updateTilesWMO(WMOInstance* wmo);
-  void updateTilesModel(ModelInstance* m2);
+  void updateTilesEntry(selection_type const& entry, model_update type);
+  void updateTilesWMO(WMOInstance* wmo, model_update type);
+  void updateTilesModel(ModelInstance* m2, model_update type);
 
   void saveMap (int width, int height);
 

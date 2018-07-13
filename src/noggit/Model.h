@@ -206,8 +206,7 @@ public:
     return std::vector<T>(start, start + count);
   }
 
-   Model(const std::string& name);
-  ~Model();
+  Model(const std::string& name);
 
   void draw (bool draw_fog, int animtime, bool draw_particles);
   void draw ( std::vector<ModelInstance*> instances
