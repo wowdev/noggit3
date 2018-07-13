@@ -28,7 +28,7 @@ public:
   //! \todo  Get this out and do somehow else.
   unsigned int uid;
 
-  float scale;
+  float scale = 1.f;
 
   // used when flag 0x8 is set in wdt
   // longest side of an AABB transformed model's bounding box from the M2 header

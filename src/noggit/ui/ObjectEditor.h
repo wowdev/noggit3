@@ -22,6 +22,7 @@ namespace noggit
   {
     class model_import;
     class rotation_editor;
+    class helper_models;
   }
 }
 
@@ -56,8 +57,9 @@ namespace noggit
                     , object_paste_params*
                     );
 
-      bool hasSelection() const;
-      void copy(selection_type entry);
+      void import_last_model_from_wmv(int type);
+      void copy(std::string const& filename);
+      void copy(boost::optional<selection_type> entry);
       void pasteObject ( math::vector_3d cursor_pos
                        , math::vector_3d camera_pos
                        , World*
@@ -67,6 +69,7 @@ namespace noggit
 
       model_import *modelImport;
       rotation_editor* rotationEditor;
+      helper_models* helper_models_widget;
     private:
       QSettings* _settings;
 
@@ -76,9 +79,11 @@ namespace noggit
       bool _copy_model_stats;
 
       boost::optional<selection_type> selected;
+      
+      void replace_selection(selection_type new_selection);
+
       void showImportModels();
       void SaveObjecttoTXT (World*);
-      void setModelName(const std::string &name);
       int pasteMode;
     };
   }

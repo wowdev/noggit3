@@ -184,139 +184,6 @@ void MapView::DeleteSelectedObject()
   }
 }
 
-void MapView::insert_last_m2_from_wmv()
-{
-  // Test if there is an selection
-  if (!_world->HasSelection())
-  {
-    return;
-  }  
-
-  std::string wmv_log_file (_settings->value ("project/wmv_log_file").toString().toStdString());
-  std::string lastModel;
-  std::string line;
-  std::ifstream fileReader(wmv_log_file.c_str());
-
-  if (fileReader.is_open())
-  {
-    while (!fileReader.eof())
-    {
-      getline(fileReader, line);
-      std::transform(line.begin(), line.end(), line.begin(), ::tolower);
-      std::regex regex("([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.(mdx|m2))");
-      std::smatch match;
-
-      if (std::regex_search (line, match, regex))
-      {
-        lastModel = match.str(0);
-        size_t found = lastModel.rfind(".mdx");
-        if (found != std::string::npos)
-        {
-          lastModel.replace(found, 4, ".m2");
-        }
-      }
-    }
-  }
-  else
-  {
-    // file not exist, no rights or other error
-    LogError << wmv_log_file << std::endl;
-  }
-
-  math::vector_3d selectionPosition;
-  switch (_world->GetCurrentSelection()->which())
-  {
-  case eEntry_Model:
-    selectionPosition = boost::get<selected_model_type> (*_world->GetCurrentSelection())->pos;
-    break;
-  case eEntry_WMO:
-    selectionPosition = boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->pos;
-    break;
-  case eEntry_MapChunk:
-    selectionPosition = boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).position;
-    break;
-  }
-
-  if (lastModel != "")
-  {
-    if (!MPQFile::exists(lastModel))
-    {
-      LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
-    }
-    else
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _ (::gl, context());
-      _world->addM2(lastModel, selectionPosition, 1.f, {0.f, 0.f, 0.f}, &_object_paste_params);
-    }
-  }
-}
-
-void MapView::insert_last_wmo_from_wmv()
-{
-  if (!_world->HasSelection())
-  {
-    return;
-  }
-
-  std::string wmv_log_file (_settings->value ("project/wmv_log_file").toString().toStdString());
-  std::string lastWMO;
-  std::string line;
-  std::ifstream fileReader(wmv_log_file.c_str());
-
-  if (fileReader.is_open())
-  {
-    while (!fileReader.eof())
-    {
-      getline(fileReader, line);
-      std::transform(line.begin(), line.end(), line.begin(), ::tolower);
-      std::regex regex("([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.(wmo))");
-      std::smatch match;
-
-      if (std::regex_search (line, match, regex))
-      {
-        lastWMO = match.str(0);
-      }
-    }
-  }
-  else
-  {
-    // file not exist, no rights or other error
-    LogError << wmv_log_file << std::endl;
-  }
-
-
-  math::vector_3d selectionPosition;
-  switch (_world->GetCurrentSelection()->which())
-  {
-  case eEntry_Model:
-    selectionPosition = boost::get<selected_model_type> (*_world->GetCurrentSelection())->pos;
-    break;
-  case eEntry_WMO:
-    selectionPosition = boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->pos;
-    break;
-  case eEntry_MapChunk:
-    selectionPosition = boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).position;
-    break;
-  }
-
-  if (lastWMO != "")
-  {
-    if (!MPQFile::exists(lastWMO))
-    {
-      LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
-    }
-    else
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _ (::gl, context());
-      _world->addWMO(lastWMO, selectionPosition, {0.f, 0.f, 0.f});
-    }
-  }
-  //! \todo Memoryleak: These models will never get deleted.
-}
-
-
 
 void MapView::changeZoneIDValue (int set)
 {
@@ -565,9 +432,9 @@ void MapView::createGUI()
 
 
   assist_menu->addSection ("Model");
-  ADD_ACTION (assist_menu, "Last m2 from WMV", "Shift+V", [this] { insert_last_m2_from_wmv(); });
-  ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { insert_last_wmo_from_wmv(); });
-  ADD_ACTION_NS (assist_menu, "Helper models", [this] { HelperModels->show(); });
+  ADD_ACTION (assist_menu, "Last M2 from WMV", "Shift+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_Model); });
+  ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_WMO); });
+  ADD_ACTION_NS (assist_menu, "Helper models", [this] { objectEditor->helper_models_widget->show(); });
 
   assist_menu->addSection ("Current ADT");
   ADD_ACTION_NS ( assist_menu
@@ -815,13 +682,8 @@ void MapView::createGUI()
               {
                 objectEditor->copy (*_world->GetCurrentSelection());
               }
-            , [this]
-              {
-                return !!_world->GetCurrentSelection();
-              }
+            , [this] { return terrainMode == editing_mode::object; }
             );
-
-
   addHotkey ( Qt::Key_C
             , MOD_none
             , [this]
@@ -843,6 +705,7 @@ void MapView::createGUI()
   addHotkey ( Qt::Key_V
             , MOD_ctrl
             , [this] { objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params); }
+            , [this] { return terrainMode == editing_mode::object; }
             );
   addHotkey ( Qt::Key_V
             , MOD_none
@@ -851,12 +714,12 @@ void MapView::createGUI()
             );
   addHotkey ( Qt::Key_V
             , MOD_shift
-            , [this] { insert_last_m2_from_wmv(); }
+            , [this] { objectEditor->import_last_model_from_wmv(eEntry_Model); }
             , [this] { return terrainMode == editing_mode::object; }
             );
   addHotkey ( Qt::Key_V
             , MOD_alt
-            , [this] { insert_last_wmo_from_wmv(); }
+            , [this] { objectEditor->import_last_model_from_wmv(eEntry_WMO); }
             , [this] { return terrainMode == editing_mode::object; }
             );
 
@@ -866,13 +729,15 @@ void MapView::createGUI()
             , [this] { return terrainMode == editing_mode::ground; }
             );
 
-  addHotkey(Qt::Key_B
-	  , MOD_ctrl
-	  , [this] {
-	  objectEditor->copy(*_world->GetCurrentSelection());
-	  objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
-  }
-  );
+  addHotkey( Qt::Key_B
+	         , MOD_ctrl
+	         , [this] 
+             {
+	             objectEditor->copy(*_world->GetCurrentSelection());
+	             objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
+             }
+           , [this] { return terrainMode == editing_mode::object; }
+           );
 
   ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
 
@@ -1174,13 +1039,6 @@ void MapView::createGUI()
   addHotkey (Qt::Key_7, MOD_ctrl, [this] { change_selected_wmo_doodadset(7); }, [this] { return _world->IsSelection(eEntry_WMO); });
   addHotkey (Qt::Key_8, MOD_ctrl, [this] { change_selected_wmo_doodadset(8); }, [this] { return _world->IsSelection(eEntry_WMO); });
   addHotkey (Qt::Key_9, MOD_ctrl, [this] { change_selected_wmo_doodadset(9); }, [this] { return _world->IsSelection(eEntry_WMO); });
-
-  // modelimport
-  objectEditor->modelImport = new noggit::ui::model_import(this);
-
-  // helper models
-  HelperModels = new noggit::ui::helper_models(this);
-  HelperModels->hide();
 }
 
 MapView::MapView( math::degrees camera_yaw0
@@ -2487,34 +2345,6 @@ void MapView::focusOutEvent (QFocusEvent*)
   look = false;
 }
 
-void MapView::insert_object_at_selection_position (std::string m2_to_add)
-{
-  if (!_world->HasSelection())
-    return;
-
-  math::vector_3d selectionPosition;
-  switch (_world->GetCurrentSelection()->which())
-  {
-  case eEntry_Model:
-    selectionPosition = boost::get<selected_model_type> (*_world->GetCurrentSelection())->pos;
-    break;
-  case eEntry_WMO:
-    selectionPosition = boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->pos;
-    break;
-  case eEntry_MapChunk:
-    selectionPosition = boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).position;
-    break;
-  }
-
-  if (!MPQFile::exists(m2_to_add))
-  {
-    LogError << "Failed adding " << m2_to_add << ". It was not in any MPQ." << std::endl;
-  }
-
-  _world->addM2(m2_to_add, selectionPosition, 1., {0.f, 0.f, 0.f}, &_object_paste_params);
-  //! \todo Memoryleak: These models will never get deleted.
-}
-
 void MapView::mouseMoveEvent (QMouseEvent* event)
 {
   //! \todo:  move the function call requiring a context in tick ?
@@ -2629,18 +2459,15 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
 void MapView::selectModel(std::string const& model)
 {
-  makeCurrent ();
-  opengl::context::scoped_setter const _ (::gl, context ());
-  
   if (boost::ends_with (model, ".m2"))
   {
-    auto mi (new ModelInstance (model));
-    mi->scale = 1.0f;
-    objectEditor->copy (mi);
+    ModelInstance mi(model);
+    objectEditor->copy(boost::make_optional<selection_type>(&mi));
   }
   else if (boost::ends_with (model, ".wmo"))
   {
-    objectEditor->copy (new WMOInstance (model));
+    WMOInstance wi(model);
+    objectEditor->copy(boost::make_optional<selection_type>(&wi));
   }
 }
 
