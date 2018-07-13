@@ -6,6 +6,7 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/WMOInstance.h>
+#include <noggit/ui/ObjectEditor.h>
 
 #include <fstream>
 #include <regex>
@@ -17,8 +18,8 @@ namespace noggit
 {
   namespace ui
   {
-    model_import::model_import (MapView* mapview)
-      : QWidget (mapview, Qt::Tool | Qt::WindowStaysOnTopHint)
+    model_import::model_import (noggit::ui::object_editor* object_editor)
+      : QWidget (object_editor, Qt::Tool | Qt::WindowStaysOnTopHint)
     {
       setWindowIcon (QIcon (":/icon"));
       auto layout (new QFormLayout (this));
@@ -36,9 +37,9 @@ namespace noggit
       buildModelList();
 
       connect ( _list, &QListWidget::itemDoubleClicked
-              , [mapview] (QListWidgetItem* item)
+              , [object_editor] (QListWidgetItem* item)
                 {
-                  mapview->selectModel (item->text ().toStdString());
+                  object_editor->copy(item->text().toStdString());
                 }
               );
     }

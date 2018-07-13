@@ -42,7 +42,6 @@ namespace noggit
     class detail_infos;
     class flatten_blur_tool;
     class help;
-    class helper_models;
     class minimap_widget;
     class shader_tool;
     class terrain_tool;
@@ -116,9 +115,6 @@ private:
   void DeleteSelectedObject();
   void changeZoneIDValue (int set);
 
-  void insert_last_m2_from_wmv();
-  void insert_last_wmo_from_wmv();
-
   QPointF _last_mouse_pos;
   float mh, mv, rh, rv;
 
@@ -188,8 +184,6 @@ public:
   ~MapView();
 
   void tick (float dt);
-
-  void insert_object_at_selection_position (std::string);
   void selectModel(std::string const& model);
   void change_selected_wmo_doodadset(int set);
 
@@ -296,6 +290,4 @@ private:
   QDockWidget* _vertex_shading;
   noggit::ui::texturing_tool* texturingTool;
   QDockWidget* _texturing;
-
-  noggit::ui::helper_models *HelperModels;
 };

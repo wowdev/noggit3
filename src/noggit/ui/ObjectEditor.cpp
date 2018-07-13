@@ -1,20 +1,18 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <sstream>
-
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
+#include <noggit/ui/HelperModels.h>
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/checkbox.hpp>
 #include <util/qt/overload.hpp>
+
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <QFormLayout>
 #include <QGridLayout>
@@ -24,7 +22,13 @@
 #include <QButtonGroup>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QtWidgets/QMessageBox>
 
+#include <fstream>
+#include <iostream>
+#include <regex>
+#include <string>
+#include <sstream>
 
 namespace noggit
 {
@@ -36,7 +40,9 @@ namespace noggit
                                  , object_paste_params* paste_params
                                  )
             : QWidget(nullptr)
+            , modelImport (new model_import(this))
             , rotationEditor (new rotation_editor(mapView))
+            , helper_models_widget(new helper_models(this))
             , _settings (new QSettings (this))
             , _copy_model_stats (true)
             , selected()
@@ -144,8 +150,14 @@ namespace noggit
 
       QPushButton *toTxt = new QPushButton("To Text File", this);
       QPushButton *fromTxt = new QPushButton("From Text File", this);
+      QPushButton *last_m2_from_wmv = new QPushButton("Last M2 from WMV", this);
+      QPushButton *last_wmo_from_wmv = new QPushButton("Last WMO from WMV", this);
+      QPushButton *helper_models_btn = new QPushButton("Helper Models", this);
       importBox->layout()->addWidget(toTxt);
       importBox->layout()->addWidget(fromTxt);
+      importBox->layout()->addWidget(last_m2_from_wmv);
+      importBox->layout()->addWidget(last_wmo_from_wmv);
+      importBox->layout()->addWidget(helper_models_btn);
 
       layout->addRow(copyBox);
       layout->addRow(pasteBox);
@@ -261,6 +273,21 @@ namespace noggit
       connect(fromTxt, &QPushButton::clicked, [=]() {
           showImportModels();
       });
+
+      connect( last_m2_from_wmv
+             , &QPushButton::clicked
+             , [=]() { import_last_model_from_wmv(eEntry_Model); }
+             );
+
+      connect( last_wmo_from_wmv
+             , &QPushButton::clicked
+             , [=]() { import_last_model_from_wmv(eEntry_WMO); }
+             );
+
+      connect( helper_models_btn
+             , &QPushButton::clicked
+             , [=]() { helper_models_widget->show(); }
+             );      
     }
 
     void object_editor::showImportModels()
@@ -274,8 +301,9 @@ namespace noggit
                                     , object_paste_params* paste_params
                                     )
     {
-      if (!hasSelection() || selected->which() == eEntry_MapChunk)
+      if (!selected || selected->which() == eEntry_MapChunk)
       {
+        LogError << "Invalid selection" << std::endl;
         return;
       }
 
@@ -345,48 +373,102 @@ namespace noggit
     void object_editor::togglePasteMode()
     {
       pasteModeGroup->button ((pasteMode + 1) % PASTE_MODE_COUNT)->setChecked (true);
-    }
+    }   
 
-    bool object_editor::hasSelection() const
+    void object_editor::replace_selection(selection_type new_selection)
     {
-      return !!selected;
-    }
-
-    void object_editor::copy(selection_type entry)
-    {
-      if (entry.which() == eEntry_Model)
+      if (selected)
       {
-        auto clone = new ModelInstance(boost::get<selected_model_type> (entry)->model->filename);
-        clone->scale = boost::get<selected_model_type> (entry)->scale;
-        clone->dir = boost::get<selected_model_type> (entry)->dir;
-        selected = clone;
-        setModelName (boost::get<selected_model_type> (entry)->model->filename);
+        auto& entry = selected.get();
+
+        if (entry.which() == eEntry_Model)
+        {
+          delete boost::get<selected_model_type> (entry);
+        }
+        else if (entry.which() == eEntry_WMO)
+        {
+          delete boost::get<selected_wmo_type> (entry);
+        }
       }
-      else if (entry.which() == eEntry_WMO)
+
+      selected = new_selection;
+
+      std::stringstream ss;
+      ss << "Model: ";      
+
+      if (new_selection.which() == eEntry_Model)
       {
-        auto clone = new WMOInstance(boost::get<selected_wmo_type> (entry)->wmo->filename);
-        clone->dir = boost::get<selected_wmo_type> (entry)->dir;
-        selected = clone;
-        setModelName(boost::get<selected_wmo_type> (entry)->wmo->filename);
+        ss << boost::get<selected_model_type>(new_selection)->model->filename;
+      }
+      else if (new_selection.which() == eEntry_WMO)
+      {
+        ss << boost::get<selected_wmo_type>(new_selection)->wmo->filename;
       }
       else
       {
-        selected = boost::none;
+        ss << "Error";
+        LogError << "The new selection wasn't a m2 or wmo" << std::endl;
+      }
+
+      _filename->setText(ss.str().c_str());
+    }
+
+    void object_editor::copy(std::string const& filename)
+    {
+      if (!MPQFile::exists(filename))
+      {
+        QMessageBox::warning
+          ( nullptr
+          , "Warning"
+          , QString::fromStdString(filename + " not found.")
+          );
+
         return;
+      }
+
+      if (boost::ends_with (filename, ".m2"))
+      {
+        replace_selection(new ModelInstance(filename));
+      }
+      else if (boost::ends_with (filename, ".wmo"))
+      {
+        replace_selection(new WMOInstance(filename));
       }
     }
 
-    void object_editor::setModelName(const std::string &name)
+    void object_editor::copy(boost::optional<selection_type> entry)
     {
-      std::stringstream ss;
-      ss << "Model: " << name;
-      _filename->setText(ss.str().c_str());
+      if (!entry)
+      {
+        return;
+      }
+
+      auto const& selection = entry.get();
+
+      if (selection.which() == eEntry_Model)
+      {
+        auto clone = new ModelInstance(boost::get<selected_model_type> (selection)->model->filename);
+        clone->scale = boost::get<selected_model_type> (selection)->scale;
+        clone->dir = boost::get<selected_model_type> (selection)->dir;
+
+        replace_selection(clone);
+      }
+      else if (selection.which() == eEntry_WMO)
+      {
+        auto clone = new WMOInstance(boost::get<selected_wmo_type> (selection)->wmo->filename);
+        clone->dir = boost::get<selected_wmo_type> (selection)->dir;
+        
+        replace_selection(clone);
+      }
     }
 
     void object_editor::SaveObjecttoTXT (World* world)
     {
-      if (!world->HasSelection())
+      if (!world->HasSelection() || world->IsSelection(eEntry_MapChunk))
+      {
         return;
+      }
+
       std::string path;
 
       if (world->IsSelection(eEntry_WMO))
@@ -403,6 +485,60 @@ namespace noggit
       stream.close();
 
       modelImport->buildModelList();
+    }
+
+    void object_editor::import_last_model_from_wmv(int type)
+    {
+      std::string wmv_log_file (_settings->value ("project/wmv_log_file").toString().toStdString());
+      std::string last_model_found;
+      std::string line;
+      std::ifstream file(wmv_log_file.c_str());
+
+      if (file.is_open())
+      {
+        while (!file.eof())
+        {
+          getline(file, line);
+          std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+          std::regex regex( type == eEntry_Model
+                          ? "([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.)(mdx|m2)"
+                          : "([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.)(wmo)"
+                          );
+
+          std::smatch match;
+
+          if (std::regex_search (line, match, regex))
+          {
+            last_model_found = match.str(0);
+            size_t found = last_model_found.rfind(".mdx");
+            if (found != std::string::npos)
+            {
+              last_model_found.replace(found, 4, ".m2");
+            }
+          }
+        }
+      }
+      else
+      {
+        QMessageBox::warning
+          ( nullptr
+          , "Warning"
+          , "The wmv log file could not be opened"
+          );
+      }
+
+      if(last_model_found == "")
+      {
+        QMessageBox::warning
+          ( nullptr
+          , "Warning"
+          , "No corresponding model found in the wmv log file."
+          );
+      }
+      else
+      {
+        copy(last_model_found);
+      }      
     }
   }
 }

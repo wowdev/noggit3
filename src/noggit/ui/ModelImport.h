@@ -12,6 +12,8 @@ namespace noggit
 {
   namespace ui
   {
+    class object_editor;
+
     class model_import : public QWidget
     {
     private:
@@ -19,7 +21,7 @@ namespace noggit
       QLineEdit* _textBox;
 
     public:
-      model_import (MapView *mapview);
+      model_import (noggit::ui::object_editor* object_editor);
       void buildModelList();
     };
   }
