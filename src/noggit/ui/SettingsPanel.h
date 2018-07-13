@@ -11,6 +11,7 @@
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QSpinBox>
 #include <QtWidgets/QWidget>
 
 namespace util
@@ -42,6 +43,8 @@ namespace noggit
       util::file_line_edit* wmvLogPathField;
       QDoubleSpinBox* viewDistanceField;
       QDoubleSpinBox* farZField;
+      QSpinBox* _adt_unload_dist;
+      QSpinBox* _adt_unload_check_interval;
 
       QCheckBox* tabletModeCheck;
       QCheckBox* _vsync_cb;

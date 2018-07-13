@@ -214,7 +214,9 @@ public:
 private:
   std::string globalWMOName;
 
-  int lastUnloadTime;
+  int _last_unload_time;
+  int _unload_interval;
+  int _unload_dist;
 
   // Is the WDT telling us to use a different alphamap structure.
   bool mBigAlpha;
