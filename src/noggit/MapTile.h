@@ -29,6 +29,7 @@ class MapTile : public AsyncObject
 
 public:
 	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World*);
+  ~MapTile();
 
   void finishLoading();
 
@@ -99,6 +100,14 @@ public:
     return async_priority::high;
   }
 
+  bool has_model(uint32_t uid) const
+  {
+    return std::find(uids.begin(), uids.end(), uid) != uids.end();
+  }
+
+  void remove_model(uint32_t uid);
+  void add_model(uint32_t uid) { uids.push_back(uid); }
+
   TileWater Water;
 private:
 
@@ -114,6 +123,8 @@ private:
   std::vector<std::string> mTextureFilenames;
   std::vector<std::string> mModelFilenames;
   std::vector<std::string> mWMOFilenames;
+  
+  std::vector<uint32_t> uids;
 
   std::unique_ptr<MapChunk> mChunks[16][16];
   std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)

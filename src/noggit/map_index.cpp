@@ -244,6 +244,32 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 }
 
+void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint32_t uid)
+{
+  if (!hasTile(tile))
+  {
+    return;
+  }
+
+  MapTile* adt = loadTile(tile);
+
+  if (!adt->finishedLoading())
+  {
+    AsyncLoader::instance().ensure_loaded(adt);
+  }
+
+  adt->changed = 1;
+
+  if (type == model_update::add)
+  {
+    adt->add_model(uid);
+  }
+  else if(type == model_update::remove)
+  {
+    adt->remove_model(uid);
+  }
+}
+
 void MapIndex::setChanged(const tile_index& tile)
 {
   MapTile* mTile = loadTile(tile);
@@ -332,23 +358,20 @@ void MapIndex::unloadTiles(const tile_index& tile)
 {
   if ( ((clock() / CLOCKS_PER_SEC) - this->lastUnloadTime) > 5) // only unload every 5 seconds
   {
-    int unloadBoundery = 6; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
-    for (int pz = 0; pz < 64; ++pz)
-    {
-      for (int px = 0; px < 64; ++px)
-      {
-        if (std::abs(px - (int)tile.x) > unloadBoundery || std::abs(pz - (int)tile.z) > unloadBoundery)
-        {
-          tile_index id(px, pz);
+    int unloadBoundery = 3; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
 
-          //Only unload adts not marked to save
-          if (getChanged(id) == 0)
-          {
-            unloadTile(id);
-          }
+    for (MapTile* adt : loaded_tiles())
+    {
+      if (std::abs((int)adt->index.x - (int)tile.x) > unloadBoundery || std::abs((int)adt->index.z - (int)tile.z) > unloadBoundery)
+      {
+        //Only unload adts not marked to save
+        if (adt->changed == 0)
+        {
+          unloadTile(adt->index);
         }
       }
     }
+
     this->lastUnloadTime = clock() / CLOCKS_PER_SEC;
   }
 }

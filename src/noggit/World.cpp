@@ -1995,7 +1995,7 @@ void World::deleteModelInstance(int pUniqueID)
   std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
   if (it == mModelInstances.end()) return;
 
-  updateTilesModel(&it->second);
+  updateTilesModel(&it->second, model_update::remove);
   mModelInstances.erase(it);
   ResetSelection();
 }
@@ -2005,7 +2005,7 @@ void World::deleteWMOInstance(int pUniqueID)
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
   if (it == mWMOInstances.end()) return;
 
-  updateTilesWMO(&it->second);
+  updateTilesWMO(&it->second, model_update::remove);
   mWMOInstances.erase(it);
   ResetSelection();
 }
@@ -2102,7 +2102,7 @@ void World::addM2 ( std::string const& filename
   // to ensure the tiles are updated correctly
   AsyncLoader::instance().ensure_loaded(newModelis.model.get());
   newModelis.recalcExtents();
-  updateTilesModel(&newModelis);
+  updateTilesModel(&newModelis, model_update::add);
   
   _models_by_filename[filename].push_back(&(mModelInstances.emplace(newModelis.uid, newModelis).first->second));
 }
@@ -2123,9 +2123,42 @@ void World::addWMO ( std::string const& filename
 
   // recalc the extends
   newWMOis.recalcExtents();
-  updateTilesWMO(&newWMOis);
+  updateTilesWMO(&newWMOis, model_update::add);
 
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
+}
+
+void World::remove_models_if_needed(std::vector<uint32_t> const& uids, tile_index const& tile_unloading)
+{
+  for (uint32_t uid : uids)
+  {
+    bool remove = true;
+
+    for (MapTile* tile : mapIndex.loaded_tiles())
+    {
+      if (tile->has_model(uid))
+      {
+        remove = false;
+        break;
+      }
+    }
+
+    if (remove)
+    {
+      if (mModelInstances.find(uid) != mModelInstances.end())
+      {
+        mModelInstances.erase(uid);
+      }
+      else
+      {
+        mWMOInstances.erase(uid);
+      }
+    }
+  }
+
+  // todo: only reset if the selected model has been unloaded
+  ResetSelection();
+  update_models_by_filename();
 }
 
 void World::reload_tile(tile_index const& tile)
@@ -2136,31 +2169,31 @@ void World::reload_tile(tile_index const& tile)
   mapIndex.reloadTile(tile);
 }
 
-void World::updateTilesEntry(selection_type const& entry)
+void World::updateTilesEntry(selection_type const& entry, model_update type)
 {
   if (entry.which() == eEntry_WMO)
   {
-    updateTilesWMO (boost::get<selected_wmo_type> (entry));
+    updateTilesWMO (boost::get<selected_wmo_type> (entry), type);
   }
   else if (entry.which() == eEntry_Model)
   {
-    updateTilesModel (boost::get<selected_model_type> (entry));
+    updateTilesModel (boost::get<selected_model_type> (entry), type);
   }
 }
 
-void World::updateTilesWMO(WMOInstance* wmo)
+void World::updateTilesWMO(WMOInstance* wmo, model_update type)
 {
   tile_index start(wmo->extents[0]), end(wmo->extents[1]);
   for (int z = start.z; z <= end.z; ++z)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex.setChanged(tile_index(x, z));
+      mapIndex.update_model_tile(tile_index(x, z), type, wmo->mUniqueID);     
     }
   }
 }
 
-void World::updateTilesModel(ModelInstance* m2)
+void World::updateTilesModel(ModelInstance* m2, model_update type)
 {
   auto const& extents(m2->extents());
   tile_index start(extents[0]), end(extents[1]);
@@ -2169,7 +2202,7 @@ void World::updateTilesModel(ModelInstance* m2)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex.setChanged(tile_index(x, z));
+      mapIndex.update_model_tile(tile_index(x, z), type, m2->uid);
     }
   }
 }

@@ -39,6 +39,11 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 {
 }
 
+MapTile::~MapTile()
+{
+  _world->remove_models_if_needed(uids, index);
+}
+
 void MapTile::finishLoading()
 {
   MPQFile theFile(filename);
@@ -269,6 +274,7 @@ void MapTile::finishLoading()
     for (auto const& object : lWMOInstances)
     {
       _world->mWMOInstances.emplace(object.uniqueID, WMOInstance(mWMOFilenames[object.nameID], &object));
+      uids.push_back(object.uniqueID);
     }
 
     // - Load M2s ------------------------------------------
@@ -276,6 +282,7 @@ void MapTile::finishLoading()
     for (auto const& model : lModelInstances)
     {
       _world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
+      uids.push_back(model.uniqueID);
     }
 
     _world->need_model_updates = true;
@@ -837,5 +844,15 @@ void MapTile::CropWater()
     {
       Water.CropMiniChunk(x, z, mChunks[z][x].get());
     }
+  }
+}
+
+void MapTile::remove_model(uint32_t uid)
+{
+  auto& it = std::find(uids.begin(), uids.end(), uid);
+
+  if (it != uids.end())
+  {
+    uids.erase(it);
   }
 }

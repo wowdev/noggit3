@@ -24,6 +24,13 @@ enum class uid_fix_status
   failed
 };
 
+enum class model_update
+{
+  add,
+  remove,
+  none
+};
+
 /*!
 \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
 */
@@ -150,6 +157,8 @@ public:
 
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile);
+
+  void update_model_tile(const tile_index& tile, model_update type, uint32_t uid);
 
   void setChanged(const tile_index& tile);
   void setChanged(MapTile* tile);
