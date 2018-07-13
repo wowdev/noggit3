@@ -22,6 +22,7 @@
 MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   : basename(pBasename)
   , _map_id (map_id)
+  , _last_unload_time((clock() / CLOCKS_PER_SEC)) // to not try to unload right away
   , mBigAlpha(false)
   , mHasAGlobalWMO(false)
   , noadt(false)
@@ -30,6 +31,10 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   , highestGUID(0)
   , _world (world)
 {
+
+  QSettings settings;
+  _unload_interval = settings.value("unload_interval", 5).toInt();
+  _unload_dist = settings.value("unload_dist", 5).toInt();
 
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
@@ -356,13 +361,11 @@ void MapIndex::reloadTile(const tile_index& tile)
 
 void MapIndex::unloadTiles(const tile_index& tile)
 {
-  if ( ((clock() / CLOCKS_PER_SEC) - this->lastUnloadTime) > 5) // only unload every 5 seconds
+  if (((clock() / CLOCKS_PER_SEC) - _last_unload_time) > _unload_interval)
   {
-    int unloadBoundery = 3; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
-
     for (MapTile* adt : loaded_tiles())
     {
-      if (std::abs((int)adt->index.x - (int)tile.x) > unloadBoundery || std::abs((int)adt->index.z - (int)tile.z) > unloadBoundery)
+      if (tile.dist(adt->index) > _unload_dist)
       {
         //Only unload adts not marked to save
         if (adt->changed == 0)
@@ -372,7 +375,7 @@ void MapIndex::unloadTiles(const tile_index& tile)
       }
     }
 
-    this->lastUnloadTime = clock() / CLOCKS_PER_SEC;
+    _last_unload_time = clock() / CLOCKS_PER_SEC;
   }
 }
 

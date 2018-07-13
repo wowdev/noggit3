@@ -156,6 +156,11 @@ namespace noggit
                      );
       farZField->setRange (0.f, 1048576.f);
 
+      layout->addRow ( "Adt unloading distance (in adt)", _adt_unload_dist = new QSpinBox(this));
+      _adt_unload_dist->setRange(1, 64);
+
+      layout->addRow ("Adt unloading check interval (sec)", _adt_unload_check_interval = new QSpinBox(this));
+      _adt_unload_check_interval->setMinimum(1);
 
       layout->addRow ("Tablet support", tabletModeCheck = new QCheckBox ("enabled", this));
 
@@ -208,6 +213,8 @@ namespace noggit
       _vsync_cb->setChecked (_settings->value ("vsync", false).toBool());
       _anti_aliasing_cb->setChecked (_settings->value ("anti_aliasing", false).toBool());
       _fullscreen_cb->setChecked (_settings->value ("fullscreen", false).toBool());
+      _adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
+      _adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
 
       _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
       _mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
@@ -218,8 +225,7 @@ namespace noggit
       _wireframe_type_group->button (_settings->value ("wireframe/type", 0).toInt())->toggle();
       _wireframe_radius->setValue (_settings->value ("wireframe/radius", 1.5f).toFloat());
       _wireframe_width->setValue (_settings->value ("wireframe/width", 1.f).toFloat());
-      _wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());
-      
+      _wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());      
     }
 
     void settings::save_changes()
@@ -234,6 +240,8 @@ namespace noggit
       _settings->setValue ("vsync", _vsync_cb->isChecked());
       _settings->setValue ("anti_aliasing", _anti_aliasing_cb->isChecked());
       _settings->setValue ("fullscreen", _fullscreen_cb->isChecked());
+      _settings->setValue ("unload_dist", _adt_unload_dist->value());
+      _settings->setValue ("unload_interval", _adt_unload_check_interval->value());
 
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
       _settings->setValue ("project/mysql/server", _mysql_server_field->text());

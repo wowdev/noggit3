@@ -21,6 +21,11 @@ struct tile_index
     return x < 64 && z < 64;
   }
 
+  float dist(tile_index const& other) const
+  {
+    return (math::vector_3d(x, 0.f, z) - math::vector_3d(other.x, 0.f, other.z)).length();
+  }
+
   std::size_t x;
   std::size_t z;
 };
