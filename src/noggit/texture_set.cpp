@@ -297,7 +297,14 @@ bool TextureSet::change_texture(int texture_id, size_t offset, float strength, f
   if (current_alpha == strength)
   {
     return false;
-  }  
+  }
+
+  // just change the first alphamap
+  if (texture_id == 0 && current_alpha == 255.f)
+  {
+    set_alpha(0, offset, -alpha_change);
+    return true;
+  }
 
   // round alpha_change to be able to get to the extremes easier
   if (alpha_after_change < 1.f && alpha_change < 0.f)
