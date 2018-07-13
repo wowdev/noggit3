@@ -151,7 +151,7 @@ void TextureSet::eraseTexture(size_t id)
   {
     if (i)
     {
-      alphamaps[id - 1] = boost::none;
+      alphamaps[i - 1] = boost::none;
       std::swap (alphamaps[i - 1], alphamaps[i]);
     }
 
