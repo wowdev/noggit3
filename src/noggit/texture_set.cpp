@@ -257,8 +257,6 @@ bool TextureSet::eraseUnusedTextures()
 
 int TextureSet::get_texture_index(scoped_blp_texture_reference texture, float target)
 {
-  int tex_layer = -1;
-
   for (int i = 0; i < nTextures; ++i)
   {
     if (textures[i] == texture)
