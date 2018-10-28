@@ -17,11 +17,11 @@ enum class async_priority : int
 class AsyncObject
 {
 private: 
-  bool _loading_failed;
+  bool _loading_failed = false;
 protected:
-  bool finished;  
+  bool finished = false;
 
-  AsyncObject(std::string filename) : filename(filename), finished(false), _loading_failed(false) {}
+  AsyncObject(std::string filename) : filename(filename) {}
 
 public:
   std::string const filename;

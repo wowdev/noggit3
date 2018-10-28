@@ -83,10 +83,10 @@ liquid_layer::liquid_layer(liquid_layer&& other)
   , _vertices(other._vertices)
   , _depth(other._depth)
   , _tex_coords(other._tex_coords)
-  , pos(other.pos)
-  , texRepeats(other.texRepeats)
   , _indices_by_lod(other._indices_by_lod)
   , _need_buffer_update(true)
+  , pos(other.pos)
+  , texRepeats(other.texRepeats)
 {
   changeLiquidID(_liquid_id);
 }
@@ -100,10 +100,10 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , _vertices(other._vertices)
   , _depth(other._depth)
   , _tex_coords(other._tex_coords)
-  , pos(other.pos)
-  , texRepeats(other.texRepeats)
   , _indices_by_lod(other._indices_by_lod)
   , _need_buffer_update(true)
+  , pos(other.pos)
+  , texRepeats(other.texRepeats)
 {
   changeLiquidID(_liquid_id);
 }

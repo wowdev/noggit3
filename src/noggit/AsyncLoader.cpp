@@ -9,7 +9,7 @@
 void AsyncLoader::process()
 {
   noggit::RegisterErrorHandlers();
-  AsyncObject* object;
+  AsyncObject* object = nullptr;
 
   while (!_stop)
   {
