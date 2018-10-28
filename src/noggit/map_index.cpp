@@ -857,7 +857,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
   {
     for (int x = 0; x < 64; ++x)
     {
-      if (!mTiles[z][x].flags & 1)
+      if (!(mTiles[z][x].flags & 1))
       {
         continue;
       }
