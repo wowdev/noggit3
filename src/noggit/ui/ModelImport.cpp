@@ -69,7 +69,7 @@ namespace noggit
           continue;
         }
 
-        std::regex regex("[^\.]+\.(m2|wmo)"), wmo_group(".*_[0-9]{3}\.wmo");
+        std::regex regex("[^\\.]+\\.(m2|wmo)"), wmo_group(".*_[0-9]{3}\\.wmo");
         std::smatch match;
 
         if (std::regex_search(path, match, regex) && !regex_match(path, wmo_group))
