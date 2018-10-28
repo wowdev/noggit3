@@ -10,7 +10,7 @@ class Alphamap
 {
 public:
   Alphamap();
-  Alphamap(MPQFile* f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha, bool upload_amap = true);
+  Alphamap(MPQFile* f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha);
 
   void setAlpha(size_t offset, unsigned char value);
   void setAlpha(unsigned char *pAmap);
