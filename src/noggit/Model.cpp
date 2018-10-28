@@ -477,7 +477,7 @@ void Model::fix_shader_id_layer()
       {
         if ((some_flags >> 8) == 1)
         {
-          if ((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6) || (pass.texture_count != 1) || (texture_unit_lookup >= 0))
+          if (((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6)) || (pass.texture_count != 1) || (texture_unit_lookup >= 0))
           {
             some_flags &= 0xFF00;
           }
@@ -504,7 +504,7 @@ void Model::fix_shader_id_layer()
             continue;
           }
 
-          if ((_render_flags[pass.renderflag_index].blend != 2) && (_render_flags[pass.renderflag_index].blend != 1)
+          if ( ((_render_flags[pass.renderflag_index].blend != 2) && (_render_flags[pass.renderflag_index].blend != 1))
             || (pass.texture_count != 1)
             || xor_unlit
             || ((pass.texture_combo_index & 0xff) != (first_pass->texture_combo_index & 0xff))
