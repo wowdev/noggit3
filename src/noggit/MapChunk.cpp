@@ -21,9 +21,6 @@
 #include <iostream>
 #include <map>
 
-static const float texDetail = 8.0f;
-static const float TEX_RANGE = 1.0f;
-
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   : mt(maintile)
   , use_big_alphamap(bigAlpha)
