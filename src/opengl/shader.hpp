@@ -5,6 +5,8 @@
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
 
+#include <boost/optional.hpp>
+
 #include <initializer_list>
 #include <map>
 #include <set>
@@ -44,7 +46,7 @@ namespace opengl
     ~program();
 
     program (program const&) = delete;
-    program (program&&) = delete;
+    program (program&&);
     program& operator= (program const&) = delete;
     program& operator= (program&&) = delete;
 
@@ -54,7 +56,7 @@ namespace opengl
 
     friend struct scoped::use_program;
 
-    GLuint _handle;
+    boost::optional<GLuint> _handle;
   };
 
   namespace scoped

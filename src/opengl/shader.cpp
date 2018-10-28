@@ -48,25 +48,37 @@ namespace opengl
 
     for (shader const& s : shaders)
     {
-      attachments.emplace_back (_handle, s._handle);
+      attachments.emplace_back (*_handle, s._handle);
     }
 
-    gl.link_program (_handle);
-    gl.validate_program (_handle);
+    gl.link_program (*_handle);
+    gl.validate_program (*_handle);
+  }
+  program::program (program&& other)
+  {
+    if (_handle)
+    {
+      gl.deleteProgram (*_handle);
+    }
+    _handle = boost::none;
+    std::swap (_handle, other._handle);
   }
   program::~program()
   {
-    gl.deleteProgram (_handle);
+    if (_handle)
+    {
+      gl.deleteProgram (*_handle);
+    }
   }
 
   //! \todo cache lookups?
   GLuint program::uniform_location (std::string const& name) const
   {
-    return gl.getUniformLocation (_handle, name.c_str());
+    return gl.getUniformLocation (*_handle, name.c_str());
   }
   GLuint program::attrib_location (std::string const& name) const
   {
-    return gl.getAttribLocation (_handle, name.c_str());
+    return gl.getAttribLocation (*_handle, name.c_str());
   }
 
   namespace scoped
@@ -74,7 +86,7 @@ namespace opengl
     use_program::use_program (program const& p)
       : _program (p)
     {
-      gl.useProgram (_program._handle);
+      gl.useProgram (*_program._handle);
     }
     use_program::~use_program()
     {
