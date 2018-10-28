@@ -1989,7 +1989,7 @@ void World::convert_alphamap(bool to_big_alpha)
 
 void World::saveMap (int width, int height)
 {
-  throw std::exception("minimap saving not implemented");
+  throw std::runtime_error("minimap saving not implemented");
 }
 
 void World::deleteModelInstance(int pUniqueID)
