@@ -32,7 +32,7 @@ private:
   int _current_liquid_id = -1;
   int _current_anim_time = 0;
 
-  opengl::program const program
+  opengl::program program
     { { GL_VERTEX_SHADER
       , R"code(
 #version 110
