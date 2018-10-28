@@ -346,7 +346,7 @@ void Model::fix_shader_id_blend_override()
       {
         shader = 1;
 
-        if (texture_unit_lookup == -1)
+        if (texture_unit_lookup == 0xFFFF)
         {
           shader |= 0x8;
         }
@@ -375,7 +375,7 @@ void Model::fix_shader_id_blend_override()
 
         runtime_shader_val[i] = override_blend;
 
-        if (texture_unit_lookup == -1)
+        if (texture_unit_lookup == 0xFFFF)
         {
           runtime_shader_val[i] |= 0x8;
         }
@@ -618,7 +618,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   }
 
   // opacity
-  if (transparency_combo_index != -1)
+  if (transparency_combo_index != 0xFFFF)
   {
     auto& transparency (m->_transparency[m->_transparency_lookup[transparency_combo_index]].trans);
     if (transparency.uses (0))
