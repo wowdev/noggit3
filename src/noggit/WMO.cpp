@@ -101,7 +101,7 @@ void WMO::finishLoading ()
   {
     f.read (&materials[i], sizeof(WMOMaterial));
 
-    auto& it = std::find(texture_ofs.begin(), texture_ofs.end(), materials[i].texture_offset_1);
+    auto it = std::find(texture_ofs.begin(), texture_ofs.end(), materials[i].texture_offset_1);
 
     // texture not loaded
     if (it == texture_ofs.end())

@@ -849,7 +849,7 @@ void MapTile::CropWater()
 
 void MapTile::remove_model(uint32_t uid)
 {
-  auto& it = std::find(uids.begin(), uids.end(), uid);
+  auto it = std::find(uids.begin(), uids.end(), uid);
 
   if (it != uids.end())
   {
