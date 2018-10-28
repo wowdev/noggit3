@@ -6,16 +6,18 @@
 
 #include <QtCore/QSettings>
 
-
-QString uid_file_path()
+namespace
 {
-  QSettings settings;
-  QString str = settings.value ("project/path").toString();
-  if (!(str.endsWith('\\') || str.endsWith('/')))
+  QString uid_file_path()
   {
-    str += "/";
+    QSettings settings;
+    QString str = settings.value ("project/path").toString();
+    if (!(str.endsWith('\\') || str.endsWith('/')))
+    {
+      str += "/";
+    }
+    return str + "/uid.ini";
   }
-  return str + "/uid.ini";
 }
 
 bool uid_storage::hasMaxUIDStored(uint32_t mapID)
