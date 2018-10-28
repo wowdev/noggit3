@@ -10,7 +10,7 @@ Alphamap::Alphamap()
   createNew();
 }
 
-Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha, bool upload_amap)
+Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha)
 {
   createNew();
 

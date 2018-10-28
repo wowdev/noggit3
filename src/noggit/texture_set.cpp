@@ -44,7 +44,7 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
       if (_layers_info[layer].flags & 0x100)
       {
         f->seek (alpha_base + _layers_info[layer].ofsAlpha);
-        alphamaps[layer - 1] = boost::in_place (f, _layers_info[layer].flags, big_alphamap, do_not_fix_alpha, false);
+        alphamaps[layer - 1] = boost::in_place (f, _layers_info[layer].flags, big_alphamap, do_not_fix_alpha);
       }
     }
 
