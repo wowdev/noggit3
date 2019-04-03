@@ -34,8 +34,8 @@ public:
   static const size_t MapID = 0;        // uint
   static const size_t InternalName = 1;    // string
   static const size_t AreaType = 2;      // uint
-  static const size_t IsBattleground = 3;    // uint
-  static const size_t Name = 4;        // loc
+  static const size_t IsBattleground = 4;    // uint
+  static const size_t Name = 5;        // loc
 
   static const size_t LoadingScreen = 57;    // uint [LoadingScreen]
   static std::string getMapName(int pMapID);
