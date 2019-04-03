@@ -142,12 +142,11 @@ namespace noggit
         e.mapID = i->getInt(MapDB::MapID);
         e.name = i->getLocalizedString(MapDB::Name);
         e.areaType = i->getUInt(MapDB::AreaType);
-        if (e.areaType == 3) e.name = i->getString(MapDB::InternalName);
 
         if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
           continue;
 
-        auto item (new QListWidgetItem (QString::fromUtf8 (e.name.c_str()), type_to_table[e.areaType]));
+        auto item (new QListWidgetItem (QString::number(e.mapID) + " - " + QString::fromUtf8 (e.name.c_str()), type_to_table[e.areaType]));
         item->setData (Qt::UserRole, QVariant (e.mapID));
       }
 
