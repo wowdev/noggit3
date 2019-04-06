@@ -377,20 +377,7 @@ namespace noggit
 
     void object_editor::replace_selection(selection_type new_selection)
     {
-      if (selected)
-      {
-        auto& entry = selected.get();
-
-        if (entry.which() == eEntry_Model)
-        {
-          delete boost::get<selected_model_type> (entry);
-        }
-        else if (entry.which() == eEntry_WMO)
-        {
-          delete boost::get<selected_wmo_type> (entry);
-        }
-      }
-
+      selected.reset();
       selected = new_selection;
 
       std::stringstream ss;
