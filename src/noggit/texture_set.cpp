@@ -158,7 +158,11 @@ void TextureSet::eraseTexture(size_t id)
     _layers_info[i] = _layers_info[i + 1];
   }
 
-  alphamaps[nTextures - 2] = boost::none;
+  if (nTextures > 1)
+  {
+    alphamaps[nTextures - 2] = boost::none;
+  }
+
   textures.erase(textures.begin()+id);
   nTextures--;
 
