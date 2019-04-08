@@ -294,12 +294,10 @@ void liquid_layer::draw ( opengl::scoped::use_program& water_shader
 
 void liquid_layer::crop(MapChunk* chunk)
 {
-  bool changed = false;
 
   if (_maximum < chunk->getMinHeight())
   {
     _subchunks = 0;
-    changed = true;
   }
   else
   {
@@ -318,7 +316,6 @@ void liquid_layer::crop(MapChunk* chunk)
             )
           {
             setSubchunk(x, z, false);
-            changed = true;
           }
         }
       }
