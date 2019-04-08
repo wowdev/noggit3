@@ -693,9 +693,6 @@ void WMOGroup::load()
 
   hascv = false;
 
-  int nLR = 0;
-  uint16_t const* useLights = nullptr;
-
   // - MVER ----------------------------------------------
 
   f.read (&fourcc, 4);
@@ -817,9 +814,6 @@ void WMOGroup::load()
     f.read (&size, 4);
 
     assert (fourcc == 'MOLR');
-
-    nLR = size / 2;
-    useLights = reinterpret_cast<uint16_t const*>(f.getPointer ());
 
     f.seekRelative (size);
   }
@@ -976,12 +970,10 @@ void WMOGroup::load()
   {
     ::math::vector_3d dirmin(1, 1, 1);
     float lenmin;
-    int lmin;
 
     for (auto doodad : ddr)
     {
       lenmin = 999999.0f * 999999.0f;
-      lmin = 0;
       ModelInstance& mi = wmo->modelis[doodad];
       for (unsigned int j = 0; j < wmo->lights.size(); j++)
       {
@@ -992,7 +984,6 @@ void WMOGroup::load()
         {
           lenmin = ll;
           dirmin = dir;
-          lmin = j;
         }
       }
       wmo->model_nearest_light_vector[doodad] = dirmin;

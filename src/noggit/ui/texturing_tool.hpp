@@ -80,12 +80,12 @@ namespace noggit
       float _spray_size;
       float _spray_pressure;
 
+      texturing_mode _texturing_mode;
+
       bool_toggle_property _anim_prop;
       unsigned_int_property _anim_speed_prop;
       unsigned_int_property _anim_rotation_prop;
       bool_toggle_property _overbright_prop;
-
-      texturing_mode _texturing_mode;
 
     private:
       QSlider* _brush_level_slider;

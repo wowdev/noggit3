@@ -965,15 +965,15 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
       float edit = change * (1.0f - dist / radius);
       if (editMode)
       {
-        mccv[i].x += (color.x - mccv[i].x)* edit;
-        mccv[i].y += (color.y - mccv[i].y)* edit;
-        mccv[i].z += (color.z - mccv[i].z)* edit;
+        mccv[i].x += (color.x - mccv[i].x) * edit;
+        mccv[i].y += (color.y - mccv[i].y) * edit;
+        mccv[i].z += (color.z - mccv[i].z) * edit;
       }
       else
       {
-        mccv[i].x += (1.0f - mccv[i].x) * edit;
-        mccv[i].y += (1.0f - mccv[i].y) * edit;
-        mccv[i].z += (1.0f - mccv[i].z) * edit;
+        mccv[i].x += ((color.x * 2.0f) - mccv[i].x) * edit;
+        mccv[i].y += ((color.y * 2.0f) - mccv[i].y) * edit;
+        mccv[i].z += ((color.z * 2.0f) - mccv[i].z) * edit;
       }
 
       mccv[i].x = std::min(std::max(mccv[i].x, 0.0f), 2.0f);
@@ -1231,8 +1231,6 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lMCNK_header->ypos = mVertices[0].y;
 
   memset(lMCNK_header->low_quality_texture_map, 0, 0x10);
-
-  static const size_t minimum_value_to_overwrite(128);
 
   for (size_t y(0); y < 8; ++y)
   {
