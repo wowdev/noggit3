@@ -66,10 +66,7 @@ void Alphamap::readBigAlpha(MPQFile *f)
 
 void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
 {
-  // not compressed
-  unsigned char *p;
   char const* abuf = f->getPointer();
-  p = amap;
 
   for (std::size_t x(0); x < 64; ++x)
   {
