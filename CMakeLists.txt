@@ -338,7 +338,6 @@ set ( math_headers
 
 set ( opengl_headers
       src/opengl/context.hpp
-      src/opengl/matrix.hpp
       src/opengl/primitives.hpp
       src/opengl/scoped.hpp
       src/opengl/shader.fwd.hpp

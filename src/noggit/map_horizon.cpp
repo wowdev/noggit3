@@ -7,7 +7,6 @@
 #include <noggit/map_index.hpp>
 #include <noggit/World.h>
 #include <opengl/context.hpp>
-#include <opengl/matrix.hpp>
 
 #include <sstream>
 
@@ -289,7 +288,9 @@ static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
   return batch.vertex_start + 17 * 17 + y * 16 + x;
 };
 
-void map_horizon::render::draw( MapIndex *index
+void map_horizon::render::draw( math::matrix_4x4 const& model_view
+                              , math::matrix_4x4 const& projection
+                              , MapIndex *index
                               , const math::vector_3d& color
                               , const float& cull_distance
                               , const math::frustum& frustum
@@ -381,8 +382,8 @@ void main()
 
   opengl::scoped::use_program shader {*_map_horizon_program.get()};
 
-  shader.uniform ("model_view", opengl::matrix::model_view());
-  shader.uniform ("projection", opengl::matrix::projection());
+  shader.uniform ("model_view", model_view);
+  shader.uniform ("projection", projection);
   shader.uniform ("color", color);
 
   shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);

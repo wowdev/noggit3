@@ -73,7 +73,9 @@ public:
     return *this;
   }
 
-  void draw ( math::frustum const&
+  void draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::frustum const&
             , const float&
             , const math::vector_3d&
             , bool force_box

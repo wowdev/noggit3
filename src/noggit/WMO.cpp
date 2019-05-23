@@ -306,7 +306,9 @@ void WMO::upload()
   _finished_upload = true;
 }
 
-void WMO::draw ( int doodadset
+void WMO::draw ( math::matrix_4x4 const& model_view
+               , math::matrix_4x4 const& projection
+               , int doodadset
                , const math::vector_3d &ofs
                , math::degrees const angle
                , bool boundingbox
@@ -361,7 +363,9 @@ void WMO::draw ( int doodadset
                , setup_fog
                );
 
-    group.drawLiquid ( ocean_color_light
+    group.drawLiquid ( model_view
+                     , projection
+                     , ocean_color_light
                      , ocean_color_dark
                      , river_color_light
                      , river_color_dark
@@ -386,11 +390,15 @@ void WMO::draw ( int doodadset
 
     for (auto& group : groups)
       opengl::primitives::wire_box (group.BoundingBoxMin, group.BoundingBoxMax)
-        .draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
+        .draw (model_view, projection, {1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
     opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
                                  , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
-                                 ).draw ({1.0f, 0.0f, 0.0f, 1.0f}, 2.0f);
+                                 ).draw ( model_view
+                                        , projection
+                                        , {1.0f, 0.0f, 0.0f, 1.0f}
+                                        , 2.0f
+                                        );
 
 
     opengl::texture::disable_texture(1);
@@ -1121,7 +1129,9 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 }
 
-void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
+void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
+                          , math::matrix_4x4 const& projection
+                          , math::vector_4d const& ocean_color_light
                           , math::vector_4d const& ocean_color_dark
                           , math::vector_4d const& river_color_light
                           , math::vector_4d const& river_color_dark
@@ -1157,7 +1167,9 @@ void WMOGroup::drawLiquid ( math::vector_4d const& ocean_color_light
     gl.disable(GL_ALPHA_TEST);
     gl.depthMask(GL_TRUE);
     gl.color4f(1, 1, 1, 1);
-    lq->draw ( ocean_color_light
+    lq->draw ( model_view
+             , projection
+             , ocean_color_light
              , ocean_color_dark
              , river_color_light
              , river_color_dark

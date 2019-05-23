@@ -15,7 +15,6 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <opengl/scoped.hpp>
-#include <opengl/matrix.hpp>
 
 #include <algorithm>
 #include <iostream>
