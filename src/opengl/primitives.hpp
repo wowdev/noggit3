@@ -22,7 +22,11 @@ namespace opengl
                , math::vector_3d const& max_point
                );
 
-      void draw (math::vector_4d const& color, float line_width) const;
+      void draw ( math::matrix_4x4 const& model_view
+                , math::matrix_4x4 const& projection
+                , math::vector_4d const& color
+                , float line_width
+                ) const;
 
     private:
       scoped::buffers<2> _buffers;

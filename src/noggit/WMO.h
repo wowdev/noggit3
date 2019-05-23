@@ -59,7 +59,9 @@ public:
            , bool world_has_skies
            , std::function<void (bool)> setup_fog
            );
-  void drawLiquid ( math::vector_4d const& ocean_color_light
+  void drawLiquid ( math::matrix_4x4 const& model_view
+                  , math::matrix_4x4 const& projection
+                  , math::vector_4d const& ocean_color_light
                   , math::vector_4d const& ocean_color_dark
                   , math::vector_4d const& river_color_light
                   , math::vector_4d const& river_color_dark
@@ -166,7 +168,9 @@ class WMO : public AsyncObject
 public:
   explicit WMO(const std::string& name);
 
-  void draw ( int doodadset
+  void draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , int doodadset
             , const math::vector_3d& ofs
             , math::degrees const
             , bool boundingbox

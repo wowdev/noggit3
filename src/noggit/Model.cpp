@@ -6,7 +6,6 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 

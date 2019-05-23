@@ -36,7 +36,9 @@ WMOInstance::WMOInstance(std::string const& filename)
   change_doodadset(_doodadset);
 }
 
-void WMOInstance::draw ( math::frustum const& frustum
+void WMOInstance::draw ( math::matrix_4x4 const& model_view
+                       , math::matrix_4x4 const& projection
+                       , math::frustum const& frustum
                        , const float& cull_distance
                        , const math::vector_3d& camera
                        , bool force_box
@@ -76,7 +78,9 @@ void WMOInstance::draw ( math::frustum const& frustum
     gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
     gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
-    wmo->draw ( _doodadset
+    wmo->draw ( model_view
+              , projection
+              , _doodadset
               , pos
               , math::degrees (roty)
               , is_selected
@@ -109,7 +113,7 @@ void WMOInstance::draw ( math::frustum const& frustum
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
-    opengl::primitives::wire_box (extents[0], extents[1]).draw (color, 1.0f);
+    opengl::primitives::wire_box (extents[0], extents[1]).draw (model_view, projection, color, 1.0f);
 
     opengl::texture::disable_texture(1);
     opengl::texture::enable_texture(0);

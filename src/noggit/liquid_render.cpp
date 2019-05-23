@@ -6,7 +6,6 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <opengl/context.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 
 #include <boost/filesystem.hpp>

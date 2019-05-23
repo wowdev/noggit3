@@ -104,6 +104,9 @@ private:
 
   display_mode _display_mode;
 
+  math::matrix_4x4 model_view() const;
+  math::matrix_4x4 projection() const;
+
   void draw_map();
 
   void createGUI();

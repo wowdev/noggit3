@@ -34,7 +34,10 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
   }
 }
 
-void ModelInstance::draw_box (bool is_current_selection)
+void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
+                             , math::matrix_4x4 const& projection
+                             , bool is_current_selection
+                             )
 {
   opengl::scoped::matrix_pusher const matrix;
 
@@ -53,11 +56,19 @@ void ModelInstance::draw_box (bool is_current_selection)
   {
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.collision_box_min)
                                  , misc::transform_model_box_coords(model->header.collision_box_max)
-                                 ).draw ({ 1.0f, 1.0f, 0.0f, 1.0f }, 1.0f);
+                                 ).draw ( model_view
+                                        , projection
+                                        , { 1.0f, 1.0f, 0.0f, 1.0f }
+                                        , 1.0f
+                                        );
 
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
                                  , misc::transform_model_box_coords(model->header.bounding_box_max)
-                                 ).draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
+                                 ).draw ( model_view
+                                        , projection
+                                        , {1.0f, 1.0f, 1.0f, 1.0f}
+                                        , 1.0f
+                                        );
 
     gl.color4fv(math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f));
     gl.begin(GL_LINES);
@@ -81,7 +92,11 @@ void ModelInstance::draw_box (bool is_current_selection)
   {
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
                                  , misc::transform_model_box_coords(model->header.bounding_box_max)
-                                 ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
+                                 ).draw ( model_view
+                                        , projection
+                                        , {0.5f, 0.5f, 0.5f, 1.0f}
+                                        , 1.0f
+                                        );
   }
 }
 

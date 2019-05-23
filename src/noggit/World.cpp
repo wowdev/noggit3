@@ -20,7 +20,6 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
@@ -432,7 +431,9 @@ void World::setupFog (bool draw_fog)
   }
 }
 
-void World::draw ( math::vector_3d const& cursor_pos
+void World::draw ( math::matrix_4x4 const& model_view
+                 , math::matrix_4x4 const& projection
+                 , math::vector_3d const& cursor_pos
                  , math::vector_4d const& cursor_color
                  , int cursor_type
                  , float brushRadius
@@ -474,8 +475,7 @@ void World::draw ( math::vector_3d const& cursor_pos
     _display_initialized = true;
   }
 
-  math::frustum const frustum
-    (::opengl::matrix::model_view() * ::opengl::matrix::projection());
+  math::frustum const frustum (model_view * projection);
 
   bool hadSky = false;
   if (draw_wmo || mapIndex.hasAGlobalWMO())
@@ -506,16 +506,20 @@ void World::draw ( math::vector_3d const& cursor_pos
   skies->initSky(camera_pos, daytime);
 
   if (!hadSky)
+  {
     hadSky = skies->drawSky ( camera_pos
                             , outdoorLightStats.nightIntensity
                             , draw_fog
                             , animtime
                             );
-
+  }
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox
   GLbitfield clearmask = GL_DEPTH_BUFFER_BIT;
-  if (!hadSky)   clearmask |= GL_COLOR_BUFFER_BIT;
+  if (!hadSky)
+  {
+    clearmask |= GL_COLOR_BUFFER_BIT;
+  }
   gl.clear(clearmask);
 
   opengl::texture::disable_texture();
@@ -529,7 +533,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   // Draw verylowres heightmap
   if (draw_fog && draw_terrain) 
   {
-    _horizon_render->draw (&mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos, display);
+    _horizon_render->draw (model_view, projection, &mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos, display);
   }
 
   // Draw height map
@@ -834,8 +838,8 @@ void main()
     
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
-    mcnk_shader.uniform("model_view", opengl::matrix::model_view());
-    mcnk_shader.uniform("projection", opengl::matrix::projection());
+    mcnk_shader.uniform("model_view", model_view);
+    mcnk_shader.uniform("projection", projection);
     mcnk_shader.attrib("texcoord", detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
@@ -1052,8 +1056,8 @@ void main()
     }
     opengl::scoped::use_program mfbo_shader { *_mfbo_program.get() };
 
-    mfbo_shader.uniform ("model_view", opengl::matrix::model_view());
-    mfbo_shader.uniform ("projection", opengl::matrix::projection());
+    mfbo_shader.uniform ("model_view", model_view);
+    mfbo_shader.uniform ("projection", projection);
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
@@ -1371,8 +1375,8 @@ void main()
       }
       opengl::scoped::use_program m2_shader{ *_m2_program.get() };
 
-      m2_shader.uniform ("model_view", opengl::matrix::model_view());
-      m2_shader.uniform ("projection", opengl::matrix::projection());
+      m2_shader.uniform ("model_view", model_view);
+      m2_shader.uniform ("projection", projection);
       m2_shader.uniform("tex1", 0);
       m2_shader.uniform("tex2", 1);
 
@@ -1452,8 +1456,8 @@ void main()
 
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
-      m2_box_shader.uniform ("model_view", opengl::matrix::model_view());
-      m2_box_shader.uniform ("projection", opengl::matrix::projection());
+      m2_box_shader.uniform ("model_view", model_view);
+      m2_box_shader.uniform ("projection", projection);
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -1480,7 +1484,7 @@ void main()
       auto model = boost::get<selected_model_type> (*GetCurrentSelection());
       if (model->is_visible(frustum, culldistance, camera_pos, display))
       {
-        model->draw_box(true);
+        model->draw_box(model_view, projection, true);
       }
     }
   }
@@ -1512,7 +1516,9 @@ void main()
       bool is_hidden = it->second.wmo->is_hidden();
       if (draw_hidden_models || !is_hidden)
       {
-        it->second.draw ( frustum
+        it->second.draw ( model_view
+                        , projection
+                        , frustum
                         , culldistance
                         , camera_pos
                         , is_hidden
@@ -1552,8 +1558,8 @@ void main()
 
     opengl::scoped::use_program water_shader{ _liquid_render->shader_program() };
 
-    water_shader.uniform ("model_view", opengl::matrix::model_view());
-    water_shader.uniform ("projection", opengl::matrix::projection());
+    water_shader.uniform ("model_view", model_view);
+    water_shader.uniform ("projection", projection);
 
     water_shader.uniform ("ocean_color_light", ocean_color_light);
     water_shader.uniform ("ocean_color_dark",  ocean_color_dark);

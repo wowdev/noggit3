@@ -5,7 +5,6 @@
 #include <noggit/World.h>
 #include <noggit/wmo_liquid.hpp>
 #include <opengl/context.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/shader.hpp>
 
 #include <boost/filesystem.hpp>
@@ -123,13 +122,15 @@ void wmo_liquid::upload()
   );
 }
 
-void wmo_liquid::draw ( math::vector_4d const& ocean_color_light
-          , math::vector_4d const& ocean_color_dark
-          , math::vector_4d const& river_color_light
-          , math::vector_4d const& river_color_dark
-          , liquid_render& render
-          , int animtime
-          )
+void wmo_liquid::draw ( math::matrix_4x4 const& model_view
+                      , math::matrix_4x4 const& projection
+                      , math::vector_4d const& ocean_color_light
+                      , math::vector_4d const& ocean_color_dark
+                      , math::vector_4d const& river_color_light
+                      , math::vector_4d const& river_color_dark
+                      , liquid_render& render
+                      , int animtime
+                      )
 {
   opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
   opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
@@ -137,8 +138,8 @@ void wmo_liquid::draw ( math::vector_4d const& ocean_color_light
 
   opengl::scoped::use_program water_shader (render.shader_program());
 
-  water_shader.uniform ("model_view", opengl::matrix::model_view());
-  water_shader.uniform ("projection", opengl::matrix::projection());
+  water_shader.uniform ("model_view", model_view);
+  water_shader.uniform ("projection", projection);
 
   water_shader.uniform ("ocean_color_light", ocean_color_light);
   water_shader.uniform ("ocean_color_dark", ocean_color_dark);

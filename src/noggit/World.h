@@ -91,7 +91,9 @@ public:
   void initDisplay();
 
   void tick(float dt);
-  void draw ( math::vector_3d const& cursor_pos
+  void draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::vector_3d const& cursor_pos
             , math::vector_4d const& cursor_color
             , int cursor_type
             , float brushRadius

@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/projection.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
@@ -32,7 +33,7 @@
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
-#include <opengl/matrix.hpp>
+
 #include <opengl/scoped.hpp>
 
 #include "revision.h"
@@ -1955,8 +1956,8 @@ math::ray MapView::intersect_ray() const
     // so we need the same order here and then invert.
     math::vector_3d const pos 
     (
-      ( (opengl::matrix::projection().transposed()
-        * opengl::matrix::model_view().transposed()
+      ( ( projection() 
+        * model_view()
         ).inverted()
         * normalized_device_coords (mx, mz)
       ).xyz_normalized_by_w()
@@ -2033,6 +2034,39 @@ void MapView::update_cursor_pos()
   }
 }
 
+math::matrix_4x4 MapView::model_view() const
+{
+  if (_display_mode == display_mode::in_2D)
+  {
+    math::vector_3d eye = _camera.position;
+    math::vector_3d target = eye;
+    target.y -= 1.f;
+    target.z -= 0.001f;
+
+    return math::look_at(eye, target, {0.f,1.f, 0.f});
+  }
+  else
+  {
+    return _camera.look_at_matrix();
+  }
+}
+math::matrix_4x4 MapView::projection() const
+{
+  float far_z = _settings->value("farZ", 2048).toFloat();
+
+  if (_display_mode == display_mode::in_2D)
+  {
+    float half_width = width() * 0.5f * _2d_zoom;
+    float half_height = height() * 0.5f * _2d_zoom;
+
+    return math::ortho(-half_width, half_width, -half_height, half_height, -1.f, far_z);
+  }
+  else
+  {
+    return math::perspective(_camera.fov(), aspect_ratio(), 1.f, far_z);
+  }
+}
+
 void MapView::draw_map()
 {
   //! \ todo: make the current tool return the radius
@@ -2071,35 +2105,7 @@ void MapView::draw_map()
     break;
   }
 
-  float far_z = _settings->value ("farZ", 2048).toFloat();
-
-  if (_display_mode == display_mode::in_2D)
-  {
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-
-    float half_width = width() * 0.5f * _2d_zoom;
-    float half_height = height() * 0.5f * _2d_zoom;
-
-    gl.ortho (-half_width, half_width, -half_height, half_height, -1.f, far_z);
-
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
-
-    math::vector_3d look_at(_camera.position);
-    look_at.y -= 1.f;
-    look_at.z -= 0.001f;
-    opengl::matrix::look_at (_camera.position, look_at, { 0.f,1.f, 0.f });
-  }
-  else
-  {
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-    opengl::matrix::perspective (_camera.fov(), aspect_ratio(), 1.f,far_z);
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
-    opengl::matrix::look_at (_camera.position, _camera.look_at(), { 0.f, 1.f, 0.f });
-  }
+  float far_z = _settings->value ("farZ", 2048).toFloat();  
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
   if (!(_world->IsSelection(eEntry_Model)
@@ -2111,7 +2117,9 @@ void MapView::draw_map()
     doSelection(true);
   }
 
-  _world->draw ( _cursor_pos
+  _world->draw ( model_view().transposed()
+               , projection().transposed()
+               , _cursor_pos
                , terrainMode == editing_mode::mccv ? shader_color : cursor_color
                , cursor_type.get()
                , radius

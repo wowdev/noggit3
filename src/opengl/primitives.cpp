@@ -3,7 +3,6 @@
 #include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
 #include <opengl/context.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/types.hpp>
@@ -70,7 +69,11 @@ void main()
       }
     }
 
-    void wire_box::draw (math::vector_4d const& color, float line_width) const
+    void wire_box::draw ( math::matrix_4x4 const& model_view
+                        , math::matrix_4x4 const& projection
+                        , math::vector_4d const& color
+                        , float line_width
+                        ) const
     {
       opengl::scoped::use_program wire_box_shader {_program};
 
@@ -78,8 +81,8 @@ void main()
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
       gl.lineWidth (line_width);
 
-      wire_box_shader.uniform ("model_view", opengl::matrix::model_view());
-      wire_box_shader.uniform ("projection", opengl::matrix::projection());
+      wire_box_shader.uniform ("model_view", model_view);
+      wire_box_shader.uniform ("projection", projection);
 
       wire_box_shader.attrib ("position", _positions, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 

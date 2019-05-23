@@ -12,7 +12,6 @@
 #include <noggit/alphamap.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 

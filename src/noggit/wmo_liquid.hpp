@@ -48,7 +48,9 @@ class wmo_liquid
 public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
 
-  void draw ( math::vector_4d const& ocean_color_light
+  void draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::vector_4d const& ocean_color_light
             , math::vector_4d const& ocean_color_dark
             , math::vector_4d const& river_color_light
             , math::vector_4d const& river_color_dark
