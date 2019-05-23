@@ -732,8 +732,8 @@ void main()
   {
     gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), gl_FragColor);
   }
-  
-  float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8.0).a;
+
+  float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8.0).r;
 
   gl_FragColor = vec4 (gl_FragColor.rgb * (1.0 - shadow_alpha), 1.0);
 
