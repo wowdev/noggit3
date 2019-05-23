@@ -5,7 +5,6 @@
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
-#include <opengl/call_list.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>

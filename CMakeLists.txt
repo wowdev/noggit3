@@ -238,7 +238,6 @@ set ( math_sources
     )
 
 set ( opengl_sources
-      src/opengl/call_list.cpp
       src/opengl/context.cpp
       src/opengl/primitives.cpp
       src/opengl/shader.cpp
@@ -338,7 +337,6 @@ set ( math_headers
     )
 
 set ( opengl_headers
-      src/opengl/call_list.hpp
       src/opengl/context.hpp
       src/opengl/matrix.hpp
       src/opengl/primitives.hpp
