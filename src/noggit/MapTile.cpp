@@ -332,6 +332,7 @@ void MapTile::convert_alphamap(bool to_big_alpha)
 
 void MapTile::draw ( math::frustum const& frustum
                    , opengl::scoped::use_program& mcnk_shader
+                   , GLuint const& tex_coord_vbo
                    , const float& cull_distance
                    , const math::vector_3d& camera
                    , bool show_unpaintable_chunks
@@ -357,6 +358,7 @@ void MapTile::draw ( math::frustum const& frustum
     {
       mChunks[j][i]->draw ( frustum
                           , mcnk_shader
+                          , tex_coord_vbo
                           , cull_distance
                           , camera
                           , show_unpaintable_chunks

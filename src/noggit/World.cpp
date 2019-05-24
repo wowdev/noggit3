@@ -574,26 +574,25 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       _mcnk_program.reset(new opengl::program({ { GL_VERTEX_SHADER
         , R"code(
-#version 110
+#version 330 core
 
-attribute vec3 position;
-attribute vec3 normal;
-attribute vec2 texcoord;
-attribute vec3 mccv;
+in vec3 position;
+in vec3 normal;
+in vec3 mccv;
+in vec2 texcoord;
 
 uniform mat4 model_view;
 uniform mat4 projection;
 
-varying vec3 vary_position;
-varying vec2 vary_texcoord;
-varying vec3 vary_normal;
-varying vec3 vary_mccv;
+out vec3 vary_position;
+out vec2 vary_texcoord;
+out vec3 vary_normal;
+out vec3 vary_mccv;
 
 void main()
 {
   gl_Position = projection * model_view * vec4(position, 1.0);
-  //! \todo gl_NormalMatrix deprecated
-  vary_normal = normalize (gl_NormalMatrix * normal);
+  vary_normal = normal;
   vary_position = position;
   vary_texcoord = texcoord;
   vary_mccv = mccv;
@@ -602,7 +601,7 @@ void main()
         }
         ,{ GL_FRAGMENT_SHADER
         , R"code(
-#version 110
+#version 330 core
 
 uniform mat4 model_view;
 
@@ -649,10 +648,12 @@ uniform vec3 light_dir;
 uniform vec3 diffuse_color;
 uniform vec3 ambient_color;
 
-varying vec3 vary_position;
-varying vec2 vary_texcoord;
-varying vec3 vary_normal;
-varying vec3 vary_mccv;
+in vec3 vary_position;
+in vec2 vary_texcoord;
+in vec3 vary_normal;
+in vec3 vary_mccv;
+
+out vec4 out_color;
 
 const float TILESIZE  = 533.33333;
 const float CHUNKSIZE = TILESIZE / 16.0;
@@ -710,40 +711,39 @@ void main()
 
   if(draw_fog && dist_from_camera >= fog_end)
   {
-    gl_FragColor = fog_color;
+    out_color = fog_color;
     return;
   } 
   vec3 fw = fwidth(vary_position.xyz);
 
-  gl_FragColor = texture_blend();
-  gl_FragColor.rgb *= vary_mccv;
+  out_color = texture_blend();
+  out_color.rgb *= vary_mccv;
 
-  // diffuse + ambient lighting  
-  gl_FragColor.rgb *= vec3(clamp (diffuse_color * max(dot(vary_normal, light_dir), 0.0), 0.0, 1.0)) + ambient_color;
-
+  // diffuse + ambient lighting
+  out_color.rgb *= vec3(clamp (diffuse_color * max(dot(vary_normal, light_dir), 0.0), 0.0, 1.0)) + ambient_color;
 
   if(cant_paint)
   {
-    gl_FragColor *= vec4(1.0, 0.0, 0.0, 1.0);
+    out_color *= vec4(1.0, 0.0, 0.0, 1.0);
   }
   
   if(draw_areaid_overlay)
   {
-    gl_FragColor = gl_FragColor * 0.3 + areaid_color;
+    out_color = out_color * 0.3 + areaid_color;
   }
 
   if(draw_impassible_flag)
   {
-    gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), gl_FragColor);
+    out_color = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), out_color);
   }
 
   float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8.0).r;
 
-  gl_FragColor = vec4 (gl_FragColor.rgb * (1.0 - shadow_alpha), 1.0);
+  out_color = vec4 (out_color.rgb * (1.0 - shadow_alpha), 1.0);
 
   if (draw_terrain_height_contour)
   {
-    gl_FragColor = vec4(gl_FragColor.rgb * contour_alpha(4.0, vary_position.y+0.1, fw.y), 1.0);
+    out_color = vec4(out_color.rgb * contour_alpha(4.0, vary_position.y+0.1, fw.y), 1.0);
   }
 
   bool lines_drawn = false;
@@ -766,15 +766,15 @@ void main()
     }
     
     lines_drawn = color.a > 0.0;
-    gl_FragColor = blend_by_alpha (color, gl_FragColor);
+    out_color = blend_by_alpha (color, out_color);
   }
 
   if(draw_fog && dist_from_camera >= fog_end * fog_start)
   {
     float start = fog_end * fog_start;
     float alpha = (dist_from_camera - start) / (fog_end - start);
-    gl_FragColor = blend_by_alpha (vec4(fog_color.rgb, alpha), gl_FragColor);
-    gl_FragColor.a = 1.0;
+    out_color = blend_by_alpha (vec4(fog_color.rgb, alpha), out_color);
+    out_color.a = 1.0;
   }
 
   if(draw_wireframe && !lines_drawn)
@@ -818,8 +818,8 @@ void main()
         color = vec4(wireframe_color.rgb, alpha * wireframe_color.a);
       }      
 
-		  gl_FragColor = blend_by_alpha (color, gl_FragColor);
-	  }	
+		  out_color = blend_by_alpha (color, out_color);
+	  }
   }
 
   if (draw_cursor_circle)
@@ -828,7 +828,7 @@ void main()
     diff = min(abs(diff - outer_cursor_radius), abs(diff - outer_cursor_radius * inner_cursor_ratio));
     float alpha = 1.0 - smoothstep(0.0, length(fw.xz), diff);
 
-    gl_FragColor = blend_by_alpha (vec4(cursor_color.rgb, alpha), gl_FragColor);
+    out_color = blend_by_alpha (vec4(cursor_color.rgb, alpha), out_color);
   }
 }
 )code"
@@ -840,7 +840,6 @@ void main()
 
     mcnk_shader.uniform("model_view", model_view);
     mcnk_shader.uniform("projection", projection);
-    mcnk_shader.attrib("texcoord", detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
@@ -909,6 +908,7 @@ void main()
     {
       tile->draw ( frustum
                  , mcnk_shader
+                 , detailtexcoords
                  , culldistance
                  , camera_pos
                  , show_unpaintable_chunks
@@ -920,11 +920,6 @@ void main()
                  , animtime
                  , display
                  );
-    }
-
-    for (int i = 0; i < 5; ++i)
-    {
-      opengl::texture::disable_texture(i);
     }
   }
 
