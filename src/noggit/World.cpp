@@ -1544,8 +1544,6 @@ void main()
   if (draw_water)
   {
     // draw the water on both sides
-    opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
-    opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
     opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
 
     opengl::scoped::use_program water_shader{ _liquid_render->shader_program() };
