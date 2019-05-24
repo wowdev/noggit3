@@ -35,17 +35,17 @@ private:
   opengl::program program
     { { GL_VERTEX_SHADER
       , R"code(
-#version 110
+#version 330 core
 
-attribute vec4 position;
-attribute vec2 tex_coord;
-attribute float depth;
+in vec4 position;
+in vec2 tex_coord;
+in float depth;
 
 uniform mat4 model_view;
 uniform mat4 projection;
 
-varying float depth_;
-varying vec2 tex_coord_;
+out float depth_;
+out vec2 tex_coord_;
 
 void main()
 {
@@ -58,7 +58,7 @@ void main()
       }
     , { GL_FRAGMENT_SHADER
       , R"code(
-#version 110
+#version 330 core
 
 uniform sampler2D texture;
 uniform vec4 ocean_color_light;
@@ -69,8 +69,10 @@ uniform float tex_repeat;
 
 uniform int type;
 
-varying float depth_;
-varying vec2 tex_coord_;
+in float depth_;
+in vec2 tex_coord_;
+
+out vec4 out_color;
 
 void main()
 {
@@ -78,7 +80,7 @@ void main()
   // lava || slime
   if(type == 2 || type == 3)
   {
-    gl_FragColor = texel;
+    out_color = texel;
   }
   else
   {
@@ -88,7 +90,7 @@ void main()
               
     vec4 tResult = clamp (texel + lerp, 0.0, 1.0); //clamp shouldn't be needed
     vec4 oColor = clamp (texel + tResult, 0.0, 1.0);
-    gl_FragColor = vec4 (oColor.rgb, lerp.a);
+    out_color = vec4 (oColor.rgb, lerp.a);
   }  
 }
 )code"
