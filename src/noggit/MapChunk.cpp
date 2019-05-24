@@ -233,6 +233,7 @@ void MapChunk::update_intersect_points()
 
 void MapChunk::upload()
 {
+  _vertex_array.upload();
   _buffers.upload();
   lod_indices.upload();
 
@@ -423,8 +424,9 @@ void MapChunk::clearHeight()
   {
     gl.bufferData<GL_ARRAY_BUFFER>
       (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-  }  
 
+    _need_vao_update = true;
+  }
 }
 
 bool MapChunk::is_visible ( const float& cull_distance
@@ -444,8 +446,36 @@ bool MapChunk::is_visible ( const float& cull_distance
 }
 
 
+void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const& tex_coord_vbo)
+{
+  opengl::scoped::vao_binder const _(_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
+    mcnk_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_normals_vbo);
+    mcnk_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mccv_vbo);
+    mcnk_shader.attrib("mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(tex_coord_vbo);
+    mcnk_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  _need_vao_update = false;
+}
+
 void MapChunk::draw ( math::frustum const& frustum
                     , opengl::scoped::use_program& mcnk_shader
+                    , GLuint const& tex_coord_vbo
                     , const float& cull_distance
                     , const math::vector_3d& camera
                     , bool show_unpaintable_chunks
@@ -471,14 +501,18 @@ void MapChunk::draw ( math::frustum const& frustum
     update_indices_buffer();
   }
 
+  // todo update lod too
+  if (_need_vao_update)
+  {
+    update_vao(mcnk_shader, tex_coord_vbo);
+  }
+
   bool cantPaint = noggit::ui::selected_texture::get()
                  && !canPaintTexture(*noggit::ui::selected_texture::get())
                  && show_unpaintable_chunks
                  && draw_paintability_overlay;
   
-  boost::optional<int> lod_level = get_lod_level(camera, display);
-
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(!lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
+  boost::optional<int> lod_level = get_lod_level(camera, display);  
 
   if (texture_set->num())
   {
@@ -511,9 +545,9 @@ void MapChunk::draw ( math::frustum const& frustum
     mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
   }
 
-  mcnk_shader.attrib("position", mVertices);
-  mcnk_shader.attrib("normal", mNormals);
-  mcnk_shader.attrib("mccv", mccv);
+  opengl::scoped::vao_binder const _ (_vao);
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(!lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
 
   auto& strip = !lod_level ? strip_with_holes : strip_lods[lod_level.get()];
 
@@ -526,8 +560,7 @@ void MapChunk::draw ( math::frustum const& frustum
     {
       mcnk_shader.uniform("tex_anim_" + std::to_string(i), math::vector_2d());
     }
-  }
-  
+  }  
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)
@@ -567,6 +600,7 @@ void MapChunk::updateVerticesData()
   if (_uploaded)
   {
     gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    _need_vao_update = true;
   }
 }
 
@@ -622,6 +656,8 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
   {
     gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
     gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+
+    _need_vao_update = true;
   }
 }
 
@@ -734,7 +770,9 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   if (changed && _uploaded)
   {
     gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    _need_vao_update = true;
   }
+
   return changed;
 }
 
