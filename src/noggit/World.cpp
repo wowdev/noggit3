@@ -1014,54 +1014,6 @@ void main()
     gl.color3f(1.0f, 1.0f, 1.0f);
   }
 
-  if (draw_mfbo)
-  {
-    if (!_mfbo_program)
-    {
-      _mfbo_program.reset(new opengl::program({ { GL_VERTEX_SHADER
-        , R"code(
-#version 330 core
-
-attribute vec4 position;
-
-uniform mat4 model_view_projection;
-
-void main()
-{
-  gl_Position = model_view_projection * position;
-}
-)code"
-        }
-        ,{ GL_FRAGMENT_SHADER
-        , R"code(
-#version 330 core
-
-uniform vec4 color;
-
-out vec4 out_color;
-
-void main()
-{
-  out_color = color;
-}
-)code"
-        }
-      }));
-    }
-    opengl::scoped::use_program mfbo_shader { *_mfbo_program.get() };
-
-    mfbo_shader.uniform ("model_view_projection", model_view * projection);
-
-    for (MapTile* tile : mapIndex.loaded_tiles())
-    {
-      tile->drawMFBO (mfbo_shader);
-    }
-  }
-
-  opengl::texture::disable_texture(0);
-  opengl::texture::disable_texture(1);
-
-  gl.color4f(1, 1, 1, 1);
   gl.enable(GL_BLEND);
 
   gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
@@ -1610,6 +1562,56 @@ void main()
                       , display
                       );
     }
+  }
+
+  // draw last because of the transparency
+  if (draw_mfbo)
+  {
+    // don't write on the depth buffer
+    gl.depthMask(GL_FALSE);
+
+    if (!_mfbo_program)
+    {
+      _mfbo_program.reset(new opengl::program({{ GL_VERTEX_SHADER
+        , R"code(
+#version 330 core
+
+attribute vec4 position;
+
+uniform mat4 model_view_projection;
+
+void main()
+{
+  gl_Position = model_view_projection * position;
+}
+)code"
+        }
+        ,{ GL_FRAGMENT_SHADER
+        , R"code(
+#version 330 core
+
+uniform vec4 color;
+
+out vec4 out_color;
+
+void main()
+{
+  out_color = color;
+}
+)code"
+        }
+                          }));
+    }
+    opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
+
+    mfbo_shader.uniform("model_view_projection", model_view * projection);
+
+    for (MapTile* tile : mapIndex.loaded_tiles())
+    {
+      tile->drawMFBO(mfbo_shader);
+    }
+
+    gl.depthMask(GL_TRUE);
   }
 }
 
