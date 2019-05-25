@@ -101,14 +101,5 @@ void main()
 
       gl.drawElements (GL_LINE_STRIP, _indices, 16, GL_UNSIGNED_SHORT, nullptr);
     }
-
-    void wire_box::draw( math::matrix_4x4 const& model_view
-                       , math::matrix_4x4 const& projection
-                       , math::vector_4d const& color
-                       , float line_width
-                       ) const
-    {
-      draw(model_view, projection, math::matrix_4x4::unit, color, line_width);
-    }
   }
 }
