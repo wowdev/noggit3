@@ -21,6 +21,7 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
   extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
 
   change_doodadset(_doodadset);
+  update_transform_matrix();
 }
 
 WMOInstance::WMOInstance(std::string const& filename)
@@ -36,7 +37,8 @@ WMOInstance::WMOInstance(std::string const& filename)
   change_doodadset(_doodadset);
 }
 
-void WMOInstance::draw ( math::matrix_4x4 const& model_view
+void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
+                       , math::matrix_4x4 const& model_view
                        , math::matrix_4x4 const& projection
                        , math::frustum const& frustum
                        , const float& cull_distance
@@ -51,9 +53,7 @@ void WMOInstance::draw ( math::matrix_4x4 const& model_view
                        , liquid_render& render
                        , boost::optional<selection_type> selection
                        , int animtime
-                       , std::function<void (bool)> setup_outdoor_lights
                        , bool world_has_skies
-                       , std::function<void (bool)> setup_fog
                        , display_mode display
                        )
 {
@@ -69,17 +69,14 @@ void WMOInstance::draw ( math::matrix_4x4 const& model_view
     );
 
   {
-    opengl::scoped::matrix_pusher const matrix;
-    gl.translatef(pos.x, pos.y, pos.z);
-
     const float roty = dir.y - 90.0f;
 
-    gl.rotatef(roty, 0.0f, 1.0f, 0.0f);
-    gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-    gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
+    wmo_shader.uniform("transform", _transform_mat_transposed);
 
-    wmo->draw ( model_view
+    wmo->draw ( wmo_shader
+              , model_view
               , projection
+              , _transform_mat_transposed
               , _doodadset
               , pos
               , math::degrees (roty)
@@ -95,29 +92,36 @@ void WMOInstance::draw ( math::matrix_4x4 const& model_view
               , river_color_dark
               , render
               , animtime
-              , setup_outdoor_lights
               , world_has_skies
-              , setup_fog
               , display
               );
   }
 
   if (force_box || is_selected)
   {
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
-    opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> const color_mat;
-
-    opengl::texture::disable_texture(0);
-    opengl::texture::disable_texture(1);
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
-    opengl::primitives::wire_box (extents[0], extents[1]).draw (model_view, projection, color, 1.0f);
-
-    opengl::texture::disable_texture(1);
-    opengl::texture::enable_texture(0);
+    opengl::primitives::wire_box (extents[0], extents[1]).draw (model_view, projection, _transform_mat_transposed, color, 1.0f);
   }
+}
+
+void WMOInstance::update_transform_matrix()
+{
+  math::matrix_4x4 mat( math::matrix_4x4(math::matrix_4x4::translation, pos)
+                      * math::matrix_4x4
+                        ( math::matrix_4x4::rotation_yzx
+                        , { math::degrees(-dir.z)
+                          , math::degrees(dir.y - 90.0f)
+                          , math::degrees(dir.x)
+                          }
+                        )
+                      );
+
+  _transform_mat = mat;
+  _transform_mat_inverted = mat.inverted();
+  _transform_mat_transposed = mat.transposed();
 }
 
 void WMOInstance::intersect (math::ray const& ray, selection_result* results)
@@ -127,17 +131,9 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
     return;
   }
 
-  math::matrix_4x4 const model_matrix
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    );
+  math::ray subray(_transform_mat_inverted, ray);
 
-  for (auto&& result : wmo->intersect ({model_matrix.inverted(), ray}))
+  for (auto&& result : wmo->intersect(subray))
   {
     results->emplace_back (result, selected_wmo_type (this));
   }
@@ -145,50 +141,43 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
 void WMOInstance::recalcExtents()
 {
+  // todo: keep track of whether the extents need to be recalculated or not
   // keep the old extents since they are saved in the adt
-  if (wmo->loading_failed())
+  if (wmo->loading_failed() || !wmo->finishedLoading())
   {
     return;
   }
 
+  update_transform_matrix();
   update_doodads();
 
   math::vector_3d min (math::vector_3d::max());
   math::vector_3d max (math::vector_3d::min());
-  math::matrix_4x4 rot
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    );
 
   std::vector<math::vector_3d> bounds (8 * (wmo->groups.size() + 1));
   math::vector_3d *ptr = bounds.data();
   math::vector_3d wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
   math::vector_3d wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
 
-  *ptr++ = rot * math::vector_3d(wmoMax.x, wmoMax.y, wmoMin.z);
-  *ptr++ = rot * math::vector_3d(wmoMin.x, wmoMax.y, wmoMin.z);
-  *ptr++ = rot * math::vector_3d(wmoMin.x, wmoMin.y, wmoMin.z);
-  *ptr++ = rot * math::vector_3d(wmoMax.x, wmoMin.y, wmoMin.z);
-  *ptr++ = rot * math::vector_3d(wmoMax.x, wmoMin.y, wmoMax.z);
-  *ptr++ = rot * math::vector_3d(wmoMax.x, wmoMax.y, wmoMax.z);
-  *ptr++ = rot * math::vector_3d(wmoMin.x, wmoMax.y, wmoMax.z);
-  *ptr++ = rot * math::vector_3d(wmoMin.x, wmoMin.y, wmoMax.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMax.y, wmoMin.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMax.y, wmoMin.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMin.y, wmoMin.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMin.y, wmoMin.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMin.y, wmoMax.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMax.y, wmoMax.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMax.y, wmoMax.z);
+  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMin.y, wmoMax.z);
 
   for (int i = 0; i < (int)wmo->groups.size(); ++i)
   {
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
-    *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
+    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
   }
 
   for (int i = 0; i < 8 * ((int)wmo->groups.size() + 1); ++i)
@@ -241,7 +230,6 @@ void WMOInstance::resetDirection()
 {
   dir = math::vector_3d(0.0f, dir.y, 0.0f);
   recalcExtents();
-
 }
 
 std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads

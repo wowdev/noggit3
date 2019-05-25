@@ -1480,10 +1480,7 @@ void main()
       }
     }
   }
-
-  opengl::texture::disable_texture(1);
-  opengl::texture::enable_texture(0);
-
+  
   if (!_liquid_render)
   {
     _liquid_render.emplace();
@@ -1498,41 +1495,85 @@ void main()
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
-    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (1.0f, 1.0f, 1.0f, 1.0f));
-    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
-
-    gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
       bool is_hidden = it->second.wmo->is_hidden();
       if (draw_hidden_models || !is_hidden)
       {
-        it->second.draw ( model_view
-                        , projection
-                        , frustum
-                        , culldistance
-                        , camera_pos
-                        , is_hidden
-                        , draw_wmo_doodads
-                        , draw_fog
-                        , ocean_color_light
-                        , ocean_color_dark
-                        , river_color_light
-                        , river_color_dark
-                        , _liquid_render.get()
-                        , mCurrentSelection
-                        , animtime
-                        , [this] (bool on) { return outdoorLights (on); }
-                        , skies->hasSkies()
-                        , [this] (bool on) { return setupFog (on); }
-                        , display
-                        );
+        if (!_wmo_program)
+        {
+          _wmo_program.reset(new opengl::program 
+            { 
+              { GL_VERTEX_SHADER
+              , R"code(
+#version 330 core
+
+in vec4 position;
+in vec3 normal;
+in vec3 color;
+in vec2 texcoord;
+
+out vec2 f_texcoord;
+
+
+uniform mat4 model_view;
+uniform mat4 projection;
+uniform mat4 transform;
+
+void main()
+{
+  gl_Position = projection * model_view * transform * position;
+
+  f_texcoord = texcoord;
+}
+)code"
+              }
+            , { GL_FRAGMENT_SHADER
+              , R"code(
+#version 330 core
+
+uniform sampler2D tex1;
+
+in vec2 f_texcoord;
+
+out vec4 out_color;
+
+void main()
+{
+  out_color = texture2D(tex1, f_texcoord);
+}
+)code"
+                   }
+            });
+      }
+
+      opengl::scoped::use_program wmo_program {*_wmo_program.get()};
+
+      wmo_program.uniform("model_view", model_view);
+      wmo_program.uniform("projection", projection);
+      wmo_program.uniform("tex1", 0);
+
+      it->second.draw( wmo_program
+                     , model_view
+                     , projection
+                     , frustum
+                     , culldistance
+                     , camera_pos
+                     , is_hidden
+                     , draw_wmo_doodads
+                     , draw_fog
+                     , ocean_color_light
+                     , ocean_color_dark
+                     , river_color_light
+                     , river_color_dark
+                     , _liquid_render.get()
+                     , mCurrentSelection
+                     , animtime
+                     , skies->hasSkies()
+                     , display
+                     );
       }
     }
-
-    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
-    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
   }
 
   outdoorLights(true);

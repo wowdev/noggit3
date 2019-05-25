@@ -47,6 +47,7 @@ class wmo_liquid
 {
 public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
+  wmo_liquid(wmo_liquid const& other);
 
   void draw ( math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
@@ -59,7 +60,6 @@ public:
             );
 
   void upload();
-  
 
 private:
   int initGeometry(MPQFile* f);
@@ -75,6 +75,8 @@ private:
   std::vector<std::uint16_t> indices;
 
   int _indices_count;
+
+  bool _uploaded = false;
 
   opengl::scoped::deferred_upload_buffers<1> _buffer;
   GLuint const& _indices_buffer = _buffer[0];

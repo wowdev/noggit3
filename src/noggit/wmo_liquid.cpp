@@ -46,6 +46,21 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   }
 }
 
+wmo_liquid::wmo_liquid(wmo_liquid const& other)
+  : pos(other.pos)
+  , texRepeats(other.texRepeats)
+  , mTransparency(other.mTransparency)
+  , xtiles(other.xtiles)
+  , ytiles(other.ytiles)
+  , depths(other.depths)
+  , tex_coords(other.tex_coords)
+  , vertices(other.vertices)
+  , indices(other.indices)
+  , _uploaded(false)
+{
+
+}
+
 
 int wmo_liquid::initGeometry(MPQFile* f)
 {
@@ -120,6 +135,8 @@ void wmo_liquid::upload()
     , indices.data()
     , GL_STATIC_DRAW
   );
+
+  _uploaded = true;
 }
 
 void wmo_liquid::draw ( math::matrix_4x4 const& model_view
@@ -132,8 +149,11 @@ void wmo_liquid::draw ( math::matrix_4x4 const& model_view
                       , int animtime
                       )
 {
-  opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
-  opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
+  if (!_uploaded)
+  {
+    upload();
+  }
+
   opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
 
   opengl::scoped::use_program water_shader (render.shader_program());
