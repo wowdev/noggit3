@@ -34,6 +34,11 @@ private:
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
   bool _need_doodadset_update = true;
+
+  math::matrix_4x4 _transform_mat = math::matrix_4x4::uninitialized;
+  math::matrix_4x4 _transform_mat_inverted = math::matrix_4x4::uninitialized;
+  math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
+
 public:
   WMOInstance(std::string const& filename, ENTRY_MODF const* d);
   explicit WMOInstance(std::string const& filename);
@@ -52,7 +57,9 @@ public:
     , _doodadset (other._doodadset)
     , _doodads_per_group(other._doodads_per_group)
     , _need_doodadset_update(other._need_doodadset_update)
-
+    , _transform_mat(other._transform_mat)
+    , _transform_mat_inverted(other._transform_mat_inverted)
+    , _transform_mat_transposed(other._transform_mat_transposed)
   {
     std::swap (extents, other.extents);
   }
@@ -70,10 +77,14 @@ public:
     std::swap(_doodadset, other._doodadset);
     std::swap(_doodads_per_group, other._doodads_per_group);
     std::swap(_need_doodadset_update, other._need_doodadset_update);
+    std::swap(_transform_mat, other._transform_mat);
+    std::swap(_transform_mat_inverted, other._transform_mat_inverted);
+    std::swap(_transform_mat_transposed, other._transform_mat_transposed);
     return *this;
   }
 
-  void draw ( math::matrix_4x4 const& model_view
+  void draw ( opengl::scoped::use_program& wmo_shader
+            , math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
             , math::frustum const&
             , const float&
@@ -88,11 +99,16 @@ public:
             , liquid_render& render
             , boost::optional<selection_type> selection
             , int animtime
-            , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies
-            , std::function<void (bool)> setup_fog
             , display_mode display
             );
+
+  void update_transform_matrix();
+
+  math::matrix_4x4 transform_matrix() const { return _transform_mat; }
+  math::matrix_4x4 transform_matrix_inverted() const { return _transform_mat_inverted; }
+  math::matrix_4x4 transform_matrix_transposed() const { return _transform_mat_transposed; }
+
   void intersect (math::ray const&, selection_result*);
 
   void recalcExtents();

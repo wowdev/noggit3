@@ -290,13 +290,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 
   math::matrix_4x4 mat
   (
-    math::matrix_4x4(math::matrix_4x4::translation, wmo->pos)
-    * math::matrix_4x4 (math::matrix_4x4::rotation_yzx
-      , { math::degrees (-wmo->dir.z)
-        , math::degrees (wmo->dir.y - 90.f)
-        , math::degrees (wmo->dir.x)
-        }
-    )
+    wmo->transform_matrix()
     * m2_mat
   );
 

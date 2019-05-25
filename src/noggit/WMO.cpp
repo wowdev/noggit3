@@ -298,16 +298,10 @@ void WMO::finishLoading ()
   finished = true;
 }
 
-void WMO::upload()
-{
-  for (auto& group : groups)
-    group.upload();
-
-  _finished_upload = true;
-}
-
-void WMO::draw ( math::matrix_4x4 const& model_view
+void WMO::draw ( opengl::scoped::use_program& wmo_shader
+               , math::matrix_4x4 const& model_view
                , math::matrix_4x4 const& projection
+               , math::matrix_4x4 const& transform
                , int doodadset
                , const math::vector_3d &ofs
                , math::degrees const angle
@@ -323,25 +317,17 @@ void WMO::draw ( math::matrix_4x4 const& model_view
                , math::vector_4d const& river_color_dark
                , liquid_render& render
                , int animtime
-               , std::function<void (bool)> setup_outdoor_lights
                , bool world_has_skies
-               , std::function<void (bool)> setup_fog
                , display_mode display
                )
 {
-  if (!_finished_upload)
-  {
-    upload();
-    return;
-  }
-
   if (draw_fog)
   {
-    gl.enable(GL_FOG);
+
   }
   else
   {
-    gl.disable(GL_FOG);
+
   }
     
 
@@ -352,15 +338,12 @@ void WMO::draw ( math::matrix_4x4 const& model_view
       continue;
     }
 
-    group.draw ( ofs
-               , angle
+    group.draw ( wmo_shader
                , frustum
                , cull_distance
                , camera
                , draw_fog
-               , setup_outdoor_lights
                , world_has_skies
-               , setup_fog
                );
 
     group.drawLiquid ( model_view
@@ -372,37 +355,26 @@ void WMO::draw ( math::matrix_4x4 const& model_view
                      , render
                      , draw_fog
                      , animtime
-                     , setup_outdoor_lights
-                     , setup_fog
                      );
   }
 
   if (boundingbox)
   {
-    opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
-    opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
     opengl::scoped::bool_setter<GL_BLEND, TRUE> const blend;
-
-    opengl::texture::disable_texture(1);
-    opengl::texture::disable_texture(0);
-
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (auto& group : groups)
       opengl::primitives::wire_box (group.BoundingBoxMin, group.BoundingBoxMax)
-        .draw (model_view, projection, {1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
+        .draw (model_view, projection, transform, {1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
     opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
                                  , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
                                  ).draw ( model_view
                                         , projection
+                                        , transform
                                         , {1.0f, 0.0f, 0.0f, 1.0f}
                                         , 2.0f
                                         );
-
-
-    opengl::texture::disable_texture(1);
-    opengl::texture::enable_texture(0);
 
   }
 }
@@ -573,6 +545,36 @@ WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
   else name = "(no name)";
 }
 
+WMOGroup::WMOGroup(WMOGroup const& other)
+  : BoundingBoxMin(other.BoundingBoxMin)
+  , BoundingBoxMax(other.BoundingBoxMax)
+  , VertexBoxMin(other.VertexBoxMin)
+  , VertexBoxMax(other.VertexBoxMax)
+  , indoor(other.indoor)
+  , hascv(other.hascv)
+  , visible(other.visible)
+  , outdoorLights(other.outdoorLights)
+  , name(other.name)
+  , wmo(other.wmo)
+  , flags(other.flags)
+  , center(other.center)
+  , rad(other.rad)
+  , num(other.num)
+  , fog(other.fog)
+  , _doodad_ref(other._doodad_ref)
+  , _batches(other._batches)
+  , _vertices(other._vertices)
+  , _normals(other._normals)
+  , _texcoords(other._texcoords)
+  , _vertex_colors(other._vertex_colors)
+  , _indices(other._indices)
+{
+  if (other.lq)
+  {
+    lq = std::make_unique<wmo_liquid>(*other.lq.get());
+  }
+}
+
 namespace
 {
   math::vector_4d colorFromInt(unsigned int col)
@@ -667,33 +669,47 @@ void WMOGroup::upload()
     lq.get()->upload();
   }
 
-  gl.genBuffers (1, &_vertices_buffer);
+  _vertex_array.upload();
+  _buffers.upload();
+
   gl.bufferData<GL_ARRAY_BUFFER> ( _vertices_buffer
                                  , _vertices.size() * sizeof (*_vertices.data())
                                  , _vertices.data()
                                  , GL_STATIC_DRAW
                                  );
 
-  gl.genBuffers (1, &_normals_buffer);
   gl.bufferData<GL_ARRAY_BUFFER> ( _normals_buffer
                                  , _normals.size() * sizeof (*_normals.data())
                                  , _normals.data()
                                  , GL_STATIC_DRAW
                                  );
 
-  gl.genBuffers (1, &_texcoords_buffer);
   gl.bufferData<GL_ARRAY_BUFFER> ( _texcoords_buffer
                                  , _texcoords.size() * sizeof (*_texcoords.data())
                                  , _texcoords.data()
                                  , GL_STATIC_DRAW
                                  );
 
-  gl.genBuffers (1, &_vertex_colors_buffer);
   gl.bufferData<GL_ARRAY_BUFFER> ( _vertex_colors_buffer
                                  , _vertex_colors.size() * sizeof (*_vertex_colors.data())
                                  , _vertex_colors.data()
                                  , GL_STATIC_DRAW
                                  );
+
+  _uploaded = true;
+}
+
+void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
+{
+  opengl::scoped::vao_binder const _ (_vao);
+
+  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_buffer);
+  wmo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoords_buffer);
+  wmo_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+  _vao_is_setup = true;
 }
 
 void WMOGroup::load()
@@ -1044,22 +1060,23 @@ bool WMOGroup::is_visible( math::vector_3d const& ofs
   return (dist < cull_distance);
 }
 
-void WMOGroup::draw( const math::vector_3d& ofs
-                   , const math::degrees angle
+void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
                    , math::frustum const& frustum
                    , const float& cull_distance
                    , const math::vector_3d& camera
                    , bool draw_fog
-                   , std::function<void (bool)> setup_outdoor_lights
                    , bool world_has_skies
-                   , std::function<void (bool)> setup_fog
                    )
 {
-  setupFog (draw_fog, setup_fog);
+  if (!_uploaded)
+  {
+    upload();
+  }
 
-  gl.vertexPointer (_vertices_buffer, 3, GL_FLOAT, 0, nullptr);
-  gl.normalPointer (_normals_buffer, GL_FLOAT, 0, nullptr);
-  gl.texCoordPointer (_texcoords_buffer, 2, GL_FLOAT, 0, nullptr);
+  if (!_vao_is_setup)
+  {
+    setup_vao(wmo_shader);
+  }
 
   if (hascv)
   {
@@ -1069,16 +1086,12 @@ void WMOGroup::draw( const math::vector_3d& ofs
       gl.colorPointer (_vertex_colors_buffer, 4, GL_FLOAT, 0, 0);
     }
 
-    gl.disable(GL_LIGHTING);
-    setup_outdoor_lights (false);
   }
   else
   {
     if (world_has_skies)
     {
-      setup_outdoor_lights (true);
     }
-    else gl.disable(GL_LIGHTING);
   }
 
   gl.disable(GL_BLEND);
@@ -1089,6 +1102,7 @@ void WMOGroup::draw( const math::vector_3d& ofs
     WMOMaterial* mat (&wmo->materials.at (batch.texture));
     scoped_material_setter const material_setter (mat, _vertex_colors.size ());
 
+    opengl::texture::set_active_texture(0);
     wmo->textures[mat->texture1]->bind();
 
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
@@ -1138,35 +1152,15 @@ void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
                           , liquid_render& render
                           , bool draw_fog
                           , int animtime
-                          , std::function<void (bool)> setup_outdoor_lights
-                          , std::function<void (bool)> setup_fog
                           )
 {
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) 
-  {
-    setupFog (draw_fog, setup_fog);
-
-    if (outdoorLights) 
-    {
-      setup_outdoor_lights (true);
-    }
-    else 
-    {
-      //! \todo  setup some kind of indoor lighting... ?
-      setup_outdoor_lights (false);
-      gl.enable(GL_LIGHT2);
-      gl.lightfv(GL_LIGHT2, GL_AMBIENT, math::vector_4d(0.1f, 0.1f, 0.1f, 1));
-      gl.lightfv(GL_LIGHT2, GL_DIFFUSE, math::vector_4d(0.8f, 0.8f, 0.8f, 1));
-      gl.lightfv(GL_LIGHT2, GL_POSITION, math::vector_4d(0, 1, 0, 0));
-    }
-
-
+  { 
     gl.disable(GL_BLEND);
-    gl.disable(GL_ALPHA_TEST);
     gl.depthMask(GL_TRUE);
-    gl.color4f(1, 1, 1, 1);
+
     lq->draw ( model_view
              , projection
              , ocean_color_light
@@ -1176,9 +1170,6 @@ void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
              , render
              , animtime
              );
-
-
-    gl.disable(GL_LIGHT2);
   }
 }
 

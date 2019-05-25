@@ -50,6 +50,8 @@ public:
     , size_cat (other.size_cat)
     , _need_recalc_extents(other._need_recalc_extents)
     , _extents(other._extents)
+    , _transform_mat_transposed(other._transform_mat_transposed)
+    , _transform_mat_inverted(other._transform_mat_inverted)
   {
   }
   ModelInstance& operator= (ModelInstance&& other)
@@ -63,6 +65,8 @@ public:
     std::swap (size_cat, other.size_cat);
     std::swap (_need_recalc_extents, other._need_recalc_extents);
     std::swap (_extents, other._extents);
+    std::swap(_transform_mat_transposed, other._transform_mat_transposed);
+    std::swap(_transform_mat_inverted, other._transform_mat_inverted);
     return *this;
   }
 

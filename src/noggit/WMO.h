@@ -44,21 +44,18 @@ struct wmo_batch
 class WMOGroup {
 public:
   WMOGroup(WMO *wmo, MPQFile* f, int num, char const* names);
+  WMOGroup(WMOGroup const&);
 
   void load();
 
-  void upload();
-
-  void draw( const math::vector_3d& ofs
-           , math::degrees const
+  void draw( opengl::scoped::use_program& wmo_shader
            , math::frustum const& frustum
            , const float& cull_distance
            , const math::vector_3d& camera
            , bool draw_fog
-           , std::function<void (bool)> setup_outdoor_lights
            , bool world_has_skies
-           , std::function<void (bool)> setup_fog
            );
+
   void drawLiquid ( math::matrix_4x4 const& model_view
                   , math::matrix_4x4 const& projection
                   , math::vector_4d const& ocean_color_light
@@ -68,8 +65,6 @@ public:
                   , liquid_render& render
                   , bool draw_fog
                   , int animtime
-                  , std::function<void (bool)> setup_outdoor_lights
-                  , std::function<void (bool)> setup_fog
                   );
 
   void setupFog (bool draw_fog, std::function<void (bool)> setup_fog);
@@ -92,7 +87,8 @@ public:
   math::vector_3d VertexBoxMin;
   math::vector_3d VertexBoxMax;
 
-  bool indoor, hascv;
+  bool indoor;
+  bool hascv;
   bool visible;
 
   bool outdoorLights;
@@ -110,13 +106,25 @@ private:
 
   std::vector<wmo_batch> _batches;
 
-  GLuint _vertices_buffer, _normals_buffer, _texcoords_buffer, _vertex_colors_buffer;
-
   std::vector<::math::vector_3d> _vertices;
   std::vector<::math::vector_3d> _normals;
   std::vector<::math::vector_2d> _texcoords;
   std::vector<::math::vector_4d> _vertex_colors;
   std::vector<uint16_t> _indices;
+
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
+  opengl::scoped::deferred_upload_buffers<4> _buffers;
+  GLuint const& _vertices_buffer = _buffers[0];
+  GLuint const& _normals_buffer = _buffers[1];
+  GLuint const& _texcoords_buffer = _buffers[2];
+  GLuint const& _vertex_colors_buffer = _buffers[3];
+
+  bool _uploaded = false;
+  bool _vao_is_setup = false;
+
+  void upload();
+  void setup_vao(opengl::scoped::use_program& wmo_shader);
 };
 
 struct WMOLight {
@@ -168,8 +176,10 @@ class WMO : public AsyncObject
 public:
   explicit WMO(const std::string& name);
 
-  void draw ( math::matrix_4x4 const& model_view
+  void draw ( opengl::scoped::use_program& wmo_shader
+            , math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
+            , math::matrix_4x4 const& transform
             , int doodadset
             , const math::vector_3d& ofs
             , math::degrees const
@@ -185,9 +195,7 @@ public:
             , math::vector_4d const& river_color_dark
             , liquid_render& render
             , int animtime
-            , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies
-            , std::function<void (bool)> setup_fog
             , display_mode display
             );
   bool drawSkybox ( math::vector_3d pCamera
@@ -200,8 +208,6 @@ public:
   std::vector<float> intersect (math::ray const&) const;
 
   void finishLoading();
-
-  void upload();
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;
 
