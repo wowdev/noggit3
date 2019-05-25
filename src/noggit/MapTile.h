@@ -116,6 +116,14 @@ private:
   math::vector_3d mMinimumValues[3 * 3];
   math::vector_3d mMaximumValues[3 * 3];
 
+  bool _mfbo_buffer_are_setup = false;
+  opengl::scoped::deferred_upload_vertex_arrays<2> _mfbo_vaos;
+  GLuint const& _mfbo_bottom_vao = _mfbo_vaos[0];
+  GLuint const& _mfbo_top_vao = _mfbo_vaos[1];
+  opengl::scoped::deferred_upload_buffers<2> _mfbo_vbos;
+  GLuint const& _mfbo_bottom_vbo = _mfbo_vbos[0];
+  GLuint const& _mfbo_top_vbo = _mfbo_vbos[1];
+
   // MHDR:
   int mFlags;
   bool mBigAlpha;

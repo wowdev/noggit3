@@ -1020,28 +1020,29 @@ void main()
     {
       _mfbo_program.reset(new opengl::program({ { GL_VERTEX_SHADER
         , R"code(
-#version 110
+#version 330 core
 
 attribute vec4 position;
 
-uniform mat4 model_view;
-uniform mat4 projection;
+uniform mat4 model_view_projection;
 
 void main()
 {
-  gl_Position = projection * model_view * position;
+  gl_Position = model_view_projection * position;
 }
 )code"
         }
         ,{ GL_FRAGMENT_SHADER
         , R"code(
-#version 110
+#version 330 core
 
 uniform vec4 color;
 
+out vec4 out_color;
+
 void main()
 {
-  gl_FragColor = color;
+  out_color = color;
 }
 )code"
         }
@@ -1049,8 +1050,7 @@ void main()
     }
     opengl::scoped::use_program mfbo_shader { *_mfbo_program.get() };
 
-    mfbo_shader.uniform ("model_view", model_view);
-    mfbo_shader.uniform ("projection", projection);
+    mfbo_shader.uniform ("model_view_projection", model_view * projection);
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
