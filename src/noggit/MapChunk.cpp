@@ -714,9 +714,9 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
       float edit = change * (1.0f - dist / radius);
       if (editMode)
       {
-        mccv[i].x += (color.x / 0.5 - mccv[i].x)* edit;
-        mccv[i].y += (color.y / 0.5 - mccv[i].y)* edit;
-        mccv[i].z += (color.z / 0.5 - mccv[i].z)* edit;
+        mccv[i].x += (color.x / 0.5f - mccv[i].x)* edit;
+        mccv[i].y += (color.y / 0.5f - mccv[i].y)* edit;
+        mccv[i].z += (color.z / 0.5f - mccv[i].z)* edit;
       }
       else
       {
