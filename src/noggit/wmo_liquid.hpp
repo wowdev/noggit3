@@ -51,6 +51,7 @@ public:
 
   void draw ( math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
+            , math::matrix_4x4 const& transform
             , math::vector_4d const& ocean_color_light
             , math::vector_4d const& ocean_color_dark
             , math::vector_4d const& river_color_light
@@ -59,7 +60,7 @@ public:
             , int animtime
             );
 
-  void upload();
+  void upload(opengl::scoped::use_program& water_shader);
 
 private:
   int initGeometry(MPQFile* f);
@@ -78,6 +79,11 @@ private:
 
   bool _uploaded = false;
 
-  opengl::scoped::deferred_upload_buffers<1> _buffer;
+  opengl::scoped::deferred_upload_buffers<4> _buffer;
   GLuint const& _indices_buffer = _buffer[0];
+  GLuint const& _vertices_buffer = _buffer[1];
+  GLuint const& _depth_buffer = _buffer[2];
+  GLuint const& _tex_coord_buffer = _buffer[3];
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
 };
