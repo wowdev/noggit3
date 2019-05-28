@@ -71,7 +71,8 @@ public:
                 , bool is_current_selection
                 );
 
-  void intersect ( math::ray const&
+  void intersect ( math::matrix_4x4 const& model_view
+                 , math::ray const&
                  , selection_result*
                  , int animtime
                  );

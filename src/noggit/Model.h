@@ -57,7 +57,12 @@ public:
   math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
 
   bool calc;
-  void calcMatrix(Bone* allbones, int anim, int time, int animtime);
+  void calcMatrix( math::matrix_4x4 const& model_view
+                 , Bone* allbones
+                 , int anim
+                 , int time
+                 , int animtime
+                 );
   Bone ( const MPQFile& f,
          const ModelBoneDef &b,
          int *global,
@@ -209,7 +214,8 @@ public:
   Model(const std::string& name);
 
   void draw (bool draw_fog, int animtime, bool draw_particles);
-  void draw ( std::vector<ModelInstance*> instances
+  void draw ( math::matrix_4x4 const& model_view
+            , std::vector<ModelInstance*> instances
             , opengl::scoped::use_program& m2_shader
             , math::frustum const& frustum
             , const float& cull_distance
@@ -223,7 +229,7 @@ public:
             );
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
 
-  std::vector<float> intersect (math::ray const&, int animtime);
+  std::vector<float> intersect (math::matrix_4x4 const& model_view, math::ray const&, int animtime);
 
   void updateEmitters(float dt);
 
@@ -280,8 +286,8 @@ private:
   void fix_shader_id_layer();
   void compute_pixel_shader_ids();
 
-  void animate(int anim, int animtime);
-  void calcBones(int anim, int time, int animation_time);
+  void animate(math::matrix_4x4 const& model_view, int anim, int animtime);
+  void calcBones(math::matrix_4x4 const& model_view, int anim, int time, int animation_time);
 
   void lightsOn(opengl::light lbase);
   void lightsOff(opengl::light lbase);
