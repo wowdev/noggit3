@@ -58,6 +58,7 @@ public:
 
   void drawLiquid ( math::matrix_4x4 const& model_view
                   , math::matrix_4x4 const& projection
+                  , math::matrix_4x4 const& transform
                   , math::vector_4d const& ocean_color_light
                   , math::vector_4d const& ocean_color_dark
                   , math::vector_4d const& river_color_light

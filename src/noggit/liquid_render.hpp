@@ -43,6 +43,9 @@ in float depth;
 
 uniform mat4 model_view;
 uniform mat4 projection;
+uniform mat4 transform;
+
+uniform int use_transform = int(0);
 
 out float depth_;
 out vec2 tex_coord_;
@@ -52,7 +55,14 @@ void main()
   depth_ = depth;
   tex_coord_ = tex_coord;
 
-  gl_Position = projection * model_view * position;
+  if(use_transform == 1)
+  {
+    gl_Position = projection * model_view * transform * position;
+  }
+  else
+  {
+    gl_Position = projection * model_view * position;
+  }
 }
 )code"
       }

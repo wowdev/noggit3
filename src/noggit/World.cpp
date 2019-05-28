@@ -1352,6 +1352,8 @@ void main()
     water_shader.uniform ("model_view", model_view);
     water_shader.uniform ("projection", projection);
 
+    water_shader.uniform ("use_transform", 0);
+
     water_shader.uniform ("ocean_color_light", ocean_color_light);
     water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
     water_shader.uniform ("river_color_light", river_color_light);
