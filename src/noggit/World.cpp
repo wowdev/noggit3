@@ -497,9 +497,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   gl.enable(GL_CULL_FACE);
   gl.disable(GL_BLEND);
-  opengl::texture::disable_texture();
   gl.disable(GL_DEPTH_TEST);
-  gl.disable(GL_FOG);
 
   int daytime = static_cast<int>(time) % 2880;
   outdoorLightStats = ol->getLightStats(daytime);
@@ -1117,8 +1115,8 @@ void main()
 
     {
       if (!_m2_program)
-      { 
-        _m2_program.reset(new opengl::program({ { GL_VERTEX_SHADER
+      {
+        _m2_program.reset(new opengl::program({{ GL_VERTEX_SHADER
           , R"code(
 #version 330 core
 
@@ -1195,6 +1193,8 @@ in vec2 uv1;
 in vec2 uv2;
 in float camera_dist;
 in vec3 norm;
+
+out vec4 out_color;
 
 uniform vec4 mesh_color;
 
@@ -1361,25 +1361,25 @@ void main()
     color = blend_by_alpha (vec4(fog_color.rgb, alpha), color);
   }
 
-  gl_FragColor = color;
+  out_color = color;
 }
 
 )code"
           }
         }));
       }
-      opengl::scoped::use_program m2_shader{ *_m2_program.get() };
+      opengl::scoped::use_program m2_shader {*_m2_program.get()};
 
-      m2_shader.uniform ("model_view", model_view);
-      m2_shader.uniform ("projection", projection);
+      m2_shader.uniform("model_view", model_view);
+      m2_shader.uniform("projection", projection);
       m2_shader.uniform("tex1", 0);
       m2_shader.uniform("tex2", 1);
 
-      m2_shader.uniform ("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));
+      m2_shader.uniform("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));
       // !\ todo use light dbcs values
-      m2_shader.uniform ("fog_end", fogdistance);
-      m2_shader.uniform ("fog_start", 0.5f);
-      m2_shader.uniform ("draw_fog", (int)draw_fog);
+      m2_shader.uniform("fog_end", fogdistance);
+      m2_shader.uniform("fog_start", 0.5f);
+      m2_shader.uniform("draw_fog", (int)draw_fog);
 
       math::vector_3d dd = outdoorLightStats.dayDir;
       math::vector_3d diffuse_color(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
@@ -1389,15 +1389,13 @@ void main()
       m2_shader.uniform("diffuse_color", diffuse_color);
       m2_shader.uniform("ambient_color", ambient_color);
 
-      opengl::texture::enable_texture(0);
-
       if (draw_models)
       {
         for (auto& it : _models_by_filename)
         {
           if (draw_hidden_models || !it.second[0]->model->is_hidden())
           {
-            it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
+            it.second[0]->model->draw(model_view, it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
           }
         }
       }
@@ -1406,13 +1404,10 @@ void main()
       {
         for (auto& it : _wmo_doodads)
         {
-          it.second[0]->model->draw(it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
+          it.second[0]->model->draw(model_view, it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
         }
-      }      
-
-      opengl::texture::disable_texture(1);
-      opengl::texture::disable_texture(0);
-    }
+      }
+    } 
     
     if(draw_models_with_box || (draw_hidden_models && !visible_model_count.empty()))
     {
@@ -1440,9 +1435,11 @@ void main()
 
 uniform vec4 color;
 
+out vec4 out_color;
+
 void main()
 {
-  gl_FragColor = color;
+  out_color = color;
 }
 )code"
           }
@@ -1577,7 +1574,8 @@ void main()
   }
 }
 
-selection_result World::intersect ( math::ray const& ray
+selection_result World::intersect ( math::matrix_4x4 const& model_view
+                                  , math::ray const& ray
                                   , bool pOnlyMap
                                   , bool do_objects
                                   , bool draw_terrain
@@ -1604,7 +1602,7 @@ selection_result World::intersect ( math::ray const& ray
       {        
         if (draw_hidden_models || ! model_instance.second.model->is_hidden())
         {
-          model_instance.second.intersect (ray, &results, animtime);
+          model_instance.second.intersect (model_view, ray, &results, animtime);
         }
       }
     }

@@ -24,11 +24,20 @@ namespace opengl
 
       void draw ( math::matrix_4x4 const& model_view
                 , math::matrix_4x4 const& projection
+                , math::matrix_4x4 const& transform
                 , math::vector_4d const& color
                 , float line_width
                 ) const;
 
+      // for legacy stuff, todo: remove
+      void draw( math::matrix_4x4 const& model_view
+               , math::matrix_4x4 const& projection
+               , math::vector_4d const& color
+               , float line_width
+               ) const;
+
     private:
+      scoped::deferred_upload_vertex_arrays<1> _vao;
       scoped::buffers<2> _buffers;
       GLuint const& _positions = _buffers[0];
       GLuint const& _indices = _buffers[1];

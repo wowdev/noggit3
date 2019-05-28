@@ -1981,7 +1981,8 @@ selection_result MapView::intersect_result(bool terrain_only)
 {
   selection_result results
   ( _world->intersect 
-    ( intersect_ray()
+    ( model_view().transposed()
+    , intersect_ray()
     , terrain_only
     , terrainMode == editing_mode::object
     , _draw_terrain.get()

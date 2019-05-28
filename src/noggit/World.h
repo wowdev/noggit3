@@ -136,7 +136,8 @@ public:
   unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
-  selection_result intersect ( math::ray const&
+  selection_result intersect ( math::matrix_4x4 const& model_view
+                             , math::ray const&
                              , bool only_map
                              , bool do_objects
                              , bool draw_terrain

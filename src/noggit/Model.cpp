@@ -742,7 +742,7 @@ void ModelRenderPass::after_draw()
 
 void ModelRenderPass::bind_texture(size_t index, Model* m)
 {
-  opengl::texture::enable_texture(index);
+  opengl::texture::set_active_texture(index);
 
   uint16_t tex = m->_texture_lookup[textures[index]];
   
@@ -1028,18 +1028,22 @@ void Model::initAnimated(const MPQFile& f)
   animcalc = false;
 }
 
-void Model::calcBones(int _anim, int time, int animation_time)
+void Model::calcBones( math::matrix_4x4 const& model_view
+                     , int _anim
+                     , int time
+                     , int animation_time
+                     )
 {
   for (size_t i = 0; i<header.nBones; ++i) {
     bones[i].calc = false;
   }
 
   for (size_t i = 0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones.data(), _anim, time, animation_time);
+    bones[i].calcMatrix(model_view, bones.data(), _anim, time, animation_time);
   }
 }
 
-void Model::animate(int _anim, int animtime_)
+void Model::animate(math::matrix_4x4 const& model_view, int _anim, int animtime_)
 {
   this->_animation = _anim;
   ModelAnimation &a = _animations[_animation];
@@ -1055,7 +1059,7 @@ void Model::animate(int _anim, int animtime_)
 
   if (animBones) 
   {
-    calcBones(_animation, t, _global_animtime);
+    calcBones(model_view, _animation, t, _global_animtime);
   }
 
   if (animGeometry) 
@@ -1175,11 +1179,8 @@ void ModelLight::setup(int time, opengl::light l, int animtime)
     p = math::vector_4d(tpos, 1.0f);
     LogError << "Light type " << type << " is unknown." << std::endl;
   }
-  //gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
-  gl.lightfv(l, GL_POSITION, p);
-  gl.lightfv(l, GL_DIFFUSE, diffcol);
-  gl.lightfv(l, GL_AMBIENT, ambcol);
-  gl.enable(l);
+ 
+  // todo: use models' light
 }
 
 TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *global)
@@ -1206,7 +1207,12 @@ Bone::Bone( const MPQFile& f,
   scale.apply(fixCoordSystem2);
 }
 
-void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
+void Bone::calcMatrix( math::matrix_4x4 const& model_view
+                     , Bone *allbones
+                     , int anim
+                     , int time
+                     , int animtime
+                     )
 {
   if (calc) return;
 
@@ -1239,11 +1245,8 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 
     if (flags.billboard)
     {
-      float modelview[16];
-      gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
-
-      math::vector_3d vRight (modelview[0], modelview[4], modelview[8]);
-      math::vector_3d vUp (modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+      math::vector_3d vRight (model_view[0], model_view[4], model_view[8]);
+      math::vector_3d vUp (model_view[1], model_view[5], model_view[9]); // Spherical billboarding
       //math::vector_3d vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
       vRight = vRight * -1;
       m (0, 2, vRight.x);
@@ -1259,7 +1262,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 
   if (parent >= 0)
   {
-    allbones[parent].calcMatrix (allbones, anim, time, animtime);
+    allbones[parent].calcMatrix (model_view, allbones, anim, time, animtime);
     mat = allbones[parent].mat * m;
   }
   else
@@ -1308,7 +1311,8 @@ void Model::draw (bool draw_fog, int animtime, bool draw_particles)
   
 }
 
-void Model::draw ( std::vector<ModelInstance*> instances
+void Model::draw ( math::matrix_4x4 const& model_view
+                 , std::vector<ModelInstance*> instances
                  , opengl::scoped::use_program& m2_shader
                  , math::frustum const& frustum
                  , const float& cull_distance
@@ -1333,7 +1337,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
 
   if (animated && (!animcalc || _per_instance_animation))
   {
-    animate(0, animtime);
+    animate(model_view, 0, animtime);
     animcalc = true;
   }
 
@@ -1386,13 +1390,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
   }
 
   gl.disable(GL_BLEND);
-  gl.alphaFunc(GL_GREATER, 0.0f);
-  gl.disable(GL_ALPHA_TEST);
   gl.enable(GL_CULL_FACE);
-
-  GLfloat czero[4] = { 0, 0, 0, 1 };
-  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
-  gl.color4f(1, 1, 1, 1);
   gl.depthMask(GL_TRUE);
 }
 
@@ -1416,7 +1414,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 }
 
 
-std::vector<float> Model::intersect (math::ray const& ray, int animtime)
+std::vector<float> Model::intersect (math::matrix_4x4 const& model_view, math::ray const& ray, int animtime)
 {
   std::vector<float> results;
 
@@ -1427,7 +1425,7 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 
   if (animated && (!animcalc || _per_instance_animation))
   {
-    animate (0, animtime);
+    animate (model_view, 0, animtime);
     animcalc = true;
   }
 
