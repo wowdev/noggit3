@@ -60,6 +60,8 @@ public:
 
     map_horizon_batch _batches[64][64];
 
+    opengl::scoped::deferred_upload_vertex_arrays<1> _vaos;
+    GLuint const& _vao = _vaos[0];
     opengl::scoped::buffers<2> _buffers;
     GLuint const& _index_buffer = _buffers[0];
     GLuint const& _vertex_buffer = _buffers[1];

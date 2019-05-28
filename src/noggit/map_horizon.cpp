@@ -275,7 +275,7 @@ map_horizon::render::render(const map_horizon& horizon)
     }
   }
 
-  gl.bufferData<GL_ARRAY_BUFFER> (_vertex_buffer, vertices.size() * sizeof (math::vector_3d), vertices.data(), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d> (_vertex_buffer, vertices, GL_STATIC_DRAW);
 }
 
 static inline uint32_t outer_index(const map_horizon_batch &batch, int y, int x)
@@ -346,14 +346,16 @@ void map_horizon::render::draw( math::matrix_4x4 const& model_view
     }
   }
 
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(_index_buffer, indices, GL_STATIC_DRAW);
+
   if (!_map_horizon_program)
   {
     _map_horizon_program.reset(new opengl::program
     { { GL_VERTEX_SHADER
       , R"code(
-#version 110
+#version 330 core
 
-attribute vec4 position;
+in vec4 position;
 
 uniform mat4 model_view;
 uniform mat4 projection;
@@ -366,21 +368,27 @@ void main()
     }
       , { GL_FRAGMENT_SHADER
       , R"code(
-#version 110
+#version 330 core
 
 uniform vec3 color;
 
+out vec4 out_color;
+
 void main()
 {
-  gl_FragColor = vec4(color, 1.0);
+  out_color = vec4(color, 1.0);
 }
 )code"
       }
     });
+  
+    _vaos.upload();
   }
    
 
   opengl::scoped::use_program shader {*_map_horizon_program.get()};
+
+  opengl::scoped::vao_binder const _ (_vao);
 
   shader.uniform ("model_view", model_view);
   shader.uniform ("projection", projection);
@@ -388,9 +396,9 @@ void main()
 
   shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> _ (_index_buffer);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder (_index_buffer);
 
-  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof (uint32_t), indices.data(), GL_STATIC_DRAW);
+  
   gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
