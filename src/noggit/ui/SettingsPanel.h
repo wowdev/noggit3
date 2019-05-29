@@ -48,6 +48,7 @@ namespace noggit
       QCheckBox* _uid_cb;
 
       QCheckBox* tabletModeCheck;
+      QCheckBox* _undock_tool_properties;
       QCheckBox* _vsync_cb;
 
       QGroupBox* _mysql_box;

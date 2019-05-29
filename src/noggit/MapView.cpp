@@ -123,6 +123,7 @@ void MapView::set_editing_mode (editing_mode mode)
     _editmode_properties->setWindowTitle("Object");
   }
 
+  _editmode_properties->adjustSize();
   terrainMode = mode;
   _toolbar->check_tool (mode);
 }
@@ -310,8 +311,14 @@ void MapView::createGUI()
   _editmode_properties->setWidget(terrainTool);
   _editmode_properties->setMinimumWidth(290);
   _main_window->addDockWidget(Qt::RightDockWidgetArea, _editmode_properties);
+  connect(_editmode_properties, &QDockWidget::topLevelChanged, this, [=]() { this->_editmode_properties->adjustSize(); });
   connect(this, &QObject::destroyed, _editmode_properties, &QObject::deleteLater);
 
+
+
+  if (_settings->value("undock_tool_properties/enabled", 1).toBool())
+    _editmode_properties->setFloating(true);
+    _editmode_properties->move(_main_window->geometry().topRight().x() - _editmode_properties->rect().width() - 20, _main_window->geometry().topRight().y() + 40);
 
   // create toolbar
 
