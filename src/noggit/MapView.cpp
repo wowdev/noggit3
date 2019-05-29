@@ -84,17 +84,10 @@ void MapView::set_editing_mode (editing_mode mode)
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  _terrain->hide();
-  _flatten_blur->hide();
-  _texturing->hide();
-  _vertex_shading->hide();
-  _water->hide();
-  TexturePicker->hide();
-  _object->hide();
   objectEditor->modelImport->hide();
   objectEditor->rotationEditor->hide();
-  _areaid->hide();
   TexturePalette->hide();
+  TexturePicker->hide();
 
   MoveObj = false;
   _world->ResetSelection();
@@ -102,25 +95,32 @@ void MapView::set_editing_mode (editing_mode mode)
   switch (mode)
   {
   case editing_mode::ground:
-    _terrain->show();
+    _editmode_properties->setWidget(terrainTool);
+    _editmode_properties->setWindowTitle("Raise / Lower");
     break;
   case editing_mode::flatten_blur:
-    _flatten_blur->show();
+    _editmode_properties->setWidget(flattenTool);
+    _editmode_properties->setWindowTitle("Flatten / Blur");
     break;
   case editing_mode::paint:
-    _texturing->show();
+    _editmode_properties->setWidget(texturingTool);
+    _editmode_properties->setWindowTitle("Texturing");
     break;
   case editing_mode::areaid:
-    _areaid->show();
+    _editmode_properties->setWidget(ZoneIDBrowser);
+    _editmode_properties->setWindowTitle("Area ID");
     break;
   case editing_mode::water:
-    _water->show();
+    _editmode_properties->setWidget(guiWater);
+    _editmode_properties->setWindowTitle("Water");
     break;
   case editing_mode::mccv:
-    _vertex_shading->show();
+    _editmode_properties->setWidget(shaderTool);
+    _editmode_properties->setWindowTitle("Vertex Shading");
     break;
   case editing_mode::object:
-    _object->show();
+    _editmode_properties->setWidget(objectEditor);
+    _editmode_properties->setWindowTitle("Object");
   }
 
   terrainMode = mode;
@@ -194,146 +194,126 @@ void MapView::changeZoneIDValue (int set)
 
 void MapView::createGUI()
 {
-  _terrain = new QDockWidget ("Raise / Lower", this);
-  _terrain->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool());
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
-  connect (this, &QObject::destroyed, _terrain, &QObject::deleteLater);
 
-  connect ( terrainTool
-          , &noggit::ui::terrain_tool::updateVertices
-          , [this] (int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
-            {
-              makeCurrent();
-              opengl::context::scoped_setter const _ (::gl, context());
+  // create tool widgets
 
-              _world->orientVertices ( vertex_mode == eVertexMode_Mouse
-                                      ? _cursor_pos
-                                      : _world->vertexCenter()
-                                      , angle
-                                      , orientation
-                                      );
-            }
-          );
+  terrainTool = new noggit::ui::terrain_tool();
 
-  _flatten_blur = new QDockWidget ("Flatten / Blur", this);
-  _flatten_blur->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _flatten_blur->setWidget (flattenTool = new noggit::ui::flatten_blur_tool());
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _flatten_blur);
-  connect (this, &QObject::destroyed, _flatten_blur, &QObject::deleteLater);
+  connect(terrainTool
+    , &noggit::ui::terrain_tool::updateVertices
+    , [this](int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
 
-  _texturing = new QDockWidget ("Texturing", this);
-  _texturing->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position, _world.get()));
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _texturing);
-  connect (this, &QObject::destroyed, _texturing, &QObject::deleteLater);
+      _world->orientVertices(vertex_mode == eVertexMode_Mouse
+        ? _cursor_pos
+        : _world->vertexCenter()
+        , angle
+        , orientation
+      );
+    }
+  );
 
-  _areaid = new QDockWidget ("Area ID", this);
-  _areaid->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _areaid->setWidget (ZoneIDBrowser = new noggit::ui::zone_id_browser());
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _areaid);
-  connect (this, &QObject::destroyed, _areaid, &QObject::deleteLater);
+  flattenTool = new noggit::ui::flatten_blur_tool();
 
-  _water = new QDockWidget ("Water", this);
-  _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _water->setWidget ( guiWater = new noggit::ui::water ( &_displayed_water_layer
-                                                       , &_display_all_water_layers
-                                                       )
-                    );
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
-  connect (this, &QObject::destroyed, _water, &QObject::deleteLater);
+  texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get());
 
-  connect ( guiWater, &noggit::ui::water::regenerate_water_opacity
-          , [this] (float factor)
-            {
-              makeCurrent();
-              opengl::context::scoped_setter const _ (::gl, context());
+  ZoneIDBrowser = new noggit::ui::zone_id_browser();
 
-              _world->autoGenWaterTrans (_camera.position, factor);
-            }
-          );
-  connect ( guiWater, &noggit::ui::water::crop_water
-          , [this]
-            {
-              makeCurrent();
-              opengl::context::scoped_setter const _ (::gl, context());
-
-              _world->CropWaterADT (_camera.position);
-            }
-          );
+  guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers);
 
 
-  _vertex_shading = new QDockWidget ("Vertex Shading", this);
-  _vertex_shading->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _vertex_shading->setWidget (shaderTool = new noggit::ui::shader_tool (shader_color));
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _vertex_shading);
-  connect (this, &QObject::destroyed, _vertex_shading, &QObject::deleteLater);
+  connect(guiWater, &noggit::ui::water::regenerate_water_opacity
+    , [this](float factor)
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
 
-  _object = new QDockWidget ("Object", this);
-  _object->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _object->setWidget ( objectEditor = new noggit::ui::object_editor ( this
-                                                                    , _world.get()
-                                                                    , &_move_model_to_cursor_position
-                                                                    , &_object_paste_params
-                                                                    )
-                     );
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
-  connect (this, &QObject::destroyed, _object, &QObject::deleteLater);
+      _world->autoGenWaterTrans(_camera.position, factor);
+    }
+  );
 
+  connect(guiWater, &noggit::ui::water::crop_water
+    , [this]
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
+
+      _world->CropWaterADT(_camera.position);
+    }
+  );
+
+  shaderTool = new noggit::ui::shader_tool(shader_color);
+
+  objectEditor = new noggit::ui::object_editor(this
+    , _world.get()
+    , &_move_model_to_cursor_position
+    , &_object_paste_params
+  );
 
   TexturePalette = new noggit::ui::tileset_chooser(this);
-  
-  connect (this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
-  connect ( texturingTool->_current_texture, &noggit::ui::current_texture::clicked
-          , [=]
-            {
-              TexturePalette->setVisible (!TexturePalette->isVisible());
-            }
-          );
-  connect ( TexturePalette, &noggit::ui::tileset_chooser::selected
-          , [=] (std::string const& filename)
-            {
-              makeCurrent();
-              opengl::context::scoped_setter const _ (::gl, context());
 
-              noggit::ui::selected_texture::set (filename);
-              texturingTool->_current_texture->set_texture (filename);
-            }
-          );
+  connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
+  connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
+    , [=]
+    {
+      TexturePalette->setVisible(!TexturePalette->isVisible());
+    }
+  );
+  connect(TexturePalette, &noggit::ui::tileset_chooser::selected
+    , [=](std::string const& filename)
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
 
+      noggit::ui::selected_texture::set(filename);
+      texturingTool->_current_texture->set_texture(filename);
+    }
+  );
 
-
-
-  // DetailInfoWindow
-  guidetailInfos = new noggit::ui::detail_infos (this);
+  guidetailInfos = new noggit::ui::detail_infos(this);
   guidetailInfos->hide();
 
-  TexturePicker = new noggit::ui::texture_picker (texturingTool->_current_texture);
+  TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture);
   TexturePicker->hide();
 
-  connect ( TexturePicker, &noggit::ui::texture_picker::shift_left
-          , [=]
-            {
-              makeCurrent();
-              opengl::context::scoped_setter const _ (::gl, context());
-              TexturePicker->shiftSelectedTextureLeft();
-            }
-          );
-  connect ( TexturePicker, &noggit::ui::texture_picker::shift_right
-          , [=]
-            {
-              makeCurrent();
-              opengl::context::scoped_setter const _ (::gl, context());
-              TexturePicker->shiftSelectedTextureRight();
-            }
-          );
+  connect(TexturePicker, &noggit::ui::texture_picker::shift_left
+    , [=]
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
+      TexturePicker->shiftSelectedTextureLeft();
+    }
+  );
+  connect(TexturePicker, &noggit::ui::texture_picker::shift_right
+    , [=]
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
+      TexturePicker->shiftSelectedTextureRight();
+    }
+  );
 
   ZoneIDBrowser->setMapID(_world->getMapID());
-  connect ( ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
-          , [this] (int area_id) { changeZoneIDValue (area_id); }
-          );
+  connect(ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
+    , [this](int area_id) { changeZoneIDValue(area_id); }
+  );
 
-  terrainTool->storeCursorPos (&_cursor_pos);
+  terrainTool->storeCursorPos(&_cursor_pos);
+
+
+  // create docking host widget
+
+  _editmode_properties = new QDockWidget("Raise / Lower", this);
+  _editmode_properties->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _editmode_properties->setWidget(terrainTool);
+  _editmode_properties->setMinimumWidth(290);
+  _main_window->addDockWidget(Qt::RightDockWidgetArea, _editmode_properties);
+  connect(this, &QObject::destroyed, _editmode_properties, &QObject::deleteLater);
+
+
+  // create toolbar
 
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
