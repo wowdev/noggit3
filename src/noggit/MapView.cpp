@@ -308,6 +308,7 @@ void MapView::createGUI()
 
   _editmode_properties = new QDockWidget("Raise / Lower", this);
   _editmode_properties->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _editmode_properties->setAllowedAreas(Qt::RightDockWidgetArea);
   _editmode_properties->setWidget(terrainTool);
   _editmode_properties->setMinimumWidth(290);
   _main_window->addDockWidget(Qt::RightDockWidgetArea, _editmode_properties);
