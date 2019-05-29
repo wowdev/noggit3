@@ -1128,6 +1128,7 @@ MapView::MapView( math::degrees camera_yaw0
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
   _minimap_dock->setVisible (false);
   _minimap_dock->setFloating(true);
+  _minimap_dock->move(_main_window->rect().center() - _minimap->rect().center());
 
 
   _time_and_navigation_dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
