@@ -291,4 +291,5 @@ private:
   QDockWidget* _vertex_shading;
   noggit::ui::texturing_tool* texturingTool;
   QDockWidget* _texturing;
+  QDockWidget* _editmode_properties;
 };
