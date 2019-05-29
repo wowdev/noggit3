@@ -24,7 +24,7 @@ namespace noggit
 
     QSize minimap_widget::sizeHint() const
     {
-      return QSize (512, 512);
+      return QSize (700, 700);
     }
 
     //! \todo Only redraw stuff as told in event.
