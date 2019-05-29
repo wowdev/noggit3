@@ -216,13 +216,19 @@ void MapView::createGUI()
     }
   );
 
+  connect(this, &QObject::destroyed, terrainTool, &QObject::deleteLater);
+
   flattenTool = new noggit::ui::flatten_blur_tool();
+  connect(this, &QObject::destroyed, flattenTool, &QObject::deleteLater);
 
   texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get());
+  connect(this, &QObject::destroyed, texturingTool, &QObject::deleteLater);
 
   ZoneIDBrowser = new noggit::ui::zone_id_browser();
+  connect(this, &QObject::destroyed, ZoneIDBrowser, &QObject::deleteLater);
 
   guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers);
+  connect(this, &QObject::destroyed, guiWater, &QObject::deleteLater);
 
 
   connect(guiWater, &noggit::ui::water::regenerate_water_opacity
@@ -246,12 +252,15 @@ void MapView::createGUI()
   );
 
   shaderTool = new noggit::ui::shader_tool(shader_color);
+  connect(this, &QObject::destroyed, shaderTool, &QObject::deleteLater);
 
   objectEditor = new noggit::ui::object_editor(this
     , _world.get()
     , &_move_model_to_cursor_position
     , &_object_paste_params
   );
+  connect(this, &QObject::destroyed, objectEditor, &QObject::deleteLater);
+
 
   TexturePalette = new noggit::ui::tileset_chooser(this);
 
@@ -295,6 +304,8 @@ void MapView::createGUI()
       TexturePicker->shiftSelectedTextureRight();
     }
   );
+  connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
+
 
   ZoneIDBrowser->setMapID(_world->getMapID());
   connect(ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
@@ -312,15 +323,16 @@ void MapView::createGUI()
   _editmode_properties->setWidget(terrainTool);
   _editmode_properties->setMinimumWidth(290);
   _main_window->addDockWidget(Qt::RightDockWidgetArea, _editmode_properties);
-  connect(_editmode_properties, &QDockWidget::topLevelChanged, this, [=]() { this->_editmode_properties->adjustSize(); });
+  connect(_editmode_properties, &QDockWidget::topLevelChanged, this, [=] { this->_editmode_properties->adjustSize(); });
   connect(this, &QObject::destroyed, _editmode_properties, &QObject::deleteLater);
 
 
-
   if (_settings->value("undock_tool_properties/enabled", 1).toBool())
+  {
     _editmode_properties->setFloating(true);
     _editmode_properties->move(_main_window->geometry().topRight().x() - _editmode_properties->rect().width() - 20, _main_window->geometry().topRight().y() + 40);
-
+  }
+   
   // create toolbar
 
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });

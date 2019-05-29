@@ -13,10 +13,10 @@ namespace noggit
       , _filename("tileset\\generic\\black.blp")
       , _need_update(true)
     {
-      QSizePolicy policy (QSizePolicy::Preferred, QSizePolicy::Preferred);
-      policy.setHeightForWidth (true);
+      QSizePolicy policy (QSizePolicy::Maximum, QSizePolicy::Maximum);
       setSizePolicy (policy);
-      setMinimumSize(64, 64);
+      setMinimumSize(225, 225);
+
       update_texture_if_needed();
     }
 
