@@ -64,6 +64,7 @@ namespace noggit
     {
       setWindowTitle ("Texture palette");
       setWindowIcon (QIcon (":/icon"));
+      setMinimumHeight(490);
 
       while (!MPQArchive::allFinishedLoading())
       {
