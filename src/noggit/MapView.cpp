@@ -92,6 +92,8 @@ void MapView::set_editing_mode (editing_mode mode)
   MoveObj = false;
   _world->ResetSelection();
 
+  _editmode_properties->show();
+
   switch (mode)
   {
   case editing_mode::ground:
@@ -121,7 +123,12 @@ void MapView::set_editing_mode (editing_mode mode)
   case editing_mode::object:
     _editmode_properties->setWidget(objectEditor);
     _editmode_properties->setWindowTitle("Object");
+    break;
+  case editing_mode::holes:
+  case editing_mode::flags:
+    _editmode_properties->hide();
   }
+   
 
   _editmode_properties->adjustSize();
   terrainMode = mode;
