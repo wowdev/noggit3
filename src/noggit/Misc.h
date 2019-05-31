@@ -37,6 +37,15 @@ namespace misc
   // normalize the filename used in adts since TC extractors don't accept /
   std::string normalize_adt_filename(std::string filename);
 
+  inline int rounded_int_div(int value, int div)
+  {
+    return value / div + (value % div <= (div >> 1) ? 0 : 1);
+  }
+  inline int rounded_255_int_div(int value)
+  {
+    return value / 255 + (value % 255 <= 127 ? 0 : 1);
+  }
+
   struct random_color : math::vector_4d
   {
     random_color()
