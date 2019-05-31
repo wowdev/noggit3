@@ -623,15 +623,13 @@ void TextureSet::alphas_to_big_alpha(uint8_t* dest)
 
   for (int i = 0; i < 64 * 64; ++i)
   {
-    float a = 1.f;
+    int a = 255;
 
-    for (int k = nTextures - 2; k >= 0 ; --k)
+    for (int k = nTextures - 2; k >= 0; --k)
     {
-      float f = static_cast<float>(*alpha(k, i)) * a;
-
-      a -= (f / 255.f);
-
-      *alpha(k, i) = static_cast<uint8_t>(std::round(f));
+      uint8_t val = misc::rounded_255_int_div(*alpha(k, i) * a);
+      a -= val;
+      *alpha(k, i) = val;
     }
   }
 }
@@ -674,22 +672,22 @@ void TextureSet::alphas_to_old_alpha(uint8_t* dest)
   for (int i = 0; i < 64 * 64; ++i)
   {
     // a = remaining visibility
-    float a = 1.f;
+    int a = 255;
 
     for (int k = nTextures - 2; k >= 0; --k)
     {
-      if (a <= 0.f)
+      if (a <= 0)
       {
         *alpha(k, i) = 0;
       }
       else
       {
-        float current = static_cast<float>(*alpha(k, i));
-        *alpha(k, i) = static_cast<uint8_t>(std::round(current / a));
-        // current/255 = coef of visibility
-        // = what need to remove to the remaining visibility
-        a -= (current / 255.f);
-      }      
+        int current = *alpha(k, i);
+        // convert big alpha value to old alpha
+        *alpha(k, i) = misc::rounded_int_div(current * 255, a);
+        // remove big alpha value from the remaining visibility
+        a -= current;
+      }
     }
   }
 }
