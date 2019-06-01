@@ -7,7 +7,7 @@ syntax: glob
 .DS_Store
 
 # Executables
-**/build/**  
+**/build/**
 *.o
 cmake-build-*
 .depend
@@ -32,4 +32,5 @@ cmake-build-*
 # Java
 *.class
 
+x64/Release/ZERO_CHECK/ZERO_CHECK.vcxproj.FileListAbsolute.txt
 syntax: regexp

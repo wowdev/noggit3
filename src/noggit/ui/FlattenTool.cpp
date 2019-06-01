@@ -310,6 +310,11 @@ namespace noggit
       _speed_spin->setValue(_speed + change);
     }
 
+    void flatten_blur_tool::setSpeed(float speed)
+    {
+      _speed_spin->setValue(speed);
+    }
+
     void flatten_blur_tool::changeOrientation(float change)
     {
       setOrientation(_orientation + change);

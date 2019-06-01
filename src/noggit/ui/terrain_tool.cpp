@@ -297,6 +297,11 @@ namespace noggit
       _speed_spin->setValue(_speed + change);
     }
 
+    void terrain_tool::setSpeed(float speed)
+    {
+      _speed_spin->setValue(speed);
+    }
+
     void terrain_tool::changeOrientation (float change)
     {
       setOrientation (_vertex_orientation._ + change);

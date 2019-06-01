@@ -42,6 +42,7 @@ namespace noggit
         "  SHIFT + R - Turn camera 180 degres\n"
         "  SHIFT + 1, 2, 3 or 4 - Set a predefined camera speed.\n"
         "  ALT + F4 - exit to main menu\n"
+        "  L - Change lookat (useful for assigning to graphic tablet styli buttons).\n"
         "\n"
         "Toggles:\n"
         "  F1 - Toggle M2s\n"

@@ -74,7 +74,7 @@ private:
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
-  bool look;
+  bool look, freelook;
 
   noggit::camera _camera;
 
@@ -222,6 +222,7 @@ private:
 
   QTimer _update_every_event_loop;
 
+  virtual void tabletEvent(QTabletEvent* event) override;
   virtual void initializeGL() override;
   virtual void paintGL() override;
   virtual void resizeGL (int w, int h) override;
@@ -245,7 +246,6 @@ private:
 #ifdef _WIN32
   HCTX hCtx = nullptr;
 #endif
-  void init_tablet();
 
   QLabel* _status_position;
   QLabel* _status_selection;
