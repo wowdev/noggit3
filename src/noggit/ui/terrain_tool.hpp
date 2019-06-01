@@ -36,6 +36,7 @@ namespace noggit
       void setRadius (float radius);
       void setOrientation (float orientation);
       void setAngle (float angle);
+      void setSpeed (float speed);
 
       // vertex edit only functions
       void moveVertices (World*, float dt);

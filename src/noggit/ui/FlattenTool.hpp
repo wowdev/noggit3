@@ -38,6 +38,7 @@ namespace noggit
       void changeHeight(float change);
 
       void setRadius(float radius);
+      void setSpeed(float speed);
       void setOrientation(float orientation);
 
       float brushRadius() const { return _radius; }

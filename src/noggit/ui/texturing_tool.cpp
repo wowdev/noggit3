@@ -436,6 +436,14 @@ namespace noggit
       }
     }
 
+    void texturing_tool::set_pressure(float pressure)
+    {
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _pressure_spin->setValue(pressure);
+      }
+    }
+
     float texturing_tool::brush_radius() const
     {
       // show only a dot when using the anim / swap mode
