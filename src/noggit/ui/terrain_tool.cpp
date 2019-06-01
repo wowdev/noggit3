@@ -367,7 +367,6 @@ namespace noggit
         _vertex_type_group->show();
         _speed_box->hide();
       }
-      adjustSize();
     }
   }
 }
