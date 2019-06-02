@@ -75,6 +75,7 @@ private:
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
   bool look, freelook;
+  bool ui_hidden = false;
 
   noggit::camera _camera;
 

@@ -8,6 +8,7 @@
 #include <QtWidgets/QMainWindow>
 
 #include <string>
+#include <unordered_set>
 
 namespace noggit
 {
@@ -21,6 +22,8 @@ namespace noggit
 
       void prompt_exit();
       void prompt_uid_fix_failure();
+
+      std::unordered_set<QWidget*> displayed_widgets;
 
     private:
       void loadMap (int mapID);
