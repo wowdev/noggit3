@@ -546,16 +546,72 @@ void MapView::createGUI()
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
 
   view_menu->addSection ("Windows");
+
+
+  auto hide_widgets = [=] {
+
+    QWidget* widget_list[] =
+    {
+      TexturePalette,
+      TexturePicker,
+      guidetailInfos,
+      _cursor_switcher.get(),
+      _keybindings.get(),
+      _minimap_dock,
+      objectEditor->modelImport,
+      objectEditor->rotationEditor,
+      objectEditor->helper_models_widget
+    };
+
+
+    if (_main_window->displayed_widgets.empty())
+    {
+      for (auto widget : widget_list)
+        if (widget->isVisible())
+        {
+          _main_window->displayed_widgets.emplace(widget);
+          widget->hide();
+        }
+
+    }
+    else
+    {
+      for (auto widget : _main_window->displayed_widgets)
+        widget->show();
+
+      _main_window->displayed_widgets.clear();
+    }
+
+
+    _main_window->statusBar()->setVisible(ui_hidden);
+    _toolbar->setVisible(ui_hidden);
+    _editmode_properties->setVisible(ui_hidden);
+
+    ui_hidden = !ui_hidden;
+
+  };
+
+  ADD_ACTION(view_menu, "Toggle UI", Qt::Key_Tab, hide_widgets);
+
+
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
   connect ( &_show_detail_info_window, &noggit::bool_toggle_property::changed
-          , guidetailInfos, &QWidget::setVisible
+          , guidetailInfos, [this]
+                            {
+                              if (!ui_hidden)
+                                guidetailInfos->setVisible(_show_detail_info_window.get());
+                            }
           );
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
           , &_show_detail_info_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
   connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
-          , _minimap_dock, &QWidget::setVisible
+          , _minimap_dock, [this]
+                           {
+                             if (!ui_hidden)
+                               _minimap_dock->setVisible(_show_minimap_window.get());
+                           }
           );
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
           , &_show_minimap_window, &noggit::bool_toggle_property::set
@@ -571,7 +627,7 @@ void MapView::createGUI()
   connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
           , TexturePalette, [this] 
                             { 
-                              if (terrainMode == editing_mode::paint)
+                              if (terrainMode == editing_mode::paint && !ui_hidden)
                               {
                                 TexturePalette->setVisible(_show_texture_palette_window.get());
                               }
@@ -1593,7 +1649,7 @@ void MapView::tick (float dt)
               _world->eraseTextures(_cursor_pos);
             }
           }
-          else if (_mod_ctrl_down)
+          else if (_mod_ctrl_down && !ui_hidden)
           {
             // Pick texture
             TexturePicker->getTextures(*_world->GetCurrentSelection());
