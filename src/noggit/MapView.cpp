@@ -77,7 +77,9 @@ void MapView::set_editing_mode (editing_mode mode)
   MoveObj = false;
   _world->ResetSelection();
 
-  _editmode_properties->show();
+
+  if (!ui_hidden)
+    _editmode_properties->show();
 
   switch (mode)
   {
