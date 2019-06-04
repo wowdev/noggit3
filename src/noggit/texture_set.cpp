@@ -284,7 +284,7 @@ int TextureSet::get_texture_index(scoped_blp_texture_reference texture, float ta
 }
 
 // assume nTextures > 1
-bool TextureSet::change_texture(int texture_id, size_t offset, float strength, float pressure)
+bool TextureSet::change_texture(int texture_id, size_t offset, uint strength, float pressure)
 {
   auto set_alpha([&](int alpha_id, size_t offset, float value)
   {
@@ -334,7 +334,7 @@ bool TextureSet::change_texture(int texture_id, size_t offset, float strength, f
   return true;
 }
 
-bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
+bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
 {
   bool changed = false;
 
