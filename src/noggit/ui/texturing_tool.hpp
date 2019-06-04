@@ -74,7 +74,7 @@ namespace noggit
       Brush _inner_brush;
       Brush _spray_brush;
 
-      float _brush_level;
+      int _brush_level;
       float _hardness;
       float _pressure;
 
@@ -95,7 +95,7 @@ namespace noggit
       QSlider* _hardness_slider;
       QSlider* _radius_slider;
       QSlider* _pressure_slider;
-      QDoubleSpinBox* _brush_level_spin;
+      QSpinBox* _brush_level_spin;
       QDoubleSpinBox* _hardness_spin;
       QDoubleSpinBox* _radius_spin;
       QDoubleSpinBox* _pressure_spin;

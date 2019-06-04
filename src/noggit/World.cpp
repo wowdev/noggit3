@@ -1839,7 +1839,7 @@ void World::recalc_norms (MapChunk* chunk) const
                      );
 }
 
-bool World::paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture)
+bool World::paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture)
 {
   return for_all_chunks_in_range
     ( pos, brush->getRadius()

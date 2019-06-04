@@ -22,7 +22,7 @@ namespace noggit
                                    , World* world
                                    )
       : QWidget(nullptr)
-      , _brush_level(255.0f)
+      , _brush_level(255)
       , _hardness(0.5f)
       , _pressure(0.9f)
       , _show_unpaintable_chunks(false)
@@ -112,11 +112,10 @@ namespace noggit
       _brush_level_slider->setStyleSheet(_brush_level_slider_style);
       slider_layout_right->addWidget(_brush_level_slider, 0, Qt::AlignHCenter);
 
-      _brush_level_spin = new QDoubleSpinBox(tool_widget);
-      _brush_level_spin->setRange(0.0f, 255.0f);
-      _brush_level_spin->setDecimals(2);
+      _brush_level_spin = new QSpinBox(tool_widget);
+      _brush_level_spin->setRange(0, 255);
       _brush_level_spin->setValue(_brush_level);
-      _brush_level_spin->setSingleStep(5.0f);
+      _brush_level_spin->setSingleStep(5);
       slider_layout_right->addWidget(_brush_level_spin);
 
       _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", tool_widget);
@@ -278,12 +277,12 @@ namespace noggit
                 }
               );
 
-      connect ( _brush_level_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+      connect ( _brush_level_spin, qOverload<int> (&QSpinBox::valueChanged)
+              , [&] (int v)
                 {
                   QSignalBlocker const blocker (_brush_level_slider);
                   _brush_level = v;
-                  _brush_level_slider->setSliderPosition ((int)std::round (v));
+                  _brush_level_slider->setSliderPosition (v);
                 }
               );
 
@@ -425,7 +424,7 @@ namespace noggit
     {
       if (_texturing_mode == texturing_mode::paint)
       {
-        _brush_level_spin->setValue(_brush_level + change);
+        _brush_level_spin->setValue(std::ceil(_brush_level + change));
       }
     }
 
