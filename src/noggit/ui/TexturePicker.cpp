@@ -2,6 +2,7 @@
 
 #include <noggit/ui/TexturePicker.h>
 
+#include <noggit/ui/font_awesome.hpp>
 #include <noggit/Selection.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/CurrentTexture.h>
@@ -40,8 +41,10 @@ namespace noggit
         _labels.push_back(click_label);
       }
 
-      QPushButton* btn_left = new QPushButton ("<<<", this);
-      QPushButton* btn_right = new QPushButton (">>>", this);
+      QPushButton* btn_left = new QPushButton (this);
+      QPushButton* btn_right = new QPushButton (this);
+      btn_left->setIcon(font_awesome_icon(font_awesome::angledoubleleft));
+      btn_right->setIcon(font_awesome_icon(font_awesome::angledoubleright));
 
       btn_left->setMinimumHeight(16);
       btn_right->setMinimumHeight(16);
