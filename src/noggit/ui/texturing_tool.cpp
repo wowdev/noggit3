@@ -48,55 +48,78 @@ namespace noggit
       auto tool_widget (new QWidget (this));
       auto tool_layout (new QFormLayout (tool_widget));
 
+      auto slider_layout (new QGridLayout);
+      tool_layout->addRow(slider_layout);
+      auto slider_layout_left (new QFormLayout(tool_widget));
+      slider_layout->addLayout(slider_layout_left, 0, 0);
+      auto slider_layout_right(new QVBoxLayout(tool_widget));
+      slider_layout->addLayout(slider_layout_right, 0, 1);
+
       _hardness_spin = new QDoubleSpinBox (tool_widget);
       _hardness_spin->setRange (0.0f, 1.0f);
       _hardness_spin->setDecimals (2);
       _hardness_spin->setValue (_hardness);
       _hardness_spin->setSingleStep(0.05f);
-      tool_layout->addRow ("Hardness:", _hardness_spin);
+      slider_layout_left->addRow("Hardness:", _hardness_spin);
 
       _hardness_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _hardness_slider->setRange (0, 100);
       _hardness_slider->setSliderPosition (_hardness * 100);
-      tool_layout->addRow (_hardness_slider);
+      slider_layout_left->addRow (_hardness_slider);
 
       _radius_spin = new QDoubleSpinBox (tool_widget);
       _radius_spin->setRange (0.0f, 100.0f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_texture_brush.getRadius());
-      tool_layout->addRow ("Radius:", _radius_spin);
+      slider_layout_left->addRow ("Radius:", _radius_spin);
 
       _radius_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _radius_slider->setRange (0, 100);
       _radius_slider->setSliderPosition (_texture_brush.getRadius());
-      tool_layout->addRow (_radius_slider);
+      slider_layout_left->addRow (_radius_slider);
 
       _pressure_spin = new QDoubleSpinBox (tool_widget);
       _pressure_spin->setRange (0.0f, 1.0);
       _pressure_spin->setDecimals (2);
       _pressure_spin->setValue (_pressure);
       _pressure_spin->setSingleStep(0.05f);
-      tool_layout->addRow ("Pressure:", _pressure_spin);
+      slider_layout_left->addRow ("Pressure:", _pressure_spin);
 
       _pressure_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _pressure_slider->setRange (0, 100);
       _pressure_slider->setSliderPosition (std::round(_pressure * 100));
-      tool_layout->addRow (_pressure_slider);
+      slider_layout_left->addRow (_pressure_slider);
 
-      _brush_level_spin = new QDoubleSpinBox (tool_widget);
-      _brush_level_spin->setRange (0.0f, 255.0f);
-      _brush_level_spin->setDecimals (2);
-      _brush_level_spin->setValue (_brush_level);
-      _brush_level_spin->setSingleStep(5.0f);
-      tool_layout->addRow ("Level:", _brush_level_spin);
-
-      _brush_level_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
+      _brush_level_slider = new QSlider (Qt::Orientation::Vertical, tool_widget);
       _brush_level_slider->setRange (0, 255);
       _brush_level_slider->setSliderPosition (_brush_level);
-      tool_layout->addRow (_brush_level_slider);
+
+      QString _brush_level_slider_style = 
+        "QSlider::groove:vertical { \n "
+        "  background-color: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop: 0 black, stop: 1 #FFFFFF); \n "
+        "  width: 35px; \n"
+        "  margin: 0 0 0 0; \n "
+        "} \n "
+        "QSlider::handle:vertical { \n"
+        "  background-color: red; \n"
+        "  height: 5px; \n" 
+        "} \n"
+        "QSlider::vertical { \n"
+        "  width: 35px; \n"
+        "} \n";
+
+      _brush_level_slider->setStyleSheet(_brush_level_slider_style);
+      slider_layout_right->addWidget(_brush_level_slider, 0, Qt::AlignHCenter);
+
+      _brush_level_spin = new QDoubleSpinBox(tool_widget);
+      _brush_level_spin->setRange(0.0f, 255.0f);
+      _brush_level_spin->setDecimals(2);
+      _brush_level_spin->setValue(_brush_level);
+      _brush_level_spin->setSingleStep(5.0f);
+      slider_layout_right->addWidget(_brush_level_spin);
 
       _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", tool_widget);
-      _show_unpaintable_chunks_cb->setChecked(true);
+      _show_unpaintable_chunks_cb->setChecked(false);
       tool_layout->addRow(_show_unpaintable_chunks_cb);
 
       // spray
