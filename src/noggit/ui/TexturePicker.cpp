@@ -21,11 +21,10 @@ namespace noggit
         (current_texture* current_texture_window)
       : widget (nullptr)
       , _chunk (nullptr)
+      , layout (new ::QGridLayout(this))
     {
       setWindowTitle ("Texture Picker");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
-
-      auto layout (new QGridLayout(this));
 
       for (int i = 0; i < 4; i++)
       {
@@ -51,7 +50,7 @@ namespace noggit
       btn_layout->addWidget (btn_left, 0, 0);
       btn_layout->addWidget (btn_right, 0, 1);
 
-      layout->addItem(btn_layout, 1, 0, 1, 4, Qt::AlignCenter);
+      layout->addItem(btn_layout, 1, 0, 1, 4, Qt::AlignHCenter | Qt::AlignBottom);
 
       connect ( btn_left, &QPushButton::clicked
               , [this]
@@ -66,6 +65,9 @@ namespace noggit
                   emit shift_right();
                 }
               );
+
+      adjustSize();
+      setFixedSize(size());
 
     }
 

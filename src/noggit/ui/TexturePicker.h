@@ -8,6 +8,8 @@
 
 #include <vector>
 
+class QGridLayout;
+
 namespace noggit
 {
   namespace ui
@@ -28,6 +30,8 @@ namespace noggit
 
     private:
       void update(bool set_changed = true);
+
+      QGridLayout* layout;
 
       std::vector<current_texture*> _labels;
       std::vector<scoped_blp_texture_reference> _textures;
