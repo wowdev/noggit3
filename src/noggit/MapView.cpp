@@ -1181,9 +1181,12 @@ MapView::MapView( math::degrees camera_yaw0
   _minimap_dock->move(_main_window->rect().center() - _minimap->rect().center());
 
 
-  _time_and_navigation_dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  _time_and_navigation_dock->setFeatures( QDockWidget::DockWidgetMovable
+                                        | QDockWidget::DockWidgetFloatable
+                                        );
+
   _main_window->addDockWidget(Qt::BottomDockWidgetArea, _time_and_navigation_dock);
-  _time_and_navigation_dock->setVisible(true);
+  _time_and_navigation_dock->setVisible(false);
 
   connect (this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
   connect (this, &QObject::destroyed, _minimap, &QObject::deleteLater);
