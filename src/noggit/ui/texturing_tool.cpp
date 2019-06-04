@@ -25,7 +25,7 @@ namespace noggit
       , _brush_level(255.0f)
       , _hardness(0.5f)
       , _pressure(0.9f)
-      , _show_unpaintable_chunks(true)
+      , _show_unpaintable_chunks(false)
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
       , _anim_prop(true)
@@ -41,6 +41,7 @@ namespace noggit
       _spray_brush.init();
 
       _current_texture = new current_texture;
+      _current_texture->resize(QSize(225, 225));
       layout->addRow (_current_texture);
 
       auto tabs (new QTabWidget(this));

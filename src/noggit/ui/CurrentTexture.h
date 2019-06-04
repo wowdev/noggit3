@@ -27,6 +27,8 @@ namespace noggit
 
       virtual int heightForWidth (int) const override;
 
+      QSize sizeHint() const override;
+
     public:
       current_texture();
       void set_texture (std::string const& texture);

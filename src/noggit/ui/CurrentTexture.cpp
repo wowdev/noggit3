@@ -15,9 +15,14 @@ namespace noggit
     {
       QSizePolicy policy (QSizePolicy::Maximum, QSizePolicy::Maximum);
       setSizePolicy (policy);
-      setMinimumSize(225, 225);
+      setMinimumSize(128, 128);
 
       update_texture_if_needed();
+    }
+
+    QSize current_texture::sizeHint() const
+    {
+      return QSize(128, 128);
     }
 
     int current_texture::heightForWidth (int width) const
