@@ -3,11 +3,20 @@
 #include <noggit/World.h>
 #include <noggit/ui/shader_tool.hpp>
 #include <util/qt/overload.hpp>
+#include <noggit/ui/font_awesome.hpp>
 
 #include <qt-color-widgets/color_selector.hpp>
 #include <qt-color-widgets/color_wheel.hpp>
+#include <qt-color-widgets/hue_slider.hpp>
+#include <qt-color-widgets/gradient_slider.hpp>
+#include <qt-color-widgets/color_list_widget.hpp>
 
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QToolButton>
+
+
+#include <functional>
 
 namespace noggit
 {
@@ -54,9 +63,95 @@ namespace noggit
 
       layout->addRow("Color:", color_picker);
 
-      auto color_wheel (new color_widgets::ColorWheel(this));
+      color_wheel = new color_widgets::ColorWheel(this);
       color_wheel->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
       layout->addRow(color_wheel);
+
+      _spin_hue = new QSpinBox(this);
+      _spin_hue->setRange(0, 359);
+      layout->addRow("Hue:", _spin_hue);
+
+      _slide_hue = new color_widgets::HueSlider(this);
+      layout->addRow(_slide_hue);
+
+      _spin_saturation = new QSpinBox(this);
+      _spin_saturation->setRange(0, 255);
+      layout->addRow("Saturation:", _spin_saturation);
+
+      _slide_saturation = new color_widgets::GradientSlider(this);
+      _slide_saturation->setRange(0, 255);
+      layout->addRow(_slide_saturation);
+
+
+      _spin_value = new QSpinBox(this);
+      _spin_value->setRange(0, 255);
+      layout->addRow("Value:", _spin_value);
+
+      _slide_value = new color_widgets::GradientSlider(this);
+      _slide_value->setRange(0, 255);
+      layout->addRow(_slide_value);
+
+      _color_palette = new color_widgets::ColorListWidget(this);
+      layout->addRow(_color_palette);
+
+      QList<QPushButton*> buttons = _color_palette->findChildren<QPushButton*>();
+
+      QString button_style =
+        "QToolButton { \n "
+        "  border: none; \n "
+        "} \n";
+      
+      for (auto button : buttons)
+      {
+        if (button->text() == "Add New")
+        {
+          button->setIcon(font_awesome_icon(font_awesome::plus));
+
+          connect(button, &QAbstractButton::clicked
+            , this
+            , [=] {
+                    QList<QToolButton*> row_buttons = _color_palette->findChildren<QToolButton*>();
+
+                    for (auto row_button : row_buttons)
+                    {
+                      if (row_button->text() == "Move Up")
+                      {
+                        row_button->setIcon(font_awesome_icon(font_awesome::chevronup));
+                      }
+                      else if (row_button->text() == "Move Down")
+                      {
+                        row_button->setIcon(font_awesome_icon(font_awesome::chevrondown));
+                      }
+                      else if (row_button->text() == "Remove")
+                      {
+                        row_button->setIcon(font_awesome_icon(font_awesome::timescircle));
+                      }
+                      row_button->setText("");
+                      row_button->setStyleSheet(button_style);
+
+                    }
+                  }
+            );
+            
+        }
+      }
+
+
+      QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
+      QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
+      QObject::connect(_slide_hue, &color_widgets::HueSlider::valueChanged, this, &shader_tool::set_hsv);
+
+      QObject::connect(color_wheel, &color_widgets::ColorWheel::colorSelected, this, &shader_tool::update_color_widgets);
+
+      QObject::connect(_slide_saturation, SIGNAL(valueChanged(int)), _spin_saturation, SLOT(setValue(int)));
+      QObject::connect(_slide_value, SIGNAL(valueChanged(int)), _spin_value, SLOT(setValue(int)));
+      QObject::connect(_slide_hue, SIGNAL(valueChanged(int)), _spin_hue, SLOT(setValue(int)));
+      
+      QObject::connect(_spin_saturation, SIGNAL(valueChanged(int)), _slide_saturation, SLOT(setValue(int)));
+      QObject::connect(_spin_hue, SIGNAL(valueChanged(int)), _slide_hue, SLOT(setValue(int)));
+      QObject::connect(_spin_value, SIGNAL(valueChanged(int)), _slide_value, SLOT(setValue(int)));
+     
+
 
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
@@ -95,7 +190,7 @@ namespace noggit
               );
 
       connect ( color_picker, &color_widgets::ColorSelector::colorChanged
-              , [this, color_wheel] (QColor new_color)
+              , [this] (QColor new_color)
                 {
                   QSignalBlocker const blocker (color_wheel);
                   color_wheel->setColor(new_color);
@@ -125,5 +220,49 @@ namespace noggit
     {
       _speed_spin->setValue(_speed + change);
     }
+
+    void shader_tool::set_hsv()
+    {
+      if (!signalsBlocked())
+      {
+        color_wheel->setColor(QColor::fromHsv(
+          _slide_hue->value(),
+          _slide_saturation->value(),
+          _slide_value->value()
+        ));
+        update_color_widgets();
+      }
+    }
+
+    void shader_tool::update_color_widgets()
+    {
+      bool blocked = signalsBlocked();
+      blockSignals(true);
+      Q_FOREACH(QWidget * w, findChildren<QWidget*>())
+        w->blockSignals(true);
+
+      _slide_hue->setValue(qRound(color_wheel->hue() * 360.0));
+      _slide_hue->setColorSaturation(color_wheel->saturation());
+      _slide_hue->setColorValue(color_wheel->value());
+      _spin_hue->setValue(_slide_hue->value());
+
+      _slide_saturation->setValue(qRound(color_wheel->saturation() * 255.0));
+      _spin_saturation->setValue(_slide_saturation->value());
+      _slide_saturation->setFirstColor(QColor::fromHsvF(color_wheel->hue(), 0, color_wheel->value()));
+      _slide_saturation->setLastColor(QColor::fromHsvF(color_wheel->hue(), 1, color_wheel->value()));
+
+      _slide_value->setValue(qRound(color_wheel->value() * 255.0));
+      _spin_value->setValue(_slide_value->value());
+      _slide_value->setFirstColor(QColor::fromHsvF(color_wheel->hue(), color_wheel->saturation(), 0));
+      _slide_value->setLastColor(QColor::fromHsvF(color_wheel->hue(), color_wheel->saturation(), 1));
+
+
+      blockSignals(blocked);
+      for (QWidget* w : findChildren<QWidget*>())
+        w->blockSignals(false);
+
+
+    }
+
   }
 }
