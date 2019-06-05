@@ -739,6 +739,31 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   return changed;
 }
 
+math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
+{
+  float dist;
+  float cur_dist = UNITSIZE;
+
+  if (!hasMCCV)
+  {
+    return math::vector_3d(0.5f, 0.5f, 0.5f);
+  }
+
+  int v_index = 0;
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    dist = misc::dist(mVertices[i], pos);
+    if (dist <= cur_dist)
+    {
+      cur_dist = dist;
+      v_index = i;
+    }
+  }
+
+  return mccv[v_index];
+
+}
+
 bool MapChunk::flattenTerrain ( math::vector_3d const& pos
                               , float remain
                               , float radius

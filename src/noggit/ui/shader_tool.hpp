@@ -25,6 +25,7 @@ namespace noggit
       shader_tool(math::vector_4d& color);
 
       void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
+      void pickColor(World* world, math::vector_3d const& pos);
 
       void changeRadius(float change);
       void changeSpeed(float change);
@@ -44,6 +45,7 @@ namespace noggit
       QSpinBox* _spin_saturation;
       QSpinBox* _spin_value;
 
+      color_widgets::ColorSelector* color_picker;
       color_widgets::ColorWheel* color_wheel;
       color_widgets::HueSlider* _slide_hue;
       color_widgets::GradientSlider* _slide_saturation;

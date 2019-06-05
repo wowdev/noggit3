@@ -2583,6 +2583,13 @@ void MapView::mousePressEvent(QMouseEvent* event)
       objMoveOffset = _cursor_pos - objPos;
     }
 
+    switch (terrainMode)
+    {
+    case editing_mode::mccv:
+      shaderTool->pickColor(_world.get(), _cursor_pos);
+      break;
+    }
+
     break;
   }
 
