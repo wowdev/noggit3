@@ -1,9 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/vector_2d.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/Log.h> // LogDebug
 #include <opengl/context.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <QtCore/QString>
 #include <QtGui/QOffscreenSurface>
@@ -272,49 +274,128 @@ namespace noggit
     QOffscreenSurface surface;
     surface.create();
 
-    context.makeCurrent (&surface);
+    context.makeCurrent(&surface);
 
     opengl::context::scoped_setter const context_set (::gl, &context);
 
-    opengl::scoped::texture_setter<0, GL_TRUE> const texture0;
-    blp_texture texture (blp_filename);
-    texture.finishLoading();
-    texture.upload();
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
+
+    
+    opengl::program program
+    (
+      {
+        {
+          GL_VERTEX_SHADER, R"code(
+#version 330 core
+
+in vec4 position;
+in vec2 tex_coord;
+out vec2 f_tex_coord;
+
+void main()
+{
+  f_tex_coord = tex_coord;
+  gl_Position = position;
+}
+)code"
+        },
+        {
+          GL_FRAGMENT_SHADER,
+          R"code(
+#version 330 core
+
+uniform sampler2D tex;
+
+in vec2 f_tex_coord;
+
+layout(location = 0) out vec4 out_color;
+
+void main()
+{
+  out_color = vec4(texture(tex, f_tex_coord).rgb, 1.);
+}
+)code"
+        }
+      }
+    );
+
+    opengl::scoped::deferred_upload_vertex_arrays<1> vao;
+    vao.upload();
+    opengl::scoped::deferred_upload_buffers<3> buffers;
+    buffers.upload();
+    GLuint const& indices_vbo = buffers[0];
+    GLuint const& vertices_vbo = buffers[1];
+    GLuint const& texcoords_vbo = buffers[2];    
+    
+    opengl::texture::set_active_texture(0);
+    blp_texture texture(blp_filename);
+    texture.finishLoading();    
 
     width = width == -1 ? texture.width() : width;
     height = height == -1 ? texture.height() : height;
 
-    QOpenGLFramebufferObject pixel_buffer (width, height, fmt);
-    pixel_buffer.bind();
+    float h = static_cast<float>(height);
+    float w = static_cast<float>(width);
+    float half_h = h * 0.5f;
+    float half_w = w * 0.5f;
 
-    gl.viewport (0, 0, width, height);
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-    gl.ortho (0.0f, width, height, 0.0f, 1.0f, -1.0f);
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
+    std::vector<math::vector_2d> vertices =
+    {
+       {-half_w, -half_h}
+      ,{-half_w, half_h}
+      ,{ half_w, half_h}
+      ,{ half_w, -half_h}
+    };
+    std::vector<math::vector_2d> texcoords =
+    {
+       {0.f, 0.f}
+      ,{0.f, h}
+      ,{w, h}
+      ,{w, 0.f}
+    };
+    std::vector<std::uint16_t> indices = {0,1,2, 2,3,0};
+    
+    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(vertices_vbo, vertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(texcoords_vbo, texcoords, GL_STATIC_DRAW);
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(indices_vbo, indices, GL_STATIC_DRAW);
 
-    gl.clearColor(.0f, .0f, .0f, .0f);
-    gl.clear(GL_COLOR_BUFFER_BIT);
+    QOpenGLFramebufferObject pixel_buffer(width, height, fmt);
+    pixel_buffer.bind();  
 
-    gl.begin (GL_TRIANGLE_FAN);
-    gl.texCoord2f (0.0f, 0.0f);
-    gl.vertex2f (0.0f, 0.0f);
-    gl.texCoord2f (1.0f, 0.0f);
-    gl.vertex2f (width, 0.0f);
-    gl.texCoord2f (1.0f, 1.0f);
-    gl.vertex2f (width, height);
-    gl.texCoord2f (0.0f, 1.0f);
-    gl.vertex2f (0.0f, height);
-    gl.end();
+    gl.viewport(0, 0, w, h);
+    gl.clearColor(.0f, .0f, .0f, 1.f);
+    gl.clear(GL_COLOR_BUFFER_BIT);    
+    
+    opengl::scoped::use_program shader (program);
 
-    QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));
+    shader.uniform("tex", 0);
+    texture.bind();
+
+    opengl::scoped::vao_binder const _ (vao[0]);
+
+    {
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_binder (vertices_vbo);
+      shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    {
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> texcoords_binder (texcoords_vbo);
+      shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(indices_vbo);    
+
+    gl.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
+    QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));    
+
+    pixel_buffer.release();
 
     if (pixmap.isNull())
     {
       throw std::runtime_error
         ("failed rendering " + blp_filename + " to pixmap");
     }
+
     return pixmap;
   }
 }
