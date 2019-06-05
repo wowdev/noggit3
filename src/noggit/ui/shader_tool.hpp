@@ -26,6 +26,7 @@ namespace noggit
 
       void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
       void pickColor(World* world, math::vector_3d const& pos);
+      void addColorToPalette();
 
       void changeRadius(float change);
       void changeSpeed(float change);
