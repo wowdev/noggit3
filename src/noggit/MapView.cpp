@@ -2310,6 +2310,15 @@ void MapView::keyPressEvent (QKeyEvent *event)
   if (event->key() == Qt::Key_Plus)
   {
     keys = 1;
+
+    switch (terrainMode)
+    {
+      case editing_mode::mccv:
+      {
+        shaderTool->addColorToPalette();
+        break;
+      }
+    }
   }
   if (event->key() == Qt::Key_Minus)
   {

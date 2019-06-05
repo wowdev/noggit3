@@ -107,7 +107,7 @@ namespace noggit
         {
           button->setIcon(font_awesome_icon(font_awesome::plus));
 
-          connect(button, &QAbstractButton::clicked
+          connect(_color_palette, &color_widgets::ColorListWidget::colorAdded
             , this
             , [=] {
                     QList<QToolButton*> row_buttons = _color_palette->findChildren<QToolButton*>();
@@ -235,6 +235,11 @@ namespace noggit
       new_color.setRgbF(color.x * 0.5, color.y * 0.5, color.z * 0.5);
       color_wheel->setColor(new_color);
 
+    }
+
+    void shader_tool::addColorToPalette()
+    {
+      _color_palette->append();
     }
 
     void shader_tool::set_hsv()

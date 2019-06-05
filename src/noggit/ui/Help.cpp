@@ -16,7 +16,6 @@ namespace noggit
     {
       setWindowTitle ("Help");
       setWindowIcon (QIcon (":/icon"));
-      setWindowState(Qt::WindowMaximized);
 
       auto layout (new QFormLayout (this));
 
@@ -212,6 +211,8 @@ namespace noggit
         "  CTRL + Left mouse - remove shader\n"
         "  ALT + left mouse + mouse move - change brush size\n"
         "  SPACE + left mouse + mouse move - change speed\n"
+        "  MMB - pick shader color from the ground\n"
+        "  + - add current color to palette\n"
       ));
 
       layout->addWidget(tabs);
