@@ -142,6 +142,7 @@ namespace noggit
       QObject::connect(_slide_hue, &color_widgets::HueSlider::valueChanged, this, &shader_tool::set_hsv);
 
       QObject::connect(color_wheel, &color_widgets::ColorWheel::colorSelected, this, &shader_tool::update_color_widgets);
+      QObject::connect(color_picker, &color_widgets::ColorSelector::colorChanged, this, &shader_tool::update_color_widgets);
 
       QObject::connect(_slide_saturation, SIGNAL(valueChanged(int)), _spin_saturation, SLOT(setValue(int)));
       QObject::connect(_slide_value, SIGNAL(valueChanged(int)), _spin_value, SLOT(setValue(int)));
