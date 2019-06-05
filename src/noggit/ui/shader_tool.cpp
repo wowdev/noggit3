@@ -57,7 +57,7 @@ namespace noggit
 
       layout->addRow(_speed_slider);
 
-      auto color_picker (new color_widgets::ColorSelector (this));
+      color_picker = new color_widgets::ColorSelector (this);
       color_picker->setDisplayMode (color_widgets::ColorSelector::NoAlpha);
       color_picker->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
 
@@ -150,9 +150,15 @@ namespace noggit
       QObject::connect(_spin_saturation, SIGNAL(valueChanged(int)), _slide_saturation, SLOT(setValue(int)));
       QObject::connect(_spin_hue, SIGNAL(valueChanged(int)), _slide_hue, SLOT(setValue(int)));
       QObject::connect(_spin_value, SIGNAL(valueChanged(int)), _slide_value, SLOT(setValue(int)));
+
+
+      connect(_color_palette, qOverload<QList<QColor>&>(&color_widgets::ColorListWidget::colorAdded)
+        , [&](QList<QColor> &colors)
+        {
+          _color_palette->setColorAt(colors.length() - 1, color_wheel->color());
+        }
+      );
      
-
-
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
@@ -219,6 +225,16 @@ namespace noggit
     void shader_tool::changeSpeed(float change)
     {
       _speed_spin->setValue(_speed + change);
+    }
+
+    void shader_tool::pickColor(World* world, math::vector_3d const& pos)
+    {
+      math::vector_3d color = world->pickShaderColor(pos);
+
+      QColor new_color;
+      new_color.setRgbF(color.x * 0.5, color.y * 0.5, color.z * 0.5);
+      color_wheel->setColor(new_color);
+
     }
 
     void shader_tool::set_hsv()

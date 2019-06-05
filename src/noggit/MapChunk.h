@@ -122,6 +122,7 @@ public:
 
   void intersect (math::ray const&, selection_result*);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
+  math::vector_3d pickMCCV(math::vector_3d const& pos);
 
   ChunkWater* liquid_chunk() const;
 
