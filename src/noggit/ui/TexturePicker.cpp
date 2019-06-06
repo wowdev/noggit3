@@ -37,6 +37,7 @@ namespace noggit
                   }
                 );
 
+        click_label->setAcceptDrops(false);
         layout->addWidget(click_label, 0, i);
         _labels.push_back(click_label);
       }

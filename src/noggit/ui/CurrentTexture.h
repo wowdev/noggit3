@@ -9,6 +9,11 @@
 
 #include <string>
 
+
+class QMouseEvent;
+class QDropEvent;
+class QDragEnterEvent;
+
 namespace noggit
 {
   namespace ui
@@ -29,9 +34,18 @@ namespace noggit
 
       QSize sizeHint() const override;
 
+      QPoint _start_pos;
+
     public:
       current_texture();
       void set_texture (std::string const& texture);
+
+      void mouseMoveEvent(QMouseEvent* event) override;
+      void mousePressEvent(QMouseEvent* event) override;
+
+      void dragEnterEvent(QDragEnterEvent* event) override;
+      void dropEvent(QDropEvent* event) override;
+
     };
   }
 }

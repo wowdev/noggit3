@@ -91,6 +91,12 @@ struct scoped_blp_texture_reference
     return *this;
   }
 
+  std::string get_filename()
+  {
+    return _filename;
+  }
+
+
   ~scoped_blp_texture_reference()
   {
     if (_blp_texture)

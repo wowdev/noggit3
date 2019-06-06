@@ -228,6 +228,8 @@ set ( noggit_ui_sources
       src/noggit/ui/shader_tool.cpp
       src/noggit/ui/terrain_tool.cpp
       src/noggit/ui/uid_fix_window.cpp
+      src/noggit/ui/texture_palette_small.cpp
+      src/noggit/ui/TextureList.cpp
     )
 
 set ( math_sources
@@ -243,10 +245,6 @@ set ( opengl_sources
       src/opengl/primitives.cpp
       src/opengl/shader.cpp
       src/opengl/texture.cpp
-    )
-
-set ( external_sources
-      src/external/wacom/Utils.cpp
     )
 
 set ( util_sources
@@ -321,6 +319,8 @@ set ( noggit_ui_headers
       src/noggit/ui/shader_tool.hpp
       src/noggit/ui/terrain_tool.hpp
       src/noggit/ui/uid_fix_window.hpp
+      src/noggit/ui/texture_palette_small.hpp
+      src/noggit/ui/TextureList.hpp
     )
 
 set ( math_headers
@@ -349,13 +349,6 @@ set ( opengl_headers
       src/opengl/types.hpp
     )
 
-set ( external_headers
-      src/external/wacom/MSGPACK.H
-      src/external/wacom/PKTDEF.H
-      src/external/wacom/Utils.h
-      src/external/wacom/WINTAB.H
-    )
-
 IF(WIN32)
   set ( os_sources
         include/win/StackWalker.cpp
@@ -379,6 +372,8 @@ list (APPEND headers_to_moc
   src/noggit/ui/minimap_widget.hpp
   src/noggit/ui/uid_fix_window.hpp
   src/noggit/ui/widget.hpp
+  src/noggit/ui/texture_palette_small.hpp
+  src/noggit/ui/TextureList.hpp
   src/noggit/unsigned_int_property.hpp
 )
 qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})

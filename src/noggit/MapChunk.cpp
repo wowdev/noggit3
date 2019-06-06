@@ -746,7 +746,7 @@ math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
 
   if (!hasMCCV)
   {
-    return math::vector_3d(0.5f, 0.5f, 0.5f);
+    return math::vector_3d(1.0f, 1.0f, 1.0f);
   }
 
   int v_index = 0;

@@ -1,8 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/CurrentTexture.h>
+#include <noggit/ui/TexturingGUI.h>
 
 #include <QtWidgets/QGridLayout>
+#include <QtGui/QMouseEvent>
+#include <QtWidgets/QApplication>
+#include <QtGui/QDrag>
+#include <QMimeData>
 
 namespace noggit
 {
@@ -16,6 +21,7 @@ namespace noggit
       QSizePolicy policy (QSizePolicy::Maximum, QSizePolicy::Maximum);
       setSizePolicy (policy);
       setMinimumSize(128, 128);
+      setAcceptDrops(true);
 
       update_texture_if_needed();
     }
@@ -50,5 +56,49 @@ namespace noggit
       setPixmap (render_blp_to_pixmap (_filename, width(), height()));
       setToolTip(QString::fromStdString(_filename));
     }
+
+    void current_texture::mouseMoveEvent(QMouseEvent* event)
+    {
+      if (event->button() == Qt::RightButton)
+        _start_pos = event->pos();
+
+      clickable_label::mouseMoveEvent(event);
+    }
+
+    void current_texture::mousePressEvent(QMouseEvent* event)
+    {
+      clickable_label::mousePressEvent(event);
+
+      if (!(event->buttons() & Qt::RightButton))
+        return;
+      if ((event->pos() - _start_pos).manhattanLength()
+        < QApplication::startDragDistance())
+        return;
+
+      QMimeData* mimeData = new QMimeData;
+      mimeData->setText(QString(_filename.c_str()));
+
+
+      QDrag* drag = new QDrag(this);
+      drag->setMimeData(mimeData);
+      drag->exec();
+      
+    }
+
+    void current_texture::dragEnterEvent(QDragEnterEvent* event)
+    {
+      if (event->mimeData()->hasText())
+        event->accept();
+    }
+
+    void current_texture::dropEvent(QDropEvent* event)
+    {
+      std::string filename = event->mimeData()->text().toStdString();
+      set_texture(filename);
+      noggit::ui::selected_texture::set(filename);
+      event->accept();
+    }
+
+
   }
 }
