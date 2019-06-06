@@ -32,6 +32,7 @@
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
+#include <noggit/ui/texture_palette_small.hpp>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 
@@ -73,6 +74,7 @@ void MapView::set_editing_mode (editing_mode mode)
   objectEditor->rotationEditor->hide();
   TexturePalette->hide();
   TexturePicker->hide();
+  _texture_palette_dock->hide();
 
   MoveObj = false;
   _world->ResetSelection();
@@ -276,6 +278,20 @@ void MapView::createGUI()
     }
   );
 
+  _texture_palette_small = new noggit::ui::texture_palette_small(this, texturingTool->_current_texture);
+  _texture_palette_small->hide();
+
+  connect(_texture_palette_small, &noggit::ui::texture_palette_small::selected
+    , [=](std::string const& filename)
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
+
+      noggit::ui::selected_texture::set(filename);
+      texturingTool->_current_texture->set_texture(filename);
+    }
+  );
+
   guidetailInfos = new noggit::ui::detail_infos(this);
   guidetailInfos->hide();
 
@@ -326,6 +342,28 @@ void MapView::createGUI()
     _editmode_properties->setFloating(true);
     _editmode_properties->move(_main_window->geometry().topRight().x() - _editmode_properties->rect().width() - 20, _main_window->geometry().topRight().y() + 40);
   }
+
+  // create quick access texture palette dock
+
+  _texture_palette_dock->setFeatures(QDockWidget::DockWidgetMovable
+    | QDockWidget::DockWidgetFloatable
+    | QDockWidget::DockWidgetClosable
+  );
+
+  _texture_palette_dock->setWidget(_texture_palette_small);
+  _texture_palette_dock->setWindowTitle("Quick Access Texture Palette");
+  _texture_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
+  _texture_palette_dock->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_palette_dock);
+
+  if (_settings->value("undock_small_texture_palette/enabled", 1).toBool())
+  {
+    _texture_palette_dock->setFloating(true);
+    _texture_palette_dock->move(_main_window->geometry().bottomLeft().x() + 50, _main_window->geometry().bottomLeft().y() - 200);
+  }
+
+  connect(this, &QObject::destroyed, _texture_palette_dock, &QObject::deleteLater);
    
   // create toolbar
 
@@ -562,7 +600,8 @@ void MapView::createGUI()
       _minimap_dock,
       objectEditor->modelImport,
       objectEditor->rotationEditor,
-      objectEditor->helper_models_widget
+      objectEditor->helper_models_widget,
+      _texture_palette_small
     };
 
 
@@ -633,11 +672,33 @@ void MapView::createGUI()
                               {
                                 TexturePalette->setVisible(_show_texture_palette_window.get());
                               }
+                              else
+                              {
+                                _show_texture_palette_window.set(false);
+                              }
                             }
           );
   connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
           , &_show_texture_palette_window, &noggit::bool_toggle_property::set
           );
+
+  ADD_TOGGLE(view_menu, "Small texture palette", Qt::Key_H, _show_texture_palette_small_window);
+  connect(&_show_texture_palette_small_window, &noggit::bool_toggle_property::changed
+    , _texture_palette_dock, [this]
+    {
+      if (terrainMode == editing_mode::paint && !ui_hidden)
+      {
+        _texture_palette_dock->setVisible(_show_texture_palette_small_window.get());
+      }
+      else
+      {
+        _show_texture_palette_small_window.set(false);
+      }
+    }
+  );
+  connect(_texture_palette_dock, &QDockWidget::visibilityChanged
+    , &_show_texture_palette_small_window, &noggit::bool_toggle_property::set
+  );
 
   addHotkey ( Qt::Key_F1
             , MOD_shift
@@ -1119,7 +1180,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_fps (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
-  , _time_and_navigation_dock (new QDockWidget(this))
+  , _texture_palette_dock(new QDockWidget(this))
   , _keybindings (new noggit::ui::help)
 {
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -1174,23 +1235,15 @@ MapView::MapView( math::degrees camera_yaw0
                              | QDockWidget::DockWidgetFloatable
                              | QDockWidget::DockWidgetClosable
                              );
-  _minimap_dock->setWidget (_minimap);
+  _minimap_dock->setWidget(_minimap);
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
   _minimap_dock->setVisible (false);
   _minimap_dock->setFloating(true);
   _minimap_dock->move(_main_window->rect().center() - _minimap->rect().center());
 
 
-  _time_and_navigation_dock->setFeatures( QDockWidget::DockWidgetMovable
-                                        | QDockWidget::DockWidgetFloatable
-                                        );
-
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _time_and_navigation_dock);
-  _time_and_navigation_dock->setVisible(false);
-
-  connect (this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
-  connect (this, &QObject::destroyed, _minimap, &QObject::deleteLater);
-  connect(this, &QObject::destroyed, _time_and_navigation_dock, &QObject::deleteLater);
+  connect(this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
+  connect(this, &QObject::destroyed, _minimap, &QObject::deleteLater);
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
@@ -1346,7 +1399,7 @@ MapView::~MapView()
     //! \ todo: fix the crash when deleting the texture picker
     TexturePicker->hide();
     _minimap->hide();
-    _time_and_navigation_dock->hide();
+    _texture_palette_dock->hide();
   }
   
   _world.reset();

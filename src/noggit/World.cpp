@@ -1776,7 +1776,7 @@ void World::changeShader(math::vector_3d const& pos, math::vector_4d const& colo
 
 math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
 {
-  math::vector_3d color = math::vector_3d(0.5f, 0.5f, 0.5f);
+  math::vector_3d color = math::vector_3d(1.0f, 1.0f, 1.0f);
   for_all_chunks_in_range
   (pos, 0.1f
     , [&](MapChunk* chunk)

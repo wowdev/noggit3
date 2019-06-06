@@ -26,10 +26,6 @@
 #include <map>
 #include <unordered_set>
 
-#ifdef _WIN32
-#include <external/wacom/WINTAB.h>
-#endif
-
 
 class World;
 
@@ -50,6 +46,7 @@ namespace noggit
     class toolbar;    
     class water;
     class zone_id_browser;
+    class texture_palette_small;
     struct main_window;
     struct tileset_chooser;
   }
@@ -244,9 +241,6 @@ private:
 
   float _tablet_pressure;
   bool _tablet_active = false;
-#ifdef _WIN32
-  HCTX hCtx = nullptr;
-#endif
 
   QLabel* _status_position;
   QLabel* _status_selection;
@@ -265,10 +259,11 @@ private:
   noggit::bool_toggle_property _show_cursor_switcher_window = {false};
   noggit::bool_toggle_property _show_keybindings_window = {false};
   noggit::bool_toggle_property _show_texture_palette_window = {false};
+  noggit::bool_toggle_property _show_texture_palette_small_window = {false};
 
   noggit::ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
-  QDockWidget* _time_and_navigation_dock;
+  QDockWidget* _texture_palette_dock;
 
   void move_camera_with_auto_height (math::vector_3d const&);
 
@@ -278,6 +273,7 @@ private:
   noggit::ui::tileset_chooser* TexturePalette;
   noggit::ui::detail_infos* guidetailInfos;
   noggit::ui::zone_id_browser* ZoneIDBrowser;
+  noggit::ui::texture_palette_small* _texture_palette_small;
   QDockWidget* _areaid;
   noggit::ui::texture_picker* TexturePicker;
   noggit::ui::water* guiWater;

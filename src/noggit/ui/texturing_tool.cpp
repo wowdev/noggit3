@@ -344,7 +344,6 @@ namespace noggit
               , [&] (bool b)
                 {
                   _spray_content->setVisible(b);
-                  adjustSize();
                 }
               );
 
