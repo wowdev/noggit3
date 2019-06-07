@@ -194,7 +194,7 @@ const std::string& TextureSet::filename(size_t id)
 
 void TextureSet::bindTexture(size_t id, size_t activeTexture)
 {
-  opengl::texture::enable_texture (activeTexture);
+  opengl::texture::set_active_texture(activeTexture);
 
   textures[id]->bind();
 }
@@ -767,7 +767,7 @@ bool TextureSet::removeDuplicate()
 
 void TextureSet::bind_alpha(std::size_t id)
 {
-  opengl::texture::enable_texture (id);
+  opengl::texture::set_active_texture(id);
   amap_gl_tex.bind();
 
   if (_need_amap_update)
