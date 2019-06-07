@@ -2,6 +2,9 @@
 
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/TexturingGUI.h>
+#include <noggit/ui/texture_swapper.hpp>
+
+#include <noggit/tool_enums.hpp>
 
 #include <QtWidgets/QGridLayout>
 #include <QtGui/QMouseEvent>
@@ -13,7 +16,7 @@ namespace noggit
 {
   namespace ui
   {
-    current_texture::current_texture()
+    current_texture::current_texture(texture_swapper* texture_switcher)
       : clickable_label (nullptr)
       , _filename("tileset\\generic\\black.blp")
       , _need_update(true)
@@ -24,6 +27,8 @@ namespace noggit
       setAcceptDrops(true);
 
       update_texture_if_needed();
+
+      _texture_switcher = texture_switcher;
     }
 
     QSize current_texture::sizeHint() const
@@ -57,19 +62,19 @@ namespace noggit
       setToolTip(QString::fromStdString(_filename));
     }
 
-    void current_texture::mouseMoveEvent(QMouseEvent* event)
-    {
-      if (event->button() == Qt::RightButton)
-        _start_pos = event->pos();
-
-      clickable_label::mouseMoveEvent(event);
-    }
-
     void current_texture::mousePressEvent(QMouseEvent* event)
     {
-      clickable_label::mousePressEvent(event);
+      if (event->button() == Qt::LeftButton)
+        _start_pos = event->pos();
 
-      if (!(event->buttons() & Qt::RightButton))
+      clickable_label::mousePressEvent(event);
+    }
+
+    void current_texture::mouseMoveEvent(QMouseEvent* event)
+    {
+      clickable_label::mouseMoveEvent(event);
+
+      if (!(event->buttons() & Qt::LeftButton))
         return;
       if ((event->pos() - _start_pos).manhattanLength()
         < QApplication::startDragDistance())
@@ -81,6 +86,7 @@ namespace noggit
 
       QDrag* drag = new QDrag(this);
       drag->setMimeData(mimeData);
+      drag->setPixmap(*pixmap());
       drag->exec();
       
     }
@@ -93,12 +99,33 @@ namespace noggit
 
     void current_texture::dropEvent(QDropEvent* event)
     {
+
       std::string filename = event->mimeData()->text().toStdString();
-      set_texture(filename);
-      noggit::ui::selected_texture::set(filename);
-      event->accept();
+
+      switch (_drop_behavior)
+      {
+        case CurrentTextureDropBehavior::current_texture:
+        {
+          set_texture(filename);
+          noggit::ui::selected_texture::set(filename);
+          event->accept();
+          break;
+        }
+        case CurrentTextureDropBehavior::texture_swapper:
+        {
+          _texture_switcher->set_texture(filename);
+          break;
+        }
+        case CurrentTextureDropBehavior::none:
+          return;
+      }
+
     }
 
+    void current_texture::set_drop_behavior(int behavior)
+    {
+      _drop_behavior = behavior;
+    }
 
   }
 }

@@ -49,6 +49,8 @@ namespace noggit
         _brush_mode_group->setChecked(!_brush_mode_group->isChecked());
       }
 
+      void set_texture(std::string& filename);
+
     private:
       boost::optional<scoped_blp_texture_reference> _texture_to_swap;
       float _radius;
