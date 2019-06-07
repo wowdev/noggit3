@@ -8,6 +8,7 @@
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
+#include <noggit/tool_enums.hpp>
 
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QPushButton>
@@ -38,6 +39,7 @@ namespace noggit
                 );
 
         click_label->setAcceptDrops(false);
+        click_label->set_drop_behavior(CurrentTextureDropBehavior::none);
         layout->addWidget(click_label, 0, i);
         _labels.push_back(click_label);
       }
