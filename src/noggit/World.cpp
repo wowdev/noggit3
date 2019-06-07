@@ -356,7 +356,6 @@ void World::draw ( math::matrix_4x4 const& model_view
   }
   gl.clear(clearmask);
 
-  opengl::texture::disable_texture();
 
   outdoorLighting();
   outdoorLights(true);
