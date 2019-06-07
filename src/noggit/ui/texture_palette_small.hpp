@@ -3,16 +3,19 @@
 #pragma once
 
 #include <noggit/ui/widget.hpp>
+#include <QtWidgets/QListWidget>
 #include <unordered_set>
 #include <string>
 
 
 
-class QListWidget;
 class QGridLayout;
 class QPushButton;
 class QDropEvent;
 class QDragEnterEvent;
+class QMouseEvent;
+class QListWidget;
+class QPoint;
 
 
 namespace noggit
@@ -20,6 +23,19 @@ namespace noggit
   namespace ui
   {
     class current_texture;
+
+    class PaletteList : public QListWidget
+    {
+    public:
+      PaletteList(QWidget* parent);
+
+      void mouseMoveEvent(QMouseEvent* event) override;
+      void mousePressEvent(QMouseEvent* event) override;
+
+    private:
+      QPoint _start_pos;
+
+    };
 
     class texture_palette_small : public widget
     {

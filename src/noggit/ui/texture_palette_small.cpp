@@ -10,8 +10,11 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QApplication>
 #include <QtGui/QDropEvent>
+#include <QtGui/QMouseEvent>
 #include <QtGui/QDragEnterEvent>
+#include <QtGui/QDrag>
 #include <QMimeData>
 
 #include <unordered_set>
@@ -24,27 +27,67 @@ namespace noggit
   namespace ui
   {
 
+    PaletteList::PaletteList(QWidget* parent) : QListWidget(parent)
+    {
+      setIconSize(QSize(100, 100));
+      setViewMode(QListWidget::IconMode);
+      setFlow(QListWidget::LeftToRight);
+      setWrapping(false);
+      setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+      setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+      setSelectionMode(QAbstractItemView::SingleSelection);
+      setAcceptDrops(false);
+    }
+
+    void PaletteList::mousePressEvent(QMouseEvent* event)
+    {
+      if (event->button() == Qt::LeftButton)
+        _start_pos = event->pos();
+
+      QListWidget::mousePressEvent(event);
+    }
+
+    void PaletteList::mouseMoveEvent(QMouseEvent* event)
+    {
+      QListWidget::mouseMoveEvent(event);
+
+      if (!(event->buttons() & Qt::LeftButton))
+        return;
+      if ((event->pos() - _start_pos).manhattanLength()
+        < QApplication::startDragDistance())
+        return;
+
+      const QList<QListWidgetItem*> selected_items = selectedItems();
+
+      for (auto item : selected_items) 
+      {
+        QMimeData* mimeData = new QMimeData;
+        mimeData->setText("tileset/" + item->toolTip());
+
+
+        QDrag* drag = new QDrag(this);
+        drag->setMimeData(mimeData);
+        drag->setPixmap(item->icon().pixmap(100, 100));
+        drag->exec();
+        return;   // we assume only one item can be selected
+      }
+
+    }
+
     texture_palette_small::texture_palette_small
     (QWidget* parent, current_texture* current_texture_window)
       : widget(parent)
       , layout(new ::QGridLayout(this)
       )
     {
-      setWindowTitle("Quick Palette");
+      setWindowTitle("Quick Access Texture Palette");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
       setMinimumSize(100, 100);
       setAcceptDrops(true);
 
       _texture_paths = std::unordered_set<std::string>();
-      _texture_list = new QListWidget(this);
-      _texture_list->setIconSize(QSize(100, 100));
-      _texture_list->setViewMode(QListWidget::IconMode);
-      _texture_list->setFlow(QListWidget::LeftToRight);
-      _texture_list->setWrapping(false);
-      _texture_list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-      _texture_list->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-      _texture_list->setSelectionMode(QAbstractItemView::SingleSelection);
-      _texture_list->setAcceptDrops(false); 
+      _texture_list = new PaletteList(this);
+     
 
       layout->addWidget(_texture_list, 0, 0);
 
