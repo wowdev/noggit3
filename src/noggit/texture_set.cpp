@@ -83,19 +83,29 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
 
 void TextureSet::switchTexture (scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
 {
-  int texLevel = -1;
+  int texLevel = -1, new_tex_level = -1;
+  
   for (size_t i = 0; i < nTextures; ++i)
   {
     if (textures[i] == oldTexture)
+    {
       texLevel = i;
-    // prevent texture duplication
-    if (textures[i] == newTexture)
-      return;
+    }
+    else if (textures[i] == newTexture)
+    {
+      new_tex_level = i;
+    }
   }
 
   if (texLevel != -1)
   {
     textures[texLevel] = newTexture;
+
+    // prevent texture duplication
+    if (new_tex_level != -1 && new_tex_level != texLevel)
+    {
+      merge_layers(texLevel, new_tex_level);
+    }
   }
 }
 
@@ -415,6 +425,13 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
   if (dist > radius)
   {
     return false;
+  }
+
+  // if the chunk is fully inside the brush, just swap the 2 textures
+  if (misc::square_is_in_circle(x, z, radius, xbase, zbase, CHUNKSIZE))
+  {
+    switchTexture(old_texture, new_texture);
+    return true;
   }
 
   bool changed = false;

@@ -78,6 +78,33 @@ namespace misc
     return getShortestDist(pos.x, pos.z, square_pos.x, square_pos.z, unitSize);
   }
 
+  bool square_is_in_circle(float x, float z, float radius, float square_x, float square_z, float square_size)
+  {
+    float px, pz;
+
+    if (std::abs(square_x - x) < std::abs(square_x + square_size - x))
+    {
+      px = square_x + square_size;
+    }
+    else
+    {
+      px = square_x;
+    }
+
+    if (std::abs(square_z - z) < std::abs(square_z + square_size - z))
+    {
+      pz = square_z + square_size;
+    }
+    else
+    {
+      pz = square_z;
+    }
+
+    // check if the furthest is in the circle
+    float d = dist(x, z, px, pz);
+    return d <= radius;
+  }
+
   bool rectOverlap(math::vector_3d const* r1, math::vector_3d const* r2)
   {
     return r1[0].x <= r2[1].x
