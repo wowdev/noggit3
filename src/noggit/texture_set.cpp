@@ -427,6 +427,13 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
     return false;
   }
 
+  // if the chunk is fully inside the brush, just swap the 2 textures
+  if (misc::square_is_in_circle(x, z, radius, xbase, zbase, CHUNKSIZE))
+  {
+    switchTexture(old_texture, new_texture);
+    return true;
+  }
+
   bool changed = false;
   int old_tex_level = -1, new_tex_level = -1;
   float x_pos, z_pos = zbase;
