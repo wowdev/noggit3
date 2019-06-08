@@ -42,7 +42,7 @@ namespace noggit
       QPoint _start_pos;
 
     public:
-      current_texture(texture_swapper* texture_switcher = nullptr);
+      current_texture(QWidget* parent = nullptr, texture_swapper* texture_switcher = nullptr);
       void set_texture (std::string const& texture);
       void set_drop_behavior(int behavior);
 

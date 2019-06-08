@@ -30,7 +30,7 @@ namespace noggit
 
       for (int i = 0; i < 4; i++)
       {
-        current_texture* click_label = new current_texture;
+        current_texture* click_label = new current_texture(this);
         connect ( click_label, &clickable_label::clicked
                 , [=]
                   {
