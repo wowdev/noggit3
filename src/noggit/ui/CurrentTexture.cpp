@@ -16,8 +16,8 @@ namespace noggit
 {
   namespace ui
   {
-    current_texture::current_texture(texture_swapper* texture_switcher)
-      : clickable_label (nullptr)
+    current_texture::current_texture(QWidget* parent, texture_swapper* texture_switcher)
+      : clickable_label (parent)
       , _filename("tileset\\generic\\black.blp")
       , _need_update(true)
     {

@@ -30,7 +30,7 @@ namespace noggit
 
       auto layout (new QFormLayout (this));
 
-      _texture_to_swap_display = new current_texture(this);
+      _texture_to_swap_display = new current_texture(this, this);
       _texture_to_swap_display->set_drop_behavior(CurrentTextureDropBehavior::texture_swapper);
 
       QPushButton* select = new QPushButton("Select", this);
