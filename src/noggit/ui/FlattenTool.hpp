@@ -20,7 +20,7 @@ namespace noggit
     class flatten_blur_tool : public QWidget
     {
     public:
-      flatten_blur_tool();
+      flatten_blur_tool(QWidget* parent = nullptr);
 
       void flatten (World* world, math::vector_3d const& cursor_pos, float dt);
       void blur (World* world, math::vector_3d const& cursor_pos, float dt);

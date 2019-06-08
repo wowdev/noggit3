@@ -15,8 +15,8 @@ namespace noggit
 {
   namespace ui
   {
-    flatten_blur_tool::flatten_blur_tool()
-      : QWidget(nullptr)
+    flatten_blur_tool::flatten_blur_tool(QWidget* parent)
+      : QWidget(parent)
       , _radius(10.0f)
       , _speed(2.0f)
       , _angle(45.0f)

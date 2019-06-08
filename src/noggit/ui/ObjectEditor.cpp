@@ -38,8 +38,9 @@ namespace noggit
                                  , World* world
                                  , bool_toggle_property* move_model_to_cursor_position
                                  , object_paste_params* paste_params
+                                 , QWidget* parent
                                  )
-            : QWidget(nullptr)
+            : QWidget(parent)
             , modelImport (new model_import(this))
             , rotationEditor (new rotation_editor(mapView))
             , helper_models_widget(new helper_models(this))

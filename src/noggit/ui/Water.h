@@ -25,6 +25,7 @@ namespace noggit
     public:
       water ( unsigned_int_property* current_layer
             , bool_toggle_property* display_all_layers
+            , QWidget* parent = nullptr
             );
 
       void updatePos(tile_index const& newTile);

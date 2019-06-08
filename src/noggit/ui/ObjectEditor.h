@@ -55,6 +55,7 @@ namespace noggit
                     , World*
                     , bool_toggle_property* move_model_to_cursor_position
                     , object_paste_params*
+                    , QWidget* parent = nullptr
                     );
 
       void import_last_model_from_wmv(int type);

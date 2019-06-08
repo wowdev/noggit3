@@ -22,8 +22,8 @@ namespace noggit
 {
   namespace ui
   {
-    shader_tool::shader_tool(math::vector_4d& color)
-      : QWidget(nullptr)
+    shader_tool::shader_tool(math::vector_4d& color, QWidget* parent)
+      : QWidget(parent)
       , _radius(15.0f)
       , _speed(1.0f)
       , _color(color)

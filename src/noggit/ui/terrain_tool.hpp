@@ -24,7 +24,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      terrain_tool();
+      terrain_tool(QWidget* parent = nullptr);
 
       void changeTerrain (World*, math::vector_3d const& pos, float dt);
 
