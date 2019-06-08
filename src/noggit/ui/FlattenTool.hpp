@@ -48,6 +48,8 @@ namespace noggit
       bool use_ref_pos() const  { return _lock_group->isChecked(); }
       math::vector_3d ref_pos() const { return _lock_pos; }
 
+      QSize sizeHint() const override;
+
     private:
 
       float _radius;

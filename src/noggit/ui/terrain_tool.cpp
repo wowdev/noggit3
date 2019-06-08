@@ -27,6 +27,7 @@ namespace noggit
       , _cursor_pos(nullptr)
       , _vertex_mode(eVertexMode_Center)
     {
+
       auto layout (new QFormLayout (this));
 
       _type_button_group = new QButtonGroup (this);
@@ -229,6 +230,8 @@ namespace noggit
                     setOrientation (v + 90.0f);
                   }
                 );
+
+      setMinimumWidth(sizeHint().width());
     }
 
     void terrain_tool::changeTerrain
@@ -367,6 +370,11 @@ namespace noggit
         _vertex_type_group->show();
         _speed_box->hide();
       }
+    }
+
+    QSize terrain_tool::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

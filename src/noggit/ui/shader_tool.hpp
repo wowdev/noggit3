@@ -33,6 +33,8 @@ namespace noggit
 
       float brushRadius() const { return _radius; }
 
+      QSize sizeHint() const override;
+
     private:
       float _radius;
       float _speed;

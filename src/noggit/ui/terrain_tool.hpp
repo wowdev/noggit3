@@ -51,6 +51,8 @@ namespace noggit
 
       void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
 
+      QSize sizeHint() const override;
+
       eTerrainType _edit_type;
 
     signals:

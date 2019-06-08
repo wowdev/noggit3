@@ -49,7 +49,7 @@ namespace noggit
       void change_pressure (float change);
       void change_brush_level (float change);
       void set_pressure (float pressure);
-	  void toggle_brush_level_min_max();
+	    void toggle_brush_level_min_max();
       void change_spray_size (float change);
       void change_spray_pressure (float change);
 
@@ -61,6 +61,8 @@ namespace noggit
       }
 
       current_texture* _current_texture;
+
+      QSize sizeHint() const override;
 
     private:
       void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);

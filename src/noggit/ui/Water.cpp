@@ -240,6 +240,7 @@ namespace noggit
               );
 
       updateData();
+      setMinimumWidth(sizeHint().width());
     }
 
     void water::updatePos(tile_index const& newTile)
@@ -347,6 +348,11 @@ namespace noggit
       case ocean_opacity:  return 0.007f;
       case custom_opacity: return _custom_opacity_factor;
       }
+    }
+
+    QSize water::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

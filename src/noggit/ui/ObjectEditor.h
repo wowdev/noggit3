@@ -71,6 +71,8 @@ namespace noggit
       model_import *modelImport;
       rotation_editor* rotationEditor;
       helper_models* helper_models_widget;
+      QSize sizeHint() const override;
+
     private:
       QSettings* _settings;
 

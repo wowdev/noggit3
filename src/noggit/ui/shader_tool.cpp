@@ -28,6 +28,7 @@ namespace noggit
       , _speed(1.0f)
       , _color(color)
     {
+
       auto layout (new QFormLayout(this));
 
       _radius_spin = new QDoubleSpinBox (this);
@@ -60,11 +61,13 @@ namespace noggit
       color_picker = new color_widgets::ColorSelector (this);
       color_picker->setDisplayMode (color_widgets::ColorSelector::NoAlpha);
       color_picker->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
+      color_picker->setMinimumHeight(20);
 
       layout->addRow("Color:", color_picker);
 
       color_wheel = new color_widgets::ColorWheel(this);
       color_wheel->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
+      color_wheel->setMinimumSize(QSize(200, 200));
       layout->addRow(color_wheel);
 
       _spin_hue = new QSpinBox(this);
@@ -93,49 +96,6 @@ namespace noggit
 
       _color_palette = new color_widgets::ColorListWidget(this);
       layout->addRow(_color_palette);
-
-      QList<QPushButton*> buttons = _color_palette->findChildren<QPushButton*>();
-
-      QString button_style =
-        "QToolButton { \n "
-        "  border: none; \n "
-        "} \n";
-      
-      for (auto button : buttons)
-      {
-        if (button->text() == "Add New")
-        {
-          button->setIcon(font_awesome_icon(font_awesome::plus));
-
-          connect(_color_palette, &color_widgets::ColorListWidget::colorAdded
-            , this
-            , [=] {
-                    QList<QToolButton*> row_buttons = _color_palette->findChildren<QToolButton*>();
-
-                    for (auto row_button : row_buttons)
-                    {
-                      if (row_button->text() == "Move Up")
-                      {
-                        row_button->setIcon(font_awesome_icon(font_awesome::chevronup));
-                      }
-                      else if (row_button->text() == "Move Down")
-                      {
-                        row_button->setIcon(font_awesome_icon(font_awesome::chevrondown));
-                      }
-                      else if (row_button->text() == "Remove")
-                      {
-                        row_button->setIcon(font_awesome_icon(font_awesome::timescircle));
-                      }
-                      row_button->setText("");
-                      row_button->setStyleSheet(button_style);
-
-                    }
-                  }
-            );
-            
-        }
-      }
-
 
       QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
       QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
@@ -209,6 +169,8 @@ namespace noggit
               );
 
       connect (color_wheel, &color_widgets::ColorWheel::colorChanged, color_picker, &color_widgets::ColorSelector::setColor);
+
+      setMinimumWidth(sizeHint().width());
 
     }
 
@@ -284,6 +246,11 @@ namespace noggit
         w->blockSignals(false);
 
 
+    }
+
+    QSize shader_tool::sizeHint() const
+    {
+      return QSize(215, height());
     }
 
   }

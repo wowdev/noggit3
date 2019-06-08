@@ -20,6 +20,7 @@
  *
  */
 #include "qt-color-widgets/abstract_widget_list.hpp"
+#include <../../noggit/ui/font_awesome.hpp>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QHeaderView>
@@ -54,7 +55,7 @@ AbstractWidgetList::AbstractWidgetList(QWidget *parent) :
     p->table->insertColumn(2);
     p->table->insertColumn(3);
 
-    p->table->setColumnWidth(0,128);
+    p->table->setColumnWidth(0,64);
     p->table->setColumnWidth(1,24);
     p->table->setColumnWidth(2,24);
     p->table->setColumnWidth(3,24);
@@ -63,7 +64,7 @@ AbstractWidgetList::AbstractWidgetList(QWidget *parent) :
     p->table->verticalHeader()->hide();
     p->table->setShowGrid(false);
 
-    QPushButton* add_button = new QPushButton(QIcon::fromTheme(QStringLiteral("list-add")),
+    QPushButton* add_button = new QPushButton(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::plus),
                                               tr("Add New"));
 
     verticalLayout->addWidget(add_button);
@@ -115,9 +116,18 @@ void AbstractWidgetList::appendWidget(QWidget *w)
     int row = count();
     p->table->insertRow(row);
 
-    QWidget* b_up = create_button(w,&p->mapper_up,QStringLiteral("go-up"),tr("Move Up"));
-    QWidget* b_down = create_button(w,&p->mapper_down,QStringLiteral("go-down"),tr("Move Down"));
-    QWidget* b_remove = create_button(w,&p->mapper_remove,QStringLiteral("list-remove"),tr("Remove"));
+    QString button_style =
+      "QToolButton { \n "
+      "  border: none; \n "
+      "} \n";
+
+    QWidget* b_up = create_button(w,&p->mapper_up, noggit::ui::font_awesome_icon(noggit::ui::font_awesome::chevronup),tr(""), tr("Move Up"));
+    b_up->setStyleSheet(button_style);
+    QWidget* b_down = create_button(w,&p->mapper_down, noggit::ui::font_awesome_icon(noggit::ui::font_awesome::chevrondown),tr(""), tr("Move Down"));
+    b_down->setStyleSheet(button_style);
+    QWidget* b_remove = create_button(w,&p->mapper_remove, noggit::ui::font_awesome_icon(noggit::ui::font_awesome::timescircle),tr(""), tr("Remove"));
+
+    b_remove->setStyleSheet(button_style);
     if ( row == 0 )
         b_up->setEnabled(false);
     else
@@ -141,12 +151,12 @@ QWidget *AbstractWidgetList::widget(int i)
 
 
 QWidget *AbstractWidgetList::create_button(QWidget *data, QSignalMapper *mapper,
-                                             QString icon_name,
+                                             QIcon icon,
                                              QString text, QString tooltip) const
 {
 
     QToolButton* btn = new QToolButton;
-    btn->setIcon(QIcon::fromTheme(icon_name));
+    btn->setIcon(icon);
     btn->setText(text);
     btn->setToolTip(tooltip.isNull() ? btn->text() : tooltip );
     connect(btn,SIGNAL(clicked()),mapper,SLOT(map()));

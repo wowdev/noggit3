@@ -24,6 +24,7 @@ namespace noggit
       , _flatten_type(eFlattenType_Linear)
       , _flatten_mode(eFlattenMode_Both)
     {
+      setMinimumWidth(sizeHint().width());
       auto layout (new QFormLayout (this));
 
       _type_button_box = new QButtonGroup (this);
@@ -350,6 +351,11 @@ namespace noggit
     void flatten_blur_tool::setRadius(float radius)
     {
       _radius_spin->setValue(radius);
+    }
+
+    QSize flatten_blur_tool::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }
