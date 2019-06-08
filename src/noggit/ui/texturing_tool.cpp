@@ -354,6 +354,8 @@ namespace noggit
       update_spray_brush();
       set_radius(15.0f);
       toggle_tool(); // to disable
+
+      setMinimumWidth(sizeHint().width());
     }
 
     void texturing_tool::update_brush_hardness()
@@ -560,6 +562,11 @@ namespace noggit
       }
 
       world->change_texture_flag(pos, texture, flag, add);
+    }
+
+    QSize texturing_tool::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

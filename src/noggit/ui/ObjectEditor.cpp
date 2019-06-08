@@ -288,7 +288,9 @@ namespace noggit
       connect( helper_models_btn
              , &QPushButton::clicked
              , [=]() { helper_models_widget->show(); }
-             );      
+             );    
+
+      setMinimumWidth(sizeHint().width());
     }
 
     void object_editor::showImportModels()
@@ -527,6 +529,11 @@ namespace noggit
       {
         copy(last_model_found);
       }      
+    }
+
+    QSize object_editor::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }
