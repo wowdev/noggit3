@@ -79,49 +79,48 @@ void MapView::set_editing_mode (editing_mode mode)
   MoveObj = false;
   _world->ResetSelection();
 
-
   if (!ui_hidden)
-    _editmode_properties->show();
+  {
+    setToolPropertyWidgetVisibility(mode);
+  }
+
+  terrainMode = mode;
+  _toolbar->check_tool (mode);
+}
+
+void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
+{
+  for (auto dock : _tool_properties_docks)
+  {
+    dock->hide();
+  }
 
   switch (mode)
   {
   case editing_mode::ground:
-    _editmode_properties->setWidget(terrainTool);
-    _editmode_properties->setWindowTitle("Raise / Lower");
+    _terrain_tool_dock->setVisible(!ui_hidden);
     break;
   case editing_mode::flatten_blur:
-    _editmode_properties->setWidget(flattenTool);
-    _editmode_properties->setWindowTitle("Flatten / Blur");
+    _flatten_blur_dock->setVisible(!ui_hidden);
     break;
   case editing_mode::paint:
-    _editmode_properties->setWidget(texturingTool);
-    _editmode_properties->setWindowTitle("Texturing");
+    _texturing_dock->setVisible(!ui_hidden);
     break;
   case editing_mode::areaid:
-    _editmode_properties->setWidget(ZoneIDBrowser);
-    _editmode_properties->setWindowTitle("Area ID");
+    _areaid_editor_dock->setVisible(!ui_hidden);
     break;
   case editing_mode::water:
-    _editmode_properties->setWidget(guiWater);
-    _editmode_properties->setWindowTitle("Water");
+    _water_editor_dock->setVisible(!ui_hidden);
     break;
   case editing_mode::mccv:
-    _editmode_properties->setWidget(shaderTool);
-    _editmode_properties->setWindowTitle("Vertex Shading");
+    _vertex_shading_dock->setVisible(!ui_hidden);
     break;
   case editing_mode::object:
-    _editmode_properties->setWidget(objectEditor);
-    _editmode_properties->setWindowTitle("Object");
+    _object_editor_dock->setVisible(!ui_hidden);
     break;
-  case editing_mode::holes:
-  case editing_mode::flags:
-    _editmode_properties->hide();
   }
-   
 
-  _editmode_properties->adjustSize();
-  terrainMode = mode;
-  _toolbar->check_tool (mode);
+  
 }
 
 void MapView::ResetSelectedObjectRotation()
@@ -194,7 +193,10 @@ void MapView::createGUI()
 
   // create tool widgets
 
-  terrainTool = new noggit::ui::terrain_tool();
+  _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
+  terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
+  _terrain_tool_dock->setWidget(terrainTool);
+  _tool_properties_docks.insert(_terrain_tool_dock);
 
   connect(terrainTool
     , &noggit::ui::terrain_tool::updateVertices
@@ -212,19 +214,25 @@ void MapView::createGUI()
     }
   );
 
-  connect(this, &QObject::destroyed, terrainTool, &QObject::deleteLater);
+  _flatten_blur_dock = new QDockWidget("Flatten / Blur", this);
+  flattenTool = new noggit::ui::flatten_blur_tool(_flatten_blur_dock);
+  _flatten_blur_dock->setWidget(flattenTool);
+  _tool_properties_docks.insert(_flatten_blur_dock);
 
-  flattenTool = new noggit::ui::flatten_blur_tool();
-  connect(this, &QObject::destroyed, flattenTool, &QObject::deleteLater);
+  _texturing_dock = new QDockWidget("Texturing", this);
+  texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get(), _texturing_dock);
+  _texturing_dock->setWidget(texturingTool);
+  _tool_properties_docks.insert(_texturing_dock);
 
-  texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get());
-  connect(this, &QObject::destroyed, texturingTool, &QObject::deleteLater);
+  _areaid_editor_dock = new QDockWidget("Area ID", this);
+  ZoneIDBrowser = new noggit::ui::zone_id_browser(_areaid_editor_dock);
+  _areaid_editor_dock->setWidget(ZoneIDBrowser);
+  _tool_properties_docks.insert(_areaid_editor_dock);
 
-  ZoneIDBrowser = new noggit::ui::zone_id_browser();
-  connect(this, &QObject::destroyed, ZoneIDBrowser, &QObject::deleteLater);
-
-  guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers);
-  connect(this, &QObject::destroyed, guiWater, &QObject::deleteLater);
+  _water_editor_dock = new QDockWidget("Water", this);
+  guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers, _water_editor_dock);
+  _water_editor_dock->setWidget(guiWater);
+  _tool_properties_docks.insert(_water_editor_dock);
 
 
   connect(guiWater, &noggit::ui::water::regenerate_water_opacity
@@ -247,20 +255,24 @@ void MapView::createGUI()
     }
   );
 
-  shaderTool = new noggit::ui::shader_tool(shader_color);
-  connect(this, &QObject::destroyed, shaderTool, &QObject::deleteLater);
+  _vertex_shading_dock = new QDockWidget("Vertex Shading", this);
+  shaderTool = new noggit::ui::shader_tool(shader_color, _vertex_shading_dock);
+  _vertex_shading_dock->setWidget(shaderTool);
+  _tool_properties_docks.insert(_vertex_shading_dock);
 
+  _object_editor_dock = new QDockWidget("Object", this);
   objectEditor = new noggit::ui::object_editor(this
     , _world.get()
     , &_move_model_to_cursor_position
     , &_object_paste_params
+    , _object_editor_dock
   );
-  connect(this, &QObject::destroyed, objectEditor, &QObject::deleteLater);
+  _object_editor_dock->setWidget(objectEditor);
+  _tool_properties_docks.insert(_object_editor_dock);
 
 
   TexturePalette = new noggit::ui::tileset_chooser(this);
 
-  connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
   connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
     , [=]
     {
@@ -295,7 +307,7 @@ void MapView::createGUI()
   guidetailInfos = new noggit::ui::detail_infos(this);
   guidetailInfos->hide();
 
-  TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture);
+  TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
   TexturePicker->hide();
 
   connect(TexturePicker, &noggit::ui::texture_picker::shift_left
@@ -314,8 +326,6 @@ void MapView::createGUI()
       TexturePicker->shiftSelectedTextureRight();
     }
   );
-  connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
-
 
   ZoneIDBrowser->setMapID(_world->getMapID());
   connect(ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
@@ -325,22 +335,34 @@ void MapView::createGUI()
   terrainTool->storeCursorPos(&_cursor_pos);
 
 
-  // create docking host widget
+  for (auto dock : _tool_properties_docks)
+  {
+    _main_window->addDockWidget(Qt::RightDockWidgetArea, dock);
+    dock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    dock->setAllowedAreas(Qt::RightDockWidgetArea);
 
-  _editmode_properties = new QDockWidget("Raise / Lower", this);
-  _editmode_properties->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  _editmode_properties->setAllowedAreas(Qt::RightDockWidgetArea);
-  _editmode_properties->setWidget(terrainTool);
-  _editmode_properties->setMinimumWidth(290);
-  _main_window->addDockWidget(Qt::RightDockWidgetArea, _editmode_properties);
-  connect(_editmode_properties, &QDockWidget::topLevelChanged, this, [=] { this->_editmode_properties->adjustSize(); });
-  connect(this, &QObject::destroyed, _editmode_properties, &QObject::deleteLater);
+    connect(dock, &QDockWidget::topLevelChanged
+      , this
+      , [=] 
+      { 
+        dock->adjustSize();
 
+        for (auto dock_ : _tool_properties_docks)
+        {
+          if (dock->isFloating() != dock_->isFloating())
+            dock_->setFloating(dock->isFloating());
+        }
+      }
+    );
+  }
 
   if (_settings->value("undock_tool_properties/enabled", 1).toBool())
   {
-    _editmode_properties->setFloating(true);
-    _editmode_properties->move(_main_window->geometry().topRight().x() - _editmode_properties->rect().width() - 20, _main_window->geometry().topRight().y() + 40);
+    for (auto dock : _tool_properties_docks)
+    {
+      dock->setFloating(true);
+      dock->move(_main_window->geometry().topRight().x() - dock->rect().width() - 20, _main_window->geometry().topRight().y() + 40);
+    }
   }
 
   // create quick access texture palette dock
@@ -362,8 +384,6 @@ void MapView::createGUI()
     _texture_palette_dock->setFloating(true);
     _texture_palette_dock->move(_main_window->geometry().bottomLeft().x() + 50, _main_window->geometry().bottomLeft().y() - 200);
   }
-
-  connect(this, &QObject::destroyed, _texture_palette_dock, &QObject::deleteLater);
    
   // create toolbar
 
@@ -626,9 +646,10 @@ void MapView::createGUI()
 
     _main_window->statusBar()->setVisible(ui_hidden);
     _toolbar->setVisible(ui_hidden);
-    _editmode_properties->setVisible(ui_hidden);
 
     ui_hidden = !ui_hidden;
+    
+    setToolPropertyWidgetVisibility(terrainMode);
 
   };
 

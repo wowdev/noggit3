@@ -22,7 +22,7 @@ namespace noggit
     class shader_tool : public QWidget
     {
     public:
-      shader_tool(math::vector_4d& color);
+      shader_tool(math::vector_4d& color, QWidget* parent = nullptr);
 
       void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
       void pickColor(World* world, math::vector_3d const& pos);

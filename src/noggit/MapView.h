@@ -267,26 +267,29 @@ private:
 
   void move_camera_with_auto_height (math::vector_3d const&);
 
+  void setToolPropertyWidgetVisibility(editing_mode mode);
+
   std::unique_ptr<noggit::ui::cursor_switcher> _cursor_switcher;
   std::unique_ptr<noggit::ui::help> _keybindings;
+
+  std::unordered_set<QDockWidget*> _tool_properties_docks;
 
   noggit::ui::tileset_chooser* TexturePalette;
   noggit::ui::detail_infos* guidetailInfos;
   noggit::ui::zone_id_browser* ZoneIDBrowser;
   noggit::ui::texture_palette_small* _texture_palette_small;
-  QDockWidget* _areaid;
+  QDockWidget* _areaid_editor_dock;
   noggit::ui::texture_picker* TexturePicker;
   noggit::ui::water* guiWater;
-  QDockWidget* _water;
+  QDockWidget* _water_editor_dock;
   noggit::ui::object_editor* objectEditor;
-  QDockWidget* _object;
+  QDockWidget* _object_editor_dock;
   noggit::ui::flatten_blur_tool* flattenTool;
-  QDockWidget* _flatten_blur;
+  QDockWidget* _flatten_blur_dock;
   noggit::ui::terrain_tool* terrainTool;
-  QDockWidget* _terrain;
+  QDockWidget* _terrain_tool_dock;
   noggit::ui::shader_tool* shaderTool;
-  QDockWidget* _vertex_shading;
+  QDockWidget* _vertex_shading_dock;
   noggit::ui::texturing_tool* texturingTool;
-  QDockWidget* _texturing;
-  QDockWidget* _editmode_properties;
+  QDockWidget* _texturing_dock;
 };

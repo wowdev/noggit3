@@ -21,7 +21,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      texture_picker (current_texture*);
+      texture_picker (current_texture*, QWidget* parent = nullptr);
 
       void getTextures(selection_type lSelection);
       void setTexture(size_t id, current_texture*);

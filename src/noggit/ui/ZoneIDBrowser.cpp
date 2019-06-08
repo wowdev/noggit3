@@ -16,8 +16,8 @@ namespace noggit
 {
   namespace ui
   {
-    zone_id_browser::zone_id_browser()
-      : QWidget(nullptr)
+    zone_id_browser::zone_id_browser(QWidget* parent)
+      : QWidget(parent)
       , _area_tree(new QTreeWidget())
       , mapID(-1)
     {

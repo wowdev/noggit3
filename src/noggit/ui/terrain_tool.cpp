@@ -16,8 +16,8 @@ namespace noggit
 {
   namespace ui
   {
-    terrain_tool::terrain_tool()
-      : QWidget(nullptr)
+    terrain_tool::terrain_tool(QWidget* parent)
+      : QWidget(parent)
       , _edit_type (eTerrainType_Linear)
       , _radius(15.0f)
       , _speed(2.0f)

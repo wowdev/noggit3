@@ -20,8 +20,9 @@ namespace noggit
   {
     texturing_tool::texturing_tool ( const math::vector_3d* camera_pos
                                    , World* world
+                                   , QWidget* parent
                                    )
-      : QWidget(nullptr)
+      : QWidget(parent)
       , _brush_level(255)
       , _hardness(0.5f)
       , _pressure(0.9f)
@@ -43,6 +44,7 @@ namespace noggit
       _current_texture = new current_texture(this);
       _current_texture->resize(QSize(225, 225));
       layout->addRow (_current_texture);
+      layout->setAlignment(_current_texture, Qt::AlignHCenter);
 
       auto tabs (new QTabWidget(this));
 

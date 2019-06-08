@@ -23,8 +23,9 @@ namespace noggit
   {
     water::water ( unsigned_int_property* current_layer
                  , bool_toggle_property* display_all_layers
+                 , QWidget* parent
                  )
-      : QWidget (nullptr)
+      : QWidget (parent)
       , _liquid_id(5)
       , _radius(10.0f)
       , _angle(10.0f)

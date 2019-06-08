@@ -34,7 +34,7 @@ namespace noggit
     class texturing_tool : public QWidget
     {
     public:
-      texturing_tool (const math::vector_3d* camera_pos, World*);
+      texturing_tool (const math::vector_3d* camera_pos, World*, QWidget* parent = nullptr);
 
       float brush_radius() const;
       float hardness() const;
