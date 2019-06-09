@@ -1731,12 +1731,15 @@ void MapView::tick (float dt)
       }
     } 
 
-    _minimap->update();
+  _minimap->update();
 
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
 
-  _world->tick (dt);
+  if (_draw_model_animations.get())
+  {
+    _world->update_models_emitters(dt);
+  }
 
   lastSelected = _world->GetCurrentSelection();
 

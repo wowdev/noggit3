@@ -224,9 +224,14 @@ public:
             , int animtime
             , bool draw_particles
             , bool all_boxes
-            , std::unordered_map<Model*, std::size_t>& visible_model_count
+            , std::unordered_map<Model*, std::size_t>& models_with_particles
+            , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
             , display_mode display
             );
+  void draw_particles( math::matrix_4x4 const& model_view
+                     , opengl::scoped::use_program& particles_shader
+                     , std::size_t instance_count
+                     );
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
 
   std::vector<float> intersect (math::matrix_4x4 const& model_view, math::ray const&, int animtime);

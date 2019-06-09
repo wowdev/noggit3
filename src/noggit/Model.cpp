@@ -1293,22 +1293,6 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
 
 void Model::draw (bool draw_fog, int animtime, bool draw_particles)
 {
-  return;
-
-  // draw particle systems & ribbons
-  if (draw_particles)
-  {
-    for (auto& particle : _particles)
-    {
-      particle.draw();
-    }
-
-    for (auto& ribbon : _ribbons)
-    {
-      ribbon.draw();
-    }
-  }
-  
 }
 
 void Model::draw ( math::matrix_4x4 const& model_view
@@ -1321,7 +1305,8 @@ void Model::draw ( math::matrix_4x4 const& model_view
                  , int animtime
                  , bool draw_particles
                  , bool all_boxes
-                 , std::unordered_map<Model*, std::size_t>& visible_model_count
+                 , std::unordered_map<Model*, std::size_t>& models_with_particles
+                 , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
                  , display_mode display
                  )
 {
@@ -1359,8 +1344,12 @@ void Model::draw ( math::matrix_4x4 const& model_view
   // store the model count to draw the bounding boxes later
   if (all_boxes || _hidden)
   {
-    visible_model_count.emplace(this, transform_matrix.size());
+    model_boxes_to_draw.emplace(this, transform_matrix.size());    
   }
+  if (draw_particles && !_particles.empty())
+  {
+    models_with_particles.emplace(this, transform_matrix.size());
+  }  
 
   opengl::scoped::vao_binder const _ (_vao);
 
@@ -1392,6 +1381,17 @@ void Model::draw ( math::matrix_4x4 const& model_view
   gl.disable(GL_BLEND);
   gl.enable(GL_CULL_FACE);
   gl.depthMask(GL_TRUE);
+}
+
+void Model::draw_particles( math::matrix_4x4 const& model_view
+                          , opengl::scoped::use_program& particles_shader
+                          , std::size_t instance_count
+                          )
+{
+  for (auto& p : _particles)
+  {
+    p.draw(model_view, particles_shader, _transform_buffer, instance_count);
+  }
 }
 
 void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)

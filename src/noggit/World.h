@@ -92,7 +92,7 @@ public:
 
   void initDisplay();
 
-  void tick(float dt);
+  void update_models_emitters(float dt);
   void draw ( math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
             , math::vector_3d const& cursor_pos
@@ -303,6 +303,7 @@ private:
   std::unique_ptr<opengl::program> _mcnk_program;;
   std::unique_ptr<opengl::program> _mfbo_program;
   std::unique_ptr<opengl::program> _m2_program;
+  std::unique_ptr<opengl::program> _m2_particles_program;
   std::unique_ptr<opengl::program> _m2_box_program;
   std::unique_ptr<opengl::program> _wmo_program;
 
