@@ -764,12 +764,12 @@ void MapView::createGUI()
 
 #if defined(_WIN32) || defined(WIN32)
   ADD_ACTION_NS ( help_menu
-                , "Manual online"
+                , "Forum"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual"
+                                 , "http://www.modcraft.io/index.php?board=48.0"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
