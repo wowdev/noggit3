@@ -40,7 +40,7 @@ namespace noggit
 
           if (!_fonts.count (rect.height()))
           {
-            auto id (QFontDatabase::addApplicationFont (":/fonts/FontAwesome.otf"));
+            auto id (QFontDatabase::addApplicationFont (":/fonts/fa-solid-900.ttf"));
 
             if (id == -1)
             {
