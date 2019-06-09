@@ -23,6 +23,8 @@ namespace noggit
 
       auto base_widget (new QWidget (this));
       auto base_layout (new QFormLayout (base_widget));
+
+      base_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
       
       base_layout->addRow (new QLabel (
         "Basic controls:\n"
@@ -111,11 +113,12 @@ namespace noggit
         "  CTRL + Left mouse - deselect vertices\n"
         "  C - clear selection\n"
         "  SPACE + F - Flatten vertices\n"
-        "  SHIFT + right mouse + move - change vertices height\n"
+        "  SPACE + Right mouse + move - orient vertices toward the mouse cursor\n"
+        "  SHIFT + Right mouse + move - change vertices height\n"
         "  SHIFT + mouse wheel - change angle\n"
         "  ALT + mouse wheel - change orientation\n"
-        "Terrain mode \"flatten / blur\":\n"
         "\n"
+        "Terrain mode \"flatten / blur\":\n"
         "  SHIFT + Left mouse click - flatten terrain\n"
         "  CTRL + Left mouse  click - blur terrain\n"
         "  T - Toggle flatten angle\n"
