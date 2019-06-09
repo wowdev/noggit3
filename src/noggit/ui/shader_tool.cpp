@@ -61,7 +61,7 @@ namespace noggit
       color_picker = new color_widgets::ColorSelector (this);
       color_picker->setDisplayMode (color_widgets::ColorSelector::NoAlpha);
       color_picker->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
-      color_picker->setMinimumHeight(20);
+      color_picker->setMinimumHeight(25);
 
       layout->addRow("Color:", color_picker);
 
@@ -95,6 +95,7 @@ namespace noggit
       layout->addRow(_slide_value);
 
       _color_palette = new color_widgets::ColorListWidget(this);
+      _color_palette->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
       layout->addRow(_color_palette);
 
       QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
