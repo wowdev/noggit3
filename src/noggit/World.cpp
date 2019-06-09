@@ -858,6 +858,8 @@ void main()
     }
   }
 
+  std::unordered_map<Model*, std::size_t> model_with_particles;
+
   // M2s / models
   if (draw_models || draw_doodads_wmo)
   {
@@ -870,8 +872,8 @@ void main()
     {
       update_models_by_filename();
     }
-
-    std::unordered_map<Model*, std::size_t> visible_model_count;
+    
+    std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
     {
       if (!_m2_program)
@@ -1155,7 +1157,20 @@ void main()
         {
           if (draw_hidden_models || !it.second[0]->model->is_hidden())
           {
-            it.second[0]->model->draw(model_view, it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
+            it.second[0]->model->draw( model_view
+                                     , it.second
+                                     , m2_shader
+                                     , frustum
+                                     , culldistance
+                                     , camera_pos
+                                     , false
+                                     , animtime
+                                     , draw_model_animations
+                                     , draw_models_with_box
+                                     , model_with_particles
+                                     , model_boxes_to_draw
+                                     , display
+                                     );
           }
         }
       }
@@ -1164,12 +1179,25 @@ void main()
       {
         for (auto& it : _wmo_doodads)
         {
-          it.second[0]->model->draw(model_view, it.second, m2_shader, frustum, culldistance, camera_pos, false, animtime, false, draw_models_with_box, visible_model_count, display);
+          it.second[0]->model->draw( model_view
+                                   , it.second
+                                   , m2_shader
+                                   , frustum
+                                   , culldistance
+                                   , camera_pos
+                                   , false
+                                   , animtime
+                                   , draw_model_animations
+                                   , draw_models_with_box
+                                   , model_with_particles
+                                   , model_boxes_to_draw
+                                   , display
+                                   );
         }
       }
     } 
     
-    if(draw_models_with_box || (draw_hidden_models && !visible_model_count.empty()))
+    if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
       if (!_m2_box_program)
       {
@@ -1215,9 +1243,8 @@ void main()
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
       gl.lineWidth (1.0f);
 
-      for (auto& it : visible_model_count)
+      for (auto& it : model_boxes_to_draw)
       {
-
         math::vector_4d color = it.first->is_hidden() 
                               ? math::vector_4d(0.f, 0.f, 1.f, 1.f) 
                               : ( it.first->use_fake_geometry() 
@@ -1338,9 +1365,90 @@ void main()
 
   outdoorLights(true);
   setupFog (draw_fog);
+  // model particles
+  if (draw_model_animations && !model_with_particles.empty())
+  {
+    if (!_m2_particles_program)
+    {
+      _m2_particles_program.reset(new opengl::program({ { GL_VERTEX_SHADER
+        , R"code(
+#version 330 core
 
-  gl.color4f(1, 1, 1, 1);
+in mat4 transform;
+in vec4 position;
+in vec3 offset;
+in vec2 uv;
+in vec4 color;
+
+out vec2 f_uv;
+out vec4 f_color;
+
+uniform mat4 model_view_projection;
+uniform int billboard;
+
+void main()
+{
+  f_uv = uv;
+  f_color = color;
+  if(billboard == 1)
+  { 
+    vec4 pos = transform*position;
+    pos.xyz += offset;
+    gl_Position = model_view_projection * pos;
+  }
+  else
+  {
+    gl_Position = model_view_projection * transform * position;
+  }
+}
+)code"
+          }
+          ,{ GL_FRAGMENT_SHADER
+          , R"code(
+#version 330 core
+
+in vec2 f_uv;
+in vec4 f_color;
+
+out vec4 out_color;
+
+uniform sampler2D tex;
+
+uniform float alpha_test;
+
+void main()
+{
+  vec4 t = texture(tex, f_uv);
+
+  if(t.a < alpha_test)
+  {
+    discard;
+  }
+
+  out_color = vec4(f_color.rgb * t.rgb, t.a);
+}
+)code"
+          }
+      }));
+    }
+
+    opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
+
+    particles_shader.uniform("model_view_projection", mvp);
+    particles_shader.uniform("tex", 0);
+    opengl::texture::set_active_texture(0);
+
+    for (auto& it : model_with_particles)
+    {
+      it.first->draw_particles(model_view, particles_shader, it.second);
+    }
+  }
+
   gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   if (draw_water)
   {
@@ -1378,7 +1486,7 @@ void main()
   if (draw_mfbo)
   {
     // don't write on the depth buffer
-    gl.depthMask(GL_FALSE);
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
     if (!_mfbo_program)
     {
@@ -1420,8 +1528,6 @@ void main()
     {
       tile->drawMFBO(mfbo_shader);
     }
-
-    gl.depthMask(GL_TRUE);
   }
 }
 
@@ -1473,9 +1579,10 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
   return results;
 }
 
-void World::tick(float dt)
+void World::update_models_emitters(float dt)
 {
-  while (dt > 0.1f) {
+  while (dt > 0.1f)
+  {
     ModelManager::updateEmitters(0.1f);
     dt -= 0.1f;
   }
