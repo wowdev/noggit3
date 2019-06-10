@@ -337,15 +337,16 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   int daytime = static_cast<int>(time) % 2880;
   outdoorLightStats = ol->getLightStats(daytime);
-  skies->initSky(camera_pos, daytime);
+  skies->update_sky_colors(camera_pos, daytime);
 
   if (!hadSky)
   {
-    hadSky = skies->drawSky ( camera_pos
-                            , outdoorLightStats.nightIntensity
-                            , draw_fog
-                            , animtime
-                            );
+    hadSky = skies->draw ( mvp
+                         , camera_pos
+                         , outdoorLightStats.nightIntensity
+                         , draw_fog
+                         , animtime
+                         );
   }
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox
@@ -366,7 +367,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // Draw verylowres heightmap
   if (draw_fog && draw_terrain) 
   {
-    _horizon_render->draw (model_view, projection, &mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos, display);
+    _horizon_render->draw (model_view, projection, &mapIndex, skies->color_set[FOG_COLOR], culldistance, frustum, camera_pos, display);
   }
 
   // Draw height map
@@ -696,7 +697,7 @@ void main()
     mcnk_shader.uniform ("rainbow_wireframe", _settings->value("wireframe/rainbow", 0).toInt());
     
     mcnk_shader.uniform ("draw_fog", (int)draw_fog);
-    mcnk_shader.uniform ("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));
+    mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
     // !\ todo use light dbcs values
     mcnk_shader.uniform ("fog_end", fogdistance);
     mcnk_shader.uniform ("fog_start", 0.5f);
@@ -704,8 +705,8 @@ void main()
 
     
     math::vector_3d dd = outdoorLightStats.dayDir;
-    math::vector_3d diffuse_color(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
-    math::vector_3d ambient_color(skies->colorSet[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);  
+    math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
+    math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);  
 
     mcnk_shader.uniform("light_dir", math::vector_3d(-dd.x, -dd.z, dd.y));
     mcnk_shader.uniform("diffuse_color", diffuse_color);
@@ -1134,15 +1135,15 @@ void main()
       m2_shader.uniform("tex1", 0);
       m2_shader.uniform("tex2", 1);
 
-      m2_shader.uniform("fog_color", math::vector_4d(skies->colorSet[FOG_COLOR], 1));
+      m2_shader.uniform("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
       // !\ todo use light dbcs values
       m2_shader.uniform("fog_end", fogdistance);
       m2_shader.uniform("fog_start", 0.5f);
       m2_shader.uniform("draw_fog", (int)draw_fog);
 
       math::vector_3d dd = outdoorLightStats.dayDir;
-      math::vector_3d diffuse_color(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
-      math::vector_3d ambient_color(skies->colorSet[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
+      math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
+      math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
 
       m2_shader.uniform("light_dir", math::vector_3d(-dd.x, -dd.z, dd.y));
       m2_shader.uniform("diffuse_color", diffuse_color);
@@ -1246,10 +1247,10 @@ void main()
   }
 
   // todo: find the correct alpha values
-  math::vector_4d ocean_color_light(skies->colorSet[OCEAN_COLOR_LIGHT], 0.7f);
-  math::vector_4d ocean_color_dark (skies->colorSet[OCEAN_COLOR_DARK], 0.9f);
-  math::vector_4d river_color_light(skies->colorSet[RIVER_COLOR_LIGHT], 0.7f);
-  math::vector_4d river_color_dark (skies->colorSet[RIVER_COLOR_DARK], 0.9f);
+  math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], 0.7f);
+  math::vector_4d ocean_color_dark (skies->color_set[OCEAN_COLOR_DARK], 0.9f);
+  math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], 0.7f);
+  math::vector_4d river_color_dark (skies->color_set[RIVER_COLOR_DARK], 0.9f);
 
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
