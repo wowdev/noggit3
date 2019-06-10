@@ -213,6 +213,37 @@ namespace opengl
       buffer_binder& operator= (buffer_binder&&) = delete;
     };
 
+    // used to bind index buffers to vao and not unbind before the vao does
+    class index_buffer_manual_binder
+    {
+    public:
+      index_buffer_manual_binder(GLuint buffer) : _buffer(buffer) {}
+
+      void bind()
+      {
+        gl.getIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, reinterpret_cast<GLint*> (&_old));
+        gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffer);
+      }
+
+      ~index_buffer_manual_binder()
+      {
+        if (_binded) 
+        { 
+          gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _old); 
+        }
+      }
+
+      index_buffer_manual_binder(index_buffer_manual_binder const&) = delete;
+      index_buffer_manual_binder(index_buffer_manual_binder&&) = delete;
+      index_buffer_manual_binder& operator= (index_buffer_manual_binder const&) = delete;
+      index_buffer_manual_binder& operator= (index_buffer_manual_binder&&) = delete;
+
+    private:
+      GLuint _old = 0;
+      GLuint _buffer;
+      bool _binded = false;
+    };
+
     template<std::size_t count>
       struct buffers
     {

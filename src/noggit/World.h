@@ -4,6 +4,7 @@
 
 #include <math/frustum.hpp>
 #include <math/trig.hpp>
+#include <noggit/cursor_render.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
@@ -13,6 +14,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
 
 #include <boost/optional/optional.hpp>
@@ -96,10 +98,10 @@ public:
             , math::vector_3d const& cursor_pos
             , math::vector_4d const& cursor_color
             , int cursor_type
-            , float brushRadius
+            , float brush_radius
             , bool show_unpaintable_chunks
             , bool draw_contour
-            , float innerRadius
+            , float inner_radius_ratio
             , math::vector_3d const& ref_pos
             , float angle
             , float orientation
@@ -303,6 +305,10 @@ private:
   std::unique_ptr<opengl::program> _m2_program;
   std::unique_ptr<opengl::program> _m2_box_program;
   std::unique_ptr<opengl::program> _wmo_program;
+
+  noggit::cursor_render _cursor_render;
+  opengl::primitives::sphere _sphere_render;
+  opengl::primitives::square _square_render;
 
   boost::optional<liquid_render> _liquid_render = boost::none;
 };

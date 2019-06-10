@@ -1,5 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/vector_2d.hpp>
+#include <math/vector_3d.hpp>
+#include <math/vector_4d.hpp>
 #include <noggit/Log.h>
 #include <opengl/context.hpp>
 #include <opengl/scoped.hpp>
@@ -1025,6 +1028,13 @@ namespace opengl
   template void context::bufferData<GL_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
 
+  template<GLenum target, typename T>
+    void context::bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage)
+  {
+    scoped::buffer_binder<target> const _(buffer);
+    return bufferData(target, sizeof(T) * data.size(), data.data(), usage);
+  }
+
   void context::vertexPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
   {
     scoped::buffer_binder<GL_ARRAY_BUFFER> const _ (buffer);
@@ -1045,6 +1055,13 @@ namespace opengl
     scoped::buffer_binder<GL_ARRAY_BUFFER> const _ (buffer);
     return normalPointer (type, stride, pointer);
   }
+  template void context::bufferData<GL_ARRAY_BUFFER, float>(GLuint buffer, std::vector<float> const& data, GLenum usage);
+  template void context::bufferData<GL_ARRAY_BUFFER, math::vector_2d>(GLuint buffer, std::vector<math::vector_2d> const& data, GLenum usage);
+  template void context::bufferData<GL_ARRAY_BUFFER, math::vector_3d>(GLuint buffer, std::vector<math::vector_3d> const& data, GLenum usage);
+  template void context::bufferData<GL_ARRAY_BUFFER, math::vector_4d>(GLuint buffer, std::vector<math::vector_4d> const& data, GLenum usage);
+  template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint8_t>(GLuint buffer, std::vector<std::uint8_t> const& data, GLenum usage);
+  template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(GLuint buffer, std::vector<std::uint16_t> const& data, GLenum usage);
+  template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(GLuint buffer, std::vector<std::uint32_t> const& data, GLenum usage);
 
   void context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
   {

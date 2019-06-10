@@ -18,20 +18,26 @@ namespace noggit
     {
       circle,
       sphere,
-      square
+      square,
+      cube,
+      mode_count
     };
 
-    void draw(mode cursor_mode, math::matrix_4x4 const& mvp, math::vector_4d color, math::vector_3d pos, float radius, float inner_radius_ratio = 0.f);
+    void draw(mode cursor_mode, math::matrix_4x4 const& mvp, math::vector_4d color, math::vector_3d const& pos, float radius, float inner_radius_ratio = 0.f);
 
   private:
     bool _uploaded = false;
 
     void upload();
+    void create_circle_buffer(opengl::scoped::use_program& shader);
+    void create_sphere_buffer(opengl::scoped::use_program& shader);
+    void create_square_buffer(opengl::scoped::use_program& shader);
+    void create_cube_buffer(opengl::scoped::use_program& shader);
 
-    opengl::scoped::deferred_upload_vertex_arrays<1> _vaos;
-    GLuint const& _vao = _vaos[0];
-    opengl::scoped::deferred_upload_buffers<1> _vbos;
-    GLuint const& _vertex_vbo = _vbos[0];
+    opengl::scoped::deferred_upload_vertex_arrays<(int)mode::mode_count> _vaos;
+    opengl::scoped::deferred_upload_buffers<(int)mode::mode_count * 2> _vbos;
+
+    std::map<mode, int> _indices_count;
 
     std::unique_ptr<opengl::program> _cursor_program;
   };

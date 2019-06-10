@@ -171,6 +171,7 @@ set ( noggit_root_sources
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
       src/noggit/ChunkWater.cpp
+      src/noggit/cursor_render.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
       src/noggit/Log.cpp
@@ -259,6 +260,7 @@ set ( noggit_root_headers
       src/noggit/Brush.h
       src/noggit/camera.hpp
       src/noggit/ChunkWater.hpp
+      src/noggit/cursor_render.hpp
       src/noggit/DBC.h
       src/noggit/DBCFile.h
       src/noggit/Log.h

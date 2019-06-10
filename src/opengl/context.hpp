@@ -262,6 +262,8 @@ namespace opengl
 
     template<GLenum target>
       void bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
+    template<GLenum target, typename T>
+      void bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage);
 
     void vertexPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
     void colorPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
