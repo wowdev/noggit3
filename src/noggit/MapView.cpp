@@ -271,6 +271,12 @@ void MapView::createGUI()
   _tool_properties_docks.insert(_object_editor_dock);
 
 
+  for (auto widget : _tool_properties_docks)
+  {
+    connect(this, &QObject::destroyed, widget, &QObject::deleteLater);
+  }
+
+
   TexturePalette = new noggit::ui::tileset_chooser(this);
 
   connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
@@ -1409,10 +1415,13 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
+
+
   if (_force_uid_check)
   {
     uid_storage::remove_uid_for_map(_world->getMapID());
   }
+
 
   // the gui isn't created if the uid fix fail
   if (!_uid_fix_failed)
@@ -1422,9 +1431,10 @@ MapView::~MapView()
     _minimap->hide();
     _texture_palette_dock->hide();
   }
-  
+
   _world.reset();
 
+ 
   AsyncLoader::instance().reset_object_fail();
 }
 

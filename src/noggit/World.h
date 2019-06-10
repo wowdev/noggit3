@@ -45,7 +45,14 @@ using StripType = uint16_t;
 
 class World
 {
+private:
+  std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
+
 public:
+  //! \todo  Get these managed? ._.
+  std::map<int, ModelInstance> mModelInstances;
+  std::map<int, WMOInstance> mWMOInstances;
+
   MapIndex mapIndex;
   noggit::map_horizon horizon;
 
@@ -80,10 +87,6 @@ public:
 
   std::unique_ptr<Skies> skies;
 
-  //! \todo  Get these managed? ._.
-  std::map<int, ModelInstance> mModelInstances;
-  std::map<int, WMOInstance> mWMOInstances;
-  
   OutdoorLightStats outdoorLightStats;
 
   explicit World(const std::string& name, int map_id);
@@ -276,7 +279,6 @@ public:
 private:
   void warning_if_uid_in_use(uint32_t uid);
   void update_models_by_filename();
-  std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
 
   std::set<MapChunk*>& vertexBorderChunks();
 

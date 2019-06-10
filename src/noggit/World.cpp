@@ -2164,6 +2164,7 @@ void World::addWMO ( std::string const& filename
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
 
+
 void World::remove_models_if_needed(std::vector<uint32_t> const& uids, tile_index const& tile_unloading)
 {
   for (uint32_t uid : uids)
