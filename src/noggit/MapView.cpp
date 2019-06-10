@@ -2873,12 +2873,9 @@ void MapView::save(save_mode mode)
 
     AsyncLoader::instance().reset_object_fail();
 
-    QMessageBox::information
-      (nullptr
-      , ""
-      , "Map saved"
-      , QMessageBox::Ok
-      );
+
+    _main_window->statusBar()->showMessage("Map saved", 2000);
+
   }
   else
   {
