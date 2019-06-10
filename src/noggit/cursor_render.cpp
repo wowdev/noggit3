@@ -6,29 +6,29 @@
 
 namespace noggit
 {
-  void cursor_render::draw(mode cursor_mode, math::matrix_4x4 const& mvp, math::vector_4d color, math::vector_3d pos, float radius, float inner_radius_ratio)
+  void cursor_render::draw(mode cursor_mode, math::matrix_4x4 const& mvp, math::vector_4d color, math::vector_3d const& pos, float radius, float inner_radius_ratio)
   {
     if (!_uploaded)
     {
       upload();
     }
 
-    static std::uint16_t indice = 0;
-
-    gl.bufferData<GL_ARRAY_BUFFER>(_vertex_vbo, sizeof(math::vector_3d), &pos, GL_STATIC_DRAW);
-
     opengl::scoped::use_program shader {*_cursor_program.get()};
 
     shader.uniform("model_view_projection", mvp);
+    shader.uniform("cursor_pos", pos);
     shader.uniform("color", color);
     shader.uniform("radius", radius);
-    shader.uniform("inner_radius_ratio", inner_radius_ratio);
 
-    opengl::scoped::vao_binder const _ (_vao);
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const buffer (_vertex_vbo);
-    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-    
-    gl.drawElements(GL_POINTS, 1, GL_UNSIGNED_SHORT, &indice);
+    opengl::scoped::vao_binder const _ (_vaos[static_cast<int>(cursor_mode)]);
+
+    gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, nullptr);
+
+    if (inner_radius_ratio > 0.f)
+    {
+      shader.uniform("radius", radius*inner_radius_ratio);
+      gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, nullptr);
+    }
   }
 
   void cursor_render::upload()
@@ -41,63 +41,16 @@ namespace noggit
           {GL_VERTEX_SHADER, R"code(
 #version 330 core
 
+uniform mat4 model_view_projection;
+uniform vec3 cursor_pos;
+uniform float radius;
+
 in vec4 position;
 
 void main()
 {
-  gl_Position = position;
-}
-)code" }
-        , {GL_GEOMETRY_SHADER, R"code(
-#version 330 core
-
-layout(points) in;
-layout(line_strip, max_vertices = 256) out;
-
-float PI = 3.14159265;
-
-uniform mat4 model_view_projection;
-uniform float radius;
-uniform float inner_radius_ratio;
-
-void line(vec4 p1, vec4 p2)
-{
-  gl_Position = model_view_projection * p1;
-  EmitVertex();
-  gl_Position = model_view_projection * p2;
-  EmitVertex();
-  EndPrimitive();
-}
-
-void circle(vec4 origin, float r, int segment)
-{
-  float div = float(segment);
-
-  for(float i=0; i<segment; ++i)
-  {
-      vec4 p1 = origin;
-      p1.x += r * cos(2*PI*float(i)/div);
-      p1.z += r * sin(2*PI*float(i)/div);
-
-    
-
-    vec4 p2 = origin;
-    p2.x += r * cos(2*PI*float(i+1)/div);
-    p2.z += r * sin(2*PI*float(i+1)/div);
-
-    line(p1, p2);
-  }
-}
-
-void main()
-{
-  vec4 origin = gl_in[0].gl_Position;
-
-  circle(origin, radius, 48);
-  if(inner_radius_ratio > 0. && inner_radius_ratio < 1.)
-  {
-    circle(origin, radius*inner_radius_ratio, 48);
-  }  
+  vec3 p = cursor_pos + position.xyz * radius;
+  gl_Position = model_view_projection * vec4(p,1.);
 }
 )code" }
         , {GL_FRAGMENT_SHADER, R"code(
@@ -115,6 +68,185 @@ void main()
       }
     ));
 
+    opengl::scoped::use_program shader {*_cursor_program.get()};
+
+    create_circle_buffer(shader);
+    create_sphere_buffer(shader);
+    create_square_buffer(shader);
+    create_cube_buffer(shader);
+
     _uploaded = true;
+  }
+
+  void cursor_render::create_circle_buffer(opengl::scoped::use_program& shader)
+  {
+    std::vector<math::vector_3d> vertices;
+    std::vector<std::uint16_t> indices;
+
+    int segment = 60;
+
+    for (int i = 0; i < segment; ++i)
+    {
+      float x = math::cos(math::degrees(i * 360 / segment));
+      float z = math::sin(math::degrees(i * 360 / segment));
+      vertices.emplace_back(x, 0.f, z);
+      indices.emplace_back(i);
+      indices.emplace_back((i + 1) % segment);
+    }
+
+    _indices_count[mode::circle] = indices.size();
+
+    int id = static_cast<int>(mode::circle);
+
+    gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
+
+    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+
+    {
+      opengl::scoped::vao_binder const _(_vaos[id]);
+
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+      indices_binder.bind();
+    }
+  }
+
+  void cursor_render::create_sphere_buffer(opengl::scoped::use_program& shader)
+  {
+    std::vector<math::vector_3d> vertices;
+    std::vector<std::uint16_t> indices;
+
+    int segment = 60;
+    int rotation_plane = 6;
+
+    int id_ofs = 0;
+
+    for (int r = 0; r <= rotation_plane; ++r)
+    {
+      math::degrees rotation(360.f*r / static_cast<float>(rotation_plane));
+
+      math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f), math::degrees(0.f), rotation));
+
+      for (int i = 0; i < segment; ++i)
+      {
+        float x = math::cos(math::degrees(i * 360 / segment));
+        float z = math::sin(math::degrees(i * 360 / segment));
+
+        math::vector_3d v(x, 0.f, z);
+
+        vertices.emplace_back(m*v);
+        if (r < rotation_plane)
+        {
+          indices.emplace_back(i + id_ofs);
+          indices.emplace_back(((i + 1) % segment) + id_ofs);
+        }
+      }
+
+      id_ofs += segment;
+    }
+    
+    for (int i = 0; i < segment; ++i)
+    {
+      for (int r = 0; r < rotation_plane; ++r)
+      {
+        indices.emplace_back(i + r*segment);
+        indices.emplace_back(i + (r+1)*segment);
+      }
+    }    
+
+    _indices_count[mode::sphere] = indices.size();
+
+    int id = static_cast<int>(mode::sphere);
+
+    gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
+
+    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+
+    {
+      opengl::scoped::vao_binder const _(_vaos[id]);
+
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+      indices_binder.bind();
+    }
+  }
+
+  void cursor_render::create_square_buffer(opengl::scoped::use_program& shader)
+  {
+    std::vector<math::vector_3d> vertices = 
+    {
+       {-0.5f,0.f,-0.5f}
+      ,{ 0.5f,0.f,-0.5f}
+      ,{ 0.5f,0.f, 0.5f}
+      ,{-0.5f,0.f, 0.5f}
+    };
+
+    std::vector<std::uint16_t> indices = {0,1, 1,2 ,2,3 ,3,0};    
+
+    _indices_count[mode::square] = indices.size();
+
+    int id = static_cast<int>(mode::square);
+
+    gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
+
+    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+
+    {
+      opengl::scoped::vao_binder const _(_vaos[id]);
+
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+      indices_binder.bind();
+    }
+
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+
+  void cursor_render::create_cube_buffer(opengl::scoped::use_program& shader)
+  {
+    std::vector<math::vector_3d> vertices =
+    {
+        {-0.5f,-0.5f,-0.5f}
+      , { 0.5f,-0.5f,-0.5f}
+      , { 0.5f,-0.5f, 0.5f}
+      , {-0.5f,-0.5f, 0.5f}
+      , {-0.5f, 0.5f,-0.5f}
+      , { 0.5f, 0.5f,-0.5f}
+      , { 0.5f, 0.5f, 0.5f}
+      , {-0.5f, 0.5f, 0.5f}
+    };
+
+    std::vector<std::uint16_t> indices = 
+    {  
+        0,1, 1,2 ,2,3 ,3,0
+      , 0,4, 1,5 ,2,6 ,3,7
+      , 4,5, 5,6 ,6,7 ,7,4
+    };
+
+    _indices_count[mode::cube] = indices.size();
+
+    int id = static_cast<int>(mode::cube);
+
+    gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
+
+    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+
+    {
+      opengl::scoped::vao_binder const _(_vaos[id]);
+
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+      indices_binder.bind();
+    }
+
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 }

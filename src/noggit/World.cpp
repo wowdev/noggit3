@@ -41,171 +41,6 @@
 #include <unordered_set>
 #include <utility>
 
-namespace
-{
-  void render_line (math::vector_3d const& p1, math::vector_3d const& p2)
-  {
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-
-    gl.lineWidth(2.5);
-
-    gl.begin(GL_LINES);
-    gl.vertex3fv (p1);
-    gl.vertex3fv (p2);
-    gl.end();
-  }
-
-  void draw_square(math::vector_3d const& pos, float size, float orientation)
-  {
-    float dx1 = size*cos(orientation) - size*sin(orientation);
-    float dx2 = size*cos(orientation + math::constants::pi / 2) - size*sin(orientation + math::constants::pi / 2);
-    float dz1 = size*sin(orientation) + size*cos(orientation);
-    float dz2 = size*sin(orientation + math::constants::pi / 2) + size*cos(orientation + math::constants::pi / 2);
-
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-
-    gl.begin(GL_QUADS);
-    gl.vertex3f(pos.x + dx1, pos.y, pos.z + dz1);
-    gl.vertex3f(pos.x + dx2, pos.y, pos.z + dz2);
-    gl.vertex3f(pos.x - dx1, pos.y, pos.z - dz1);
-    gl.vertex3f(pos.x - dx2, pos.y, pos.z - dz2);
-    gl.vertex3f(pos.x + dx1, pos.y, pos.z + dz1);
-    gl.end();
-  }
-
-  void render_square(math::vector_3d const& pos, float radius, float orientation, float inner_radius = 0.0f, bool useInnerRadius = true)
-  {
-    draw_square(pos, radius, orientation);
-
-    if (useInnerRadius)
-    {
-      draw_square(pos, inner_radius, orientation);
-    }
-  }
-
-
-  std::size_t const sphere_segments (15);
-  void draw_sphere_point (int i, int j, float radius)
-  {
-    static math::radians const drho (math::constants::pi / sphere_segments);
-    static math::radians const dtheta (2.0f * drho._);
-
-    math::radians const rho (i * drho._);
-    math::radians const theta (j * dtheta._);
-    gl.vertex3f ( math::cos (theta) * math::sin (rho) * radius
-                , math::sin (theta) * math::sin (rho) * radius
-                , math::cos (rho) * radius
-                );
-  }
-  void draw_sphere (float radius)
-  {
-    for (int i = 1; i < sphere_segments; i++)
-    {
-      gl.begin (GL_LINE_LOOP);
-      for (int j = 0; j < sphere_segments; j++)
-      {
-        draw_sphere_point (i, j, radius);
-      }
-      gl.end();
-    }
-
-    for (int j = 0; j < sphere_segments; j++)
-    {
-      gl.begin(GL_LINE_STRIP);
-      for (int i = 0; i <= sphere_segments; i++)
-      {
-        draw_sphere_point (i, j, radius);
-      }
-      gl.end();
-    }
-  }
-  void render_sphere (::math::vector_3d const& position, float radius, math::vector_4d const& color)
-  {
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-
-    gl.color4f(color.x, color.y, color.z, color.w);
-
-    opengl::scoped::matrix_pusher matrix;
-
-    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
-
-    draw_sphere (0.3f);
-    draw_sphere (radius);
-  }
-
-  void draw_disk_point (float radius, math::radians& arc, math::radians const& angle, math::radians const& orientation)
-  {
-    float x = radius * math::sin(arc);
-    float y = radius * math::cos(arc);
-    float z = (y * math::cos(orientation) + x * math::sin(orientation)) * math::tan(angle);;
-    gl.vertex3f (x, y, z);
-  }
-  void draw_disk (float radius, bool stipple, math::radians const& angle, math::radians const& orientation)
-  {
-    int const slices (std::max (35.0f, radius * 1.5f));
-    static math::radians const max (2.0f * math::constants::pi);
-
-    float const stride (max._ / slices);
-
-    if (stipple)
-    {
-      gl.enable(GL_LINE_STIPPLE);
-      gl.lineStipple(10, 0xAAAA);
-    }
-
-	  gl.lineWidth(3.0f);
-
-      gl.begin (GL_LINE_LOOP);
-      for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
-      {
-        draw_disk_point (radius, arc, angle, orientation);
-      }
-      gl.end();
-
-	  gl.lineWidth(1.0f);
-
-    if (stipple)
-    {
-      gl.disable(GL_LINE_STIPPLE);
-    }
-  }
-
-  void render_disk( ::math::vector_3d const& position
-                  , float radius
-                  , math::vector_4d const& color
-                  , bool stipple = false
-                  , math::radians const& angle = math::radians(0.0f)
-                  , math::radians const& orientation = math::radians(0.0f)
-                  )
-  {
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-
-    {
-      opengl::scoped::matrix_pusher matrix;
-      opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-      gl.colorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-      opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_TRUE> color_material;
-
-      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
-      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation_xyz, math::degrees::vec3 {math::degrees (90.0f), math::degrees (0.0f), math::degrees (0.0f)}).transposed());
-
-      gl.color4f(color.x, color.y, color.z, color.w);
-
-      draw_disk (radius, stipple, angle, orientation);
-    }
-
-    {
-      opengl::scoped::matrix_pusher matrix;
-
-      gl.multMatrixf(math::matrix_4x4(math::matrix_4x4::translation, position).transposed());
-
-      draw_sphere(0.3f);
-    }
-
-  }
-}
 
 bool World::IsEditableWorld(int pMapId)
 {
@@ -436,10 +271,10 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , math::vector_3d const& cursor_pos
                  , math::vector_4d const& cursor_color
                  , int cursor_type
-                 , float brushRadius
+                 , float brush_radius
                  , bool show_unpaintable_chunks
                  , bool draw_contour
-                 , float innerRadius
+                 , float inner_radius_ratio
                  , math::vector_3d const& ref_pos
                  , float angle
                  , float orientation
@@ -475,7 +310,8 @@ void World::draw ( math::matrix_4x4 const& model_view
     _display_initialized = true;
   }
 
-  math::frustum const frustum (model_view * projection);
+  math::matrix_4x4 const mvp(model_view * projection);
+  math::frustum const frustum (mvp);
 
   bool hadSky = false;
   if (draw_wmo || mapIndex.hasAGlobalWMO())
@@ -881,8 +717,8 @@ void main()
     {
       mcnk_shader.uniform ("draw_cursor_circle", 1);
       mcnk_shader.uniform ("cursor_position", cursor_pos);
-      mcnk_shader.uniform ("outer_cursor_radius", brushRadius);
-      mcnk_shader.uniform ("inner_cursor_ratio", innerRadius);
+      mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
+      mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
       mcnk_shader.uniform ("cursor_color", cursor_color);
     }
     else
@@ -920,120 +756,92 @@ void main()
                  );
     }
   }
-
-  opengl::texture::disable_texture(1);
-  opengl::texture::disable_texture(0);
-
-  // Selection circle
-  if (this->IsSelection(eEntry_MapChunk))
+  
+  // 4 = terrain shader cursor
+  if(cursor_type != 4)
   {
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+    gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
+    noggit::cursor_render::mode mode;
 
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
     {
-      render_square(cursor_pos, brushRadius / 2.0f, 0.0f, brushRadius / 2.0f * innerRadius, true);
+      mode = cursor_type == 2 
+        ? noggit::cursor_render::mode::square
+        : noggit::cursor_render::mode::cube;
+    }
+    else if (cursor_type == 2)
+    {
+      mode = noggit::cursor_render::mode::sphere;
     }
     else
     {
-      if (cursor_type == 1)
-      {
-        render_disk(cursor_pos, brushRadius, cursor_color);
-        if (innerRadius >= 0.01f)
-        {
-          render_disk(cursor_pos, brushRadius * innerRadius, cursor_color, true);
-        }
-      }
-      else if (cursor_type == 2)
-      {
-        render_sphere(cursor_pos, brushRadius, cursor_color);
-      }
-    }
-    if (angled_mode && !use_ref_pos)
-    {
-      math::degrees o = math::degrees(orientation);
-      float x = brushRadius * cos(o);
-      float z = brushRadius * sin(o);
-      float h = brushRadius * tan(math::degrees(angle));
-      math::vector_3d const dest1 = cursor_pos + math::vector_3d(x, 0.f, z);
-      math::vector_3d const dest2 = cursor_pos + math::vector_3d(x, h, z);
-      render_line(cursor_pos, dest1);
-      render_line(cursor_pos, dest2);
-      render_line(dest1, dest2);
+      mode = noggit::cursor_render::mode::circle;
     }
 
-    if (use_ref_pos)
-    {
-      render_sphere(ref_pos, 1.0f, cursor_color);
-
-      math::vector_3d pos = cursor_pos;
-
-      if (angled_mode)
-      {
-        // orient + 90.0f because of the rotation done in render_disk
-        math::degrees a(angle), o(orientation+90.0f);
-        pos.y = misc::angledHeight(ref_pos, pos, a, math::degrees(orientation));
-        render_disk(pos, brushRadius, cursor_color, false, a, o);
-        render_line(ref_pos, cursor_pos);
-        render_line(ref_pos, pos);
-      }
-      else
-      {
-        pos.y = ref_pos.y;
-        render_disk(pos, brushRadius, cursor_color);
-      }
-
-      render_line(cursor_pos, pos);
-    }
-
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    _cursor_render.draw(mode, mvp, cursor_color, cursor_pos, brush_radius, inner_radius_ratio);
   }
+  
+  if (use_ref_pos)
+  {
+    _sphere_render.draw(mvp, ref_pos, cursor_color, 2.f);    
+  }  
 
   if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
   {
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-    opengl::scoped::bool_setter<GL_FOG, GL_FALSE> fog;
-    opengl::scoped::bool_setter<GL_BLEND, GL_FALSE> blend;
-
     float size = (vertexCenter() - camera_pos).length();
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
-    gl.color4f(1.0f, 0.0f, 0.0f, 1.0f);
 
-    gl.begin(GL_POINTS);
     for (math::vector_3d const* pos : _vertices_selected)
     {
-      gl.vertex3f(pos->x, pos->y + 0.1f, pos->z);
+      _sphere_render.draw(mvp, *pos, math::vector_4d(1.f, 0.f, 0.f, 1.f), 0.5f);
     }
-    gl.end();
 
-    gl.color4f(0.0f, 0.0f, 1.0f, 1.0f);
-    render_sphere(vertexCenter(), 2.0f, cursor_color);
-    gl.color3f(1.0f, 1.0f, 1.0f);
+    _sphere_render.draw(mvp, vertexCenter(), cursor_color, 2.f);
   }
 
-  gl.enable(GL_BLEND);
-
-  gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
-  gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
-
-  gl.enable(GL_CULL_FACE);
-
-  gl.disable(GL_BLEND);
-  gl.disable(GL_ALPHA_TEST);
-
-  // TEMP: for fucking around with lighting
-  for (opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
   {
-    const float l_const( 0.0f );
-    const float l_linear( 0.7f );
-    const float l_quadratic( 0.03f );
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
 
-    gl.lightf(light, GL_CONSTANT_ATTENUATION, l_const);
-    gl.lightf(light, GL_LINEAR_ATTENUATION, l_linear);
-    gl.lightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
+    math::degrees orient = math::degrees(orientation);
+    math::degrees incl = math::degrees(angle);
+    math::vector_4d color = cursor_color;
+    // always half transparent regardless or the cursor transparency
+    color.w = 0.5f;
+
+    float radius = 1.2f * brush_radius;
+
+    if (angled_mode && !use_ref_pos)
+    {   
+      math::vector_3d pos = cursor_pos;
+      pos.y += 0.1f; // to avoid z-fighting with the ground
+      _square_render.draw(mvp, pos, radius, incl, orient, color);
+    }
+    else if (use_ref_pos)
+    {
+      if (angled_mode)
+      {
+        math::vector_3d pos = cursor_pos;
+        pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
+        pos.y += 0.1f;
+        _square_render.draw(mvp, pos, radius, incl, orient, color);
+
+        // display the plane when the cursor is far from ref_point
+        if(misc::dist(pos.x, pos.z, ref_pos.x, ref_pos.z) > 10.f + radius)
+        {
+          math::vector_3d ref = ref_pos;
+          ref.y += 0.1f;
+          _square_render.draw(mvp, ref, 10.f, incl, orient, color);
+        }
+      }
+      else
+      {
+        math::vector_3d pos = cursor_pos;
+        pos.y = ref_pos.y + 0.1f;
+        _square_render.draw(mvp, pos, radius, math::degrees(0.f), math::degrees(0.f), color);
+      }
+    }
   }
 
   std::unordered_map<std::string, std::vector<ModelInstance*>> _wmo_doodads;
