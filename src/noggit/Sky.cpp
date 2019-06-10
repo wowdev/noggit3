@@ -6,7 +6,7 @@
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Sky.h>
 #include <noggit/World.h>
-#include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <algorithm>
 #include <string>
@@ -155,41 +155,12 @@ const math::degrees angles[] = { math::degrees (90.0f)
                                };
 const int skycolors[] = { 2, 3, 4, 5, 6, 7, 7 };
 const int cnum = 7;
-
-
 const int hseg = 32;
 
-void Skies::draw()
-{
-  // draw sky sphere?
-  //! \todo  do this as a vertex array and use gl.colorPointer? :|
-  math::vector_3d basepos1[cnum], basepos2[cnum];
-  gl.begin(GL_QUADS);
-  for (int h = 0; h<hseg; h++) {
-    for (int i = 0; i<cnum; ++i) {
-      basepos1[i] = basepos2[i] = math::vector_3d(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
-      math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians (math::constants::pi*2.0f / hseg*h));
-      math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians (math::constants::pi*2.0f / hseg*(h + 1)));
-    }
-
-    for (int v = 0; v<cnum - 1; v++) {
-      gl.color3fv(colorSet[skycolors[v]]);
-      gl.vertex3fv(basepos2[v]);
-      gl.vertex3fv(basepos1[v]);
-      gl.color3fv(colorSet[skycolors[v + 1]]);
-      gl.vertex3fv(basepos1[v + 1]);
-      gl.vertex3fv(basepos2[v + 1]);
-    }
-  }
-  gl.end();
-}
 
 Skies::Skies(unsigned int mapid)
   : stars ("Environments\\Stars\\Stars.mdx")
 {
-  numSkies = 0;
-  cs = -1;
-
   for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
   {
     if (mapid == i->getUInt(LightDB::Map))
@@ -213,8 +184,6 @@ Skies::Skies(unsigned int mapid)
       }
     }
   }
-
-
 
   // sort skies from smallest to largest; global last.
   // smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
@@ -246,47 +215,91 @@ void Skies::findSkyWeights(math::vector_3d pos)
   // weights are all normalized at this point :D
 }
 
-void Skies::initSky(math::vector_3d pos, int t)
+void Skies::update_sky_colors(math::vector_3d pos, int time)
 {
-  if (numSkies == 0) return;
+  if (numSkies == 0 || (_last_time == time && _last_pos == pos))
+  {
+    return;
+  }  
 
   findSkyWeights(pos);
 
-  for (int i = 0; i<NUM_SkyColorNames; ++i) colorSet[i] = math::vector_3d(1, 1, 1);
+  for (int i = 0; i < NUM_SkyColorNames; ++i)
+  {
+    color_set[i] = math::vector_3d(1, 1, 1);
+  }
 
   // interpolation
-  for (size_t j = 0; j<skies.size(); j++) {
-    if (skies[j].weight>0) {
+  for (size_t j = 0; j<skies.size(); j++) 
+  {
+    if (skies[j].weight>0) 
+    {
       // now calculate the color rows
-      for (int i = 0; i<NUM_SkyColorNames; ++i) {
-        if ((skies[j].colorFor(i, t).x>1.0f) || (skies[j].colorFor(i, t).y>1.0f) || (skies[j].colorFor(i, t).z>1.0f))
+      for (int i = 0; i<NUM_SkyColorNames; ++i) 
+      {
+        if ((skies[j].colorFor(i, time).x>1.0f) || (skies[j].colorFor(i, time).y>1.0f) || (skies[j].colorFor(i, time).z>1.0f))
         {
           LogDebug << "Sky " << j << " " << i << " is out of bounds!" << std::endl;
           continue;
         }
-        colorSet[i] += skies[j].colorFor(i, t) * skies[j].weight;
+        color_set[i] += skies[j].colorFor(i, time) * skies[j].weight;
       }
     }
   }
   for (int i = 0; i<NUM_SkyColorNames; ++i)
   {
-    colorSet[i] -= math::vector_3d(1, 1, 1);
+    color_set[i] -= math::vector_3d(1.f, 1.f, 1.f);
   }
+
+  _last_pos = pos;
+  _last_time = time;
+
+  _need_color_buffer_update = true;  
 }
 
-bool Skies::drawSky ( const math::vector_3d &pos
-                    , float night_intensity
-                    , bool draw_fog
-                    , int animtime
-                    )
+bool Skies::draw ( math::matrix_4x4 const& mvp
+                 , math::vector_3d const& pos
+                 , float night_intensity
+                 , bool draw_fog
+                 , int animtime
+                 )
 {
-  if (numSkies == 0) return false;
+  if (numSkies == 0)
+  {
+    return false;
+  }
+
+  if (!_uploaded)
+  {
+    upload();
+  }
+
+  if (_need_color_buffer_update)
+  {
+    update_color_buffer();
+  }
+
+  opengl::scoped::use_program shader {*_program.get()};
+
+  if(_need_vao_update)
+  {
+    update_vao(shader);
+  }
+
+  {
+    opengl::scoped::vao_binder const _ (_vao);
+
+    shader.uniform("model_view_projection", mvp);
+    shader.uniform("camera_pos", pos);
+
+    gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);
+  }
 
   // drawing the sky: we'll undo the camera translation
   opengl::scoped::matrix_pusher const matrix;
   gl.translatef(pos.x, pos.y, pos.z);
 
-  draw();
+  
 
   // if it's night, draw the stars
   if (night_intensity > 0) {
@@ -297,6 +310,127 @@ bool Skies::drawSky ( const math::vector_3d &pos
   }
 
   return true;
+}
+
+void Skies::upload()
+{
+  _program.reset(new opengl::program(
+    {
+        {GL_VERTEX_SHADER, R"code(
+#version 330 core
+
+uniform mat4 model_view_projection;
+uniform vec3 camera_pos;
+
+in vec3 position;
+in vec3 color;
+
+out vec3 f_color;
+
+void main()
+{
+  vec4 pos = vec4(position+camera_pos, 1.f);
+  gl_Position = model_view_projection * pos;
+  f_color = color;
+}
+)code" }
+        , {GL_FRAGMENT_SHADER, R"code(
+#version 330 core
+
+in vec3 f_color;
+
+out vec4 out_color;
+
+void main()
+{
+  out_color = vec4(f_color, 1.);
+}
+)code" }
+    }
+  ));
+
+  _vertex_array.upload();
+  _buffers.upload();
+
+  std::vector<math::vector_3d> vertices;
+  std::vector<std::uint16_t> indices;
+
+  math::vector_3d basepos1[cnum], basepos2[cnum];
+
+  for (int h = 0; h < hseg; h++)
+  {
+    for (int i = 0; i < cnum; ++i)
+    {
+      basepos1[i] = basepos2[i] = math::vector_3d(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
+      math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians(math::constants::pi*2.0f / hseg * h));
+      math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians(math::constants::pi*2.0f / hseg * (h + 1)));
+    }
+
+    for (int v = 0; v < cnum - 1; v++)
+    {
+      int start = vertices.size();
+
+      vertices.push_back(basepos2[v]);
+      vertices.push_back(basepos1[v]);
+      vertices.push_back(basepos1[v + 1]);
+      vertices.push_back(basepos2[v + 1]);
+
+      indices.push_back(start+0);
+      indices.push_back(start+1);
+      indices.push_back(start+2);
+
+      indices.push_back(start+2);
+      indices.push_back(start+3);
+      indices.push_back(start+0);
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STATIC_DRAW);
+
+  _indices_count = indices.size();
+
+  _uploaded = true;
+  _need_vao_update = true;
+}
+
+void Skies::update_vao(opengl::scoped::use_program& shader)
+{
+  opengl::scoped::index_buffer_manual_binder indices_binder (_indices_vbo);
+
+  {
+    opengl::scoped::vao_binder const _ (_vao);
+
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_buffer (_vertices_vbo);
+    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> colors_buffer (_colors_vbo);
+    shader.attrib("color", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    indices_binder.bind();
+  }
+
+  _need_vao_update = false;
+}
+
+void Skies::update_color_buffer()
+{
+  std::vector<math::vector_3d> colors;
+
+  for (int h = 0; h < hseg; h++)
+  {
+    for (int v = 0; v < cnum - 1; v++)
+    {
+      colors.push_back(color_set[skycolors[v]]);
+      colors.push_back(color_set[skycolors[v]]);
+      colors.push_back(color_set[skycolors[v + 1]]);
+      colors.push_back(color_set[skycolors[v + 1]]);
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_colors_vbo, colors, GL_STATIC_DRAW);
+
+  _need_vao_update = true;
 }
 
 //! \todo  figure out what dnc.db is _really_ used for
