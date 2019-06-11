@@ -3,6 +3,9 @@
     <qresource prefix="/fonts">
         <file>fa-solid-900.ttf</file>
     </qresource>
+    <qresource prefix="/fonts">
+        <file>noggit_font.ttf</file>
+    </qresource>
     <qresource prefix="/">
         <file alias="icon">../media/noggit_icon.png</file>
     </qresource>
