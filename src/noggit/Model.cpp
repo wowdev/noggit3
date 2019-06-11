@@ -1346,7 +1346,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     model_boxes_to_draw.emplace(this, transform_matrix.size());    
   }
-  if (draw_particles && !_particles.empty())
+  if (draw_particles && (!_particles.empty() || !_ribbons.empty()))
   {
     models_with_particles.emplace(this, transform_matrix.size());
   }  
@@ -1391,6 +1391,16 @@ void Model::draw_particles( math::matrix_4x4 const& model_view
   for (auto& p : _particles)
   {
     p.draw(model_view, particles_shader, _transform_buffer, instance_count);
+  }
+}
+
+void Model::draw_ribbons( opengl::scoped::use_program& ribbons_shader
+                        , std::size_t instance_count
+                        )
+{
+  for (auto& r : _ribbons)
+  {
+    r.draw(ribbons_shader, _transform_buffer, instance_count);
   }
 }
 

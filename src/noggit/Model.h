@@ -232,6 +232,10 @@ public:
                      , opengl::scoped::use_program& particles_shader
                      , std::size_t instance_count
                      );
+  void draw_ribbons( opengl::scoped::use_program& ribbons_shader
+                   , std::size_t instance_count
+                   );
+
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
 
   std::vector<float> intersect (math::matrix_4x4 const& model_view, math::ray const&, int animtime);

@@ -1447,6 +1447,66 @@ void main()
     }
   }
 
+  if (draw_model_animations && !model_with_particles.empty())
+  {
+    if (!_m2_ribbons_program)
+    {
+      _m2_ribbons_program.reset(new opengl::program({{ GL_VERTEX_SHADER
+        , R"code(
+#version 330 core
+
+in mat4 transform;
+in vec4 position;
+in vec2 uv;
+
+out vec2 f_uv;
+
+uniform mat4 model_view_projection;
+
+void main()
+{
+  f_uv = uv;
+  gl_Position = model_view_projection * transform * position;
+}
+)code"
+          }
+          ,{ GL_FRAGMENT_SHADER
+          , R"code(
+#version 330 core
+
+in vec2 f_uv;
+
+out vec4 out_color;
+
+uniform sampler2D tex;
+uniform vec4 color;
+
+void main()
+{
+  vec4 t = texture(tex, f_uv);
+  out_color = vec4(color.rgb * t.rgb, color.a);
+}
+)code"
+          }
+      }));
+    }
+
+    opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
+
+    ribbon_shader.uniform("model_view_projection", mvp);
+    ribbon_shader.uniform("tex", 0);
+
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    for (auto& it : model_with_particles)
+    {
+      it.first->draw_ribbons(ribbon_shader, it.second);
+    }
+  }
+
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

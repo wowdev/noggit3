@@ -784,6 +784,52 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
   segs.emplace_back(tpos, 0);
 }
 
+RibbonEmitter::RibbonEmitter(RibbonEmitter const& other)
+  : model(other.model)
+  , color(other.color)
+  , opacity(other.opacity)
+  , above(other.above)
+  , below(other.below)
+  , parent(other.parent)
+  , pos(other.pos)
+  , manim(other.manim)
+  , mtime(other.mtime)
+  , seglen(other.seglen)
+  , length(other.length)
+  , tpos(other.tpos)
+  , tcolor(other.tcolor)
+  , tabove(other.tabove)
+  , tbelow(other.tbelow)
+  , _texture_ids(other._texture_ids)
+  , _material_ids(other._material_ids)
+  , segs(other.segs)
+{
+
+}
+
+RibbonEmitter::RibbonEmitter(RibbonEmitter&& other)
+  : model(other.model)
+  , color(other.color)
+  , opacity(other.opacity)
+  , above(other.above)
+  , below(other.below)
+  , parent(other.parent)
+  , pos(other.pos)
+  , manim(other.manim)
+  , mtime(other.mtime)
+  , seglen(other.seglen)
+  , length(other.length)
+  , tpos(other.tpos)
+  , tcolor(other.tcolor)
+  , tabove(other.tabove)
+  , tbelow(other.tbelow)
+  , _texture_ids(other._texture_ids)
+  , _material_ids(other._material_ids)
+  , segs(other.segs)
+{
+
+}
+
 void RibbonEmitter::setup(int anim, int time, int animtime)
 {
   math::vector_3d ntpos = parent->mat * pos;
@@ -835,59 +881,92 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
   tbelow = below.getValue(anim, time, animtime);
 }
 
-void RibbonEmitter::draw()
+void RibbonEmitter::draw( opengl::scoped::use_program& shader
+                        , GLuint const& transform_vbo
+                        , int instances_count
+                        )
 {
-  /*
-  // placeholders
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-  gl.color4f(1,1,1,1);
-  gl.begin(GL_TRIANGLES);
-  gl.vertex3fv(tpos);
-  gl.vertex3fv(tpos + math::vector_3d(1,1,0));
-  gl.vertex3fv(tpos + math::vector_3d(-1,1,0));
-  gl.end();
-  opengl::texture::enable_texture();
-  gl.enable(GL_LIGHTING);
-  */
+  if (!_uploaded)
+  {
+    upload();
+  }
 
-  //  gl.pushName(texture);
+  std::vector<std::uint16_t> indices;
+  std::vector<math::vector_3d> vertices;
+  std::vector<math::vector_2d> texcoords;
+
   model->_textures[_texture_ids[0]]->bind();
-  gl.enable(GL_BLEND);
-  gl.disable(GL_LIGHTING);
-  gl.disable(GL_ALPHA_TEST);
-  gl.disable(GL_CULL_FACE);
-  gl.depthMask(GL_FALSE);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-  gl.color4fv(tcolor);
 
-  gl.begin(GL_QUAD_STRIP);
+  gl.enable(GL_BLEND);
+  
+  shader.uniform("color", tcolor);
+
+  std::uint16_t indice = 0;
+  auto add_quad_indices([] (std::vector<std::uint16_t>& indices, std::uint16_t& start)
+  {
+    indices.push_back(start + 0);
+    indices.push_back(start + 1);
+    indices.push_back(start + 2);
+
+    indices.push_back(start + 2);
+    indices.push_back(start + 1);
+    indices.push_back(start + 3);
+
+    start += 2;
+  });
+
   std::list<RibbonSegment>::iterator it = segs.begin();
   float l = 0;
-  for (; it != segs.end(); ++it) {
+  for (; it != segs.end(); ++it) 
+  {
     float u = l / length;
 
-    gl.texCoord2f(u, 0);
-    gl.vertex3fv(it->pos + tabove * it->up);
-    gl.texCoord2f(u, 1);
-    gl.vertex3fv(it->pos - tbelow * it->up);
+    texcoords.emplace_back(u, 0);
+    vertices.push_back(it->pos + tabove * it->up);
+    texcoords.emplace_back(u, 1);
+    vertices.push_back(it->pos - tbelow * it->up);
 
     l += it->len;
+
+    add_quad_indices(indices, indice);
   }
 
-  if (segs.size() > 1) {
+  if (segs.size() > 1) 
+  {
     // last segment...?
     --it;
-    gl.texCoord2f(1, 0);
-    gl.vertex3fv(it->pos + tabove * it->up + (it->len / it->len0) * it->back);
-    gl.texCoord2f(1, 1);
-    gl.vertex3fv(it->pos - tbelow * it->up + (it->len / it->len0) * it->back);
+    texcoords.emplace_back(1, 0);
+    vertices.push_back(it->pos + tabove * it->up + (it->len / it->len0) * it->back);
+    texcoords.emplace_back(1, 1);
+    vertices.push_back(it->pos - tbelow * it->up + (it->len / it->len0) * it->back);
   }
-  gl.end();
 
-  gl.color4f(1, 1, 1, 1);
-  gl.enable(GL_LIGHTING);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.depthMask(GL_TRUE);
-  //  gl.popName();
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
+
+  opengl::scoped::vao_binder const _(_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder(_vertices_vbo);
+    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoord_vbo);
+    shader.attrib("uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder(transform_vbo);
+    shader.attrib("transform", 0, 1);
+  }
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder(_indices_vbo);
+  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
+}
+
+void RibbonEmitter::upload()
+{
+  _vertex_array.upload();
+  _buffers.upload();
+  _uploaded = true;
 }
