@@ -3,6 +3,7 @@
 #include <noggit/ui/TexturePicker.h>
 
 #include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/font_noggit.hpp>
 #include <noggit/Selection.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/CurrentTexture.h>

@@ -3,6 +3,8 @@
 #pragma once
 
 #include <QtGui/QIcon>
+#include <QtGui/QIconEngine>
+
 
 namespace noggit
 {
@@ -976,5 +978,25 @@ namespace noggit
     public:
       font_awesome_icon (font_awesome::icons const&);
     };
+
+    class font_awesome_icon_engine : public QIconEngine
+    {
+    public:
+      font_awesome_icon_engine(const QString& text);
+
+      virtual font_awesome_icon_engine* clone() const override;
+
+      virtual void paint(QPainter* painter, QRect const& rect, QIcon::Mode mode, QIcon::State state) override;
+
+      virtual QPixmap pixmap(QSize const& size, QIcon::Mode mode, QIcon::State state) override;
+
+
+    private:
+      const QString _text;
+
+      static std::map<int, QFont> _fonts;
+
+    };
+
   }
 }

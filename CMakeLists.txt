@@ -210,6 +210,7 @@ set ( noggit_ui_sources
       src/noggit/ui/DetailInfos.cpp
       src/noggit/ui/FlattenTool.cpp
       src/noggit/ui/font_awesome.cpp
+      src/noggit/ui/font_noggit.cpp
       src/noggit/ui/Help.cpp
       src/noggit/ui/HelperModels.cpp
       src/noggit/ui/ModelImport.cpp
@@ -301,6 +302,7 @@ set ( noggit_ui_headers
       src/noggit/ui/DetailInfos.h
       src/noggit/ui/FlattenTool.hpp
       src/noggit/ui/font_awesome.hpp
+      src/noggit/ui/font_noggit.hpp
       src/noggit/ui/Help.h
       src/noggit/ui/HelperModels.h
       src/noggit/ui/ModelImport.h
