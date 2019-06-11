@@ -115,7 +115,8 @@ private:
 };
 
 
-struct RibbonSegment {
+struct RibbonSegment 
+{
   math::vector_3d pos, up, back;
   float len, len0;
   RibbonSegment (::math::vector_3d pos_, float len_)
@@ -124,7 +125,8 @@ struct RibbonSegment {
   {}
 };
 
-class RibbonEmitter {
+class RibbonEmitter 
+{
   Model *model;
 
   Animation::M2Value<math::vector_3d> color;
@@ -150,6 +152,25 @@ class RibbonEmitter {
 
 public:
   RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals);
+  RibbonEmitter(RibbonEmitter const& other);
+  RibbonEmitter(RibbonEmitter&&);
+  RibbonEmitter& operator= (RibbonEmitter const&) = delete;
+  RibbonEmitter& operator= (RibbonEmitter&&) = delete;
+
   void setup(int anim, int time, int animtime);
-  void draw();
+  void draw( opengl::scoped::use_program& shader
+           , GLuint const& transform_vbo
+           , int instances_count
+           );
+
+private:
+  bool _uploaded = false;
+  void upload();
+
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
+  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  GLuint const& _vertices_vbo = _buffers[0];
+  GLuint const& _texcoord_vbo = _buffers[1];
+  GLuint const& _indices_vbo = _buffers[2];
 };
