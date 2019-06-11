@@ -356,6 +356,8 @@ set ( external_headers
     )
     
 set ( shaders
+      src/glsl/m2_vert.glsl
+      src/glsl/m2_frag.glsl
     )
 
 IF(WIN32)

@@ -27,22 +27,27 @@ Sky::Sky(DBCFile::Iterator data)
   r1 = data->getFloat(LightDB::RadiusInner) / skymul;
   r2 = data->getFloat(LightDB::RadiusOuter) / skymul;
 
-  for (int i = 0; i<36; ++i)
+  for (int i = 0; i < 36; ++i)
+  {
     mmin[i] = -2;
+  }
 
   global = (pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f);
 
-  int FirstId = data->getInt(LightDB::DataIDs) * NUM_SkyColorNames - 17; // cromons light fix ;) Thanks
+  int light_param_0 = data->getInt(LightDB::DataIDs);
+  int light_int_start = light_param_0 * NUM_SkyColorNames - 17; // cromons light fix ;) Thanks
 
   for (int i = 0; i < NUM_SkyColorNames; ++i)
   {
     try
     {
-      DBCFile::Record rec = gLightIntBandDB.getByID(FirstId + i);
+      DBCFile::Record rec = gLightIntBandDB.getByID(light_int_start + i);
       int entries = rec.getInt(LightIntBandDB::Entries);
 
       if (entries == 0)
+      {
         mmin[i] = -1;
+      }
       else
       {
         mmin[i] = rec.getInt(LightIntBandDB::Times);
@@ -60,7 +65,9 @@ Sky::Sky(DBCFile::Iterator data)
       int entries = rec.getInt(LightIntBandDB::Entries);
 
       if (entries == 0)
+      {
         mmin[i] = -1;
+      }
       else
       {
         mmin[i] = rec.getInt(LightIntBandDB::Times);
@@ -73,26 +80,20 @@ Sky::Sky(DBCFile::Iterator data)
     }
   }
 
+  try
+  {
+    DBCFile::Record light_param = gLightParamsDB.getByID(light_param_0);
+    int skybox_id = light_param.getInt(LightParamsDB::skybox);
 
-
-  /*
-  unsigned int SKYFOG = data->getInt( LightDB::DataIDs );
-  unsigned int ID = data->getInt( LightDB::ID );
-  DBCFile::Record rec = gLightParamsDB.getByID( SKYFOG );
-  unsigned int skybox = rec.getInt( LightParamsDB::skybox);
-
-
-  if ( skybox == 0 )
-  alt_sky=nullptr;
-  else{
-  DBCFile::Record rec = gLightSkyboxDB.getByID(skybox);
-  std::string skyname= rec.getString(LightSkyboxDB::filename);
-  alt_sky=new Model(skyname); // if this is ever uncommented, use ModelManager::
-  Log << "Loaded sky " << skyname << std::endl;
+    if (skybox_id)
+    {
+      skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename));
+    }
   }
-
-  */
-
+  catch (...)
+  {
+    LogError << "When trying to get the skybox for the entry " << light_param_0 << " in LightParams.dbc. Sad." << std::endl;
+  }
 }
 
 math::vector_3d Sky::colorFor(int r, int t) const
@@ -159,7 +160,7 @@ const int hseg = 32;
 
 
 Skies::Skies(unsigned int mapid)
-  : stars ("Environments\\Stars\\Stars.mdx")
+  : stars (ModelInstance("Environments\\Stars\\Stars.mdx"))
 {
   for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
   {
@@ -257,12 +258,16 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
   _need_color_buffer_update = true;  
 }
 
-bool Skies::draw ( math::matrix_4x4 const& mvp
-                 , math::vector_3d const& pos
-                 , float night_intensity
-                 , bool draw_fog
-                 , int animtime
-                 )
+bool Skies::draw( math::matrix_4x4 const& model_view
+                , math::matrix_4x4 const& projection
+                , math::vector_3d const& camera_pos
+                , opengl::scoped::use_program& m2_shader
+                , math::frustum const& frustum
+                , const float& cull_distance
+                , int animtime
+                , bool draw_particles
+                , OutdoorLightStats const& light_stats
+                )
 {
   if (numSkies == 0)
   {
@@ -279,34 +284,46 @@ bool Skies::draw ( math::matrix_4x4 const& mvp
     update_color_buffer();
   }
 
-  opengl::scoped::use_program shader {*_program.get()};
-
-  if(_need_vao_update)
   {
-    update_vao(shader);
+    opengl::scoped::use_program shader {*_program.get()};
+
+    if(_need_vao_update)
+    {
+      update_vao(shader);
+    }
+
+    {
+      opengl::scoped::vao_binder const _ (_vao);
+
+      shader.uniform("model_view_projection", model_view*projection);
+      shader.uniform("camera_pos", camera_pos);
+
+      gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);
+    }
   }
 
+  for (Sky& sky : skies)
   {
-    opengl::scoped::vao_binder const _ (_vao);
+    if (sky.weight > 0.f && sky.skybox)
+    {
+      auto& model = sky.skybox.get();
+      model.model->trans = sky.weight;
+      model.pos = camera_pos;
+      model.scale = 0.1f;
+      model.recalcExtents();
 
-    shader.uniform("model_view_projection", mvp);
-    shader.uniform("camera_pos", pos);
-
-    gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);
+      model.model->draw(model_view, model, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+    }
   }
-
-  // drawing the sky: we'll undo the camera translation
-  opengl::scoped::matrix_pusher const matrix;
-  gl.translatef(pos.x, pos.y, pos.z);
-
-  
-
   // if it's night, draw the stars
-  if (night_intensity > 0) {
-    const float sc = 0.1f;
-    gl.scalef(sc, sc, sc);
-    stars->trans = night_intensity;
-    stars->draw (draw_fog, animtime, true);
+  if (light_stats.nightIntensity > 0)
+  {
+    stars.model->trans = light_stats.nightIntensity;
+    stars.pos = camera_pos;
+    stars.scale = 0.1f;
+    stars.recalcExtents();
+
+    stars.model->draw(model_view, stars, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
   }
 
   return true;
@@ -599,7 +616,8 @@ OutdoorLighting::OutdoorLighting(const std::string& fname)
   f.read(&d, 4); // d is now the final offset
   f.seek(8 + n * 8);
 
-  while (f.getPos() < d) {
+  while (f.getPos() < d) 
+  {
     OutdoorLightStats ols;
     ols.init(&f);
 

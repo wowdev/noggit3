@@ -213,7 +213,17 @@ public:
 
   Model(const std::string& name);
 
-  void draw (bool draw_fog, int animtime, bool draw_particles);
+  void draw( math::matrix_4x4 const& model_view
+           , ModelInstance& instance
+           , opengl::scoped::use_program& m2_shader
+           , math::frustum const& frustum
+           , const float& cull_distance
+           , const math::vector_3d& camera
+           , int animtime
+           , bool draw_particles
+           , bool all_boxes
+           , display_mode display
+           );
   void draw ( math::matrix_4x4 const& model_view
             , std::vector<ModelInstance*> instances
             , opengl::scoped::use_program& m2_shader

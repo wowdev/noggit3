@@ -10,6 +10,8 @@
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -150,12 +152,14 @@ void WMO::finishLoading ()
 
   if (size > 4)
   {
-    std::string path = std::string (reinterpret_cast<char const*>(f.getPointer ()));
+    std::string path = noggit::mpq::normalized_filename(std::string (reinterpret_cast<char const*>(f.getPointer ())));
+    boost::replace_all(path, "mdx", "m2");
+
     if (path.length())
     {
       if (MPQFile::exists(path))
       {
-        skybox = scoped_model_reference (path);
+        skybox = scoped_model_reference(path);
       }
     }
   }
@@ -399,37 +403,46 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   return results;
 }
 
-bool WMO::drawSkybox ( math::vector_3d pCamera
-                     , math::vector_3d pLower
-                     , math::vector_3d pUpper
-                     , bool draw_fog
-                     , int animtime
-                     ) const
+bool WMO::draw_skybox ( math::matrix_4x4 const& model_view
+                      , math::vector_3d const& camera_pos
+                      , opengl::scoped::use_program& m2_shader
+                      , math::frustum const& frustum
+                      , const float& cull_distance
+                      , int animtime
+                      , bool draw_particles
+                      , math::vector_3d aabb_min
+                      , math::vector_3d aabb_max
+                      , std::map<int, std::pair<math::vector_3d, math::vector_3d>> const& group_extents
+                      ) const
 {
-  if (skybox && pCamera.is_inside_of(pLower, pUpper))
+  if (!skybox || !camera_pos.is_inside_of(aabb_min, aabb_max))
   {
-    //! \todo  only draw sky if we are "inside" the WMO... ?
-
-    // We need to clear the depth buffer, because the skybox model can (will?)
-    // require it *. This is inefficient - is there a better way to do this?
-    // * planets in front of "space" in Caverns of Time
-    //gl.clear(GL_DEPTH_BUFFER_BIT);
-
-    // update: skybox models seem to have an explicit renderop ordering!
-    // that saves us the depth buffer clear and the depth testing, too
-
-    gl.disable(GL_CULL_FACE);
-    gl.disable(GL_DEPTH_TEST);
-    opengl::scoped::matrix_pusher const matrix;
-    math::vector_3d o = pCamera;
-    gl.translatef(o.x, o.y, o.z);
-    const float sc = 2.0f;
-    gl.scalef(sc, sc, sc);
-    skybox.get()->draw (draw_fog, animtime, true);
-    gl.enable(GL_DEPTH_TEST);
-
-    return true;
+    return false;
   }
+
+  for (int i=0; i<groups.size(); ++i)
+  {
+    auto const& g = groups[i];
+
+    if (!g.has_skybox())
+    {
+      continue;
+    }
+
+    auto& extent(group_extents.at(i));
+
+    if (camera_pos.is_inside_of(extent.first, extent.second))
+    {
+      ModelInstance sky(skybox.get()->filename);
+      sky.pos = camera_pos;
+      sky.scale = 2.f;
+      sky.recalcExtents();
+
+      skybox->get()->draw(model_view, sky, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+
+      return true;
+    }
+  }  
 
   return false;
 }

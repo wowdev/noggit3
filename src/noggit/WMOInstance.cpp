@@ -170,14 +170,29 @@ void WMOInstance::recalcExtents()
 
   for (int i = 0; i < (int)wmo->groups.size(); ++i)
   {
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
-    *ptr++ = _transform_mat * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
+    auto const& group = wmo->groups[i];
+
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMax.y, group.BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMax.y, group.BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMin.y, group.BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMin.y, group.BoundingBoxMin.z);
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMin.y, group.BoundingBoxMax.z);
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMax.y, group.BoundingBoxMax.z);
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMax.y, group.BoundingBoxMax.z);
+    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMin.y, group.BoundingBoxMax.z);
+
+    if (group.has_skybox())
+    {
+      math::vector_3d group_min(math::vector_3d::max());
+      math::vector_3d group_max(math::vector_3d::min());
+
+      for (int n = (i+1) * 8; n < (i+2)*8; ++n)
+      {
+        misc::extract_v3d_min_max(bounds[n], group_min, group_max);
+      }
+
+      group_extents[i] = {group_min, group_max};
+    }
   }
 
   for (int i = 0; i < 8 * ((int)wmo->groups.size() + 1); ++i)

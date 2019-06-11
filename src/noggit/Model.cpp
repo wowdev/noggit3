@@ -1290,9 +1290,65 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
   calc = true;
 }
 
-
-void Model::draw (bool draw_fog, int animtime, bool draw_particles)
+void Model::draw( math::matrix_4x4 const& model_view
+                , ModelInstance& instance
+                , opengl::scoped::use_program& m2_shader
+                , math::frustum const& frustum
+                , const float& cull_distance
+                , const math::vector_3d& camera
+                , int animtime
+                , bool draw_particles
+                , bool all_boxes
+                , display_mode display
+                )
 {
+  if (!finishedLoading() || loading_failed())
+  {
+    return;
+  }
+
+  if (!instance.is_visible(frustum, cull_distance, camera, display))
+  {
+    return;
+  }
+
+  if (!_finished_upload)
+  {
+    upload();
+  }
+
+  if (animated && (!animcalc || _per_instance_animation))
+  {
+    animate(model_view, 0, animtime);
+    animcalc = true;
+  }
+
+  opengl::scoped::vao_binder const _(_vao);
+
+  m2_shader.uniform("transform", instance.transform_matrix_transposed());
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+    m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
+    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) + 8));
+    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8));
+    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+  }
+
+  for (ModelRenderPass& p : _render_passes)
+  {
+    if (p.prepare_draw(m2_shader, this))
+    {
+      gl.drawElements(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start);
+      p.after_draw();
+    }
+  }
+
+  gl.disable(GL_BLEND);
+  gl.enable(GL_CULL_FACE);
+  gl.depthMask(GL_TRUE);
 }
 
 void Model::draw ( math::matrix_4x4 const& model_view

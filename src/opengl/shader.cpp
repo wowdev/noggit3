@@ -136,6 +136,7 @@ namespace opengl
     use_program::use_program (program const& p)
       : _program (p)
     {
+      gl.getIntegerv(GL_CURRENT_PROGRAM, reinterpret_cast<GLint*> (&_old));
       gl.useProgram (*_program._handle);
     }
     use_program::~use_program()
@@ -144,7 +145,7 @@ namespace opengl
       {
         gl.disableVertexAttribArray (array);
       }
-      gl.useProgram (0);
+      gl.useProgram (_old);
     }
 
     void use_program::uniform (std::string const& name, GLint value)
