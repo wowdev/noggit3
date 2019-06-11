@@ -303,6 +303,7 @@ private:
   std::unique_ptr<opengl::program> _mcnk_program;;
   std::unique_ptr<opengl::program> _mfbo_program;
   std::unique_ptr<opengl::program> _m2_program;
+  std::unique_ptr<opengl::program> _m2_instanced_program;
   std::unique_ptr<opengl::program> _m2_particles_program;
   std::unique_ptr<opengl::program> _m2_ribbons_program;
   std::unique_ptr<opengl::program> _m2_box_program;

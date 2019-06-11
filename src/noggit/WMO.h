@@ -91,9 +91,10 @@ public:
   bool indoor;
   bool hascv;
   bool visible;
-
   bool outdoorLights;
   std::string name;
+
+  bool has_skybox() const { return flags & 0x40000; }
 
 private:
   WMO *wmo;
@@ -199,11 +200,16 @@ public:
             , bool world_has_skies
             , display_mode display
             );
-  bool drawSkybox ( math::vector_3d pCamera
-                  , math::vector_3d pLower
-                  , math::vector_3d pUpper
-                  , bool draw_fog
+  bool draw_skybox( math::matrix_4x4 const& model_view
+                  , math::vector_3d const& camera_pos
+                  , opengl::scoped::use_program& m2_shader
+                  , math::frustum const& frustum
+                  , const float& cull_distance
                   , int animtime
+                  , bool draw_particles
+                  , math::vector_3d aabb_min
+                  , math::vector_3d aabb_max
+                  , std::map<int, std::pair<math::vector_3d, math::vector_3d>> const& group_extents
                   ) const;
 
   std::vector<float> intersect (math::ray const&) const;

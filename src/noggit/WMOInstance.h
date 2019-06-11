@@ -18,6 +18,7 @@ public:
   scoped_wmo_reference wmo;
   math::vector_3d pos;
   math::vector_3d  extents[2];
+  std::map<int, std::pair<math::vector_3d, math::vector_3d>> group_extents;
   math::vector_3d  dir;
   unsigned int mUniqueID;
   uint16_t mFlags;
@@ -49,6 +50,7 @@ public:
   WMOInstance (WMOInstance&& other)
     : wmo (std::move (other.wmo))
     , pos (other.pos)
+    , group_extents(other.group_extents)
     , dir (other.dir)
     , mUniqueID (other.mUniqueID)
     , mFlags (other.mFlags)
@@ -69,6 +71,7 @@ public:
     std::swap(wmo, other.wmo);
     std::swap(pos, other.pos);
     std::swap(extents, other.extents);
+    std::swap(group_extents, other.group_extents);
     std::swap(dir, other.dir);
     std::swap(mUniqueID, other.mUniqueID);
     std::swap(mFlags, other.mFlags);

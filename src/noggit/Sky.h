@@ -5,7 +5,7 @@
 #include <math/vector_3d.hpp>
 #include <noggit/DBCFile.h>
 #include <noggit/MPQ.h>
-#include <noggit/ModelManager.h>
+#include <noggit/ModelInstance.h>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 
@@ -13,18 +13,49 @@
 #include <string>
 #include <vector>
 
-class Model;
 
-struct SkyColor {
+/*
+It seems that lighting info is also stored in lights.lit, so I
+wonder what the heck is in Dnc.db. Maybe just light directions and/or
+sun/moon positions...?
+*/
+struct OutdoorLightStats
+{
+  int time; // converted from hour:min to the 2880 half-minute ticks thing used in the other Sky thing
+
+  float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
+  math::vector_3d dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
+
+  void init(MPQFile* f);
+
+  void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
+  void setupLighting();
+  // void setupFog(); //! \todo  add fog maybe?
+};
+
+class OutdoorLighting
+{
+private:
+  std::vector<OutdoorLightStats> lightStats;
+
+public:
+  explicit OutdoorLighting(const std::string& fname);
+
+  OutdoorLightStats getLightStats(int time);
+};
+
+struct SkyColor 
+{
   math::vector_3d color;
   int time;
 
   SkyColor(int t, int col);
 };
 
-class Sky {
+class Sky 
+{
 public:
-  Model *alt_sky;
+  boost::optional<ModelInstance> skybox;
 
   math::vector_3d pos;
   float r1, r2;
@@ -49,7 +80,8 @@ public:
   }
 };
 
-enum SkyColorNames {
+enum SkyColorNames 
+{
   LIGHT_GLOBAL_DIFFUSE,
   LIGHT_GLOBAL_AMBIENT,
   SKY_COLOR_0,
@@ -76,7 +108,7 @@ class Skies
 private:
   int numSkies = 0;
   int cs = -1;
-  scoped_model_reference stars;
+  ModelInstance stars;
 
   int _last_time = -1;
   math::vector_3d _last_pos;
@@ -90,11 +122,15 @@ public:
   void findSkyWeights(math::vector_3d pos);
   void update_sky_colors(math::vector_3d pos, int time);
 
-  bool draw ( math::matrix_4x4 const& mvp
-            , math::vector_3d const& pos
-            , float night_intensity
-            , bool draw_fog
+  bool draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::vector_3d const& camera_pos
+            , opengl::scoped::use_program& m2_shader
+            , math::frustum const& frustum
+            , const float& cull_distance
             , int animtime
+            , bool draw_particles
+            , OutdoorLightStats const& light_stats
             );
   bool hasSkies() { return numSkies > 0; }
 
@@ -117,36 +153,4 @@ private:
   GLuint const& _indices_vbo = _buffers[2];
 
   std::unique_ptr<opengl::program> _program;
-};
-
-
-/*
-It seems that lighting info is also stored in lights.lit, so I
-wonder what the heck is in Dnc.db. Maybe just light directions and/or
-sun/moon positions...?
-*/
-struct OutdoorLightStats {
-  int time; // converted from hour:min to the 2880 half-minute ticks thing used in the other Sky thing
-
-  float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
-  math::vector_3d dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
-
-  void init(MPQFile* f);
-
-  void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
-  void setupLighting();
-  // void setupFog(); //! \todo  add fog maybe?
-
-};
-
-
-class OutdoorLighting {
-
-  std::vector<OutdoorLightStats> lightStats;
-
-public:
-  explicit OutdoorLighting(const std::string& fname);
-
-  OutdoorLightStats getLightStats(int time);
-
 };

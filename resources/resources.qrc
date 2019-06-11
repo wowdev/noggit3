@@ -6,4 +6,8 @@
     <qresource prefix="/">
         <file alias="icon">../media/noggit_icon.png</file>
     </qresource>
+    <qresource prefix="/shader">
+      <file alias="m2_vs">../src/glsl/m2_vert.glsl</file>
+      <file alias="m2_fs">../src/glsl/m2_frag.glsl</file>
+    </qresource>
 </RCC>

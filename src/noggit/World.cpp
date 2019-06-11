@@ -313,41 +313,98 @@ void World::draw ( math::matrix_4x4 const& model_view
   math::matrix_4x4 const mvp(model_view * projection);
   math::frustum const frustum (mvp);
 
-  bool hadSky = false;
-  if (draw_wmo || mapIndex.hasAGlobalWMO())
+  if (!_m2_program)
   {
-    for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-    {
-      hadSky = it->second.wmo->drawSkybox ( camera_pos
-                                          , it->second.extents[0]
-                                          , it->second.extents[1]
-                                          , draw_fog
-                                          , animtime
-                                          );
-      if (hadSky)
-      {
-        break;
-      }
-    }
+    _m2_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+          }
+      );
+
+    _m2_instanced_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+          }
+      );
   }
 
-  gl.enable(GL_CULL_FACE);
-  gl.disable(GL_BLEND);
   gl.disable(GL_DEPTH_TEST);
 
   int daytime = static_cast<int>(time) % 2880;
-  outdoorLightStats = ol->getLightStats(daytime);
-  skies->update_sky_colors(camera_pos, daytime);
+  outdoorLightStats = ol->getLightStats(daytime);  
 
-  if (!hadSky)
+  // only draw the sky in 3D
+  if(display == display_mode::in_3D)
   {
-    hadSky = skies->draw ( mvp
-                         , camera_pos
-                         , outdoorLightStats.nightIntensity
-                         , draw_fog
-                         , animtime
-                         );
-  }
+    opengl::scoped::use_program m2_shader {*_m2_program.get()};
+
+    m2_shader.uniform("model_view", model_view);
+    m2_shader.uniform("projection", projection);
+    m2_shader.uniform("tex1", 0);
+    m2_shader.uniform("tex2", 1);
+
+    m2_shader.uniform("draw_fog", 0);
+
+    math::vector_3d dd = outdoorLightStats.dayDir;
+    math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
+    math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
+
+    m2_shader.uniform("light_dir", math::vector_3d(-dd.x, -dd.z, dd.y));
+    m2_shader.uniform("diffuse_color", diffuse_color);
+    m2_shader.uniform("ambient_color", ambient_color);
+
+    bool hadSky = false;
+
+    if (draw_wmo || mapIndex.hasAGlobalWMO())
+    {
+      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+      {
+        if (!it->second.wmo->finishedLoading() || !it->second.wmo->skybox)
+        {
+          continue;
+        }
+        if (it->second.group_extents.empty())
+        {
+          it->second.recalcExtents();
+        }
+        
+        hadSky = it->second.wmo->draw_skybox ( model_view
+                                             , camera_pos
+                                             , m2_shader
+                                             , frustum
+                                             , culldistance
+                                             , animtime
+                                             , draw_model_animations
+                                             , it->second.extents[0]
+                                             , it->second.extents[1]
+                                             , it->second.group_extents
+                                             );
+        if (hadSky)
+        {
+          break;
+        }
+      }
+    }
+
+    skies->update_sky_colors(camera_pos, daytime);
+
+    if (!hadSky)
+    {
+      skies->draw( model_view
+                 , projection
+                 , camera_pos
+                 , m2_shader
+                 , frustum
+                 , culldistance
+                 , animtime
+                 , draw_model_animations
+                 , outdoorLightStats
+                 );
+    }
+  }  
+
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox
   GLbitfield clearmask = GL_DEPTH_BUFFER_BIT;
@@ -876,261 +933,7 @@ void main()
     std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
     {
-      if (!_m2_program)
-      {
-        _m2_program.reset(new opengl::program({{ GL_VERTEX_SHADER
-          , R"code(
-#version 330 core
-
-in vec4 pos;
-in vec3 normal;
-in vec2 texcoord1;
-in vec2 texcoord2;
-in mat4 transform;
-
-out vec2 uv1;
-out vec2 uv2;
-out float camera_dist;
-out vec3 norm;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-uniform int tex_unit_lookup_1;
-uniform int tex_unit_lookup_2;
-
-uniform mat4 tex_matrix_1;
-uniform mat4 tex_matrix_2;
-
-// code from https://wowdev.wiki/M2/.skin#Environment_mapping
-vec2 sphere_map(vec3 vert, vec3 norm)
-{
-  vec3 normPos = -(normalize(vert));
-  vec3 temp = (normPos - (norm * (2.0 * dot(normPos, norm))));
-  temp = vec3(temp.x, temp.y, temp.z + 1.0);
- 
-  return ((normalize(temp).xy * 0.5) + vec2(0.5));
-}
-
-vec2 get_texture_uv(int tex_unit_lookup, vec3 vert, vec3 norm)
-{
-  if(tex_unit_lookup == 0)
-  {
-    return sphere_map(vert, norm);
-  }
-  else if(tex_unit_lookup == 1)
-  {
-    return (transpose(tex_matrix_1) * vec4(texcoord1, 0.0, 1.0)).xy;
-  }
-  else if(tex_unit_lookup == 2)
-  {
-    return (transpose(tex_matrix_2) * vec4(texcoord2, 0.0, 1.0)).xy;
-  }
-  else
-  {
-    return vec2(0.0);
-  }
-}
-
-void main()
-{
-  mat4 camera_mat = model_view * transform;
-  vec4 vertex = camera_mat * pos;
-
-  norm = mat3(camera_mat) * normal;
-
-  uv1 = get_texture_uv(tex_unit_lookup_1, vertex.xyz, norm);
-  uv2 = get_texture_uv(tex_unit_lookup_2, vertex.xyz, norm);
-
-  camera_dist = -vertex.z;
-  gl_Position = projection * vertex;
-}
-)code"
-          }
-          ,{ GL_FRAGMENT_SHADER
-          , R"code(
-#version 330 core
-
-in vec2 uv1;
-in vec2 uv2;
-in float camera_dist;
-in vec3 norm;
-
-out vec4 out_color;
-
-uniform vec4 mesh_color;
-
-uniform sampler2D tex1;
-uniform sampler2D tex2;
-
-uniform vec4 fog_color;
-uniform float fog_start;
-uniform float fog_end;
-uniform int draw_fog;
-uniform int unfogged;
-uniform int unlit;
-
-uniform vec3 light_dir;
-uniform vec3 diffuse_color;
-uniform vec3 ambient_color;
-
-uniform float alpha_test;
-uniform int pixel_shader;
-
-vec4 blend_by_alpha (in vec4 source, in vec4 dest)
-{
-  return source * source.w + dest * (1.0 - source.w);
-}
-
-void main()
-{
-  vec4 color = vec4(0.0);
-
-  if(mesh_color.a < alpha_test)
-  {
-    discard;
-  }
-
-  vec4 texture1 = texture(tex1, uv1);
-  vec4 texture2 = texture(tex2, uv2);
-  
-  // code from Deamon87 and https://wowdev.wiki/M2/Rendering#Pixel_Shaders
-  if (pixel_shader == 0) //Combiners_Opaque
-  { 
-      color.rgb = texture1.rgb * mesh_color.rgb;
-      color.a = mesh_color.a;
-  } 
-  else if (pixel_shader == 1) // Combiners_Decal
-  { 
-      color.rgb = mix(mesh_color.rgb, texture1.rgb, mesh_color.a);
-      color.a = mesh_color.a;
-  } 
-  else if (pixel_shader == 2) // Combiners_Add
-  { 
-      color.rgba = texture1.rgba + mesh_color.rgba;
-  } 
-  else if (pixel_shader == 3) // Combiners_Mod2x
-  { 
-      color.rgb = texture1.rgb * mesh_color.rgb * vec3(2.0);
-      color.a = texture1.a * mesh_color.a * 2.0;
-  } 
-  else if (pixel_shader == 4) // Combiners_Fade
-  { 
-      color.rgb = mix(texture1.rgb, mesh_color.rgb, mesh_color.a);
-      color.a = mesh_color.a;
-  } 
-  else if (pixel_shader == 5) // Combiners_Mod
-  { 
-      color.rgba = texture1.rgba * mesh_color.rgba;
-  } 
-  else if (pixel_shader == 6) // Combiners_Opaque_Opaque
-  { 
-      color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb;
-      color.a = mesh_color.a;
-  } 
-  else if (pixel_shader == 7) // Combiners_Opaque_Add
-  { 
-      color.rgb = texture2.rgb + texture1.rgb * mesh_color.rgb;
-      color.a = mesh_color.a + texture1.a;
-  } 
-  else if (pixel_shader == 8) // Combiners_Opaque_Mod2x
-  { 
-      color.rgb = texture1.rgb * mesh_color.rgb * texture2.rgb * vec3(2.0);
-      color.a  = texture2.a * mesh_color.a * 2.0;
-  } 
-  else if (pixel_shader == 9)  // Combiners_Opaque_Mod2xNA
-  {
-      color.rgb = texture1.rgb * mesh_color.rgb * texture2.rgb * vec3(2.0);
-      color.a  = mesh_color.a;
-  } 
-  else if (pixel_shader == 10) // Combiners_Opaque_AddNA
-  { 
-      color.rgb = texture2.rgb + texture1.rgb * mesh_color.rgb;
-      color.a = mesh_color.a;
-  } 
-  else if (pixel_shader == 11) // Combiners_Opaque_Mod
-  { 
-      color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb;
-      color.a = texture2.a * mesh_color.a;
-  } 
-  else if (pixel_shader == 12) // Combiners_Mod_Opaque
-  { 
-      color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb;
-      color.a = texture1.a;
-  } 
-  else if (pixel_shader == 13) // Combiners_Mod_Add
-  { 
-      color.rgba = texture2.rgba + texture1.rgba * mesh_color.rgba;
-  } 
-  else if (pixel_shader == 14) // Combiners_Mod_Mod2x
-  { 
-      color.rgba = texture1.rgba * texture2.rgba * mesh_color.rgba * vec4(2.0);
-  } 
-  else if (pixel_shader == 15) // Combiners_Mod_Mod2xNA
-  { 
-      color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb * vec3(2.0);
-      color.a = texture1.a * mesh_color.a;
-  } 
-  else if (pixel_shader == 16) // Combiners_Mod_AddNA
-  { 
-      color.rgb = texture2.rgb + texture1.rgb * mesh_color.rgb;
-      color.a = texture1.a * mesh_color.a;
-  } 
-  else if (pixel_shader == 17) // Combiners_Mod_Mod
-  { 
-      color.rgba = texture1.rgba * texture2.rgba * mesh_color.rgba;
-  } 
-  else if (pixel_shader == 18) // Combiners_Add_Mod
-  { 
-      color.rgb = (texture1.rgb + mesh_color.rgb) * texture2.a;
-      color.a = (texture1.a + mesh_color.a) * texture2.a;
-  } 
-  else if (pixel_shader == 19) // Combiners_Mod2x_Mod2x
-  {
-      color.rgba = texture1.rgba * texture2.rgba * mesh_color.rgba * vec4(4.0);
-  }
-  else if (pixel_shader == 20)  // Combiners_Opaque_Mod2xNA_Alpha
-  {
-    color.rgb = (mesh_color.rgb * texture1.rgb) * mix(texture2.rgb * 2.0, vec3(1.0), texture1.a);
-    color.a = mesh_color.a;
-  }
-  else if (pixel_shader == 21)   //Combiners_Opaque_AddAlpha
-  {
-    color.rgb = (mesh_color.rgb * texture1.rgb) + (texture2.rgb * texture2.a);
-    color.a = mesh_color.a;
-  }
-  else if (pixel_shader == 22)   // Combiners_Opaque_AddAlpha_Alpha
-  {
-    color.rgb = (mesh_color.rgb * texture1.rgb) + (texture2.rgb * texture2.a * texture1.a);
-    color.a = mesh_color.a;
-  }
-
-  if(color.a < alpha_test)
-  {
-    discard;
-  }
-
-  if(unlit == 0)
-  {
-    // diffuse + ambient lighting  
-    color.rgb *= vec3(clamp (diffuse_color * max(dot(norm, light_dir), 0.0), 0.0, 1.0)) + ambient_color;
-  }  
-
-  if(draw_fog == 1 && unfogged == 0 && camera_dist >= fog_end * fog_start)
-  {
-    float start = fog_end * fog_start;
-    float alpha = (camera_dist - start) / (fog_end - start);
-    color = blend_by_alpha (vec4(fog_color.rgb, alpha), color);
-  }
-
-  out_color = color;
-}
-
-)code"
-          }
-        }));
-      }
-      opengl::scoped::use_program m2_shader {*_m2_program.get()};
+      opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
       m2_shader.uniform("model_view", model_view);
       m2_shader.uniform("projection", projection);
