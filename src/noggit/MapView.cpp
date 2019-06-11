@@ -296,6 +296,8 @@ void MapView::createGUI()
     }
   );
 
+  connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
+
   _texture_palette_small = new noggit::ui::texture_palette_small(this, texturingTool->_current_texture);
   _texture_palette_small->hide();
 
@@ -309,12 +311,15 @@ void MapView::createGUI()
       texturingTool->_current_texture->set_texture(filename);
     }
   );
+  connect(this, &QObject::destroyed, _texture_palette_small, &QObject::deleteLater);
 
   guidetailInfos = new noggit::ui::detail_infos(this);
   guidetailInfos->hide();
+  connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
 
   TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
   TexturePicker->hide();
+  connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
 
   connect(TexturePicker, &noggit::ui::texture_picker::shift_left
     , [=]
@@ -390,6 +395,8 @@ void MapView::createGUI()
     _texture_palette_dock->setFloating(true);
     _texture_palette_dock->move(_main_window->geometry().bottomLeft().x() + 50, _main_window->geometry().bottomLeft().y() - 200);
   }
+
+  connect(this, &QObject::destroyed, _texture_palette_dock, &QObject::deleteLater);
    
   // create toolbar
 
@@ -478,7 +485,7 @@ void MapView::createGUI()
   file_menu->addSeparator();
   ADD_ACTION_NS (file_menu, "Force uid check on next opening", [this] { _force_uid_check = true; });
   file_menu->addSeparator();
-  ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
+  ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->close(); });
 
 
   //! \todo sections are not rendered on all platforms. one should
@@ -1415,26 +1422,13 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-
-
   if (_force_uid_check)
   {
     uid_storage::remove_uid_for_map(_world->getMapID());
   }
 
-
-  // the gui isn't created if the uid fix fail
-  if (!_uid_fix_failed)
-  {
-    //! \ todo: fix the crash when deleting the texture picker
-    TexturePicker->hide();
-    _minimap->hide();
-    _texture_palette_dock->hide();
-  }
-
   _world.reset();
 
- 
   AsyncLoader::instance().reset_object_fail();
 }
 

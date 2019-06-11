@@ -20,7 +20,7 @@ namespace noggit
     {
       main_window();
 
-      void prompt_exit();
+      void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
 
       std::unordered_set<QWidget*> displayed_widgets;
@@ -60,6 +60,8 @@ namespace noggit
       QWidget* _null_widget;
 
       std::unique_ptr<World> _world;
+
+      bool map_loaded = false;
 
       virtual void closeEvent (QCloseEvent*) override;
     };
