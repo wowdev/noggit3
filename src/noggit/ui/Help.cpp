@@ -202,7 +202,7 @@ namespace noggit
       generate_hotkey_row({ font_noggit::t },                          "\a - Toggle angled mode", water_layout);
       generate_hotkey_row({ font_noggit::alt, font_noggit::mmb },      "\a+\a - Change orientation", water_layout);
       generate_hotkey_row({ font_noggit::shift, font_noggit::mmb },    "\a+\a - Change angle", water_layout);
-      generate_hotkey_row({ font_noggit::f },                          "\a+\a - Set lock position to cursor position", water_layout);
+      generate_hotkey_row({ font_noggit::f },                          "\a - Set lock position to cursor position", water_layout);
       generate_hotkey_row({ font_noggit::space, font_noggit::f },      "\a+\a - Toggle lock mode", water_layout);
       generate_hotkey_row({ font_noggit::space, font_noggit::mmb },    "\a+\a - Change height", water_layout);
 
@@ -244,8 +244,8 @@ namespace noggit
       generate_hotkey_row({ font_noggit::ctrl, font_noggit::lmb },       "\a+\a - Remove shader", shader_layout);
       generate_hotkey_row({ font_noggit::alt, font_noggit::lmb_drag },   "\a+\a - Change brush size", shader_layout);
       generate_hotkey_row({ font_noggit::space, font_noggit::lmb_drag }, "\a+\a - Change speed", shader_layout);
-      generate_hotkey_row({ font_noggit::mmb },                          "\a+\a - Pick shader color from the ground", shader_layout);
-      generate_hotkey_row({ font_noggit::plus },                         "\a+\a - Add current color to palette", shader_layout);
+      generate_hotkey_row({ font_noggit::mmb },                          "\a - Pick shader color from the ground", shader_layout);
+      generate_hotkey_row({ font_noggit::plus },                         "\a - Add current color to palette", shader_layout);
 
       layout->addWidget(tabs);
       tabs->addTab(base_widget, "Base");
