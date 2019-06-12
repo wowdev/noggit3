@@ -274,7 +274,7 @@ private:
   void setToolPropertyWidgetVisibility(editing_mode mode);
 
   std::unique_ptr<noggit::ui::cursor_switcher> _cursor_switcher;
-  std::unique_ptr<noggit::ui::help> _keybindings;
+  noggit::ui::help* _keybindings;
 
   std::unordered_set<QDockWidget*> _tool_properties_docks;
 
