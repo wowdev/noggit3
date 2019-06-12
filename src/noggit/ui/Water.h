@@ -13,6 +13,7 @@ class QLabel;
 class QPushButton;
 class QSpinBox;
 class World;
+class QComboBox;
 
 namespace noggit
 {
@@ -85,8 +86,8 @@ namespace noggit
       QDoubleSpinBox* _z_spin;
       QDoubleSpinBox* _h_spin;
 
-      QPushButton *waterType;
-      QSpinBox *waterLayer;
+      QComboBox* waterType;
+      QSpinBox* waterLayer;
 
       tile_index tile;
     };
