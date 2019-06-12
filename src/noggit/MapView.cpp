@@ -1167,15 +1167,15 @@ void MapView::createGUI()
   addHotkey (Qt::Key_4, MOD_alt, [this] { texturingTool->set_brush_level(255.0f* 0.75f); });
   addHotkey (Qt::Key_5, MOD_alt, [this] { texturingTool->set_brush_level(255.0f); });
 
-  addHotkey (Qt::Key_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
-  addHotkey (Qt::Key_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
-  addHotkey (Qt::Key_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); });
-  addHotkey (Qt::Key_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); });
-  addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); });
-  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); });
-  addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); });
-  addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
-  addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); });
+  addHotkey(Qt::Key_1, MOD_none, [this] { set_editing_mode(editing_mode::ground); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); }, [this] { return !_mod_num_down;  });
 
   addHotkey (Qt::Key_0, MOD_ctrl, [this] { change_selected_wmo_doodadset(0); }, [this] { return _world->IsSelection(eEntry_WMO); });
   addHotkey (Qt::Key_1, MOD_ctrl, [this] { change_selected_wmo_doodadset(1); }, [this] { return _world->IsSelection(eEntry_WMO); });
@@ -1437,6 +1437,7 @@ void MapView::tick (float dt)
 	_mod_shift_down = QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
 	_mod_ctrl_down = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 	_mod_alt_down = QApplication::keyboardModifiers().testFlag(Qt::AltModifier);
+	_mod_num_down = QApplication::keyboardModifiers().testFlag(Qt::KeypadModifier);
 
 
   // start unloading tiles
@@ -1512,10 +1513,10 @@ void MapView::tick (float dt)
       bool canMoveObj = !objectEditor->rotationEditor->hasFocus();
 
       // Set move scale and rotate for numpad keys
-      float moveratio (0.001f);
-      if (_mod_ctrl_down && _mod_shift_down)  moveratio = 0.1f;
-      else if (_mod_shift_down) moveratio = 0.01f;
-      else if (_mod_ctrl_down) moveratio = 0.005f;
+
+      if (_mod_ctrl_down && _mod_shift_down)  numpad_moveratio += 0.1f;
+      else if (_mod_shift_down) numpad_moveratio += 0.01f;
+      else if (_mod_ctrl_down) numpad_moveratio += 0.0005f;
 
       if (canMoveObj && (keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
       {
@@ -1523,10 +1524,10 @@ void MapView::tick (float dt)
         if (Selection->which() == eEntry_WMO)
         {
           _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::remove);
-          boost::get<selected_wmo_type> (*Selection)->pos.x += keyx * moveratio;
-          boost::get<selected_wmo_type> (*Selection)->pos.y += keyy * moveratio;
-          boost::get<selected_wmo_type> (*Selection)->pos.z += keyz * moveratio;
-          boost::get<selected_wmo_type> (*Selection)->dir.y += keyr * moveratio * 5;
+          boost::get<selected_wmo_type> (*Selection)->pos.x += keyx * numpad_moveratio;
+          boost::get<selected_wmo_type> (*Selection)->pos.y += keyy * numpad_moveratio;
+          boost::get<selected_wmo_type> (*Selection)->pos.z += keyz * numpad_moveratio;
+          boost::get<selected_wmo_type> (*Selection)->dir.y += keyr * numpad_moveratio * 5;
 
           boost::get<selected_wmo_type> (*Selection)->recalcExtents();
           _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::add);
@@ -1536,15 +1537,19 @@ void MapView::tick (float dt)
         if (Selection->which() == eEntry_Model)
         {
           _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::remove);
-          boost::get<selected_model_type> (*Selection)->pos.x += keyx * moveratio;
-          boost::get<selected_model_type> (*Selection)->pos.y += keyy * moveratio;
-          boost::get<selected_model_type> (*Selection)->pos.z += keyz * moveratio;
-          boost::get<selected_model_type> (*Selection)->dir.y += keyr * moveratio * 5;
-          boost::get<selected_model_type> (*Selection)->scale += keys * moveratio / 50;
+          boost::get<selected_model_type> (*Selection)->pos.x += keyx * numpad_moveratio;
+          boost::get<selected_model_type> (*Selection)->pos.y += keyy * numpad_moveratio;
+          boost::get<selected_model_type> (*Selection)->pos.z += keyz * numpad_moveratio;
+          boost::get<selected_model_type> (*Selection)->dir.y += keyr * numpad_moveratio * 5;
+          boost::get<selected_model_type> (*Selection)->scale += keys * numpad_moveratio / 50;
           boost::get<selected_model_type> (*Selection)->recalcExtents();
           _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::add);
           objectEditor->rotationEditor->updateValues();
         }
+      }
+      else
+      {
+        numpad_moveratio = 0.001f;
       }
 
       math::vector_3d ObjPos;
@@ -2285,6 +2290,7 @@ void MapView::keyPressEvent (QKeyEvent *event)
     | ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0)
     | ((event->modifiers() & Qt::AltModifier) ? MOD_alt : 0)
     | ((event->modifiers() & Qt::MetaModifier) ? MOD_meta : 0)
+    | ((event->modifiers() & Qt::KeypadModifier) ? MOD_num : 0)
     | (_mod_space_down ? MOD_space : 0)
     );
 
@@ -2302,6 +2308,7 @@ void MapView::keyPressEvent (QKeyEvent *event)
 
   if (event->key() == Qt::Key_Space)
     _mod_space_down = true;
+
 
   // movement
   if (event->key() == Qt::Key_W)
@@ -2484,6 +2491,7 @@ void MapView::focusOutEvent (QFocusEvent*)
   _mod_ctrl_down = false;
   _mod_shift_down = false;
   _mod_space_down = false;
+  _mod_num_down = false;
 
   moving = 0.0f;
   lookat = 0.0f;

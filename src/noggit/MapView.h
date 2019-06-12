@@ -67,6 +67,7 @@ private:
   bool _mod_ctrl_down = false;
   bool _mod_shift_down = false;
   bool _mod_space_down = false;
+  bool _mod_num_down = false;
 
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
@@ -119,6 +120,7 @@ private:
   float keyx = 0, keyy = 0, keyz = 0, keyr = 0, keys = 0;
 
   bool MoveObj;
+  float numpad_moveratio = 0.001f;
 
   math::vector_3d objMove;
   math::vector_3d objMoveOffset;
@@ -196,7 +198,9 @@ private:
     MOD_alt = 0x04,
     MOD_meta = 0x08,
     MOD_space = 0x10,
-    MOD_none = 0x00,
+    MOD_num = 0x20,
+    MOD_none = 0x00
+
   };
   struct HotKey
   {
