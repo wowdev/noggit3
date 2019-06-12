@@ -317,6 +317,10 @@ void MapView::createGUI()
   guidetailInfos->hide();
   connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
 
+  _keybindings = new noggit::ui::help(this);
+  _keybindings->hide(); 
+  connect(this, &QObject::destroyed, _keybindings, &QObject::deleteLater);
+
   TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
   TexturePicker->hide();
   connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
@@ -629,7 +633,7 @@ void MapView::createGUI()
       TexturePicker,
       guidetailInfos,
       _cursor_switcher.get(),
-      _keybindings.get(),
+      _keybindings,
       _minimap_dock,
       objectEditor->modelImport,
       objectEditor->rotationEditor,
@@ -769,9 +773,9 @@ void MapView::createGUI()
 
   ADD_TOGGLE (help_menu, "Key Bindings", "Ctrl+F1", _show_keybindings_window);
   connect ( &_show_keybindings_window, &noggit::bool_toggle_property::changed
-          , _keybindings.get(), &QWidget::setVisible
+          , _keybindings, &QWidget::setVisible
           );
-  connect ( _keybindings.get(), &noggit::ui::widget::visibilityChanged
+  connect ( _keybindings, &noggit::ui::widget::visibilityChanged
           , &_show_keybindings_window, &noggit::bool_toggle_property::set
           );
 
@@ -1215,7 +1219,6 @@ MapView::MapView( math::degrees camera_yaw0
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
   , _texture_palette_dock(new QDockWidget(this))
-  , _keybindings (new noggit::ui::help)
 {
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);

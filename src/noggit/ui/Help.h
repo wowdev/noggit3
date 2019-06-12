@@ -14,7 +14,7 @@ namespace noggit
     class help : public widget
     {
     public:
-      help();
+      help(QWidget* parent = nullptr);
 
     private:
       inline void generate_hotkey_row(std::initializer_list<font_noggit::icons>&& hotkeys, const char* description, QFormLayout* layout);
