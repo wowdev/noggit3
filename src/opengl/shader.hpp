@@ -26,8 +26,11 @@ namespace opengl
 {
   struct shader
   {
-    shader (GLenum type, std::string const& source);
+    shader(GLenum type, std::string const& source);
     ~shader();
+
+    static std::string src_from_qrc(std::string const& shader_alias);
+    static std::string src_from_qrc(std::string const& shader_alias, std::vector<std::string> const& defines);
 
     shader (shader const&) = delete;
     shader (shader&&) = delete;

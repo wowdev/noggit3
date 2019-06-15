@@ -9,7 +9,14 @@
 #include <opengl/shader.hpp>
 #include <opengl/texture.hpp>
 
+#include <boost/filesystem/string_file.hpp>
+
+#include <QFile>
+#include <QTextStream>
+
 #include <list>
+#include <regex>
+#include <sstream>
 
 namespace opengl
 {
@@ -23,6 +30,49 @@ namespace opengl
   shader::~shader()
   {
     gl.deleteShader (_handle);
+  }
+
+  std::string shader::src_from_qrc(std::string const& shader_alias)
+  {
+    QFile f(QString::fromStdString(":/shader/" + shader_alias));
+
+    if (!f.open(QFile::ReadOnly | QFile::Text))
+    {
+      throw std::logic_error("Could not load " + shader_alias + " from the qrc file");
+    }
+
+    QTextStream stream(&f);
+
+    return stream.readAll().toStdString();
+  }
+
+  std::string shader::src_from_qrc(std::string const& shader_alias, std::vector<std::string> const& defines)
+  {
+    std::string src(src_from_qrc(shader_alias));
+    std::stringstream ss;
+
+    ss << "\n";
+    for (auto const& def : defines)
+    {
+      ss << "#define " << def << "\n";
+    }
+
+    std::regex regex("([^#]*(#version)[ \t]+[0-9]+)");
+    std::smatch match;
+
+    if (std::regex_search(src, match, regex))
+    {
+      // #version is always the first thing in the shader, insert defines after it
+      std::size_t version_length = match.length(0);
+      // insert the defines after the version directive
+      src.insert(version_length, ss.str());
+    }
+    else
+    {
+      throw std::logic_error("shader" + shader_alias + " has no #version directive");
+    }
+
+    return src;
   }
 
   program::program (std::initializer_list<shader> shaders)
