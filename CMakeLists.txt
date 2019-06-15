@@ -354,6 +354,9 @@ set ( external_headers
       src/external/wacom/Utils.h
       src/external/wacom/WINTAB.H
     )
+    
+set ( shaders
+    )
 
 IF(WIN32)
   set ( os_sources
@@ -389,6 +392,7 @@ source_group("math"  FILES ${math_sources} ${math_headers})
 source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
+source_group("glsl"  FILES ${shaders})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
@@ -413,8 +417,9 @@ ADD_EXECUTABLE ( noggit
                   ${ResFiles}
                   ${moced}
                   ${compiled_resource_files}
+                  ${shaders}
                 )
-
+                
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   StormLib
