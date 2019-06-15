@@ -36,37 +36,12 @@ namespace noggit
     _vaos.upload();
     _vbos.upload();
 
-    _cursor_program.reset(new opengl::program(
-      {
-          {GL_VERTEX_SHADER, R"code(
-#version 330 core
-
-uniform mat4 model_view_projection;
-uniform vec3 cursor_pos;
-uniform float radius;
-
-in vec4 position;
-
-void main()
-{
-  vec3 p = cursor_pos + position.xyz * radius;
-  gl_Position = model_view_projection * vec4(p,1.);
-}
-)code" }
-        , {GL_FRAGMENT_SHADER, R"code(
-#version 330 core
-
-uniform vec4 color;
-
-out vec4 out_color;
-
-void main()
-{
-  out_color = color;
-}
-)code" }
-      }
-    ));
+    _cursor_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("cursor_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("cursor_fs") }
+          }
+      );    
 
     opengl::scoped::use_program shader {*_cursor_program.get()};
 

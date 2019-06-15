@@ -323,8 +323,10 @@ void map_horizon::render::draw( math::matrix_4x4 const& model_view
         for (size_t i (0); i < 16; ++i)
         {
           // do not draw over visible chunks
-          if (index->tileLoaded ({y, x}) && index->getTile ({y, x})->getChunk (j, i)->is_visible (cull_distance, frustum, camera, display))
+          if (index->tileLoaded({y, x}) && index->getTile({y, x})->getChunk(j, i)->is_visible(cull_distance, frustum, camera, display))
+          {
             continue;
+          }
 
           indices.push_back (inner_index (batch, j, i));
           indices.push_back (outer_index (batch, j, i));
@@ -350,37 +352,12 @@ void map_horizon::render::draw( math::matrix_4x4 const& model_view
 
   if (!_map_horizon_program)
   {
-    _map_horizon_program.reset(new opengl::program
-    { { GL_VERTEX_SHADER
-      , R"code(
-#version 330 core
-
-in vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-void main()
-{
-  gl_Position = projection * model_view * position;
-}
-)code"
-    }
-      , { GL_FRAGMENT_SHADER
-      , R"code(
-#version 330 core
-
-uniform vec3 color;
-
-out vec4 out_color;
-
-void main()
-{
-  out_color = vec4(color, 1.0);
-}
-)code"
-      }
-    });
+    _map_horizon_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("horizon_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("horizon_fs") }
+          }
+      );
   
     _vaos.upload();
   }

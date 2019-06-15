@@ -33,78 +33,8 @@ private:
   int _current_anim_time = 0;
 
   opengl::program program
-    { { GL_VERTEX_SHADER
-      , R"code(
-#version 330 core
-
-in vec4 position;
-in vec2 tex_coord;
-in float depth;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-uniform mat4 transform;
-
-uniform int use_transform = int(0);
-
-out float depth_;
-out vec2 tex_coord_;
-
-void main()
-{
-  depth_ = depth;
-  tex_coord_ = tex_coord;
-
-  if(use_transform == 1)
-  {
-    gl_Position = projection * model_view * transform * position;
-  }
-  else
-  {
-    gl_Position = projection * model_view * position;
-  }
-}
-)code"
-      }
-    , { GL_FRAGMENT_SHADER
-      , R"code(
-#version 330 core
-
-uniform sampler2D texture;
-uniform vec4 ocean_color_light;
-uniform vec4 ocean_color_dark;
-uniform vec4 river_color_light;
-uniform vec4 river_color_dark;
-uniform float tex_repeat;
-
-uniform int type;
-
-in float depth_;
-in vec2 tex_coord_;
-
-out vec4 out_color;
-
-void main()
-{
-  vec4 texel = texture2D (texture, tex_coord_ / tex_repeat);
-  // lava || slime
-  if(type == 2 || type == 3)
-  {
-    out_color = texel;
-  }
-  else
-  {
-    vec4 lerp = (type == 1)
-              ? mix (ocean_color_light, ocean_color_dark, depth_) 
-              : mix (river_color_light, river_color_dark, depth_);
-              
-    vec4 tResult = clamp (texel + lerp, 0.0, 1.0); //clamp shouldn't be needed
-    vec4 oColor = clamp (texel + tResult, 0.0, 1.0);
-    out_color = vec4 (oColor.rgb, lerp.a);
-  }  
-}
-)code"
-      }
+    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("liquid_vs") }
+    , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("liquid_fs") }
     };
 
   std::map<int, int> _liquid_id_types;

@@ -358,6 +358,24 @@ set ( external_headers
 set ( shaders
       src/glsl/m2_vert.glsl
       src/glsl/m2_frag.glsl
+      src/glsl/m2_box_vert.glsl
+      src/glsl/m2_box_frag.glsl
+      src/glsl/particle_vert.glsl
+      src/glsl/particle_frag.glsl
+      src/glsl/ribbon_vert.glsl
+      src/glsl/ribbon_frag.glsl
+      src/glsl/terrain_vert.glsl
+      src/glsl/terrain_frag.glsl
+      src/glsl/wmo_vert.glsl
+      src/glsl/wmo_frag.glsl
+      src/glsl/liquid_vert.glsl
+      src/glsl/liquid_frag.glsl
+      src/glsl/mfbo_vert.glsl
+      src/glsl/mfbo_frag.glsl
+      src/glsl/cursor_vert.glsl
+      src/glsl/cursor_frag.glsl
+      src/glsl/horizon_vert.glsl
+      src/glsl/horizon_frag.glsl
     )
 
 IF(WIN32)
