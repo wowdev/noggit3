@@ -3,11 +3,23 @@
 
 uniform sampler2D tex1;
 
+uniform bool use_vertex_color;
+
 in vec2 f_texcoord;
+in vec4 f_vertex_color;
 
 out vec4 out_color;
 
 void main()
 {
-  out_color = texture2D(tex1, f_texcoord);
+  vec4 tex = texture2D(tex1, f_texcoord);
+  
+  if(use_vertex_color) 
+  {
+    out_color = vec4(tex.rgb * f_vertex_color.rgb, tex.a);
+  }
+  else
+  {
+    out_color = tex;
+  }
 }

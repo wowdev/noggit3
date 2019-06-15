@@ -712,11 +712,13 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
 {
   opengl::scoped::vao_binder const _ (_vao);
 
-  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_buffer);
-  wmo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoords_buffer);
-  wmo_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  if (hascv)
+  {
+    wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
+  }
 
   _vao_is_setup = true;
 }
@@ -1089,20 +1091,20 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
 
   if (hascv)
   {
+    wmo_shader.uniform("use_vertex_color", 1);
+
     if(indoor)
     {
-      gl.enableClientState (GL_COLOR_ARRAY);
-      gl.colorPointer (_vertex_colors_buffer, 4, GL_FLOAT, 0, 0);
     }
-
   }
   else
   {
+    wmo_shader.uniform("use_vertex_color", 0);
+
     if (world_has_skies)
     {
     }
   }
-
 
   opengl::scoped::vao_binder const _ (_vao);
 

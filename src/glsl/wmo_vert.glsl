@@ -3,11 +3,11 @@
 
 in vec4 position;
 in vec3 normal;
-in vec3 color;
+in vec4 vertex_color;
 in vec2 texcoord;
 
 out vec2 f_texcoord;
-
+out vec4 f_vertex_color;
 
 uniform mat4 model_view;
 uniform mat4 projection;
@@ -18,4 +18,5 @@ void main()
   gl_Position = projection * model_view * transform * position;
 
   f_texcoord = texcoord;
+  f_vertex_color = vertex_color;
 }
