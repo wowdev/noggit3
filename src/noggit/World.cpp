@@ -463,268 +463,12 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     if (!_mcnk_program)
     {
-      _mcnk_program.reset(new opengl::program({ { GL_VERTEX_SHADER
-        , R"code(
-#version 330 core
-
-in vec3 position;
-in vec3 normal;
-in vec3 mccv;
-in vec2 texcoord;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-out vec3 vary_position;
-out vec2 vary_texcoord;
-out vec3 vary_normal;
-out vec3 vary_mccv;
-
-void main()
-{
-  gl_Position = projection * model_view * vec4(position, 1.0);
-  vary_normal = normal;
-  vary_position = position;
-  vary_texcoord = texcoord;
-  vary_mccv = mccv;
-}
-)code"
-        }
-        ,{ GL_FRAGMENT_SHADER
-        , R"code(
-#version 330 core
-
-uniform mat4 model_view;
-
-uniform sampler2D shadow_map;
-uniform sampler2D tex0;
-uniform sampler2D tex1;
-uniform sampler2D tex2;
-uniform sampler2D tex3;
-uniform vec2 tex_anim_0;
-uniform vec2 tex_anim_1;
-uniform vec2 tex_anim_2;
-uniform vec2 tex_anim_3;
-uniform sampler2D alphamap;
-uniform int layer_count;
-uniform bool has_mccv;
-uniform bool cant_paint;
-uniform bool draw_areaid_overlay;
-uniform vec4 areaid_color;
-uniform bool draw_impassible_flag;
-uniform bool draw_terrain_height_contour;
-uniform bool draw_lines;
-uniform bool draw_hole_lines;
-
-uniform bool draw_wireframe;
-uniform int wireframe_type;
-uniform float wireframe_radius;
-uniform float wireframe_width;
-uniform vec4 wireframe_color;
-uniform bool rainbow_wireframe;
-
-uniform vec3 camera;
-uniform bool draw_fog;
-uniform vec4 fog_color;
-uniform float fog_start;
-uniform float fog_end;
-
-uniform bool draw_cursor_circle;
-uniform vec3 cursor_position;
-uniform float outer_cursor_radius;
-uniform float inner_cursor_ratio;
-uniform vec4 cursor_color;
-
-uniform vec3 light_dir;
-uniform vec3 diffuse_color;
-uniform vec3 ambient_color;
-
-in vec3 vary_position;
-in vec2 vary_texcoord;
-in vec3 vary_normal;
-in vec3 vary_mccv;
-
-out vec4 out_color;
-
-const float TILESIZE  = 533.33333;
-const float CHUNKSIZE = TILESIZE / 16.0;
-const float HOLESIZE  = CHUNKSIZE * 0.25;
-const float UNITSIZE = HOLESIZE * 0.5;
-
-vec4 blend_by_alpha (in vec4 source, in vec4 dest)
-{
-  return source * source.w + dest * (1.0 - source.w);
-}
-
-vec4 texture_blend() 
-{
-  if(layer_count == 0)
-    return vec4 (1.0, 1.0, 1.0, 1.0);
-
-  vec3 alpha = texture2D (alphamap, vary_texcoord / 8.0).rgb;
-  float a0 = alpha.r;  
-  float a1 = alpha.g;
-  float a2 = alpha.b;
-
-  vec3 t0 = texture2D(tex0, vary_texcoord + tex_anim_0).rgb;
-  vec3 t1 = texture2D(tex1, vary_texcoord + tex_anim_1).rgb;
-  vec3 t2 = texture2D(tex2, vary_texcoord + tex_anim_2).rgb;
-  vec3 t3 = texture2D(tex3, vary_texcoord + tex_anim_3).rgb;
-
-  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
-}
-
-float contour_alpha(float unit_size, float pos, float line_width)
-{
-  float f = abs(fract((pos + unit_size*0.5) / unit_size) - 0.5);
-  float df = abs(line_width / unit_size);
-  return smoothstep(0.0, df, f);
-}
-
-float contour_alpha(float unit_size, vec2 pos, vec2 line_width)
-{
-  return 1.0 - min( contour_alpha(unit_size, pos.x, line_width.x)
-                  , contour_alpha(unit_size, pos.y, line_width.y)
-                  );
-}
-
-float dist_3d(vec3 a, vec3 b)
-{
-  float x = a.x - b.x;
-  float y = a.y - b.y;
-  float z = a.z - b.z;
-  return sqrt(x*x + y*y + z*z);
-}
-
-void main()
-{
-  float dist_from_camera = dist_3d(camera, vary_position);
-
-  if(draw_fog && dist_from_camera >= fog_end)
-  {
-    out_color = fog_color;
-    return;
-  } 
-  vec3 fw = fwidth(vary_position.xyz);
-
-  out_color = texture_blend();
-  out_color.rgb *= vary_mccv;
-
-  // diffuse + ambient lighting
-  out_color.rgb *= vec3(clamp (diffuse_color * max(dot(vary_normal, light_dir), 0.0), 0.0, 1.0)) + ambient_color;
-
-  if(cant_paint)
-  {
-    out_color *= vec4(1.0, 0.0, 0.0, 1.0);
-  }
-  
-  if(draw_areaid_overlay)
-  {
-    out_color = out_color * 0.3 + areaid_color;
-  }
-
-  if(draw_impassible_flag)
-  {
-    out_color = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), out_color);
-  }
-
-  float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8.0).r;
-
-  out_color = vec4 (out_color.rgb * (1.0 - shadow_alpha), 1.0);
-
-  if (draw_terrain_height_contour)
-  {
-    out_color = vec4(out_color.rgb * contour_alpha(4.0, vary_position.y+0.1, fw.y), 1.0);
-  }
-
-  bool lines_drawn = false;
-  if(draw_lines)
-  {
-    vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
-
-    color.a = contour_alpha(TILESIZE, vary_position.xz, fw.xz * 1.5);
-    color.g = color.a > 0.0 ? 0.8 : 0.0;
-
-    if(color.a == 0.0)
-    {
-      color.a = contour_alpha(CHUNKSIZE, vary_position.xz, fw.xz);
-      color.r = color.a > 0.0 ? 0.8 : 0.0;
-    }
-    if(draw_hole_lines && color.a == 0.0)
-    {
-      color.a = contour_alpha(HOLESIZE, vary_position.xz, fw.xz * 0.75);
-      color.b = 0.8;
-    }
-    
-    lines_drawn = color.a > 0.0;
-    out_color = blend_by_alpha (color, out_color);
-  }
-
-  if(draw_fog && dist_from_camera >= fog_end * fog_start)
-  {
-    float start = fog_end * fog_start;
-    float alpha = (dist_from_camera - start) / (fog_end - start);
-    out_color = blend_by_alpha (vec4(fog_color.rgb, alpha), out_color);
-    out_color.a = 1.0;
-  }
-
-  if(draw_wireframe && !lines_drawn)
-  {
-    // true by default => type 0
-	  bool draw_wire = true;
-    float real_wireframe_radius = max(outer_cursor_radius * wireframe_radius, 2.0 * UNITSIZE); 
-	
-	  if(wireframe_type == 1)
-	  {
-		  draw_wire = (length(vary_position.xz - cursor_position.xz) < real_wireframe_radius);
-	  }
-	
-	  if(draw_wire)
-	  {
-		  float alpha = 0.0;
-
-		  alpha = contour_alpha(UNITSIZE, vary_position.xz, fw.xz * wireframe_width);
-
-		  float xmod = mod(vary_position.x, UNITSIZE);
-		  float zmod = mod(vary_position.z, UNITSIZE);
-		  float d = length(fw.xz) * wireframe_width;
-		  float diff = min( min(abs(xmod - zmod), abs(xmod - UNITSIZE + zmod))
-                      , min(abs(zmod - xmod), abs(zmod + UNITSIZE - zmod))
-                      );        
-
-		  alpha = max(alpha, 1.0 - smoothstep(0.0, d, diff));
-      vec4 color;
- 
-      if(rainbow_wireframe)
-      {
-        float pct = (vary_position.x - cursor_position.x + real_wireframe_radius) / (2.0 * real_wireframe_radius);          
-        float red = (1.0 - smoothstep(0.2, 0.4, pct)) + smoothstep(0.8, 1.0, pct);
-        float green = (pct < 0.6 ? smoothstep(0.0, 0.2, pct) : (1.0 - smoothstep(0.6, 0.8, pct)));
-        float blue = smoothstep(0.4, 0.6, pct);
-
-        color = vec4(red, green, blue, alpha);
-      }
-      else
-      {
-        color = vec4(wireframe_color.rgb, alpha * wireframe_color.a);
-      }      
-
-		  out_color = blend_by_alpha (color, out_color);
-	  }
-  }
-
-  if (draw_cursor_circle)
-  {
-    float diff = length(vary_position.xz - cursor_position.xz);
-    diff = min(abs(diff - outer_cursor_radius), abs(diff - outer_cursor_radius * inner_cursor_ratio));
-    float alpha = 1.0 - smoothstep(0.0, length(fw.xz), diff);
-
-    out_color = blend_by_alpha (vec4(cursor_color.rgb, alpha), out_color);
-  }
-}
-)code"
-        }
-      } ));
+      _mcnk_program.reset
+        ( new opengl::program
+            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("terrain_vs") }
+            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("terrain_fs") }
+            }
+        );
     }
     
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
@@ -751,7 +495,6 @@ void main()
     QColor c = _settings->value("wireframe/color").value<QColor>();
     math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
     mcnk_shader.uniform ("wireframe_color", wireframe_color);
-    mcnk_shader.uniform ("rainbow_wireframe", _settings->value("wireframe/rainbow", 0).toInt());
     
     mcnk_shader.uniform ("draw_fog", (int)draw_fog);
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
@@ -1004,37 +747,12 @@ void main()
     {
       if (!_m2_box_program)
       {
-        _m2_box_program.reset(new opengl::program({ { GL_VERTEX_SHADER
-          , R"code(
-#version 330 core
-
-in mat4 transform;
-in vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-void main()
-{
-  gl_Position = projection * model_view * transform * position;
-}
-)code"
-          }
-          ,{ GL_FRAGMENT_SHADER
-          , R"code(
-#version 330 core
-
-uniform vec4 color;
-
-out vec4 out_color;
-
-void main()
-{
-  out_color = color;
-}
-)code"
-          }
-        }));
+        _m2_box_program.reset
+          ( new opengl::program
+              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
+              , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
+              }
+          );
       }
 
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
@@ -1092,76 +810,39 @@ void main()
       {
         if (!_wmo_program)
         {
-          _wmo_program.reset(new opengl::program 
-            { 
-              { GL_VERTEX_SHADER
-              , R"code(
-#version 330 core
+          _wmo_program.reset
+            ( new opengl::program
+                { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
+                , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
+                }
+            );
+        }
 
-in vec4 position;
-in vec3 normal;
-in vec3 color;
-in vec2 texcoord;
+        opengl::scoped::use_program wmo_program {*_wmo_program.get()};
 
-out vec2 f_texcoord;
+        wmo_program.uniform("model_view", model_view);
+        wmo_program.uniform("projection", projection);
+        wmo_program.uniform("tex1", 0);
 
-
-uniform mat4 model_view;
-uniform mat4 projection;
-uniform mat4 transform;
-
-void main()
-{
-  gl_Position = projection * model_view * transform * position;
-
-  f_texcoord = texcoord;
-}
-)code"
-              }
-            , { GL_FRAGMENT_SHADER
-              , R"code(
-#version 330 core
-
-uniform sampler2D tex1;
-
-in vec2 f_texcoord;
-
-out vec4 out_color;
-
-void main()
-{
-  out_color = texture2D(tex1, f_texcoord);
-}
-)code"
-                   }
-            });
-      }
-
-      opengl::scoped::use_program wmo_program {*_wmo_program.get()};
-
-      wmo_program.uniform("model_view", model_view);
-      wmo_program.uniform("projection", projection);
-      wmo_program.uniform("tex1", 0);
-
-      it->second.draw( wmo_program
-                     , model_view
-                     , projection
-                     , frustum
-                     , culldistance
-                     , camera_pos
-                     , is_hidden
-                     , draw_wmo_doodads
-                     , draw_fog
-                     , ocean_color_light
-                     , ocean_color_dark
-                     , river_color_light
-                     , river_color_dark
-                     , _liquid_render.get()
-                     , mCurrentSelection
-                     , animtime
-                     , skies->hasSkies()
-                     , display
-                     );
+        it->second.draw( wmo_program
+                       , model_view
+                       , projection
+                       , frustum
+                       , culldistance
+                       , camera_pos
+                       , is_hidden
+                       , draw_wmo_doodads
+                       , draw_fog
+                       , ocean_color_light
+                       , ocean_color_dark
+                       , river_color_light
+                       , river_color_dark
+                       , _liquid_render.get()
+                       , mCurrentSelection
+                       , animtime
+                       , skies->hasSkies()
+                       , display
+                       );
       }
     }
   }
@@ -1173,66 +854,12 @@ void main()
   {
     if (!_m2_particles_program)
     {
-      _m2_particles_program.reset(new opengl::program({ { GL_VERTEX_SHADER
-        , R"code(
-#version 330 core
-
-in mat4 transform;
-in vec4 position;
-in vec3 offset;
-in vec2 uv;
-in vec4 color;
-
-out vec2 f_uv;
-out vec4 f_color;
-
-uniform mat4 model_view_projection;
-uniform int billboard;
-
-void main()
-{
-  f_uv = uv;
-  f_color = color;
-  if(billboard == 1)
-  { 
-    vec4 pos = transform*position;
-    pos.xyz += offset;
-    gl_Position = model_view_projection * pos;
-  }
-  else
-  {
-    gl_Position = model_view_projection * transform * position;
-  }
-}
-)code"
-          }
-          ,{ GL_FRAGMENT_SHADER
-          , R"code(
-#version 330 core
-
-in vec2 f_uv;
-in vec4 f_color;
-
-out vec4 out_color;
-
-uniform sampler2D tex;
-
-uniform float alpha_test;
-
-void main()
-{
-  vec4 t = texture(tex, f_uv);
-
-  if(t.a < alpha_test)
-  {
-    discard;
-  }
-
-  out_color = vec4(f_color.rgb * t.rgb, t.a);
-}
-)code"
-          }
-      }));
+      _m2_particles_program.reset
+        ( new opengl::program
+            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
+            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
+            }
+        );
     }
 
     opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
@@ -1254,44 +881,12 @@ void main()
   {
     if (!_m2_ribbons_program)
     {
-      _m2_ribbons_program.reset(new opengl::program({{ GL_VERTEX_SHADER
-        , R"code(
-#version 330 core
-
-in mat4 transform;
-in vec4 position;
-in vec2 uv;
-
-out vec2 f_uv;
-
-uniform mat4 model_view_projection;
-
-void main()
-{
-  f_uv = uv;
-  gl_Position = model_view_projection * transform * position;
-}
-)code"
+      _m2_ribbons_program.reset
+        ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
           }
-          ,{ GL_FRAGMENT_SHADER
-          , R"code(
-#version 330 core
-
-in vec2 f_uv;
-
-out vec4 out_color;
-
-uniform sampler2D tex;
-uniform vec4 color;
-
-void main()
-{
-  vec4 t = texture(tex, f_uv);
-  out_color = vec4(color.rgb * t.rgb, color.a);
-}
-)code"
-          }
-      }));
+        );
     }
 
     opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
@@ -1353,35 +948,12 @@ void main()
 
     if (!_mfbo_program)
     {
-      _mfbo_program.reset(new opengl::program({{ GL_VERTEX_SHADER
-        , R"code(
-#version 330 core
-
-attribute vec4 position;
-
-uniform mat4 model_view_projection;
-
-void main()
-{
-  gl_Position = model_view_projection * position;
-}
-)code"
-        }
-        ,{ GL_FRAGMENT_SHADER
-        , R"code(
-#version 330 core
-
-uniform vec4 color;
-
-out vec4 out_color;
-
-void main()
-{
-  out_color = color;
-}
-)code"
-        }
-                          }));
+      _mfbo_program.reset
+        ( new opengl::program
+            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("mfbo_vs") }
+            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("mfbo_fs") }
+            }
+        );
     }
     opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
 
