@@ -324,17 +324,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , bool world_has_skies
                , display_mode display
                )
-{
-  if (draw_fog)
-  {
-
-  }
-  else
-  {
-
-  }
-    
-
+{ 
   for (auto& group : groups)
   {
     if (!group.is_visible(ofs, angle, frustum, cull_distance, camera, display))
@@ -1112,6 +1102,8 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
   {
     WMOMaterial* mat (&wmo->materials.at (batch.texture));
     scoped_material_setter const material_setter (mat, _vertex_colors.size ());
+
+    wmo_shader.uniform("unfogged", (int)mat->flags.unfogged);
 
     opengl::texture::set_active_texture(0);
     wmo->textures[mat->texture1]->bind();

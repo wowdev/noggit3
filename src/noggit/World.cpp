@@ -824,6 +824,17 @@ void World::draw ( math::matrix_4x4 const& model_view
         wmo_program.uniform("projection", projection);
         wmo_program.uniform("tex1", 0);
 
+        wmo_program.uniform("draw_fog", (int)draw_fog);
+
+        if (draw_fog)
+        {          
+          wmo_program.uniform("fog_end", fogdistance);
+          wmo_program.uniform("fog_start", 0.5f);
+          wmo_program.uniform("fog_color", skies->color_set[FOG_COLOR]);
+          wmo_program.uniform("camera", camera_pos);
+        }
+
+
         it->second.draw( wmo_program
                        , model_view
                        , projection

@@ -41,7 +41,8 @@ struct wmo_batch
   uint8_t texture;
 };
 
-class WMOGroup {
+class WMOGroup 
+{
 public:
   WMOGroup(WMO *wmo, MPQFile* f, int num, char const* names);
   WMOGroup(WMOGroup const&);
