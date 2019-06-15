@@ -6,6 +6,7 @@ in vec3 normal;
 in vec4 vertex_color;
 in vec2 texcoord;
 
+out vec3 f_position;
 out vec2 f_texcoord;
 out vec4 f_vertex_color;
 
@@ -15,8 +16,11 @@ uniform mat4 transform;
 
 void main()
 {
-  gl_Position = projection * model_view * transform * position;
+  vec4 pos = transform * position;
 
+  gl_Position = projection * model_view * pos;
+
+  f_position = pos.xyz;
   f_texcoord = texcoord;
   f_vertex_color = vertex_color;
 }
