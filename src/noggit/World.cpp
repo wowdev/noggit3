@@ -740,6 +740,9 @@ void World::draw ( math::matrix_4x4 const& model_view
                        );
       }
     }
+
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
   // model particles
