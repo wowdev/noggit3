@@ -29,8 +29,6 @@ struct OutdoorLightStats
   void init(MPQFile* f);
 
   void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
-  void setupLighting();
-  // void setupFog(); //! \todo  add fog maybe?
 };
 
 class OutdoorLighting

@@ -1238,10 +1238,6 @@ MapView::MapView( math::degrees camera_yaw0
     {
       move_camera_with_auto_height (_camera.position);
     }    
-
-    gl.enableClientState (GL_VERTEX_ARRAY);
-    gl.enableClientState (GL_NORMAL_ARRAY);
-    gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
   }
 
   void MapView::paintGL()
@@ -2108,8 +2104,6 @@ void MapView::draw_map()
     radius = shaderTool->brushRadius();
     break;
   }
-
-  float far_z = _settings->value ("farZ", 2048).toFloat();  
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
   if (!(_world->IsSelection(eEntry_Model)

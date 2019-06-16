@@ -501,12 +501,6 @@ void WMOLight::setup(GLint light)
 
   GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
   GLfloat LightPosition[] = { pos.x, pos.y, pos.z, 0.0f };
-
-  gl.lightfv(light, GL_AMBIENT, LightAmbient);
-  gl.lightfv(light, GL_DIFFUSE, fcolor);
-  gl.lightfv(light, GL_POSITION, LightPosition);
-
-  gl.enable(light);
 }
 
 void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d light_color)
@@ -519,9 +513,6 @@ void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d light
   math::vector_4d diffuse = math::vector_4d(light_color, 1);
   //math::vector_4d diffuse = math::vector_4d(0.439216f, 0.266667f, 0, 1);
 
-  gl.lightfv(light, GL_AMBIENT, ambient);
-  gl.lightfv(light, GL_DIFFUSE, diffuse);
-  gl.lightfv(light, GL_POSITION, position);
 
   gl.enable(light);
 }
@@ -612,14 +603,11 @@ namespace
     {
       if (_alpha_test)
       {
-        gl.enable (GL_ALPHA_TEST);
-
         float aval = 0;
 
         if (material->flags & 0x80) aval = 0.3f;
         if (material->flags & 0x01) aval = 0.0f;
 
-        gl.alphaFunc (GL_GREATER, aval);
       }
 
       if (_back_face_cull)
@@ -629,19 +617,16 @@ namespace
 
       if (_specular)
       {
-        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(material->col2));
       }
       else
       {
         ::math::vector_4d nospec(0, 0, 0, 1);
-        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
       }
 
       if (_over_bright)
       {
         //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
         GLfloat em[4] = {1,1,1,1};
-        gl.materialfv (GL_FRONT, GL_EMISSION, em);
       }
     }
 
@@ -650,12 +635,10 @@ namespace
       if (_over_bright)
       {
         GLfloat em[4] = {0,0,0,1};
-        gl.materialfv (GL_FRONT, GL_EMISSION, em);
       }
 
       if (_alpha_test)
       {
-        gl.disable (GL_ALPHA_TEST);
       }
     }
 
@@ -1110,15 +1093,6 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
 
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
-
-  gl.color4f(1, 1, 1, 1);
-  gl.enable(GL_CULL_FACE);
-
-  if (hascv)
-  {
-    gl.disableClientState (GL_COLOR_ARRAY);
-    gl.enable (GL_LIGHTING);
-  }
 }
 
 void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) const
@@ -1203,16 +1177,7 @@ void WMOFog::init(MPQFile* f)
 
 void WMOFog::setup()
 {
-  /*if (gWorld->drawfog) {
-  gl.fogfv(GL_FOG_COLOR, color);
-  gl.fogf(GL_FOG_START, fogstart);
-  gl.fogf(GL_FOG_END, fogend);
 
-  gl.enable(GL_FOG);
-  } else {
-  gl.disable(GL_FOG);
-  }*/
-  gl.disable(GL_FOG);
 }
 
 decltype (WMOManager::_) WMOManager::_;
