@@ -12,6 +12,8 @@ uniform float fog_end;
 uniform vec3 fog_color;
 uniform vec3 camera;
 
+uniform float alpha_test;
+
 in vec3 f_position;
 in vec2 f_texcoord;
 in vec4 f_vertex_color;
@@ -22,7 +24,6 @@ void main()
 {
   float dist_from_camera = distance(camera, f_position);
   bool fog = draw_fog && !unfogged;
-  vec4 color;
 
   if(fog && dist_from_camera >= fog_end)
   {
@@ -31,14 +32,19 @@ void main()
   }
 
   vec4 tex = texture2D(tex1, f_texcoord);
+
+  if(tex.a < alpha_test)
+  {
+    discard;
+  }
   
   if(use_vertex_color) 
   {
-    color = vec4(tex.rgb * f_vertex_color.rgb, tex.a);
+    out_color = vec4(tex.rgb * f_vertex_color.rgb, tex.a);
   }
   else
   {
-    color = tex;
+    out_color = tex;
   }
 
   if(fog && (dist_from_camera >= fog_end * fog_start))
@@ -46,8 +52,11 @@ void main()
     float start = fog_end * fog_start;
     float alpha = (dist_from_camera - start) / (fog_end - start);
 
-    color.rgb = mix(color.rgb, fog_color, alpha);
+    out_color.rgb = mix(out_color.rgb, fog_color, alpha);
   }
 
-  out_color = color;
+  if(out_color.a < alpha_test)
+  {
+    discard;
+  }
 }

@@ -15,20 +15,54 @@
 
 #include <memory>
 
-struct WMOMaterial {
-  int32_t flags;
-  int32_t specular;
-  int32_t transparent; // Blending: 0 for opaque, 1 for transparent
-  int32_t texture_offset_1; // Start position for the first texture filename in the MOTX data block
-  uint32_t col1; // color
-  int32_t d3; // flag
-  int32_t texture_offset_2; // Start position for the second texture filename in the MOTX data block
-  uint32_t col2; // color
-  int32_t d4; // flag
-  uint32_t col3;
-  float f2;
-  float diffColor[3];
-  uint32_t texture1; // this is the first texture object. of course only in RAM.
+struct CImVector
+{
+  std::uint8_t b;
+  std::uint8_t g;
+  std::uint8_t r;
+  std::uint8_t a;
+};
+
+struct CArgb
+{
+  std::uint8_t r;
+  std::uint8_t g;
+  std::uint8_t b;
+  std::uint8_t a;
+};
+
+struct WMOMaterial 
+{
+  union
+  {
+    uint32_t value;
+    struct
+    {
+      uint32_t unlit :  1;
+      uint32_t unfogged : 1;
+      uint32_t unculled : 1;
+      uint32_t ext_light: 1; // darkened used for the intern face of windows
+      uint32_t sidn :  1;
+      uint32_t window :  1; // lighting related(flag checked in CMapObj::UpdateSceneMaterials)
+      uint32_t clamp_s :  1;
+      uint32_t clamp_t : 1;
+      uint32_t unused : 24;
+    };
+  } flags;
+  uint32_t shader;
+  uint32_t blend_mode; // Blending: 0 for opaque, 1 for transparent
+  uint32_t texture_offset_1; // Start position for the first texture filename in the MOTX data block
+  CImVector sidn_color; // emissive color
+  CImVector frame_sidn_color; // runtime value
+  uint32_t envNameIndex; 
+  CArgb diffuse_color;
+  uint32_t ground_type;
+  uint32_t texture_offset_2; // Start position for the second texture filename in the MOTX data block
+  uint32_t color_2;
+  uint32_t flag_2;
+  uint32_t runtime_data[2];
+  // also runtime data
+  uint32_t texture1; // this is the first texture object.
   uint32_t texture2; // this is the second texture object.
 };
 

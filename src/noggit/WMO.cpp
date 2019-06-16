@@ -591,64 +591,6 @@ struct WMOGroupHeader {
   int32_t unk1, id, unk2, unk3;
 };
 
-namespace
-{
-  struct scoped_material_setter
-  {
-    scoped_material_setter (WMOMaterial* material, bool vertex_colors)
-      : _over_bright ((material->flags & 0x10) && !vertex_colors)
-      , _specular (material->specular && !vertex_colors && !_over_bright)
-      , _alpha_test ((material->transparent) != 0)
-      , _back_face_cull (material->flags & 0x04)
-    {
-      if (_alpha_test)
-      {
-        float aval = 0;
-
-        if (material->flags & 0x80) aval = 0.3f;
-        if (material->flags & 0x01) aval = 0.0f;
-
-      }
-
-      if (_back_face_cull)
-        gl.disable (GL_CULL_FACE);
-      else
-        gl.enable (GL_CULL_FACE);
-
-      if (_specular)
-      {
-      }
-      else
-      {
-        ::math::vector_4d nospec(0, 0, 0, 1);
-      }
-
-      if (_over_bright)
-      {
-        //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
-        GLfloat em[4] = {1,1,1,1};
-      }
-    }
-
-    ~scoped_material_setter()
-    {
-      if (_over_bright)
-      {
-        GLfloat em[4] = {0,0,0,1};
-      }
-
-      if (_alpha_test)
-      {
-      }
-    }
-
-    const bool _over_bright;
-    const bool _specular;
-    const bool _alpha_test;
-    const bool _back_face_cull;
-  };
-}
-
 void WMOGroup::upload()
 {
   _vertex_array.upload();
@@ -1062,34 +1004,54 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
     setup_vao(wmo_shader);
   }
 
-  if (hascv)
-  {
-    wmo_shader.uniform("use_vertex_color", 1);
-
-    if(indoor)
-    {
-    }
-  }
-  else
-  {
-    wmo_shader.uniform("use_vertex_color", 0);
-
-    if (world_has_skies)
-    {
-    }
-  }
+  wmo_shader.uniform("use_vertex_color", (int)hascv);
 
   opengl::scoped::vao_binder const _ (_vao);
 
   for (wmo_batch& batch : _batches)
   {
-    WMOMaterial* mat (&wmo->materials.at (batch.texture));
-    scoped_material_setter const material_setter (mat, _vertex_colors.size ());
+    WMOMaterial const& mat (wmo->materials.at (batch.texture));
+    
+    float alpha_test = 0.003921568f; // 1/255
 
-    wmo_shader.uniform("unfogged", (int)mat->flags.unfogged);
+    switch (mat.blend_mode)
+    {
+      case 1:
+        gl.disable(GL_BLEND);
+        alpha_test = 0.878431372f; // 224/255
+        break;
+      case 2:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+      case 3:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+        break;
+      case 4:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_ZERO);
+        break;
+      case 5:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+        break;
+      case 6:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_ONE);
+        break;
+      case 0:
+      default:
+        alpha_test = -1.f;
+        gl.disable(GL_BLEND);
+        break;
+    }    
+
+    wmo_shader.uniform("alpha_test", alpha_test);
+    wmo_shader.uniform("unfogged", (int)mat.flags.unfogged);
 
     opengl::texture::set_active_texture(0);
-    wmo->textures[mat->texture1]->bind();
+    wmo->textures[mat.texture1]->bind();
 
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
