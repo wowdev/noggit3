@@ -190,82 +190,6 @@ void World::initDisplay()
   ol = std::make_unique<OutdoorLighting> ("World\\dnc.db");
 }
 
-void World::outdoorLighting()
-{
-  math::vector_4d black(0, 0, 0, 0);
-  math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-
-  float di = outdoorLightStats.dayIntensity;
-  //float ni = outdoorLightStats.nightIntensity;
-
-  math::vector_3d dd = outdoorLightStats.dayDir;
-  // HACK: let's just keep the light source in place for now
-  //math::vector_4d pos(-1, 1, -1, 0);
-  math::vector_4d pos(-dd.x, -dd.z, dd.y, 0.0f);
-  math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
-  gl.lightfv(GL_LIGHT0, GL_AMBIENT, black);
-  gl.lightfv(GL_LIGHT0, GL_DIFFUSE, col);
-  gl.lightfv(GL_LIGHT0, GL_POSITION, pos);
-}
-
-void World::outdoorLights(bool on)
-{
-  float di = outdoorLightStats.dayIntensity;
-  float ni = outdoorLightStats.nightIntensity;
-
-  if (on) {
-    math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    if (di>0) {
-      gl.enable(GL_LIGHT0);
-    }
-    else {
-      gl.disable(GL_LIGHT0);
-    }
-    if (ni>0) {
-      gl.enable(GL_LIGHT1);
-    }
-    else {
-      gl.disable(GL_LIGHT1);
-    }
-  }
-  else {
-    math::vector_4d ambient(0, 0, 0, 1);
-    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    gl.disable(GL_LIGHT0);
-    gl.disable(GL_LIGHT1);
-  }
-}
-
-void World::setupFog (bool draw_fog)
-{
-  if (draw_fog) 
-  {
-    //float fogdist = 357.0f; // minimum draw distance in wow
-    //float fogdist = 777.0f; // maximum draw distance in wow
-
-    float fogdist = fogdistance;
-    float fogstart = 0.5f;
-
-    culldistance = fogdist;
-
-    //FOG_COLOR
-    math::vector_4d fogcolor(skies->colorSet[FOG_COLOR], 1);
-    gl.fogfv(GL_FOG_COLOR, fogcolor);
-    //! \todo  retreive fogstart and fogend from lights.lit somehow
-    gl.fogf(GL_FOG_END, fogdist);
-    gl.fogf(GL_FOG_START, fogdist * fogstart);
-
-    gl.enable(GL_FOG);
-  }
-  else 
-  {
-    gl.disable(GL_FOG);
-    culldistance = _view_distance;
-  }
-}
-
 void World::draw ( math::matrix_4x4 const& model_view
                  , math::matrix_4x4 const& projection
                  , math::vector_3d const& cursor_pos
@@ -405,21 +329,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }  
 
-  // clearing the depth buffer only - color buffer is/has been overwritten anyway
-  // unless there is no sky OR skybox
-  GLbitfield clearmask = GL_DEPTH_BUFFER_BIT;
-  if (!hadSky)
-  {
-    clearmask |= GL_COLOR_BUFFER_BIT;
-  }
-  gl.clear(clearmask);
-
-
-  outdoorLighting();
-  outdoorLights(true);
-
-  gl.fogi(GL_FOG_MODE, GL_LINEAR);
-  setupFog (draw_fog);
+  culldistance = draw_fog ? fogdistance : _view_distance;
 
   // Draw verylowres heightmap
   if (draw_fog && draw_terrain) 
@@ -427,36 +337,10 @@ void World::draw ( math::matrix_4x4 const& model_view
     _horizon_render->draw (model_view, projection, &mapIndex, skies->color_set[FOG_COLOR], culldistance, frustum, camera_pos, display);
   }
 
-  // Draw height map
-  gl.enableClientState(GL_VERTEX_ARRAY);
-  gl.enableClientState(GL_NORMAL_ARRAY);
-
   gl.enable(GL_DEPTH_TEST);
   gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
-  gl.enable(GL_LIGHTING);
-
-  gl.enable(GL_COLOR_MATERIAL);
-  //gl.colorMaterial(GL_FRONT, GL_DIFFUSE);
-  gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  gl.color4f(1, 1, 1, 1);
-
-  gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.1f, 0.1f, 0.1f, 0.1f));
-  gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 64);
-
-  gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  gl.clientActiveTexture(GL_TEXTURE0);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  gl.texCoordPointer (detailtexcoords, 2, GL_FLOAT, 0, 0);
-
-  gl.clientActiveTexture(GL_TEXTURE1);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  gl.texCoordPointer (alphatexcoords, 2, GL_FLOAT, 0, 0);
-
-  gl.clientActiveTexture(GL_TEXTURE0);
 
   // height map w/ a zillion texture passes
   if (draw_terrain)
@@ -858,8 +742,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
-  outdoorLights(true);
-  setupFog (draw_fog);
   // model particles
   if (draw_model_animations && !model_with_particles.empty())
   {

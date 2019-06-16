@@ -66,8 +66,6 @@ public:
   // The lighting used.
   std::unique_ptr<OutdoorLighting> ol;
 
-  void outdoorLighting();
-
   unsigned int getMapID();
   // Time of the day.
   float animtime;
@@ -131,9 +129,6 @@ public:
             , int water_layer
             , display_mode display
             );
-
-  void outdoorLights(bool on);
-  void setupFog (bool draw_fog);
 
   unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt);

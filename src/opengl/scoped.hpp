@@ -74,64 +74,6 @@ namespace opengl
       GLboolean _was_enabled;
     };
 
-    template<std::size_t texture_number, GLboolean value>
-    class texture_setter
-    {
-    public:
-      texture_setter()
-        : _was_enabled (false)
-      {
-        texture::set_active_texture (texture_number);
-        _was_enabled = (gl.isEnabled (GL_TEXTURE_2D) == GL_TRUE);
-        if (value == GL_TRUE)
-        {
-          texture::enable_texture();
-        }
-        else
-        {
-          texture::disable_texture();
-        }
-      }
-
-      ~texture_setter()
-      {
-        texture::set_active_texture (texture_number);
-        if (_was_enabled == GL_TRUE)
-        {
-          texture::enable_texture();
-        }
-        else
-        {
-          texture::disable_texture();
-        }
-      }
-
-      texture_setter (texture_setter const&) = delete;
-      texture_setter (texture_setter&&) = delete;
-      texture_setter& operator= (texture_setter const&) = delete;
-      texture_setter& operator= (texture_setter&&) = delete;
-
-    private:
-      bool _was_enabled;
-    };
-
-    class matrix_pusher
-    {
-    public:
-      matrix_pusher()
-      {
-        gl.pushMatrix();
-      }
-      ~matrix_pusher()
-      {
-        gl.popMatrix();
-      }
-
-      matrix_pusher (matrix_pusher const&) = delete;
-      matrix_pusher (matrix_pusher&&) = delete;
-      matrix_pusher& operator= (matrix_pusher const&) = delete;
-      matrix_pusher& operator= (matrix_pusher&&) = delete;
-    };
 
     template<GLint matrix_mode>
     class matrix_mode_setter
