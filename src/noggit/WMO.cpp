@@ -1050,6 +1050,15 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
     wmo_shader.uniform("alpha_test", alpha_test);
     wmo_shader.uniform("unfogged", (int)mat.flags.unfogged);
 
+    if (mat.flags.unculled)
+    {
+      gl.disable(GL_CULL_FACE);
+    }
+    else
+    {
+      gl.enable(GL_CULL_FACE);
+    }
+
     opengl::texture::set_active_texture(0);
     wmo->textures[mat.texture1]->bind();
 
