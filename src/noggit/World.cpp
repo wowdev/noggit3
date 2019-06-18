@@ -316,6 +316,13 @@ void World::SetCurrentSelection(selection_type entry)
   mCurrentSelection.push_back(entry);
 }
 
+void World::RemoveFromCurrentSelection(selection_type entry)
+{
+  std::vector<selection_type>::iterator position = std::find(mCurrentSelection.begin(), mCurrentSelection.end(), entry);
+  if (position != mCurrentSelection.end()) // == myVector.end() means the element was not found
+    mCurrentSelection.erase(position);
+}
+
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 {
   if (!*pDetailTexCoords && !*pAlphaTexCoords)

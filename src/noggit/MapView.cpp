@@ -2250,9 +2250,16 @@ void MapView::doSelection (bool selectTerrainOnly)
 
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
     {
-      if (!_world->IsSelected(hit) && hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
+      if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
       {
-        _world->AddToCurrentSelection(hit);
+        if (!_world->IsSelected(hit))
+        {
+          _world->AddToCurrentSelection(hit);
+        }
+        else
+        {
+          _world->RemoveFromCurrentSelection(hit);
+        }
       }
     }
     else if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
