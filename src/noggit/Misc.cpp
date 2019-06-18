@@ -1,12 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Misc.h>
+#include <noggit/Selection.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/WMOInstance.h>
 
 #include <iomanip>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 namespace misc
 {
@@ -232,4 +236,142 @@ bool checkInside(math::vector_3d extentA[2], math::vector_3d extentB[2])
 bool checkOriginInside(math::vector_3d extentA[2], math::vector_3d modelPos)
 {
   return pointInside(modelPos, extentA);
+}
+
+math::vector_3d getObjectPosition(selection_type object)
+{
+  if (object.which() == eEntry_Model)
+  {
+    return boost::get<selected_model_type>(object)->pos;
+  }
+  else if (object.which() == eEntry_WMO)
+  {
+    return boost::get<selected_wmo_type>(object)->pos;
+  }
+}
+
+math::vector_3d getMedianPivotPoint(std::vector<selection_type> entries)
+{
+  // get pivot point
+  math::vector_3d minPos;
+  math::vector_3d maxPos;
+  auto firstSelectionObject = entries.front();
+  minPos = getObjectPosition(firstSelectionObject);
+  maxPos = getObjectPosition(firstSelectionObject);
+
+  for (auto& selection : entries)
+  {
+    minPos = std::min(minPos, getObjectPosition(selection));
+    maxPos = std::max(maxPos, getObjectPosition(selection));
+  }
+
+  auto pivotPoint = (minPos + maxPos) / 2.0f;
+
+  return pivotPoint;
+}
+
+void rotateByXAxis(selection_type object, math::vector_3d pivotPoint, float angle)
+{
+  auto cos = std::cos(angle);
+  auto sin = std::sin(angle);
+
+  math::vector_3d* position;
+
+  if (object.which() == eEntry_Model)
+  {
+    position = &boost::get<selected_model_type>(object)->pos;
+  }
+  else if (object.which() == eEntry_WMO)
+  {
+    position = &boost::get<selected_wmo_type>(object)->pos;
+  }
+
+  position->y -= pivotPoint.y;
+  position->z -= pivotPoint.z;
+
+  float newY = position->y * cos - position->z * sin;
+  float newZ = position->y * sin + position->z * cos;
+
+  position->y = newY + pivotPoint.y;
+  position->z = newZ + pivotPoint.z;
+}
+
+void rotateByYAxis(selection_type object, math::vector_3d pivotPoint, float angle)
+{
+  auto cos = std::cos(angle);
+  auto sin = std::sin(angle);
+
+  math::vector_3d* position;
+
+  if (object.which() == eEntry_Model)
+  {
+    position = &boost::get<selected_model_type>(object)->pos;
+  }
+  else if (object.which() == eEntry_WMO)
+  {
+    position = &boost::get<selected_wmo_type>(object)->pos;
+  }
+
+  position->x -= pivotPoint.x;
+  position->z -= pivotPoint.z;
+
+  float newX = position->x * cos + position->z * sin;
+  float newZ = -position->x * sin + position->z * cos;
+
+  position->x = newX + pivotPoint.x;
+  position->z = newZ + pivotPoint.z;
+}
+
+void rotateByZAxis(selection_type object, math::vector_3d pivotPoint, float angle)
+{
+  auto cos = std::cos(angle);
+  auto sin = std::sin(angle);
+
+  math::vector_3d* position;
+
+  if (object.which() == eEntry_Model)
+  {
+    position = &boost::get<selected_model_type>(object)->pos;
+  }
+  else if (object.which() == eEntry_WMO)
+  {
+    position = &boost::get<selected_wmo_type>(object)->pos;
+  }
+
+  position->x -= pivotPoint.x;
+  position->y -= pivotPoint.y;
+
+  float newX = position->x * cos - position->y * sin;
+  float newY = position->x * sin + position->y * cos;
+
+  position->x = newX + pivotPoint.x;
+  position->y = newY + pivotPoint.y;
+}
+
+float calculateRotationXAngle(math::vector_3d position1, math::vector_3d position2, math::vector_3d pivotPoint)
+{
+  auto numerator = position2.z * (pivotPoint.y - position1.y) + pivotPoint.z * (position1.y - position2.y) + position1.z * (position2.y - pivotPoint.y);
+  auto denominator = (position2.y - pivotPoint.y) * (pivotPoint.y - position1.y) + (position2.z - pivotPoint.z) * (pivotPoint.z - position1.z);
+  auto ratio = numerator / denominator;
+  auto angleRad = std::atan(ratio);
+  auto angleDeg = (angleRad * 180) / math::constants::pi;
+  return angleDeg;
+}
+
+float calculateRotationYAngle(math::vector_3d position1, math::vector_3d position2, math::vector_3d pivotPoint)
+{
+  auto numerator = position2.z * (pivotPoint.x - position1.x) + pivotPoint.z * (position1.x - position2.x) + position1.z * (position2.x - pivotPoint.x);
+  auto denominator = (position2.x - pivotPoint.x) * (pivotPoint.x - position1.x) + (position2.z - pivotPoint.z) * (pivotPoint.z - position1.z);
+  auto ratio = numerator / denominator;
+  auto angleRad = std::atan(ratio);
+  return (angleRad * 180) / math::constants::pi;
+}
+
+float calculateRotationZAngle(math::vector_3d position1, math::vector_3d position2, math::vector_3d pivotPoint)
+{
+  auto numerator = position2.y * (pivotPoint.x - position1.x) + pivotPoint.y * (position1.x - position2.x) + position1.y * (position2.x - pivotPoint.x);
+  auto denominator = (position2.x - pivotPoint.x) * (pivotPoint.x - position1.x) + (position2.y - pivotPoint.y) * (pivotPoint.y - position1.y);
+  auto ratio = numerator / denominator;
+  auto angleRad = std::atan(ratio);
+  return (angleRad * 180) / math::constants::pi;
 }

@@ -54,13 +54,14 @@ namespace noggit
       object_editor ( MapView*
                     , World*
                     , bool_toggle_property* move_model_to_cursor_position
+                    , bool_toggle_property* use_median_pivot_point
                     , object_paste_params*
                     , QWidget* parent = nullptr
                     );
 
       void import_last_model_from_wmv(int type);
       void copy(std::string const& filename);
-      void copy(boost::optional<selection_type> entry);
+      void copy(std::vector<selection_type> currentSelection);
       void pasteObject ( math::vector_3d cursor_pos
                        , math::vector_3d camera_pos
                        , World*
@@ -80,10 +81,11 @@ namespace noggit
       QLabel* _filename;
 
       bool _copy_model_stats;
+      bool _use_median_pivot_point;
 
-      boost::optional<selection_type> selected;
+      std::vector<selection_type> selected;
       
-      void replace_selection(selection_type new_selection);
+      void replace_selection(std::vector<selection_type> new_selection);
 
       void showImportModels();
       void SaveObjecttoTXT (World*);

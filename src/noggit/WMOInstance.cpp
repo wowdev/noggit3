@@ -47,7 +47,7 @@ void WMOInstance::draw ( math::frustum const& frustum
                        , math::vector_4d const& river_color_light
                        , math::vector_4d const& river_color_dark
                        , liquid_render& render
-                       , boost::optional<selection_type> selection
+                       , std::vector<selection_type> selection
                        , int animtime
                        , std::function<void (bool)> setup_outdoor_lights
                        , bool world_has_skies
@@ -60,11 +60,9 @@ void WMOInstance::draw ( math::frustum const& frustum
     return;
   }
 
-  bool const is_selected
-    ( selection
-    && boost::get<selected_wmo_type> (&*selection)
-    && boost::get<selected_wmo_type> (*selection)->mUniqueID == this->mUniqueID
-    );
+  const uint id = this->mUniqueID;
+  bool const is_selected = selection.size() > 0 &&
+                           std::find_if(selection.begin(), selection.end(), [id](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == id; }) != selection.end();
 
   {
     opengl::scoped::matrix_pusher const matrix;
