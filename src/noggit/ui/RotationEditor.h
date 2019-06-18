@@ -19,20 +19,17 @@ namespace noggit
     public:
       rotation_editor(QWidget* parent);
 
-      void select(selection_type entry);
+      bool* use_median_pivot_point;
+
+      void select(std::vector<selection_type> entries);
       void updateValues();
-      bool hasSelection() const { return _selection; }
 
       bool hasFocus() const {return false;}
 
     private:
-      void update_model();
-      math::vector_3d* rotationVect;
-      math::vector_3d* posVect;
-      float* scale;
+      void update_model(selection_type entry);
 
-      bool _selection;
-	  boost::optional<selection_type> _entry;
+	    std::vector<selection_type> _entries;
 
       QDoubleSpinBox* _rotation_x;
       QDoubleSpinBox* _rotation_z;

@@ -22,6 +22,7 @@
 #include <map>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 namespace opengl
 {
@@ -50,7 +51,7 @@ public:
   noggit::map_horizon horizon;
 
   // Information about the currently selected model / WMO / triangle.
-  boost::optional<selection_type> mCurrentSelection;
+  std::vector<selection_type> mCurrentSelection;
   bool SelectionMode;
 
   // Temporary variables for loading a WMO, if we have a global WMO.
@@ -145,13 +146,15 @@ public:
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
-  bool HasSelection();
-
   // Selection related methods.
-  bool IsSelection(int pSelectionType);
-  boost::optional<selection_type> GetCurrentSelection() { return mCurrentSelection; }
-  void SetCurrentSelection (boost::optional<selection_type> entry) { mCurrentSelection = entry; }
-  void ResetSelection() { mCurrentSelection.reset(); }
+  bool IsSelection(int pSelectionType, selection_type selection);
+  bool IsSelected(selection_type selection);
+  std::vector<selection_type> GetCurrentSelection() { return mCurrentSelection; }
+  bool HasSelection();
+  bool HasMultiSelection();
+  void SetCurrentSelection(selection_type entry);
+  void AddToCurrentSelection(selection_type entry) { mCurrentSelection.push_back(entry); }
+  void ResetSelection() { mCurrentSelection.clear(); }
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
 

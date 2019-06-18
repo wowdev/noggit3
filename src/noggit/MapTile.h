@@ -71,7 +71,7 @@ public:
             , bool draw_chunk_flag_overlay
             , bool draw_areaid_overlay
             , std::map<int, misc::random_color>& area_id_colors
-            , boost::optional<selection_type> selection
+            , std::vector<selection_type> selection
             , int animtime
             , display_mode display
             );

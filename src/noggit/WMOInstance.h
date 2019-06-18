@@ -72,6 +72,11 @@ public:
     std::swap(_need_doodadset_update, other._need_doodadset_update);
     return *this;
   }
+  /*
+  bool operator==(WMOInstance&& other) const
+  {
+      return this->mUniqueID == other.mUniqueID;
+  }*/
 
   void draw ( math::frustum const&
             , const float&
@@ -84,7 +89,7 @@ public:
             , math::vector_4d const& river_color_light
             , math::vector_4d const& river_color_dark
             , liquid_render& render
-            , boost::optional<selection_type> selection
+            , std::vector<selection_type> selection
             , int animtime
             , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies

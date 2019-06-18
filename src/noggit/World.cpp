@@ -277,14 +277,43 @@ World::World(const std::string& name, int map_id)
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
 
-bool World::IsSelection(int pSelectionType)
+bool World::IsSelection(int pSelectionType, selection_type selection)
 {
-  return HasSelection() && mCurrentSelection->which() == pSelectionType;
+  return HasSelection() && selection.which() == pSelectionType;
+}
+
+bool World::IsSelected(selection_type selection)
+{
+    auto currentSelection = this->GetCurrentSelection();
+    if (selection.which() == eEntry_Model)
+    {
+      uint uniqueId = boost::get<selected_model_type>(selection)->uid;
+      if (std::find_if(currentSelection.begin(), currentSelection.end(), [uniqueId](selection_type type) {return type.type() == typeid(selected_model_type) && boost::get<selected_model_type>(type)->uid == uniqueId; }) != currentSelection.end())
+        return true;
+    }
+    else if (selection.which() == eEntry_WMO)
+    {
+      uint uniqueId = boost::get<selected_wmo_type>(selection)->mUniqueID;
+      if (std::find_if(currentSelection.begin(), currentSelection.end(), [uniqueId](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == uniqueId; }) != currentSelection.end())
+        return true;
+    }
+    return false;
 }
 
 bool World::HasSelection()
 {
-  return !!mCurrentSelection;
+  return mCurrentSelection.size() > 0;
+}
+
+bool World::HasMultiSelection()
+{
+  return mCurrentSelection.size() > 1;
+}
+
+void World::SetCurrentSelection(selection_type entry)
+{
+  mCurrentSelection.clear();
+  mCurrentSelection.push_back(entry);
 }
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
@@ -928,7 +957,7 @@ void main()
   opengl::texture::disable_texture(0);
 
   // Selection circle
-  if (this->IsSelection(eEntry_MapChunk))
+  if (this->HasSelection() /*this->IsSelection(eEntry_MapChunk)*/)
   {
     gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -1475,12 +1504,15 @@ void main()
       }
     }
 
-    if (IsSelection (eEntry_Model))
+    for (auto& selection : GetCurrentSelection())
     {
-      auto model = boost::get<selected_model_type> (*GetCurrentSelection());
-      if (model->is_visible(frustum, culldistance, camera_pos, display))
+      if (IsSelection(eEntry_Model, selection))
       {
-        model->draw_box(true);
+        auto model = boost::get<selected_model_type>(selection);
+        if (model->is_visible(frustum, culldistance, camera_pos, display))
+        {
+          model->draw_box(true);
+        }
       }
     }
   }
@@ -1523,7 +1555,7 @@ void main()
                         , river_color_light
                         , river_color_dark
                         , _liquid_render.get()
-                        , mCurrentSelection
+                        , GetCurrentSelection()
                         , animtime
                         , [this] (bool on) { return outdoorLights (on); }
                         , skies->hasSkies()
@@ -1997,9 +2029,14 @@ void World::deleteModelInstance(int pUniqueID)
   std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
   if (it == mModelInstances.end()) return;
 
+  auto selectionIt = std::find_if(mCurrentSelection.begin(), mCurrentSelection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_model_type) && boost::get<selected_model_type>(type)->uid == pUniqueID; });
+  if (selectionIt != mCurrentSelection.end())
+  {
+    mCurrentSelection.erase(selectionIt);
+  }
+
   updateTilesModel(&it->second, model_update::remove);
   mModelInstances.erase(it);
-  ResetSelection();
 }
 
 void World::deleteWMOInstance(int pUniqueID)
@@ -2007,9 +2044,14 @@ void World::deleteWMOInstance(int pUniqueID)
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
   if (it == mWMOInstances.end()) return;
 
+  auto selectionIt = std::find_if(mCurrentSelection.begin(), mCurrentSelection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == pUniqueID; });
+  if (selectionIt != mCurrentSelection.end())
+  {
+    mCurrentSelection.erase(selectionIt);
+  }
+
   updateTilesWMO(&it->second, model_update::remove);
   mWMOInstances.erase(it);
-  ResetSelection();
 }
 
 void World::delete_duplicate_model_and_wmo_instances()
