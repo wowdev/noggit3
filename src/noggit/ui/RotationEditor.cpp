@@ -7,6 +7,7 @@
 #include <noggit/Selection.h>
 #include <noggit/WMOInstance.h>
 #include <util/qt/overload.hpp>
+#include <noggit/ui/ObjectEditor.h>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
@@ -17,11 +18,6 @@ namespace noggit
   {
     rotation_editor::rotation_editor(QWidget* parent)
       : QWidget (parent)
-      , rotationVect(nullptr)
-      , posVect(nullptr)
-      , scale(nullptr)
-      , _selection(false)
-      , _entry(boost::none)
     {
       setWindowTitle("Pos/Rotation Editor");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -52,11 +48,10 @@ namespace noggit
       _rotation_z->setDecimals (3);
       _rotation_z->setWrapping(true);
       _rotation_z->setSingleStep(5.0f);
-
       _rotation_y->setRange (0.f, 360.f);
       _rotation_y->setDecimals (3);
       _rotation_y->setWrapping(true);
-      _rotation_z->setSingleStep(5.0f);
+      _rotation_y->setSingleStep(5.0f);
 
       _position_x->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
       _position_x->setDecimals (5);
@@ -73,79 +68,276 @@ namespace noggit
       connect ( _rotation_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  rotationVect->x = v;
-                  update_model();
+                  auto lastEntry = _entries.back();
+                  double difference = v;
+                  if (lastEntry.which() == eEntry_Model)
+                  {
+                    difference = v - boost::get<selected_model_type>(lastEntry)->dir.x;
+                  }
+                  else if (lastEntry.which() == eEntry_WMO)
+                  {
+                    difference = v - boost::get<selected_wmo_type>(lastEntry)->dir.x;
+                  }
+
+                  if (_entries.size() > 1 && *use_median_pivot_point)
+                  {
+                    auto rotationPivotPoint = getMedianPivotPoint(_entries);
+
+                    for (auto& selection : _entries)
+                    {
+                      math::vector_3d* position = nullptr;
+                      math::vector_3d* rotation = nullptr;
+
+                      if (selection.which() == eEntry_Model)
+                      {
+                        position = &boost::get<selected_model_type>(selection)->pos;
+                        rotation = &boost::get<selected_model_type>(selection)->dir;
+                      }
+                      else if (selection.which() == eEntry_WMO)
+                      {
+                        position = &boost::get<selected_wmo_type>(selection)->pos;
+                        rotation = &boost::get<selected_wmo_type>(selection)->dir;
+                      }
+
+                      auto oldPos = *position;
+
+                      rotateByXAxis(selection, rotationPivotPoint, difference * math::constants::pi / 180);
+                      rotation->x -= calculateRotationXAngle(*position, oldPos, rotationPivotPoint);
+
+                      if (rotation->x > 180.0f)
+                        rotation->x -= 360.0f;
+                      else if (rotation->x < -180.0f)
+                        rotation->x += 360.0f;
+
+                      update_model(selection);
+                    }
+                  }
+                  else
+                  {
+                    for (auto& selection : _entries)
+                    {
+                      if (selection.which() == eEntry_Model)
+                      {
+                        auto model = boost::get<selected_model_type>(selection);
+                        model->dir.x = v;
+                      }
+                      else if (selection.which() == eEntry_WMO)
+                      {
+                        auto wmo = boost::get<selected_wmo_type>(selection);
+                        wmo->dir.x = v;
+                      }
+                      update_model(selection);
+                    }
+                  }
                 }
               );
       connect ( _rotation_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  rotationVect->z = v;
-                  update_model();
+                  auto lastEntry = _entries.back();
+                  double difference = v;
+                  if (lastEntry.which() == eEntry_Model)
+                  {
+                    difference = v - boost::get<selected_model_type>(lastEntry)->dir.z;
+                  }
+                  else if (lastEntry.which() == eEntry_WMO)
+                  {
+                    difference = v - boost::get<selected_wmo_type>(lastEntry)->dir.z;
+                  }
+
+                  if (_entries.size() > 1 && *use_median_pivot_point)
+                  {
+                    auto rotationPivotPoint = getMedianPivotPoint(_entries);
+
+                    for (auto& selection : _entries)
+                    {
+                      math::vector_3d* position = nullptr;
+                      math::vector_3d* rotation = nullptr;
+
+                      if (selection.which() == eEntry_Model)
+                      {
+                        position = &boost::get<selected_model_type>(selection)->pos;
+                        rotation = &boost::get<selected_model_type>(selection)->dir;
+                      }
+                      else if (selection.which() == eEntry_WMO)
+                      {
+                        position = &boost::get<selected_wmo_type>(selection)->pos;
+                        rotation = &boost::get<selected_wmo_type>(selection)->dir;
+                      }
+
+                      auto oldPos = *position;
+
+                      rotateByZAxis(selection, rotationPivotPoint, difference * math::constants::pi / 180);
+                      rotation->z -= calculateRotationZAngle(*position, oldPos, rotationPivotPoint);
+
+                      if (rotation->z > 180)
+                        rotation->z -= 360.0f;
+                      else if (rotation->z < -180.0f)
+                        rotation->z += 360.0f;
+
+                      update_model(selection);
+                    }
+                  }
+                  else
+                  {
+                    for (auto& selection : _entries)
+                    {
+                      if (selection.which() == eEntry_Model)
+                      {
+                        auto model = boost::get<selected_model_type>(selection);
+                        model->dir.z = v;
+                      }
+                      else if (selection.which() == eEntry_WMO)
+                      {
+                        auto wmo = boost::get<selected_wmo_type>(selection);
+                        wmo->dir.z = v;
+                      }
+                      update_model(selection);
+                    }
+                  }
                 }
               );
       connect ( _rotation_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  rotationVect->y = v;
-				          update_model();
+                  auto lastEntry = _entries.back();
+                  double difference = v;
+                  if (lastEntry.which() == eEntry_Model)
+                  {
+                    difference = v - boost::get<selected_model_type>(lastEntry)->dir.y;
+                  }
+                  else if (lastEntry.which() == eEntry_WMO)
+                  {
+                    difference = v - boost::get<selected_wmo_type>(lastEntry)->dir.y;
+                  }
+
+                  if (_entries.size() > 1 && *use_median_pivot_point)
+                  {
+                    auto rotationPivotPoint = getMedianPivotPoint(_entries);
+
+                    for (auto& selection : _entries)
+                    {
+                      math::vector_3d* position = nullptr;
+                      math::vector_3d* rotation = nullptr;
+
+                      if (selection.which() == eEntry_Model)
+                      {
+                        position = &boost::get<selected_model_type>(selection)->pos;
+                        rotation = &boost::get<selected_model_type>(selection)->dir;
+                      }
+                      else if (selection.which() == eEntry_WMO)
+                      {
+                        position = &boost::get<selected_wmo_type>(selection)->pos;
+                        rotation = &boost::get<selected_wmo_type>(selection)->dir;
+                      }
+
+                      auto oldPos = *position;
+
+                      rotateByYAxis(selection, rotationPivotPoint, difference * math::constants::pi / 180);
+                      rotation->y += calculateRotationYAngle(*position, oldPos, rotationPivotPoint);
+
+                      if (rotation->y > 360.0f)
+                        rotation->y -= 360.0f;
+                      else if (rotation->y < 0.0f)
+                        rotation->y += 360.0f;
+
+                      update_model(selection);
+                    }
+                  }
+                  else
+                  {
+                    for (auto& selection : _entries)
+                    {
+                      if (selection.which() == eEntry_Model)
+                      {
+                        auto model = boost::get<selected_model_type>(selection);
+                        model->dir.y = v;
+                      }
+                      else if (selection.which() == eEntry_WMO)
+                      {
+                        auto wmo = boost::get<selected_wmo_type>(selection);
+                        wmo->dir.y = v;
+                      }
+                      update_model(selection);
+                    }
+                  }
                 }
               );
 
       connect ( _position_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  posVect->x = v;
-				          update_model();
+                  for (auto& selection : _entries)
+                  {
+                    if (selection.which() == eEntry_Model)
+                    {
+                      boost::get<selected_model_type>(selection)->pos.x = v;
+                    }
+                    else if (selection.which() == eEntry_WMO)
+                    {
+                      boost::get<selected_wmo_type>(selection)->pos.x = v;
+                    }
+                    update_model(selection);
+                  }
                 }
               );
       connect ( _position_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  posVect->z = v;
-				          update_model();
+                  for (auto& selection : _entries)
+                  {
+                    if (selection.which() == eEntry_Model)
+                    {
+                      boost::get<selected_model_type>(selection)->pos.z = v;
+                    }
+                    else if (selection.which() == eEntry_WMO)
+                    {
+                      boost::get<selected_wmo_type>(selection)->pos.z = v;
+                    }
+                    update_model(selection);
+                  }
                 }
               );
       connect ( _position_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  posVect->y = v;
-				          update_model();
+                  for (auto& selection : _entries)
+                  {
+                    if (selection.which() == eEntry_Model)
+                    {
+                      boost::get<selected_model_type>(selection)->pos.y = v;
+                    }
+                    else if (selection.which() == eEntry_WMO)
+                    {
+                      boost::get<selected_wmo_type>(selection)->pos.y = v;
+                    }
+                    update_model(selection);
+                  }
                 }
               );
 
       connect ( _scale, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  *scale = v;
-				          update_model();
+                  for (auto& selection : _entries)
+                  {
+                    if (selection.which() == eEntry_Model)
+                    {
+                      boost::get<selected_model_type>(selection)->scale = v;
+                      update_model(selection);
+                    }
+                  }
                 }
               );
     }
 
-    void rotation_editor::select(selection_type entry)
+    void rotation_editor::select(std::vector<selection_type> entries)
     {
-      _selection = true;
-	    _entry = entry;
+      _entries.clear();
 
-      if (entry.which() == eEntry_Model)
+      if (entries.size() > 0)
       {
-        rotationVect = &(boost::get<selected_model_type> (entry)->dir);
-        posVect = &(boost::get<selected_model_type> (entry)->pos);
-        scale = &(boost::get<selected_model_type> (entry)->scale);        
-      }
-      else if (entry.which() == eEntry_WMO)
-      {
-		    rotationVect = &(boost::get<selected_wmo_type> (entry)->dir);
-		    posVect = &(boost::get<selected_wmo_type> (entry)->pos);
-      }
-      else
-      {
-		    _entry.reset();
-        _selection = false;
-        rotationVect = nullptr;
-        posVect = nullptr;
-        scale = nullptr;
+        _entries.insert(_entries.end(), entries.begin(), entries.end());
       }
 
       updateValues();
@@ -153,7 +345,7 @@ namespace noggit
 
     void rotation_editor::updateValues()
     {
-      if (_entry)
+      if (_entries.size() > 0)
       {
         QSignalBlocker const block_rotation_x (_rotation_x);
         QSignalBlocker const block_rotation_y (_rotation_y);
@@ -161,14 +353,19 @@ namespace noggit
         QSignalBlocker const block_position_x (_position_x);
         QSignalBlocker const block_position_y (_position_y);
         QSignalBlocker const block_position_z (_position_z);
-        QSignalBlocker const block_scale (_scale);
 
-        _rotation_x->setValue (rotationVect->x);
-        _rotation_y->setValue (rotationVect->y);
-        _rotation_z->setValue (rotationVect->z);
-        _position_x->setValue (posVect->x);
-        _position_y->setValue (posVect->y);
-        _position_z->setValue (posVect->z);
+        auto lastEntry = _entries.back();
+
+        if (lastEntry.which() == eEntry_Model)
+        {
+          auto model = boost::get<selected_model_type>(lastEntry);
+          _rotation_x->setValue(model->dir.x);
+          _rotation_y->setValue(model->dir.y);
+          _rotation_z->setValue(model->dir.z);
+          _position_x->setValue(model->pos.x);
+          _position_y->setValue(model->pos.y);
+          _position_z->setValue(model->pos.z);
+          _scale->setValue(model->scale);
 
         _rotation_x->setEnabled (true);
         _rotation_y->setEnabled (true);
@@ -176,15 +373,24 @@ namespace noggit
         _position_x->setEnabled (true);
         _position_y->setEnabled (true);
         _position_z->setEnabled (true);
-
-        if (_entry && _entry.get().which() == eEntry_Model)
-        {
-          _scale->setValue (*scale);
           _scale->setEnabled (true);
         }
-        else
+        else if (lastEntry.which() == eEntry_WMO)
         {
-          _scale->setEnabled (false);
+          auto wmo = boost::get<selected_wmo_type>(lastEntry);
+          _rotation_x->setValue(wmo->dir.x);
+          _rotation_y->setValue(wmo->dir.y);
+          _rotation_z->setValue(wmo->dir.z);
+          _position_x->setValue(wmo->pos.x);
+          _position_y->setValue(wmo->pos.y);
+          _position_z->setValue(wmo->pos.z);
+
+          _rotation_x->setEnabled(true);
+          _rotation_y->setEnabled(true);
+          _rotation_z->setEnabled(true);
+          _position_x->setEnabled(true);
+          _position_y->setEnabled(true);
+          _position_z->setEnabled(true);
         }
       }
       else
@@ -199,20 +405,17 @@ namespace noggit
       }
     }
 
-    void rotation_editor::update_model()
+    void rotation_editor::update_model(selection_type entry)
     {
-      if (_entry)
+      if (entry.which() == eEntry_Model)
       {
-        switch (_entry.get().which())
+        boost::get<selected_model_type>(entry)->recalcExtents();
+      }
+      else if (entry.which() == eEntry_WMO)
         {
-        case eEntry_Model:
-          boost::get<selected_model_type> (_entry.get())->recalcExtents();
-          break;
-        case eEntry_WMO:
-          boost::get<selected_wmo_type> (_entry.get())->recalcExtents();
-          break;
+        boost::get<selected_wmo_type>(entry)->recalcExtents();
         }
       }
+
     }
   }
-}
