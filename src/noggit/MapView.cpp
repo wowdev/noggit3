@@ -1671,18 +1671,18 @@ void MapView::tick (float dt)
             {
               position = &boost::get<selected_model_type>(selection)->pos;
               rotation = &boost::get<selected_model_type>(selection)->dir;
-        }
+            }
             else if (selection.which() == eEntry_WMO)
-        {
+            {
               position = &boost::get<selected_wmo_type>(selection)->pos;
               rotation = &boost::get<selected_wmo_type>(selection)->dir;
-        }
+            }
 
             auto rotationSpeed = (rh + rv) * math::constants::pi / 180;
             auto oldPos = *position;
 
             if (_mod_ctrl_down) // X
-        {
+            {
               rotateByXAxis(selection, rotationPivotPoint, rotationSpeed);
               rotation->x -= calculateRotationXAngle(*position, oldPos, rotationPivotPoint);
 
@@ -1718,17 +1718,17 @@ void MapView::tick (float dt)
 
           objectEditor->rotationEditor->updateValues();
 
-            _world->updateTilesEntry(selection, model_update::remove);
+          _world->updateTilesEntry(selection, model_update::remove);
 
-            if (selection.which() == eEntry_WMO)
+          if (selection.which() == eEntry_WMO)
           {
               boost::get<selected_wmo_type>(selection)->recalcExtents();
               _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::add);
           }
-            else if (selection.which() == eEntry_Model)
+          else if (selection.which() == eEntry_Model)
           {
-              boost::get<selected_model_type>(selection)->recalcExtents();
-              _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::add);
+            boost::get<selected_model_type>(selection)->recalcExtents();
+            _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::add);
           }
         }
       }
@@ -2262,14 +2262,12 @@ void MapView::doSelection (bool selectTerrainOnly)
         }
       }
     }
-    else if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
-    {
-    _world->SetCurrentSelection (hit);
-    }
     else
     {
       _world->ResetSelection();
+      _world->AddToCurrentSelection(hit);
     }
+
 
     _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type>(hit)->pos
       : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type>(hit)->pos

@@ -537,25 +537,25 @@ namespace noggit
       std::vector<selection_type> selectionVector;
       for (auto& selection : currentSelection)
       {
-      if (selection.which() == eEntry_Model)
-      {
-          auto original = boost::get<selected_model_type>(selection);
-          auto clone = new ModelInstance(original->model->filename);
-          clone->scale = original->scale;
-          clone->dir = original->dir;
-          clone->pos = original->pos;
-          selectionVector.push_back(clone);
+        if (selection.which() == eEntry_Model)
+        {
+            auto original = boost::get<selected_model_type>(selection);
+            auto clone = new ModelInstance(original->model->filename);
+            clone->scale = original->scale;
+            clone->dir = original->dir;
+            clone->pos = original->pos;
+            selectionVector.push_back(clone);
+        }
+        else if (selection.which() == eEntry_WMO)
+        {
+            auto original = boost::get<selected_wmo_type>(selection);
+            auto clone = new WMOInstance(original->wmo->filename);
+            clone->dir = original->dir;
+            clone->pos = original->pos;
+            selectionVector.push_back(clone);
+        }
       }
-      else if (selection.which() == eEntry_WMO)
-      {
-          auto original = boost::get<selected_wmo_type>(selection);
-          auto clone = new WMOInstance(original->wmo->filename);
-          clone->dir = original->dir;
-          clone->pos = original->pos;
-          selectionVector.push_back(clone);
-      }
-    }
-      replace_selection(selectionVector);
+        replace_selection(selectionVector);
     }
 
     void object_editor::SaveObjecttoTXT (World* world)
