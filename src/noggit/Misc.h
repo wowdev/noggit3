@@ -15,7 +15,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include <noggit\Selection.h>
+#include <noggit/Selection.h>
 
 // namespace for static helper functions.
 

@@ -842,7 +842,7 @@ void MapView::createGUI()
             , MOD_ctrl
             , [this]
               {
-      objectEditor->copy(_world->GetCurrentSelection());
+                objectEditor->copy(_world->GetCurrentSelection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -850,7 +850,7 @@ void MapView::createGUI()
             , MOD_none
             , [this]
               {
-      objectEditor->copy(_world->GetCurrentSelection());
+                objectEditor->copy(_world->GetCurrentSelection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -895,7 +895,7 @@ void MapView::createGUI()
 	         , MOD_ctrl
 	         , [this] 
              {
-      objectEditor->copy(_world->GetCurrentSelection());
+               objectEditor->copy(_world->GetCurrentSelection());
 	             objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
              }
            , [this] { return terrainMode == editing_mode::object; }
@@ -1032,16 +1032,16 @@ void MapView::createGUI()
               {
                 if (_world->HasSelection())
                 {
-        for (auto& selection : _world->GetCurrentSelection())
+                  for (auto& selection : _world->GetCurrentSelection())
                   {
-          if (selection.which() == eEntry_Model)
-          {
-            boost::get<selected_model_type>(selection)->model->toggle_visibility();
-                  }
-          else if (selection.which() == eEntry_WMO)
-                  {
-            boost::get<selected_wmo_type>(selection)->wmo->toggle_visibility();
-          }
+                    if (selection.which() == eEntry_Model)
+                    {
+                      boost::get<selected_model_type>(selection)->model->toggle_visibility();
+                    }
+                    else if (selection.which() == eEntry_WMO)
+                    {
+                      boost::get<selected_wmo_type>(selection)->wmo->toggle_visibility();
+                    }
                   }
                 }
               }
@@ -1125,20 +1125,20 @@ void MapView::createGUI()
         for (auto& selection : _world->GetCurrentSelection())
                   {
 
-          if (selection.which() == eEntry_Model)
-          {
-            _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::remove);
-            boost::get<selected_model_type>(selection)->pos = _cursor_pos;
-            boost::get<selected_model_type>(selection)->recalcExtents();
-            _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::add);
-                  }
-          else if (selection.which() == eEntry_WMO)
-                  {
-            _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::remove);
-            boost::get<selected_wmo_type>(selection)->pos = _cursor_pos;
-            boost::get<selected_wmo_type>(selection)->recalcExtents();
-            _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::add);
-          }
+                    if (selection.which() == eEntry_Model)
+                    {
+                      _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::remove);
+                      boost::get<selected_model_type>(selection)->pos = _cursor_pos;
+                      boost::get<selected_model_type>(selection)->recalcExtents();
+                      _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::add);
+                    }
+                    else if (selection.which() == eEntry_WMO)
+                    {
+                      _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::remove);
+                      boost::get<selected_wmo_type>(selection)->pos = _cursor_pos;
+                      boost::get<selected_wmo_type>(selection)->recalcExtents();
+                      _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::add);
+                    }
                   }
                 }
               }
@@ -1195,7 +1195,6 @@ void MapView::createGUI()
   addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); }, [this] { return !_mod_num_down;  });
   addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); }, [this] { return !_mod_num_down;  });
 
-  addHotkey(Qt::Key_0, MOD_ctrl, [this] { change_selected_wmo_doodadset(0); });
   addHotkey(Qt::Key_1, MOD_ctrl, [this] { change_selected_wmo_doodadset(1); });
   addHotkey(Qt::Key_2, MOD_ctrl, [this] { change_selected_wmo_doodadset(2); });
   addHotkey(Qt::Key_3, MOD_ctrl, [this] { change_selected_wmo_doodadset(3); });
