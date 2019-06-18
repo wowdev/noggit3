@@ -524,6 +524,7 @@ WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
   , num(_num)
 {
   // extract group info from f
+  std::uint32_t flags; // not used, the flags are in the group header
   f->read(&flags, 4);
   float ff[3];
   f->read(ff, 12);
@@ -545,13 +546,10 @@ WMOGroup::WMOGroup(WMOGroup const& other)
   , BoundingBoxMax(other.BoundingBoxMax)
   , VertexBoxMin(other.VertexBoxMin)
   , VertexBoxMax(other.VertexBoxMax)
-  , indoor(other.indoor)
-  , hascv(other.hascv)
-  , visible(other.visible)
-  , outdoorLights(other.outdoorLights)
+  , use_outdoor_lights(other.use_outdoor_lights)
   , name(other.name)
   , wmo(other.wmo)
-  , flags(other.flags)
+  , header(other.header)
   , center(other.center)
   , rad(other.rad)
   , num(other.num)
@@ -582,14 +580,6 @@ namespace
     return math::vector_4d(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
   }
 }
-struct WMOGroupHeader {
-  uint32_t nameStart, nameStart2, flags;
-  float box1[3], box2[3];
-  uint16_t portalStart, portalCount;
-  uint16_t batches[4];
-  uint8_t fogs[4];
-  int32_t unk1, id, unk2, unk3;
-};
 
 void WMOGroup::upload()
 {
@@ -630,7 +620,7 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
   wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
   wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-  if (hascv)
+  if (header.flags.has_vertex_color)
   {
     wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
   }
@@ -656,8 +646,6 @@ void WMOGroup::load()
   uint32_t fourcc;
   uint32_t size;
 
-  hascv = false;
-
   // - MVER ----------------------------------------------
 
   f.read (&fourcc, 4);
@@ -676,9 +664,7 @@ void WMOGroup::load()
 
   assert (fourcc == 'MOGP');
 
-  WMOGroupHeader header;
-
-  f.read (&header, sizeof (WMOGroupHeader));
+  f.read (&header, sizeof (wmo_group_header));
 
   WMOFog &wf = wmo->fogs[header.fogs[0]];
   if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
@@ -773,7 +759,7 @@ void WMOGroup::load()
   f.read (_batches.data (), size);
 
   // - MOLR ----------------------------------------------
-  if (header.flags & 0x200)
+  if (header.flags.has_light)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -783,7 +769,7 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
   // - MODR ----------------------------------------------
-  if (header.flags & 0x800)
+  if (header.flags.has_doodads)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -795,7 +781,7 @@ void WMOGroup::load()
     f.read (_doodad_ref.data (), size);
   }
   // - MOBN ----------------------------------------------
-  if (header.flags & 0x1)
+  if (header.flags.has_bsp_tree)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -805,7 +791,7 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
   // - MOBR ----------------------------------------------
-  if (header.flags & 0x1)
+  if (header.flags.has_bsp_tree)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -814,39 +800,34 @@ void WMOGroup::load()
 
     f.seekRelative (size);
   }
-  // - MPBV ----------------------------------------------
-  if (header.flags & 0x400)
+  
+  if (header.flags.flag_0x400)
   {
+    // - MPBV ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MPBV');
 
     f.seekRelative (size);
-  }
-  // - MPBP ----------------------------------------------
-  if (header.flags & 0x400)
-  {
+
+    // - MPBP ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MPBP');
 
     f.seekRelative (size);
-  }
-  // - MPBI ----------------------------------------------
-  if (header.flags & 0x400)
-  {
+
+    // - MPBI ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MPBI');
 
     f.seekRelative (size);
-  }
-  // - MPBG ----------------------------------------------
-  if (header.flags & 0x400)
-  {
+
+    // - MPBG ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
@@ -855,14 +836,12 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
   // - MOCV ----------------------------------------------
-  if (header.flags & 0x4)
+  if (header.flags.has_vertex_color)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MOCV');
-
-    hascv = true;
 
     uint32_t const* colors = reinterpret_cast<uint32_t const*> (f.getPointer ());
     _vertex_colors.resize (size / sizeof (uint32_t));
@@ -875,7 +854,7 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
   // - MLIQ ----------------------------------------------
-  if (header.flags & 0x1000)
+  if (header.flags.has_water)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -885,9 +864,9 @@ void WMOGroup::load()
     WMOLiquidHeader hlq;
     f.read(&hlq, 0x1E);
 
-    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->materials[hlq.type], (flags & 0x2000) != 0);
+    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->materials[hlq.type], header.flags.indoor != 0);
   }
-  if (header.flags & 0x20000)
+  if (header.flags.has_mori_morb)
   {
     // - MORI ----------------------------------------------
     f.read (&fourcc, 4);
@@ -907,7 +886,7 @@ void WMOGroup::load()
   }
 
   // - MOTV ----------------------------------------------
-  if (header.flags & 0x2000000)
+  if (header.flags.has_two_motv)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -917,7 +896,7 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
   // - MOCV ----------------------------------------------
-  if (header.flags & 0x1000000)
+  if (header.flags.has_two_mocv)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -927,11 +906,9 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
 
-  indoor = flags & 8192;
-
   //dl_light = 0;
   // "real" lighting?
-  if ((flags & 0x2000) && hascv)
+  if (header.flags.indoor && header.flags.has_vertex_color)
   {
     ::math::vector_3d dirmin(1, 1, 1);
     float lenmin;
@@ -954,11 +931,11 @@ void WMOGroup::load()
       wmo->model_nearest_light_vector[doodad] = dirmin;
     }
 
-    outdoorLights = false;
+    use_outdoor_lights = false;
   }
   else
   {
-    outdoorLights = true;
+    use_outdoor_lights = true;
   }
 }
 
@@ -1004,7 +981,7 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
     setup_vao(wmo_shader);
   }
 
-  wmo_shader.uniform("use_vertex_color", (int)hascv);
+  wmo_shader.uniform("use_vertex_color", (int)header.flags.has_vertex_color);
 
   opengl::scoped::vao_binder const _ (_vao);
 
@@ -1125,7 +1102,7 @@ void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
 
 void WMOGroup::setupFog (bool draw_fog, std::function<void (bool)> setup_fog)
 {
-  if (outdoorLights || fog == -1) {
+  if (use_outdoor_lights || fog == -1) {
     setup_fog (draw_fog);
   }
   else {
