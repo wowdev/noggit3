@@ -123,10 +123,11 @@ private:
   bool MoveObj;
 
   math::vector_3d objMove;
-  math::vector_3d objMoveOffset;
+  std::map<uint, math::vector_3d> objMoveOffset;
   math::vector_3d objRot;
+  math::vector_3d rotationPivotPoint;
 
-  boost::optional<selection_type> lastSelected;
+  std::vector<selection_type> lastSelected;
 
   bool TestSelection = false;
 
@@ -255,6 +256,7 @@ private:
 
   noggit::bool_toggle_property _locked_cursor_mode = {false};
   noggit::bool_toggle_property _move_model_to_cursor_position = {true};
+  noggit::bool_toggle_property _use_median_pivot_point = {true};
   noggit::bool_toggle_property _display_all_water_layers = {true};
   noggit::unsigned_int_property _displayed_water_layer = {0};
   noggit::object_paste_params _object_paste_params;

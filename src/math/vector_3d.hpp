@@ -65,14 +65,29 @@ namespace math
       return x * v.x + y * v.y + z * v.z;
     }
 
+    inline T operator/ (const vector_3d_base<T>& v) const
+    {
+      return x / v.x + y / v.y + z / v.z;
+    }
+
     inline vector_3d_base<T> operator* (const T& d) const
     {
       return vector_3d_base<T> (x * d, y * d, z * d);
     }
 
+    inline vector_3d_base<T> operator/ (const T& d) const
+    {
+      return vector_3d_base<T>(x / d, y / d, z / d);
+    }
+
     friend vector_3d_base<T> operator* (const T& d, const vector_3d_base<T>& v)
     {
       return v * d;
+    }
+
+    friend vector_3d_base<T> operator/ (const T& d, const vector_3d_base<T>& v)
+    {
+      return v / d;
     }
 
     inline vector_3d_base<T> operator% (const vector_3d_base<T>& v) const
@@ -104,6 +119,14 @@ namespace math
       x *= d;
       y *= d;
       z *= d;
+      return *this;
+    }
+
+    inline vector_3d_base<T>& operator/= (T d)
+    {
+      x /= d;
+      y /= d;
+      z /= d;
       return *this;
     }
 
