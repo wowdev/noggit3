@@ -157,6 +157,8 @@ public:
   bool HasMultiSelection();
   void SetCurrentSelection(selection_type entry);
   void AddToCurrentSelection(selection_type entry) { mCurrentSelection.push_back(entry); }
+  void RemoveFromCurrentSelection(selection_type entry);
+
   void ResetSelection() { mCurrentSelection.clear(); }
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
