@@ -2756,10 +2756,14 @@ void MapView::change_selected_wmo_doodadset(int set)
 {
   for (auto& selection : _world->GetCurrentSelection())
   {
-    auto wmo = boost::get<selected_wmo_type>(selection);
-  wmo->change_doodadset(set);
-  _world->updateTilesWMO(wmo, model_update::none);
-}
+
+    if (selection.which() == eEntry_WMO)
+    {
+      auto wmo = boost::get<selected_wmo_type>(selection);
+      wmo->change_doodadset(set);
+      _world->updateTilesWMO(wmo, model_update::none);
+    }
+  }
 }
 
 void MapView::mousePressEvent(QMouseEvent* event)
