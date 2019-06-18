@@ -353,6 +353,7 @@ namespace noggit
         QSignalBlocker const block_position_x (_position_x);
         QSignalBlocker const block_position_y (_position_y);
         QSignalBlocker const block_position_z (_position_z);
+        QSignalBlocker const blocl_scale (_scale);
 
         auto lastEntry = _entries.back();
 
