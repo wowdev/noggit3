@@ -353,7 +353,7 @@ namespace noggit
         case PASTE_ON_TERRAIN:
           if (selected.size() > 1) // calculate offsets when we have selected multiple objects and paste on cursor position
           {
-            pos = cursor_pos + midPos - getObjectPosition(selection);
+            pos = cursor_pos - (midPos - getObjectPosition(selection));
           } // else: insert the only copied object onto cursor position
           break;
         case PASTE_ON_SELECTION:
@@ -380,9 +380,9 @@ namespace noggit
 
               // calculate offsets when we have selected multiple objects and paste on middle of selection
               if (selected.size() > 1)
-            {
+              {
                 pos = midSelectionPos + midPos - getObjectPosition(selection);
-            }
+              }
               else // else: paste only objecton middle of selection
               {
                 pos = midSelectionPos;
@@ -408,14 +408,14 @@ namespace noggit
             // calculate offsets when we have selected multiple objects and paste on last cursor
             if (selected.size() > 1)
             {
-              pos = cursor_pos + midPos - getObjectPosition(selection);
+              pos = cursor_pos - (midPos - getObjectPosition(selection));
             } 
           } // else: use cursor position for single object
           break;
         case PASTE_ON_CAMERA:
           if (selected.size() > 1) // calculate offsets when we have selected multiple objects and paste on camera position
           {
-            pos = camera_pos + midPos - getObjectPosition(selection);
+            pos = camera_pos - (midPos - getObjectPosition(selection));
           } 
           else // else: insert the only copied object onto cursor position
           {

@@ -1122,7 +1122,7 @@ void MapView::createGUI()
               {
                 if (_world->HasSelection())
                 {
-        for (auto& selection : _world->GetCurrentSelection())
+                  for (auto& selection : _world->GetCurrentSelection())
                   {
 
                     if (selection.which() == eEntry_Model)
