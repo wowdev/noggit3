@@ -24,8 +24,6 @@ namespace noggit
       void select(std::vector<selection_type> entries);
       void updateValues();
 
-      bool hasFocus() const {return false;}
-
     private:
       void update_model(selection_type entry);
 

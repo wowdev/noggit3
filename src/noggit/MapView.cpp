@@ -1519,19 +1519,18 @@ void MapView::tick (float dt)
 
   auto currentSelection = _world->GetCurrentSelection();
   if (_world->HasSelection())
-    {
+  {
       // update rotation editor if the selection has changed
     if (lastSelected != currentSelection)
-      {
+    {
       objectEditor->rotationEditor->select(currentSelection);
-      }
+    }
+
+    bool canMoveObj = terrainMode == editing_mode::object;
 
     for (auto& selection : currentSelection)
     {
-      bool canMoveObj = !objectEditor->rotationEditor->hasFocus();
-
       // Set move scale and rotate for numpad keys
-
       if (_mod_ctrl_down && _mod_shift_down)  numpad_moveratio += 0.1f;
       else if (_mod_shift_down) numpad_moveratio += 0.01f;
       else if (_mod_ctrl_down) numpad_moveratio += 0.0005f;
