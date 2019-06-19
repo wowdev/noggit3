@@ -353,7 +353,7 @@ namespace noggit
         QSignalBlocker const block_position_x (_position_x);
         QSignalBlocker const block_position_y (_position_y);
         QSignalBlocker const block_position_z (_position_z);
-        QSignalBlocker const blocl_scale (_scale);
+        QSignalBlocker const block_scale (_scale);
 
         auto lastEntry = _entries.back();
 
@@ -368,12 +368,12 @@ namespace noggit
           _position_z->setValue(model->pos.z);
           _scale->setValue(model->scale);
 
-        _rotation_x->setEnabled (true);
-        _rotation_y->setEnabled (true);
-        _rotation_z->setEnabled (true);
-        _position_x->setEnabled (true);
-        _position_y->setEnabled (true);
-        _position_z->setEnabled (true);
+          _rotation_x->setEnabled (true);
+          _rotation_y->setEnabled (true);
+          _rotation_z->setEnabled (true);
+          _position_x->setEnabled (true);
+          _position_y->setEnabled (true);
+          _position_z->setEnabled (true);
           _scale->setEnabled (true);
         }
         else if (lastEntry.which() == eEntry_WMO)
