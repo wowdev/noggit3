@@ -30,6 +30,7 @@ struct selected_chunk_type
     return chunk == other.chunk;
   }
 };
+
 using selected_model_type = ModelInstance*;
 using selected_wmo_type = WMOInstance*;
 using selection_type = boost::variant < selected_model_type

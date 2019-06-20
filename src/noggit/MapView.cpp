@@ -1120,24 +1120,29 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
+
                 if (_world->HasSelection())
                 {
-                  for (auto& selection : _world->GetCurrentSelection())
+                  auto selected_objects = _world->GetCurrentSelection();
+                  auto midPos = getMedianPivotPoint(selected_objects);
+         
+
+                  for (auto& object : selected_objects)
                   {
 
-                    if (selection.which() == eEntry_Model)
+                    if (object.which() == eEntry_Model)
                     {
-                      _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::remove);
-                      boost::get<selected_model_type>(selection)->pos = _cursor_pos;
-                      boost::get<selected_model_type>(selection)->recalcExtents();
-                      _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::add);
+                      _world->updateTilesModel(boost::get<selected_model_type>(object), model_update::remove);
+                      boost::get<selected_model_type>(object)->pos = _cursor_pos - (midPos - getObjectPosition(object));
+                      boost::get<selected_model_type>(object)->recalcExtents();
+                      _world->updateTilesModel(boost::get<selected_model_type>(object), model_update::add);
                     }
-                    else if (selection.which() == eEntry_WMO)
+                    else if (object.which() == eEntry_WMO)
                     {
-                      _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::remove);
-                      boost::get<selected_wmo_type>(selection)->pos = _cursor_pos;
-                      boost::get<selected_wmo_type>(selection)->recalcExtents();
-                      _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::add);
+                      _world->updateTilesWMO(boost::get<selected_wmo_type>(object), model_update::remove);
+                      boost::get<selected_wmo_type>(object)->pos = _cursor_pos - (midPos - getObjectPosition(object));
+                      boost::get<selected_wmo_type>(object)->recalcExtents();
+                      _world->updateTilesWMO(boost::get<selected_wmo_type>(object), model_update::add);
                     }
                   }
                 }
@@ -1533,6 +1538,134 @@ void MapView::tick (float dt)
     for (auto& selection : currentSelection)
     {
 
+      if (leftMouse && selection.which() == eEntry_MapChunk)
+      {
+        bool underMap = _world->isUnderMap(_cursor_pos);
+
+        switch (terrainMode)
+        {
+        case editing_mode::ground:
+          if (_display_mode == display_mode::in_3D && !underMap)
+          {
+            if (_mod_shift_down)
+            {
+              terrainTool->changeTerrain(_world.get(), _cursor_pos, 7.5f * dt);
+            }
+            else if (_mod_ctrl_down)
+            {
+              terrainTool->changeTerrain(_world.get(), _cursor_pos, -7.5f * dt);
+            }
+          }
+          break;
+        case editing_mode::flatten_blur:
+          if (_display_mode == display_mode::in_3D && !underMap)
+          {
+            if (_mod_shift_down)
+            {
+              flattenTool->flatten(_world.get(), _cursor_pos, dt);
+            }
+            else if (_mod_ctrl_down)
+            {
+              flattenTool->blur(_world.get(), _cursor_pos, dt);
+            }
+          }
+          break;
+        case editing_mode::paint:
+          if (_mod_shift_down && _mod_ctrl_down && _mod_alt_down)
+          {
+            // clear chunk texture
+            if (!underMap)
+            {
+              _world->eraseTextures(_cursor_pos);
+            }
+          }
+          else if (_mod_ctrl_down && !ui_hidden)
+          {
+            // Pick texture
+            TexturePicker->getTextures(selection);
+          }
+          else  if (_mod_shift_down && !!noggit::ui::selected_texture::get())
+          {
+            if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
+            {
+              texturingTool->paint(_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
+            }
+          }
+          break;
+
+        case editing_mode::holes:
+          // no undermap check here, else it's impossible to remove holes
+          if (_mod_shift_down)
+          {
+            auto pos(boost::get<selected_chunk_type>(selection).position);
+            _world->setHole(pos, _mod_alt_down, false);
+          }
+          else if (_mod_ctrl_down && !underMap)
+          {
+            _world->setHole(_cursor_pos, _mod_alt_down, true);
+          }
+          break;
+        case editing_mode::areaid:
+          if (!underMap)
+          {
+            if (_mod_shift_down)
+            {
+              // draw the selected AreaId on current selected chunk
+              _world->setAreaID(_cursor_pos, _selected_area_id, false);
+            }
+            else if (_mod_ctrl_down)
+            {
+              // pick areaID from chunk
+              MapChunk* chnk(boost::get<selected_chunk_type>(selection).chunk);
+              int newID = chnk->getAreaID();
+              _selected_area_id = newID;
+              ZoneIDBrowser->setZoneID(newID);
+            }
+          }
+          break;
+        case editing_mode::flags:
+          if (!underMap)
+          {
+            // todo: replace this
+            if (_mod_shift_down)
+            {
+              _world->mapIndex.setFlag(true, _cursor_pos, 0x2);
+            }
+            else if (_mod_ctrl_down)
+            {
+              _world->mapIndex.setFlag(false, _cursor_pos, 0x2);
+            }
+          }
+          break;
+        case editing_mode::water:
+          if (_display_mode == display_mode::in_3D && !underMap)
+          {
+            if (_mod_shift_down)
+            {
+              guiWater->paintLiquid(_world.get(), _cursor_pos, true);
+            }
+            else if (_mod_ctrl_down)
+            {
+              guiWater->paintLiquid(_world.get(), _cursor_pos, false);
+            }
+          }
+          break;
+        case editing_mode::mccv:
+          if (!underMap)
+          {
+            if (_mod_shift_down)
+            {
+              shaderTool->changeShader(_world.get(), _cursor_pos, dt, true);
+            }
+            if (_mod_ctrl_down)
+            {
+              shaderTool->changeShader(_world.get(), _cursor_pos, dt, false);
+            }
+          }
+          break;
+        }
+      }
+
       if (selection.which() == eEntry_MapChunk)
       {
         continue;
@@ -1797,133 +1930,6 @@ void MapView::tick (float dt)
         }
       }
 
-      if (leftMouse && selection.which() == eEntry_MapChunk)
-      {
-        bool underMap = _world->isUnderMap(_cursor_pos);
-
-        switch (terrainMode)
-        {
-        case editing_mode::ground:
-          if (_display_mode == display_mode::in_3D && !underMap)
-          {
-            if (_mod_shift_down)
-            {
-              terrainTool->changeTerrain (_world.get(), _cursor_pos, 7.5f * dt);
-            }
-            else if (_mod_ctrl_down)
-            {
-              terrainTool->changeTerrain (_world.get(), _cursor_pos, -7.5f * dt);
-            }
-          }
-          break;
-        case editing_mode::flatten_blur:
-          if (_display_mode == display_mode::in_3D && !underMap)
-          {
-            if (_mod_shift_down)
-            {
-              flattenTool->flatten (_world.get(), _cursor_pos, dt);
-            }
-            else if (_mod_ctrl_down)
-            {
-              flattenTool->blur (_world.get(), _cursor_pos, dt);
-            }
-          }
-          break;
-        case editing_mode::paint:
-          if (_mod_shift_down && _mod_ctrl_down && _mod_alt_down)
-          {
-            // clear chunk texture
-            if (!underMap)
-            {
-              _world->eraseTextures(_cursor_pos);
-            }
-          }
-          else if (_mod_ctrl_down && !ui_hidden)
-          {
-            // Pick texture
-            TexturePicker->getTextures(selection);
-          }
-          else  if (_mod_shift_down && !!noggit::ui::selected_texture::get())
-          {
-            if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
-            {
-              texturingTool->paint (_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
-            }
-          }
-          break;
-
-        case editing_mode::holes:
-          // no undermap check here, else it's impossible to remove holes
-          if (_mod_shift_down)
-          {
-            auto pos(boost::get<selected_chunk_type>(selection).position);
-            _world->setHole(pos, _mod_alt_down, false);
-          }
-          else if (_mod_ctrl_down && !underMap)
-          {
-            _world->setHole(_cursor_pos, _mod_alt_down, true);
-          }
-          break;
-        case editing_mode::areaid:
-          if (!underMap)
-          {
-            if (_mod_shift_down)
-            {
-              // draw the selected AreaId on current selected chunk
-              _world->setAreaID(_cursor_pos, _selected_area_id, false);
-            }
-            else if (_mod_ctrl_down)
-            {
-              // pick areaID from chunk
-              MapChunk* chnk(boost::get<selected_chunk_type>(selection).chunk);
-              int newID = chnk->getAreaID();
-              _selected_area_id = newID;
-              ZoneIDBrowser->setZoneID(newID);
-            }
-          }
-          break;
-        case editing_mode::flags:
-          if (!underMap)
-          {
-            // todo: replace this
-            if (_mod_shift_down)
-            {
-              _world->mapIndex.setFlag(true, _cursor_pos, 0x2);
-            }
-            else if (_mod_ctrl_down)
-            {
-              _world->mapIndex.setFlag(false, _cursor_pos, 0x2);
-            }
-          }
-          break;
-        case editing_mode::water:
-          if (_display_mode == display_mode::in_3D && !underMap)
-          {
-            if (_mod_shift_down)
-            {
-              guiWater->paintLiquid (_world.get(), _cursor_pos, true);
-            }
-            else if (_mod_ctrl_down)
-            {
-              guiWater->paintLiquid (_world.get(), _cursor_pos, false);
-            }
-          }
-          break;
-        case editing_mode::mccv:
-          if (!underMap)
-          {
-            if (_mod_shift_down)
-            {
-              shaderTool->changeShader (_world.get(), _cursor_pos, dt, true);
-            }
-            if (_mod_ctrl_down)
-            {
-              shaderTool->changeShader (_world.get(), _cursor_pos, dt, false);
-            }
-          }
-          break;
-        }
-      }
     }
   }
 
