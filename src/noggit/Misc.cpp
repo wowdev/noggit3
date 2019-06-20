@@ -250,7 +250,7 @@ math::vector_3d getObjectPosition(selection_type object)
   }
 }
 
-math::vector_3d getMedianPivotPoint(std::vector<selection_type> entries)
+math::vector_3d getMedianPivotPoint(std::vector<selection_type>& entries)
 {
   // get pivot point
   math::vector_3d minPos;
