@@ -324,6 +324,7 @@ namespace noggit
 
         case QMessageBox::DestructiveRole:
         {
+          build_menu();
           event->accept();
           break;
         }

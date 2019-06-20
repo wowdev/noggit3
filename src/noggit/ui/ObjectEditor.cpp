@@ -429,32 +429,32 @@ namespace noggit
 
       {
           if (selection.which() == eEntry_Model)
-        {
-          float scale (1.f);
-          math::vector_3d rotation (0.f, 0.f, 0.f);
-
-          if (_copy_model_stats)
           {
-            // copy rot size from original model. Dirty but woring
-              scale = boost::get<selected_model_type>(selection)->scale;
-              rotation = boost::get<selected_model_type>(selection)->dir;
-          }
+            float scale (1.f);
+            math::vector_3d rotation (0.f, 0.f, 0.f);
 
-            world->addM2(boost::get<selected_model_type>(selection)->model->filename
-                       , pos
-                       , scale
-                       , rotation
-                       , paste_params
-                       );
-        }
+            if (_copy_model_stats)
+            {
+              // copy rot size from original model. Dirty but woring
+                scale = boost::get<selected_model_type>(selection)->scale;
+                rotation = boost::get<selected_model_type>(selection)->dir;
+            }
+
+              world->addM2(boost::get<selected_model_type>(selection)->model->filename
+                         , pos
+                         , scale
+                         , rotation
+                         , paste_params
+                         );
+          }
           else if (selection.which() == eEntry_WMO)
-        {
-          math::vector_3d rotation (0.f, 0.f, 0.f);
-          if (_copy_model_stats)
           {
-            // copy rot from original model. Dirty but working
-              rotation = boost::get<selected_wmo_type>(selection)->dir;
-          }
+            math::vector_3d rotation (0.f, 0.f, 0.f);
+            if (_copy_model_stats)
+            {
+              // copy rot from original model. Dirty but working
+                rotation = boost::get<selected_wmo_type>(selection)->dir;
+            }
 
             world->addWMO(boost::get<selected_wmo_type>(selection)->wmo->filename, pos, rotation);
         }
