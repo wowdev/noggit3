@@ -1530,6 +1530,12 @@ void MapView::tick (float dt)
 
     for (auto& selection : currentSelection)
     {
+
+      if (selection.which() == eEntry_MapChunk)
+      {
+        continue;
+      }
+
       // Set move scale and rotate for numpad keys
       if (_mod_ctrl_down && _mod_shift_down)  numpad_moveratio += 0.1f;
       else if (_mod_shift_down) numpad_moveratio += 0.01f;
