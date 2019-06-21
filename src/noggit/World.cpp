@@ -972,6 +972,11 @@ void main()
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
 
+    if (terrainMode == editing_mode::object && HasMultiSelection())
+    {
+      render_sphere(getMedianPivotPoint(mCurrentSelection), 2.f, cursor_color);
+    }
+
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
     {
       render_square(cursor_pos, brushRadius / 2.0f, 0.0f, brushRadius / 2.0f * innerRadius, true);
