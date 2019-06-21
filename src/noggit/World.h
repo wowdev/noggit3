@@ -169,6 +169,11 @@ public:
   };
 
   void scale_selected_models(float v, m2_scaling_type type);
+  void move_selected_models(float dx, float dy, float dz);
+  void move_selected_models(math::vector_3d const& delta)
+  {
+    move_selected_models(delta.x, delta.y, delta.z);
+  }
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
 

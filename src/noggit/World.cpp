@@ -360,6 +360,42 @@ void World::scale_selected_models(float v, m2_scaling_type type)
   }
 }
 
+void World::move_selected_models(float dx, float dy, float dz)
+{
+  for (auto& entry : mCurrentSelection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    math::vector_3d& pos = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->pos
+      : boost::get<selected_wmo_type>(entry)->pos
+      ;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    pos.x += dx;
+    pos.y += dy;
+    pos.z += dz;
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+}
+
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 {
   if (!*pDetailTexCoords && !*pAlphaTexCoords)
