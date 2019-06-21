@@ -21,6 +21,7 @@
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QOpenGLWidget>
+#include <QWidgetAction>
 
 #include <forward_list>
 #include <map>
@@ -106,6 +107,8 @@ private:
   void draw_map();
 
   void createGUI();
+
+  QWidgetAction* createTextSeparator(const QString& text);
 
   float mTimespeed;
 
