@@ -161,6 +161,15 @@ public:
 
   void ResetSelection() { mCurrentSelection.clear(); }
 
+  enum class m2_scaling_type
+  {
+    set,
+    add,
+    mult
+  };
+
+  void scale_selected_models(float v, m2_scaling_type type);
+
   bool GetVertex(float x, float z, math::vector_3d *V) const;
 
   // check if the cursor is under map or in an unloaded tile

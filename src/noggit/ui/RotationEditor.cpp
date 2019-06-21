@@ -6,6 +6,7 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/WMOInstance.h>
+#include <noggit/World.h>
 #include <util/qt/overload.hpp>
 #include <noggit/ui/ObjectEditor.h>
 
@@ -16,7 +17,7 @@ namespace noggit
 {
   namespace ui
   {
-    rotation_editor::rotation_editor(QWidget* parent)
+    rotation_editor::rotation_editor(QWidget* parent, World* world)
       : QWidget (parent)
     {
       setWindowTitle("Pos/Rotation Editor");
@@ -60,7 +61,7 @@ namespace noggit
       _position_y->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
       _position_y->setDecimals (5);
 
-      _scale->setRange (0.01f, 63.0f);
+      _scale->setRange (ModelInstance::min_scale, ModelInstance::max_scale);
       _scale->setDecimals (2);
       _scale->setSingleStep(0.1f);
 
@@ -319,14 +320,7 @@ namespace noggit
       connect ( _scale, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  for (auto& selection : _entries)
-                  {
-                    if (selection.which() == eEntry_Model)
-                    {
-                      boost::get<selected_model_type>(selection)->scale = v;
-                      update_model(selection);
-                    }
-                  }
+                  world->scale_selected_models(v, World::m2_scaling_type::set);
                 }
               );
     }

@@ -1553,13 +1553,25 @@ void MapView::tick (float dt)
   auto currentSelection = _world->GetCurrentSelection();
   if (_world->HasSelection())
   {
-      // update rotation editor if the selection has changed
+    // update rotation editor if the selection has changed
     if (lastSelected != currentSelection)
     {
       objectEditor->rotationEditor->select(currentSelection);
     }
 
     bool canMoveObj = terrainMode == editing_mode::object;
+
+    if (terrainMode == editing_mode::object)
+    {
+      if (keys != 0.f)
+      {
+        _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
+      }
+      if (MoveObj && _mod_alt_down)
+      {
+        _world->scale_selected_models(std::pow(2.f, mv*4.f), World::m2_scaling_type::mult);
+      }
+    }
 
     for (auto& selection : currentSelection)
     {
@@ -1726,7 +1738,6 @@ void MapView::tick (float dt)
           model->pos.y += keyy * numpad_moveratio;
           model->pos.z += keyz * numpad_moveratio;
           model->dir.y += keyr * numpad_moveratio * 5;
-          model->scale += keys * numpad_moveratio / 50;
           model->recalcExtents();
           _world->updateTilesModel(model, model_update::add);
           objectEditor->rotationEditor->updateValues();
@@ -1791,12 +1802,7 @@ void MapView::tick (float dt)
 
           if (_mod_alt_down)
           {
-            float ScaleAmount = pow(2.0f, mv * 4.0f);
-            model->scale *= ScaleAmount;
-            if (model->scale > 63.9f)
-              model->scale = 63.9f;
-            else if (model->scale < 0.00098f)
-              model->scale = 0.00098f;
+            // do nothing, scaling is done outsite the loop now
           }
           else if (_mod_shift_down)
           {

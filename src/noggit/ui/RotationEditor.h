@@ -10,6 +10,8 @@
 #include <QtWidgets/QWidget>
 #include <QDockWidget>
 
+class World;
+
 namespace noggit
 {
   namespace ui
@@ -17,7 +19,7 @@ namespace noggit
     class rotation_editor : public QWidget
     {
     public:
-      rotation_editor(QWidget* parent);
+      rotation_editor(QWidget* parent, World* world);
 
       bool* use_median_pivot_point;
 
