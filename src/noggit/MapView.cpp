@@ -1563,6 +1563,27 @@ void MapView::tick (float dt)
 
     if (terrainMode == editing_mode::object)
     {
+      // reset numpad_moveratio when no numpad key is pressed
+      if (!(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
+      {
+        numpad_moveratio = 0.001f;
+      }
+      else // Set move scale and rotate for numpad keys
+      {
+        if (_mod_ctrl_down && _mod_shift_down)
+        {
+          numpad_moveratio += 0.1f;
+        }
+        else if (_mod_shift_down)
+        {
+          numpad_moveratio += 0.01f;
+        }
+        else if (_mod_ctrl_down)
+        {
+          numpad_moveratio += 0.0005f;
+        }
+      }
+
       if (keys != 0.f)
       {
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
@@ -1594,7 +1615,7 @@ void MapView::tick (float dt)
       if (keyx != 0.f || keyy != 0.f || keyz != 0.f)
       {
         _world->move_selected_models(keyx * numpad_moveratio, keyy * numpad_moveratio, keyz * numpad_moveratio);
-      }
+      }      
     }
 
     for (auto& selection : currentSelection)
@@ -1730,14 +1751,10 @@ void MapView::tick (float dt)
       if (selection.which() == eEntry_MapChunk)
       {
         continue;
-      }
+      }   
+      
 
-      // Set move scale and rotate for numpad keys
-      if (_mod_ctrl_down && _mod_shift_down)  numpad_moveratio += 0.1f;
-      else if (_mod_shift_down) numpad_moveratio += 0.01f;
-      else if (_mod_ctrl_down) numpad_moveratio += 0.0005f;
-
-      if (canMoveObj && (keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
+      if (canMoveObj && keyr != 0)
       {
         // Move scale and rotate with numpad keys
         if (selection.which() == eEntry_WMO)
