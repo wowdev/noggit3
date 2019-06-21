@@ -68,200 +68,57 @@ namespace noggit
 
 
       connect ( _rotation_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  auto lastEntry = _entries.back();
-                  double difference = v;
-                  if (lastEntry.which() == eEntry_Model)
-                  {
-                    difference = v - boost::get<selected_model_type>(lastEntry)->dir.x;
-                  }
-                  else if (lastEntry.which() == eEntry_WMO)
-                  {
-                    difference = v - boost::get<selected_wmo_type>(lastEntry)->dir.x;
-                  }
-
-                  if (_entries.size() > 1 && *use_median_pivot_point)
-                  {
-                    auto rotationPivotPoint = getMedianPivotPoint(_entries);
-
-                    for (auto& selection : _entries)
-                    {
-                      math::vector_3d* position = nullptr;
-                      math::vector_3d* rotation = nullptr;
-
-                      if (selection.which() == eEntry_Model)
-                      {
-                        position = &boost::get<selected_model_type>(selection)->pos;
-                        rotation = &boost::get<selected_model_type>(selection)->dir;
-                      }
-                      else if (selection.which() == eEntry_WMO)
-                      {
-                        position = &boost::get<selected_wmo_type>(selection)->pos;
-                        rotation = &boost::get<selected_wmo_type>(selection)->dir;
-                      }
-
-                      auto oldPos = *position;
-
-                      rotateByXAxis(selection, rotationPivotPoint, difference * math::constants::pi / 180);
-                      rotation->x -= calculateRotationXAngle(*position, oldPos, rotationPivotPoint);
-
-                      if (rotation->x > 180.0f)
-                        rotation->x -= 360.0f;
-                      else if (rotation->x < -180.0f)
-                        rotation->x += 360.0f;
-
-                      update_model(selection);
-                    }
-                  }
-                  else
-                  {
-                    for (auto& selection : _entries)
-                    {
-                      if (selection.which() == eEntry_Model)
-                      {
-                        auto model = boost::get<selected_model_type>(selection);
-                        model->dir.x = v;
-                      }
-                      else if (selection.which() == eEntry_WMO)
-                      {
-                        auto wmo = boost::get<selected_wmo_type>(selection);
-                        wmo->dir.x = v;
-                      }
-                      update_model(selection);
-                    }
-                  }
-                }
+              , [&] (double v) { set_model_rotation(); }
               );
       connect ( _rotation_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+              , [&] (double v) { set_model_rotation(); }
+              );
+      connect ( _rotation_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&] (double v) { set_model_rotation(); }
+              );
+
+      connect ( _rotation_x, &QDoubleSpinBox::editingFinished
+              , [&] 
                 {
-                  auto lastEntry = _entries.back();
-                  double difference = v;
-                  if (lastEntry.which() == eEntry_Model)
+                  // avoid rotation changes when losing focus
+                  if(_rotation_x->hasFocus())
                   {
-                    difference = v - boost::get<selected_model_type>(lastEntry)->dir.z;
+                    change_models_rotation();
                   }
-                  else if (lastEntry.which() == eEntry_WMO)
+                  else // reset value
                   {
-                    difference = v - boost::get<selected_wmo_type>(lastEntry)->dir.z;
-                  }
-
-                  if (_entries.size() > 1 && *use_median_pivot_point)
-                  {
-                    auto rotationPivotPoint = getMedianPivotPoint(_entries);
-
-                    for (auto& selection : _entries)
-                    {
-                      math::vector_3d* position = nullptr;
-                      math::vector_3d* rotation = nullptr;
-
-                      if (selection.which() == eEntry_Model)
-                      {
-                        position = &boost::get<selected_model_type>(selection)->pos;
-                        rotation = &boost::get<selected_model_type>(selection)->dir;
-                      }
-                      else if (selection.which() == eEntry_WMO)
-                      {
-                        position = &boost::get<selected_wmo_type>(selection)->pos;
-                        rotation = &boost::get<selected_wmo_type>(selection)->dir;
-                      }
-
-                      auto oldPos = *position;
-
-                      rotateByZAxis(selection, rotationPivotPoint, difference * math::constants::pi / 180);
-                      rotation->z -= calculateRotationZAngle(*position, oldPos, rotationPivotPoint);
-
-                      if (rotation->z > 180)
-                        rotation->z -= 360.0f;
-                      else if (rotation->z < -180.0f)
-                        rotation->z += 360.0f;
-
-                      update_model(selection);
-                    }
-                  }
-                  else
-                  {
-                    for (auto& selection : _entries)
-                    {
-                      if (selection.which() == eEntry_Model)
-                      {
-                        auto model = boost::get<selected_model_type>(selection);
-                        model->dir.z = v;
-                      }
-                      else if (selection.which() == eEntry_WMO)
-                      {
-                        auto wmo = boost::get<selected_wmo_type>(selection);
-                        wmo->dir.z = v;
-                      }
-                      update_model(selection);
-                    }
+                    QSignalBlocker const _ (_rotation_x);
+                    _rotation_x->setValue(0.f);
                   }
                 }
               );
-      connect ( _rotation_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+      connect ( _rotation_z, &QDoubleSpinBox::editingFinished
+              , [&] 
                 {
-                  auto lastEntry = _entries.back();
-                  double difference = v;
-                  if (lastEntry.which() == eEntry_Model)
+                  // avoid rotation changes when losing focus
+                  if(_rotation_z->hasFocus())
                   {
-                    difference = v - boost::get<selected_model_type>(lastEntry)->dir.y;
+                    change_models_rotation();
                   }
-                  else if (lastEntry.which() == eEntry_WMO)
+                  else // reset value
                   {
-                    difference = v - boost::get<selected_wmo_type>(lastEntry)->dir.y;
+                    QSignalBlocker const _ (_rotation_z);
+                    _rotation_z->setValue(0.f);
                   }
-
-                  if (_entries.size() > 1 && *use_median_pivot_point)
+                }
+              );
+      connect ( _rotation_y, &QDoubleSpinBox::editingFinished
+              , [&] 
+                {
+                  // avoid rotation changes when losing focus
+                  if(_rotation_y->hasFocus())
                   {
-                    auto rotationPivotPoint = getMedianPivotPoint(_entries);
-
-                    for (auto& selection : _entries)
-                    {
-                      math::vector_3d* position = nullptr;
-                      math::vector_3d* rotation = nullptr;
-
-                      if (selection.which() == eEntry_Model)
-                      {
-                        position = &boost::get<selected_model_type>(selection)->pos;
-                        rotation = &boost::get<selected_model_type>(selection)->dir;
-                      }
-                      else if (selection.which() == eEntry_WMO)
-                      {
-                        position = &boost::get<selected_wmo_type>(selection)->pos;
-                        rotation = &boost::get<selected_wmo_type>(selection)->dir;
-                      }
-
-                      auto oldPos = *position;
-
-                      rotateByYAxis(selection, rotationPivotPoint, difference * math::constants::pi / 180);
-                      rotation->y += calculateRotationYAngle(*position, oldPos, rotationPivotPoint);
-
-                      if (rotation->y > 360.0f)
-                        rotation->y -= 360.0f;
-                      else if (rotation->y < 0.0f)
-                        rotation->y += 360.0f;
-
-                      update_model(selection);
-                    }
+                    change_models_rotation();
                   }
-                  else
+                  else // reset value
                   {
-                    for (auto& selection : _entries)
-                    {
-                      if (selection.which() == eEntry_Model)
-                      {
-                        auto model = boost::get<selected_model_type>(selection);
-                        model->dir.y = v;
-                      }
-                      else if (selection.which() == eEntry_WMO)
-                      {
-                        auto wmo = boost::get<selected_wmo_type>(selection);
-                        wmo->dir.y = v;
-                      }
-                      update_model(selection);
-                    }
+                    QSignalBlocker const _ (_rotation_y);
+                    _rotation_y->setValue(0.f);
                   }
                 }
               );
@@ -293,18 +150,6 @@ namespace noggit
               );
     }
 
-    void rotation_editor::select(std::vector<selection_type> entries)
-    {
-      _entries.clear();
-
-      if (entries.size() > 0)
-      {
-        _entries.insert(_entries.end(), entries.begin(), entries.end());
-      }
-
-      updateValues();
-    }
-
     void rotation_editor::updateValues()
     {
       QSignalBlocker const block_rotation_x(_rotation_x);
@@ -326,14 +171,15 @@ namespace noggit
         _position_x->setEnabled(true);
         _position_y->setEnabled(true);
         _position_z->setEnabled(true);
-        // disable rotation and scaling for now with multi selection
+        // default value for rotation, affect the models only when pressing enter
         _rotation_x->setValue(0.f);
         _rotation_y->setValue(0.f);
         _rotation_z->setValue(0.f);
+        _rotation_x->setEnabled(true);
+        _rotation_y->setEnabled(true);
+        _rotation_z->setEnabled(true);
+        // disable scaling for now
         _scale->setValue(1.f);
-        _rotation_x->setEnabled(false);
-        _rotation_y->setEnabled(false);
-        _rotation_z->setEnabled(false);
         _scale->setEnabled(false);
       }
       else
@@ -391,15 +237,30 @@ namespace noggit
       }
     }
 
-    void rotation_editor::update_model(selection_type entry)
+    void rotation_editor::set_model_rotation()
     {
-      if (entry.which() == eEntry_Model)
+      // only for single model rotation
+      if (!_world->has_multiple_model_selected())
       {
-        boost::get<selected_model_type>(entry)->recalcExtents();
+        _world->set_selected_models_rotation
+          ( math::degrees(_rotation_x->value())
+          , math::degrees(_rotation_y->value())
+          , math::degrees(_rotation_z->value())
+          );
       }
-      else if (entry.which() == eEntry_WMO)
+    }
+
+    void rotation_editor::change_models_rotation()
+    {
+      // only for multi models rotation
+      if (_world->has_multiple_model_selected())
       {
-        boost::get<selected_wmo_type>(entry)->recalcExtents();
+        _world->rotate_selected_models
+          ( math::degrees(_rotation_x->value())
+          , math::degrees(_rotation_y->value())
+          , math::degrees(_rotation_z->value())
+          , *use_median_pivot_point
+          );
       }
     }
   }

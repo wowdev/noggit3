@@ -1556,7 +1556,7 @@ void MapView::tick (float dt)
     // update rotation editor if the selection has changed
     if (lastSelected != currentSelection)
     {
-      objectEditor->rotationEditor->select(currentSelection);
+      objectEditor->rotationEditor->updateValues();
     }
 
     bool canMoveObj = terrainMode == editing_mode::object;
@@ -1588,6 +1588,15 @@ void MapView::tick (float dt)
       {
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
       }
+      if (keyr != 0.f)
+      {
+        _world->rotate_selected_models( math::degrees(0.f)
+                                      , math::degrees(keyr * numpad_moveratio * 5.f)
+                                      , math::degrees(0.f)
+                                      , _use_median_pivot_point.get()
+                                      );
+      }
+
       if (MoveObj)
       {
         if (_mod_alt_down)
@@ -1615,7 +1624,35 @@ void MapView::tick (float dt)
       if (keyx != 0.f || keyy != 0.f || keyz != 0.f)
       {
         _world->move_selected_models(keyx * numpad_moveratio, keyy * numpad_moveratio, keyz * numpad_moveratio);
-      }      
+      }
+
+      if (look)
+      {
+        if (_mod_ctrl_down) // X
+        {
+          _world->rotate_selected_models( math::degrees(rh + rv)
+                                        , math::degrees(0.f)
+                                        , math::degrees(0.f)
+                                        , _use_median_pivot_point.get()
+                                        );
+        }
+        if (_mod_shift_down) // Y
+        {
+          _world->rotate_selected_models( math::degrees(0.f)
+                                        , math::degrees(rh + rv)
+                                        , math::degrees(0.f)
+                                        , _use_median_pivot_point.get()
+                                        );
+        }
+        if (_mod_alt_down) // Z
+        {
+          _world->rotate_selected_models( math::degrees(0.f)
+                                        , math::degrees(0.f)
+                                        , math::degrees(rh + rv)
+                                        , _use_median_pivot_point.get()
+                                        );
+        }
+      }
     }
 
     for (auto& selection : currentSelection)
@@ -1746,175 +1783,7 @@ void MapView::tick (float dt)
           }
           break;
         }
-      }
-
-      if (selection.which() == eEntry_MapChunk)
-      {
-        continue;
-      }   
-      
-
-      if (canMoveObj && keyr != 0)
-      {
-        // Move scale and rotate with numpad keys
-        if (selection.which() == eEntry_WMO)
-        {
-          auto wmo = boost::get<selected_wmo_type>(selection);
-          _world->updateTilesWMO(wmo, model_update::remove);
-          wmo->dir.y += keyr * numpad_moveratio * 5;
-          wmo->recalcExtents();
-          _world->updateTilesWMO(wmo, model_update::add);
-          objectEditor->rotationEditor->updateValues();
-        }
-
-        if (selection.which() == eEntry_Model)
-        {
-          auto model = boost::get<selected_model_type>(selection);
-          _world->updateTilesModel(model, model_update::remove);
-          model->dir.y += keyr * numpad_moveratio * 5;
-          model->recalcExtents();
-          _world->updateTilesModel(model, model_update::add);
-          objectEditor->rotationEditor->updateValues();
-        }
-      }
-      else
-      {
-        numpad_moveratio = 0.001f;
-      }
-
-      // rotating objects
-      if (look && canMoveObj)
-      {
-        if (currentSelection.size() > 1 && _use_median_pivot_point.get())
-        {
-          if (_mod_shift_down || _mod_ctrl_down || _mod_alt_down)
-          {
-            math::vector_3d* position = nullptr;
-            math::vector_3d* rotation = nullptr;
-
-            if (selection.which() == eEntry_Model)
-            {
-              position = &boost::get<selected_model_type>(selection)->pos;
-              rotation = &boost::get<selected_model_type>(selection)->dir;
-            }
-            else if (selection.which() == eEntry_WMO)
-            {
-              position = &boost::get<selected_wmo_type>(selection)->pos;
-              rotation = &boost::get<selected_wmo_type>(selection)->dir;
-            }
-
-            auto rotationSpeed = (rh + rv) * math::constants::pi / 180;
-            auto oldPos = *position;
-
-            if (_mod_ctrl_down) // X
-            {
-              rotateByXAxis(selection, rotationPivotPoint, rotationSpeed);
-              rotation->x -= calculateRotationXAngle(*position, oldPos, rotationPivotPoint);
-
-              // evtl. alle 3 angles berechnen? blender ändert alle
-
-              if (rotation->x > 180.0f)
-                rotation->x -= 360.0f;
-              else if (rotation->x < -180.0f)
-                rotation->x += 360.0f;
-            }
-            if (_mod_shift_down) // Y
-            {
-              rotateByYAxis(selection, rotationPivotPoint, rotationSpeed);
-              rotation->y += calculateRotationYAngle(*position, oldPos, rotationPivotPoint);
-              //rotation->y -= rotationSpeed;
-
-              if (rotation->y > 360.0f)
-                rotation->y -= 360.0f;
-              else if (rotation->y < 0.0f)
-                rotation->y += 360.0f;
-            }
-            if (_mod_alt_down) // Z
-            {
-              rotateByZAxis(selection, rotationPivotPoint, rotationSpeed);
-              //rotation->z -= calculateRotationZAngle(*position, oldPos, rotationPivotPoint);
-              rotation->z -= rotationSpeed;
-
-              if (rotation->z > 180)
-                rotation->z -= 360.0f;
-              else if (rotation->z < -180.0f)
-                rotation->z += 360.0f;
-            }
-
-          objectEditor->rotationEditor->updateValues();
-
-          _world->updateTilesEntry(selection, model_update::remove);
-
-          if (selection.which() == eEntry_WMO)
-          {
-              boost::get<selected_wmo_type>(selection)->recalcExtents();
-              _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::add);
-          }
-          else if (selection.which() == eEntry_Model)
-          {
-            boost::get<selected_model_type>(selection)->recalcExtents();
-            _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::add);
-          }
-        }
-      }
-        else if(currentSelection.size() > 0)
-        {
-          if (_mod_shift_down || _mod_ctrl_down || _mod_alt_down)
-          {
-            math::vector_3d* rotation = nullptr;
-
-            if (selection.which() == eEntry_Model)
-            {
-              rotation = &boost::get<selected_model_type>(selection)->dir;
-            }
-            else if (selection.which() == eEntry_WMO)
-            {
-              rotation = &boost::get<selected_wmo_type>(selection)->dir;
-            }
-
-            _world->updateTilesEntry(selection, model_update::remove);
-
-            if (_mod_ctrl_down) // X
-            {
-              rotation->x += rh + rv;
-              if (rotation->x > 180.0f)
-                rotation->x -= 360.0f;
-              else if (rotation->x < -180.0f)
-                rotation->x += 360.0f;
-            }
-            if (_mod_shift_down) // Y
-            {
-              rotation->y += rh + rv;
-              if (rotation->y > 360.0f)
-                rotation->y -= 360.0f;
-              else if (rotation->y < 0.0f)
-                rotation->y += 360.0f;
-            }
-            if (_mod_alt_down) // Z
-            {
-              rotation->z += rh + rv;
-              if (rotation->z > 180)
-                rotation->z -= 360.0f;
-              else if (rotation->z < -180.0f)
-                rotation->z += 360.0f;
-            }
-
-            objectEditor->rotationEditor->updateValues();
-
-            if (selection.which() == eEntry_WMO)
-            {
-              boost::get<selected_wmo_type>(selection)->recalcExtents();
-              _world->updateTilesWMO(boost::get<selected_wmo_type>(selection), model_update::add);
-            }
-            else if (selection.which() == eEntry_Model)
-            {
-              boost::get<selected_model_type>(selection)->recalcExtents();
-              _world->updateTilesModel(boost::get<selected_model_type>(selection), model_update::add);
-            }
-          }
-        }
-      }
-
+      }      
     }
   }
 

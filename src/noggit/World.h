@@ -185,6 +185,8 @@ public:
     return set_selected_models_pos({x,y,z}, change_height);
   }
   void set_selected_models_pos(math::vector_3d const& pos, bool change_height = true);
+  void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
+  void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
 
