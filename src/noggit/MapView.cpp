@@ -78,7 +78,7 @@ void MapView::set_editing_mode (editing_mode mode)
   _texture_palette_dock->hide();
 
   MoveObj = false;
-  _world->ResetSelection();
+  _world->reset_selection();
 
   if (!ui_hidden)
   {
@@ -126,16 +126,16 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
 
 void MapView::ResetSelectedObjectRotation()
 {
-  for (auto& selection : _world->GetCurrentSelection())
+  for (auto& selection : _world->current_selection())
   {
-    if (_world->IsSelection(eEntry_WMO, selection))
+    if (_world->is_selection(eEntry_WMO, selection))
     {
       WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
     _world->updateTilesWMO(wmo, model_update::remove);
     wmo->resetDirection();
     _world->updateTilesWMO(wmo, model_update::add);
   }
-    else if (_world->IsSelection(eEntry_Model, selection))
+    else if (_world->is_selection(eEntry_Model, selection))
   {
       ModelInstance* m2 = boost::get<selected_model_type>(selection);
     _world->updateTilesModel(m2, model_update::remove);
@@ -148,9 +148,9 @@ void MapView::ResetSelectedObjectRotation()
 
 void MapView::SnapSelectedObjectToGround()
 {
-  for (auto& selection : _world->GetCurrentSelection())
+  for (auto& selection : _world->current_selection())
   {
-    if (_world->IsSelection(eEntry_WMO, selection))
+    if (_world->is_selection(eEntry_WMO, selection))
     {
       WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
     math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
@@ -159,7 +159,7 @@ void MapView::SnapSelectedObjectToGround()
 	  wmo->recalcExtents();
     _world->updateTilesWMO(wmo, model_update::none);
   }
-    else if (_world->IsSelection(eEntry_Model, selection))
+    else if (_world->is_selection(eEntry_Model, selection))
   {
       ModelInstance* m2 = boost::get<selected_model_type>(selection);
     math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
@@ -177,13 +177,13 @@ void MapView::DeleteSelectedObject()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  for (auto& selection : _world->GetCurrentSelection())
+  for (auto& selection : _world->current_selection())
   {
-    if (_world->IsSelection(eEntry_WMO, selection))
+    if (_world->is_selection(eEntry_WMO, selection))
     {
       _world->deleteWMOInstance(boost::get<selected_wmo_type>(selection)->mUniqueID);
   }
-    else if (_world->IsSelection(eEntry_Model, selection))
+    else if (_world->is_selection(eEntry_Model, selection))
   {
       _world->deleteModelInstance(boost::get<selected_model_type>(selection)->uid);
     _world->need_model_updates = true;
@@ -868,7 +868,7 @@ void MapView::createGUI()
             , MOD_ctrl
             , [this]
               {
-                objectEditor->copy(_world->GetCurrentSelection());
+                objectEditor->copy(_world->current_selection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -876,7 +876,7 @@ void MapView::createGUI()
             , MOD_none
             , [this]
               {
-                objectEditor->copy(_world->GetCurrentSelection());
+                objectEditor->copy(_world->current_selection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -921,7 +921,7 @@ void MapView::createGUI()
 	         , MOD_ctrl
 	         , [this] 
              {
-               objectEditor->copy(_world->GetCurrentSelection());
+               objectEditor->copy(_world->current_selection());
 	             objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
              }
            , [this] { return terrainMode == editing_mode::object; }
@@ -1056,9 +1056,9 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                if (_world->HasSelection())
+                if (_world->has_selection())
                 {
-                  for (auto& selection : _world->GetCurrentSelection())
+                  for (auto& selection : _world->current_selection())
                   {
                     if (selection.which() == eEntry_Model)
                     {
@@ -1147,9 +1147,9 @@ void MapView::createGUI()
             , [&]
               {
 
-                if (_world->HasSelection())
+                if (_world->has_selection())
                 {
-                  auto selected_objects = _world->GetCurrentSelection();
+                  auto selected_objects = _world->current_selection();
                   auto midPos = getMedianPivotPoint(selected_objects);
          
 
@@ -1550,8 +1550,8 @@ void MapView::tick (float dt)
       math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, yaw);
     }
 
-  auto currentSelection = _world->GetCurrentSelection();
-  if (_world->HasSelection())
+  auto currentSelection = _world->current_selection();
+  if (_world->has_selection())
   {
     // update rotation editor if the selection has changed
     if (lastSelected != currentSelection)
@@ -2009,7 +2009,7 @@ void MapView::tick (float dt)
 
   _world->tick (dt);
 
-  if (_world->HasSelection())
+  if (_world->has_selection())
     lastSelected = currentSelection;
 
   QString status;
@@ -2278,7 +2278,7 @@ void MapView::doSelection (bool selectTerrainOnly)
 
   if (results.empty())
   {
-    _world->ResetSelection();
+    _world->reset_selection();
   }
   else
   {
@@ -2288,20 +2288,20 @@ void MapView::doSelection (bool selectTerrainOnly)
     {
       if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
       {
-        if (!_world->IsSelected(hit))
+        if (!_world->is_selected(hit))
         {
-          _world->AddToCurrentSelection(hit);
+          _world->add_to_selection(hit);
         }
         else
         {
-          _world->RemoveFromCurrentSelection(hit);
+          _world->remove_from_selection(hit);
         }
       }
     }
     else
     {
-      _world->ResetSelection();
-      _world->AddToCurrentSelection(hit);
+      _world->reset_selection();
+      _world->add_to_selection(hit);
     }
 
 
@@ -2393,7 +2393,7 @@ void MapView::draw_map()
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if (!(_world->HasSelection()
+  if (!(_world->has_selection()
     || _locked_cursor_mode.get()))
   {
     doSelection(true);
@@ -2782,20 +2782,20 @@ void MapView::selectModel(std::string const& model)
   if (boost::ends_with (model, ".m2"))
   {
     ModelInstance mi(model);
-    _world->SetCurrentSelection(boost::get<selected_model_type>(&mi));
+    _world->set_current_selection(boost::get<selected_model_type>(&mi));
 
   }
   else if (boost::ends_with (model, ".wmo"))
   {
     WMOInstance wi(model);
-    _world->SetCurrentSelection(boost::get<selected_wmo_type>(&wi));
+    _world->set_current_selection(boost::get<selected_wmo_type>(&wi));
   }
-  objectEditor->copy(_world->GetCurrentSelection());
+  objectEditor->copy(_world->current_selection());
 }
 
 void MapView::change_selected_wmo_doodadset(int set)
 {
-  for (auto& selection : _world->GetCurrentSelection())
+  for (auto& selection : _world->current_selection())
   {
 
     if (selection.which() == eEntry_WMO)
@@ -2819,21 +2819,21 @@ void MapView::mousePressEvent(QMouseEvent* event)
     break;
 
   case Qt::RightButton:
-    if (_world->HasMultiSelection())
+    if (_world->has_multiple_model_selected())
     {
-      rotationPivotPoint = getMedianPivotPoint(_world->GetCurrentSelection());
+      rotationPivotPoint = getMedianPivotPoint(_world->current_selection());
     }
 
     rightMouse = true;
     break;
 
   case Qt::MiddleButton:
-    if (_world->HasSelection())
+    if (_world->has_selection())
     {
       MoveObj = true;
       objMoveOffset.clear();
 
-      for (auto& selection : _world->GetCurrentSelection())
+      for (auto& selection : _world->current_selection())
       {
         if (selection.which() == eEntry_WMO)
         {
