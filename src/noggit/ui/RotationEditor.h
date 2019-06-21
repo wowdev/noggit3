@@ -23,13 +23,12 @@ namespace noggit
 
       bool* use_median_pivot_point;
 
-      void select(std::vector<selection_type> entries);
       void updateValues();
-
     private:
-      void update_model(selection_type entry);
-
-	    std::vector<selection_type> _entries;
+      // for single selection
+      void set_model_rotation();
+      // for multi selection
+      void change_models_rotation();
 
       QDoubleSpinBox* _rotation_x;
       QDoubleSpinBox* _rotation_z;

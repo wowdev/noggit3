@@ -280,7 +280,24 @@ void World::update_selection_pivot()
 {
   if (has_multiple_model_selected())
   {
-    _multi_select_pivot = getMedianPivotPoint(_current_selection);
+    math::vector_3d pivot;
+    int model_count = 0;
+
+    for (auto const& entry : _current_selection)
+    {
+      if (entry.which() == eEntry_Model)
+      {
+        pivot += boost::get<selected_model_type>(entry)->pos;
+        model_count++;
+      }
+      else if (entry.which() == eEntry_WMO)
+      {
+        pivot += boost::get<selected_wmo_type>(entry)->pos;
+        model_count++;
+      }
+    }
+
+    _multi_select_pivot = pivot / static_cast<float>(model_count);
   }
   else
   {
@@ -495,6 +512,100 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
   }
 
   update_selection_pivot();
+}
+
+void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
+{
+  math::vector_3d dir_change(rx._, ry._, rz._);
+  bool has_multi_select = has_multiple_model_selected();
+
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    if (use_pivot && has_multi_select)
+    {     
+      math::vector_3d& pos = entry_is_m2
+        ? boost::get<selected_model_type>(entry)->pos
+        : boost::get<selected_wmo_type>(entry)->pos
+        ;
+
+      math::vector_3d& dir = entry_is_m2
+        ? boost::get<selected_model_type>(entry)->dir
+        : boost::get<selected_wmo_type>(entry)->dir
+        ;
+
+      math::vector_3d diff_pos = pos - _multi_select_pivot.get();
+      math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
+
+      pos += rot_result - diff_pos;
+      dir += dir_change;
+    }
+    else
+    {
+      math::vector_3d& dir = entry_is_m2
+        ? boost::get<selected_model_type>(entry)->dir
+        : boost::get<selected_wmo_type>(entry)->dir
+        ;
+
+      dir += dir_change;
+    }
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+}
+
+void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
+{
+  math::vector_3d new_dir(rx._, ry._, rz._);
+  
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);
+    
+    math::vector_3d& dir = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->dir
+      : boost::get<selected_wmo_type>(entry)->dir
+      ;
+
+    dir = new_dir;
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
 }
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
