@@ -1567,9 +1567,28 @@ void MapView::tick (float dt)
       {
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
       }
-      if (MoveObj && _mod_alt_down)
+      if (MoveObj)
       {
-        _world->scale_selected_models(std::pow(2.f, mv*4.f), World::m2_scaling_type::mult);
+        if (_mod_alt_down)
+        {
+          _world->scale_selected_models(std::pow(2.f, mv*4.f), World::m2_scaling_type::mult);
+        }
+        else if (_mod_shift_down)
+        {
+          _world->move_selected_models(0.f, mv*80.f, 0.f);
+        }
+        else
+        {
+          if (!_move_model_to_cursor_position.get())
+          {
+            _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
+          }
+        }
+      }
+
+      if (keyx != 0.f || keyy != 0.f || keyz != 0.f)
+      {
+        _world->move_selected_models(keyx * numpad_moveratio, keyy * numpad_moveratio, keyz * numpad_moveratio);
       }
     }
 
@@ -1721,9 +1740,6 @@ void MapView::tick (float dt)
         {
           auto wmo = boost::get<selected_wmo_type>(selection);
           _world->updateTilesWMO(wmo, model_update::remove);
-          wmo->pos.x += keyx * numpad_moveratio;
-          wmo->pos.y += keyy * numpad_moveratio;
-          wmo->pos.z += keyz * numpad_moveratio;
           wmo->dir.y += keyr * numpad_moveratio * 5;
           wmo->recalcExtents();
           _world->updateTilesWMO(wmo, model_update::add);
@@ -1734,9 +1750,6 @@ void MapView::tick (float dt)
         {
           auto model = boost::get<selected_model_type>(selection);
           _world->updateTilesModel(model, model_update::remove);
-          model->pos.x += keyx * numpad_moveratio;
-          model->pos.y += keyy * numpad_moveratio;
-          model->pos.z += keyz * numpad_moveratio;
           model->dir.y += keyr * numpad_moveratio * 5;
           model->recalcExtents();
           _world->updateTilesModel(model, model_update::add);
@@ -1748,21 +1761,10 @@ void MapView::tick (float dt)
         numpad_moveratio = 0.001f;
       }
 
-      math::vector_3d ObjPos;
-      if (_world->IsSelection(eEntry_Model, selection))
-      {
-        //! \todo  Tell me what this is.
-        ObjPos = boost::get<selected_model_type>(selection)->pos - _camera.position;
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, _camera.pitch());
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, yaw);
-        ObjPos.x = std::abs(ObjPos.x);
-      }
-
       // moving and scaling objects
       //! \todo  Alternatively automatically align it to the terrain.
       if (MoveObj && canMoveObj)
       {
-        ObjPos.x = 80.0f;
         if (selection.which() == eEntry_WMO)
         {
           auto wmo = boost::get<selected_wmo_type>(selection);
@@ -1775,7 +1777,7 @@ void MapView::tick (float dt)
           }
           else if (_mod_shift_down)
           {
-            wmo->pos.y += mv * ObjPos.x;
+            // moved outside the loop
           }
           else
           {
@@ -1783,11 +1785,6 @@ void MapView::tick (float dt)
             {
               wmo->pos.x = _cursor_pos.x - objMoveOffset[wmo->mUniqueID].x;
               wmo->pos.z = _cursor_pos.z - objMoveOffset[wmo->mUniqueID].z;
-            }
-            else
-            {
-              wmo->pos += mv * dirUp * ObjPos.x;
-              wmo->pos -= mh * dirRight * ObjPos.x;
             }
           }
 
@@ -1806,28 +1803,22 @@ void MapView::tick (float dt)
           }
           else if (_mod_shift_down)
           {
-            model->pos.y += mv * ObjPos.x;
-            }
-            else
+            // moved outside the loop
+          }
+          else
+          {
+            if (_move_model_to_cursor_position.get())
             {
-              if (_move_model_to_cursor_position.get())
-              {
               model->pos.x = _cursor_pos.x - objMoveOffset[model->uid].x;
               model->pos.z = _cursor_pos.z - objMoveOffset[model->uid].z;
-              }
-              else
-              {
-              model->pos += mv * dirUp * ObjPos.x;
-              model->pos -= mh * dirRight * ObjPos.x;
-              }
             }
+          }
 
           objectEditor->rotationEditor->updateValues();
           model->recalcExtents();
           _world->updateTilesModel(model, model_update::add);
         }
       }
-
 
       // rotating objects
       if (look && canMoveObj)
