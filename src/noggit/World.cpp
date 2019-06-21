@@ -323,6 +323,43 @@ void World::RemoveFromCurrentSelection(selection_type entry)
     mCurrentSelection.erase(position);
 }
 
+void World::scale_selected_models(float v, m2_scaling_type type)
+{
+  for (auto& entry : mCurrentSelection)
+  {
+    if (entry.which() == eEntry_Model)
+    {
+      ModelInstance* mi = boost::get<selected_model_type>(entry);      
+
+      float scale = mi->scale;
+
+      switch (type)
+      {
+        case World::m2_scaling_type::set:
+          scale = v;
+          break;
+        case World::m2_scaling_type::add:
+          scale += v;
+          break;
+        case World::m2_scaling_type::mult:
+          scale *= v;
+          break;
+      }
+
+      // if the change is too small, do nothing
+      if (std::abs(scale - mi->scale) < ModelInstance::min_scale)
+      {
+        continue;
+      }
+
+      updateTilesModel(mi, model_update::remove);
+      mi->scale = std::min(ModelInstance::max_scale, std::max(ModelInstance::min_scale, scale));
+      mi->recalcExtents();
+      updateTilesModel(mi, model_update::add);
+    }
+  }
+}
+
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 {
   if (!*pDetailTexCoords && !*pAlphaTexCoords)

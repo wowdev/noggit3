@@ -43,7 +43,7 @@ namespace noggit
                                  )
             : QWidget(parent)
             , modelImport (new model_import(this))
-            , rotationEditor (new rotation_editor(mapView))
+            , rotationEditor (new rotation_editor(mapView, world))
             , helper_models_widget(new helper_models(this))
             , _settings (new QSettings (this))
             , _copy_model_stats (true)
