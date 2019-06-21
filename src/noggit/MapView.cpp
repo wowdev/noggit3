@@ -49,6 +49,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QWidgetAction>
 
 #include <algorithm>
 #include <cmath>
@@ -194,6 +195,17 @@ void MapView::DeleteSelectedObject()
 void MapView::changeZoneIDValue (int set)
 {
   _selected_area_id = set;
+}
+
+
+QWidgetAction* MapView::createTextSeparator(const QString& text)
+{
+  auto* pLabel = new QLabel(text);
+  //pLabel->setMinimumWidth(this->minimumWidth() - 4);
+  pLabel->setAlignment(Qt::AlignCenter);
+  auto* separator = new QWidgetAction(this);
+  separator->setDefaultWidget(pLabel);
+  return separator;
 }
 
 
@@ -481,12 +493,12 @@ void MapView::createGUI()
 
 
 
-  ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); });
-  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); });
-  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] { save(save_mode::all); });
+  ADD_ACTION (file_menu, "Save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); });
+  ADD_ACTION (file_menu, "Save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); });
+  ADD_ACTION (file_menu, "Save all tiles", "Ctrl+Shift+A", [this] { save(save_mode::all); });
   
   ADD_ACTION ( file_menu
-             , "reload tile"
+             , "Reload tile"
              , "Shift+J"
              , [this]
                {
@@ -499,26 +511,32 @@ void MapView::createGUI()
   file_menu->addSeparator();
   ADD_ACTION_NS (file_menu, "Force uid check on next opening", [this] { _force_uid_check = true; });
   file_menu->addSeparator();
-  ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->close(); });
 
 
-  //! \todo sections are not rendered on all platforms. one should
-  //! probably do separator+disabled entry to force rendering
-  edit_menu->addSection ("selected object");
-  ADD_ACTION (edit_menu, "delete", Qt::Key_Delete, [this] { DeleteSelectedObject(); });
-  ADD_ACTION (edit_menu, "reset rotation", "Ctrl+R", [this] { ResetSelectedObjectRotation(); });
-  ADD_ACTION (edit_menu, "set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
-
-  edit_menu->addSection ("options");
-  ADD_TOGGLE_NS (edit_menu, "locked cursor mode", _locked_cursor_mode);
+  edit_menu->addSeparator();
+  edit_menu->addAction(createTextSeparator("Selected object"));
+  edit_menu->addSeparator();
+  ADD_ACTION (edit_menu, "Delete", Qt::Key_Delete, [this] { DeleteSelectedObject(); });
+  ADD_ACTION (edit_menu, "Reset rotation", "Ctrl+R", [this] { ResetSelectedObjectRotation(); });
+  ADD_ACTION (edit_menu, "Set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
 
 
-  assist_menu->addSection ("Model");
+  edit_menu->addSeparator();
+  edit_menu->addAction(createTextSeparator("Options"));
+  edit_menu->addSeparator();
+  ADD_TOGGLE_NS (edit_menu, "Locked cursor mode", _locked_cursor_mode);
+
+
+  assist_menu->addSeparator();
+  assist_menu->addAction(createTextSeparator("Model"));
+  assist_menu->addSeparator();
   ADD_ACTION (assist_menu, "Last M2 from WMV", "Shift+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_Model); });
   ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_WMO); });
   ADD_ACTION_NS (assist_menu, "Helper models", [this] { objectEditor->helper_models_widget->show(); });
 
-  assist_menu->addSection ("Current ADT");
+  assist_menu->addSeparator();
+  assist_menu->addAction(createTextSeparator("Current ADT"));
+  assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
                 , "Set Area ID"
                 , [this]
@@ -584,9 +602,11 @@ void MapView::createGUI()
                   }
                 );
 
-  assist_menu->addSection ("Loaded ADTs");
+  assist_menu->addSeparator();
+  assist_menu->addAction(createTextSeparator("Loaded ADTs"));
+  assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-                , "Fix gaps (all loaded ADTs)"
+                , "Fix gaps"
                 , [this]
                   {
                     makeCurrent();
@@ -595,7 +615,9 @@ void MapView::createGUI()
                   }
                 );
 
-  assist_menu->addSection ("Global");
+  assist_menu->addSeparator();
+  assist_menu->addAction(createTextSeparator("Global"));
+  assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
                 , "Map to big alpha"
                 , [this]
@@ -615,7 +637,9 @@ void MapView::createGUI()
                   }
                 );
 
-  view_menu->addSection ("Drawing");
+  view_menu->addSeparator();
+  view_menu->addAction(createTextSeparator("Drawing"));
+  view_menu->addSeparator();
   ADD_TOGGLE (view_menu, "Doodads", Qt::Key_F1, _draw_models);
   ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F2, _draw_wmo_doodads);
   ADD_TOGGLE (view_menu, "Terrain", Qt::Key_F3, _draw_terrain);
@@ -632,7 +656,9 @@ void MapView::createGUI()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
 
-  view_menu->addSection ("Windows");
+  view_menu->addSeparator();
+  view_menu->addAction(createTextSeparator("Windows"));
+  view_menu->addSeparator();
 
 
   auto hide_widgets = [=] {
@@ -834,9 +860,9 @@ void MapView::createGUI()
                }
              );
 
-  ADD_ACTION (view_menu, "increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
-  ADD_ACTION (view_menu, "decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
-  ADD_ACTION (view_menu, "pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
+  ADD_ACTION (view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
+  ADD_ACTION (view_menu, "Decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
+  ADD_ACTION (view_menu, "Pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
 
   addHotkey ( Qt::Key_C
             , MOD_ctrl
@@ -901,15 +927,15 @@ void MapView::createGUI()
            , [this] { return terrainMode == editing_mode::object; }
            );
 
-  ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
+  ADD_ACTION (view_menu, "Invert mouse", "I", [this] { mousedir *= -1.f; });
 
-  ADD_ACTION (view_menu, "decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
-  ADD_ACTION (view_menu, "increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
+  ADD_ACTION (view_menu, "Decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
+  ADD_ACTION (view_menu, "Increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
 
-  ADD_ACTION (file_menu, "save minimaps", "Ctrl+Shift+P", [this] { Saving = true; });
+  ADD_ACTION (file_menu, "Save minimaps", "Ctrl+Shift+P", [this] { Saving = true; });
 
   ADD_ACTION ( view_menu
-             , "turn camera around 180°"
+             , "Turn camera around 180°"
              , "Shift+R"
              , [this]
                {
@@ -919,7 +945,7 @@ void MapView::createGUI()
              );
 
   ADD_ACTION ( file_menu
-             , "write coordinates to port.txt"
+             , "Write coordinates to port.txt"
              , Qt::Key_G
              , [this]
                {
@@ -944,7 +970,7 @@ void MapView::createGUI()
             );
 
   ADD_ACTION ( view_menu
-             , "toggle tile mode"
+             , "Toggle tile mode"
              , Qt::Key_U
              , [this]
                {
