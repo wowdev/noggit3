@@ -257,8 +257,7 @@ bool World::IsEditableWorld(int pMapId)
 World::World(const std::string& name, int map_id)
   : mapIndex (name, map_id, this)
   , horizon(name)
-  , mCurrentSelection()
-  , SelectionMode(false)
+  , _current_selection()
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
   , detailtexcoords(0)
@@ -277,14 +276,26 @@ World::World(const std::string& name, int map_id)
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
 
-bool World::IsSelection(int pSelectionType, selection_type selection)
+void World::update_selection_pivot()
 {
-  return HasSelection() && selection.which() == pSelectionType;
+  if (has_multiple_model_selected())
+  {
+    _multi_select_pivot = getMedianPivotPoint(_current_selection);
+  }
+  else
+  {
+    _multi_select_pivot = boost::none;
+  }  
 }
 
-bool World::IsSelected(selection_type selection)
+bool World::is_selection(int pSelectionType, selection_type selection)
 {
-    auto currentSelection = this->GetCurrentSelection();
+  return has_selection() && selection.which() == pSelectionType;
+}
+
+bool World::is_selected(selection_type selection)
+{
+    auto currentSelection = this->current_selection();
     if (selection.which() == eEntry_Model)
     {
       uint uniqueId = boost::get<selected_model_type>(selection)->uid;
@@ -300,32 +311,53 @@ bool World::IsSelected(selection_type selection)
     return false;
 }
 
-bool World::HasSelection()
+bool World::has_multiple_model_selected()
 {
-  return mCurrentSelection.size() > 0;
+  int model_counts = 0;
+
+  for (auto const& entry : _current_selection)
+  {
+    if (entry.which() != eEntry_MapChunk)
+    {
+      model_counts++;
+    }
+  }
+
+  return model_counts > 1;
 }
 
-bool World::HasMultiSelection()
+void World::set_current_selection(selection_type entry)
 {
-  return mCurrentSelection.size() > 1;
+  _current_selection.clear();
+  _current_selection.push_back(entry);
+  _multi_select_pivot = boost::none;
 }
 
-void World::SetCurrentSelection(selection_type entry)
+void World::add_to_selection(selection_type entry) 
 {
-  mCurrentSelection.clear();
-  mCurrentSelection.push_back(entry);
+  _current_selection.push_back(entry); 
+  update_selection_pivot();
 }
 
-void World::RemoveFromCurrentSelection(selection_type entry)
+void World::remove_from_selection(selection_type entry)
 {
-  std::vector<selection_type>::iterator position = std::find(mCurrentSelection.begin(), mCurrentSelection.end(), entry);
-  if (position != mCurrentSelection.end()) // == myVector.end() means the element was not found
-    mCurrentSelection.erase(position);
+  std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
+  if (position != _current_selection.end())
+  {
+    _current_selection.erase(position);
+    update_selection_pivot();
+  }  
+}
+
+void World::reset_selection() 
+{
+  _current_selection.clear(); 
+  _multi_select_pivot = boost::none;
 }
 
 void World::scale_selected_models(float v, m2_scaling_type type)
 {
-  for (auto& entry : mCurrentSelection)
+  for (auto& entry : _current_selection)
   {
     if (entry.which() == eEntry_Model)
     {
@@ -362,7 +394,7 @@ void World::scale_selected_models(float v, m2_scaling_type type)
 
 void World::move_selected_models(float dx, float dy, float dz)
 {
-  for (auto& entry : mCurrentSelection)
+  for (auto& entry : _current_selection)
   {
     auto type = entry.which();
     if (type == eEntry_MapChunk)
@@ -394,6 +426,8 @@ void World::move_selected_models(float dx, float dy, float dz)
 
     updateTilesEntry(entry, model_update::add);
   }
+
+  update_selection_pivot();
 }
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
@@ -1021,7 +1055,7 @@ void main()
                  , draw_chunk_flag_overlay
                  , draw_areaid_overlay
                  , area_id_colors
-                 , mCurrentSelection
+                 , _current_selection
                  , animtime
                  , display
                  );
@@ -1037,7 +1071,7 @@ void main()
   opengl::texture::disable_texture(0);
 
   // Selection circle
-  if (this->HasSelection() /*this->IsSelection(eEntry_MapChunk)*/)
+  if (this->has_selection() /*this->IsSelection(eEntry_MapChunk)*/)
   {
     gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -1045,9 +1079,9 @@ void main()
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
 
-    if (terrainMode == editing_mode::object && HasMultiSelection())
+    if (terrainMode == editing_mode::object && has_multiple_model_selected())
     {
-      render_sphere(getMedianPivotPoint(mCurrentSelection), 2.f, cursor_color);
+      render_sphere(getMedianPivotPoint(_current_selection), 2.f, cursor_color);
     }
 
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
@@ -1589,9 +1623,9 @@ void main()
       }
     }
 
-    for (auto& selection : GetCurrentSelection())
+    for (auto& selection : current_selection())
     {
-      if (IsSelection(eEntry_Model, selection))
+      if (is_selection(eEntry_Model, selection))
       {
         auto model = boost::get<selected_model_type>(selection);
       if (model->is_visible(frustum, culldistance, camera_pos, display))
@@ -1640,7 +1674,7 @@ void main()
                         , river_color_light
                         , river_color_dark
                         , _liquid_render.get()
-                        , GetCurrentSelection()
+                        , current_selection()
                         , animtime
                         , [this] (bool on) { return outdoorLights (on); }
                         , skies->hasSkies()
@@ -2131,10 +2165,10 @@ void World::deleteModelInstance(int pUniqueID)
   std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
   if (it == mModelInstances.end()) return;
 
-  auto selectionIt = std::find_if(mCurrentSelection.begin(), mCurrentSelection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_model_type) && boost::get<selected_model_type>(type)->uid == pUniqueID; });
-  if (selectionIt != mCurrentSelection.end())
+  auto selectionIt = std::find_if(_current_selection.begin(), _current_selection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_model_type) && boost::get<selected_model_type>(type)->uid == pUniqueID; });
+  if (selectionIt != _current_selection.end())
   {
-    mCurrentSelection.erase(selectionIt);
+    _current_selection.erase(selectionIt);
   }
 
   updateTilesModel(&it->second, model_update::remove);
@@ -2146,10 +2180,10 @@ void World::deleteWMOInstance(int pUniqueID)
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
   if (it == mWMOInstances.end()) return;
 
-  auto selectionIt = std::find_if(mCurrentSelection.begin(), mCurrentSelection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == pUniqueID; });
-  if (selectionIt != mCurrentSelection.end())
+  auto selectionIt = std::find_if(_current_selection.begin(), _current_selection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == pUniqueID; });
+  if (selectionIt != _current_selection.end())
   {
-    mCurrentSelection.erase(selectionIt);
+    _current_selection.erase(selectionIt);
   }
 
   updateTilesWMO(&it->second, model_update::remove);
@@ -2321,13 +2355,13 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids, tile_inde
   }
 
   // todo: only reset if the selected model has been unloaded
-  ResetSelection();
+  reset_selection();
   update_models_by_filename();
 }
 
 void World::reload_tile(tile_index const& tile)
 {
-  ResetSelection();
+  reset_selection();
   // to remove the new models and reload the old ones
   clearAllModelsOnADT(tile);
   mapIndex.reloadTile(tile);

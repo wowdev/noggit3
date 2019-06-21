@@ -357,20 +357,20 @@ namespace noggit
           } // else: insert the only copied object onto cursor position
           break;
         case PASTE_ON_SELECTION:
-          if (world->HasSelection())
+          if (world->has_selection())
           {
-            if (_use_median_pivot_point && world->HasMultiSelection())
+            if (_use_median_pivot_point && world->has_multiple_model_selected())
             {
               // Calculate middle of current selection
               math::vector_3d minSelectionPos;
               math::vector_3d maxSelectionPos;
               math::vector_3d midSelectionPos;
 
-              auto firstSelectionobject = world->GetCurrentSelection().front();
+              auto firstSelectionobject = world->current_selection().front();
               minSelectionPos = getObjectPosition(firstSelectionobject);
               maxSelectionPos = getObjectPosition(firstSelectionobject);
 
-              for (auto& selection : world->GetCurrentSelection())
+              for (auto& selection : world->current_selection())
               {
                 minSelectionPos = std::min(minSelectionPos, getObjectPosition(selection));
                 maxSelectionPos = std::max(maxSelectionPos, getObjectPosition(selection));
@@ -390,7 +390,7 @@ namespace noggit
             }
             else // Don't use median pivot point
             {
-              math::vector_3d lastSelectionPos = getObjectPosition(world->GetCurrentSelection().back()); // use last selected object as position
+              math::vector_3d lastSelectionPos = getObjectPosition(world->current_selection().back()); // use last selected object as position
 
               // calculate offsets when we have selected multiple objects and paste on last selected object
               if (selected.size() > 1)
@@ -560,24 +560,24 @@ namespace noggit
 
     void object_editor::SaveObjecttoTXT (World* world)
     {
-      if (!world->HasSelection())
+      if (!world->has_selection())
           return;
 
       std::ofstream stream(_settings->value("project/import_file", "import.txt").toString().toStdString(), std::ios_base::app);
-      for (auto& selection : world->GetCurrentSelection())
+      for (auto& selection : world->current_selection())
       {
-        if (world->IsSelection(eEntry_MapChunk, selection))
+        if (world->is_selection(eEntry_MapChunk, selection))
         {
           continue;
       }
 
       std::string path;
 
-        if (world->IsSelection(eEntry_WMO, selection))
+        if (world->is_selection(eEntry_WMO, selection))
       {
           path = boost::get<selected_wmo_type>(selection)->wmo->filename;
       }
-        else if (world->IsSelection(eEntry_Model, selection))
+        else if (world->is_selection(eEntry_Model, selection))
       {
           path = boost::get<selected_model_type>(selection)->model->filename;
       }

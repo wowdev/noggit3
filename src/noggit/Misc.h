@@ -130,7 +130,7 @@ bool checkInside(math::vector_3d extentA[2], math::vector_3d extentB[2]);
 bool checkOriginInside(math::vector_3d extentA[2], math::vector_3d modelPos);
 
 math::vector_3d getObjectPosition(selection_type object);
-math::vector_3d getMedianPivotPoint(std::vector<selection_type>& entries);
+math::vector_3d getMedianPivotPoint(std::vector<selection_type> const& entries);
 void rotateByXAxis(selection_type object, math::vector_3d pivotPoint, float angle);
 void rotateByYAxis(selection_type object, math::vector_3d pivotPoint, float angle);
 void rotateByZAxis(selection_type object, math::vector_3d pivotPoint, float angle);

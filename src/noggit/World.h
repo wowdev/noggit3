@@ -57,10 +57,6 @@ public:
   MapIndex mapIndex;
   noggit::map_horizon horizon;
 
-  // Information about the currently selected model / WMO / triangle.
-  std::vector<selection_type> mCurrentSelection;
-  bool SelectionMode;
-
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
   ENTRY_MODF mWmoEntry;
@@ -149,17 +145,26 @@ public:
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
-  // Selection related methods.
-  bool IsSelection(int pSelectionType, selection_type selection);
-  bool IsSelected(selection_type selection);
-  std::vector<selection_type> GetCurrentSelection() { return mCurrentSelection; }
-  bool HasSelection();
-  bool HasMultiSelection();
-  void SetCurrentSelection(selection_type entry);
-  void AddToCurrentSelection(selection_type entry) { mCurrentSelection.push_back(entry); }
-  void RemoveFromCurrentSelection(selection_type entry);
+private:
+  // Information about the currently selected model / WMO / triangle.
+  std::vector<selection_type> _current_selection;
+  boost::optional<math::vector_3d> _multi_select_pivot;
 
-  void ResetSelection() { mCurrentSelection.clear(); }
+  void update_selection_pivot();
+public:
+
+  boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
+
+  // Selection related methods.
+  bool is_selection(int pSelectionType, selection_type selection);
+  bool is_selected(selection_type selection);
+  std::vector<selection_type> const& current_selection() const { return _current_selection; }
+  bool has_selection() { return !_current_selection.empty(); }
+  bool has_multiple_model_selected();
+  void set_current_selection(selection_type entry);
+  void add_to_selection(selection_type entry);
+  void remove_from_selection(selection_type entry);
+  void reset_selection();
 
   enum class m2_scaling_type
   {
