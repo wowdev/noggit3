@@ -38,6 +38,8 @@ namespace noggit
       QDoubleSpinBox* _position_z;
       QDoubleSpinBox* _position_y;
       QDoubleSpinBox* _scale;
+
+      World* _world;
     };
   }
 }

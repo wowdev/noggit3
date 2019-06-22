@@ -159,6 +159,7 @@ public:
   bool is_selection(int pSelectionType, selection_type selection);
   bool is_selected(selection_type selection);
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
+  boost::optional<selection_type> get_first_selected_model() const;
   bool has_selection() { return !_current_selection.empty(); }
   bool has_multiple_model_selected();
   void set_current_selection(selection_type entry);
@@ -179,6 +180,11 @@ public:
   {
     move_selected_models(delta.x, delta.y, delta.z);
   }
+  void set_selected_models_pos(float x, float y, float z, bool change_height = true)
+  {
+    return set_selected_models_pos({x,y,z}, change_height);
+  }
+  void set_selected_models_pos(math::vector_3d const& pos, bool change_height = true);
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
 

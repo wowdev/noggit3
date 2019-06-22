@@ -19,6 +19,7 @@ namespace noggit
   {
     rotation_editor::rotation_editor(QWidget* parent, World* world)
       : QWidget (parent)
+      , _world(world)
     {
       setWindowTitle("Pos/Rotation Editor");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -268,52 +269,19 @@ namespace noggit
       connect ( _position_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  for (auto& selection : _entries)
-                  {
-                    if (selection.which() == eEntry_Model)
-                    {
-                      boost::get<selected_model_type>(selection)->pos.x = v;
-                    }
-                    else if (selection.which() == eEntry_WMO)
-                    {
-                      boost::get<selected_wmo_type>(selection)->pos.x = v;
-                    }
-                    update_model(selection);
-                  }
+                  _world->set_selected_models_pos(v, _position_y->value(), _position_z->value());
                 }
               );
       connect ( _position_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  for (auto& selection : _entries)
-                  {
-                    if (selection.which() == eEntry_Model)
-                    {
-                      boost::get<selected_model_type>(selection)->pos.z = v;
-                    }
-                    else if (selection.which() == eEntry_WMO)
-                    {
-                      boost::get<selected_wmo_type>(selection)->pos.z = v;
-                    }
-                    update_model(selection);
-                  }
+                  _world->set_selected_models_pos(_position_x->value(), _position_y->value(), v);
                 }
               );
       connect ( _position_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  for (auto& selection : _entries)
-                  {
-                    if (selection.which() == eEntry_Model)
-                    {
-                      boost::get<selected_model_type>(selection)->pos.y = v;
-                    }
-                    else if (selection.which() == eEntry_WMO)
-                    {
-                      boost::get<selected_wmo_type>(selection)->pos.y = v;
-                    }
-                    update_model(selection);
-                  }
+                  _world->set_selected_models_pos(_position_x->value(), v, _position_z->value());
                 }
               );
 
@@ -339,46 +307,69 @@ namespace noggit
 
     void rotation_editor::updateValues()
     {
-      if (_entries.size() > 0)
+      QSignalBlocker const block_rotation_x(_rotation_x);
+      QSignalBlocker const block_rotation_y(_rotation_y);
+      QSignalBlocker const block_rotation_z(_rotation_z);
+      QSignalBlocker const block_position_x(_position_x);
+      QSignalBlocker const block_position_y(_position_y);
+      QSignalBlocker const block_position_z(_position_z);
+      QSignalBlocker const block_scale(_scale);
+
+      if (_world->has_multiple_model_selected())
       {
-        QSignalBlocker const block_rotation_x (_rotation_x);
-        QSignalBlocker const block_rotation_y (_rotation_y);
-        QSignalBlocker const block_rotation_z (_rotation_z);
-        QSignalBlocker const block_position_x (_position_x);
-        QSignalBlocker const block_position_y (_position_y);
-        QSignalBlocker const block_position_z (_position_z);
-        QSignalBlocker const block_scale (_scale);
+        math::vector_3d const& p = _world->multi_select_pivot().get();
 
-        auto lastEntry = _entries.back();
+        _position_x->setValue(p.x);
+        _position_y->setValue(p.y);
+        _position_z->setValue(p.z);
 
-        if (lastEntry.which() == eEntry_Model)
+        _position_x->setEnabled(true);
+        _position_y->setEnabled(true);
+        _position_z->setEnabled(true);
+        // disable rotation and scaling for now with multi selection
+        _rotation_x->setValue(0.f);
+        _rotation_y->setValue(0.f);
+        _rotation_z->setValue(0.f);
+        _scale->setValue(1.f);
+        _rotation_x->setEnabled(false);
+        _rotation_y->setEnabled(false);
+        _rotation_z->setEnabled(false);
+        _scale->setEnabled(false);
+      }
+      else
+      {
+        auto entry = _world->get_first_selected_model();
+
+        if (entry)
         {
-          auto model = boost::get<selected_model_type>(lastEntry);
-          _rotation_x->setValue(model->dir.x);
-          _rotation_y->setValue(model->dir.y);
-          _rotation_z->setValue(model->dir.z);
-          _position_x->setValue(model->pos.x);
-          _position_y->setValue(model->pos.y);
-          _position_z->setValue(model->pos.z);
-          _scale->setValue(model->scale);
+          selection_type selection = entry.get();
 
-          _rotation_x->setEnabled (true);
-          _rotation_y->setEnabled (true);
-          _rotation_z->setEnabled (true);
-          _position_x->setEnabled (true);
-          _position_y->setEnabled (true);
-          _position_z->setEnabled (true);
-          _scale->setEnabled (true);
-        }
-        else if (lastEntry.which() == eEntry_WMO)
-        {
-          auto wmo = boost::get<selected_wmo_type>(lastEntry);
-          _rotation_x->setValue(wmo->dir.x);
-          _rotation_y->setValue(wmo->dir.y);
-          _rotation_z->setValue(wmo->dir.z);
-          _position_x->setValue(wmo->pos.x);
-          _position_y->setValue(wmo->pos.y);
-          _position_z->setValue(wmo->pos.z);
+          if (selection.which() == eEntry_Model)
+          {
+            auto model = boost::get<selected_model_type>(selection);
+            _position_x->setValue(model->pos.x);
+            _position_y->setValue(model->pos.y);
+            _position_z->setValue(model->pos.z);
+            _rotation_x->setValue(model->dir.x);
+            _rotation_y->setValue(model->dir.y);
+            _rotation_z->setValue(model->dir.z);
+            _scale->setValue(model->scale);
+
+            _scale->setEnabled(true);
+          }
+          else // we know it's a wmo
+          {
+            auto wmo = boost::get<selected_wmo_type>(selection);
+            _position_x->setValue(wmo->pos.x);
+            _position_y->setValue(wmo->pos.y);
+            _position_z->setValue(wmo->pos.z);
+            _rotation_x->setValue(wmo->dir.x);
+            _rotation_y->setValue(wmo->dir.y);
+            _rotation_z->setValue(wmo->dir.z);            
+
+            _scale->setValue(1.f);
+            _scale->setEnabled(false);
+          }
 
           _rotation_x->setEnabled(true);
           _rotation_y->setEnabled(true);
@@ -387,16 +378,16 @@ namespace noggit
           _position_y->setEnabled(true);
           _position_z->setEnabled(true);
         }
-      }
-      else
-      {
-        _rotation_x->setEnabled (false);
-        _rotation_y->setEnabled (false);
-        _rotation_z->setEnabled (false);
-        _position_x->setEnabled (false);
-        _position_y->setEnabled (false);
-        _position_z->setEnabled (false);
-        _scale->setEnabled (false);
+        else
+        {
+          _rotation_x->setEnabled(false);
+          _rotation_y->setEnabled(false);
+          _rotation_z->setEnabled(false);
+          _position_x->setEnabled(false);
+          _position_y->setEnabled(false);
+          _position_z->setEnabled(false);
+          _scale->setEnabled(false);
+        }
       }
     }
 
@@ -407,10 +398,9 @@ namespace noggit
         boost::get<selected_model_type>(entry)->recalcExtents();
       }
       else if (entry.which() == eEntry_WMO)
-        {
+      {
         boost::get<selected_wmo_type>(entry)->recalcExtents();
-        }
       }
-
     }
   }
+}
