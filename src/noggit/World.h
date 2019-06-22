@@ -149,19 +149,19 @@ private:
   // Information about the currently selected model / WMO / triangle.
   std::vector<selection_type> _current_selection;
   boost::optional<math::vector_3d> _multi_select_pivot;
-
+  int _selected_model_count = 0;
   void update_selection_pivot();
 public:
 
   boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
-  bool is_selection(int pSelectionType, selection_type selection);
-  bool is_selected(selection_type selection);
+  bool is_selection(int pSelectionType, selection_type selection) const;
+  bool is_selected(selection_type selection) const;
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
   boost::optional<selection_type> get_last_selected_model() const;
-  bool has_selection() { return !_current_selection.empty(); }
-  bool has_multiple_model_selected();
+  bool has_selection() const { return !_current_selection.empty(); }
+  bool has_multiple_model_selected() const { return _selected_model_count > 1; }
   void set_current_selection(selection_type entry);
   void add_to_selection(selection_type entry);
   void remove_from_selection(selection_type entry);
