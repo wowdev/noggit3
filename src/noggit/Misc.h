@@ -125,15 +125,3 @@ void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSi
 
 bool pointInside(math::vector_3d point, math::vector_3d extents[2]);
 void minmax(math::vector_3d* a, math::vector_3d* b);
-
-bool checkInside(math::vector_3d extentA[2], math::vector_3d extentB[2]);
-bool checkOriginInside(math::vector_3d extentA[2], math::vector_3d modelPos);
-
-math::vector_3d getObjectPosition(selection_type object);
-math::vector_3d getMedianPivotPoint(std::vector<selection_type> const& entries);
-void rotateByXAxis(selection_type object, math::vector_3d pivotPoint, float angle);
-void rotateByYAxis(selection_type object, math::vector_3d pivotPoint, float angle);
-void rotateByZAxis(selection_type object, math::vector_3d pivotPoint, float angle);
-float calculateRotationXAngle(math::vector_3d position1, math::vector_3d position2, math::vector_3d position3);
-float calculateRotationYAngle(math::vector_3d position1, math::vector_3d position2, math::vector_3d position3);
-float calculateRotationZAngle(math::vector_3d position1, math::vector_3d position2, math::vector_3d position3);
