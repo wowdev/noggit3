@@ -159,7 +159,7 @@ public:
   bool is_selection(int pSelectionType, selection_type selection);
   bool is_selected(selection_type selection);
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
-  boost::optional<selection_type> get_first_selected_model() const;
+  boost::optional<selection_type> get_last_selected_model() const;
   bool has_selection() { return !_current_selection.empty(); }
   bool has_multiple_model_selected();
   void set_current_selection(selection_type entry);

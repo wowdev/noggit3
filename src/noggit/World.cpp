@@ -328,15 +328,15 @@ bool World::is_selected(selection_type selection)
     return false;
 }
 
-boost::optional<selection_type> World::get_first_selected_model() const
+boost::optional<selection_type> World::get_last_selected_model() const
 {
   boost::optional<selection_type> selection;
 
-  for (auto const& entry : _current_selection)
+  for(auto& it = _current_selection.rbegin(); it!=_current_selection.rend(); it++)
   {
-    if (entry.which() != eEntry_MapChunk)
+    if (it->which() != eEntry_MapChunk)
     {
-      selection = entry;
+      selection = *it;
       break;
     }
   }

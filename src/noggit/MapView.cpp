@@ -868,7 +868,7 @@ void MapView::createGUI()
             , MOD_ctrl
             , [this]
               {
-                objectEditor->copy(_world->current_selection());
+                objectEditor->copy_current_selection(_world.get());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -876,7 +876,7 @@ void MapView::createGUI()
             , MOD_none
             , [this]
               {
-                objectEditor->copy(_world->current_selection());
+                objectEditor->copy_current_selection(_world.get());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -921,7 +921,7 @@ void MapView::createGUI()
 	         , MOD_ctrl
 	         , [this] 
              {
-               objectEditor->copy(_world->current_selection());
+               objectEditor->copy_current_selection(_world.get());
 	             objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
              }
            , [this] { return terrainMode == editing_mode::object; }
@@ -2621,7 +2621,7 @@ void MapView::selectModel(std::string const& model)
     WMOInstance wi(model);
     _world->set_current_selection(boost::get<selected_wmo_type>(&wi));
   }
-  objectEditor->copy(_world->current_selection());
+  objectEditor->copy_current_selection(_world.get());
 }
 
 void MapView::change_selected_wmo_doodadset(int set)
