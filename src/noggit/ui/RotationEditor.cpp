@@ -207,7 +207,7 @@ namespace noggit
       }
       else
       {
-        auto entry = _world->get_first_selected_model();
+        auto entry = _world->get_last_selected_model();
 
         if (entry)
         {
