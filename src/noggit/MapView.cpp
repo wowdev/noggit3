@@ -1583,6 +1583,11 @@ void MapView::tick (float dt)
           {
             _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
           }
+          else
+          {
+            // todo: add option to align with the terrain's height
+            _world->set_selected_models_pos(_cursor_pos, false);
+          }
         }
       }
 
@@ -1594,7 +1599,6 @@ void MapView::tick (float dt)
 
     for (auto& selection : currentSelection)
     {
-
       if (leftMouse && selection.which() == eEntry_MapChunk)
       {
         bool underMap = _world->isUnderMap(_cursor_pos);
@@ -1759,65 +1763,6 @@ void MapView::tick (float dt)
       else
       {
         numpad_moveratio = 0.001f;
-      }
-
-      // moving and scaling objects
-      //! \todo  Alternatively automatically align it to the terrain.
-      if (MoveObj && canMoveObj)
-      {
-        if (selection.which() == eEntry_WMO)
-        {
-          auto wmo = boost::get<selected_wmo_type>(selection);
-          _world->updateTilesWMO(wmo, model_update::remove);
-
-          if (_mod_alt_down)
-          {
-            // Don't do anything here.
-            // If you select M2 and WMOs at the same time, this will stop moving the WMOs while u resize the M2s.
-          }
-          else if (_mod_shift_down)
-          {
-            // moved outside the loop
-          }
-          else
-          {
-            if (_move_model_to_cursor_position.get())
-            {
-              wmo->pos.x = _cursor_pos.x - objMoveOffset[wmo->mUniqueID].x;
-              wmo->pos.z = _cursor_pos.z - objMoveOffset[wmo->mUniqueID].z;
-            }
-          }
-
-          wmo->recalcExtents();
-          _world->updateTilesWMO(wmo, model_update::add);
-          objectEditor->rotationEditor->updateValues();
-        }
-        else if (selection.which() == eEntry_Model)
-        {
-          auto model = boost::get<selected_model_type>(selection);
-          _world->updateTilesModel(model, model_update::remove);
-
-          if (_mod_alt_down)
-          {
-            // do nothing, scaling is done outsite the loop now
-          }
-          else if (_mod_shift_down)
-          {
-            // moved outside the loop
-          }
-          else
-          {
-            if (_move_model_to_cursor_position.get())
-            {
-              model->pos.x = _cursor_pos.x - objMoveOffset[model->uid].x;
-              model->pos.z = _cursor_pos.z - objMoveOffset[model->uid].z;
-            }
-          }
-
-          objectEditor->rotationEditor->updateValues();
-          model->recalcExtents();
-          _world->updateTilesModel(model, model_update::add);
-        }
       }
 
       // rotating objects

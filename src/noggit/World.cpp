@@ -311,6 +311,22 @@ bool World::is_selected(selection_type selection)
     return false;
 }
 
+boost::optional<selection_type> World::get_first_selected_model() const
+{
+  boost::optional<selection_type> selection;
+
+  for (auto const& entry : _current_selection)
+  {
+    if (entry.which() != eEntry_MapChunk)
+    {
+      selection = entry;
+      break;
+    }
+  }
+
+  return selection;
+}
+
 bool World::has_multiple_model_selected()
 {
   int model_counts = 0;
@@ -422,6 +438,57 @@ void World::move_selected_models(float dx, float dy, float dz)
     else
     {
       boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+
+  update_selection_pivot();
+}
+
+void World::set_selected_models_pos(math::vector_3d const& pos, bool change_height)
+{
+  bool multi_select = has_multiple_model_selected();
+  // move models relative to the pivot when several are selected
+  if (has_multiple_model_selected())
+  {
+    math::vector_3d diff = pos - _multi_select_pivot.get();
+
+    if (change_height)
+    {
+      move_selected_models(diff);
+    }
+    else
+    {
+      move_selected_models(diff.x, 0.f, diff.z);
+    }
+
+    return;
+  }
+
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);   
+
+    if (entry_is_m2)
+    {
+      ModelInstance* mi = boost::get<selected_model_type>(entry);
+      mi->pos = pos;
+      mi->recalcExtents();
+    }
+    else
+    {
+      WMOInstance* wi = boost::get<selected_wmo_type>(entry);
+      wi->pos = pos;
+      wi->recalcExtents();
     }
 
     updateTilesEntry(entry, model_update::add);
@@ -1081,7 +1148,7 @@ void main()
 
     if (terrainMode == editing_mode::object && has_multiple_model_selected())
     {
-      render_sphere(getMedianPivotPoint(_current_selection), 2.f, cursor_color);
+      render_sphere(_multi_select_pivot.get(), 2.f, cursor_color);
     }
 
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
