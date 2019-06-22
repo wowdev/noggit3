@@ -41,6 +41,9 @@ namespace noggit
       layout->addRow (new QLabel ("Scale", this));
       layout->addRow ("", _scale = new QDoubleSpinBox (this));
 
+      layout->addRow(new QLabel("Multi selection warning:", this));
+      layout->addRow(new QLabel("- rotation and scale only\n  change when pressing enter", this));
+      layout->addRow(new QLabel("- scaling is multiplicative", this));
 
       _rotation_x->setRange (-180.f, 180.f);
       _rotation_x->setDecimals (3);
@@ -145,7 +148,28 @@ namespace noggit
       connect ( _scale, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (double v)
                 {
-                  world->scale_selected_models(v, World::m2_scaling_type::set);
+                  if (!_world->has_multiple_model_selected())
+                  {
+                    _world->scale_selected_models(v, World::m2_scaling_type::set);
+                  }
+                }
+              );
+      connect (_scale, &QDoubleSpinBox::editingFinished
+              , [&, world]
+                {
+                  if(world->has_multiple_model_selected())
+                  {
+                    // avoid scale changes when losing focus
+                    if (_scale->hasFocus())
+                    {
+                      world->scale_selected_models(_scale->value(), World::m2_scaling_type::mult);
+                    }
+                    else // reset value
+                    {
+                      QSignalBlocker const _(_scale);
+                      _scale->setValue(1.f);
+                    }
+                  }
                 }
               );
     }
@@ -171,16 +195,15 @@ namespace noggit
         _position_x->setEnabled(true);
         _position_y->setEnabled(true);
         _position_z->setEnabled(true);
-        // default value for rotation, affect the models only when pressing enter
+        // default value for rotation and scaling, affect the models only when pressing enter
         _rotation_x->setValue(0.f);
         _rotation_y->setValue(0.f);
         _rotation_z->setValue(0.f);
         _rotation_x->setEnabled(true);
         _rotation_y->setEnabled(true);
         _rotation_z->setEnabled(true);
-        // disable scaling for now
         _scale->setValue(1.f);
-        _scale->setEnabled(false);
+        _scale->setEnabled(true);
       }
       else
       {
@@ -233,6 +256,14 @@ namespace noggit
           _position_y->setEnabled(false);
           _position_z->setEnabled(false);
           _scale->setEnabled(false);
+
+          _rotation_x->setValue(0.f);
+          _rotation_y->setValue(0.f);
+          _rotation_z->setValue(0.f);
+          _position_x->setValue(0.f);
+          _position_y->setValue(0.f);
+          _position_z->setValue(0.f);
+          _scale->setValue(1.f);
         }
       }
     }
