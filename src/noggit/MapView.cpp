@@ -1146,32 +1146,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-
-                if (_world->has_selection())
-                {
-                  auto selected_objects = _world->current_selection();
-                  auto midPos = getMedianPivotPoint(selected_objects);
-         
-
-                  for (auto& object : selected_objects)
-                  {
-
-                    if (object.which() == eEntry_Model)
-                    {
-                      _world->updateTilesModel(boost::get<selected_model_type>(object), model_update::remove);
-                      boost::get<selected_model_type>(object)->pos = _cursor_pos - (midPos - getObjectPosition(object));
-                      boost::get<selected_model_type>(object)->recalcExtents();
-                      _world->updateTilesModel(boost::get<selected_model_type>(object), model_update::add);
-                    }
-                    else if (object.which() == eEntry_WMO)
-                    {
-                      _world->updateTilesWMO(boost::get<selected_wmo_type>(object), model_update::remove);
-                      boost::get<selected_wmo_type>(object)->pos = _cursor_pos - (midPos - getObjectPosition(object));
-                      boost::get<selected_wmo_type>(object)->recalcExtents();
-                      _world->updateTilesWMO(boost::get<selected_wmo_type>(object), model_update::add);
-                    }
-                  }
-                }
+                _world->set_selected_models_pos(_cursor_pos);
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
@@ -1792,48 +1767,48 @@ void MapView::tick (float dt)
   rh = 0;
   rv = 0;
 
-    if (_display_mode != display_mode::in_2D)
+  if (_display_mode != display_mode::in_2D)
+  {
+    if (turn)
     {
-      if (turn)
-      {
-        _camera.add_to_yaw(math::degrees(turn));
-      }
-      if (lookat)
-      {
-        _camera.add_to_pitch(math::degrees(lookat));
-      }
-      if (moving)
-      {
-        _camera.move_forward(moving, dt);
-      }
-      if (strafing)
-      {
-        _camera.move_horizontal(strafing, dt);
-      }
-      if (updown)
-      {
-        _camera.move_vertical(updown, dt);
-      }
+      _camera.add_to_yaw(math::degrees(turn));
     }
-    else
+    if (lookat)
     {
-      //! \todo this is total bullshit. there should be a seperate view and camera class for tilemode
-      if (moving)
-      {
-        _camera.position.z -= dt * _camera.move_speed * moving;
-      }
-      if (strafing)
-      {
-        _camera.position.x += dt * _camera.move_speed * strafing;
-      }
-      if (updown)
-      {
-        _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
-        _2d_zoom = std::max(0.01f, _2d_zoom);
-      }
-    } 
+      _camera.add_to_pitch(math::degrees(lookat));
+    }
+    if (moving)
+    {
+      _camera.move_forward(moving, dt);
+    }
+    if (strafing)
+    {
+      _camera.move_horizontal(strafing, dt);
+    }
+    if (updown)
+    {
+      _camera.move_vertical(updown, dt);
+    }
+  }
+  else
+  {
+    //! \todo this is total bullshit. there should be a seperate view and camera class for tilemode
+    if (moving)
+    {
+      _camera.position.z -= dt * _camera.move_speed * moving;
+    }
+    if (strafing)
+    {
+      _camera.position.x += dt * _camera.move_speed * strafing;
+    }
+    if (updown)
+    {
+      _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
+      _2d_zoom = std::max(0.01f, _2d_zoom);
+    }
+  } 
 
-    _minimap->update();
+  _minimap->update();
 
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
@@ -2650,11 +2625,6 @@ void MapView::mousePressEvent(QMouseEvent* event)
     break;
 
   case Qt::RightButton:
-    if (_world->has_multiple_model_selected())
-    {
-      rotationPivotPoint = getMedianPivotPoint(_world->current_selection());
-    }
-
     rightMouse = true;
     break;
 
@@ -2662,29 +2632,11 @@ void MapView::mousePressEvent(QMouseEvent* event)
     if (_world->has_selection())
     {
       MoveObj = true;
-      objMoveOffset.clear();
-
-      for (auto& selection : _world->current_selection())
-      {
-        if (selection.which() == eEntry_WMO)
-        {
-          auto wmo = boost::get<selected_wmo_type>(selection);
-          objMoveOffset[wmo->mUniqueID] = _cursor_pos - wmo->pos;
-        }
-        else if (selection.which() == eEntry_Model)
-        {
-          auto model = boost::get<selected_model_type>(selection);
-          objMoveOffset[model->uid] = _cursor_pos - model->pos;
-        }
-
-      }
     }
 
-    switch (terrainMode)
+    if(terrainMode == editing_mode::mccv)
     {
-    case editing_mode::mccv:
       shaderTool->pickColor(_world.get(), _cursor_pos);
-      break;
     }
 
     break;

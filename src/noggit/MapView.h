@@ -126,18 +126,12 @@ private:
   float numpad_moveratio = 0.001f;
 
   math::vector_3d objMove;
-  std::map<uint, math::vector_3d> objMoveOffset;
-  math::vector_3d objRot;
-  math::vector_3d rotationPivotPoint;
-
+  
   std::vector<selection_type> lastSelected;
-
-  bool TestSelection = false;
 
   bool  leftMouse = false;
   bool  leftClicked = false;
   bool  rightMouse = false;
-  bool  painting = false;
 
   // Vars for the ground editing toggle mode store the status of some
   // view settings when the ground editing mode is switched on to
@@ -204,7 +198,6 @@ private:
     MOD_space = 0x10,
     MOD_num = 0x20,
     MOD_none = 0x00
-
   };
   struct HotKey
   {
