@@ -305,27 +305,48 @@ void World::update_selection_pivot()
   }  
 }
 
-bool World::is_selection(int pSelectionType, selection_type selection)
+bool World::is_selection(int pSelectionType, selection_type selection) const
 {
   return has_selection() && selection.which() == pSelectionType;
 }
 
-bool World::is_selected(selection_type selection)
+bool World::is_selected(selection_type selection) const
 {
-    auto currentSelection = this->current_selection();
-    if (selection.which() == eEntry_Model)
+  if (selection.which() == eEntry_Model)
+  {
+    uint uid = boost::get<selected_model_type>(selection)->uid;
+    auto const& it = std::find_if( _current_selection.begin()
+                                  , _current_selection.end()
+                                  , [uid] (selection_type type)
+                                    {
+                                      return type.type() == typeid(selected_model_type) 
+                                        && boost::get<selected_model_type>(type)->uid == uid;
+                                    }
+                                  );
+
+    if (it != _current_selection.end())
     {
-      uint uniqueId = boost::get<selected_model_type>(selection)->uid;
-      if (std::find_if(currentSelection.begin(), currentSelection.end(), [uniqueId](selection_type type) {return type.type() == typeid(selected_model_type) && boost::get<selected_model_type>(type)->uid == uniqueId; }) != currentSelection.end())
-        return true;
+      return true;
     }
-    else if (selection.which() == eEntry_WMO)
+  }
+  else if (selection.which() == eEntry_WMO)
+  {
+    uint uid = boost::get<selected_wmo_type>(selection)->mUniqueID;
+    auto const& it = std::find_if( _current_selection.begin()
+                            , _current_selection.end()
+                            , [uid] (selection_type type)
+                              {
+                                return type.type() == typeid(selected_wmo_type)
+                                  && boost::get<selected_wmo_type>(type)->mUniqueID == uid;
+                              }
+                            );
+    if (it != _current_selection.end())
     {
-      uint uniqueId = boost::get<selected_wmo_type>(selection)->mUniqueID;
-      if (std::find_if(currentSelection.begin(), currentSelection.end(), [uniqueId](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == uniqueId; }) != currentSelection.end())
-        return true;
+      return true;
     }
-    return false;
+  }
+
+  return false;
 }
 
 boost::optional<selection_type> World::get_last_selected_model() const
@@ -344,30 +365,22 @@ boost::optional<selection_type> World::get_last_selected_model() const
   return selection;
 }
 
-bool World::has_multiple_model_selected()
-{
-  int model_counts = 0;
-
-  for (auto const& entry : _current_selection)
-  {
-    if (entry.which() != eEntry_MapChunk)
-    {
-      model_counts++;
-    }
-  }
-
-  return model_counts > 1;
-}
-
 void World::set_current_selection(selection_type entry)
 {
   _current_selection.clear();
   _current_selection.push_back(entry);
   _multi_select_pivot = boost::none;
+
+  _selected_model_count = entry.which() == eEntry_MapChunk ? 0 : 1;
 }
 
 void World::add_to_selection(selection_type entry) 
 {
+  if (entry.which() != eEntry_MapChunk)
+  {
+    _selected_model_count++;
+  }
+
   _current_selection.push_back(entry); 
   update_selection_pivot();
 }
@@ -377,6 +390,11 @@ void World::remove_from_selection(selection_type entry)
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
   if (position != _current_selection.end())
   {
+    if (entry.which() != eEntry_MapChunk)
+    {
+      _selected_model_count--;
+    }
+
     _current_selection.erase(position);
     update_selection_pivot();
   }  
@@ -386,6 +404,7 @@ void World::reset_selection()
 {
   _current_selection.clear(); 
   _multi_select_pivot = boost::none;
+  _selected_model_count = 0;
 }
 
 void World::scale_selected_models(float v, m2_scaling_type type)
