@@ -1531,7 +1531,7 @@ void MapView::tick (float dt)
     // update rotation editor if the selection has changed
     if (lastSelected != currentSelection)
     {
-      objectEditor->rotationEditor->updateValues();
+      objectEditor->rotationEditor->updateValues(_world.get());
     }
 
     bool canMoveObj = terrainMode == editing_mode::object;

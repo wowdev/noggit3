@@ -19,7 +19,6 @@ namespace noggit
   {
     rotation_editor::rotation_editor(QWidget* parent, World* world)
       : QWidget (parent)
-      , _world(world)
     {
       setWindowTitle("Pos/Rotation Editor");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -71,22 +70,22 @@ namespace noggit
 
 
       connect ( _rotation_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v) { set_model_rotation(); }
+              , [&, world] (double v) { set_model_rotation(world); }
               );
       connect ( _rotation_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v) { set_model_rotation(); }
+              , [&, world] (double v) { set_model_rotation(world); }
               );
       connect ( _rotation_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v) { set_model_rotation(); }
+              , [&, world] (double v) { set_model_rotation(world); }
               );
 
       connect ( _rotation_x, &QDoubleSpinBox::editingFinished
-              , [&] 
+              , [&, world]
                 {
                   // avoid rotation changes when losing focus
                   if(_rotation_x->hasFocus())
                   {
-                    change_models_rotation();
+                    change_models_rotation(world);
                   }
                   else // reset value
                   {
@@ -96,12 +95,12 @@ namespace noggit
                 }
               );
       connect ( _rotation_z, &QDoubleSpinBox::editingFinished
-              , [&] 
+              , [&, world]
                 {
                   // avoid rotation changes when losing focus
                   if(_rotation_z->hasFocus())
                   {
-                    change_models_rotation();
+                    change_models_rotation(world);
                   }
                   else // reset value
                   {
@@ -111,12 +110,12 @@ namespace noggit
                 }
               );
       connect ( _rotation_y, &QDoubleSpinBox::editingFinished
-              , [&] 
+              , [&, world] 
                 {
                   // avoid rotation changes when losing focus
                   if(_rotation_y->hasFocus())
                   {
-                    change_models_rotation();
+                    change_models_rotation(world);
                   }
                   else // reset value
                   {
@@ -127,30 +126,30 @@ namespace noggit
               );
 
       connect ( _position_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+              , [&, world] (double v)
                 {
-                  _world->set_selected_models_pos(v, _position_y->value(), _position_z->value());
+                  world->set_selected_models_pos(v, _position_y->value(), _position_z->value());
                 }
               );
       connect ( _position_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+              , [&, world] (double v)
                 {
-                  _world->set_selected_models_pos(_position_x->value(), _position_y->value(), v);
+                  world->set_selected_models_pos(_position_x->value(), _position_y->value(), v);
                 }
               );
       connect ( _position_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+              , [&, world] (double v)
                 {
-                  _world->set_selected_models_pos(_position_x->value(), v, _position_z->value());
+                  world->set_selected_models_pos(_position_x->value(), v, _position_z->value());
                 }
               );
 
       connect ( _scale, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+              , [world] (double v)
                 {
-                  if (!_world->has_multiple_model_selected())
+                  if (!world->has_multiple_model_selected())
                   {
-                    _world->scale_selected_models(v, World::m2_scaling_type::set);
+                    world->scale_selected_models(v, World::m2_scaling_type::set);
                   }
                 }
               );
@@ -174,7 +173,7 @@ namespace noggit
               );
     }
 
-    void rotation_editor::updateValues()
+    void rotation_editor::updateValues(World* world)
     {
       QSignalBlocker const block_rotation_x(_rotation_x);
       QSignalBlocker const block_rotation_y(_rotation_y);
@@ -184,9 +183,9 @@ namespace noggit
       QSignalBlocker const block_position_z(_position_z);
       QSignalBlocker const block_scale(_scale);
 
-      if (_world->has_multiple_model_selected())
+      if (world->has_multiple_model_selected())
       {
-        math::vector_3d const& p = _world->multi_select_pivot().get();
+        math::vector_3d const& p = world->multi_select_pivot().get();
 
         _position_x->setValue(p.x);
         _position_y->setValue(p.y);
@@ -207,7 +206,7 @@ namespace noggit
       }
       else
       {
-        auto entry = _world->get_last_selected_model();
+        auto entry = world->get_last_selected_model();
 
         if (entry)
         {
@@ -268,12 +267,12 @@ namespace noggit
       }
     }
 
-    void rotation_editor::set_model_rotation()
+    void rotation_editor::set_model_rotation(World* world)
     {
       // only for single model rotation
-      if (!_world->has_multiple_model_selected())
+      if (!world->has_multiple_model_selected())
       {
-        _world->set_selected_models_rotation
+        world->set_selected_models_rotation
           ( math::degrees(_rotation_x->value())
           , math::degrees(_rotation_y->value())
           , math::degrees(_rotation_z->value())
@@ -281,12 +280,12 @@ namespace noggit
       }
     }
 
-    void rotation_editor::change_models_rotation()
+    void rotation_editor::change_models_rotation(World* world)
     {
       // only for multi models rotation
-      if (_world->has_multiple_model_selected())
+      if (world->has_multiple_model_selected())
       {
-        _world->rotate_selected_models
+        world->rotate_selected_models
           ( math::degrees(_rotation_x->value())
           , math::degrees(_rotation_y->value())
           , math::degrees(_rotation_z->value())
