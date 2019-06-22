@@ -23,12 +23,12 @@ namespace noggit
 
       bool* use_median_pivot_point;
 
-      void updateValues();
+      void updateValues(World* world);
     private:
       // for single selection
-      void set_model_rotation();
+      void set_model_rotation(World* world);
       // for multi selection
-      void change_models_rotation();
+      void change_models_rotation(World* world);
 
       QDoubleSpinBox* _rotation_x;
       QDoubleSpinBox* _rotation_z;
@@ -37,8 +37,6 @@ namespace noggit
       QDoubleSpinBox* _position_z;
       QDoubleSpinBox* _position_y;
       QDoubleSpinBox* _scale;
-
-      World* _world;
     };
   }
 }
