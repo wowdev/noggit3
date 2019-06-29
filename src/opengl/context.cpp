@@ -10,7 +10,6 @@
 #include <boost/current_function.hpp>
 
 #include <QtGui/QOpenGLFunctions>
-#include <QtGui/QOpenGLFunctions_3_3_Core>
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 
 #include <functional>
@@ -186,7 +185,7 @@ namespace opengl
   void context::readBuffer (GLenum target)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glReadBuffer (target);
+    return _3_3_core_func->glReadBuffer (target);
   }
   void context::readPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data)
   {
@@ -203,27 +202,27 @@ namespace opengl
   void context::pointParameterf (GLenum pname, GLfloat param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glPointParameterf (pname, param);
+    return _3_3_core_func->glPointParameterf (pname, param);
   }
   void context::pointParameteri (GLenum pname, GLint param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glPointParameteri (pname, param);
+    return _3_3_core_func->glPointParameteri (pname, param);
   }
   void context::pointParameterfv (GLenum pname, GLfloat const* param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glPointParameterfv (pname, param);
+    return _3_3_core_func->glPointParameterfv (pname, param);
   }
   void context::pointParameteriv (GLenum pname, GLint const* param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glPointParameteriv (pname, param);
+    return _3_3_core_func->glPointParameteriv (pname, param);
   }
   void context::pointSize (GLfloat size)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glPointSize (size);
+    return _3_3_core_func->glPointSize (size);
   }
 
   void context::hint (GLenum target, GLenum mode)
@@ -234,7 +233,7 @@ namespace opengl
   void context::polygonMode (GLenum face, GLenum mode)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glPolygonMode (face, mode);
+    return _3_3_core_func->glPolygonMode (face, mode);
   }
 
   void context::genTextures (GLuint count, GLuint* textures)
@@ -297,17 +296,17 @@ namespace opengl
   void context::genVertexArrays (GLuint count, GLuint* arrays)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glGenVertexArrays(count, arrays);
+    return _3_3_core_func->glGenVertexArrays(count, arrays);
   }
   void context::deleteVertexArray (GLuint count, GLuint* arrays)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glDeleteVertexArrays(count, arrays);
+    return _3_3_core_func->glDeleteVertexArrays(count, arrays);
   }
   void context::bindVertexArray (GLenum array)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glBindVertexArray(array);
+    return _3_3_core_func->glBindVertexArray(array);
   }
   void context::genBuffers (GLuint count, GLuint* buffers)
   {
@@ -332,12 +331,12 @@ namespace opengl
   GLvoid* context::mapBuffer (GLenum target, GLenum access)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glMapBuffer (target, access);
+    return _3_3_core_func->glMapBuffer (target, access);
   }
   GLboolean context::unmapBuffer (GLenum target)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glUnmapBuffer (target);
+    return _3_3_core_func->glUnmapBuffer (target);
   }
   void context::drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices)
   {
@@ -347,12 +346,12 @@ namespace opengl
   void context::drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glDrawElementsInstanced (mode, count, type, indices, instancecount);
+    return _3_3_core_func->glDrawElementsInstanced (mode, count, type, indices, instancecount);
   }
   void context::drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glDrawRangeElements (mode, start, end, count, type, indices);
+    return _3_3_core_func->glDrawRangeElements (mode, start, end, count, type, indices);
   }
 
   void context::genPrograms (GLsizei count, GLuint* programs)
@@ -403,7 +402,7 @@ namespace opengl
   void context::getDoublev (GLenum target, GLdouble* value)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glGetDoublev (target, value);
+    return _3_3_core_func->glGetDoublev (target, value);
   }
   void context::getFloatv (GLenum target, GLfloat* value)
   {
@@ -530,7 +529,7 @@ namespace opengl
   void context::vertexAttribDivisor (GLuint index, GLuint divisor)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glVertexAttribDivisor(index, divisor);
+    return _3_3_core_func->glVertexAttribDivisor(index, divisor);
   }
   void context::enableVertexAttribArray (GLuint index)
   {
