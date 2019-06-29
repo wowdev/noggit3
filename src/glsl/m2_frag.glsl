@@ -27,11 +27,6 @@ uniform vec3 ambient_color;
 uniform float alpha_test;
 uniform int pixel_shader;
 
-vec4 blend_by_alpha (in vec4 source, in vec4 dest)
-{
-  return source * source.w + dest * (1.0 - source.w);
-}
-
 void main()
 {
   vec4 color = vec4(0.0);
@@ -170,7 +165,7 @@ void main()
   {
     float start = fog_end * fog_start;
     float alpha = (camera_dist - start) / (fog_end - start);
-    color = blend_by_alpha (vec4(fog_color.rgb, alpha), color);
+    color.rgb = mix(color.rgb, fog_color.rgb, alpha);
   }
 
   out_color = color;
