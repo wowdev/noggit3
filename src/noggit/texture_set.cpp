@@ -493,11 +493,6 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
   return changed;
 }
 
-size_t TextureSet::num()
-{
-  return nTextures;
-}
-
 unsigned int TextureSet::flag(size_t id)
 {
   return _layers_info[id].flags;
