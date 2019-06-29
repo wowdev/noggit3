@@ -545,9 +545,8 @@ void MapChunk::draw ( math::frustum const& frustum
     mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
   }
 
-  opengl::scoped::vao_binder const _ (_vao);
-
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(!lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
+  gl.bindVertexArray(_vao);
+  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
 
   auto& strip = !lod_level ? strip_with_holes : strip_lods[lod_level.get()];
 
