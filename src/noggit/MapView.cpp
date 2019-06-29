@@ -1826,7 +1826,9 @@ void MapView::tick (float dt)
                         )
       / qreal (_last_frame_durations.size())
       );
-    _status_fps->setText ("FPS: " + QString::number (int (1. / avg_frame_duration)));
+    _status_fps->setText ( "FPS: " + QString::number (int (1. / avg_frame_duration)) 
+                         + " - Average frame time: " + QString::number(avg_frame_duration*1000.0) + "ms"
+                         );
 
     _last_frame_durations.clear();
     _last_fps_update = 0.f;
