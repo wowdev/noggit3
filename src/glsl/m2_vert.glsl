@@ -1,5 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#version 330
+#version 330 core
 
 in vec4 pos;
 in vec3 normal;

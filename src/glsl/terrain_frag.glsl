@@ -56,11 +56,6 @@ const float CHUNKSIZE = TILESIZE / 16.0;
 const float HOLESIZE  = CHUNKSIZE * 0.25;
 const float UNITSIZE = HOLESIZE * 0.5;
 
-vec4 blend_by_alpha (in vec4 source, in vec4 dest)
-{
-  return source * source.w + dest * (1.0 - source.w);
-}
-
 vec4 texture_blend() 
 {
   if(layer_count == 0)
@@ -130,7 +125,7 @@ void main()
 
   if(draw_impassible_flag)
   {
-    out_color = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.5), out_color);
+    out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
   float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8.0).r;
@@ -162,15 +157,14 @@ void main()
     }
     
     lines_drawn = color.a > 0.0;
-    out_color = blend_by_alpha (color, out_color);
+    out_color.rgb = mix(out_color.rgb, color.rgb, color.a);
   }
 
   if(draw_fog && dist_from_camera >= fog_end * fog_start)
   {
     float start = fog_end * fog_start;
     float alpha = (dist_from_camera - start) / (fog_end - start);
-    out_color = blend_by_alpha (vec4(fog_color.rgb, alpha), out_color);
-    out_color.a = 1.0;
+    out_color.rgb = mix(out_color.rgb, fog_color.rgb, alpha);
   }
 
   if(draw_wireframe && !lines_drawn)
@@ -203,8 +197,8 @@ void main()
   {
     float diff = length(vary_position.xz - cursor_position.xz);
     diff = min(abs(diff - outer_cursor_radius), abs(diff - outer_cursor_radius * inner_cursor_ratio));
-    float alpha = 1.0 - smoothstep(0.0, length(fw.xz), diff);
+    float alpha = smoothstep(0.0, length(fw.xz), diff);
 
-    out_color = blend_by_alpha (vec4(cursor_color.rgb, alpha), out_color);
+    out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);
   }
 }
