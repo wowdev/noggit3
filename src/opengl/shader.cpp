@@ -57,7 +57,7 @@ namespace opengl
       ss << "#define " << def << "\n";
     }
 
-    std::regex regex("([^#]*(#version)[ \t]+[0-9]+)");
+    std::regex regex("([^#]*(#version)[ \t]+[0-9]+.*$)");
     std::smatch match;
 
     if (std::regex_search(src, match, regex))
