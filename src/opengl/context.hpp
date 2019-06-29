@@ -4,6 +4,8 @@
 
 #include <opengl/types.hpp>
 
+#include <QtGui/QOpenGLFunctions_3_3_Core>
+
 namespace opengl
 {
   struct context
@@ -13,12 +15,20 @@ namespace opengl
       scoped_setter (context& context_, QOpenGLContext* current_context)
         : _context (context_)
         , _old_context (_context._current_context)
+        , _old_core_func (context_._3_3_core_func)
       {
         _context._current_context = current_context;
+        _context._3_3_core_func = current_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+
+        if (!_context._3_3_core_func)
+        {
+          throw std::runtime_error("Noggit requires OpenGL 3.3 core functions");
+        }
       }
       ~scoped_setter()
       {
         _context._current_context = _old_context;
+        _context._3_3_core_func = _old_core_func;
       }
 
       scoped_setter (scoped_setter const&) = delete;
@@ -29,6 +39,7 @@ namespace opengl
     private:
       context& _context;
       QOpenGLContext* _old_context;
+      QOpenGLFunctions_3_3_Core* _old_core_func;
     };
 
     struct save_current_context
@@ -65,6 +76,7 @@ namespace opengl
     };
 
     QOpenGLContext* _current_context = nullptr;
+    QOpenGLFunctions_3_3_Core* _3_3_core_func = nullptr;
 
     void enable (GLenum);
     void disable (GLenum);
