@@ -439,6 +439,9 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , display
                  );
     }
+
+    gl.bindVertexArray(0);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
   
   // 4 = terrain shader cursor
