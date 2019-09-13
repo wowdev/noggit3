@@ -1199,25 +1199,32 @@ template<typename Fun>
   void World::for_all_chunks_on_tile (math::vector_3d const& pos, Fun&& fun)
 {
   MapTile* tile (mapIndex.getTile (pos));
-  mapIndex.setChanged (tile);
 
-  for (size_t ty = 0; ty < 16; ++ty)
+  if (tile && tile->finishedLoading())
   {
-    for (size_t tx = 0; tx < 16; ++tx)
+    mapIndex.setChanged(tile);
+
+    for (size_t ty = 0; ty < 16; ++ty)
     {
-      fun (tile->getChunk (ty, tx));
+      for (size_t tx = 0; tx < 16; ++tx)
+      {
+        fun(tile->getChunk(ty, tx));
+      }
     }
   }
 }
 
 template<typename Fun>
-  auto World::for_chunk_at(math::vector_3d const& pos, Fun&& fun) -> decltype (fun (nullptr))
+  void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
+{
+  MapTile* tile(mapIndex.getTile(pos));
+  
+  if (tile && tile->finishedLoading())
   {
-    MapTile* tile(mapIndex.getTile(pos));
     mapIndex.setChanged(tile);
-
-    return fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
+    fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }
+}
 
 template<typename Fun>
   auto World::for_maybe_chunk_at(math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
