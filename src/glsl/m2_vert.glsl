@@ -58,10 +58,10 @@ vec2 get_texture_uv(int tex_unit_lookup, vec3 vert, vec3 norm)
 
 void main()
 {
-  mat4 camera_mat = model_view * transform;
-  vec4 vertex = camera_mat * pos;
+  vec4 vertex = model_view * transform * pos;
 
-  norm = mat3(camera_mat) * normal;
+  // important to normalize because of the scaling !!
+  norm = normalize(mat3(transform) * normal);
 
   uv1 = get_texture_uv(tex_unit_lookup_1, vertex.xyz, norm);
   uv2 = get_texture_uv(tex_unit_lookup_2, vertex.xyz, norm);
