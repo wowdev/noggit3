@@ -618,6 +618,7 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
   opengl::scoped::vao_binder const _ (_vao);
 
   wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
   wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   if (header.flags.has_vertex_color)
@@ -736,6 +737,11 @@ void WMOGroup::load()
   _normals.resize (size / sizeof (::math::vector_3d));
 
   f.read (_normals.data (), size);
+
+  for (auto& n : _normals)
+  {
+    std::swap(n.y, n.z);
+  }
 
   // - MOTV ----------------------------------------------
 
@@ -981,7 +987,10 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
     setup_vao(wmo_shader);
   }
 
+  bool exterior_lit = header.flags.exterior_lit | header.flags.exterior;
+
   wmo_shader.uniform("use_vertex_color", (int)header.flags.has_vertex_color);
+  wmo_shader.uniform("exterior_lit", (int)exterior_lit);
 
   opengl::scoped::vao_binder const _ (_vao);
 
