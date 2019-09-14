@@ -7,6 +7,7 @@ in vec4 vertex_color;
 in vec2 texcoord;
 
 out vec3 f_position;
+out vec3 f_normal;
 out vec2 f_texcoord;
 out vec4 f_vertex_color;
 
@@ -21,6 +22,7 @@ void main()
   gl_Position = projection * model_view * pos;
 
   f_position = pos.xyz;
+  f_normal = mat3(transform) * normal;
   f_texcoord = texcoord;
   f_vertex_color = vertex_color;
 }

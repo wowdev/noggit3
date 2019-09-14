@@ -12,9 +12,15 @@ uniform float fog_end;
 uniform vec3 fog_color;
 uniform vec3 camera;
 
+uniform bool exterior_lit;
+uniform vec3 exterior_light_dir;
+uniform vec3 exterior_diffuse_color;
+uniform vec3 exterior_ambient_color;
+
 uniform float alpha_test;
 
 in vec3 f_position;
+in vec3 f_normal;
 in vec2 f_texcoord;
 in vec4 f_vertex_color;
 
@@ -45,6 +51,11 @@ void main()
   else
   {
     out_color = tex;
+  }
+
+  if(exterior_lit)
+  {
+    out_color.rgb *= vec3(clamp (exterior_diffuse_color * max(dot(f_normal, exterior_light_dir), 0.0), 0.0, 1.0)) + exterior_ambient_color;
   }
 
   if(fog && (dist_from_camera >= fog_end * fog_start))
