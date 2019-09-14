@@ -78,6 +78,58 @@ namespace noggit
       build_menu();
     }
 
+    void main_window::check_uid_then_enter_map
+                        ( math::vector_3d pos
+                        , math::degrees camera_pitch
+                        , math::degrees camera_yaw
+                        , bool from_bookmark
+                        )
+    {
+      QSettings settings;
+#ifdef USE_MYSQL_UID_STORAGE
+      bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
+
+      if ((use_myqsl && mysql::hasMaxUIDStoredDB(_world->getMapID()))
+        || uid_storage::hasMaxUIDStored(_world->getMapID())
+         )
+      {
+        _world->mapIndex.loadMaxUID();
+        enterMapAt(pos, camera_pitch, camera_yaw, from_bookmark);
+      }
+#else
+      if (uid_storage::hasMaxUIDStored(_world->getMapID()))
+      {
+        if (settings.value("uid_startup_check", true).toBool())
+        {
+          enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid, from_bookmark);
+        }
+        else
+        {
+          _world->mapIndex.loadMaxUID();
+          enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::none, from_bookmark);
+        }
+      }
+#endif
+      else
+      {
+        auto uidFixWindow(new uid_fix_window(pos, camera_pitch, camera_yaw));
+        uidFixWindow->show();
+
+        connect( uidFixWindow
+               , &noggit::ui::uid_fix_window::fix_uid
+               , [this, from_bookmark] 
+                   ( math::vector_3d pos
+                   , math::degrees camera_pitch
+                   , math::degrees camera_yaw
+                   , uid_fix_mode uid_fix
+                   )
+                 {
+                   enterMapAt(pos, camera_pitch, camera_yaw, uid_fix, from_bookmark);
+                 }
+               );
+      }
+    }
+
     void main_window::enterMapAt ( math::vector_3d pos
                                  , math::degrees camera_pitch
                                  , math::degrees camera_yaw
@@ -179,12 +231,11 @@ namespace noggit
                              if (it->getInt(MapDB::MapID) == entry.mapID)
                              {
                                _world = std::make_unique<World> (it->getString(MapDB::InternalName), entry.mapID);
-                               enterMapAt ( entry.pos
-                                          , math::degrees (entry.camera_pitch)
-                                          , math::degrees (entry.camera_yaw)
-                                          , uid_fix_mode::none
-                                          , true
-                                          );
+                               check_uid_then_enter_map ( entry.pos
+                                                        , math::degrees (entry.camera_pitch)
+                                                        , math::degrees (entry.camera_yaw)
+                                                        , true
+                                                        );
 
                                return;
                              }
@@ -200,48 +251,7 @@ namespace noggit
         ( _minimap,  &minimap_widget::map_clicked
         , [this] (::math::vector_3d const& pos)
           {
-            QSettings settings;
-#ifdef USE_MYSQL_UID_STORAGE
-            bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
-
-            if ( (use_myqsl && mysql::hasMaxUIDStoredDB (_world->getMapID()))
-              || uid_storage::hasMaxUIDStored (_world->getMapID())
-               )
-            {
-              _world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
-            }
-#else
-            if (uid_storage::hasMaxUIDStored (_world->getMapID()))
-            {
-              if (settings.value("uid_startup_check", true).toBool())
-              {
-                enterMapAt (pos, math::degrees (30.f), math::degrees (90.f), uid_fix_mode::max_uid);
-              }
-              else
-              {
-                _world->mapIndex.loadMaxUID();
-                enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
-              }
-            }
-#endif
-            else
-            {
-              auto uidFixWindow (new uid_fix_window (pos, math::degrees (30.f), math::degrees (90.f)));
-              uidFixWindow->show();
-
-              connect ( uidFixWindow
-                      , &noggit::ui::uid_fix_window::fix_uid
-                      , [this] ( math::vector_3d pos
-                               , math::degrees camera_pitch
-                               , math::degrees camera_yaw
-                               , uid_fix_mode uid_fix
-                               )
-                        {
-                          enterMapAt(pos, camera_pitch, camera_yaw, uid_fix);
-                        }
-                      );
-            }
+            check_uid_then_enter_map(pos, math::degrees(30.f), math::degrees(90.f));
           }
         );
 

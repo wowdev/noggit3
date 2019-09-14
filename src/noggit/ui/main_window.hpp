@@ -24,6 +24,13 @@ namespace noggit
 
     private:
       void loadMap (int mapID);
+
+      void check_uid_then_enter_map ( math::vector_3d pos
+                                    , math::degrees camera_pitch
+                                    , math::degrees camera_yaw
+                                    , bool from_bookmark = false
+                                    );
+
       void enterMapAt ( math::vector_3d pos
                       , math::degrees camera_pitch
                       , math::degrees camera_yaw
