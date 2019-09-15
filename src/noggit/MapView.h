@@ -77,6 +77,7 @@ private:
   bool look;
 
   noggit::camera _camera;
+  bool _camera_moved_since_last_draw = true;
 
   noggit::bool_toggle_property _draw_contour = {false};
   noggit::bool_toggle_property _draw_mfbo = {false};

@@ -756,6 +756,7 @@ void MapView::createGUI()
              , [this]
                {
                  _camera.add_to_yaw(math::degrees(180.f));
+                 _camera_moved_since_last_draw = true;
                  _minimap->update();
                }
              );
@@ -1691,22 +1692,27 @@ void MapView::tick (float dt)
       if (turn)
       {
         _camera.add_to_yaw(math::degrees(turn));
+        _camera_moved_since_last_draw = true;
       }
       if (lookat)
       {
         _camera.add_to_pitch(math::degrees(lookat));
+        _camera_moved_since_last_draw = true;
       }
       if (moving)
       {
         _camera.move_forward(moving, dt);
+        _camera_moved_since_last_draw = true;
       }
       if (strafing)
       {
         _camera.move_horizontal(strafing, dt);
+        _camera_moved_since_last_draw = true;
       }
       if (updown)
       {
         _camera.move_vertical(updown, dt);
+        _camera_moved_since_last_draw = true;
       }
     }
     else
@@ -1715,15 +1721,18 @@ void MapView::tick (float dt)
       if (moving)
       {
         _camera.position.z -= dt * _camera.move_speed * moving;
+        _camera_moved_since_last_draw = true;
       }
       if (strafing)
       {
         _camera.position.x += dt * _camera.move_speed * strafing;
+        _camera_moved_since_last_draw = true;
       }
       if (updown)
       {
         _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
         _2d_zoom = std::max(0.01f, _2d_zoom);
+        _camera_moved_since_last_draw = true;
       }
     } 
 
@@ -2136,6 +2145,7 @@ void MapView::draw_map()
                , terrainMode == editing_mode::areaid
                , terrainMode
                , _camera.position
+               , _camera_moved_since_last_draw
                , _draw_mfbo.get()
                , _draw_wireframe.get()
                , _draw_lines.get()
@@ -2154,6 +2164,9 @@ void MapView::draw_map()
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                , _display_mode
                );
+
+  // reset after each world::draw call
+  _camera_moved_since_last_draw = false;
 }
 
 void MapView::keyPressEvent (QKeyEvent *event)
@@ -2372,6 +2385,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
     _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
+    _camera_moved_since_last_draw = true;
     _minimap->update();
   }
 
