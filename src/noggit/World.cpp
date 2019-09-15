@@ -209,6 +209,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , bool draw_areaid_overlay
                  , editing_mode terrainMode
                  , math::vector_3d const& camera_pos
+                 , bool camera_moved
                  , bool draw_mfbo
                  , bool draw_wireframe
                  , bool draw_lines
@@ -429,6 +430,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , detailtexcoords
                  , culldistance
                  , camera_pos
+                 , camera_moved
                  , show_unpaintable_chunks
                  , draw_paintability_overlay
                  , draw_chunk_flag_overlay

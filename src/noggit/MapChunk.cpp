@@ -227,6 +227,10 @@ int MapChunk::indexNoLoD(int x, int y)
 
 void MapChunk::update_intersect_points()
 {
+  // update the center of the chunk and visibility when the vertices changed
+  vcenter = (vmin + vmax) * 0.5f;
+  _need_visibility_update = true;
+
   _intersect_points.clear();
   _intersect_points = misc::intersection_points(vmin, vmax);
 }
@@ -473,11 +477,30 @@ void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const
   _need_vao_update = false;
 }
 
+bool MapChunk::update_visibility ( const float& cull_distance
+                                 , const math::frustum& frustum
+                                 , const math::vector_3d& camera
+                                 , display_mode display
+                                 )
+{
+  _is_visible = is_visible(cull_distance, frustum, camera, display);
+  _need_visibility_update = false;
+
+  auto lod = get_lod_level(camera, display);
+  int new_lod_level = lod ? lod.get() : -1;
+  bool lod_changed = new_lod_level != _lod_level;
+
+  _lod_level = new_lod_level;
+
+  return lod_changed;
+}
+
 void MapChunk::draw ( math::frustum const& frustum
                     , opengl::scoped::use_program& mcnk_shader
                     , GLuint const& tex_coord_vbo
                     , const float& cull_distance
                     , const math::vector_3d& camera
+                    , bool need_visibility_update
                     , bool show_unpaintable_chunks
                     , bool draw_paintability_overlay
                     , bool draw_chunk_flag_overlay
@@ -488,12 +511,24 @@ void MapChunk::draw ( math::frustum const& frustum
                     , display_mode display
                     )
 {
-  if (!is_visible (cull_distance, frustum, camera, display))
+  bool lod_changed = false;
+
+  if (need_visibility_update || _need_visibility_update)
+  {
+    lod_changed = update_visibility(cull_distance, frustum, camera, display);
+  }
+
+  if (!_is_visible)
+  {
     return;
+  }
 
   if (!_uploaded)
   {
     upload();
+    // force lod update on upload
+    lod_changed = true;
+    update_visibility(cull_distance, frustum, camera, display);
   }
 
   if (_need_indice_buffer_update)
@@ -510,9 +545,7 @@ void MapChunk::draw ( math::frustum const& frustum
   bool cantPaint = noggit::ui::selected_texture::get()
                  && !canPaintTexture(*noggit::ui::selected_texture::get())
                  && show_unpaintable_chunks
-                 && draw_paintability_overlay;
-  
-  boost::optional<int> lod_level = get_lod_level(camera, display);  
+                 && draw_paintability_overlay; 
 
   if (texture_set->num())
   {
@@ -546,11 +579,14 @@ void MapChunk::draw ( math::frustum const& frustum
   }
 
   gl.bindVertexArray(_vao);
-  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !lod_level ? _indices_buffer : lod_indices[lod_level.get()]);
 
-  auto& strip = !lod_level ? strip_with_holes : strip_lods[lod_level.get()];
+  if (lod_changed)
+  {
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _lod_level == -1 ? _indices_buffer : lod_indices[_lod_level]);
+    _lod_level_indice_count = _lod_level == -1 ? strip_with_holes.size() : strip_lods[_lod_level].size();
+  }
 
-  gl.drawElements(GL_TRIANGLES, strip.size(), GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
 
   
   for (int i = 0; i < texture_set->num(); ++i)

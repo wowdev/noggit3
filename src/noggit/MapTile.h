@@ -67,6 +67,7 @@ public:
             , GLuint const& tex_coord_vbo
             , const float& cull_distance
             , const math::vector_3d& camera
+            , bool need_visibility_update
             , bool show_unpaintable_chunks
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay

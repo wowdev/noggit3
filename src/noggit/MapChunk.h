@@ -108,12 +108,26 @@ public:
                   , const math::vector_3d& camera
                   , display_mode display
                   ) const;
+private:
+  // return true if the lod level changed
+  bool update_visibility ( const float& cull_distance
+                         , const math::frustum& frustum
+                         , const math::vector_3d& camera
+                         , display_mode display
+                         );
+
+  bool _is_visible = true; // visible by default
+  bool _need_visibility_update = true;
+  int _lod_level = -1; // -1 = no lod
+  size_t _lod_level_indice_count = 0;
+public:
 
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
             , GLuint const& tex_coord_vbo
             , const float& cull_distance
             , const math::vector_3d& camera
+            , bool need_visibility_update
             , bool show_unpaintable_chunks
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay
