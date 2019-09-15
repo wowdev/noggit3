@@ -740,7 +740,7 @@ void WMOGroup::load()
 
   for (auto& n : _normals)
   {
-    std::swap(n.y, n.z);
+    n = {n.x, n.z, -n.y};
   }
 
   // - MOTV ----------------------------------------------
