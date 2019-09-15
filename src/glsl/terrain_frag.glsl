@@ -88,17 +88,9 @@ float contour_alpha(float unit_size, vec2 pos, vec2 line_width)
                   );
 }
 
-float dist_3d(vec3 a, vec3 b)
-{
-  float x = a.x - b.x;
-  float y = a.y - b.y;
-  float z = a.z - b.z;
-  return sqrt(x*x + y*y + z*z);
-}
-
 void main()
 {
-  float dist_from_camera = dist_3d(camera, vary_position);
+  float dist_from_camera = distance(camera, vary_position);
 
   if(draw_fog && dist_from_camera >= fog_end)
   {
