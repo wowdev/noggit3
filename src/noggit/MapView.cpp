@@ -1201,6 +1201,7 @@ void MapView::createGUI()
   addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); }, [this] { return !_mod_num_down;  });
   addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); }, [this] { return !_mod_num_down;  });
 
+  addHotkey(Qt::Key_0, MOD_ctrl, [this] { change_selected_wmo_doodadset(0); });
   addHotkey(Qt::Key_1, MOD_ctrl, [this] { change_selected_wmo_doodadset(1); });
   addHotkey(Qt::Key_2, MOD_ctrl, [this] { change_selected_wmo_doodadset(2); });
   addHotkey(Qt::Key_3, MOD_ctrl, [this] { change_selected_wmo_doodadset(3); });
