@@ -181,7 +181,7 @@ void main()
                       );        
 
 		  alpha = max(alpha, 1.0 - smoothstep(0.0, d, diff));
-      out_color = vec4(wireframe_color.rgb, alpha * wireframe_color.a);
+      out_color.rgb = mix(out_color.rgb, wireframe_color.rgb, wireframe_color.a*alpha);
 	  }
   }
 
