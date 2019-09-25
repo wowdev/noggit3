@@ -151,6 +151,8 @@ public:
   bool has_skybox() const { return header.flags.skybox; }
 
 private:
+  void fix_vertex_color_alpha();
+
   WMO *wmo;
   wmo_group_header header;
   ::math::vector_3d center;
@@ -165,16 +167,18 @@ private:
   std::vector<::math::vector_3d> _vertices;
   std::vector<::math::vector_3d> _normals;
   std::vector<::math::vector_2d> _texcoords;
+  std::vector<::math::vector_2d> _texcoords_2;
   std::vector<::math::vector_4d> _vertex_colors;
   std::vector<uint16_t> _indices;
 
   opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
   GLuint const& _vao = _vertex_array[0];
-  opengl::scoped::deferred_upload_buffers<4> _buffers;
+  opengl::scoped::deferred_upload_buffers<5> _buffers;
   GLuint const& _vertices_buffer = _buffers[0];
   GLuint const& _normals_buffer = _buffers[1];
   GLuint const& _texcoords_buffer = _buffers[2];
-  GLuint const& _vertex_colors_buffer = _buffers[3];
+  GLuint const& _texcoords_buffer_2 = _buffers[3];
+  GLuint const& _vertex_colors_buffer = _buffers[4];
 
   bool _uploaded = false;
   bool _vao_is_setup = false;
@@ -225,6 +229,19 @@ struct WMOFog {
   math::vector_4d color;
   void init(MPQFile* f);
   void setup();
+};
+
+union mohd_flags
+{
+  std::uint16_t flags;
+  struct
+  {
+    std::uint16_t do_not_attenuate_vertices_based_on_distance_to_portal : 1;
+    std::uint16_t use_unified_render_path : 1;
+    std::uint16_t use_liquid_type_dbc_id : 1;
+    std::uint16_t do_not_fix_vertex_color_alpha : 1;
+    std::uint16_t unused : 12;
+  };
 };
 
 class WMO : public AsyncObject
@@ -285,6 +302,9 @@ public:
   std::vector<math::vector_3d> model_nearest_light_vector;
 
   std::vector<WMOLight> lights;
+  math::vector_4d ambient_light_color;
+
+  mohd_flags flags;
 
   std::vector<WMOFog> fogs;
 
