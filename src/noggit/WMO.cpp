@@ -60,7 +60,8 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOHD');
 
-  unsigned int col, nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+  CArgb ambient_color;
+  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
@@ -69,13 +70,20 @@ void WMO::finishLoading ()
   f.read (&nModels, 4);
   f.read (&nDoodads, 4);
   f.read (&nDoodadSets, 4);
-  f.read (&col, 4);
+  f.read (&ambient_color, 4);
   f.read (&nX, 4);
   f.read (ff, 12);
   extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
   f.read (ff, 12);
   extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
-  f.seekRelative (4);
+  f.read(&flags, 2);
+
+  f.seekRelative (2);
+
+  ambient_light_color.x = static_cast<float>(ambient_color.r) / 255.f;
+  ambient_light_color.y = static_cast<float>(ambient_color.g) / 255.f;
+  ambient_light_color.z = static_cast<float>(ambient_color.b) / 255.f;
+  ambient_light_color.w = static_cast<float>(ambient_color.a) / 255.f;
 
   // - MOTX ----------------------------------------------
 
@@ -325,6 +333,9 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , display_mode display
                )
 { 
+  wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
+
+
   for (auto& group : groups)
   {
     if (!group.is_visible(ofs, angle, frustum, cull_distance, camera, display))
@@ -559,6 +570,7 @@ WMOGroup::WMOGroup(WMOGroup const& other)
   , _vertices(other._vertices)
   , _normals(other._normals)
   , _texcoords(other._texcoords)
+  , _texcoords_2(other._texcoords_2)
   , _vertex_colors(other._vertex_colors)
   , _indices(other._indices)
 {
@@ -603,6 +615,14 @@ void WMOGroup::upload()
                                  , _texcoords.data()
                                  , GL_STATIC_DRAW
                                  );
+  
+  if (header.flags.has_two_motv)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d> ( _texcoords_buffer_2
+                                                    , _texcoords_2
+                                                    , GL_STATIC_DRAW
+                                                    );
+  }
 
   gl.bufferData<GL_ARRAY_BUFFER> ( _vertex_colors_buffer
                                  , _vertex_colors.size() * sizeof (*_vertex_colors.data())
@@ -620,6 +640,11 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
   wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
   wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
   wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+  if (header.flags.has_two_motv)
+  {
+    wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
 
   if (header.flags.has_vertex_color)
   {
@@ -857,6 +882,18 @@ void WMOGroup::load()
       _vertex_colors[i] = colorFromInt (colors[i]);
     }
 
+    if (wmo->flags.do_not_fix_vertex_color_alpha)
+    {
+      for (auto& color : _vertex_colors)
+      {
+        color.w = header.flags.exterior ? 255.f : 0.f;
+      }
+    }
+    else
+    {
+      fix_vertex_color_alpha();
+    }
+
     f.seekRelative (size);
   }
   // - MLIQ ----------------------------------------------
@@ -899,7 +936,8 @@ void WMOGroup::load()
 
     assert (fourcc == 'MOTV');
 
-    f.seekRelative (size);
+    _texcoords_2.resize(size / sizeof(::math::vector_2d));
+    f.read(_texcoords_2.data(), size);
   }
   // - MOCV ----------------------------------------------
   if (header.flags.has_two_mocv)
@@ -909,7 +947,14 @@ void WMOGroup::load()
 
     assert (fourcc == 'MOCV');
 
-    f.seekRelative (size);
+    std::vector<CImVector> mocv_2(_vertex_colors.size());
+    f.read(mocv_2.data(), size);
+
+    for (int i = 0; i < mocv_2.size(); ++i)
+    {
+      // second mocv chunks is used to change the alpha of the color from the first chunk, don't ask why
+      _vertex_colors[i].w = static_cast<float>(mocv_2[i].a) / 255.f;
+    }
   }
 
   //dl_light = 0;
@@ -942,6 +987,62 @@ void WMOGroup::load()
   else
   {
     use_outdoor_lights = true;
+  }
+}
+
+void WMOGroup::fix_vertex_color_alpha()
+{
+  int interior_batchs_start = 0;
+  
+  if (header.transparency_batches_count > 0)
+  {
+    interior_batchs_start = _batches[header.transparency_batches_count - 1].vertex_end + 1;
+  }
+
+  math::vector_4d wmo_ambient_color;
+
+  if (wmo->flags.use_unified_render_path)
+  {
+    wmo_ambient_color = {0.f, 0.f, 0.f, 0.f};
+  }
+  else
+  {
+    wmo_ambient_color = wmo->ambient_light_color;
+    // w is not used, set it to 0 to avoid changing the vertex color alpha
+    wmo_ambient_color.w = 0.f;
+  }
+
+  for (int i = 0; i < _vertex_colors.size(); ++i)
+  {
+    auto& color = _vertex_colors[i];
+    float r = color.x;
+    float g = color.y;
+    float b = color.z;
+    float a = color.w;
+
+    // I removed the color = color/2 because it's just multiplied by 2 in the shader afterward in blizzard's code
+    if (i >= interior_batchs_start)
+    {
+      r += ((r * a / 64.f) - wmo_ambient_color.x);
+      g += ((g * a / 64.f) - wmo_ambient_color.y);
+      r += ((b * a / 64.f) - wmo_ambient_color.z);
+    }
+    else
+    {
+      r -= wmo_ambient_color.x;
+      g -= wmo_ambient_color.y;
+      b -= wmo_ambient_color.z;
+
+      r = (r * (1.f - a));
+      g = (g * (1.f - a));
+      b = (b * (1.f - a));
+    }
+
+    color.x = std::min(255.f, std::max(0.f, r));
+    color.y = std::min(255.f, std::max(0.f, g));
+    color.z = std::min(255.f, std::max(0.f, b));
+    color.w = 1.f; // default value used in the shader so I simplified it here,
+                   // it can be overriden by the 2nd mocv chunk
   }
 }
 
@@ -1033,8 +1134,11 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
         break;
     }    
 
+    wmo_shader.uniform("shader_id", (int)mat.shader);
+
     wmo_shader.uniform("alpha_test", alpha_test);
     wmo_shader.uniform("unfogged", (int)mat.flags.unfogged);
+    wmo_shader.uniform("unlit", (int)mat.flags.unlit);
 
     if (mat.flags.unculled)
     {
@@ -1047,6 +1151,13 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
 
     opengl::texture::set_active_texture(0);
     wmo->textures[mat.texture1]->bind();
+
+    // only shaders using 2 textures in wotlk
+    if (mat.shader == 6 || mat.shader == 5 || mat.shader == 3)
+    {
+      opengl::texture::set_active_texture(1);
+      wmo->textures[mat.texture2]->bind();
+    }
 
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
