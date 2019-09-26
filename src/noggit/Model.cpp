@@ -638,35 +638,42 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   case M2Blend::Opaque:
     gl.disable(GL_BLEND);
     m2_shader.uniform("alpha_test", -1.f);    
+    m2_shader.uniform("fog_mode", 1);
     break;
   case M2Blend::Alpha_Key:
     gl.disable(GL_BLEND);
     m2_shader.uniform("alpha_test", (224.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 1);
     break;
   case M2Blend::Alpha:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 1);
     break;
   case M2Blend::No_Add_Alpha:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_ONE, GL_ONE);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 2); // Warning: wiki is unsure on that
     break;
   case M2Blend::Add:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 2);
     break;
   case M2Blend::Mod:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_ZERO);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 3);
     break;
   case M2Blend::Mod2x:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 4);
     break;
   }
 

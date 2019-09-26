@@ -17,6 +17,7 @@ uniform vec4 fog_color;
 uniform float fog_start;
 uniform float fog_end;
 uniform int draw_fog;
+uniform int fog_mode;
 uniform int unfogged;
 uniform int unlit;
 
@@ -165,7 +166,28 @@ void main()
   {
     float start = fog_end * fog_start;
     float alpha = (camera_dist - start) / (fog_end - start);
-    color.rgb = mix(color.rgb, fog_color.rgb, alpha);
+
+    vec3 fog;
+
+    // see https://wowdev.wiki/M2/Rendering#Fog_Modes
+    if(fog_mode == 1)
+    {
+      fog = fog_color.rgb;
+    }
+    else if(fog_mode == 2)
+    {
+      fog = vec3(0.);
+    }
+    else if(fog_mode == 3)
+    {
+      fog = vec3(1.);
+    }
+    else if(fog_mode == 4)
+    {
+      fog = vec3(0.5);
+    }
+
+    color.rgb = mix(color.rgb, fog, alpha);
   }
 
   out_color = color;
