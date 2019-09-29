@@ -31,6 +31,13 @@ struct CArgb
   std::uint8_t a;
 };
 
+struct SMOLTile
+{
+  uint8_t liquid : 6;
+  uint8_t fishable : 1;
+  uint8_t shared : 1;
+};
+
 struct WMOMaterial 
 {
   union
@@ -69,18 +76,32 @@ struct WMOMaterial
 struct WMOLiquidHeader {
   int32_t X, Y, A, B;
   math::vector_3d pos;
-  int16_t type;
+  int16_t material_id;
 };
 
 struct LiquidVertex {
-  unsigned char c[4];
-  float h;
+  union
+  {
+    struct SMOWVert
+    {
+      uint8_t flow1;
+      uint8_t flow2;
+      uint8_t flow1Pct;
+      uint8_t filler;
+    }  water_vertex;
+    struct SMOMVert
+    {
+      int16_t s;
+      int16_t t;
+    } magma_vertex;
+  };
+  float height;
 };
 
 class wmo_liquid
 {
 public:
-  wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
+  wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, int group_liquid, bool use_dbc_type, bool is_ocean);
   wmo_liquid(wmo_liquid const& other);
 
   void draw ( math::matrix_4x4 const& model_view
@@ -103,6 +124,7 @@ private:
   float texRepeats;
   bool mTransparency;
   int xtiles, ytiles;
+  int _liquid_id;
 
   std::vector<float> depths;
   std::vector<math::vector_2d> tex_coords;

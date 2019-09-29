@@ -910,7 +910,13 @@ void WMOGroup::load()
     WMOLiquidHeader hlq;
     f.read(&hlq, 0x1E);
 
-    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->materials[hlq.type], header.flags.indoor != 0);
+    lq = std::make_unique<wmo_liquid> ( &f
+                                      , hlq
+                                      , wmo->materials[hlq.material_id]
+                                      , header.group_liquid
+                                      , (bool)wmo->flags.use_liquid_type_dbc_id
+                                      , (bool)header.flags.ocean
+                                      );
   }
   if (header.flags.has_mori_morb)
   {
