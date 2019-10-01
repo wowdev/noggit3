@@ -54,7 +54,7 @@ void Model::finishLoading()
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
-  _animation = 0;
+  _current_anim_seq = 0;
 
   rad = header.bounding_box_radius;
 
@@ -599,9 +599,9 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   if (color_index != -1 && m->_colors[color_index].color.uses(0))
   {
     ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->_anim_time, m->_global_animtime));
-    if (m->_colors[color_index].opacity.uses (m->_animation))
+    if (m->_colors[color_index].opacity.uses (m->_current_anim_seq))
     {
-      mesh_color.w = m->_colors[color_index].opacity.getValue (m->_animation, m->_anim_time, m->_global_animtime);
+      mesh_color.w = m->_colors[color_index].opacity.getValue (m->_current_anim_seq, m->_anim_time, m->_global_animtime);
     }
 
     if (renderflag.flags.unlit)
@@ -959,20 +959,22 @@ void Model::initAnimated(const MPQFile& f)
 {
   std::vector<std::unique_ptr<MPQFile>> animation_files;
 
-  if (header.nAnimations > 0) {
-    _animations.resize (header.nAnimations);
-    memcpy(_animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
-    for (size_t i = 0; i < header.nAnimations; ++i)
-    {
-      //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
-      _animations[i].length = std::max(_animations[i].length, 1U);
-    }
+  if (header.nAnimations > 0) 
+  {
+    std::vector<ModelAnimation> animations(header.nAnimations);
 
-    for (size_t i = 0; i < header.nAnimations; ++i)
+    memcpy(animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+
+    for (auto& anim : animations)
     {
+      anim.length = std::max(anim.length, 1U);
+
+      _animation_length[anim.animID] += anim.length;
+      _animations_seq_per_id[anim.animID][anim.subAnimID] = anim;
+
       std::string lodname = filename.substr(0, filename.length() - 3);
       std::stringstream tempname;
-      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID << ".anim";
+      tempname << lodname << anim.animID << "-" << anim.subAnimID << ".anim";
       if (MPQFile::exists(tempname.str()))
       {
         animation_files.push_back(std::make_unique<MPQFile>(tempname.str()));
@@ -1050,23 +1052,38 @@ void Model::calcBones( math::matrix_4x4 const& model_view
   }
 }
 
-void Model::animate(math::matrix_4x4 const& model_view, int _anim, int animtime_)
+void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time)
 {
-  this->_animation = _anim;
-  ModelAnimation &a = _animations[_animation];
-
-  if (_animations.empty())
+  if (_animations_seq_per_id.empty() || _animations_seq_per_id.at(anim_id).empty())
+  {
     return;
+  }
 
-  int t = animtime_;
-  int tmax = a.length;
-  t %= tmax;
+  int tmax = _animation_length[anim_id];
+  int t = anim_time % tmax;
+  int current_sub_anim;
+  int time_for_anim = t;
+
+  for (auto const& sub_animation : _animations_seq_per_id[anim_id])
+  {
+    if (sub_animation.second.length > time_for_anim)
+    {
+      current_sub_anim = sub_animation.first;
+      break;
+    }
+
+    time_for_anim -= sub_animation.second.length;
+  }
+
+  ModelAnimation const& a = _animations_seq_per_id[anim_id][current_sub_anim];
+
+  _current_anim_seq = a.Index;//_animations_seq_lookup[anim_id][current_sub_anim];
   _anim_time = t;
-  _global_animtime = animtime_;
+  _global_animtime = anim_time;
 
   if (animBones) 
   {
-    calcBones(model_view, _animation, t, _global_animtime);
+    calcBones(model_view, _current_anim_seq, t, _global_animtime);
   }
 
   if (animGeometry) 
@@ -1100,27 +1117,28 @@ void Model::animate(math::matrix_4x4 const& model_view, int _anim, int animtime_
 
   for (size_t i=0; i<header.nLights; ++i) 
   {
-    if (_lights[i].parent>=0) {
+    if (_lights[i].parent >= 0) 
+    {
       _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
       _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
     }
-  }  
+  }
 
   for (auto& particle : _particles)
   {
     // random time distribution for teh win ..?
     int pt = (t + static_cast<int>(tmax*particle.tofs)) % tmax;
-    particle.setup(_animation, pt, _global_animtime);
+    particle.setup(_current_anim_seq, pt, _global_animtime);
   }
 
   for (size_t i = 0; i<header.nRibbonEmitters; ++i) 
   {
-    _ribbons[i].setup(_animation, t, _global_animtime);
+    _ribbons[i].setup(_current_anim_seq, t, _global_animtime);
   }
 
   for (auto& tex_anim : _texture_animations)
   {
-    tex_anim.calc(_animation, t, _anim_time);
+    tex_anim.calc(_current_anim_seq, t, _anim_time);
   }
 }
 

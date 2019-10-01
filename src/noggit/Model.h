@@ -293,7 +293,7 @@ public:
 
 private:
   bool _per_instance_animation;
-  int _animation;
+  int _current_anim_seq;
   int _anim_time;
   int _global_animtime;
 
@@ -305,7 +305,7 @@ private:
   void fix_shader_id_layer();
   void compute_pixel_shader_ids();
 
-  void animate(math::matrix_4x4 const& model_view, int anim, int animtime);
+  void animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time);
   void calcBones(math::matrix_4x4 const& model_view, int anim, int time, int animation_time);
 
   void lightsOn(opengl::light lbase);
@@ -346,11 +346,14 @@ private:
   bool animated;
   bool animGeometry, animTextures, animBones;
 
+  //      <anim_id, <sub_anim_id, animation>
+  std::map<uint16_t, std::map<uint16_t, ModelAnimation>> _animations_seq_per_id;
+  std::map<int16_t, uint32_t> _animation_length;
+
   std::vector<ModelRenderFlags> _render_flags;
   std::vector<ParticleSystem> _particles;
   std::vector<RibbonEmitter> _ribbons;
 
-  std::vector<ModelAnimation> _animations;
   std::vector<int> _global_sequences;
   std::vector<TextureAnim> _texture_animations;
   std::vector<int16_t> _texture_animation_lookups;
