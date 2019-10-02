@@ -4,6 +4,7 @@
 
 #include <math/frustum.hpp>
 #include <math/trig.hpp>
+#include <noggit/cursor_render.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
@@ -13,6 +14,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
 
 #include <boost/optional/optional.hpp>
@@ -68,8 +70,6 @@ public:
   // The lighting used.
   std::unique_ptr<OutdoorLighting> ol;
 
-  void outdoorLighting();
-
   unsigned int getMapID();
   // Time of the day.
   float animtime;
@@ -90,14 +90,16 @@ public:
 
   void initDisplay();
 
-  void tick(float dt);
-  void draw ( math::vector_3d const& cursor_pos
+  void update_models_emitters(float dt);
+  void draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::vector_3d const& cursor_pos
             , math::vector_4d const& cursor_color
             , int cursor_type
-            , float brushRadius
+            , float brush_radius
             , bool show_unpaintable_chunks
             , bool draw_contour
-            , float innerRadius
+            , float inner_radius_ratio
             , math::vector_3d const& ref_pos
             , float angle
             , float orientation
@@ -109,6 +111,7 @@ public:
             //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
             , editing_mode
             , math::vector_3d const& camera_pos
+            , bool camera_moved
             , bool draw_mfbo
             , bool draw_wireframe
             , bool draw_lines
@@ -128,13 +131,11 @@ public:
             , display_mode display
             );
 
-  void outdoorLights(bool on);
-  void setupFog (bool draw_fog);
-
   unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
-  selection_result intersect ( math::ray const&
+  selection_result intersect ( math::matrix_4x4 const& model_view
+                             , math::ray const&
                              , bool only_map
                              , bool do_objects
                              , bool draw_terrain
@@ -208,7 +209,7 @@ public:
     void for_all_chunks_on_tile (math::vector_3d const& pos, Fun&&);
 
   template<typename Fun>
-    auto for_chunk_at(math::vector_3d const& pos, Fun&& fun) -> decltype (fun (nullptr));
+    void for_chunk_at(math::vector_3d const& pos, Fun&& fun);
   template<typename Fun>
     auto for_maybe_chunk_at (math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>;
 
@@ -333,7 +334,15 @@ private:
   std::unique_ptr<opengl::program> _mcnk_program;;
   std::unique_ptr<opengl::program> _mfbo_program;
   std::unique_ptr<opengl::program> _m2_program;
+  std::unique_ptr<opengl::program> _m2_instanced_program;
+  std::unique_ptr<opengl::program> _m2_particles_program;
+  std::unique_ptr<opengl::program> _m2_ribbons_program;
   std::unique_ptr<opengl::program> _m2_box_program;
+  std::unique_ptr<opengl::program> _wmo_program;
+
+  noggit::cursor_render _cursor_render;
+  opengl::primitives::sphere _sphere_render;
+  opengl::primitives::square _square_render;
 
   boost::optional<liquid_render> _liquid_render = boost::none;
 };

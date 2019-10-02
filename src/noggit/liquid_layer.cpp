@@ -5,7 +5,6 @@
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
-#include <opengl/call_list.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -288,7 +287,9 @@ void liquid_layer::update_indices()
             _indices_by_lod[lod_level].emplace_back (p);
             _indices_by_lod[lod_level].emplace_back (p + n * 9);
             _indices_by_lod[lod_level].emplace_back (p + n * 9 + n);
+            _indices_by_lod[lod_level].emplace_back(p + n * 9 + n);
             _indices_by_lod[lod_level].emplace_back (p + n);
+            _indices_by_lod[lod_level].emplace_back(p);
           }                    
         }
         else
@@ -302,20 +303,52 @@ void liquid_layer::update_indices()
   _need_buffer_update = true;
 }
 
+void liquid_layer::upload()
+{
+  _index_buffer.upload();
+  _buffers.upload();
+  _vertex_array.upload();
+
+  _uploaded = true;
+}
+
+// todo: update only buffer that needs to be updated
 void liquid_layer::update_buffers()
 {
-  if (!_index_buffer.buffer_generated())
-  {
-    _index_buffer.upload();
-  }
-
   for (int i = 0; i < lod_count; ++i)
   {
     opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_index_buffer[i]);
     gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices_by_lod[i].size() * sizeof (uint16_t), _indices_by_lod[i].data(), GL_STATIC_DRAW);
   }
 
+  gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(*_vertices.data()) * _vertices.size(), _vertices.data(), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>(_depth_vbo, sizeof(*_depth.data()) * _depth.size(), _depth.data(), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>(_tex_coord_vbo, sizeof(*_tex_coords.data()) * _tex_coords.size(), _tex_coords.data(), GL_STATIC_DRAW);
+
   _need_buffer_update = false;
+  _vao_need_update = true;
+}
+
+void liquid_layer::update_vao(opengl::scoped::use_program& water_shader)
+{
+  opengl::scoped::vao_binder const _ (_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
+    water_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_depth_vbo);
+    water_shader.attrib("depth", 1, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_tex_coord_vbo);
+    water_shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  _vao_need_update = false;
 }
 
 void liquid_layer::draw ( liquid_render& render
@@ -324,22 +357,31 @@ void liquid_layer::draw ( liquid_render& render
                         , int animtime
                         )
 {
+  if (!_uploaded)
+  {
+    upload();
+  }
+
   if (_need_buffer_update)
   {
     update_buffers();
   }
 
-  int lod_level = get_lod_level(camera);
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(_index_buffer[lod_level]);
+  if (_vao_need_update)
+  {
+    update_vao(water_shader);
+  }
+
+  opengl::scoped::vao_binder const _ (_vao);
 
   render.prepare_draw (water_shader, _liquid_id, animtime);
 
-  water_shader.attrib ("position", _vertices);
-  water_shader.attrib ("tex_coord", _tex_coords);
-  water_shader.attrib ("depth", _depth);
   water_shader.uniform ("tex_repeat", texRepeats);
+
+  int lod_level = get_lod_level(camera);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(_index_buffer[lod_level]);
   
-  gl.drawElements (GL_QUADS, _indices_by_lod[lod_level].size(), GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, _indices_by_lod[lod_level].size(), GL_UNSIGNED_SHORT, nullptr);
 }
 
 void liquid_layer::crop(MapChunk* chunk)

@@ -77,6 +77,7 @@ private:
   bool ui_hidden = false;
 
   noggit::camera _camera;
+  bool _camera_moved_since_last_draw = true;
 
   noggit::bool_toggle_property _draw_contour = {false};
   noggit::bool_toggle_property _draw_mfbo = {false};
@@ -103,6 +104,9 @@ private:
   void update_cursor_pos();
 
   display_mode _display_mode;
+
+  math::matrix_4x4 model_view() const;
+  math::matrix_4x4 projection() const;
 
   void draw_map();
 

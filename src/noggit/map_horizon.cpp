@@ -7,7 +7,6 @@
 #include <noggit/map_index.hpp>
 #include <noggit/World.h>
 #include <opengl/context.hpp>
-#include <opengl/matrix.hpp>
 
 #include <sstream>
 
@@ -276,7 +275,7 @@ map_horizon::render::render(const map_horizon& horizon)
     }
   }
 
-  gl.bufferData<GL_ARRAY_BUFFER> (_vertex_buffer, vertices.size() * sizeof (math::vector_3d), vertices.data(), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d> (_vertex_buffer, vertices, GL_STATIC_DRAW);
 }
 
 static inline uint32_t outer_index(const map_horizon_batch &batch, int y, int x)
@@ -289,7 +288,9 @@ static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
   return batch.vertex_start + 17 * 17 + y * 16 + x;
 };
 
-void map_horizon::render::draw( MapIndex *index
+void map_horizon::render::draw( math::matrix_4x4 const& model_view
+                              , math::matrix_4x4 const& projection
+                              , MapIndex *index
                               , const math::vector_3d& color
                               , const float& cull_distance
                               , const math::frustum& frustum
@@ -322,8 +323,10 @@ void map_horizon::render::draw( MapIndex *index
         for (size_t i (0); i < 16; ++i)
         {
           // do not draw over visible chunks
-          if (index->tileLoaded ({y, x}) && index->getTile ({y, x})->getChunk (j, i)->is_visible (cull_distance, frustum, camera, display))
+          if (index->tileLoaded({y, x}) && index->getTile({y, x})->getChunk(j, i)->is_visible(cull_distance, frustum, camera, display))
+          {
             continue;
+          }
 
           indices.push_back (inner_index (batch, j, i));
           indices.push_back (outer_index (batch, j, i));
@@ -345,51 +348,34 @@ void map_horizon::render::draw( MapIndex *index
     }
   }
 
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(_index_buffer, indices, GL_STATIC_DRAW);
+
   if (!_map_horizon_program)
   {
-    _map_horizon_program.reset(new opengl::program
-    { { GL_VERTEX_SHADER
-      , R"code(
-#version 110
-
-attribute vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-void main()
-{
-  gl_Position = projection * model_view * position;
-}
-)code"
-    }
-      , { GL_FRAGMENT_SHADER
-      , R"code(
-#version 110
-
-uniform vec3 color;
-
-void main()
-{
-  gl_FragColor = vec4(color, 1.0);
-}
-)code"
-      }
-    });
+    _map_horizon_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("horizon_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("horizon_fs") }
+          }
+      );
+  
+    _vaos.upload();
   }
    
 
   opengl::scoped::use_program shader {*_map_horizon_program.get()};
 
-  shader.uniform ("model_view", opengl::matrix::model_view());
-  shader.uniform ("projection", opengl::matrix::projection());
+  opengl::scoped::vao_binder const _ (_vao);
+
+  shader.uniform ("model_view", model_view);
+  shader.uniform ("projection", projection);
   shader.uniform ("color", color);
 
   shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> _ (_index_buffer);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder (_index_buffer);
 
-  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof (uint32_t), indices.data(), GL_STATIC_DRAW);
+  
   gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 

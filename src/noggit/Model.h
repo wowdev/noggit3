@@ -57,7 +57,12 @@ public:
   math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
 
   bool calc;
-  void calcMatrix(Bone* allbones, int anim, int time, int animtime);
+  void calcMatrix( math::matrix_4x4 const& model_view
+                 , Bone* allbones
+                 , int anim
+                 , int time
+                 , int animtime
+                 );
   Bone ( const MPQFile& f,
          const ModelBoneDef &b,
          int *global,
@@ -208,8 +213,19 @@ public:
 
   Model(const std::string& name);
 
-  void draw (bool draw_fog, int animtime, bool draw_particles);
-  void draw ( std::vector<ModelInstance*> instances
+  void draw( math::matrix_4x4 const& model_view
+           , ModelInstance& instance
+           , opengl::scoped::use_program& m2_shader
+           , math::frustum const& frustum
+           , const float& cull_distance
+           , const math::vector_3d& camera
+           , int animtime
+           , bool draw_particles
+           , bool all_boxes
+           , display_mode display
+           );
+  void draw ( math::matrix_4x4 const& model_view
+            , std::vector<ModelInstance*> instances
             , opengl::scoped::use_program& m2_shader
             , math::frustum const& frustum
             , const float& cull_distance
@@ -218,12 +234,21 @@ public:
             , int animtime
             , bool draw_particles
             , bool all_boxes
-            , std::unordered_map<Model*, std::size_t>& visible_model_count
+            , std::unordered_map<Model*, std::size_t>& models_with_particles
+            , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
             , display_mode display
             );
+  void draw_particles( math::matrix_4x4 const& model_view
+                     , opengl::scoped::use_program& particles_shader
+                     , std::size_t instance_count
+                     );
+  void draw_ribbons( opengl::scoped::use_program& ribbons_shader
+                   , std::size_t instance_count
+                   );
+
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
 
-  std::vector<float> intersect (math::ray const&, int animtime);
+  std::vector<float> intersect (math::matrix_4x4 const& model_view, math::ray const&, int animtime);
 
   void updateEmitters(float dt);
 
@@ -268,7 +293,7 @@ public:
 
 private:
   bool _per_instance_animation;
-  int _animation;
+  int _current_anim_seq;
   int _anim_time;
   int _global_animtime;
 
@@ -280,8 +305,8 @@ private:
   void fix_shader_id_layer();
   void compute_pixel_shader_ids();
 
-  void animate(int anim, int animtime);
-  void calcBones(int anim, int time, int animation_time);
+  void animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time);
+  void calcBones(math::matrix_4x4 const& model_view, int anim, int time, int animation_time);
 
   void lightsOn(opengl::light lbase);
   void lightsOff(opengl::light lbase);
@@ -321,11 +346,14 @@ private:
   bool animated;
   bool animGeometry, animTextures, animBones;
 
+  //      <anim_id, <sub_anim_id, animation>
+  std::map<uint16_t, std::map<uint16_t, ModelAnimation>> _animations_seq_per_id;
+  std::map<int16_t, uint32_t> _animation_length;
+
   std::vector<ModelRenderFlags> _render_flags;
   std::vector<ParticleSystem> _particles;
   std::vector<RibbonEmitter> _ribbons;
 
-  std::vector<ModelAnimation> _animations;
   std::vector<int> _global_sequences;
   std::vector<TextureAnim> _texture_animations;
   std::vector<int16_t> _texture_animation_lookups;

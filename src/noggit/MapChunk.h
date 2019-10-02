@@ -68,10 +68,14 @@ private:
 
   bool _uploaded = false;
   bool _need_indice_buffer_update = true;
+  bool _need_vao_update = true;
 
   void upload();
   void update_indices_buffer();
+  void update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const& tex_coord_vbo);
 
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
   opengl::scoped::deferred_upload_buffers<6> _buffers;
   GLuint const& _vertices_vbo = _buffers[0];
   GLuint const& _normals_vbo = _buffers[1];
@@ -104,11 +108,26 @@ public:
                   , const math::vector_3d& camera
                   , display_mode display
                   ) const;
+private:
+  // return true if the lod level changed
+  bool update_visibility ( const float& cull_distance
+                         , const math::frustum& frustum
+                         , const math::vector_3d& camera
+                         , display_mode display
+                         );
+
+  bool _is_visible = true; // visible by default
+  bool _need_visibility_update = true;
+  int _lod_level = -1; // -1 = no lod
+  size_t _lod_level_indice_count = 0;
+public:
 
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
+            , GLuint const& tex_coord_vbo
             , const float& cull_distance
             , const math::vector_3d& camera
+            , bool need_visibility_update
             , bool show_unpaintable_chunks
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay

@@ -35,7 +35,7 @@ public:
 
   const std::string& filename(size_t id);
 
-  size_t num();
+  size_t const& num() const { return nTextures; }
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
   bool is_animated(std::size_t id) const;

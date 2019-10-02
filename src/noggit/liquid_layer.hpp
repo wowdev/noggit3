@@ -63,7 +63,6 @@ public:
 
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
-  void update_buffers();
 private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
@@ -72,6 +71,12 @@ private:
   static int const lod_count = 4;
 
   opengl::scoped::deferred_upload_buffers<lod_count> _index_buffer;
+  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  GLuint const& _vertices_vbo = _buffers[0];
+  GLuint const& _depth_vbo = _buffers[1];
+  GLuint const& _tex_coord_vbo = _buffers[2];
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
 
   int _liquid_id;
   int _liquid_vertex_format;
@@ -84,6 +89,12 @@ private:
   std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
 
   bool _need_buffer_update = true;
+  bool _vao_need_update = true;
+  bool _uploaded = false;
+
+  void upload();
+  void update_buffers();
+  void update_vao(opengl::scoped::use_program& water_shader);
 
 private:
   math::vector_3d pos;

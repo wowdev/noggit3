@@ -1,5 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/vector_2d.hpp>
+#include <math/vector_3d.hpp>
+#include <math/vector_4d.hpp>
 #include <noggit/Log.h>
 #include <opengl/context.hpp>
 #include <opengl/scoped.hpp>
@@ -7,14 +10,6 @@
 #include <boost/current_function.hpp>
 
 #include <QtGui/QOpenGLFunctions>
-#include <QtGui/QOpenGLFunctions_1_0>
-#include <QtGui/QOpenGLFunctions_1_1>
-#include <QtGui/QOpenGLFunctions_1_2>
-#include <QtGui/QOpenGLFunctions_1_3>
-#include <QtGui/QOpenGLFunctions_1_4>
-#include <QtGui/QOpenGLFunctions_1_5>
-#include <QtGui/QOpenGLFunctions_3_1>
-#include <QtGui/QOpenGLFunctions_3_3_Core>
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 
 #include <functional>
@@ -155,163 +150,10 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glIsEnabled (target);
   }
-
-  void context::begin (GLenum target)
-  {
-    ++inside_gl_begin_end;
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glBegin (target);
-  }
-  void context::end()
-  {
-    --inside_gl_begin_end;
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glEnd();
-  }
-
-  void context::enableClientState (GLenum target)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_1>()->glEnableClientState (target);
-  }
-  void context::disableClientState (GLenum target)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_1>()->glDisableClientState (target);
-  }
-  void context::clientActiveTexture (GLenum target)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_3>()->glClientActiveTexture (target);
-  }
-
-  void context::normal3f (GLfloat x, GLfloat y, GLfloat z)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glNormal3f (x, y, z);
-  }
-  void context::normal3fv (GLfloat const data[3])
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glNormal3fv (data);
-  }
-  void context::vertex2f (GLfloat x, GLfloat y)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glVertex2f (x, y);
-  }
-  void context::vertex3f (GLfloat x, GLfloat y, GLfloat z)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glVertex3f (x, y, z);
-  }
-  void context::vertex3fv (GLfloat const data[3])
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glVertex3fv (data);
-  }
-  void context::color3f (GLfloat x, GLfloat y, GLfloat z)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glColor3f (x, y, z);
-  }
-  void context::color4f (GLfloat x, GLfloat y, GLfloat z, GLfloat w)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glColor4f (x, y, z, w);
-  }
-  void context::color4ub (GLubyte x, GLubyte y, GLubyte z, GLubyte w)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glColor4ub (x, y, z, w);
-  }
-  void context::color3fv (GLfloat const data[3])
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glColor3fv (data);
-  }
-  void context::color4fv (GLfloat const data[4])
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glColor4fv (data);
-  }
-  void context::texCoord2f (GLfloat x, GLfloat y)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexCoord2f (x, y);
-  }
-  void context::texCoord2fv (GLfloat const data[2])
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexCoord2fv (data);
-  }
-  void context::multiTexCoord2f (GLenum target, GLfloat x, GLfloat y)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_3>()->glMultiTexCoord2f (target, x, y);
-  }
-
-  void context::matrixMode (GLenum target)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glMatrixMode (target);
-  }
-  void context::pushMatrix()
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPushMatrix();
-  }
-  void context::popMatrix()
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPopMatrix();
-  }
-  void context::loadIdentity()
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLoadIdentity();
-  }
-  void context::translatef (GLfloat x, GLfloat y, GLfloat z)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTranslatef (x, y, z);
-  }
-  void context::scalef (GLfloat x, GLfloat y, GLfloat z)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glScalef (x, y, z);
-  }
-  void context::rotatef (GLfloat x, GLfloat y, GLfloat z, GLfloat w)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glRotatef (x, y, z, w);
-  }
-  void context::multMatrixf (GLfloat const data[4])
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glMultMatrixf (data);
-  }
-
-  void context::ortho (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble nearVal, GLdouble farVal)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glOrtho (left, right, bottom, top, nearVal, farVal);
-  }
-  void context::frustum (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble nearVal, GLdouble farVal)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glFrustum (left, right, bottom, top, nearVal, farVal);
-  }
   void context::viewport (GLint x, GLint y, GLsizei width, GLsizei height)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glViewport (x, y, width, height);
-  }
-
-  void context::alphaFunc (GLenum func, GLfloat ref)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glAlphaFunc (func, ref);
   }
   void context::depthFunc (GLenum target)
   {
@@ -328,11 +170,6 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glBlendFunc (sfactor, dfactor);
   }
-  void context::shadeModel (GLenum target)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glShadeModel (target);
-  }
 
   void context::clear (GLenum target)
   {
@@ -348,7 +185,7 @@ namespace opengl
   void context::readBuffer (GLenum target)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glReadBuffer (target);
+    return _3_3_core_func->glReadBuffer (target);
   }
   void context::readPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data)
   {
@@ -361,36 +198,31 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glLineWidth (width);
   }
-  void context::lineStipple (GLint factor, GLushort pattern)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLineStipple (factor, pattern);
-  }
 
   void context::pointParameterf (GLenum pname, GLfloat param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_4>()->glPointParameterf (pname, param);
+    return _3_3_core_func->glPointParameterf (pname, param);
   }
   void context::pointParameteri (GLenum pname, GLint param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_4>()->glPointParameteri (pname, param);
+    return _3_3_core_func->glPointParameteri (pname, param);
   }
   void context::pointParameterfv (GLenum pname, GLfloat const* param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_4>()->glPointParameterfv (pname, param);
+    return _3_3_core_func->glPointParameterfv (pname, param);
   }
   void context::pointParameteriv (GLenum pname, GLint const* param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_4>()->glPointParameteriv (pname, param);
+    return _3_3_core_func->glPointParameteriv (pname, param);
   }
   void context::pointSize (GLfloat size)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPointSize (size);
+    return _3_3_core_func->glPointSize (size);
   }
 
   void context::hint (GLenum target, GLenum mode)
@@ -401,12 +233,7 @@ namespace opengl
   void context::polygonMode (GLenum face, GLenum mode)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPolygonMode (face, mode);
-  }
-  GLint context::renderMode (GLenum mode)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glRenderMode (mode);
+    return _3_3_core_func->glPolygonMode (face, mode);
   }
 
   void context::genTextures (GLuint count, GLuint* textures)
@@ -445,48 +272,6 @@ namespace opengl
     return _current_context->functions()->glActiveTexture (target);
   }
 
-  void context::texEnvf (GLenum target, GLenum pname, GLfloat param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexEnvf (target, pname, param);
-  }
-  void context::texEnvi (GLenum target, GLenum pname, GLint param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexEnvi (target, pname, param);
-  }
-
-  void context::texGeni (GLenum coord, GLenum pname, GLint param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexGeni (coord, pname, param);
-  }
-  void context::texGenf (GLenum coord, GLenum pname, GLfloat param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexGenf (coord, pname, param);
-  }
-  void context::texGend (GLenum coord, GLenum pname, GLdouble param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexGend (coord, pname, param);
-  }
-  void context::texGeniv (GLenum coord, GLenum pname, GLint const* params)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexGeniv (coord, pname, params);
-  }
-  void context::texGenfv (GLenum coord, GLenum pname, GLfloat const* params)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexGenfv (coord, pname, params);
-  }
-  void context::texGendv (GLenum coord, GLenum pname, GLdouble const* params)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glTexGendv (coord, pname, params);
-  }
-
   void context::texParameteri (GLenum target, GLenum pname, GLint param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
@@ -511,17 +296,17 @@ namespace opengl
   void context::genVertexArrays (GLuint count, GLuint* arrays)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glGenVertexArrays(count, arrays);
+    return _3_3_core_func->glGenVertexArrays(count, arrays);
   }
   void context::deleteVertexArray (GLuint count, GLuint* arrays)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glDeleteVertexArrays(count, arrays);
+    return _3_3_core_func->glDeleteVertexArrays(count, arrays);
   }
   void context::bindVertexArray (GLenum array)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glBindVertexArray(array);
+    return _3_3_core_func->glBindVertexArray(array);
   }
   void context::genBuffers (GLuint count, GLuint* buffers)
   {
@@ -546,12 +331,12 @@ namespace opengl
   GLvoid* context::mapBuffer (GLenum target, GLenum access)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_5>()->glMapBuffer (target, access);
+    return _3_3_core_func->glMapBuffer (target, access);
   }
   GLboolean context::unmapBuffer (GLenum target)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_5>()->glUnmapBuffer (target);
+    return _3_3_core_func->glUnmapBuffer (target);
   }
   void context::drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices)
   {
@@ -561,59 +346,12 @@ namespace opengl
   void context::drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_1>()->glDrawElementsInstanced (mode, count, type, indices, instancecount);
+    return _3_3_core_func->glDrawElementsInstanced (mode, count, type, indices, instancecount);
   }
   void context::drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_2>()->glDrawRangeElements (mode, start, end, count, type, indices);
-  }
-
-  void context::vertexPointer (GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_1>()->glVertexPointer (size, type, stride, pointer);
-  }
-  void context::colorPointer (GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_1>()->glColorPointer (size, type, stride, pointer);
-  }
-  void context::texCoordPointer (GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_1>()->glTexCoordPointer (size, type, stride, pointer);
-  }
-  void context::normalPointer (GLenum type, GLsizei stride, GLvoid const* pointer)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_1>()->glNormalPointer (type, stride, pointer);
-  }
-
-  GLuint context::genLists (GLsizei range)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glGenLists (range);
-  }
-  void context::deleteLists (GLuint list, GLsizei range)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glDeleteLists (list, range);
-  }
-  void context::newList (GLuint list, GLenum mode)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glNewList (list, mode);
-  }
-  void context::endList()
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glEndList();
-  }
-  void context::callList (GLuint list)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glCallList (list);
+    return _3_3_core_func->glDrawRangeElements (mode, start, end, count, type, indices);
   }
 
   void context::genPrograms (GLsizei count, GLuint* programs)
@@ -656,94 +394,6 @@ namespace opengl
     return _.extension_functions<QOpenGLExtension_ARB_vertex_program>()->glProgramLocalParameter4fARB (target, index, x, y, z, w);
   }
 
-  void context::lightf (GLenum light, GLenum pname, GLfloat param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLightf (light, pname, param);
-  }
-  void context::lighti (GLenum light, GLenum pname, GLint param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLighti (light, pname, param);
-  }
-  void context::lightfv (GLenum light, GLenum pname, GLfloat const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLightfv (light, pname, param);
-  }
-  void context::lightiv (GLenum light, GLenum pname, GLint const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLightiv (light, pname, param);
-  }
-  void context::lightModelf (GLenum pname, GLfloat param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLightModelf (pname, param);
-  }
-  void context::lightModeli (GLenum pname, GLint param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLightModeli (pname, param);
-  }
-  void context::lightModelfv (GLenum pname, GLfloat const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLightModelfv (pname, param);
-  }
-  void context::lightModeliv (GLenum pname, GLint const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glLightModeliv (pname, param);
-  }
-
-  void context::materiali (GLenum face, GLenum pname, GLint param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glMateriali (face, pname, param);
-  }
-  void context::materialf (GLenum face, GLenum pname, GLfloat param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glMaterialf (face, pname, param);
-  }
-  void context::materialiv (GLenum face, GLenum pname, GLint const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glMaterialiv (face, pname, param);
-  }
-  void context::materialfv (GLenum face, GLenum pname, GLfloat const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glMaterialfv (face, pname, param);
-  }
-  void context::colorMaterial (GLenum face, GLenum mode)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glColorMaterial (face, mode);
-  }
-
-  void context::fogi (GLenum pname, GLint param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glFogi (pname, param);
-  }
-  void context::fogiv (GLenum pname, GLint const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glFogiv (pname, param);
-  }
-  void context::fogf (GLenum pname, GLfloat param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glFogf (pname, param);
-  }
-  void context::fogfv (GLenum pname, GLfloat const* param)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glFogfv (pname, param);
-  }
-
   void context::getBooleanv (GLenum target, GLboolean* value)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
@@ -752,7 +402,7 @@ namespace opengl
   void context::getDoublev (GLenum target, GLdouble* value)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glGetDoublev (target, value);
+    return _3_3_core_func->glGetDoublev (target, value);
   }
   void context::getFloatv (GLenum target, GLfloat* value)
   {
@@ -879,7 +529,7 @@ namespace opengl
   void context::vertexAttribDivisor (GLuint index, GLuint divisor)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_3_3_Core>()->glVertexAttribDivisor(index, divisor);
+    return _3_3_core_func->glVertexAttribDivisor(index, divisor);
   }
   void context::enableVertexAttribArray (GLuint index)
   {
@@ -968,17 +618,6 @@ namespace opengl
     return _current_context->functions()->glPolygonOffset (factor, units);
   }
 
-  void context::pushAttrib (GLbitfield mask)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPushAttrib (mask);
-  }
-  void context::popAttrib()
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPopAttrib();
-  }
-
   void context::genFramebuffers (GLsizei n, GLuint *ids)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
@@ -1025,26 +664,20 @@ namespace opengl
   template void context::bufferData<GL_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
 
-  void context::vertexPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
+  template<GLenum target, typename T>
+    void context::bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage)
   {
-    scoped::buffer_binder<GL_ARRAY_BUFFER> const _ (buffer);
-    return vertexPointer (size, type, stride, pointer);
+    scoped::buffer_binder<target> const _(buffer);
+    return bufferData(target, sizeof(T) * data.size(), data.data(), usage);
   }
-  void context::colorPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
-  {
-    scoped::buffer_binder<GL_ARRAY_BUFFER> const _ (buffer);
-    return colorPointer (size, type, stride, pointer);
-  }
-  void context::texCoordPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
-  {
-    scoped::buffer_binder<GL_ARRAY_BUFFER> const _ (buffer);
-    return texCoordPointer (size, type, stride, pointer);
-  }
-  void context::normalPointer (GLuint buffer, GLenum type, GLsizei stride, GLvoid const* pointer)
-  {
-    scoped::buffer_binder<GL_ARRAY_BUFFER> const _ (buffer);
-    return normalPointer (type, stride, pointer);
-  }
+
+  template void context::bufferData<GL_ARRAY_BUFFER, float>(GLuint buffer, std::vector<float> const& data, GLenum usage);
+  template void context::bufferData<GL_ARRAY_BUFFER, math::vector_2d>(GLuint buffer, std::vector<math::vector_2d> const& data, GLenum usage);
+  template void context::bufferData<GL_ARRAY_BUFFER, math::vector_3d>(GLuint buffer, std::vector<math::vector_3d> const& data, GLenum usage);
+  template void context::bufferData<GL_ARRAY_BUFFER, math::vector_4d>(GLuint buffer, std::vector<math::vector_4d> const& data, GLenum usage);
+  template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint8_t>(GLuint buffer, std::vector<std::uint8_t> const& data, GLenum usage);
+  template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(GLuint buffer, std::vector<std::uint16_t> const& data, GLenum usage);
+  template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(GLuint buffer, std::vector<std::uint32_t> const& data, GLenum usage);
 
   void context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
   {

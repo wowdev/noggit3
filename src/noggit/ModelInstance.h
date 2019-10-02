@@ -53,6 +53,8 @@ public:
     , size_cat (other.size_cat)
     , _need_recalc_extents(other._need_recalc_extents)
     , _extents(other._extents)
+    , _transform_mat_transposed(other._transform_mat_transposed)
+    , _transform_mat_inverted(other._transform_mat_inverted)
   {
   }
   ModelInstance& operator= (ModelInstance&& other)
@@ -66,12 +68,18 @@ public:
     std::swap (size_cat, other.size_cat);
     std::swap (_need_recalc_extents, other._need_recalc_extents);
     std::swap (_extents, other._extents);
+    std::swap(_transform_mat_transposed, other._transform_mat_transposed);
+    std::swap(_transform_mat_inverted, other._transform_mat_inverted);
     return *this;
   }
 
-  void draw_box (bool is_current_selection);
+  void draw_box ( math::matrix_4x4 const& model_view
+                , math::matrix_4x4 const& projection
+                , bool is_current_selection
+                );
 
-  void intersect ( math::ray const&
+  void intersect ( math::matrix_4x4 const& model_view
+                 , math::ray const&
                  , selection_result*
                  , int animtime
                  );

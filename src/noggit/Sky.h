@@ -5,23 +5,55 @@
 #include <math/vector_3d.hpp>
 #include <noggit/DBCFile.h>
 #include <noggit/MPQ.h>
-#include <noggit/ModelManager.h>
+#include <noggit/ModelInstance.h>
+#include <opengl/scoped.hpp>
+#include <opengl/shader.fwd.hpp>
 
+#include <memory>
 #include <string>
 #include <vector>
 
-class Model;
 
-struct SkyColor {
+/*
+It seems that lighting info is also stored in lights.lit, so I
+wonder what the heck is in Dnc.db. Maybe just light directions and/or
+sun/moon positions...?
+*/
+struct OutdoorLightStats
+{
+  int time; // converted from hour:min to the 2880 half-minute ticks thing used in the other Sky thing
+
+  float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
+  math::vector_3d dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
+
+  void init(MPQFile* f);
+
+  void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
+};
+
+class OutdoorLighting
+{
+private:
+  std::vector<OutdoorLightStats> lightStats;
+
+public:
+  explicit OutdoorLighting(const std::string& fname);
+
+  OutdoorLightStats getLightStats(int time);
+};
+
+struct SkyColor 
+{
   math::vector_3d color;
   int time;
 
   SkyColor(int t, int col);
 };
 
-class Sky {
+class Sky 
+{
 public:
-  Model *alt_sky;
+  boost::optional<ModelInstance> skybox;
 
   math::vector_3d pos;
   float r1, r2;
@@ -46,7 +78,8 @@ public:
   }
 };
 
-enum SkyColorNames {
+enum SkyColorNames 
+{
   LIGHT_GLOBAL_DIFFUSE,
   LIGHT_GLOBAL_AMBIENT,
   SKY_COLOR_0,
@@ -68,59 +101,54 @@ enum SkyColorNames {
   NUM_SkyColorNames,
 };
 
-class Skies {
+class Skies 
+{
+private:
+  int numSkies = 0;
+  int cs = -1;
+  ModelInstance stars;
 
-  int numSkies;
-  int cs;
-  scoped_model_reference stars;
+  int _last_time = -1;
+  math::vector_3d _last_pos;
 
 public:
   std::vector<Sky> skies;
-  math::vector_3d colorSet[NUM_SkyColorNames];
+  std::vector<math::vector_3d> color_set = std::vector<math::vector_3d>(NUM_SkyColorNames);
 
   explicit Skies(unsigned int mapid);
 
   void findSkyWeights(math::vector_3d pos);
-  void initSky(math::vector_3d pos, int t);
+  void update_sky_colors(math::vector_3d pos, int time);
 
-  void draw();
-
-  bool drawSky ( const math::vector_3d &pos
-               , float night_intensity
-               , bool draw_fog
-               , int animtime
-               );
+  bool draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::vector_3d const& camera_pos
+            , opengl::scoped::use_program& m2_shader
+            , math::frustum const& frustum
+            , const float& cull_distance
+            , int animtime
+            , bool draw_particles
+            , OutdoorLightStats const& light_stats
+            );
   bool hasSkies() { return numSkies > 0; }
-};
 
+private:
+  bool _uploaded = false;
+  bool _need_color_buffer_update = true;
+  bool _need_vao_update = true;
 
-/*
-It seems that lighting info is also stored in lights.lit, so I
-wonder what the heck is in Dnc.db. Maybe just light directions and/or
-sun/moon positions...?
-*/
-struct OutdoorLightStats {
-  int time; // converted from hour:min to the 2880 half-minute ticks thing used in the other Sky thing
+  int _indices_count;
 
-  float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
-  math::vector_3d dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
+  void upload();
+  void update_color_buffer();
+  void update_vao(opengl::scoped::use_program& shader);
 
-  void init(MPQFile* f);
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
+  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  GLuint const& _vertices_vbo = _buffers[0];
+  GLuint const& _colors_vbo = _buffers[1];
+  GLuint const& _indices_vbo = _buffers[2];
 
-  void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
-  void setupLighting();
-  // void setupFog(); //! \todo  add fog maybe?
-
-};
-
-
-class OutdoorLighting {
-
-  std::vector<OutdoorLightStats> lightStats;
-
-public:
-  explicit OutdoorLighting(const std::string& fname);
-
-  OutdoorLightStats getLightStats(int time);
-
+  std::unique_ptr<opengl::program> _program;
 };

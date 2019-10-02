@@ -6,7 +6,7 @@
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Sky.h>
 #include <noggit/World.h>
-#include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <algorithm>
 #include <string>
@@ -27,22 +27,27 @@ Sky::Sky(DBCFile::Iterator data)
   r1 = data->getFloat(LightDB::RadiusInner) / skymul;
   r2 = data->getFloat(LightDB::RadiusOuter) / skymul;
 
-  for (int i = 0; i<36; ++i)
+  for (int i = 0; i < 36; ++i)
+  {
     mmin[i] = -2;
+  }
 
   global = (pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f);
 
-  int FirstId = data->getInt(LightDB::DataIDs) * NUM_SkyColorNames - 17; // cromons light fix ;) Thanks
+  int light_param_0 = data->getInt(LightDB::DataIDs);
+  int light_int_start = light_param_0 * NUM_SkyColorNames - 17; // cromons light fix ;) Thanks
 
   for (int i = 0; i < NUM_SkyColorNames; ++i)
   {
     try
     {
-      DBCFile::Record rec = gLightIntBandDB.getByID(FirstId + i);
+      DBCFile::Record rec = gLightIntBandDB.getByID(light_int_start + i);
       int entries = rec.getInt(LightIntBandDB::Entries);
 
       if (entries == 0)
+      {
         mmin[i] = -1;
+      }
       else
       {
         mmin[i] = rec.getInt(LightIntBandDB::Times);
@@ -60,7 +65,9 @@ Sky::Sky(DBCFile::Iterator data)
       int entries = rec.getInt(LightIntBandDB::Entries);
 
       if (entries == 0)
+      {
         mmin[i] = -1;
+      }
       else
       {
         mmin[i] = rec.getInt(LightIntBandDB::Times);
@@ -73,26 +80,20 @@ Sky::Sky(DBCFile::Iterator data)
     }
   }
 
+  try
+  {
+    DBCFile::Record light_param = gLightParamsDB.getByID(light_param_0);
+    int skybox_id = light_param.getInt(LightParamsDB::skybox);
 
-
-  /*
-  unsigned int SKYFOG = data->getInt( LightDB::DataIDs );
-  unsigned int ID = data->getInt( LightDB::ID );
-  DBCFile::Record rec = gLightParamsDB.getByID( SKYFOG );
-  unsigned int skybox = rec.getInt( LightParamsDB::skybox);
-
-
-  if ( skybox == 0 )
-  alt_sky=nullptr;
-  else{
-  DBCFile::Record rec = gLightSkyboxDB.getByID(skybox);
-  std::string skyname= rec.getString(LightSkyboxDB::filename);
-  alt_sky=new Model(skyname); // if this is ever uncommented, use ModelManager::
-  Log << "Loaded sky " << skyname << std::endl;
+    if (skybox_id)
+    {
+      skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename));
+    }
   }
-
-  */
-
+  catch (...)
+  {
+    LogError << "When trying to get the skybox for the entry " << light_param_0 << " in LightParams.dbc. Sad." << std::endl;
+  }
 }
 
 math::vector_3d Sky::colorFor(int r, int t) const
@@ -155,41 +156,12 @@ const math::degrees angles[] = { math::degrees (90.0f)
                                };
 const int skycolors[] = { 2, 3, 4, 5, 6, 7, 7 };
 const int cnum = 7;
-
-
 const int hseg = 32;
 
-void Skies::draw()
-{
-  // draw sky sphere?
-  //! \todo  do this as a vertex array and use gl.colorPointer? :|
-  math::vector_3d basepos1[cnum], basepos2[cnum];
-  gl.begin(GL_QUADS);
-  for (int h = 0; h<hseg; h++) {
-    for (int i = 0; i<cnum; ++i) {
-      basepos1[i] = basepos2[i] = math::vector_3d(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
-      math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians (math::constants::pi*2.0f / hseg*h));
-      math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians (math::constants::pi*2.0f / hseg*(h + 1)));
-    }
-
-    for (int v = 0; v<cnum - 1; v++) {
-      gl.color3fv(colorSet[skycolors[v]]);
-      gl.vertex3fv(basepos2[v]);
-      gl.vertex3fv(basepos1[v]);
-      gl.color3fv(colorSet[skycolors[v + 1]]);
-      gl.vertex3fv(basepos1[v + 1]);
-      gl.vertex3fv(basepos2[v + 1]);
-    }
-  }
-  gl.end();
-}
 
 Skies::Skies(unsigned int mapid)
-  : stars ("Environments\\Stars\\Stars.mdx")
+  : stars (ModelInstance("Environments\\Stars\\Stars.mdx"))
 {
-  numSkies = 0;
-  cs = -1;
-
   for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
   {
     if (mapid == i->getUInt(LightDB::Map))
@@ -213,8 +185,6 @@ Skies::Skies(unsigned int mapid)
       }
     }
   }
-
-
 
   // sort skies from smallest to largest; global last.
   // smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
@@ -246,58 +216,238 @@ void Skies::findSkyWeights(math::vector_3d pos)
   // weights are all normalized at this point :D
 }
 
-void Skies::initSky(math::vector_3d pos, int t)
+void Skies::update_sky_colors(math::vector_3d pos, int time)
 {
-  if (numSkies == 0) return;
+  if (numSkies == 0 || (_last_time == time && _last_pos == pos))
+  {
+    return;
+  }  
 
   findSkyWeights(pos);
 
-  for (int i = 0; i<NUM_SkyColorNames; ++i) colorSet[i] = math::vector_3d(1, 1, 1);
+  for (int i = 0; i < NUM_SkyColorNames; ++i)
+  {
+    color_set[i] = math::vector_3d(1, 1, 1);
+  }
 
   // interpolation
-  for (size_t j = 0; j<skies.size(); j++) {
-    if (skies[j].weight>0) {
+  for (size_t j = 0; j<skies.size(); j++) 
+  {
+    if (skies[j].weight>0) 
+    {
       // now calculate the color rows
-      for (int i = 0; i<NUM_SkyColorNames; ++i) {
-        if ((skies[j].colorFor(i, t).x>1.0f) || (skies[j].colorFor(i, t).y>1.0f) || (skies[j].colorFor(i, t).z>1.0f))
+      for (int i = 0; i<NUM_SkyColorNames; ++i) 
+      {
+        if ((skies[j].colorFor(i, time).x>1.0f) || (skies[j].colorFor(i, time).y>1.0f) || (skies[j].colorFor(i, time).z>1.0f))
         {
           LogDebug << "Sky " << j << " " << i << " is out of bounds!" << std::endl;
           continue;
         }
-        colorSet[i] += skies[j].colorFor(i, t) * skies[j].weight;
+        color_set[i] += skies[j].colorFor(i, time) * skies[j].weight;
       }
     }
   }
   for (int i = 0; i<NUM_SkyColorNames; ++i)
   {
-    colorSet[i] -= math::vector_3d(1, 1, 1);
+    color_set[i] -= math::vector_3d(1.f, 1.f, 1.f);
   }
+
+  _last_pos = pos;
+  _last_time = time;
+
+  _need_color_buffer_update = true;  
 }
 
-bool Skies::drawSky ( const math::vector_3d &pos
-                    , float night_intensity
-                    , bool draw_fog
-                    , int animtime
-                    )
+bool Skies::draw( math::matrix_4x4 const& model_view
+                , math::matrix_4x4 const& projection
+                , math::vector_3d const& camera_pos
+                , opengl::scoped::use_program& m2_shader
+                , math::frustum const& frustum
+                , const float& cull_distance
+                , int animtime
+                , bool draw_particles
+                , OutdoorLightStats const& light_stats
+                )
 {
-  if (numSkies == 0) return false;
+  if (numSkies == 0)
+  {
+    return false;
+  }
 
-  // drawing the sky: we'll undo the camera translation
-  opengl::scoped::matrix_pusher const matrix;
-  gl.translatef(pos.x, pos.y, pos.z);
+  if (!_uploaded)
+  {
+    upload();
+  }
 
-  draw();
+  if (_need_color_buffer_update)
+  {
+    update_color_buffer();
+  }
 
+  {
+    opengl::scoped::use_program shader {*_program.get()};
+
+    if(_need_vao_update)
+    {
+      update_vao(shader);
+    }
+
+    {
+      opengl::scoped::vao_binder const _ (_vao);
+
+      shader.uniform("model_view_projection", model_view*projection);
+      shader.uniform("camera_pos", camera_pos);
+
+      gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);
+    }
+  }
+
+  for (Sky& sky : skies)
+  {
+    if (sky.weight > 0.f && sky.skybox)
+    {
+      auto& model = sky.skybox.get();
+      model.model->trans = sky.weight;
+      model.pos = camera_pos;
+      model.scale = 0.1f;
+      model.recalcExtents();
+
+      model.model->draw(model_view, model, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+    }
+  }
   // if it's night, draw the stars
-  if (night_intensity > 0) {
-    const float sc = 0.1f;
-    gl.scalef(sc, sc, sc);
-    opengl::texture::enable_texture();
-    stars->trans = night_intensity;
-    stars->draw (draw_fog, animtime, true);
+  if (light_stats.nightIntensity > 0)
+  {
+    stars.model->trans = light_stats.nightIntensity;
+    stars.pos = camera_pos;
+    stars.scale = 0.1f;
+    stars.recalcExtents();
+
+    stars.model->draw(model_view, stars, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
   }
 
   return true;
+}
+
+void Skies::upload()
+{
+  _program.reset(new opengl::program(
+    {
+        {GL_VERTEX_SHADER, R"code(
+#version 330 core
+
+uniform mat4 model_view_projection;
+uniform vec3 camera_pos;
+
+in vec3 position;
+in vec3 color;
+
+out vec3 f_color;
+
+void main()
+{
+  vec4 pos = vec4(position+camera_pos, 1.f);
+  gl_Position = model_view_projection * pos;
+  f_color = color;
+}
+)code" }
+        , {GL_FRAGMENT_SHADER, R"code(
+#version 330 core
+
+in vec3 f_color;
+
+out vec4 out_color;
+
+void main()
+{
+  out_color = vec4(f_color, 1.);
+}
+)code" }
+    }
+  ));
+
+  _vertex_array.upload();
+  _buffers.upload();
+
+  std::vector<math::vector_3d> vertices;
+  std::vector<std::uint16_t> indices;
+
+  math::vector_3d basepos1[cnum], basepos2[cnum];
+
+  for (int h = 0; h < hseg; h++)
+  {
+    for (int i = 0; i < cnum; ++i)
+    {
+      basepos1[i] = basepos2[i] = math::vector_3d(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
+      math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians(math::constants::pi*2.0f / hseg * h));
+      math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians(math::constants::pi*2.0f / hseg * (h + 1)));
+    }
+
+    for (int v = 0; v < cnum - 1; v++)
+    {
+      int start = vertices.size();
+
+      vertices.push_back(basepos2[v]);
+      vertices.push_back(basepos1[v]);
+      vertices.push_back(basepos1[v + 1]);
+      vertices.push_back(basepos2[v + 1]);
+
+      indices.push_back(start+0);
+      indices.push_back(start+1);
+      indices.push_back(start+2);
+
+      indices.push_back(start+2);
+      indices.push_back(start+3);
+      indices.push_back(start+0);
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STATIC_DRAW);
+
+  _indices_count = indices.size();
+
+  _uploaded = true;
+  _need_vao_update = true;
+}
+
+void Skies::update_vao(opengl::scoped::use_program& shader)
+{
+  opengl::scoped::index_buffer_manual_binder indices_binder (_indices_vbo);
+
+  {
+    opengl::scoped::vao_binder const _ (_vao);
+
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_buffer (_vertices_vbo);
+    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> colors_buffer (_colors_vbo);
+    shader.attrib("color", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    indices_binder.bind();
+  }
+
+  _need_vao_update = false;
+}
+
+void Skies::update_color_buffer()
+{
+  std::vector<math::vector_3d> colors;
+
+  for (int h = 0; h < hseg; h++)
+  {
+    for (int v = 0; v < cnum - 1; v++)
+    {
+      colors.push_back(color_set[skycolors[v]]);
+      colors.push_back(color_set[skycolors[v]]);
+      colors.push_back(color_set[skycolors[v + 1]]);
+      colors.push_back(color_set[skycolors[v + 1]]);
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_colors_vbo, colors, GL_STATIC_DRAW);
+
+  _need_vao_update = true;
 }
 
 //! \todo  figure out what dnc.db is _really_ used for
@@ -387,73 +537,6 @@ void OutdoorLightStats::interpolate(OutdoorLightStats *a, OutdoorLightStats *b, 
   nightDir = a->nightDir * ir + b->nightDir * r;
 }
 
-void OutdoorLightStats::setupLighting()
-{
-  GLfloat la[4];
-  GLfloat ld[4];
-  GLfloat lp[4];
-
-  la[3] = 1.0f;
-  ld[3] = 1.0f;
-  lp[3] = 0.0f; // directional lights plz
-
-  la[0] = la[1] = la[2] = 0.0f;
-
-  if (dayIntensity > 0) {
-    ld[0] = dayColor.x * dayIntensity;
-    ld[1] = dayColor.y * dayIntensity;
-    ld[2] = dayColor.z * dayIntensity;
-    lp[0] = dayDir.x;
-    lp[1] = dayDir.z;
-    lp[2] = -dayDir.y;
-
-    gl.lightfv(GL_LIGHT0, GL_AMBIENT, la);
-    gl.lightfv(GL_LIGHT0, GL_DIFFUSE, ld);
-    gl.lightfv(GL_LIGHT0, GL_POSITION, lp);
-    gl.enable(GL_LIGHT0);
-  }
-  else gl.disable(GL_LIGHT0);
-
-  if (nightIntensity > 0) {
-    ld[0] = nightColor.x * nightIntensity;
-    ld[1] = nightColor.y * nightIntensity;
-    ld[2] = nightColor.z * nightIntensity;
-    lp[0] = nightDir.x;
-    lp[1] = nightDir.z;
-    lp[2] = -nightDir.y;
-
-    gl.lightfv(GL_LIGHT1, GL_AMBIENT, la);
-    gl.lightfv(GL_LIGHT1, GL_DIFFUSE, ld);
-    gl.lightfv(GL_LIGHT1, GL_POSITION, lp);
-    gl.enable(GL_LIGHT1);
-  }
-  else gl.disable(GL_LIGHT1);
-
-  // light 2 will be ambient -> max. 3 lights for outdoors...
-  la[0] = ambientColor.x * ambientIntensity;
-  la[1] = ambientColor.y * ambientIntensity;
-  la[2] = ambientColor.z * ambientIntensity;
-
-  /*
-  ld[0] = ld[1] = ld[2] = 0.0f;
-  lp[0] = lp[1] = lp[2] = 0.0f;
-  gl.lightfv(GL_LIGHT2, GL_AMBIENT, la);
-  gl.lightfv(GL_LIGHT2, GL_DIFFUSE, ld);
-  gl.lightfv(GL_LIGHT2, GL_POSITION,lp);
-  gl.enable(GL_LIGHT2);
-  */
-  gl.disable(GL_LIGHT2);
-  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
-
-  // not using the rest
-  gl.disable(GL_LIGHT3);
-  gl.disable(GL_LIGHT4);
-  gl.disable(GL_LIGHT5);
-  gl.disable(GL_LIGHT6);
-  gl.disable(GL_LIGHT7);
-  // should really loop to GL_MAX_LIGHTS lol
-}
-
 OutdoorLighting::OutdoorLighting(const std::string& fname)
 {
   MPQFile f(fname);
@@ -466,7 +549,8 @@ OutdoorLighting::OutdoorLighting(const std::string& fname)
   f.read(&d, 4); // d is now the final offset
   f.seek(8 + n * 8);
 
-  while (f.getPos() < d) {
+  while (f.getPos() < d) 
+  {
     OutdoorLightStats ols;
     ols.init(&f);
 

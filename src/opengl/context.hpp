@@ -4,6 +4,8 @@
 
 #include <opengl/types.hpp>
 
+#include <QtGui/QOpenGLFunctions_3_3_Core>
+
 namespace opengl
 {
   struct context
@@ -13,12 +15,20 @@ namespace opengl
       scoped_setter (context& context_, QOpenGLContext* current_context)
         : _context (context_)
         , _old_context (_context._current_context)
+        , _old_core_func (context_._3_3_core_func)
       {
         _context._current_context = current_context;
+        _context._3_3_core_func = current_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+
+        if (!_context._3_3_core_func)
+        {
+          throw std::runtime_error("Noggit requires OpenGL 3.3 core functions");
+        }
       }
       ~scoped_setter()
       {
         _context._current_context = _old_context;
+        _context._3_3_core_func = _old_core_func;
       }
 
       scoped_setter (scoped_setter const&) = delete;
@@ -29,6 +39,7 @@ namespace opengl
     private:
       context& _context;
       QOpenGLContext* _old_context;
+      QOpenGLFunctions_3_3_Core* _old_core_func;
     };
 
     struct save_current_context
@@ -65,50 +76,17 @@ namespace opengl
     };
 
     QOpenGLContext* _current_context = nullptr;
+    QOpenGLFunctions_3_3_Core* _3_3_core_func = nullptr;
 
     void enable (GLenum);
     void disable (GLenum);
     GLboolean isEnabled (GLenum);
 
-    void begin (GLenum);
-    void end();
-
-    void enableClientState (GLenum);
-    void disableClientState (GLenum);
-    void clientActiveTexture (GLenum);
-
-    void normal3f (GLfloat, GLfloat, GLfloat);
-    void normal3fv (GLfloat const[3]);
-    void vertex2f (GLfloat, GLfloat);
-    void vertex3f (GLfloat, GLfloat, GLfloat);
-    void vertex3fv (GLfloat const[3]);
-    void color3f (GLfloat, GLfloat, GLfloat);
-    void color4f (GLfloat, GLfloat, GLfloat, GLfloat);
-    void color4ub (GLubyte, GLubyte, GLubyte, GLubyte);
-    void color3fv (GLfloat const[3]);
-    void color4fv (GLfloat const[4]);
-    void texCoord2f (GLfloat, GLfloat);
-    void texCoord2fv (GLfloat const[2]);
-    void multiTexCoord2f (GLenum target, GLfloat, GLfloat);
-
-    void matrixMode (GLenum);
-    void pushMatrix();
-    void popMatrix();
-    void loadIdentity();
-    void translatef (GLfloat, GLfloat, GLfloat);
-    void scalef (GLfloat, GLfloat, GLfloat);
-    void rotatef (GLfloat, GLfloat, GLfloat, GLfloat);
-    void multMatrixf (GLfloat const*);
-
-    void ortho (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble nearVal, GLdouble farVal);
-    void frustum (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble nearVal, GLdouble farVal);
     void viewport (GLint x, GLint y, GLsizei width, GLsizei height);
 
-    void alphaFunc (GLenum, GLfloat);
     void depthFunc (GLenum);
     void depthMask (GLboolean);
     void blendFunc (GLenum, GLenum);
-    void shadeModel (GLenum);
 
     void clear (GLenum);
     void clearColor (GLfloat, GLfloat, GLfloat, GLfloat);
@@ -117,7 +95,6 @@ namespace opengl
     void readPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data);
 
     void lineWidth (GLfloat);
-    void lineStipple (GLint factor, GLushort pattern);
 
     void pointParameterf (GLenum pname, GLfloat param);
     void pointParameteri (GLenum pname, GLint param);
@@ -127,7 +104,6 @@ namespace opengl
 
     void hint (GLenum, GLenum);
     void polygonMode (GLenum face, GLenum mode);
-    GLint renderMode (GLenum mode);
 
     void genTextures (GLuint, GLuint*);
     void deleteTextures (GLuint, GLuint*);
@@ -136,16 +112,6 @@ namespace opengl
     void compressedTexImage2D (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLvoid const* data);
     void generateMipmap (GLenum);
     void activeTexture (GLenum);
-
-    void texEnvf (GLenum, GLenum, GLfloat);
-    void texEnvi (GLenum, GLenum, GLint);
-
-    void texGeni (GLenum coord, GLenum pname, GLint param);
-    void texGenf (GLenum coord, GLenum pname, GLfloat param);
-    void texGend (GLenum coord, GLenum pname, GLdouble param);
-    void texGeniv (GLenum coord, GLenum pname, GLint const* params);
-    void texGenfv (GLenum coord, GLenum pname, GLfloat const* params);
-    void texGendv (GLenum coord, GLenum pname, GLdouble const* params);
 
     void texParameteri (GLenum target, GLenum pname, GLint param);
     void texParameterf (GLenum target, GLenum pname, GLfloat param);
@@ -166,43 +132,12 @@ namespace opengl
     void drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount);
     void drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices);
 
-    void vertexPointer (GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
-    void colorPointer (GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
-    void texCoordPointer (GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
-    void normalPointer (GLenum type, GLsizei stride, GLvoid const* pointer);
-
-    GLuint genLists (GLsizei);
-    void deleteLists (GLuint list, GLsizei range);
-    void newList (GLuint list, GLenum mode);
-    void endList();
-    void callList (GLuint list);
-
     void genPrograms (GLsizei programs, GLuint*);
     void deletePrograms (GLsizei programs, GLuint*);
     void bindProgram (GLenum, GLuint);
     void programString (GLenum target, GLenum format, GLsizei len, GLvoid const* pointer);
     void getProgramiv (GLuint program, GLenum pname, GLint* params);
     void programLocalParameter4f (GLenum, GLuint, GLfloat, GLfloat, GLfloat, GLfloat);
-
-    void lightf (GLenum light, GLenum pname, GLfloat param);
-    void lighti (GLenum light, GLenum pname, GLint param);
-    void lightfv (GLenum light, GLenum pname, GLfloat const* param);
-    void lightiv (GLenum light, GLenum pname, GLint const* param);
-    void lightModelf (GLenum pname, GLfloat param);
-    void lightModeli (GLenum pname, GLint param);
-    void lightModelfv (GLenum pname, GLfloat const* param);
-    void lightModeliv (GLenum pname, GLint const* param);
-
-    void materiali (GLenum, GLenum, GLint);
-    void materialf (GLenum, GLenum, GLfloat);
-    void materialiv (GLenum, GLenum, GLint const*);
-    void materialfv (GLenum, GLenum, GLfloat const*);
-    void colorMaterial (GLenum, GLenum);
-
-    void fogi (GLenum, GLint);
-    void fogiv (GLenum, GLint const*);
-    void fogf (GLenum, GLfloat);
-    void fogfv (GLenum, GLfloat const*);
 
     void getBooleanv (GLenum, GLboolean*);
     void getDoublev (GLenum, GLdouble*);
@@ -248,9 +183,6 @@ namespace opengl
 
     void polygonOffset (GLfloat factor, GLfloat units);
 
-    void pushAttrib (GLbitfield);
-    void popAttrib();
-
     void genFramebuffers (GLsizei n, GLuint *ids);
     void bindFramebuffer (GLenum target, GLuint framebuffer);
     void framebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
@@ -262,11 +194,8 @@ namespace opengl
 
     template<GLenum target>
       void bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
-
-    void vertexPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
-    void colorPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
-    void texCoordPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
-    void normalPointer (GLuint buffer, GLenum type, GLsizei stride, GLvoid const* pointer);
+    template<GLenum target, typename T>
+      void bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage);
 
     void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
   };

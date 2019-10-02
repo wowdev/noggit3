@@ -41,33 +41,88 @@ struct wmo_batch
   uint8_t texture;
 };
 
-class WMOGroup {
+union wmo_group_flags
+{
+  uint32_t value;
+  struct
+  {
+    uint32_t has_bsp_tree : 1; // 0x1
+    uint32_t has_light_map : 1; // 0x2
+    uint32_t has_vertex_color : 1; // 0x4
+    uint32_t exterior : 1; // 0x8
+    uint32_t flag_0x10 : 1;
+    uint32_t flag_0x20 : 1;
+    uint32_t exterior_lit : 1; // 0x40
+    uint32_t unreacheable : 1; // 0x80
+    uint32_t flag_0x100: 1;
+    uint32_t has_light : 1; // 0x200
+    uint32_t flag_0x400 : 1;
+    uint32_t has_doodads : 1; // 0x800
+    uint32_t has_water : 1; // 0x1000
+    uint32_t indoor : 1; // 0x2000
+    uint32_t flag_0x4000 : 1;
+    uint32_t flag_0x8000 : 1;
+    uint32_t always_draw : 1; // 0x10000
+    uint32_t has_mori_morb : 1; // 0x20000, cata+ only (?)
+    uint32_t skybox : 1; // 0x40000
+    uint32_t ocean : 1; // 0x80000
+    uint32_t flag_0x100000 : 1;
+    uint32_t mount_allowed : 1; // 0x200000
+    uint32_t flag_0x400000 : 1;
+    uint32_t flag_0x800000 : 1;
+    uint32_t has_two_mocv : 1; // 0x1000000
+    uint32_t has_two_motv : 1; // 0x2000000
+    uint32_t antiportal : 1; // 0x4000000
+    uint32_t unk : 1; // 0x8000000 requires intBatchCount == 0, extBatchCount == 0, UNREACHABLE. 
+    uint32_t unused : 4;
+  };
+};
+
+struct wmo_group_header
+{
+  uint32_t group_name; // offset into MOGN
+  uint32_t descriptive_group_name; // offset into MOGN
+  wmo_group_flags flags;
+  float box1[3];
+  float box2[3];
+  uint16_t portal_start;
+  uint16_t portal_count;
+  uint16_t transparency_batches_count;
+  uint16_t interior_batch_count;
+  uint16_t exterior_batch_count;
+  uint16_t padding_or_batch_type_d; // probably padding, but might be data?
+  uint8_t fogs[4];
+  uint32_t group_liquid; // used for MLIQ
+  uint32_t id;
+  int32_t unk2, unk3;
+};
+
+class WMOGroup 
+{
 public:
   WMOGroup(WMO *wmo, MPQFile* f, int num, char const* names);
+  WMOGroup(WMOGroup const&);
 
   void load();
 
-  void upload();
-
-  void draw( const math::vector_3d& ofs
-           , math::degrees const
+  void draw( opengl::scoped::use_program& wmo_shader
            , math::frustum const& frustum
            , const float& cull_distance
            , const math::vector_3d& camera
            , bool draw_fog
-           , std::function<void (bool)> setup_outdoor_lights
            , bool world_has_skies
-           , std::function<void (bool)> setup_fog
            );
-  void drawLiquid ( math::vector_4d const& ocean_color_light
+
+  void drawLiquid ( math::matrix_4x4 const& model_view
+                  , math::matrix_4x4 const& projection
+                  , math::matrix_4x4 const& transform
+                  , math::vector_4d const& ocean_color_light
                   , math::vector_4d const& ocean_color_dark
                   , math::vector_4d const& river_color_light
                   , math::vector_4d const& river_color_dark
                   , liquid_render& render
                   , bool draw_fog
                   , int animtime
-                  , std::function<void (bool)> setup_outdoor_lights
-                  , std::function<void (bool)> setup_fog
                   );
 
   void setupFog (bool draw_fog, std::function<void (bool)> setup_fog);
@@ -75,8 +130,7 @@ public:
   void intersect (math::ray const&, std::vector<float>* results) const;
 
   // todo: portal culling
-  bool is_visible( math::vector_3d const& ofs
-                 , math::degrees const& angle
+  bool is_visible( math::matrix_4x4 const& transform_matrix
                  , math::frustum const& frustum
                  , float const& cull_distance
                  , math::vector_3d const& camera
@@ -90,15 +144,16 @@ public:
   math::vector_3d VertexBoxMin;
   math::vector_3d VertexBoxMax;
 
-  bool indoor, hascv;
-  bool visible;
-
-  bool outdoorLights;
+  bool use_outdoor_lights;
   std::string name;
 
+  bool has_skybox() const { return header.flags.skybox; }
+
 private:
+  void fix_vertex_color_alpha();
+
   WMO *wmo;
-  uint32_t flags;
+  wmo_group_header header;
   ::math::vector_3d center;
   float rad;
   int32_t num;
@@ -108,13 +163,27 @@ private:
 
   std::vector<wmo_batch> _batches;
 
-  GLuint _vertices_buffer, _normals_buffer, _texcoords_buffer, _vertex_colors_buffer;
-
   std::vector<::math::vector_3d> _vertices;
   std::vector<::math::vector_3d> _normals;
   std::vector<::math::vector_2d> _texcoords;
+  std::vector<::math::vector_2d> _texcoords_2;
   std::vector<::math::vector_4d> _vertex_colors;
   std::vector<uint16_t> _indices;
+
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
+  opengl::scoped::deferred_upload_buffers<5> _buffers;
+  GLuint const& _vertices_buffer = _buffers[0];
+  GLuint const& _normals_buffer = _buffers[1];
+  GLuint const& _texcoords_buffer = _buffers[2];
+  GLuint const& _texcoords_buffer_2 = _buffers[3];
+  GLuint const& _vertex_colors_buffer = _buffers[4];
+
+  bool _uploaded = false;
+  bool _vao_is_setup = false;
+
+  void upload();
+  void setup_vao(opengl::scoped::use_program& wmo_shader);
 };
 
 struct WMOLight {
@@ -161,14 +230,29 @@ struct WMOFog {
   void setup();
 };
 
+union mohd_flags
+{
+  std::uint16_t flags;
+  struct
+  {
+    std::uint16_t do_not_attenuate_vertices_based_on_distance_to_portal : 1;
+    std::uint16_t use_unified_render_path : 1;
+    std::uint16_t use_liquid_type_dbc_id : 1;
+    std::uint16_t do_not_fix_vertex_color_alpha : 1;
+    std::uint16_t unused : 12;
+  };
+};
+
 class WMO : public AsyncObject
 {
 public:
   explicit WMO(const std::string& name);
 
-  void draw ( int doodadset
-            , const math::vector_3d& ofs
-            , math::degrees const
+  void draw ( opengl::scoped::use_program& wmo_shader
+            , math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::matrix_4x4 const& transform_matrix
+            , math::matrix_4x4 const& transform_matrix_transposed
             , bool boundingbox
             , math::frustum const& frustum
             , const float& cull_distance
@@ -181,23 +265,24 @@ public:
             , math::vector_4d const& river_color_dark
             , liquid_render& render
             , int animtime
-            , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies
-            , std::function<void (bool)> setup_fog
             , display_mode display
             );
-  bool drawSkybox ( math::vector_3d pCamera
-                  , math::vector_3d pLower
-                  , math::vector_3d pUpper
-                  , bool draw_fog
+  bool draw_skybox( math::matrix_4x4 const& model_view
+                  , math::vector_3d const& camera_pos
+                  , opengl::scoped::use_program& m2_shader
+                  , math::frustum const& frustum
+                  , const float& cull_distance
                   , int animtime
+                  , bool draw_particles
+                  , math::vector_3d aabb_min
+                  , math::vector_3d aabb_max
+                  , std::map<int, std::pair<math::vector_3d, math::vector_3d>> const& group_extents
                   ) const;
 
   std::vector<float> intersect (math::ray const&) const;
 
   void finishLoading();
-
-  void upload();
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;
 
@@ -214,6 +299,9 @@ public:
   std::vector<math::vector_3d> model_nearest_light_vector;
 
   std::vector<WMOLight> lights;
+  math::vector_4d ambient_light_color;
+
+  mohd_flags flags;
 
   std::vector<WMOFog> fogs;
 

@@ -5,7 +5,6 @@
 #include <noggit/World.h>
 #include <noggit/wmo_liquid.hpp>
 #include <opengl/context.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/shader.hpp>
 
 #include <boost/filesystem.hpp>
@@ -14,45 +13,116 @@
 #include <algorithm>
 #include <string>
 
+namespace
+{
 
+  enum liquid_basic_types
+  {
+    liquid_basic_types_water = 0,
+    liquid_basic_types_ocean = 1,
+    liquid_basic_types_magma = 2,
+    liquid_basic_types_slime = 3,
 
-wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const&, bool /*indoor*/)
+    liquid_basic_types_MASK = 3,
+  };
+  enum liquid_types
+  {
+    LIQUID_WMO_Water = 13,
+    LIQUID_WMO_Ocean = 14,
+    LIQUID_Green_Lava = 15,
+    LIQUID_WMO_Magma = 19,
+    LIQUID_WMO_Slime = 20,
+
+    LIQUID_END_BASIC_LIQUIDS = 20,
+    LIQUID_FIRST_NONBASIC_LIQUID_TYPE = 21,
+
+    LIQUID_NAXX_SLIME = 21,
+  };
+
+  liquid_types to_wmo_liquid(int x, bool ocean)
+  {
+    liquid_basic_types const basic(static_cast<liquid_basic_types>(x & liquid_basic_types_MASK));
+    switch (basic)
+    {
+      default:
+      case liquid_basic_types_water:
+        return ocean ? LIQUID_WMO_Ocean : LIQUID_WMO_Water;
+      case liquid_basic_types_ocean:
+        return LIQUID_WMO_Ocean;
+      case liquid_basic_types_magma:
+        return LIQUID_WMO_Magma;
+      case liquid_basic_types_slime:
+        return LIQUID_WMO_Slime;
+    }
+  }
+}
+
+// todo: use material
+wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, int group_liquid, bool use_dbc_type, bool is_ocean)
   : pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
   , texRepeats(4.0f)
   , xtiles(header.A)
   , ytiles(header.B)
 {
-  int flag = initGeometry (f);
-  std::string texture;
+  int liquid = initGeometry(f);
 
-  // value for the last drawn tile
-  if (flag & 1)
+  // see: https://wowdev.wiki/WMO#how_to_determine_LiquidTypeRec_to_use
+  if (use_dbc_type)
   {
-    // "XTEXTURES\\SLIME\\slime.%d.blp"
-    texture = "XTextures\\river\\lake_a.%d.blp";
-    texRepeats = 2.0f;
-    mTransparency = false;
-  }
-  else if (flag & 2)
-  {
-    // "XTEXTURES\\LAVA\\lava.%d.blp"
-    texture = "XTextures\\river\\lake_a.%d.blp";
-    mTransparency = false;
+    if (group_liquid < LIQUID_FIRST_NONBASIC_LIQUID_TYPE)
+    {
+      _liquid_id = to_wmo_liquid(group_liquid - 1, is_ocean);
+    }
+    else
+    {
+      _liquid_id = group_liquid;
+    }
   }
   else
   {
-    // "XTEXTURES\\river\\lake_a.%d.blp"
-    texture = "XTextures\\river\\lake_a.%d.blp";
-    mTransparency = true;
+    if (group_liquid == LIQUID_Green_Lava)
+    {
+      // todo: investigage
+      // This method is most likely wrong since "liquid" is the last SMOLTile's liquid value
+      // and it can vary from one liquid tile to another.
+      _liquid_id = to_wmo_liquid(liquid, is_ocean);
+    }
+    else
+    {
+      if (group_liquid < LIQUID_END_BASIC_LIQUIDS)
+      {
+        _liquid_id = to_wmo_liquid(group_liquid, is_ocean);
+      }
+      else
+      {
+        _liquid_id = group_liquid + 1;
+      }
+    }
   }
+}
+
+wmo_liquid::wmo_liquid(wmo_liquid const& other)
+  : pos(other.pos)
+  , texRepeats(other.texRepeats)
+  , mTransparency(other.mTransparency)
+  , xtiles(other.xtiles)
+  , ytiles(other.ytiles)
+  , _liquid_id(other._liquid_id)
+  , depths(other.depths)
+  , tex_coords(other.tex_coords)
+  , vertices(other.vertices)
+  , indices(other.indices)
+  , _uploaded(false)
+{
+
 }
 
 
 int wmo_liquid::initGeometry(MPQFile* f)
 {
   LiquidVertex const* map = reinterpret_cast<LiquidVertex const*>(f->getPointer());
-  unsigned char const* flags = reinterpret_cast<unsigned char const*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));
-  int last_flag = 0;
+  SMOLTile const* tiles = reinterpret_cast<SMOLTile const*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));
+  int last_liquid_id = 0;
 
   // generate vertices
   std::vector<math::vector_3d> lVertices ((xtiles + 1)*(ytiles + 1));
@@ -63,7 +133,7 @@ int wmo_liquid::initGeometry(MPQFile* f)
     {
       size_t p = j*(xtiles + 1) + i;
       lVertices[p] = math::vector_3d( pos.x + UNITSIZE * i
-                                    , map[p].h
+                                    , map[p].height
                                     , pos.z + -1.0f * UNITSIZE * j
                                     );
     }
@@ -75,85 +145,142 @@ int wmo_liquid::initGeometry(MPQFile* f)
   {
     for (int i = 0; i<xtiles; ++i)
     {
-      unsigned char flag = flags[j*xtiles + i];
+      SMOLTile const& tile = tiles[j*xtiles + i];
 
-      if (!(flag & 8))
+      // it seems that if (liquid & 8) != 0 => do not render
+      if (!(tile.liquid & 0x8))
       {
-        last_flag = flag;
-        // 15 seems to be "don't draw"
+        last_liquid_id = tile.liquid;
+
         size_t p = j*(xtiles + 1) + i;
 
-        depths.emplace_back (static_cast<float>(map[p].c[0]) / 255.0f);
-        tex_coords.emplace_back (i + 0.f, j + 0.f);
+        if (!(tile.liquid & 2))
+        {
+          depths.emplace_back(static_cast<float>(map[p].water_vertex.flow1) / 255.0f);
+          tex_coords.emplace_back(i + 0.f, j + 0.f);
+
+          depths.emplace_back(static_cast<float>(map[p + 1].water_vertex.flow1) / 255.0f);
+          tex_coords.emplace_back(i + 1.f, j + 0.f);          
+
+          depths.emplace_back(static_cast<float>(map[p + xtiles + 1 + 1].water_vertex.flow1) / 255.0f);
+          tex_coords.emplace_back(i + 1.f, j + 1.f);
+
+          depths.emplace_back(static_cast<float>(map[p + xtiles + 1].water_vertex.flow1) / 255.0f);
+          tex_coords.emplace_back(i + 0.f, j + 1.f);
+        }
+        else
+        {
+          // todo handle that properly
+          // depth isn't used for lava, it's just to fill up the buffer
+          depths.emplace_back(1.f);
+          depths.emplace_back(1.f);
+          depths.emplace_back(1.f);
+          depths.emplace_back(1.f);
+
+          tex_coords.emplace_back( static_cast<float>(map[p].magma_vertex.s) / 255.f
+                                 , static_cast<float>(map[p].magma_vertex.t) / 255.f
+                                 );
+          tex_coords.emplace_back( static_cast<float>(map[p + 1].magma_vertex.s) / 255.f 
+                                 , static_cast<float>(map[p + 1].magma_vertex.t) / 255.f
+                                 );
+          tex_coords.emplace_back( static_cast<float>(map[p + xtiles + 1 + 1].magma_vertex.s) / 255.f 
+                                 , static_cast<float>(map[p + xtiles + 1 + 1].magma_vertex.t) / 255.f 
+                                 );
+          tex_coords.emplace_back( static_cast<float>(map[p + xtiles + 1].magma_vertex.s) / 255.f
+                                 , static_cast<float>(map[p + xtiles + 1].magma_vertex.t) / 255.f 
+                                 );
+        }
+
         vertices.emplace_back (lVertices[p]);
-        indices.emplace_back (index++);
-
-        depths.emplace_back (static_cast<float>(map[p + 1].c[0]) / 255.0f);
-        tex_coords.emplace_back (i + 1.f, j + 0.f);
         vertices.emplace_back (lVertices[p + 1]);
-        indices.emplace_back (index++);
-
-        depths.emplace_back (static_cast<float>(map[p + xtiles + 1 + 1].c[0]) / 255.0f);
-        tex_coords.emplace_back (i + 1.f, j + 1.f);
         vertices.emplace_back (lVertices[p + xtiles + 1 + 1]);
-        indices.emplace_back (index++);
-
-        depths.emplace_back (static_cast<float>(map[p + xtiles + 1].c[0]) / 255.0f);
-        tex_coords.emplace_back (i + 0.f, j + 1.f);
         vertices.emplace_back (lVertices[p + xtiles + 1]);
-        indices.emplace_back (index++);
+
+        indices.emplace_back(index);
+        indices.emplace_back(index+1);
+        indices.emplace_back(index+2);
+
+        indices.emplace_back(index+2);
+        indices.emplace_back(index+3);
+        indices.emplace_back(index);
+
+        index += 4;
       }
     }
   }
 
   _indices_count = indices.size();
 
-  return last_flag;
+  return last_liquid_id;
 }
 
-void wmo_liquid::upload()
+void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
 {
   _buffer.upload();
+  _vertex_array.upload();
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
-  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER
-    , _indices_count * sizeof (indices[0])
-    , indices.data()
-    , GL_STATIC_DRAW
-  );
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_buffer, indices, GL_STATIC_DRAW);
+
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_buffer, vertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_tex_coord_buffer, tex_coords, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, float>(_depth_buffer, depths, GL_STATIC_DRAW);
+
+  opengl::scoped::index_buffer_manual_binder indices_binder (_indices_buffer);
+
+  {
+    opengl::scoped::vao_binder const _ (_vao);
+    
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_buffer);
+    water_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const tex_coord_binder(_tex_coord_buffer);
+    water_shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const depth_binder(_depth_buffer);
+    water_shader.attrib("depth", 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+    indices_binder.bind();
+  }
+
+  _uploaded = true;
 }
 
-void wmo_liquid::draw ( math::vector_4d const& ocean_color_light
-          , math::vector_4d const& ocean_color_dark
-          , math::vector_4d const& river_color_light
-          , math::vector_4d const& river_color_dark
-          , liquid_render& render
-          , int animtime
-          )
+void wmo_liquid::draw ( math::matrix_4x4 const& model_view
+                      , math::matrix_4x4 const& projection
+                      , math::matrix_4x4 const& transform
+                      , math::vector_4d const& ocean_color_light
+                      , math::vector_4d const& ocean_color_dark
+                      , math::vector_4d const& river_color_light
+                      , math::vector_4d const& river_color_dark
+                      , liquid_render& render
+                      , int animtime
+                      )
 {
-  opengl::scoped::bool_setter<GL_COLOR_MATERIAL, FALSE> const color_mat;
-  opengl::scoped::bool_setter<GL_LIGHTING, FALSE> const lighting;
-  opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
+  opengl::scoped::use_program water_shader(render.shader_program());
 
-  opengl::scoped::use_program water_shader (render.shader_program());
+  if (!_uploaded)
+  {
+    upload(water_shader);
+  }
 
-  water_shader.uniform ("model_view", opengl::matrix::model_view());
-  water_shader.uniform ("projection", opengl::matrix::projection());
+  opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;  
+
+  water_shader.uniform ("model_view", model_view);
+  water_shader.uniform ("projection", projection);
+  water_shader.uniform ("transform", transform);
+
+  water_shader.uniform ("use_transform", 1);
 
   water_shader.uniform ("ocean_color_light", ocean_color_light);
   water_shader.uniform ("ocean_color_dark", ocean_color_dark);
   water_shader.uniform ("river_color_light", river_color_light);
   water_shader.uniform ("river_color_dark", river_color_dark);
 
-  render.prepare_draw (water_shader, 13, animtime, true);
+  water_shader.uniform("tex_repeat", texRepeats);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
+  opengl::scoped::vao_binder const _ (_vao);
 
-  water_shader.attrib ("position", vertices);
-  water_shader.attrib ("tex_coord", tex_coords);
-  water_shader.attrib ("depth", depths);
-  water_shader.uniform ("tex_repeat", texRepeats);
+  render.prepare_draw (water_shader, _liquid_id, animtime, true);
 
-
-  gl.drawElements (GL_QUADS, indices.size(), GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 }

@@ -12,7 +12,6 @@
 #include <noggit/alphamap.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
@@ -333,8 +332,10 @@ void MapTile::convert_alphamap(bool to_big_alpha)
 
 void MapTile::draw ( math::frustum const& frustum
                    , opengl::scoped::use_program& mcnk_shader
+                   , GLuint const& tex_coord_vbo
                    , const float& cull_distance
                    , const math::vector_3d& camera
+                   , bool need_visibility_update
                    , bool show_unpaintable_chunks
                    , bool draw_paintability_overlay
                    , bool draw_chunk_flag_overlay
@@ -350,16 +351,16 @@ void MapTile::draw ( math::frustum const& frustum
     return;
   }
 
-  gl.color4f(1, 1, 1, 1);
-
   for (int j = 0; j<16; ++j)
   {
     for (int i = 0; i<16; ++i)
     {
       mChunks[j][i]->draw ( frustum
                           , mcnk_shader
+                          , tex_coord_vbo
                           , cull_distance
                           , camera
+                          , need_visibility_update
                           , show_unpaintable_chunks
                           , draw_paintability_overlay
                           , draw_chunk_flag_overlay
@@ -391,15 +392,52 @@ void MapTile::intersect (math::ray const& ray, selection_result* results) const
 
 void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 {
-  static unsigned char const indices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
+  static std::vector<std::uint8_t> const indices = {4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1};
 
-  mfbo_shader.attrib ("position", mMaximumValues);
-  mfbo_shader.uniform ("color", math::vector_4d (0.0f, 1.0f, 1.0f, 0.2f));
-  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
+  if (!_mfbo_buffer_are_setup)
+  {
+    _mfbo_vbos.upload();
+    _mfbo_vaos.upload();
 
-  mfbo_shader.attrib ("position", mMinimumValues);
-  mfbo_shader.uniform ("color", math::vector_4d (1.0f, 1.0f, 0.0f, 0.2f));
-  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
+    
+
+    gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_bottom_vbo
+                                  , 9 * sizeof(math::vector_3d)
+                                  , mMinimumValues
+                                  , GL_STATIC_DRAW
+                                  );
+    gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_top_vbo
+                                  , 9 * sizeof(math::vector_3d)
+                                  , mMaximumValues
+                                  , GL_STATIC_DRAW
+                                  );    
+
+    {
+      opengl::scoped::vao_binder const _ (_mfbo_bottom_vao);
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder (_mfbo_bottom_vbo);
+      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    {
+      opengl::scoped::vao_binder const _(_mfbo_top_vao);
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder(_mfbo_top_vbo);
+      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    _mfbo_buffer_are_setup = true;
+  }
+
+  {
+    opengl::scoped::vao_binder const _(_mfbo_bottom_vao);
+    mfbo_shader.uniform("color", math::vector_4d(1.0f, 1.0f, 0.0f, 0.2f));
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+  }
+
+  {
+    opengl::scoped::vao_binder const _(_mfbo_top_vao);
+    mfbo_shader.uniform("color", math::vector_4d(0.0f, 1.0f, 1.0f, 0.2f));
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+  }
 }
 
 void MapTile::drawWater ( math::frustum const& frustum

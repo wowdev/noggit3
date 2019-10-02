@@ -34,18 +34,11 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
   }
 }
 
-void ModelInstance::draw_box (bool is_current_selection)
+void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
+                             , math::matrix_4x4 const& projection
+                             , bool is_current_selection
+                             )
 {
-  opengl::scoped::matrix_pusher const matrix;
-
-  gl.multMatrixf (_transform_mat_transposed);
-
-  opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-  opengl::scoped::bool_setter<GL_FOG, GL_FALSE> fog;
-  opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> color_material;
-  opengl::texture::disable_texture(1);
-  opengl::texture::disable_texture(0);
-
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -53,35 +46,32 @@ void ModelInstance::draw_box (bool is_current_selection)
   {
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.collision_box_min)
                                  , misc::transform_model_box_coords(model->header.collision_box_max)
-                                 ).draw ({ 1.0f, 1.0f, 0.0f, 1.0f }, 1.0f);
+                                 ).draw ( model_view
+                                        , projection
+                                        , transform_matrix_transposed()
+                                        , { 1.0f, 1.0f, 0.0f, 1.0f }
+                                        , 1.0f
+                                        );
 
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
                                  , misc::transform_model_box_coords(model->header.bounding_box_max)
-                                 ).draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
-
-    gl.color4fv(math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f));
-    gl.begin(GL_LINES);
-    gl.vertex3f(0.0f, 0.0f, 0.0f);
-    gl.vertex3f(model->header.bounding_box_max.x + model->header.bounding_box_max.x / 5.0f, 0.0f, 0.0f);
-    gl.end();
-
-    gl.color4fv(math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f));
-    gl.begin(GL_LINES);
-    gl.vertex3f(0.0f, 0.0f, 0.0f);
-    gl.vertex3f(0.0f, model->header.bounding_box_max.z + model->header.bounding_box_max.z / 5.0f, 0.0f);
-    gl.end();
-
-    gl.color4fv(math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f));
-    gl.begin(GL_LINES);
-    gl.vertex3f(0.0f, 0.0f, 0.0f);
-    gl.vertex3f(0.0f, 0.0f, model->header.bounding_box_max.y + model->header.bounding_box_max.y / 5.0f);
-    gl.end();
+                                 ).draw ( model_view
+                                        , projection
+                                        , transform_matrix_transposed()
+                                        , {1.0f, 1.0f, 1.0f, 1.0f}
+                                        , 1.0f
+                                        );
   }
   else
   {
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
                                  , misc::transform_model_box_coords(model->header.bounding_box_max)
-                                 ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
+                                 ).draw ( model_view
+                                        , projection
+                                        , transform_matrix_transposed()
+                                        , {0.5f, 0.5f, 0.5f, 1.0f}
+                                        , 1.0f
+                                        );
   }
 }
 
@@ -101,7 +91,8 @@ void ModelInstance::update_transform_matrix()
   _transform_mat_transposed = mat.transposed();
 }
 
-void ModelInstance::intersect ( math::ray const& ray
+void ModelInstance::intersect ( math::matrix_4x4 const& model_view
+                              , math::ray const& ray
                               , selection_result* results
                               , int animtime
                               )
@@ -116,7 +107,7 @@ void ModelInstance::intersect ( math::ray const& ray
     return;
   }
 
-  for (auto&& result : model->intersect (subray, animtime))
+  for (auto&& result : model->intersect (model_view, subray, animtime))
   {
     //! \todo why is only sc important? these are relative to subray,
     //! so should be inverted by model_matrix?
@@ -284,7 +275,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
     return;
   }  
 
-  world_pos = pos + wmo->pos;
+  world_pos = wmo->transform_matrix() * pos;
 
   math::matrix_4x4 m2_mat
   (
@@ -295,13 +286,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 
   math::matrix_4x4 mat
   (
-    math::matrix_4x4(math::matrix_4x4::translation, wmo->pos)
-    * math::matrix_4x4 (math::matrix_4x4::rotation_yzx
-      , { math::degrees (-wmo->dir.z)
-        , math::degrees (wmo->dir.y - 90.f)
-        , math::degrees (wmo->dir.x)
-        }
-    )
+    wmo->transform_matrix()
     * m2_mat
   );
 

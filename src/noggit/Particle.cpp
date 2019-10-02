@@ -3,6 +3,7 @@
 #include <noggit/Misc.h>
 #include <noggit/Particle.h>
 #include <opengl/context.hpp>
+#include <opengl/shader.hpp>
 
 #include <list>
 
@@ -17,6 +18,7 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 
 ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals)
   : model (model_)
+  , emitter_type(mta.EmitterType)
   , emitter ( mta.EmitterType == 1 ? std::unique_ptr<ParticleEmitter> (std::make_unique<PlaneParticleEmitter>())
             : mta.EmitterType == 2 ? std::unique_ptr<ParticleEmitter> (std::make_unique<SphereParticleEmitter>())
             : throw std::logic_error ("unimplemented emitter type: " + std::to_string(mta.EmitterType))
@@ -46,6 +48,7 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
   , billboard (!(mta.flags & 4096))
   , rem(0)
   , parent (&model->bones[mta.bone])
+  , flags(mta.flags)
   , tofs (misc::frand())
 {
   math::vector_3d colors2[3];
@@ -64,6 +67,89 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
     initTile(tc.tc, i);
     tiles.push_back(tc);
   }
+}
+
+ParticleSystem::ParticleSystem(ParticleSystem const& other)
+  : model(other.model)
+  , emitter_type(other.emitter_type)
+  , emitter( emitter_type == 1 ? std::unique_ptr<ParticleEmitter>(std::make_unique<PlaneParticleEmitter>())
+           : emitter_type == 2 ? std::unique_ptr<ParticleEmitter>(std::make_unique<SphereParticleEmitter>())
+           : throw std::logic_error("unimplemented emitter type: " + std::to_string(emitter_type))
+           )
+  , speed(other.speed)
+  , variation(other.variation)
+  , spread(other.spread)
+  , lat(other.lat)
+  , gravity(other.gravity)
+  , lifespan(other.lifespan)
+  , rate(other.rate)
+  , areal(other.areal)
+  , areaw(other.areaw)
+  , deacceleration(other.deacceleration)
+  , enabled(other.enabled)
+  , colors(other.colors)
+  , sizes(other.sizes)
+  , mid(other.mid)
+  , slowdown(other.slowdown)
+  , pos(other.pos)
+  , _texture_id(other._texture_id)
+  , particles(other.particles)
+  , blend(other.blend)
+  , order(other.order)
+  , type(other.type)
+  , manim(other.manim)
+  , mtime(other.mtime)
+  , manimtime(other.manimtime)
+  , rows(other.rows)
+  , cols(other.cols)
+  , tiles(other.tiles)
+  , billboard(other.billboard)
+  , rem(other.rem)
+  , parent(other.parent)
+  , flags(other.flags)
+  , tofs(other.tofs)
+{
+
+}
+
+ParticleSystem::ParticleSystem(ParticleSystem&& other)
+  : model(other.model)
+  , emitter_type(other.emitter_type)
+  , emitter(std::move(other.emitter))
+  , speed(other.speed)
+  , variation(other.variation)
+  , spread(other.spread)
+  , lat(other.lat)
+  , gravity(other.gravity)
+  , lifespan(other.lifespan)
+  , rate(other.rate)
+  , areal(other.areal)
+  , areaw(other.areaw)
+  , deacceleration(other.deacceleration)
+  , enabled(other.enabled)
+  , colors(other.colors)
+  , sizes(other.sizes)
+  , mid(other.mid)
+  , slowdown(other.slowdown)
+  , pos(other.pos)
+  , _texture_id(other._texture_id)
+  , particles(other.particles)
+  , blend(other.blend)
+  , order(other.order)
+  , type(other.type)
+  , manim(other.manim)
+  , mtime(other.mtime)
+  , manimtime(other.manimtime)
+  , rows(other.rows)
+  , cols(other.cols)
+  , tiles(other.tiles)
+  , billboard(other.billboard)
+  , rem(other.rem)
+  , parent(other.parent)
+  , flags(other.flags)
+  , tofs(other.tofs)
+{
+
 }
 
 void ParticleSystem::initTile(math::vector_2d *tc, int num)
@@ -172,121 +258,46 @@ void ParticleSystem::setup(int anim, int time, int animtime)
   manim = anim;
   mtime = time;
   manimtime = animtime;
-
-  /*
-  if (transform) {
-  // transform every particle by the parent trans matrix   - apparently this isn't needed
-  Matrix m = parent->mat;
-  for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-  it->tpos = m * it->pos;
-  }
-  } else {
-  for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-  it->tpos = it->pos;
-  }
-  }
-  */
 }
 
-void ParticleSystem::draw()
+void ParticleSystem::draw( math::matrix_4x4 const& model_view
+                         , opengl::scoped::use_program& shader
+                         , GLuint const& transform_vbo
+                         , int instances_count
+)
 {
-  /*
-  // just draw points:
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-  gl.color4f(1,1,1,1);
-  gl.begin(GL_POINTS);
-  for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-  gl.vertex3fv(it->tpos);
+  if (!_uploaded)
+  {
+    upload();
   }
-  gl.end();
-  gl.enable(GL_LIGHTING);
-  opengl::texture::enable_texture();
-  */
 
   // setup blend mode
-  switch (blend) {
+  float alpha_test = -1.f;
+
+  switch (blend) 
+  {
   case 0:
     gl.disable(GL_BLEND);
-    gl.disable(GL_ALPHA_TEST);
     break;
   case 1:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_COLOR, GL_ONE);
-    gl.disable(GL_ALPHA_TEST);
     break;
   case 2:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl.disable(GL_ALPHA_TEST);
     break;
   case 3:
     gl.disable(GL_BLEND);
-    gl.enable(GL_ALPHA_TEST);
+    alpha_test = 0.5f;
     break;
   case 4:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-    gl.disable(GL_ALPHA_TEST);
     break;
   }
 
-  //gl.disable(GL_LIGHTING);
-  //gl.disable(GL_CULL_FACE);
-  //gl.depthMask(GL_FALSE);
-
-  //  gl.pushName(texture);
   model->_textures[_texture_id]->bind();
-
-  /*
-  if (supportPointSprites && rows==1 && cols==1) {
-  // This is how will our point sprite's size will be modified by
-  // distance from the viewer
-  float quadratic[] = {0.1f, 0.0f, 0.5f};
-  //float quadratic[] = {0.88f, 0.001f, 0.000004f};
-  gl.pointParameterfv( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic);
-
-  // Query for the max point size supported by the hardware
-  float maxSize = 512.0f;
-  //gl.getFloatv(GL_POINT_SIZE_MAX_, &maxSize );
-
-  // Clamp size to 100.0f or the sprites could get a little too big on some
-  // of the newer graphic cards. My ATI card at home supports a max point
-  // size of 1024.0f!
-  //if( maxSize > 100.0f )
-  //  maxSize = 100.0f;
-
-  gl.pointSize(maxSize);
-
-  // The alpha of a point is calculated to allow the fading of points
-  // instead of shrinking them past a defined threshold size. The threshold
-  // is defined by GL_POINT_FADE_THRESHOLD_SIZE_ and is not clamped to
-  // the minimum and maximum point sizes.
-  gl.pointParameterf(GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f);
-
-  gl.pointParameterf(GL_POINT_SIZE_MIN_ARB, 1.0f );
-  gl.pointParameterf(GL_POINT_SIZE_MAX_ARB, maxSize );
-
-  // Specify point sprite texture coordinate replacement mode for each texture unit
-  gl.texEnvf(GL_POINT_SPRITE_, GL_COORD_REPLACE_ARB, GL_TRUE);
-  // Render point sprites...
-  gl.enable(GL_POINT_SPRITE_);
-
-  gl.begin(GL_POINTS);
-  {
-  for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-  gl.pointSize(it->size);
-  gl.texCoord2fv(tiles[it->tile].tc[0]);
-  gl.color4fv(it->color);
-  gl.vertex3fv(it->pos);
-  }
-  }
-  gl.end();
-
-  gl.disable(GL_POINT_SPRITE_);
-  gl.texEnvf(GL_POINT_SPRITE_, GL_COORD_REPLACE_ARB, GL_FALSE);
-
-  } else { // Old slow method */
 
   math::vector_3d vRight(1, 0, 0);
   math::vector_3d vUp(0, 1, 0);
@@ -296,72 +307,112 @@ void ParticleSystem::draw()
   math::vector_3d bv0 = math::vector_3d(-f, +f, 0);
   math::vector_3d bv1 = math::vector_3d(+f, +f, 0);
 
-  if (billboard) {
-    float modelview[16];
-    gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
+  std::vector<std::uint16_t> indices;
+  std::vector<math::vector_3d> vertices;
+  std::vector<math::vector_3d> offsets;
+  std::vector<math::vector_4d> colors;
+  std::vector<math::vector_2d> texcoords;
 
-    vRight = math::vector_3d(modelview[0], modelview[4], modelview[8]);
-    vUp = math::vector_3d(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+  std::uint16_t indice = 0;
+
+  if (billboard) 
+  {
+    vRight = math::vector_3d(model_view[0], model_view[4], model_view[8]);
+    vUp = math::vector_3d(model_view[1], model_view[5], model_view[9]); // Spherical billboarding
     //vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
   }
+
+  auto add_quad_indices([] (std::vector<std::uint16_t>& indices, std::uint16_t& start)
+  {
+    indices.push_back(start + 0);
+    indices.push_back(start + 1);
+    indices.push_back(start + 2);
+
+    indices.push_back(start + 2);
+    indices.push_back(start + 3);
+    indices.push_back(start + 0);
+
+    start += 4;
+  });
+
   /*
   * type:
   * 0   "normal" particle
   * 1  large quad from the particle's origin to its position (used in Moonwell water effects)
   * 2  seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
   */
-  if (type == 0 || type == 2) {
+  if (type == 0 || type == 2) 
+  {
     //! \todo figure out type 2 (deeprun tram subway sign)
     // - doesn't seem to be any different from 0 -_-
     // regular particles
 
-    if (billboard) {
-      gl.begin(GL_QUADS);
+    if (billboard) 
+    {
       //! \todo per-particle rotation in a non-expensive way?? :|
-      for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
+      for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) 
+      {
         if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
+        {
           break;
+        }
+
         const float size = it->size;// / 2;
-        gl.color4fv(it->color);
 
-        gl.texCoord2fv(tiles[it->tile].tc[0]);
-        gl.vertex3fv(it->pos - (vRight + vUp) * size);
+        texcoords.push_back(tiles[it->tile].tc[0]);
+        vertices.push_back(it->pos);
+        offsets.push_back(-(vRight + vUp) * size);
+        colors.push_back(it->color);
 
-        gl.texCoord2fv(tiles[it->tile].tc[1]);
-        gl.vertex3fv(it->pos + (vRight - vUp) * size);
+        texcoords.push_back(tiles[it->tile].tc[1]);
+        vertices.push_back(it->pos);
+        offsets.push_back((vRight - vUp) * size);
+        colors.push_back(it->color);
 
-        gl.texCoord2fv(tiles[it->tile].tc[2]);
-        gl.vertex3fv(it->pos + (vRight + vUp) * size);
+        texcoords.push_back(tiles[it->tile].tc[2]);
+        vertices.push_back(it->pos);
+        offsets.push_back((vRight + vUp) * size);
+        colors.push_back(it->color);
 
-        gl.texCoord2fv(tiles[it->tile].tc[3]);
-        gl.vertex3fv(it->pos - (vRight - vUp) * size);
+        texcoords.push_back(tiles[it->tile].tc[3]);
+        vertices.push_back(it->pos);
+        offsets.push_back(-(vRight - vUp) * size);
+        colors.push_back(it->color);
+
+        add_quad_indices(indices, indice);
       }
-      gl.end();
-
     }
-    else {
-      gl.begin(GL_QUADS);
-      for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
+    else 
+    {
+      for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) 
+      {
         if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
+        {
           break;
-        gl.color4fv(it->color);
+        }
 
-        gl.texCoord2fv(tiles[it->tile].tc[0]);
-        gl.vertex3fv(it->pos + it->corners[0] * it->size);
+        texcoords.push_back(tiles[it->tile].tc[0]);
+        vertices.push_back(it->pos + it->corners[0] * it->size);
+        colors.push_back(it->color);
 
-        gl.texCoord2fv(tiles[it->tile].tc[1]);
-        gl.vertex3fv(it->pos + it->corners[1] * it->size);
+        texcoords.push_back(tiles[it->tile].tc[1]);
+        vertices.push_back(it->pos + it->corners[1] * it->size);
+        colors.push_back(it->color);
 
-        gl.texCoord2fv(tiles[it->tile].tc[2]);
-        gl.vertex3fv(it->pos + it->corners[2] * it->size);
+        texcoords.push_back(tiles[it->tile].tc[2]);
+        vertices.push_back(it->pos + it->corners[2] * it->size);
+        colors.push_back(it->color);
 
-        gl.texCoord2fv(tiles[it->tile].tc[3]);
-        gl.vertex3fv(it->pos + it->corners[3] * it->size);
+        texcoords.push_back(tiles[it->tile].tc[3]);
+        vertices.push_back(it->pos + it->corners[3] * it->size);
+        colors.push_back(it->color);
+
+        add_quad_indices(indices, indice);
       }
-      gl.end();
     }
-  }
-  else if (type == 1) { // Sphere particles
+  }  
+  else if (type == 1) 
+  { // Sphere particles
     // particles from origin to position
     /*
     bv0 = mbb * math::vector_3d(0,-1.0f,0);
@@ -372,33 +423,77 @@ void ParticleSystem::draw()
     bv1 = mbb * math::vector_3d(1.0f,0,0);
     */
 
-    gl.begin(GL_QUADS);
-    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
+    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) 
+    {
       if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
+      {
         break;
-      gl.color4fv(it->color);
+      }
 
-      gl.texCoord2fv(tiles[it->tile].tc[0]);
-      gl.vertex3fv(it->pos + bv0 * it->size);
+      texcoords.push_back(tiles[it->tile].tc[0]);
+      vertices.push_back(it->pos + bv0 * it->size);
+      colors.push_back(it->color);
 
-      gl.texCoord2fv(tiles[it->tile].tc[1]);
-      gl.vertex3fv(it->pos + bv1 * it->size);
+      texcoords.push_back(tiles[it->tile].tc[1]);
+      vertices.push_back(it->pos + bv1 * it->size);
+      colors.push_back(it->color);
 
-      gl.texCoord2fv(tiles[it->tile].tc[2]);
-      gl.vertex3fv(it->origin + bv1 * it->size);
+      texcoords.push_back(tiles[it->tile].tc[2]);
+      vertices.push_back(it->origin + bv1 * it->size);
+      colors.push_back(it->color);
 
-      gl.texCoord2fv(tiles[it->tile].tc[3]);
-      gl.vertex3fv(it->origin + bv0 * it->size);
+      texcoords.push_back(tiles[it->tile].tc[3]);
+      vertices.push_back(it->origin + bv0 * it->size);
+      colors.push_back(it->color);
+
+      add_quad_indices(indices, indice);
     }
-    gl.end();
-
   }
-  //}
 
-  //gl.enable(GL_LIGHTING);
-  //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //gl.depthMask(GL_TRUE);
-  //gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_4d>(_colors_vbo, colors, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
+
+  shader.uniform("alpha_test", alpha_test);
+  shader.uniform("billboard", (int)billboard);
+
+  opengl::scoped::vao_binder const _ (_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
+    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  if(billboard)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_offsets_vbo, offsets, GL_STREAM_DRAW);
+
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const offset_binder (_offsets_vbo);
+    shader.attrib("offset", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder (_texcoord_vbo);
+    shader.attrib("uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const colors_binder (_colors_vbo);
+    shader.attrib("color", 4, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (transform_vbo);
+    shader.attrib("transform", 0, 1);
+  }
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder (_indices_vbo);
+  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
+
+}
+
+void ParticleSystem::upload()
+{
+  _vertex_array.upload();
+  _buffers.upload();
+  _uploaded = true;
 }
 
 namespace
@@ -689,6 +784,52 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
   segs.emplace_back(tpos, 0);
 }
 
+RibbonEmitter::RibbonEmitter(RibbonEmitter const& other)
+  : model(other.model)
+  , color(other.color)
+  , opacity(other.opacity)
+  , above(other.above)
+  , below(other.below)
+  , parent(other.parent)
+  , pos(other.pos)
+  , manim(other.manim)
+  , mtime(other.mtime)
+  , seglen(other.seglen)
+  , length(other.length)
+  , tpos(other.tpos)
+  , tcolor(other.tcolor)
+  , tabove(other.tabove)
+  , tbelow(other.tbelow)
+  , _texture_ids(other._texture_ids)
+  , _material_ids(other._material_ids)
+  , segs(other.segs)
+{
+
+}
+
+RibbonEmitter::RibbonEmitter(RibbonEmitter&& other)
+  : model(other.model)
+  , color(other.color)
+  , opacity(other.opacity)
+  , above(other.above)
+  , below(other.below)
+  , parent(other.parent)
+  , pos(other.pos)
+  , manim(other.manim)
+  , mtime(other.mtime)
+  , seglen(other.seglen)
+  , length(other.length)
+  , tpos(other.tpos)
+  , tcolor(other.tcolor)
+  , tabove(other.tabove)
+  , tbelow(other.tbelow)
+  , _texture_ids(other._texture_ids)
+  , _material_ids(other._material_ids)
+  , segs(other.segs)
+{
+
+}
+
 void RibbonEmitter::setup(int anim, int time, int animtime)
 {
   math::vector_3d ntpos = parent->mat * pos;
@@ -740,59 +881,92 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
   tbelow = below.getValue(anim, time, animtime);
 }
 
-void RibbonEmitter::draw()
+void RibbonEmitter::draw( opengl::scoped::use_program& shader
+                        , GLuint const& transform_vbo
+                        , int instances_count
+                        )
 {
-  /*
-  // placeholders
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-  gl.color4f(1,1,1,1);
-  gl.begin(GL_TRIANGLES);
-  gl.vertex3fv(tpos);
-  gl.vertex3fv(tpos + math::vector_3d(1,1,0));
-  gl.vertex3fv(tpos + math::vector_3d(-1,1,0));
-  gl.end();
-  opengl::texture::enable_texture();
-  gl.enable(GL_LIGHTING);
-  */
+  if (!_uploaded)
+  {
+    upload();
+  }
 
-  //  gl.pushName(texture);
+  std::vector<std::uint16_t> indices;
+  std::vector<math::vector_3d> vertices;
+  std::vector<math::vector_2d> texcoords;
+
   model->_textures[_texture_ids[0]]->bind();
-  gl.enable(GL_BLEND);
-  gl.disable(GL_LIGHTING);
-  gl.disable(GL_ALPHA_TEST);
-  gl.disable(GL_CULL_FACE);
-  gl.depthMask(GL_FALSE);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-  gl.color4fv(tcolor);
 
-  gl.begin(GL_QUAD_STRIP);
+  gl.enable(GL_BLEND);
+  
+  shader.uniform("color", tcolor);
+
+  std::uint16_t indice = 0;
+  auto add_quad_indices([] (std::vector<std::uint16_t>& indices, std::uint16_t& start)
+  {
+    indices.push_back(start + 0);
+    indices.push_back(start + 1);
+    indices.push_back(start + 2);
+
+    indices.push_back(start + 2);
+    indices.push_back(start + 1);
+    indices.push_back(start + 3);
+
+    start += 2;
+  });
+
   std::list<RibbonSegment>::iterator it = segs.begin();
   float l = 0;
-  for (; it != segs.end(); ++it) {
+  for (; it != segs.end(); ++it) 
+  {
     float u = l / length;
 
-    gl.texCoord2f(u, 0);
-    gl.vertex3fv(it->pos + tabove * it->up);
-    gl.texCoord2f(u, 1);
-    gl.vertex3fv(it->pos - tbelow * it->up);
+    texcoords.emplace_back(u, 0);
+    vertices.push_back(it->pos + tabove * it->up);
+    texcoords.emplace_back(u, 1);
+    vertices.push_back(it->pos - tbelow * it->up);
 
     l += it->len;
+
+    add_quad_indices(indices, indice);
   }
 
-  if (segs.size() > 1) {
+  if (segs.size() > 1) 
+  {
     // last segment...?
     --it;
-    gl.texCoord2f(1, 0);
-    gl.vertex3fv(it->pos + tabove * it->up + (it->len / it->len0) * it->back);
-    gl.texCoord2f(1, 1);
-    gl.vertex3fv(it->pos - tbelow * it->up + (it->len / it->len0) * it->back);
+    texcoords.emplace_back(1, 0);
+    vertices.push_back(it->pos + tabove * it->up + (it->len / it->len0) * it->back);
+    texcoords.emplace_back(1, 1);
+    vertices.push_back(it->pos - tbelow * it->up + (it->len / it->len0) * it->back);
   }
-  gl.end();
 
-  gl.color4f(1, 1, 1, 1);
-  gl.enable(GL_LIGHTING);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.depthMask(GL_TRUE);
-  //  gl.popName();
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
+
+  opengl::scoped::vao_binder const _(_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder(_vertices_vbo);
+    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoord_vbo);
+    shader.attrib("uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder(transform_vbo);
+    shader.attrib("transform", 0, 1);
+  }
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder(_indices_vbo);
+  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
+}
+
+void RibbonEmitter::upload()
+{
+  _vertex_array.upload();
+  _buffers.upload();
+  _uploaded = true;
 }

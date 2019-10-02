@@ -18,6 +18,7 @@ public:
   scoped_wmo_reference wmo;
   math::vector_3d pos;
   math::vector_3d  extents[2];
+  std::map<int, std::pair<math::vector_3d, math::vector_3d>> group_extents;
   math::vector_3d  dir;
   unsigned int mUniqueID;
   uint16_t mFlags;
@@ -34,6 +35,11 @@ private:
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
   bool _need_doodadset_update = true;
+
+  math::matrix_4x4 _transform_mat = math::matrix_4x4::uninitialized;
+  math::matrix_4x4 _transform_mat_inverted = math::matrix_4x4::uninitialized;
+  math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
+
 public:
   WMOInstance(std::string const& filename, ENTRY_MODF const* d);
   explicit WMOInstance(std::string const& filename);
@@ -44,6 +50,7 @@ public:
   WMOInstance (WMOInstance&& other)
     : wmo (std::move (other.wmo))
     , pos (other.pos)
+    , group_extents(other.group_extents)
     , dir (other.dir)
     , mUniqueID (other.mUniqueID)
     , mFlags (other.mFlags)
@@ -52,7 +59,9 @@ public:
     , _doodadset (other._doodadset)
     , _doodads_per_group(other._doodads_per_group)
     , _need_doodadset_update(other._need_doodadset_update)
-
+    , _transform_mat(other._transform_mat)
+    , _transform_mat_inverted(other._transform_mat_inverted)
+    , _transform_mat_transposed(other._transform_mat_transposed)
   {
     std::swap (extents, other.extents);
   }
@@ -62,6 +71,7 @@ public:
     std::swap(wmo, other.wmo);
     std::swap(pos, other.pos);
     std::swap(extents, other.extents);
+    std::swap(group_extents, other.group_extents);
     std::swap(dir, other.dir);
     std::swap(mUniqueID, other.mUniqueID);
     std::swap(mFlags, other.mFlags);
@@ -70,6 +80,9 @@ public:
     std::swap(_doodadset, other._doodadset);
     std::swap(_doodads_per_group, other._doodads_per_group);
     std::swap(_need_doodadset_update, other._need_doodadset_update);
+    std::swap(_transform_mat, other._transform_mat);
+    std::swap(_transform_mat_inverted, other._transform_mat_inverted);
+    std::swap(_transform_mat_transposed, other._transform_mat_transposed);
     return *this;
   }
   /*
@@ -78,9 +91,12 @@ public:
       return this->mUniqueID == other.mUniqueID;
   }*/
 
-  void draw ( math::frustum const&
-            , const float&
-            , const math::vector_3d&
+  void draw ( opengl::scoped::use_program& wmo_shader
+            , math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::frustum const& frustum
+            , const float& cull_distance
+            , const math::vector_3d& camera
             , bool force_box
             , bool draw_doodads
             , bool draw_fog
@@ -91,11 +107,16 @@ public:
             , liquid_render& render
             , std::vector<selection_type> selection
             , int animtime
-            , std::function<void (bool)> setup_outdoor_lights
             , bool world_has_skies
-            , std::function<void (bool)> setup_fog
             , display_mode display
             );
+
+  void update_transform_matrix();
+
+  math::matrix_4x4 transform_matrix() const { return _transform_mat; }
+  math::matrix_4x4 transform_matrix_inverted() const { return _transform_mat_inverted; }
+  math::matrix_4x4 transform_matrix_transposed() const { return _transform_mat_transposed; }
+
   void intersect (math::ray const&, selection_result*);
 
   void recalcExtents();

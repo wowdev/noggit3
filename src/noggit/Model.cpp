@@ -6,7 +6,6 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
@@ -55,7 +54,7 @@ void Model::finishLoading()
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
-  _animation = 0;
+  _current_anim_seq = 0;
 
   rad = header.bounding_box_radius;
 
@@ -600,9 +599,9 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   if (color_index != -1 && m->_colors[color_index].color.uses(0))
   {
     ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->_anim_time, m->_global_animtime));
-    if (m->_colors[color_index].opacity.uses (m->_animation))
+    if (m->_colors[color_index].opacity.uses (m->_current_anim_seq))
     {
-      mesh_color.w = m->_colors[color_index].opacity.getValue (m->_animation, m->_anim_time, m->_global_animtime);
+      mesh_color.w = m->_colors[color_index].opacity.getValue (m->_current_anim_seq, m->_anim_time, m->_global_animtime);
     }
 
     if (renderflag.flags.unlit)
@@ -639,35 +638,42 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   case M2Blend::Opaque:
     gl.disable(GL_BLEND);
     m2_shader.uniform("alpha_test", -1.f);    
+    m2_shader.uniform("fog_mode", 1);
     break;
   case M2Blend::Alpha_Key:
     gl.disable(GL_BLEND);
     m2_shader.uniform("alpha_test", (224.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 1);
     break;
   case M2Blend::Alpha:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 1);
     break;
   case M2Blend::No_Add_Alpha:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_ONE, GL_ONE);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 2); // Warning: wiki is unsure on that
     break;
   case M2Blend::Add:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 2);
     break;
   case M2Blend::Mod:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_ZERO);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 3);
     break;
   case M2Blend::Mod2x:
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
     m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 4);
     break;
   }
 
@@ -743,7 +749,7 @@ void ModelRenderPass::after_draw()
 
 void ModelRenderPass::bind_texture(size_t index, Model* m)
 {
-  opengl::texture::enable_texture(index);
+  opengl::texture::set_active_texture(index);
 
   uint16_t tex = m->_texture_lookup[textures[index]];
   
@@ -953,20 +959,22 @@ void Model::initAnimated(const MPQFile& f)
 {
   std::vector<std::unique_ptr<MPQFile>> animation_files;
 
-  if (header.nAnimations > 0) {
-    _animations.resize (header.nAnimations);
-    memcpy(_animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
-    for (size_t i = 0; i < header.nAnimations; ++i)
-    {
-      //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
-      _animations[i].length = std::max(_animations[i].length, 1U);
-    }
+  if (header.nAnimations > 0) 
+  {
+    std::vector<ModelAnimation> animations(header.nAnimations);
 
-    for (size_t i = 0; i < header.nAnimations; ++i)
+    memcpy(animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+
+    for (auto& anim : animations)
     {
+      anim.length = std::max(anim.length, 1U);
+
+      _animation_length[anim.animID] += anim.length;
+      _animations_seq_per_id[anim.animID][anim.subAnimID] = anim;
+
       std::string lodname = filename.substr(0, filename.length() - 3);
       std::stringstream tempname;
-      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID << ".anim";
+      tempname << lodname << anim.animID << "-" << anim.subAnimID << ".anim";
       if (MPQFile::exists(tempname.str()))
       {
         animation_files.push_back(std::make_unique<MPQFile>(tempname.str()));
@@ -1029,34 +1037,53 @@ void Model::initAnimated(const MPQFile& f)
   animcalc = false;
 }
 
-void Model::calcBones(int _anim, int time, int animation_time)
+void Model::calcBones( math::matrix_4x4 const& model_view
+                     , int _anim
+                     , int time
+                     , int animation_time
+                     )
 {
   for (size_t i = 0; i<header.nBones; ++i) {
     bones[i].calc = false;
   }
 
   for (size_t i = 0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones.data(), _anim, time, animation_time);
+    bones[i].calcMatrix(model_view, bones.data(), _anim, time, animation_time);
   }
 }
 
-void Model::animate(int _anim, int animtime_)
+void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time)
 {
-  this->_animation = _anim;
-  ModelAnimation &a = _animations[_animation];
-
-  if (_animations.empty())
+  if (_animations_seq_per_id.empty() || _animations_seq_per_id.at(anim_id).empty())
+  {
     return;
+  }
 
-  int t = animtime_;
-  int tmax = a.length;
-  t %= tmax;
+  int tmax = _animation_length[anim_id];
+  int t = anim_time % tmax;
+  int current_sub_anim;
+  int time_for_anim = t;
+
+  for (auto const& sub_animation : _animations_seq_per_id[anim_id])
+  {
+    if (sub_animation.second.length > time_for_anim)
+    {
+      current_sub_anim = sub_animation.first;
+      break;
+    }
+
+    time_for_anim -= sub_animation.second.length;
+  }
+
+  ModelAnimation const& a = _animations_seq_per_id[anim_id][current_sub_anim];
+
+  _current_anim_seq = a.Index;//_animations_seq_lookup[anim_id][current_sub_anim];
   _anim_time = t;
-  _global_animtime = animtime_;
+  _global_animtime = anim_time;
 
   if (animBones) 
   {
-    calcBones(_animation, t, _global_animtime);
+    calcBones(model_view, _current_anim_seq, t, _global_animtime);
   }
 
   if (animGeometry) 
@@ -1090,27 +1117,28 @@ void Model::animate(int _anim, int animtime_)
 
   for (size_t i=0; i<header.nLights; ++i) 
   {
-    if (_lights[i].parent>=0) {
+    if (_lights[i].parent >= 0) 
+    {
       _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
       _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
     }
-  }  
+  }
 
   for (auto& particle : _particles)
   {
     // random time distribution for teh win ..?
     int pt = (t + static_cast<int>(tmax*particle.tofs)) % tmax;
-    particle.setup(_animation, pt, _global_animtime);
+    particle.setup(_current_anim_seq, pt, _global_animtime);
   }
 
   for (size_t i = 0; i<header.nRibbonEmitters; ++i) 
   {
-    _ribbons[i].setup(_animation, t, _global_animtime);
+    _ribbons[i].setup(_current_anim_seq, t, _global_animtime);
   }
 
   for (auto& tex_anim : _texture_animations)
   {
-    tex_anim.calc(_animation, t, _anim_time);
+    tex_anim.calc(_current_anim_seq, t, _anim_time);
   }
 }
 
@@ -1176,11 +1204,8 @@ void ModelLight::setup(int time, opengl::light l, int animtime)
     p = math::vector_4d(tpos, 1.0f);
     LogError << "Light type " << type << " is unknown." << std::endl;
   }
-  //gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
-  gl.lightfv(l, GL_POSITION, p);
-  gl.lightfv(l, GL_DIFFUSE, diffcol);
-  gl.lightfv(l, GL_AMBIENT, ambcol);
-  gl.enable(l);
+ 
+  // todo: use models' light
 }
 
 TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *global)
@@ -1207,7 +1232,12 @@ Bone::Bone( const MPQFile& f,
   scale.apply(fixCoordSystem2);
 }
 
-void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
+void Bone::calcMatrix( math::matrix_4x4 const& model_view
+                     , Bone *allbones
+                     , int anim
+                     , int time
+                     , int animtime
+                     )
 {
   if (calc) return;
 
@@ -1240,11 +1270,8 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 
     if (flags.billboard)
     {
-      float modelview[16];
-      gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
-
-      math::vector_3d vRight (modelview[0], modelview[4], modelview[8]);
-      math::vector_3d vUp (modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+      math::vector_3d vRight (model_view[0], model_view[4], model_view[8]);
+      math::vector_3d vUp (model_view[1], model_view[5], model_view[9]); // Spherical billboarding
       //math::vector_3d vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
       vRight = vRight * -1;
       m (0, 2, vRight.x);
@@ -1260,7 +1287,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 
   if (parent >= 0)
   {
-    allbones[parent].calcMatrix (allbones, anim, time, animtime);
+    allbones[parent].calcMatrix (model_view, allbones, anim, time, animtime);
     mat = allbones[parent].mat * m;
   }
   else
@@ -1288,28 +1315,69 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
   calc = true;
 }
 
-
-void Model::draw (bool draw_fog, int animtime, bool draw_particles)
+void Model::draw( math::matrix_4x4 const& model_view
+                , ModelInstance& instance
+                , opengl::scoped::use_program& m2_shader
+                , math::frustum const& frustum
+                , const float& cull_distance
+                , const math::vector_3d& camera
+                , int animtime
+                , bool draw_particles
+                , bool all_boxes
+                , display_mode display
+                )
 {
-  return;
-
-  // draw particle systems & ribbons
-  if (draw_particles)
+  if (!finishedLoading() || loading_failed())
   {
-    for (auto& particle : _particles)
-    {
-      particle.draw();
-    }
+    return;
+  }
 
-    for (auto& ribbon : _ribbons)
+  if (!instance.is_visible(frustum, cull_distance, camera, display))
+  {
+    return;
+  }
+
+  if (!_finished_upload)
+  {
+    upload();
+  }
+
+  if (animated && (!animcalc || _per_instance_animation))
+  {
+    animate(model_view, 0, animtime);
+    animcalc = true;
+  }
+
+  opengl::scoped::vao_binder const _(_vao);
+
+  m2_shader.uniform("transform", instance.transform_matrix_transposed());
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+    m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
+    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) + 8));
+    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8));
+    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+  }
+
+  for (ModelRenderPass& p : _render_passes)
+  {
+    if (p.prepare_draw(m2_shader, this))
     {
-      ribbon.draw();
+      gl.drawElements(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start);
+      p.after_draw();
     }
   }
-  
+
+  gl.disable(GL_BLEND);
+  gl.enable(GL_CULL_FACE);
+  gl.depthMask(GL_TRUE);
 }
 
-void Model::draw ( std::vector<ModelInstance*> instances
+void Model::draw ( math::matrix_4x4 const& model_view
+                 , std::vector<ModelInstance*> instances
                  , opengl::scoped::use_program& m2_shader
                  , math::frustum const& frustum
                  , const float& cull_distance
@@ -1318,7 +1386,8 @@ void Model::draw ( std::vector<ModelInstance*> instances
                  , int animtime
                  , bool draw_particles
                  , bool all_boxes
-                 , std::unordered_map<Model*, std::size_t>& visible_model_count
+                 , std::unordered_map<Model*, std::size_t>& models_with_particles
+                 , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
                  , display_mode display
                  )
 {
@@ -1334,7 +1403,7 @@ void Model::draw ( std::vector<ModelInstance*> instances
 
   if (animated && (!animcalc || _per_instance_animation))
   {
-    animate(0, animtime);
+    animate(model_view, 0, animtime);
     animcalc = true;
   }
 
@@ -1356,8 +1425,12 @@ void Model::draw ( std::vector<ModelInstance*> instances
   // store the model count to draw the bounding boxes later
   if (all_boxes || _hidden)
   {
-    visible_model_count.emplace(this, transform_matrix.size());
+    model_boxes_to_draw.emplace(this, transform_matrix.size());    
   }
+  if (draw_particles && (!_particles.empty() || !_ribbons.empty()))
+  {
+    models_with_particles.emplace(this, transform_matrix.size());
+  }  
 
   opengl::scoped::vao_binder const _ (_vao);
 
@@ -1387,14 +1460,29 @@ void Model::draw ( std::vector<ModelInstance*> instances
   }
 
   gl.disable(GL_BLEND);
-  gl.alphaFunc(GL_GREATER, 0.0f);
-  gl.disable(GL_ALPHA_TEST);
   gl.enable(GL_CULL_FACE);
-
-  GLfloat czero[4] = { 0, 0, 0, 1 };
-  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
-  gl.color4f(1, 1, 1, 1);
   gl.depthMask(GL_TRUE);
+}
+
+void Model::draw_particles( math::matrix_4x4 const& model_view
+                          , opengl::scoped::use_program& particles_shader
+                          , std::size_t instance_count
+                          )
+{
+  for (auto& p : _particles)
+  {
+    p.draw(model_view, particles_shader, _transform_buffer, instance_count);
+  }
+}
+
+void Model::draw_ribbons( opengl::scoped::use_program& ribbons_shader
+                        , std::size_t instance_count
+                        )
+{
+  for (auto& r : _ribbons)
+  {
+    r.draw(ribbons_shader, _transform_buffer, instance_count);
+  }
 }
 
 void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)
@@ -1417,7 +1505,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 }
 
 
-std::vector<float> Model::intersect (math::ray const& ray, int animtime)
+std::vector<float> Model::intersect (math::matrix_4x4 const& model_view, math::ray const& ray, int animtime)
 {
   std::vector<float> results;
 
@@ -1428,7 +1516,7 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 
   if (animated && (!animcalc || _per_instance_animation))
   {
-    animate (0, animtime);
+    animate (model_view, 0, animtime);
     animcalc = true;
   }
 

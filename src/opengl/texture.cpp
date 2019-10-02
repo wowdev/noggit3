@@ -42,24 +42,6 @@ namespace opengl
     gl.bindTexture (GL_TEXTURE_2D, _id);
   }
 
-  void texture::enable_texture()
-  {
-    gl.enable (GL_TEXTURE_2D);
-  }
-  void texture::enable_texture (size_t num)
-  {
-    set_active_texture (num);
-    enable_texture();
-  }
-  void texture::disable_texture()
-  {
-    gl.disable (GL_TEXTURE_2D);
-  }
-  void texture::disable_texture (size_t num)
-  {
-    set_active_texture (num);
-    disable_texture();
-  }
   void texture::set_active_texture (size_t num)
   {
     gl.activeTexture (GL_TEXTURE0 + num);

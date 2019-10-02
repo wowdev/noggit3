@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/projection.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
@@ -33,7 +34,6 @@
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 
 #include "revision.h"
@@ -940,6 +940,7 @@ void MapView::createGUI()
              , [this]
                {
                  _camera.add_to_yaw(math::degrees(180.f));
+                 _camera_moved_since_last_draw = true;
                  _minimap->update();
                }
              );
@@ -1412,10 +1413,6 @@ MapView::MapView( math::degrees camera_yaw0
     {
       move_camera_with_auto_height (_camera.position);
     }    
-
-    gl.enableClientState (GL_VERTEX_ARRAY);
-    gl.enableClientState (GL_NORMAL_ARRAY);
-    gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
   }
 
   void MapView::paintGL()
@@ -1773,22 +1770,27 @@ void MapView::tick (float dt)
     if (turn)
     {
       _camera.add_to_yaw(math::degrees(turn));
+      _camera_moved_since_last_draw = true;
     }
     if (lookat)
     {
       _camera.add_to_pitch(math::degrees(lookat));
+      _camera_moved_since_last_draw = true;
     }
     if (moving)
     {
       _camera.move_forward(moving, dt);
+      _camera_moved_since_last_draw = true;
     }
     if (strafing)
     {
       _camera.move_horizontal(strafing, dt);
+      _camera_moved_since_last_draw = true;
     }
     if (updown)
     {
       _camera.move_vertical(updown, dt);
+      _camera_moved_since_last_draw = true;
     }
   }
   else
@@ -1797,24 +1799,30 @@ void MapView::tick (float dt)
     if (moving)
     {
       _camera.position.z -= dt * _camera.move_speed * moving;
+      _camera_moved_since_last_draw = true;
     }
     if (strafing)
     {
       _camera.position.x += dt * _camera.move_speed * strafing;
+      _camera_moved_since_last_draw = true;
     }
     if (updown)
     {
       _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
       _2d_zoom = std::max(0.01f, _2d_zoom);
+      _camera_moved_since_last_draw = true;
     }
-  } 
+  }
 
   _minimap->update();
 
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
 
-  _world->tick (dt);
+  if (_draw_model_animations.get())
+  {
+    _world->update_models_emitters(dt);
+  }
 
   if (_world->has_selection())
     lastSelected = currentSelection;
@@ -1903,7 +1911,9 @@ void MapView::tick (float dt)
                         )
       / qreal (_last_frame_durations.size())
       );
-    _status_fps->setText ("FPS: " + QString::number (int (1. / avg_frame_duration)));
+    _status_fps->setText ( "FPS: " + QString::number (int (1. / avg_frame_duration)) 
+                         + " - Average frame time: " + QString::number(avg_frame_duration*1000.0) + "ms"
+                         );
 
     _last_frame_durations.clear();
     _last_fps_update = 0.f;
@@ -2033,8 +2043,8 @@ math::ray MapView::intersect_ray() const
     // so we need the same order here and then invert.
     math::vector_3d const pos 
     (
-      ( (opengl::matrix::projection().transposed()
-        * opengl::matrix::model_view().transposed()
+      ( ( projection() 
+        * model_view()
         ).inverted()
         * normalized_device_coords (mx, mz)
       ).xyz_normalized_by_w()
@@ -2058,7 +2068,8 @@ selection_result MapView::intersect_result(bool terrain_only)
 {
   selection_result results
   ( _world->intersect 
-    ( intersect_ray()
+    ( model_view().transposed()
+    , intersect_ray()
     , terrain_only
     , terrainMode == editing_mode::object
     , _draw_terrain.get()
@@ -2131,6 +2142,39 @@ void MapView::update_cursor_pos()
   }
 }
 
+math::matrix_4x4 MapView::model_view() const
+{
+  if (_display_mode == display_mode::in_2D)
+  {
+    math::vector_3d eye = _camera.position;
+    math::vector_3d target = eye;
+    target.y -= 1.f;
+    target.z -= 0.001f;
+
+    return math::look_at(eye, target, {0.f,1.f, 0.f});
+  }
+  else
+  {
+    return _camera.look_at_matrix();
+  }
+}
+math::matrix_4x4 MapView::projection() const
+{
+  float far_z = _settings->value("farZ", 2048).toFloat();
+
+  if (_display_mode == display_mode::in_2D)
+  {
+    float half_width = width() * 0.5f * _2d_zoom;
+    float half_height = height() * 0.5f * _2d_zoom;
+
+    return math::ortho(-half_width, half_width, -half_height, half_height, -1.f, far_z);
+  }
+  else
+  {
+    return math::perspective(_camera.fov(), aspect_ratio(), 1.f, far_z);
+  }
+}
+
 void MapView::draw_map()
 {
   //! \ todo: make the current tool return the radius
@@ -2169,36 +2213,6 @@ void MapView::draw_map()
     break;
   }
 
-  float far_z = _settings->value ("farZ", 2048).toFloat();
-
-  if (_display_mode == display_mode::in_2D)
-  {
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-
-    float half_width = width() * 0.5f * _2d_zoom;
-    float half_height = height() * 0.5f * _2d_zoom;
-
-    gl.ortho (-half_width, half_width, -half_height, half_height, -1.f, far_z);
-
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
-
-    math::vector_3d look_at(_camera.position);
-    look_at.y -= 1.f;
-    look_at.z -= 0.001f;
-    opengl::matrix::look_at (_camera.position, look_at, { 0.f,1.f, 0.f });
-  }
-  else
-  {
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-    opengl::matrix::perspective (_camera.fov(), aspect_ratio(), 1.f,far_z);
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
-    opengl::matrix::look_at (_camera.position, _camera.look_at(), { 0.f, 1.f, 0.f });
-  }
-
   //! \note Select terrain below mouse, if no item selected or the item is map.
   if (!(_world->has_selection()
     || _locked_cursor_mode.get()))
@@ -2206,7 +2220,9 @@ void MapView::draw_map()
     doSelection(true);
   }
 
-  _world->draw ( _cursor_pos
+  _world->draw ( model_view().transposed()
+               , projection().transposed()
+               , _cursor_pos
                , terrainMode == editing_mode::mccv ? shader_color : cursor_color
                , cursor_type.get()
                , radius
@@ -2223,6 +2239,7 @@ void MapView::draw_map()
                , terrainMode == editing_mode::areaid
                , terrainMode
                , _camera.position
+               , _camera_moved_since_last_draw
                , _draw_mfbo.get()
                , _draw_wireframe.get()
                , _draw_lines.get()
@@ -2241,6 +2258,9 @@ void MapView::draw_map()
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                , _display_mode
                );
+
+  // reset after each world::draw call
+  _camera_moved_since_last_draw = false;
 }
 
 void MapView::keyPressEvent (QKeyEvent *event)
@@ -2483,6 +2503,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
     _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
+    _camera_moved_since_last_draw = true;
     _minimap->update();
   }
 

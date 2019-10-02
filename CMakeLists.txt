@@ -171,6 +171,7 @@ set ( noggit_root_sources
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
       src/noggit/ChunkWater.cpp
+      src/noggit/cursor_render.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
       src/noggit/Log.cpp
@@ -241,7 +242,6 @@ set ( math_sources
     )
 
 set ( opengl_sources
-      src/opengl/call_list.cpp
       src/opengl/context.cpp
       src/opengl/primitives.cpp
       src/opengl/shader.cpp
@@ -259,6 +259,7 @@ set ( noggit_root_headers
       src/noggit/Brush.h
       src/noggit/camera.hpp
       src/noggit/ChunkWater.hpp
+      src/noggit/cursor_render.hpp
       src/noggit/DBC.h
       src/noggit/DBCFile.h
       src/noggit/Log.h
@@ -340,15 +341,36 @@ set ( math_headers
     )
 
 set ( opengl_headers
-      src/opengl/call_list.hpp
       src/opengl/context.hpp
-      src/opengl/matrix.hpp
       src/opengl/primitives.hpp
       src/opengl/scoped.hpp
       src/opengl/shader.fwd.hpp
       src/opengl/shader.hpp
       src/opengl/texture.hpp
       src/opengl/types.hpp
+    )
+    
+set ( shaders
+      src/glsl/m2_vert.glsl
+      src/glsl/m2_frag.glsl
+      src/glsl/m2_box_vert.glsl
+      src/glsl/m2_box_frag.glsl
+      src/glsl/particle_vert.glsl
+      src/glsl/particle_frag.glsl
+      src/glsl/ribbon_vert.glsl
+      src/glsl/ribbon_frag.glsl
+      src/glsl/terrain_vert.glsl
+      src/glsl/terrain_frag.glsl
+      src/glsl/wmo_vert.glsl
+      src/glsl/wmo_frag.glsl
+      src/glsl/liquid_vert.glsl
+      src/glsl/liquid_frag.glsl
+      src/glsl/mfbo_vert.glsl
+      src/glsl/mfbo_frag.glsl
+      src/glsl/cursor_vert.glsl
+      src/glsl/cursor_frag.glsl
+      src/glsl/horizon_vert.glsl
+      src/glsl/horizon_frag.glsl
     )
 
 IF(WIN32)
@@ -387,6 +409,7 @@ source_group("math"  FILES ${math_sources} ${math_headers})
 source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
+source_group("glsl"  FILES ${shaders})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
@@ -411,8 +434,9 @@ ADD_EXECUTABLE ( noggit
                   ${ResFiles}
                   ${moced}
                   ${compiled_resource_files}
+                  ${shaders}
                 )
-
+                
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   StormLib
