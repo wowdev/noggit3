@@ -150,6 +150,7 @@ public:
   bool has_skybox() const { return header.flags.skybox; }
 
 private:
+  void load_mocv(MPQFile& f, uint32_t size);
   void fix_vertex_color_alpha();
 
   WMO *wmo;

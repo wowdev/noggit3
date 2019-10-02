@@ -877,27 +877,7 @@ void WMOGroup::load()
 
     assert (fourcc == 'MOCV');
 
-    uint32_t const* colors = reinterpret_cast<uint32_t const*> (f.getPointer ());
-    _vertex_colors.resize (size / sizeof (uint32_t));
-
-    for(size_t i (0); i < size / sizeof (uint32_t); ++i)
-    {
-      _vertex_colors[i] = colorFromInt (colors[i]);
-    }
-
-    if (wmo->flags.do_not_fix_vertex_color_alpha)
-    {
-      for (auto& color : _vertex_colors)
-      {
-        color.w = header.flags.exterior ? 255.f : 0.f;
-      }
-    }
-    else
-    {
-      fix_vertex_color_alpha();
-    }
-
-    f.seekRelative (size);
+    load_mocv(f, size);
   }
   // - MLIQ ----------------------------------------------
   if (header.flags.has_water)
@@ -956,13 +936,21 @@ void WMOGroup::load()
 
     assert (fourcc == 'MOCV');
 
-    std::vector<CImVector> mocv_2(_vertex_colors.size());
-    f.read(mocv_2.data(), size);
-
-    for (int i = 0; i < mocv_2.size(); ++i)
+    // there can be only the 2nd chunk
+    if (header.flags.has_vertex_color)
     {
-      // second mocv chunks is used to change the alpha of the color from the first chunk, don't ask why
-      _vertex_colors[i].w = static_cast<float>(mocv_2[i].a) / 255.f;
+      std::vector<CImVector> mocv_2(_vertex_colors.size());
+      f.read(mocv_2.data(), size);
+
+      for (int i = 0; i < mocv_2.size(); ++i)
+      {
+        // second mocv chunks is used to change the alpha of the color from the first chunk, don't ask why
+        _vertex_colors[i].w = static_cast<float>(mocv_2[i].a) / 255.f;
+      }
+    }
+    else
+    {
+      load_mocv(f, size);
     }
   }
 
@@ -997,6 +985,32 @@ void WMOGroup::load()
   {
     use_outdoor_lights = true;
   }
+}
+
+void WMOGroup::load_mocv(MPQFile& f, uint32_t size)
+{
+  uint32_t const* colors = reinterpret_cast<uint32_t const*> (f.getPointer());
+  _vertex_colors.resize(size / sizeof(uint32_t));
+
+  for (size_t i(0); i < size / sizeof(uint32_t); ++i)
+  {
+    _vertex_colors[i] = colorFromInt(colors[i]);
+  }
+
+  if (wmo->flags.do_not_fix_vertex_color_alpha)
+  {
+    for (auto& color : _vertex_colors)
+    {
+      color.w = header.flags.exterior ? 255.f : 0.f;
+    }
+  }
+  else
+  {
+    fix_vertex_color_alpha();
+  }
+
+  // there's no read so this is required
+  f.seekRelative(size);
 }
 
 void WMOGroup::fix_vertex_color_alpha()
