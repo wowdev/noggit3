@@ -225,11 +225,7 @@ void ModelInstance::recalcExtents()
   _extents[0] = min;
   _extents[1] = max;
 
-  size_cat = std::max( vertex_box_max.x - vertex_box_min.x
-                     , std::max( vertex_box_max.y - vertex_box_min.y
-                               , vertex_box_max.z - vertex_box_min.z
-                               )
-                     );
+  size_cat = (max - min).length();
 
   _need_recalc_extents = false;
 }

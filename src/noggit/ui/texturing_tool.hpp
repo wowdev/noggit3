@@ -34,7 +34,7 @@ namespace noggit
     class texturing_tool : public QWidget
     {
     public:
-      texturing_tool (const math::vector_3d* camera_pos, World*);
+      texturing_tool (const math::vector_3d* camera_pos, World*, QWidget* parent = nullptr);
 
       float brush_radius() const;
       float hardness() const;
@@ -48,7 +48,8 @@ namespace noggit
       void change_hardness (float change);
       void change_pressure (float change);
       void change_brush_level (float change);
-	  void toggle_brush_level_min_max();
+      void set_pressure (float pressure);
+	    void toggle_brush_level_min_max();
       void change_spray_size (float change);
       void change_spray_pressure (float change);
 
@@ -60,6 +61,8 @@ namespace noggit
       }
 
       current_texture* _current_texture;
+
+      QSize sizeHint() const override;
 
     private:
       void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);
@@ -73,7 +76,7 @@ namespace noggit
       Brush _inner_brush;
       Brush _spray_brush;
 
-      float _brush_level;
+      int _brush_level;
       float _hardness;
       float _pressure;
 
@@ -94,7 +97,7 @@ namespace noggit
       QSlider* _hardness_slider;
       QSlider* _radius_slider;
       QSlider* _pressure_slider;
-      QDoubleSpinBox* _brush_level_spin;
+      QSpinBox* _brush_level_spin;
       QDoubleSpinBox* _hardness_spin;
       QDoubleSpinBox* _radius_spin;
       QDoubleSpinBox* _pressure_spin;

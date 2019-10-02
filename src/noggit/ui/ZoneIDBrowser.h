@@ -17,7 +17,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      zone_id_browser();
+      zone_id_browser(QWidget* parent = nullptr);
       void setMapID(int id);
       void setZoneID(int id);
 

@@ -136,7 +136,7 @@ void World::update_selection_pivot()
   else
   {
     _multi_select_pivot = boost::none;
-  }
+  }  
 }
 
 bool World::is_selection(int pSelectionType, selection_type selection) const
@@ -149,14 +149,14 @@ bool World::is_selected(selection_type selection) const
   if (selection.which() == eEntry_Model)
   {
     uint uid = boost::get<selected_model_type>(selection)->uid;
-    auto const& it = std::find_if(_current_selection.begin()
+    auto const& it = std::find_if( _current_selection.begin()
                                   , _current_selection.end()
                                   , [uid] (selection_type type)
-    {
-      return type.type() == typeid(selected_model_type)
-        && boost::get<selected_model_type>(type)->uid == uid;
-    }
-    );
+                                    {
+                                      return type.type() == typeid(selected_model_type) 
+                                        && boost::get<selected_model_type>(type)->uid == uid;
+                                    }
+                                  );
 
     if (it != _current_selection.end())
     {
@@ -166,14 +166,14 @@ bool World::is_selected(selection_type selection) const
   else if (selection.which() == eEntry_WMO)
   {
     uint uid = boost::get<selected_wmo_type>(selection)->mUniqueID;
-    auto const& it = std::find_if(_current_selection.begin()
+    auto const& it = std::find_if( _current_selection.begin()
                             , _current_selection.end()
                             , [uid] (selection_type type)
-    {
-      return type.type() == typeid(selected_wmo_type)
-        && boost::get<selected_wmo_type>(type)->mUniqueID == uid;
-    }
-    );
+                              {
+                                return type.type() == typeid(selected_wmo_type)
+                                  && boost::get<selected_wmo_type>(type)->mUniqueID == uid;
+                              }
+                            );
     if (it != _current_selection.end())
     {
       return true;
@@ -187,7 +187,7 @@ boost::optional<selection_type> World::get_last_selected_model() const
 {
   boost::optional<selection_type> selection;
 
-  for (auto& it = _current_selection.rbegin(); it != _current_selection.rend(); it++)
+  for(auto& it = _current_selection.rbegin(); it!=_current_selection.rend(); it++)
   {
     if (it->which() != eEntry_MapChunk)
     {
@@ -208,14 +208,14 @@ void World::set_current_selection(selection_type entry)
   _selected_model_count = entry.which() == eEntry_MapChunk ? 0 : 1;
 }
 
-void World::add_to_selection(selection_type entry)
+void World::add_to_selection(selection_type entry) 
 {
   if (entry.which() != eEntry_MapChunk)
   {
     _selected_model_count++;
   }
 
-  _current_selection.push_back(entry);
+  _current_selection.push_back(entry); 
   update_selection_pivot();
 }
 
@@ -231,12 +231,12 @@ void World::remove_from_selection(selection_type entry)
 
     _current_selection.erase(position);
     update_selection_pivot();
-  }
+  }  
 }
 
-void World::reset_selection()
+void World::reset_selection() 
 {
-  _current_selection.clear();
+  _current_selection.clear(); 
   _multi_select_pivot = boost::none;
   _selected_model_count = 0;
 }
@@ -247,7 +247,7 @@ void World::scale_selected_models(float v, m2_scaling_type type)
   {
     if (entry.which() == eEntry_Model)
     {
-      ModelInstance* mi = boost::get<selected_model_type>(entry);
+      ModelInstance* mi = boost::get<selected_model_type>(entry);      
 
       float scale = mi->scale;
 
@@ -346,7 +346,7 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
 
     bool entry_is_m2 = type == eEntry_Model;
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(entry, model_update::remove);   
 
     if (entry_is_m2)
     {
@@ -385,7 +385,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     updateTilesEntry(entry, model_update::remove);
 
     if (use_pivot && has_multi_select)
-    {
+    {     
       math::vector_3d& pos = entry_is_m2
         ? boost::get<selected_model_type>(entry)->pos
         : boost::get<selected_wmo_type>(entry)->pos
@@ -428,7 +428,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
   math::vector_3d new_dir(rx._, ry._, rz._);
-
+  
   for (auto& entry : _current_selection)
   {
     auto type = entry.which();
@@ -440,7 +440,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
     bool entry_is_m2 = type == eEntry_Model;
 
     updateTilesEntry(entry, model_update::remove);
-
+    
     math::vector_3d& dir = entry_is_m2
       ? boost::get<selected_model_type>(entry)->dir
       : boost::get<selected_wmo_type>(entry)->dir
@@ -775,7 +775,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , draw_chunk_flag_overlay
                  , draw_areaid_overlay
                  , area_id_colors
-                 , current_selection()
+                 , _current_selection
                  , animtime
                  , display
                  );
@@ -793,6 +793,11 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     noggit::cursor_render::mode mode;
 
+    if (terrainMode == editing_mode::object && has_multiple_model_selected())
+    {
+      render_sphere(_multi_select_pivot.get(), 2.f, cursor_color);
+    }
+
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
     {
       mode = cursor_type == 2 
@@ -809,11 +814,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
 
     _cursor_render.draw(mode, mvp, cursor_color, cursor_pos, brush_radius, inner_radius_ratio);
-  }
-
-  if (terrainMode == editing_mode::object && has_multiple_model_selected())
-  {
-    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 2.f);
   }
   
   if (use_ref_pos)
@@ -1013,14 +1013,21 @@ void World::draw ( math::matrix_4x4 const& model_view
       if (is_selection(eEntry_Model, selection))
       {
         auto model = boost::get<selected_model_type>(selection);
-        if (model->is_visible(frustum, culldistance, camera_pos, display))
-        {
-          model->draw_box(model_view, projection, true);
-        }
+      if (model->is_visible(frustum, culldistance, camera_pos, display))
+      {
+        model->draw_box(model_view, projection, true);
       }
     }
   }
+<<<<<<< local
   
+=======
+  }
+
+  opengl::texture::disable_texture(1);
+  opengl::texture::enable_texture(0);
+
+>>>>>>> other
   if (!_liquid_render)
   {
     _liquid_render.emplace();
@@ -1086,7 +1093,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                          , river_color_light
                          , river_color_dark
                          , _liquid_render.get()
-                         , current_selection()
+                         , mCurrentSelection
                          , animtime
                          , skies->hasSkies()
                          , display
@@ -1105,12 +1112,37 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     if (!_m2_particles_program)
     {
+<<<<<<< local
       _m2_particles_program.reset
         ( new opengl::program
             { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
             , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
             }
         );
+=======
+      bool is_hidden = it->second.wmo->is_hidden();
+      if (draw_hidden_models || !is_hidden)
+      {
+        it->second.draw ( frustum
+                        , culldistance
+                        , camera_pos
+                        , is_hidden
+                        , draw_wmo_doodads
+                        , draw_fog
+                        , ocean_color_light
+                        , ocean_color_dark
+                        , river_color_light
+                        , river_color_dark
+                        , _liquid_render.get()
+                        , current_selection()
+                        , animtime
+                        , [this] (bool on) { return outdoorLights (on); }
+                        , skies->hasSkies()
+                        , [this] (bool on) { return setupFog (on); }
+                        , display
+                        );
+      }
+>>>>>>> other
     }
 
     opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;
@@ -1404,6 +1436,7 @@ template<typename Fun, typename Post>
   return changed;
 }
 
+
 void World::changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
   for_all_chunks_in_range
@@ -1415,20 +1448,22 @@ void World::changeShader(math::vector_3d const& pos, math::vector_4d const& colo
     );
 }
 
+
 math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
 {
   math::vector_3d color = math::vector_3d(1.0f, 1.0f, 1.0f);
   for_all_chunks_in_range
   (pos, 0.1f
-    , [&] (MapChunk* chunk)
-  {
-    color = chunk->pickMCCV(pos);
-    return true;
-  }
+    , [&](MapChunk* chunk)
+    {
+       color = chunk->pickMCCV(pos);
+       return true;
+    }
   );
 
   return color;
 }
+
 
 void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
 {
@@ -1496,7 +1531,7 @@ void World::recalc_norms (MapChunk* chunk) const
                      );
 }
 
-bool World::paintTexture(math::vector_3d const& pos, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
+bool World::paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture)
 {
   return for_all_chunks_in_range
     ( pos, brush->getRadius()
@@ -1659,13 +1694,13 @@ void World::saveMap (int width, int height)
 void World::deleteModelInstance(int pUniqueID)
 {
   std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
-  
-  if (it == mModelInstances.end())
+  if (it == mModelInstances.end()) return;
+
+  auto selectionIt = std::find_if(_current_selection.begin(), _current_selection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_model_type) && boost::get<selected_model_type>(type)->uid == pUniqueID; });
+  if (selectionIt != _current_selection.end())
   {
-    return;
-  } 
-  
-  remove_from_selection(&it->second);
+    _current_selection.erase(selectionIt);
+  }
 
   updateTilesModel(&it->second, model_update::remove);
   mModelInstances.erase(it);
@@ -1674,13 +1709,13 @@ void World::deleteModelInstance(int pUniqueID)
 void World::deleteWMOInstance(int pUniqueID)
 {
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
-  
-  if (it == mWMOInstances.end())
-  {
-    return;
-  }
+  if (it == mWMOInstances.end()) return;
 
-  remove_from_selection(&it->second);
+  auto selectionIt = std::find_if(_current_selection.begin(), _current_selection.end(), [pUniqueID](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == pUniqueID; });
+  if (selectionIt != _current_selection.end())
+  {
+    _current_selection.erase(selectionIt);
+  }
 
   updateTilesWMO(&it->second, model_update::remove);
   mWMOInstances.erase(it);
@@ -1820,6 +1855,7 @@ void World::addWMO ( std::string const& filename
 
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
+
 
 void World::remove_models_if_needed(std::vector<uint32_t> const& uids, tile_index const& tile_unloading)
 {

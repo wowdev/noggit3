@@ -13,7 +13,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      using QLabel::QLabel;
+      clickable_label(QWidget* parent=nullptr);
 
     signals:
       void clicked();

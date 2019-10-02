@@ -13,6 +13,7 @@
 #include <noggit/Misc.h>
 #include <noggit/MPQ.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/ui/TextureList.hpp>
 
 #include <unordered_set>
 
@@ -20,7 +21,6 @@
 #include <QtCore/QSortFilterProxyModel>
 #include <QtGui/QStandardItemModel>
 #include <QtWidgets/QCheckBox>
-#include <QtWidgets/QListView>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QVBoxLayout>
 
@@ -64,6 +64,7 @@ namespace noggit
     {
       setWindowTitle ("Texture palette");
       setWindowIcon (QIcon (":/icon"));
+      setMinimumHeight(490);
 
       while (!MPQArchive::allFinishedLoading())
       {
@@ -184,7 +185,7 @@ namespace noggit
 
 
 
-      auto list (new QListView);
+      auto list = new TextureList(this);
       list->setEditTriggers (QAbstractItemView::NoEditTriggers);
       list->setViewMode (QListView::IconMode);
       list->setMovement (QListView::Static);
@@ -194,7 +195,7 @@ namespace noggit
       list->setWrapping (true);
       list->setModel (search_filter);
 
-      connect ( list, &QAbstractItemView::doubleClicked
+      connect ( list, &QAbstractItemView::clicked
               , [=] (QModelIndex const& index)
                 {
                   emit selected
@@ -224,7 +225,6 @@ namespace noggit
 
       resize(155 * 5 + 35, height());
     }
-
     
     // selected_texture:
     boost::optional<scoped_blp_texture_reference> selected_texture::texture = boost::none;

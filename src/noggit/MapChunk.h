@@ -133,7 +133,6 @@ public:
             , bool draw_chunk_flag_overlay
             , bool draw_areaid_overlay
             , std::map<int, misc::random_color>& area_id_colors
-            , boost::optional<selection_type> selection
             , int animtime
             , display_mode display
             );
@@ -141,6 +140,7 @@ public:
 
   void intersect (math::ray const&, selection_result*);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
+  math::vector_3d pickMCCV(math::vector_3d const& pos);
 
   ChunkWater* liquid_chunk() const;
 
@@ -160,7 +160,7 @@ public:
   bool isBorderChunk(std::set<math::vector_3d*>& selected);
 
   //! \todo implement Action stack for these
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture);
   bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture);
   bool canPaintTexture(scoped_blp_texture_reference texture);
   int addTexture(scoped_blp_texture_reference texture);

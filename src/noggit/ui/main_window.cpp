@@ -67,11 +67,11 @@ namespace noggit
                          }
                        );
 
-      auto mapmenu_action (file_menu->addAction ("Create Map Editor"));
+      auto mapmenu_action (file_menu->addAction ("Exit"));
       QObject::connect ( mapmenu_action, &QAction::triggered
                        , [this]
                          {
-                           build_menu();
+                            close();
                          }
                        );
 
@@ -141,6 +141,8 @@ namespace noggit
       connect(mapview, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
 
       setCentralWidget (mapview);
+
+      map_loaded = true;
     }
 
     void main_window::loadMap(int mapID)
@@ -293,34 +295,58 @@ namespace noggit
 
     void main_window::closeEvent (QCloseEvent* event)
     {
-      if (centralWidget() != _null_widget)
+      if (map_loaded)
       {
         event->ignore();
-        prompt_exit();
+        prompt_exit(event);
+      }
+      else
+      {
+        event->accept();
       }
     }
 
-    void main_window::prompt_exit()
+    void main_window::prompt_exit(QCloseEvent* event)
     {
       QMessageBox prompt;
       prompt.setIcon (QMessageBox::Warning);
-      prompt.setWindowTitle ("Exit current editor?");
-      prompt.setText ("Exit current editor?");
+      prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
+      prompt.setText ("Exit?");
       prompt.setInformativeText ("Any unsaved changes will be lost.");
-      prompt.addButton ("Exit", QMessageBox::AcceptRole);
-      prompt.setDefaultButton (prompt.addButton ("Continue Editing", QMessageBox::RejectRole));
+      prompt.addButton ("Exit", QMessageBox::DestructiveRole);
+      prompt.addButton ("Return to menu", QMessageBox::AcceptRole);
+      prompt.setDefaultButton (prompt.addButton ("Cancel", QMessageBox::RejectRole));
       prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
       prompt.exec();
 
-      if (prompt.buttonRole (prompt.clickedButton()) == QMessageBox::AcceptRole)
+      switch (prompt.buttonRole(prompt.clickedButton()))
       {
-        setCentralWidget (_null_widget = new QWidget (this));
-        // update bookmark list
-        createBookmarkList();
+        case QMessageBox::AcceptRole:
+        {
+          // update bookmark list
+          createBookmarkList();
+          map_loaded = false;
 
-        //!\ todo: rebuild/show the map selection menu
+          build_menu();
+          break;
+        }
+
+        case QMessageBox::DestructiveRole:
+        {
+          build_menu();
+          event->accept();
+          break;
+        }
+
+        default:
+        {
+          event->ignore();
+          break;
+        }
+
       }
+
     }
 
     void main_window::prompt_uid_fix_failure()

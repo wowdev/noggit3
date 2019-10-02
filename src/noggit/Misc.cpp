@@ -1,12 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Misc.h>
+#include <noggit/Selection.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/WMOInstance.h>
 
 #include <iomanip>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 namespace misc
 {
@@ -76,6 +80,33 @@ namespace misc
   float getShortestDist(math::vector_3d const& pos, math::vector_3d const& square_pos, float unitSize)
   {
     return getShortestDist(pos.x, pos.z, square_pos.x, square_pos.z, unitSize);
+  }
+
+  bool square_is_in_circle(float x, float z, float radius, float square_x, float square_z, float square_size)
+  {
+    float px, pz;
+
+    if (std::abs(square_x - x) < std::abs(square_x + square_size - x))
+    {
+      px = square_x + square_size;
+    }
+    else
+    {
+      px = square_x;
+    }
+
+    if (std::abs(square_z - z) < std::abs(square_z + square_size - z))
+    {
+      pz = square_z + square_size;
+    }
+    else
+    {
+      pz = square_z;
+    }
+
+    // check if the furthest is in the circle
+    float d = dist(x, z, px, pz);
+    return d <= radius;
   }
 
   bool rectOverlap(math::vector_3d const* r1, math::vector_3d const* r2)
@@ -173,36 +204,14 @@ void minmax(math::vector_3d* a, math::vector_3d* b)
 {
   if (a->x > b->x)
   {
-    float t = b->x;
-    b->x = a->x;
-    a->x = t;
+    std::swap(a->x, b->x);
   }
   if (a->y > b->y)
   {
-    float t = b->y;
-    b->y = a->y;
-    a->y = t;
+    std::swap(a->y, b->y);
   }
   if (a->z > b->z)
   {
-    float t = b->z;
-    b->z = a->z;
-    a->z = t;
+    std::swap(a->z, b->z);
   }
-}
-
-bool checkInside(math::vector_3d extentA[2], math::vector_3d extentB[2])
-{
-  minmax(&extentA[0], &extentA[1]);
-  minmax(&extentB[0], &extentB[1]);
-
-  return pointInside(extentA[0], extentB) ||
-    pointInside(extentA[1], extentB) ||
-    pointInside(extentB[0], extentA) ||
-    pointInside(extentB[1], extentA);
-}
-
-bool checkOriginInside(math::vector_3d extentA[2], math::vector_3d modelPos)
-{
-  return pointInside(modelPos, extentA);
 }

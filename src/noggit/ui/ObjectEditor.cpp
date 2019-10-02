@@ -37,11 +37,13 @@ namespace noggit
     object_editor::object_editor ( MapView* mapView
                                  , World* world
                                  , bool_toggle_property* move_model_to_cursor_position
+                                 , bool_toggle_property* use_median_pivot_point
                                  , object_paste_params* paste_params
+                                 , QWidget* parent
                                  )
-            : QWidget(nullptr)
+            : QWidget(parent)
             , modelImport (new model_import(this))
-            , rotationEditor (new rotation_editor(mapView))
+            , rotationEditor (new rotation_editor(mapView, world))
             , helper_models_widget(new helper_models(this))
             , _settings (new QSettings (this))
             , _copy_model_stats (true)
@@ -138,7 +140,14 @@ namespace noggit
                                              )
                               );
 
+      auto object_median_pivot_point (new checkbox ("Median pivot point"
+                                                   , use_median_pivot_point
+                                                   , this
+                                                   )
+                                     );
+
       object_movement_layout->addRow(object_movement_cb);
+      object_movement_layout->addRow(object_median_pivot_point);
 
       QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
       QPushButton *visToggleButton = new QPushButton("Toggle Visibility", this);
@@ -167,6 +176,8 @@ namespace noggit
       layout->addRow(clearListButton);
       layout->addRow(importBox);
       layout->addRow (_filename);
+
+      rotationEditor->use_median_pivot_point = &_use_median_pivot_point;
 
       connect (rotation_group, &QGroupBox::toggled, [&] (int s)
       {
@@ -245,6 +256,11 @@ namespace noggit
 
       pasteModeGroup->button(pasteMode)->setChecked(true);
 
+      connect (object_median_pivot_point, &QCheckBox::stateChanged, [this](bool b)
+      {
+          _use_median_pivot_point = b;
+      });
+
       connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
                 {
@@ -287,7 +303,9 @@ namespace noggit
       connect( helper_models_btn
              , &QPushButton::clicked
              , [=]() { helper_models_widget->show(); }
-             );      
+             );    
+
+      setMinimumWidth(sizeHint().width());
     }
 
     void object_editor::showImportModels()
@@ -301,73 +319,83 @@ namespace noggit
                                     , object_paste_params* paste_params
                                     )
     {
-      if (!selected || selected->which() == eEntry_MapChunk)
-      {
-        LogError << "Invalid selection" << std::endl;
-        return;
-      }
+      auto last_entry = world->get_last_selected_model();
+      bool multi_selection = world->has_multiple_model_selected();
 
-      math::vector_3d pos = cursor_pos;
-
-      switch (pasteMode)
+      for (auto& selection : selected)
       {
-        case PASTE_ON_TERRAIN: // use cursor pos
+        math::vector_3d pos;
+
+        if (selection.which() == eEntry_MapChunk)
+        {
+          LogError << "Invalid selection" << std::endl;
+          return;
+        }
+
+        math::vector_3d model_pos = selection.which() == eEntry_Model
+          ? boost::get<selected_model_type>(selection)->pos
+          : boost::get<selected_wmo_type>(selection)->pos
+          ;
+
+        switch (pasteMode)
+        {
+        case PASTE_ON_TERRAIN:
+          pos = cursor_pos + model_pos;
           break;
         case PASTE_ON_SELECTION:
-          if (world->HasSelection())
+          if (last_entry)
           {
-            auto selection = *world->GetCurrentSelection();
-            if (selection.which() == eEntry_Model)
-            {
-              pos = boost::get<selected_model_type> (selection)->pos;
-            }
-            else if (selection.which() == eEntry_WMO)
-            {
-              pos = boost::get<selected_wmo_type> (selection)->pos;
-            }
-          } // else: use cursor pos
+            math::vector_3d last_entry_pos = last_entry->which() == eEntry_Model
+              ? boost::get<selected_model_type>(last_entry.get())->pos
+              : boost::get<selected_wmo_type>(last_entry.get())->pos
+              ;
+
+            pos = last_entry_pos + model_pos;
+          }
+          else // paste to mouse cursor when there's no selected model
+          {
+            pos = cursor_pos + model_pos;
+          }
           break;
         case PASTE_ON_CAMERA:
-          pos = camera_pos;
+          pos = camera_pos + model_pos;
           break;
         default:
-          LogDebug << "UIObjectEditor::pasteObject: Unknown pasteMode " << pasteMode << std::endl;
+          LogDebug << "object_editor::pasteObject: unknown paste mode " << pasteMode << std::endl;
           break;
-      }
-
-      {
-        if (selected->which() == eEntry_Model)
+        }
+        
+        if (selection.which() == eEntry_Model)
         {
-          float scale (1.f);
-          math::vector_3d rotation (0.f, 0.f, 0.f);
+          float scale(1.f);
+          math::vector_3d rotation(0.f, 0.f, 0.f);
 
           if (_copy_model_stats)
           {
             // copy rot size from original model. Dirty but woring
-            scale = boost::get<selected_model_type> (selected.get())->scale;
-            rotation = boost::get<selected_model_type> (selected.get())->dir;
+            scale = boost::get<selected_model_type>(selection)->scale;
+            rotation = boost::get<selected_model_type>(selection)->dir;
           }
 
-          world->addM2 ( boost::get<selected_model_type> (selected.get())->model->filename
-                       , pos
-                       , scale
-                       , rotation
-                       , paste_params
-                       );
+          world->addM2( boost::get<selected_model_type>(selection)->model->filename
+                      , pos
+                      , scale
+                      , rotation
+                      , paste_params
+                      );
         }
-        else if (selected->which() == eEntry_WMO)
+        else if (selection.which() == eEntry_WMO)
         {
-          math::vector_3d rotation (0.f, 0.f, 0.f);
+          math::vector_3d rotation(0.f, 0.f, 0.f);
           if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working
-            rotation = boost::get<selected_wmo_type> (selected.get())->dir;
+            rotation = boost::get<selected_wmo_type>(selection)->dir;
           }
 
-          world->addWMO(boost::get<selected_wmo_type> (selected.get())->wmo->filename, pos, rotation);
-        }
+          world->addWMO(boost::get<selected_wmo_type>(selection)->wmo->filename, pos, rotation);
+        }        
       }
-
     }
 
     void object_editor::togglePasteMode()
@@ -375,26 +403,40 @@ namespace noggit
       pasteModeGroup->button ((pasteMode + 1) % PASTE_MODE_COUNT)->setChecked (true);
     }   
 
-    void object_editor::replace_selection(selection_type new_selection)
+    void object_editor::replace_selection(std::vector<selection_type> new_selection)
     {
-      selected.reset();
       selected = new_selection;
 
       std::stringstream ss;
-      ss << "Model: ";      
-
-      if (new_selection.which() == eEntry_Model)
+      
+      if (selected.empty())
       {
-        ss << boost::get<selected_model_type>(new_selection)->model->filename;
+        _filename->setText("");
+        return;
       }
-      else if (new_selection.which() == eEntry_WMO)
+
+      if (selected.size() == 1)
       {
-        ss << boost::get<selected_wmo_type>(new_selection)->wmo->filename;
+        ss << "Model: ";
+
+        auto selectedObject = new_selection.front();
+        if (selectedObject.which() == eEntry_Model)
+        {
+          ss << boost::get<selected_model_type>(selectedObject)->model->filename;
+        }
+        else if (selectedObject.which() == eEntry_WMO)
+        {
+          ss << boost::get<selected_wmo_type>(selectedObject)->wmo->filename;
+        }
+        else
+        {
+          ss << "Error";
+          LogError << "The new selection wasn't a m2 or wmo" << std::endl;
+        }
       }
       else
       {
-        ss << "Error";
-        LogError << "The new selection wasn't a m2 or wmo" << std::endl;
+        ss << "Multiple objects selected";
       }
 
       _filename->setText(ss.str().c_str());
@@ -413,64 +455,82 @@ namespace noggit
         return;
       }
 
+      std::vector<selection_type> selectionVector;
       if (boost::ends_with (filename, ".m2"))
       {
-        replace_selection(new ModelInstance(filename));
+        selectionVector.push_back(new ModelInstance(filename));
+        replace_selection(selectionVector);
       }
       else if (boost::ends_with (filename, ".wmo"))
       {
-        replace_selection(new WMOInstance(filename));
+        selectionVector.push_back(new WMOInstance(filename));
+        replace_selection(selectionVector);
       }
     }
 
-    void object_editor::copy(boost::optional<selection_type> entry)
+    void object_editor::copy_current_selection(World* world)
     {
-      if (!entry)
+      auto const& current_selection = world->current_selection();
+      auto const& pivot = world->multi_select_pivot();
+
+      if (current_selection.empty())
       {
         return;
       }
 
-      auto const& selection = entry.get();
-
-      if (selection.which() == eEntry_Model)
+      std::vector<selection_type> selectionVector;
+      for (auto& selection : current_selection)
       {
-        auto clone = new ModelInstance(boost::get<selected_model_type> (selection)->model->filename);
-        clone->scale = boost::get<selected_model_type> (selection)->scale;
-        clone->dir = boost::get<selected_model_type> (selection)->dir;
-
-        replace_selection(clone);
+        if (selection.which() == eEntry_Model)
+        {
+          auto original = boost::get<selected_model_type>(selection);
+          auto clone = new ModelInstance(original->model->filename);
+          clone->scale = original->scale;
+          clone->dir = original->dir;
+          clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
+          selectionVector.push_back(clone);
+        }
+        else if (selection.which() == eEntry_WMO)
+        {
+          auto original = boost::get<selected_wmo_type>(selection);
+          auto clone = new WMOInstance(original->wmo->filename);
+          clone->dir = original->dir;
+          clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
+          selectionVector.push_back(clone);
+        }
       }
-      else if (selection.which() == eEntry_WMO)
-      {
-        auto clone = new WMOInstance(boost::get<selected_wmo_type> (selection)->wmo->filename);
-        clone->dir = boost::get<selected_wmo_type> (selection)->dir;
-        
-        replace_selection(clone);
-      }
+      replace_selection(selectionVector);
     }
 
     void object_editor::SaveObjecttoTXT (World* world)
     {
-      if (!world->HasSelection() || world->IsSelection(eEntry_MapChunk))
+      if (!world->has_selection())
       {
         return;
       }
 
-      std::string path;
-
-      if (world->IsSelection(eEntry_WMO))
+      std::ofstream stream(_settings->value("project/import_file", "import.txt").toString().toStdString(), std::ios_base::app);
+      for (auto& selection : world->current_selection())
       {
-        path = boost::get<selected_wmo_type> (*world->GetCurrentSelection())->wmo->filename;
-      }
-      else if (world->IsSelection(eEntry_Model))
-      {
-        path = boost::get<selected_model_type> (*world->GetCurrentSelection())->model->filename;
-      }
+        if (world->is_selection(eEntry_MapChunk, selection))
+        {
+          continue;
+        }
 
-      std::ofstream stream(_settings->value("project/import_file" , "import.txt").toString().toStdString(), std::ios_base::app);
-      stream << path << std::endl;
+        std::string path;
+
+        if (world->is_selection(eEntry_WMO, selection))
+        {
+          path = boost::get<selected_wmo_type>(selection)->wmo->filename;
+        }
+        else if (world->is_selection(eEntry_Model, selection))
+        {
+          path = boost::get<selected_model_type>(selection)->model->filename;
+        }
+
+        stream << path << std::endl;
+      }
       stream.close();
-
       modelImport->buildModelList();
     }
 
@@ -526,6 +586,11 @@ namespace noggit
       {
         copy(last_model_found);
       }      
+    }
+
+    QSize object_editor::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

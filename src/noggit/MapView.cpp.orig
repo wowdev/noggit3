@@ -33,7 +33,7 @@
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
-#include <noggit/ui/texture_palette_small.hpp>
+
 #include <opengl/scoped.hpp>
 
 #include "revision.h"
@@ -49,7 +49,6 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
-#include <QWidgetAction>
 
 #include <algorithm>
 #include <cmath>
@@ -62,6 +61,21 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#include <external/wacom/MSGPACK.H>
+#define PACKETDATA  (PK_BUTTONS | PK_NORMAL_PRESSURE)
+#define PACKETMODE  PK_BUTTONS
+#include <external/wacom/PKTDEF.H>
+#include <external/wacom/Utils.h>
+#include <direct.h>
+#include <windows.h>
+#include <winerror.h>
+#define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
+HINSTANCE hInst;
+char* gpszProgramName = "Noggit3";
+static LOGCONTEXT  glogContext = { 0 };
+#endif
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -71,104 +85,88 @@ void MapView::set_editing_mode (editing_mode mode)
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
+  _terrain->hide();
+  _flatten_blur->hide();
+  _texturing->hide();
+  _vertex_shading->hide();
+  _water->hide();
+  TexturePicker->hide();
+  _object->hide();
   objectEditor->modelImport->hide();
   objectEditor->rotationEditor->hide();
+  _areaid->hide();
   TexturePalette->hide();
-  TexturePicker->hide();
-  _texture_palette_dock->hide();
 
   MoveObj = false;
-  _world->reset_selection();
+  _world->ResetSelection();
 
-  if (!ui_hidden)
+  switch (mode)
   {
-    setToolPropertyWidgetVisibility(mode);
+  case editing_mode::ground:
+    _terrain->show();
+    break;
+  case editing_mode::flatten_blur:
+    _flatten_blur->show();
+    break;
+  case editing_mode::paint:
+    _texturing->show();
+    break;
+  case editing_mode::areaid:
+    _areaid->show();
+    break;
+  case editing_mode::water:
+    _water->show();
+    break;
+  case editing_mode::mccv:
+    _vertex_shading->show();
+    break;
+  case editing_mode::object:
+    _object->show();
   }
 
   terrainMode = mode;
   _toolbar->check_tool (mode);
 }
 
-void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
-{
-  for (auto dock : _tool_properties_docks)
-  {
-    dock->hide();
-  }
-
-  switch (mode)
-  {
-  case editing_mode::ground:
-    _terrain_tool_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::flatten_blur:
-    _flatten_blur_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::paint:
-    _texturing_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::areaid:
-    _areaid_editor_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::water:
-    _water_editor_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::mccv:
-    _vertex_shading_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::object:
-    _object_editor_dock->setVisible(!ui_hidden);
-    break;
-  }
-
-  
-}
-
 void MapView::ResetSelectedObjectRotation()
 {
-  for (auto& selection : _world->current_selection())
+  if (_world->IsSelection(eEntry_WMO))
   {
-    if (_world->is_selection(eEntry_WMO, selection))
-    {
-      WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
+    WMOInstance* wmo = boost::get<selected_wmo_type> (*_world->GetCurrentSelection());
     _world->updateTilesWMO(wmo, model_update::remove);
     wmo->resetDirection();
     _world->updateTilesWMO(wmo, model_update::add);
   }
-    else if (_world->is_selection(eEntry_Model, selection))
+  else if (_world->IsSelection(eEntry_Model))
   {
-      ModelInstance* m2 = boost::get<selected_model_type>(selection);
+    ModelInstance* m2 = boost::get<selected_model_type> (*_world->GetCurrentSelection());
     _world->updateTilesModel(m2, model_update::remove);
     m2->resetDirection();
     m2->recalcExtents();
     _world->updateTilesModel(m2, model_update::add);
   }
 }
-}
 
 void MapView::SnapSelectedObjectToGround()
 {
-  for (auto& selection : _world->current_selection())
+  if (_world->IsSelection(eEntry_WMO))
   {
-    if (_world->is_selection(eEntry_WMO, selection))
-    {
-      WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
+    WMOInstance* wmo = boost::get<selected_wmo_type> (*_world->GetCurrentSelection());
     math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
     _world->GetVertex(wmo->pos.x, wmo->pos.z, &t);
     wmo->pos.y = t.y;
 	  wmo->recalcExtents();
     _world->updateTilesWMO(wmo, model_update::none);
   }
-    else if (_world->is_selection(eEntry_Model, selection))
+  else if (_world->IsSelection(eEntry_Model))
   {
-      ModelInstance* m2 = boost::get<selected_model_type>(selection);
+    ModelInstance* m2 = boost::get<selected_model_type> (*_world->GetCurrentSelection());
     math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
     _world->GetVertex(m2->pos.x, m2->pos.z, &t);
     m2->pos.y = t.y;
 	  m2->recalcExtents();
     _world->updateTilesModel(m2, model_update::none);
   }
-}
 }
 
 
@@ -177,18 +175,15 @@ void MapView::DeleteSelectedObject()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  for (auto& selection : _world->current_selection())
+  if (_world->IsSelection(eEntry_WMO))
   {
-    if (_world->is_selection(eEntry_WMO, selection))
-    {
-      _world->deleteWMOInstance(boost::get<selected_wmo_type>(selection)->mUniqueID);
+    _world->deleteWMOInstance(boost::get<selected_wmo_type> (*_world->GetCurrentSelection())->mUniqueID);
   }
-    else if (_world->is_selection(eEntry_Model, selection))
+  else if (_world->IsSelection(eEntry_Model))
   {
-      _world->deleteModelInstance(boost::get<selected_model_type>(selection)->uid);
+    _world->deleteModelInstance(boost::get<selected_model_type> (*_world->GetCurrentSelection())->uid);
     _world->need_model_updates = true;
   }
-}
 }
 
 
@@ -198,233 +193,148 @@ void MapView::changeZoneIDValue (int set)
 }
 
 
-QWidgetAction* MapView::createTextSeparator(const QString& text)
-{
-  auto* pLabel = new QLabel(text);
-  //pLabel->setMinimumWidth(this->minimumWidth() - 4);
-  pLabel->setAlignment(Qt::AlignCenter);
-  auto* separator = new QWidgetAction(this);
-  separator->setDefaultWidget(pLabel);
-  return separator;
-}
-
-
 void MapView::createGUI()
 {
+  _terrain = new QDockWidget ("Raise / Lower", this);
+  _terrain->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _terrain->setWidget (terrainTool = new noggit::ui::terrain_tool());
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _terrain);
+  connect (this, &QObject::destroyed, _terrain, &QObject::deleteLater);
 
-  // create tool widgets
+  connect ( terrainTool
+          , &noggit::ui::terrain_tool::updateVertices
+          , [this] (int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
 
-  _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
-  terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
-  _terrain_tool_dock->setWidget(terrainTool);
-  _tool_properties_docks.insert(_terrain_tool_dock);
+              _world->orientVertices ( vertex_mode == eVertexMode_Mouse
+                                      ? _cursor_pos
+                                      : _world->vertexCenter()
+                                      , angle
+                                      , orientation
+                                      );
+            }
+          );
 
-  connect(terrainTool
-    , &noggit::ui::terrain_tool::updateVertices
-    , [this](int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
+  _flatten_blur = new QDockWidget ("Flatten / Blur", this);
+  _flatten_blur->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _flatten_blur->setWidget (flattenTool = new noggit::ui::flatten_blur_tool());
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _flatten_blur);
+  connect (this, &QObject::destroyed, _flatten_blur, &QObject::deleteLater);
 
-      _world->orientVertices(vertex_mode == eVertexMode_Mouse
-        ? _cursor_pos
-        : _world->vertexCenter()
-        , angle
-        , orientation
-      );
-    }
-  );
+  _texturing = new QDockWidget ("Texturing", this);
+  _texturing->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _texturing->setWidget (texturingTool = new noggit::ui::texturing_tool (&_camera.position, _world.get()));
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _texturing);
+  connect (this, &QObject::destroyed, _texturing, &QObject::deleteLater);
 
-  _flatten_blur_dock = new QDockWidget("Flatten / Blur", this);
-  flattenTool = new noggit::ui::flatten_blur_tool(_flatten_blur_dock);
-  _flatten_blur_dock->setWidget(flattenTool);
-  _tool_properties_docks.insert(_flatten_blur_dock);
+  _areaid = new QDockWidget ("Area ID", this);
+  _areaid->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _areaid->setWidget (ZoneIDBrowser = new noggit::ui::zone_id_browser());
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _areaid);
+  connect (this, &QObject::destroyed, _areaid, &QObject::deleteLater);
 
-  _texturing_dock = new QDockWidget("Texturing", this);
-  texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get(), _texturing_dock);
-  _texturing_dock->setWidget(texturingTool);
-  _tool_properties_docks.insert(_texturing_dock);
+  _water = new QDockWidget ("Water", this);
+  _water->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _water->setWidget ( guiWater = new noggit::ui::water ( &_displayed_water_layer
+                                                       , &_display_all_water_layers
+                                                       )
+                    );
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _water);
+  connect (this, &QObject::destroyed, _water, &QObject::deleteLater);
 
-  _areaid_editor_dock = new QDockWidget("Area ID", this);
-  ZoneIDBrowser = new noggit::ui::zone_id_browser(_areaid_editor_dock);
-  _areaid_editor_dock->setWidget(ZoneIDBrowser);
-  _tool_properties_docks.insert(_areaid_editor_dock);
+  connect ( guiWater, &noggit::ui::water::regenerate_water_opacity
+          , [this] (float factor)
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
 
-  _water_editor_dock = new QDockWidget("Water", this);
-  guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers, _water_editor_dock);
-  _water_editor_dock->setWidget(guiWater);
-  _tool_properties_docks.insert(_water_editor_dock);
+              _world->autoGenWaterTrans (_camera.position, factor);
+            }
+          );
+  connect ( guiWater, &noggit::ui::water::crop_water
+          , [this]
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
 
-
-  connect(guiWater, &noggit::ui::water::regenerate_water_opacity
-    , [this](float factor)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-
-      _world->autoGenWaterTrans(_camera.position, factor);
-    }
-  );
-
-  connect(guiWater, &noggit::ui::water::crop_water
-    , [this]
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-
-      _world->CropWaterADT(_camera.position);
-    }
-  );
-
-  _vertex_shading_dock = new QDockWidget("Vertex Shading", this);
-  shaderTool = new noggit::ui::shader_tool(shader_color, _vertex_shading_dock);
-  _vertex_shading_dock->setWidget(shaderTool);
-  _tool_properties_docks.insert(_vertex_shading_dock);
-
-  _object_editor_dock = new QDockWidget("Object", this);
-  objectEditor = new noggit::ui::object_editor(this
-    , _world.get()
-    , &_move_model_to_cursor_position
-    , &_use_median_pivot_point
-    , &_object_paste_params
-    , _object_editor_dock
-  );
-  _object_editor_dock->setWidget(objectEditor);
-  _tool_properties_docks.insert(_object_editor_dock);
+              _world->CropWaterADT (_camera.position);
+            }
+          );
 
 
-  for (auto widget : _tool_properties_docks)
-  {
-    connect(this, &QObject::destroyed, widget, &QObject::deleteLater);
-  }
+  _vertex_shading = new QDockWidget ("Vertex Shading", this);
+  _vertex_shading->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _vertex_shading->setWidget (shaderTool = new noggit::ui::shader_tool (shader_color));
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _vertex_shading);
+  connect (this, &QObject::destroyed, _vertex_shading, &QObject::deleteLater);
+
+  _object = new QDockWidget ("Object", this);
+  _object->setFeatures (QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  _object->setWidget ( objectEditor = new noggit::ui::object_editor ( this
+                                                                    , _world.get()
+                                                                    , &_move_model_to_cursor_position
+                                                                    , &_object_paste_params
+                                                                    )
+                     );
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _object);
+  connect (this, &QObject::destroyed, _object, &QObject::deleteLater);
 
 
   TexturePalette = new noggit::ui::tileset_chooser(this);
+  
+  connect (this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
+  connect ( texturingTool->_current_texture, &noggit::ui::current_texture::clicked
+          , [=]
+            {
+              TexturePalette->setVisible (!TexturePalette->isVisible());
+            }
+          );
+  connect ( TexturePalette, &noggit::ui::tileset_chooser::selected
+          , [=] (std::string const& filename)
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
 
-  connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
-    , [=]
-    {
-      TexturePalette->setVisible(!TexturePalette->isVisible());
-    }
-  );
-  connect(TexturePalette, &noggit::ui::tileset_chooser::selected
-    , [=](std::string const& filename)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
+              noggit::ui::selected_texture::set (filename);
+              texturingTool->_current_texture->set_texture (filename);
+            }
+          );
 
-      noggit::ui::selected_texture::set(filename);
-      texturingTool->_current_texture->set_texture(filename);
-    }
-  );
 
-  connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
 
-  _texture_palette_small = new noggit::ui::texture_palette_small(this, texturingTool->_current_texture);
-  _texture_palette_small->hide();
 
-  connect(_texture_palette_small, &noggit::ui::texture_palette_small::selected
-    , [=](std::string const& filename)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-
-      noggit::ui::selected_texture::set(filename);
-      texturingTool->_current_texture->set_texture(filename);
-    }
-  );
-  connect(this, &QObject::destroyed, _texture_palette_small, &QObject::deleteLater);
-
-  guidetailInfos = new noggit::ui::detail_infos(this);
+  // DetailInfoWindow
+  guidetailInfos = new noggit::ui::detail_infos (this);
   guidetailInfos->hide();
-  connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
 
-  _keybindings = new noggit::ui::help(this);
-  _keybindings->hide(); 
-  connect(this, &QObject::destroyed, _keybindings, &QObject::deleteLater);
-
-  TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
+  TexturePicker = new noggit::ui::texture_picker (texturingTool->_current_texture);
   TexturePicker->hide();
-  connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
 
-  connect(TexturePicker, &noggit::ui::texture_picker::shift_left
-    , [=]
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-      TexturePicker->shiftSelectedTextureLeft();
-    }
-  );
-  connect(TexturePicker, &noggit::ui::texture_picker::shift_right
-    , [=]
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-      TexturePicker->shiftSelectedTextureRight();
-    }
-  );
+  connect ( TexturePicker, &noggit::ui::texture_picker::shift_left
+          , [=]
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
+              TexturePicker->shiftSelectedTextureLeft();
+            }
+          );
+  connect ( TexturePicker, &noggit::ui::texture_picker::shift_right
+          , [=]
+            {
+              makeCurrent();
+              opengl::context::scoped_setter const _ (::gl, context());
+              TexturePicker->shiftSelectedTextureRight();
+            }
+          );
 
   ZoneIDBrowser->setMapID(_world->getMapID());
-  connect(ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
-    , [this](int area_id) { changeZoneIDValue(area_id); }
-  );
+  connect ( ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
+          , [this] (int area_id) { changeZoneIDValue (area_id); }
+          );
 
-  terrainTool->storeCursorPos(&_cursor_pos);
-
-
-  for (auto dock : _tool_properties_docks)
-  {
-    _main_window->addDockWidget(Qt::RightDockWidgetArea, dock);
-    dock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    dock->setAllowedAreas(Qt::RightDockWidgetArea);
-
-    connect(dock, &QDockWidget::topLevelChanged
-      , this
-      , [=] 
-      { 
-        dock->adjustSize();
-
-        for (auto dock_ : _tool_properties_docks)
-        {
-          if (dock->isFloating() != dock_->isFloating())
-            dock_->setFloating(dock->isFloating());
-        }
-      }
-    );
-  }
-
-  if (_settings->value("undock_tool_properties/enabled", 1).toBool())
-  {
-    for (auto dock : _tool_properties_docks)
-    {
-      dock->setFloating(true);
-      dock->move(_main_window->geometry().topRight().x() - dock->rect().width() - 20, _main_window->geometry().topRight().y() + 40);
-    }
-  }
-
-  // create quick access texture palette dock
-
-  _texture_palette_dock->setFeatures(QDockWidget::DockWidgetMovable
-    | QDockWidget::DockWidgetFloatable
-    | QDockWidget::DockWidgetClosable
-  );
-
-  _texture_palette_dock->setWidget(_texture_palette_small);
-  _texture_palette_dock->setWindowTitle("Quick Access Texture Palette");
-  _texture_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
-  _texture_palette_dock->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
-
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_palette_dock);
-
-  if (_settings->value("undock_small_texture_palette/enabled", 1).toBool())
-  {
-    _texture_palette_dock->setFloating(true);
-    _texture_palette_dock->move(_main_window->geometry().bottomLeft().x() + 50, _main_window->geometry().bottomLeft().y() - 200);
-  }
-
-  connect(this, &QObject::destroyed, _texture_palette_dock, &QObject::deleteLater);
-   
-  // create toolbar
+  terrainTool->storeCursorPos (&_cursor_pos);
 
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
@@ -493,12 +403,12 @@ void MapView::createGUI()
 
 
 
-  ADD_ACTION (file_menu, "Save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); });
-  ADD_ACTION (file_menu, "Save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); });
-  ADD_ACTION (file_menu, "Save all tiles", "Ctrl+Shift+A", [this] { save(save_mode::all); });
+  ADD_ACTION (file_menu, "save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); });
+  ADD_ACTION (file_menu, "save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); });
+  ADD_ACTION (file_menu, "save all tiles", "Ctrl+Shift+A", [this] { save(save_mode::all); });
   
   ADD_ACTION ( file_menu
-             , "Reload tile"
+             , "reload tile"
              , "Shift+J"
              , [this]
                {
@@ -511,32 +421,26 @@ void MapView::createGUI()
   file_menu->addSeparator();
   ADD_ACTION_NS (file_menu, "Force uid check on next opening", [this] { _force_uid_check = true; });
   file_menu->addSeparator();
+  ADD_ACTION (file_menu, "exit", QKeySequence::Quit, [this] { _main_window->prompt_exit(); });
 
 
-  edit_menu->addSeparator();
-  edit_menu->addAction(createTextSeparator("Selected object"));
-  edit_menu->addSeparator();
-  ADD_ACTION (edit_menu, "Delete", Qt::Key_Delete, [this] { DeleteSelectedObject(); });
-  ADD_ACTION (edit_menu, "Reset rotation", "Ctrl+R", [this] { ResetSelectedObjectRotation(); });
-  ADD_ACTION (edit_menu, "Set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
+  //! \todo sections are not rendered on all platforms. one should
+  //! probably do separator+disabled entry to force rendering
+  edit_menu->addSection ("selected object");
+  ADD_ACTION (edit_menu, "delete", Qt::Key_Delete, [this] { DeleteSelectedObject(); });
+  ADD_ACTION (edit_menu, "reset rotation", "Ctrl+R", [this] { ResetSelectedObjectRotation(); });
+  ADD_ACTION (edit_menu, "set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
+
+  edit_menu->addSection ("options");
+  ADD_TOGGLE_NS (edit_menu, "locked cursor mode", _locked_cursor_mode);
 
 
-  edit_menu->addSeparator();
-  edit_menu->addAction(createTextSeparator("Options"));
-  edit_menu->addSeparator();
-  ADD_TOGGLE_NS (edit_menu, "Locked cursor mode", _locked_cursor_mode);
-
-
-  assist_menu->addSeparator();
-  assist_menu->addAction(createTextSeparator("Model"));
-  assist_menu->addSeparator();
+  assist_menu->addSection ("Model");
   ADD_ACTION (assist_menu, "Last M2 from WMV", "Shift+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_Model); });
   ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_WMO); });
   ADD_ACTION_NS (assist_menu, "Helper models", [this] { objectEditor->helper_models_widget->show(); });
 
-  assist_menu->addSeparator();
-  assist_menu->addAction(createTextSeparator("Current ADT"));
-  assist_menu->addSeparator();
+  assist_menu->addSection ("Current ADT");
   ADD_ACTION_NS ( assist_menu
                 , "Set Area ID"
                 , [this]
@@ -602,11 +506,9 @@ void MapView::createGUI()
                   }
                 );
 
-  assist_menu->addSeparator();
-  assist_menu->addAction(createTextSeparator("Loaded ADTs"));
-  assist_menu->addSeparator();
+  assist_menu->addSection ("Loaded ADTs");
   ADD_ACTION_NS ( assist_menu
-                , "Fix gaps"
+                , "Fix gaps (all loaded ADTs)"
                 , [this]
                   {
                     makeCurrent();
@@ -615,9 +517,7 @@ void MapView::createGUI()
                   }
                 );
 
-  assist_menu->addSeparator();
-  assist_menu->addAction(createTextSeparator("Global"));
-  assist_menu->addSeparator();
+  assist_menu->addSection ("Global");
   ADD_ACTION_NS ( assist_menu
                 , "Map to big alpha"
                 , [this]
@@ -637,9 +537,7 @@ void MapView::createGUI()
                   }
                 );
 
-  view_menu->addSeparator();
-  view_menu->addAction(createTextSeparator("Drawing"));
-  view_menu->addSeparator();
+  view_menu->addSection ("Drawing");
   ADD_TOGGLE (view_menu, "Doodads", Qt::Key_F1, _draw_models);
   ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F2, _draw_wmo_doodads);
   ADD_TOGGLE (view_menu, "Terrain", Qt::Key_F3, _draw_terrain);
@@ -656,77 +554,17 @@ void MapView::createGUI()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
 
-  view_menu->addSeparator();
-  view_menu->addAction(createTextSeparator("Windows"));
-  view_menu->addSeparator();
-
-
-  auto hide_widgets = [=] {
-
-    QWidget* widget_list[] =
-    {
-      TexturePalette,
-      TexturePicker,
-      guidetailInfos,
-      _cursor_switcher.get(),
-      _keybindings,
-      _minimap_dock,
-      objectEditor->modelImport,
-      objectEditor->rotationEditor,
-      objectEditor->helper_models_widget,
-      _texture_palette_small
-    };
-
-
-    if (_main_window->displayed_widgets.empty())
-    {
-      for (auto widget : widget_list)
-        if (widget->isVisible())
-        {
-          _main_window->displayed_widgets.emplace(widget);
-          widget->hide();
-        }
-
-    }
-    else
-    {
-      for (auto widget : _main_window->displayed_widgets)
-        widget->show();
-
-      _main_window->displayed_widgets.clear();
-    }
-
-
-    _main_window->statusBar()->setVisible(ui_hidden);
-    _toolbar->setVisible(ui_hidden);
-
-    ui_hidden = !ui_hidden;
-    
-    setToolPropertyWidgetVisibility(terrainMode);
-
-  };
-
-  ADD_ACTION(view_menu, "Toggle UI", Qt::Key_Tab, hide_widgets);
-
-
+  view_menu->addSection ("Windows");
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
   connect ( &_show_detail_info_window, &noggit::bool_toggle_property::changed
-          , guidetailInfos, [this]
-                            {
-                              if (!ui_hidden)
-                                guidetailInfos->setVisible(_show_detail_info_window.get());
-                            }
+          , guidetailInfos, &QWidget::setVisible
           );
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
           , &_show_detail_info_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
   connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
-          , _minimap_dock, [this]
-                           {
-                             if (!ui_hidden)
-                               _minimap_dock->setVisible(_show_minimap_window.get());
-                           }
+          , _minimap_dock, &QWidget::setVisible
           );
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
           , &_show_minimap_window, &noggit::bool_toggle_property::set
@@ -742,37 +580,15 @@ void MapView::createGUI()
   connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
           , TexturePalette, [this] 
                             { 
-                              if (terrainMode == editing_mode::paint && !ui_hidden)
+                              if (terrainMode == editing_mode::paint)
                               {
                                 TexturePalette->setVisible(_show_texture_palette_window.get());
-                              }
-                              else
-                              {
-                                _show_texture_palette_window.set(false);
                               }
                             }
           );
   connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
           , &_show_texture_palette_window, &noggit::bool_toggle_property::set
           );
-
-  ADD_TOGGLE(view_menu, "Small texture palette", Qt::Key_H, _show_texture_palette_small_window);
-  connect(&_show_texture_palette_small_window, &noggit::bool_toggle_property::changed
-    , _texture_palette_dock, [this]
-    {
-      if (terrainMode == editing_mode::paint && !ui_hidden)
-      {
-        _texture_palette_dock->setVisible(_show_texture_palette_small_window.get());
-      }
-      else
-      {
-        _show_texture_palette_small_window.set(false);
-      }
-    }
-  );
-  connect(_texture_palette_dock, &QDockWidget::visibilityChanged
-    , &_show_texture_palette_small_window, &noggit::bool_toggle_property::set
-  );
 
   addHotkey ( Qt::Key_F1
             , MOD_shift
@@ -809,20 +625,20 @@ void MapView::createGUI()
 
   ADD_TOGGLE (help_menu, "Key Bindings", "Ctrl+F1", _show_keybindings_window);
   connect ( &_show_keybindings_window, &noggit::bool_toggle_property::changed
-          , _keybindings, &QWidget::setVisible
+          , _keybindings.get(), &QWidget::setVisible
           );
-  connect ( _keybindings, &noggit::ui::widget::visibilityChanged
+  connect ( _keybindings.get(), &noggit::ui::widget::visibilityChanged
           , &_show_keybindings_window, &noggit::bool_toggle_property::set
           );
 
 #if defined(_WIN32) || defined(WIN32)
   ADD_ACTION_NS ( help_menu
-                , "Forum"
+                , "Manual online"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "http://www.modcraft.io/index.php?board=48.0"
+                                 , "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
@@ -860,15 +676,15 @@ void MapView::createGUI()
                }
              );
 
-  ADD_ACTION (view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
-  ADD_ACTION (view_menu, "Decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
-  ADD_ACTION (view_menu, "Pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
+  ADD_ACTION (view_menu, "increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
+  ADD_ACTION (view_menu, "decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
+  ADD_ACTION (view_menu, "pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
 
   addHotkey ( Qt::Key_C
             , MOD_ctrl
             , [this]
               {
-                objectEditor->copy_current_selection(_world.get());
+                objectEditor->copy (*_world->GetCurrentSelection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -876,7 +692,7 @@ void MapView::createGUI()
             , MOD_none
             , [this]
               {
-                objectEditor->copy_current_selection(_world.get());
+                objectEditor->copy(*_world->GetCurrentSelection());
               }
             , [this] { return terrainMode == editing_mode::object; }
             );
@@ -921,21 +737,21 @@ void MapView::createGUI()
 	         , MOD_ctrl
 	         , [this] 
              {
-               objectEditor->copy_current_selection(_world.get());
+	             objectEditor->copy(*_world->GetCurrentSelection());
 	             objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
              }
            , [this] { return terrainMode == editing_mode::object; }
            );
 
-  ADD_ACTION (view_menu, "Invert mouse", "I", [this] { mousedir *= -1.f; });
+  ADD_ACTION (view_menu, "invert mouse", "I", [this] { mousedir *= -1.f; });
 
-  ADD_ACTION (view_menu, "Decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
-  ADD_ACTION (view_menu, "Increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
+  ADD_ACTION (view_menu, "decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
+  ADD_ACTION (view_menu, "increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
 
-  ADD_ACTION (file_menu, "Save minimaps", "Ctrl+Shift+P", [this] { Saving = true; });
+  ADD_ACTION (file_menu, "save minimaps", "Ctrl+Shift+P", [this] { Saving = true; });
 
   ADD_ACTION ( view_menu
-             , "Turn camera around 180°"
+             , "turn camera around 180°"
              , "Shift+R"
              , [this]
                {
@@ -946,7 +762,7 @@ void MapView::createGUI()
              );
 
   ADD_ACTION ( file_menu
-             , "Write coordinates to port.txt"
+             , "write coordinates to port.txt"
              , Qt::Key_G
              , [this]
                {
@@ -971,7 +787,7 @@ void MapView::createGUI()
             );
 
   ADD_ACTION ( view_menu
-             , "Toggle tile mode"
+             , "toggle tile mode"
              , Qt::Key_U
              , [this]
                {
@@ -1057,18 +873,16 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                if (_world->has_selection())
+                if (_world->HasSelection())
                 {
-                  for (auto& selection : _world->current_selection())
+                  auto selection = _world->GetCurrentSelection();
+                  if (selection->which() == eEntry_Model)
                   {
-                    if (selection.which() == eEntry_Model)
-                    {
-                      boost::get<selected_model_type>(selection)->model->toggle_visibility();
-                    }
-                    else if (selection.which() == eEntry_WMO)
-                    {
-                      boost::get<selected_wmo_type>(selection)->wmo->toggle_visibility();
-                    }
+                    boost::get<selected_model_type> (*selection)->model->toggle_visibility();
+                  }
+                  else if (selection->which() == eEntry_WMO)
+                  {
+                    boost::get<selected_wmo_type> (*selection)->wmo->toggle_visibility();
                   }
                 }
               }
@@ -1147,7 +961,25 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                _world->set_selected_models_pos(_cursor_pos);
+                if (_world->HasSelection())
+                {
+                  auto selection = _world->GetCurrentSelection();
+
+                  if (selection->which() == eEntry_Model)
+                  {
+                    _world->updateTilesModel(boost::get<selected_model_type> (*selection), model_update::remove);
+                    boost::get<selected_model_type> (*selection)->pos = _cursor_pos;
+                    boost::get<selected_model_type> (*selection)->recalcExtents();
+                    _world->updateTilesModel(boost::get<selected_model_type> (*selection), model_update::add);
+                  }
+                  else if (selection->which() == eEntry_WMO)
+                  {
+                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection), model_update::remove);
+                    boost::get<selected_wmo_type> (*selection)->pos = _cursor_pos;
+                    boost::get<selected_wmo_type> (*selection)->recalcExtents();
+                    _world->updateTilesWMO(boost::get<selected_wmo_type> (*selection), model_update::add);
+                  }
+                }
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
@@ -1192,26 +1024,26 @@ void MapView::createGUI()
   addHotkey (Qt::Key_4, MOD_alt, [this] { texturingTool->set_brush_level(255.0f* 0.75f); });
   addHotkey (Qt::Key_5, MOD_alt, [this] { texturingTool->set_brush_level(255.0f); });
 
-  addHotkey(Qt::Key_1, MOD_none, [this] { set_editing_mode(editing_mode::ground); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); }, [this] { return !_mod_num_down;  });
-  addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); }, [this] { return !_mod_num_down;  });
+  addHotkey (Qt::Key_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
+  addHotkey (Qt::Key_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
+  addHotkey (Qt::Key_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); });
+  addHotkey (Qt::Key_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); });
+  addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); });
+  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); });
+  addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); });
+  addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
+  addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); });
 
-  addHotkey(Qt::Key_0, MOD_ctrl, [this] { change_selected_wmo_doodadset(0); });
-  addHotkey(Qt::Key_1, MOD_ctrl, [this] { change_selected_wmo_doodadset(1); });
-  addHotkey(Qt::Key_2, MOD_ctrl, [this] { change_selected_wmo_doodadset(2); });
-  addHotkey(Qt::Key_3, MOD_ctrl, [this] { change_selected_wmo_doodadset(3); });
-  addHotkey(Qt::Key_4, MOD_ctrl, [this] { change_selected_wmo_doodadset(4); });
-  addHotkey(Qt::Key_5, MOD_ctrl, [this] { change_selected_wmo_doodadset(5); });
-  addHotkey(Qt::Key_6, MOD_ctrl, [this] { change_selected_wmo_doodadset(6); });
-  addHotkey(Qt::Key_7, MOD_ctrl, [this] { change_selected_wmo_doodadset(7); });
-  addHotkey(Qt::Key_8, MOD_ctrl, [this] { change_selected_wmo_doodadset(8); });
-  addHotkey(Qt::Key_9, MOD_ctrl, [this] { change_selected_wmo_doodadset(9); });
+  addHotkey (Qt::Key_0, MOD_ctrl, [this] { change_selected_wmo_doodadset(0); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_1, MOD_ctrl, [this] { change_selected_wmo_doodadset(1); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_2, MOD_ctrl, [this] { change_selected_wmo_doodadset(2); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_3, MOD_ctrl, [this] { change_selected_wmo_doodadset(3); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_4, MOD_ctrl, [this] { change_selected_wmo_doodadset(4); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_5, MOD_ctrl, [this] { change_selected_wmo_doodadset(5); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_6, MOD_ctrl, [this] { change_selected_wmo_doodadset(6); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_7, MOD_ctrl, [this] { change_selected_wmo_doodadset(7); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_8, MOD_ctrl, [this] { change_selected_wmo_doodadset(8); }, [this] { return _world->IsSelection(eEntry_WMO); });
+  addHotkey (Qt::Key_9, MOD_ctrl, [this] { change_selected_wmo_doodadset(9); }, [this] { return _world->IsSelection(eEntry_WMO); });
 }
 
 MapView::MapView( math::degrees camera_yaw0
@@ -1239,7 +1071,8 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_fps (new QLabel (this))
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
-  , _texture_palette_dock(new QDockWidget(this))
+  , _time_and_navigation_dock (new QDockWidget(this))
+  , _keybindings (new noggit::ui::help)
 {
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
@@ -1293,15 +1126,17 @@ MapView::MapView( math::degrees camera_yaw0
                              | QDockWidget::DockWidgetFloatable
                              | QDockWidget::DockWidgetClosable
                              );
-  _minimap_dock->setWidget(_minimap);
+  _minimap_dock->setWidget (_minimap);
   _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
   _minimap_dock->setVisible (false);
-  _minimap_dock->setFloating(true);
-  _minimap_dock->move(_main_window->rect().center() - _minimap->rect().center());
 
+  _time_and_navigation_dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _time_and_navigation_dock);
+  _time_and_navigation_dock->setVisible(true);
 
-  connect(this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
-  connect(this, &QObject::destroyed, _minimap, &QObject::deleteLater);
+  connect (this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
+  connect (this, &QObject::destroyed, _minimap, &QObject::deleteLater);
+  connect(this, &QObject::destroyed, _time_and_navigation_dock, &QObject::deleteLater);
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
@@ -1323,26 +1158,17 @@ MapView::MapView( math::degrees camera_yaw0
 
   moving = strafing = updown = lookat = turn = 0.0f;
 
-  freelook = false;
-
   mousedir = -1.0f;
 
   look = false;
   _display_mode = display_mode::in_3D;
 
-  _tablet_active = true;
+  init_tablet();
 
   _startup_time.start();
   _update_every_event_loop.start (0);
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
 }
-
-  void MapView::tabletEvent(QTabletEvent* event)
-  {
-    _tablet_pressure = event->pressure();
-    event->setAccepted(true);
-    
-  }
 
   void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
   {
@@ -1442,13 +1268,20 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  delete TexturePicker; // explicitly delete this here to avoid opengl context related crash
-
   if (_force_uid_check)
   {
     uid_storage::remove_uid_for_map(_world->getMapID());
   }
 
+  // the gui isn't created if the uid fix fail
+  if (!_uid_fix_failed)
+  {
+    //! \ todo: fix the crash when deleting the texture picker
+    TexturePicker->hide();
+    _minimap->hide();
+    _time_and_navigation_dock->hide();
+  }
+  
   _world.reset();
 
   AsyncLoader::instance().reset_object_fail();
@@ -1459,8 +1292,17 @@ void MapView::tick (float dt)
 	_mod_shift_down = QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
 	_mod_ctrl_down = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 	_mod_alt_down = QApplication::keyboardModifiers().testFlag(Qt::AltModifier);
-	_mod_num_down = QApplication::keyboardModifiers().testFlag(Qt::KeypadModifier);
 
+#ifdef _WIN32
+  if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
+  {
+    PACKET pkt;
+    while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
+    {
+      _tablet_pressure = pkt.pkNormalPressure;
+    }
+  }
+#endif
 
   // start unloading tiles
   _world->mapIndex.enterTile (tile_index (_camera.position));
@@ -1485,20 +1327,22 @@ void MapView::tick (float dt)
     update_cursor_pos();
   }
 
+#ifdef _WIN32
   if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
   {
     switch (terrainMode)
     {
     case editing_mode::ground:
-      terrainTool->setSpeed(_tablet_pressure * 10.0f);
+      terrainTool->setRadius (_tablet_pressure / 20.0f);
     case editing_mode::flatten_blur:
-      flattenTool->setSpeed(_tablet_pressure * 10.0f);
+      flattenTool->setRadius (_tablet_pressure / 20.0f);
       break;
     case editing_mode::paint:
-      texturingTool->set_pressure(_tablet_pressure);
+      texturingTool->change_pressure (_tablet_pressure / 2048.0f);
       break;
     }
   }
+#endif
 
     math::degrees yaw (-_camera.yaw()._);
 
@@ -1523,114 +1367,198 @@ void MapView::tick (float dt)
       math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, yaw);
     }
 
-  auto currentSelection = _world->current_selection();
-  if (_world->has_selection())
-  {
-    // update rotation editor if the selection has changed
-    if (lastSelected != currentSelection)
+    auto Selection = _world->GetCurrentSelection();
+    if (Selection)
     {
-      objectEditor->rotationEditor->updateValues(_world.get());
-    }
-
-    bool canMoveObj = terrainMode == editing_mode::object;
-
-    if (terrainMode == editing_mode::object)
-    {
-      // reset numpad_moveratio when no numpad key is pressed
-      if (!(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
+      // update rotation editor if the selection has changed
+      if (!lastSelected || lastSelected != Selection)
       {
-        numpad_moveratio = 0.001f;
-      }
-      else // Set move scale and rotate for numpad keys
-      {
-        if (_mod_ctrl_down && _mod_shift_down)
-        {
-          numpad_moveratio += 0.1f;
-        }
-        else if (_mod_shift_down)
-        {
-          numpad_moveratio += 0.01f;
-        }
-        else if (_mod_ctrl_down)
-        {
-          numpad_moveratio += 0.0005f;
-        }
+        objectEditor->rotationEditor->select(*Selection);
       }
 
-      if (keys != 0.f)
+      bool canMoveObj = !objectEditor->rotationEditor->hasFocus();
+
+      // Set move scale and rotate for numpad keys
+      float moveratio (0.001f);
+      if (_mod_ctrl_down && _mod_shift_down)  moveratio = 0.1f;
+      else if (_mod_shift_down) moveratio = 0.01f;
+      else if (_mod_ctrl_down) moveratio = 0.005f;
+
+      if (canMoveObj && (keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
       {
-        _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
-      }
-      if (keyr != 0.f)
-      {
-        _world->rotate_selected_models( math::degrees(0.f)
-                                      , math::degrees(keyr * numpad_moveratio * 5.f)
-                                      , math::degrees(0.f)
-                                      , _use_median_pivot_point.get()
-                                      );
+        // Move scale and rotate with numpad keys
+        if (Selection->which() == eEntry_WMO)
+        {
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::remove);
+          boost::get<selected_wmo_type> (*Selection)->pos.x += keyx * moveratio;
+          boost::get<selected_wmo_type> (*Selection)->pos.y += keyy * moveratio;
+          boost::get<selected_wmo_type> (*Selection)->pos.z += keyz * moveratio;
+          boost::get<selected_wmo_type> (*Selection)->dir.y += keyr * moveratio * 5;
+
+          boost::get<selected_wmo_type> (*Selection)->recalcExtents();
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::add);
+          objectEditor->rotationEditor->updateValues();
+        }
+
+        if (Selection->which() == eEntry_Model)
+        {
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::remove);
+          boost::get<selected_model_type> (*Selection)->pos.x += keyx * moveratio;
+          boost::get<selected_model_type> (*Selection)->pos.y += keyy * moveratio;
+          boost::get<selected_model_type> (*Selection)->pos.z += keyz * moveratio;
+          boost::get<selected_model_type> (*Selection)->dir.y += keyr * moveratio * 5;
+          boost::get<selected_model_type> (*Selection)->scale += keys * moveratio / 50;
+          boost::get<selected_model_type> (*Selection)->recalcExtents();
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::add);
+          objectEditor->rotationEditor->updateValues();
+        }
       }
 
-      if (MoveObj)
+      math::vector_3d ObjPos;
+      if (_world->IsSelection(eEntry_Model))
       {
-        if (_mod_alt_down)
+        //! \todo  Tell me what this is.
+        ObjPos = boost::get<selected_model_type> (*Selection)->pos - _camera.position;
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, _camera.pitch());
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, yaw);
+        ObjPos.x = std::abs(ObjPos.x);
+      }
+
+      // moving and scaling objects
+      //! \todo  Alternatively automatically align it to the terrain.
+      if (MoveObj && canMoveObj)
+      {
+        ObjPos.x = 80.0f;
+        if (Selection->which() == eEntry_WMO)
         {
-          _world->scale_selected_models(std::pow(2.f, mv*4.f), World::m2_scaling_type::mult);
-        }
-        else if (_mod_shift_down)
-        {
-          _world->move_selected_models(0.f, mv*80.f, 0.f);
-        }
-        else
-        {
-          if (!_move_model_to_cursor_position.get())
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::remove);
+
+          if (_mod_shift_down)
           {
-            _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
+            boost::get<selected_wmo_type> (*Selection)->pos.y += mv * ObjPos.x;
           }
           else
           {
-            // todo: add option to align with the terrain's height
-            _world->set_selected_models_pos(_cursor_pos, false);
+            if (_move_model_to_cursor_position.get())
+            {
+              boost::get<selected_wmo_type> (*Selection)->pos.x = _cursor_pos.x - objMoveOffset.x;
+              boost::get<selected_wmo_type> (*Selection)->pos.z = _cursor_pos.z - objMoveOffset.z;
+            }
+            else
+            {
+              boost::get<selected_wmo_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
+              boost::get<selected_wmo_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+            }
+          }
+
+          boost::get<selected_wmo_type> (*Selection)->recalcExtents();
+          _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::add);
+          objectEditor->rotationEditor->updateValues();
+        }
+        else if (Selection->which() == eEntry_Model)
+        {
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::remove);
+          if (_mod_alt_down)
+          {
+            float ScaleAmount = pow(2.0f, mv * 4.0f);
+
+            boost::get<selected_model_type> (*Selection)->scale *= ScaleAmount;
+            if (boost::get<selected_model_type> (*Selection)->scale > 63.9f)
+              boost::get<selected_model_type> (*Selection)->scale = 63.9f;
+            else if (boost::get<selected_model_type> (*Selection)->scale < 0.00098f)
+              boost::get<selected_model_type> (*Selection)->scale = 0.00098f;
+          }
+          else
+          {
+            if (_mod_shift_down)
+            {
+              boost::get<selected_model_type> (*Selection)->pos.y += mv * ObjPos.x;
+            }
+            else
+            {
+              if (_move_model_to_cursor_position.get())
+              {
+                boost::get<selected_model_type> (*Selection)->pos.x = _cursor_pos.x - objMoveOffset.x;
+                boost::get<selected_model_type> (*Selection)->pos.z = _cursor_pos.z - objMoveOffset.z;
+              }
+              else
+              {
+                boost::get<selected_model_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
+                boost::get<selected_model_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
+              }
+
+            }
+          }
+
+          objectEditor->rotationEditor->updateValues();
+          boost::get<selected_model_type> (*Selection)->recalcExtents();
+          _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::add);
+        }
+      }
+
+
+      // rotating objects
+      if (look && canMoveObj)
+      {
+        float * lTarget = nullptr;
+        bool lModify = false;
+
+        if (Selection->which() == eEntry_Model)
+        {
+          lModify = _mod_shift_down | _mod_ctrl_down | _mod_alt_down;
+          if (_mod_shift_down)
+            lTarget = &boost::get<selected_model_type> (*Selection)->dir.y;
+          else if (_mod_ctrl_down)
+            lTarget = &boost::get<selected_model_type> (*Selection)->dir.x;
+          else if (_mod_alt_down)
+            lTarget = &boost::get<selected_model_type> (*Selection)->dir.z;
+
+        }
+        else if (Selection->which() == eEntry_WMO)
+        {
+          lModify = _mod_shift_down | _mod_ctrl_down | _mod_alt_down;
+          if (_mod_shift_down)
+            lTarget = &boost::get<selected_wmo_type> (*Selection)->dir.y;
+          else if (_mod_ctrl_down)
+            lTarget = &boost::get<selected_wmo_type> (*Selection)->dir.x;
+          else if (_mod_alt_down)
+            lTarget = &boost::get<selected_wmo_type> (*Selection)->dir.z;
+
+        }
+
+        if (lModify && lTarget)
+        {
+          _world->updateTilesEntry(*Selection, model_update::remove);
+
+          *lTarget = *lTarget + rh + rv;
+
+          if (*lTarget > 360.0f)
+            *lTarget = *lTarget - 360.0f;
+          else if (*lTarget < -360.0f)
+            *lTarget = *lTarget + 360.0f;
+
+          objectEditor->rotationEditor->updateValues();
+
+          if (Selection->which() == eEntry_WMO)
+          {
+            boost::get<selected_wmo_type> (*Selection)->recalcExtents();
+            _world->updateTilesWMO(boost::get<selected_wmo_type> (*Selection), model_update::add);
+          }
+          else if (Selection->which() == eEntry_Model)
+          {
+            boost::get<selected_model_type> (*Selection)->recalcExtents();
+            _world->updateTilesModel(boost::get<selected_model_type> (*Selection), model_update::add);
           }
         }
       }
 
-      if (keyx != 0.f || keyy != 0.f || keyz != 0.f)
-      {
-        _world->move_selected_models(keyx * numpad_moveratio, keyy * numpad_moveratio, keyz * numpad_moveratio);
-      }
+      mh = 0;
+      mv = 0;
+      rh = 0;
+      rv = 0;
 
-      if (look)
-      {
-        if (_mod_ctrl_down) // X
-        {
-          _world->rotate_selected_models( math::degrees(rh + rv)
-                                        , math::degrees(0.f)
-                                        , math::degrees(0.f)
-                                        , _use_median_pivot_point.get()
-                                        );
-        }
-        if (_mod_shift_down) // Y
-        {
-          _world->rotate_selected_models( math::degrees(0.f)
-                                        , math::degrees(rh + rv)
-                                        , math::degrees(0.f)
-                                        , _use_median_pivot_point.get()
-                                        );
-        }
-        if (_mod_alt_down) // Z
-        {
-          _world->rotate_selected_models( math::degrees(0.f)
-                                        , math::degrees(0.f)
-                                        , math::degrees(rh + rv)
-                                        , _use_median_pivot_point.get()
-                                        );
-        }
-      }
-    }
 
-    for (auto& selection : currentSelection)
-    {
-      if (leftMouse && selection.which() == eEntry_MapChunk)
+      if (leftMouse && Selection->which() == eEntry_MapChunk)
       {
         bool underMap = _world->isUnderMap(_cursor_pos);
 
@@ -1641,11 +1569,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              terrainTool->changeTerrain(_world.get(), _cursor_pos, 7.5f * dt);
+              terrainTool->changeTerrain (_world.get(), _cursor_pos, 7.5f * dt);
             }
             else if (_mod_ctrl_down)
             {
-              terrainTool->changeTerrain(_world.get(), _cursor_pos, -7.5f * dt);
+              terrainTool->changeTerrain (_world.get(), _cursor_pos, -7.5f * dt);
             }
           }
           break;
@@ -1654,11 +1582,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              flattenTool->flatten(_world.get(), _cursor_pos, dt);
+              flattenTool->flatten (_world.get(), _cursor_pos, dt);
             }
             else if (_mod_ctrl_down)
             {
-              flattenTool->blur(_world.get(), _cursor_pos, dt);
+              flattenTool->blur (_world.get(), _cursor_pos, dt);
             }
           }
           break;
@@ -1671,16 +1599,16 @@ void MapView::tick (float dt)
               _world->eraseTextures(_cursor_pos);
             }
           }
-          else if (_mod_ctrl_down && !ui_hidden)
+          else if (_mod_ctrl_down)
           {
             // Pick texture
-            TexturePicker->getTextures(selection);
+            TexturePicker->getTextures(*_world->GetCurrentSelection());
           }
           else  if (_mod_shift_down && !!noggit::ui::selected_texture::get())
           {
             if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
             {
-              texturingTool->paint(_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
+              texturingTool->paint (_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
             }
           }
           break;
@@ -1689,7 +1617,7 @@ void MapView::tick (float dt)
           // no undermap check here, else it's impossible to remove holes
           if (_mod_shift_down)
           {
-            auto pos(boost::get<selected_chunk_type>(selection).position);
+            auto pos (boost::get<selected_chunk_type> (*Selection).position);
             _world->setHole(pos, _mod_alt_down, false);
           }
           else if (_mod_ctrl_down && !underMap)
@@ -1708,7 +1636,7 @@ void MapView::tick (float dt)
             else if (_mod_ctrl_down)
             {
               // pick areaID from chunk
-              MapChunk* chnk(boost::get<selected_chunk_type>(selection).chunk);
+              MapChunk* chnk (boost::get<selected_chunk_type> (*_world->GetCurrentSelection()).chunk);
               int newID = chnk->getAreaID();
               _selected_area_id = newID;
               ZoneIDBrowser->setZoneID(newID);
@@ -1734,11 +1662,11 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              guiWater->paintLiquid(_world.get(), _cursor_pos, true);
+              guiWater->paintLiquid (_world.get(), _cursor_pos, true);
             }
             else if (_mod_ctrl_down)
             {
-              guiWater->paintLiquid(_world.get(), _cursor_pos, false);
+              guiWater->paintLiquid (_world.get(), _cursor_pos, false);
             }
           }
           break;
@@ -1747,72 +1675,66 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              shaderTool->changeShader(_world.get(), _cursor_pos, dt, true);
+              shaderTool->changeShader (_world.get(), _cursor_pos, dt, true);
             }
             if (_mod_ctrl_down)
             {
-              shaderTool->changeShader(_world.get(), _cursor_pos, dt, false);
+              shaderTool->changeShader (_world.get(), _cursor_pos, dt, false);
             }
           }
           break;
         }
-      }      
+      }
     }
-  }
 
-  mh = 0;
-  mv = 0;
-  rh = 0;
-  rv = 0;
-
-  if (_display_mode != display_mode::in_2D)
-  {
-    if (turn)
+    if (_display_mode != display_mode::in_2D)
     {
-      _camera.add_to_yaw(math::degrees(turn));
-      _camera_moved_since_last_draw = true;
+      if (turn)
+      {
+        _camera.add_to_yaw(math::degrees(turn));
+        _camera_moved_since_last_draw = true;
+      }
+      if (lookat)
+      {
+        _camera.add_to_pitch(math::degrees(lookat));
+        _camera_moved_since_last_draw = true;
+      }
+      if (moving)
+      {
+        _camera.move_forward(moving, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (strafing)
+      {
+        _camera.move_horizontal(strafing, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (updown)
+      {
+        _camera.move_vertical(updown, dt);
+        _camera_moved_since_last_draw = true;
+      }
     }
-    if (lookat)
+    else
     {
-      _camera.add_to_pitch(math::degrees(lookat));
-      _camera_moved_since_last_draw = true;
-    }
-    if (moving)
-    {
-      _camera.move_forward(moving, dt);
-      _camera_moved_since_last_draw = true;
-    }
-    if (strafing)
-    {
-      _camera.move_horizontal(strafing, dt);
-      _camera_moved_since_last_draw = true;
-    }
-    if (updown)
-    {
-      _camera.move_vertical(updown, dt);
-      _camera_moved_since_last_draw = true;
-    }
-  }
-  else
-  {
-    //! \todo this is total bullshit. there should be a seperate view and camera class for tilemode
-    if (moving)
-    {
-      _camera.position.z -= dt * _camera.move_speed * moving;
-      _camera_moved_since_last_draw = true;
-    }
-    if (strafing)
-    {
-      _camera.position.x += dt * _camera.move_speed * strafing;
-      _camera_moved_since_last_draw = true;
-    }
-    if (updown)
-    {
-      _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
-      _2d_zoom = std::max(0.01f, _2d_zoom);
-      _camera_moved_since_last_draw = true;
-    }
-  }
+      //! \todo this is total bullshit. there should be a seperate view and camera class for tilemode
+      if (moving)
+      {
+        _camera.position.z -= dt * _camera.move_speed * moving;
+        _camera_moved_since_last_draw = true;
+      }
+      if (strafing)
+      {
+        _camera.position.x += dt * _camera.move_speed * strafing;
+        _camera_moved_since_last_draw = true;
+      }
+      if (updown)
+      {
+        _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
+        _2d_zoom = std::max(0.01f, _2d_zoom);
+        _camera_moved_since_last_draw = true;
+      }
+    } 
 
   _minimap->update();
 
@@ -1824,8 +1746,7 @@ void MapView::tick (float dt)
     _world->update_models_emitters(dt);
   }
 
-  if (_world->has_selection())
-    lastSelected = currentSelection;
+  lastSelected = _world->GetCurrentSelection();
 
   QString status;
   status += ( QString ("tile: %1 %2")
@@ -1843,17 +1764,19 @@ void MapView::tick (float dt)
 
   _status_position->setText (status);
 
-  if (currentSelection.size() > 0)
+  auto current_selection = _world->GetCurrentSelection();
+
+  if (!current_selection)
   {
     _status_selection->setText ("");
   }
-  else if (currentSelection.size() == 1)
+  else
   {
-    switch (currentSelection.begin()->which())
+    switch (current_selection->which())
     {
     case eEntry_Model:
       {
-      auto instance(boost::get<selected_model_type>(*currentSelection.begin()));
+        auto instance (boost::get<selected_model_type> (*current_selection));
         _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->uid)
@@ -1863,7 +1786,7 @@ void MapView::tick (float dt)
       }
     case eEntry_WMO:
       {
-      auto instance(boost::get<selected_wmo_type>(*currentSelection.begin()));
+        auto instance (boost::get<selected_wmo_type> (*current_selection));
         _status_selection->setText
           ( QString ("%1: %2")
           . arg (instance->mUniqueID)
@@ -1873,7 +1796,7 @@ void MapView::tick (float dt)
       }
     case eEntry_MapChunk:
       {
-      auto chunk(boost::get<selected_chunk_type>(*currentSelection.begin()).chunk);
+        auto chunk (boost::get<selected_chunk_type> (*current_selection).chunk);
         _status_selection->setText
           (QString ("%1, %2").arg (chunk->px).arg (chunk->py));
         break;
@@ -1890,11 +1813,12 @@ void MapView::tick (float dt)
     timestrs << "Time: " << (time / 60) << ":" << std::setfill ('0')
              << std::setw (2) << (time % 60);
 
-
+#ifdef _WIN32
     if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
     {
       timestrs << ", Pres: " << _tablet_pressure;
     }
+#endif
 
     _status_time->setText (QString::fromStdString (timestrs.str()));
   }
@@ -1922,14 +1846,13 @@ void MapView::tick (float dt)
   guiWater->updatePos (_camera.position);
 
   std::stringstream detailInfo;
-  if (currentSelection.size() > 0)
+  if (current_selection)
   {
-    auto lastSelection = currentSelection.back();
-    switch (lastSelection.which())
+    switch (current_selection->which())
     {
     case eEntry_Model:
       {
-      auto instance(boost::get<selected_model_type>(lastSelection));
+        auto instance (boost::get<selected_model_type> (*current_selection));
         detailInfo << "filename: " << instance->model->filename
                     << "\nunique ID: " << instance->uid
                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
@@ -1952,7 +1875,7 @@ void MapView::tick (float dt)
       }
     case eEntry_WMO:
       {
-      auto instance(boost::get<selected_wmo_type>(lastSelection));
+        auto instance (boost::get<selected_wmo_type> (*current_selection));
         detailInfo << "filename: " << instance->wmo->filename
                     << "\nunique ID: " << instance->mUniqueID
                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
@@ -1976,7 +1899,7 @@ void MapView::tick (float dt)
       }
     case eEntry_MapChunk:
       {
-      auto chunk(boost::get<selected_chunk_type>(lastSelection).chunk);
+        auto chunk (boost::get<selected_chunk_type> (*current_selection).chunk);
         mcnk_flags const& flags = chunk->header_flags;
 
         detailInfo << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
@@ -2096,32 +2019,12 @@ void MapView::doSelection (bool selectTerrainOnly)
 
   if (results.empty())
   {
-    _world->reset_selection();
+    _world->SetCurrentSelection (boost::none);
   }
   else
   {
     auto const& hit (results.front().second);
-
-    if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
-    {
-      if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
-      {
-        if (!_world->is_selected(hit))
-        {
-          _world->add_to_selection(hit);
-        }
-        else
-        {
-          _world->remove_from_selection(hit);
-        }
-      }
-    }
-    else
-    {
-      _world->reset_selection();
-      _world->add_to_selection(hit);
-    }
-
+    _world->SetCurrentSelection (hit);
 
     _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type>(hit)->pos
       : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type>(hit)->pos
@@ -2214,8 +2117,11 @@ void MapView::draw_map()
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if (!(_world->has_selection()
-    || _locked_cursor_mode.get()))
+  if (!(_world->IsSelection(eEntry_Model)
+    || _world->IsSelection(eEntry_WMO)
+    || _locked_cursor_mode.get()
+    )
+    )
   {
     doSelection(true);
   }
@@ -2270,7 +2176,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
     | ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0)
     | ((event->modifiers() & Qt::AltModifier) ? MOD_alt : 0)
     | ((event->modifiers() & Qt::MetaModifier) ? MOD_meta : 0)
-    | ((event->modifiers() & Qt::KeypadModifier) ? MOD_num : 0)
     | (_mod_space_down ? MOD_space : 0)
     );
 
@@ -2288,7 +2193,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
 
   if (event->key() == Qt::Key_Space)
     _mod_space_down = true;
-
 
   // movement
   if (event->key() == Qt::Key_W)
@@ -2375,15 +2279,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
   if (event->key() == Qt::Key_Plus)
   {
     keys = 1;
-
-    switch (terrainMode)
-    {
-      case editing_mode::mccv:
-      {
-        shaderTool->addColorToPalette();
-        break;
-      }
-    }
   }
   if (event->key() == Qt::Key_Minus)
   {
@@ -2393,11 +2288,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
   {
 	  _camera.position = math::vector_3d(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z); ;
 	  _minimap->update();
-  }
-
-  if (event->key() == Qt::Key_L)
-  {
-    freelook = true;
   }
 }
 
@@ -2457,12 +2347,6 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
   {
     keys = 0.0f;
   }
-
-  if (event->key() == Qt::Key_L || event->key() == Qt::Key_Minus)
-  {
-    freelook = false;
-  }
-
 }
 
 void MapView::focusOutEvent (QFocusEvent*)
@@ -2471,7 +2355,6 @@ void MapView::focusOutEvent (QFocusEvent*)
   _mod_ctrl_down = false;
   _mod_shift_down = false;
   _mod_space_down = false;
-  _mod_num_down = false;
 
   moving = 0.0f;
   lookat = 0.0f;
@@ -2489,7 +2372,6 @@ void MapView::focusOutEvent (QFocusEvent*)
   rightMouse = false;
   MoveObj = false;
   look = false;
-  freelook = false;
 }
 
 void MapView::mouseMoveEvent (QMouseEvent* event)
@@ -2499,7 +2381,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   opengl::context::scoped_setter const _ (::gl, context());
   QLineF const relative_movement (_last_mouse_pos, event->pos());
 
-  if ((look || freelook) && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
+  if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
   {
     _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
     _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
@@ -2610,35 +2492,26 @@ void MapView::selectModel(std::string const& model)
   if (boost::ends_with (model, ".m2"))
   {
     ModelInstance mi(model);
-    _world->set_current_selection(boost::get<selected_model_type>(&mi));
-
+    objectEditor->copy(boost::make_optional<selection_type>(&mi));
   }
   else if (boost::ends_with (model, ".wmo"))
   {
     WMOInstance wi(model);
-    _world->set_current_selection(boost::get<selected_wmo_type>(&wi));
+    objectEditor->copy(boost::make_optional<selection_type>(&wi));
   }
-  objectEditor->copy_current_selection(_world.get());
 }
 
 void MapView::change_selected_wmo_doodadset(int set)
 {
-  for (auto& selection : _world->current_selection())
-  {
-
-    if (selection.which() == eEntry_WMO)
-    {
-      auto wmo = boost::get<selected_wmo_type>(selection);
-      wmo->change_doodadset(set);
-      _world->updateTilesWMO(wmo, model_update::none);
-    }
-  }
+  auto wmo = boost::get<selected_wmo_type> (*_world->GetCurrentSelection());
+  wmo->change_doodadset(set);
+  _world->updateTilesWMO(wmo, model_update::none);
 }
 
-void MapView::mousePressEvent(QMouseEvent* event)
+void MapView::mousePressEvent (QMouseEvent* event)
 {
   makeCurrent();
-  opengl::context::scoped_setter const _(::gl, context());
+  opengl::context::scoped_setter const _ (::gl, context());
 
   switch (event->button())
   {
@@ -2651,14 +2524,21 @@ void MapView::mousePressEvent(QMouseEvent* event)
     break;
 
   case Qt::MiddleButton:
-    if (_world->has_selection())
+    if (_world->HasSelection())
     {
       MoveObj = true;
-    }
+      auto selection = _world->GetCurrentSelection();
+      math::vector_3d objPos;
+      if (selection->which() == eEntry_WMO)
+      {
+        objPos = boost::get<selected_wmo_type> (*selection)->pos;
+      }
+      else if (selection->which() == eEntry_Model)
+      {
+        objPos = boost::get<selected_model_type> (*selection)->pos;
+      }
 
-    if(terrainMode == editing_mode::mccv)
-    {
-      shaderTool->pickColor(_world.get(), _cursor_pos);
+      objMoveOffset = _cursor_pos - objPos;
     }
 
     break;
@@ -2861,9 +2741,12 @@ void MapView::save(save_mode mode)
 
     AsyncLoader::instance().reset_object_fail();
 
-
-    _main_window->statusBar()->showMessage("Map saved", 2000);
-
+    QMessageBox::information
+      (nullptr
+      , ""
+      , "Map saved"
+      , QMessageBox::Ok
+      );
   }
   else
   {
@@ -2879,4 +2762,113 @@ void MapView::save(save_mode mode)
 void MapView::addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition)
 {
   hotkeys.emplace_front (key, modifiers, function, condition);
+}
+
+#ifdef _WIN32
+HCTX static NEAR TabletInit(HWND hWnd)
+{
+  HCTX hctx = nullptr;
+  UINT wDevice = 0;
+  UINT wExtX = 0;
+  UINT wExtY = 0;
+  UINT wWTInfoRetVal = 0;
+  AXIS TabletX = { 0 };
+  AXIS TabletY = { 0 };
+
+  // Set option to move system cursor before getting default system context.
+  glogContext.lcOptions |= CXO_SYSTEM;
+
+  // Open default system context so that we can get tablet data
+  // in screen coordinates (not tablet coordinates).
+  wWTInfoRetVal = gpWTInfoA(WTI_DEFSYSCTX, 0, &glogContext);
+  WACOM_ASSERT(wWTInfoRetVal == sizeof(LOGCONTEXT));
+
+  WACOM_ASSERT(glogContext.lcOptions & CXO_SYSTEM);
+
+  // modify the digitizing region
+  wsprintf(glogContext.lcName, "PrsTest Digitizing %x", hInst);
+
+  // We process WT_PACKET (CXO_MESSAGES) messages.
+  glogContext.lcOptions |= CXO_MESSAGES;
+
+  // What data items we want to be included in the tablet packets
+  glogContext.lcPktData = PACKETDATA;
+
+  // Which packet items should show change in value since the last
+  // packet (referred to as 'relative' data) and which items
+  // should be 'absolute'.
+  glogContext.lcPktMode = PACKETMODE;
+
+  // This bitfield determines whether or not this context will receive
+  // a packet when a value for each packet field changes.  This is not
+  // supported by the Intuos Wintab.  Your context will always receive
+  // packets, even if there has been no change in the data.
+  glogContext.lcMoveMask = PACKETDATA;
+
+  // Which buttons events will be handled by this context.  lcBtnMask
+  // is a bitfield with one bit per button.
+  glogContext.lcBtnUpMask = glogContext.lcBtnDnMask;
+
+  // Set the entire tablet as active
+  wWTInfoRetVal = gpWTInfoA(WTI_DEVICES + 0, DVC_X, &TabletX);
+  WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+
+  wWTInfoRetVal = gpWTInfoA(WTI_DEVICES, DVC_Y, &TabletY);
+  WACOM_ASSERT(wWTInfoRetVal == sizeof(AXIS));
+
+  glogContext.lcInOrgX = 0;
+  glogContext.lcInOrgY = 0;
+  glogContext.lcInExtX = TabletX.axMax;
+  glogContext.lcInExtY = TabletY.axMax;
+
+  // Guarantee the output coordinate space to be in screen coordinates.
+  glogContext.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+  glogContext.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+  glogContext.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
+
+                                  // In Wintab, the tablet origin is lower left.  Move origin to upper left
+                                  // so that it coincides with screen origin.
+  glogContext.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);  //SM_CYSCREEN );
+
+                                  // Leave the system origin and extents as received:
+                                  // lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
+
+                                  // open the region
+                                  // The Wintab spec says we must open the context disabled if we are
+                                  // using cursor masks.
+  hctx = gpWTOpenA(hWnd, &glogContext, FALSE);
+
+  WacomTrace("HCTX: %i\n", hctx);
+
+  return hctx;
+}
+#endif
+
+void MapView::init_tablet()
+{
+#ifdef _WIN32
+  //this is for graphics tablet (e.g. Wacom, Huion, possibly others) initialization.
+  HWND WindowHandle = (HWND)effectiveWinId();
+  hInst = (HINSTANCE)GetWindowLongPtr(WindowHandle, GWLP_HINSTANCE);
+
+  if (LoadWintab())
+  {
+    /* check if WinTab available. */
+    if (gpWTInfoA(0, 0, nullptr))
+    {
+      hCtx = TabletInit(WindowHandle);
+      gpWTEnable(hCtx, TRUE);
+      gpWTOverlap(hCtx, TRUE);
+      if (!hCtx)
+      {
+        Log << "Could Not Open Tablet Context." << std::endl;
+      }
+      else
+      {
+        Log << "Opened Tablet Context." << std::endl;
+      }
+      _tablet_active = true;
+    }
+  }
+#endif
 }

@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 namespace opengl
 {
@@ -47,13 +48,16 @@ using StripType = uint16_t;
 
 class World
 {
+private:
+  std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
+
 public:
+  //! \todo  Get these managed? ._.
+  std::map<int, ModelInstance> mModelInstances;
+  std::map<int, WMOInstance> mWMOInstances;
+
   MapIndex mapIndex;
   noggit::map_horizon horizon;
-
-  // Information about the currently selected model / WMO / triangle.
-  boost::optional<selection_type> mCurrentSelection;
-  bool SelectionMode;
 
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
@@ -80,10 +84,6 @@ public:
 
   std::unique_ptr<Skies> skies;
 
-  //! \todo  Get these managed? ._.
-  std::map<int, ModelInstance> mModelInstances;
-  std::map<int, WMOInstance> mWMOInstances;
-  
   OutdoorLightStats outdoorLightStats;
 
   explicit World(const std::string& name, int map_id);
@@ -146,13 +146,48 @@ public:
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
-  bool HasSelection();
+private:
+  // Information about the currently selected model / WMO / triangle.
+  std::vector<selection_type> _current_selection;
+  boost::optional<math::vector_3d> _multi_select_pivot;
+  int _selected_model_count = 0;
+  void update_selection_pivot();
+public:
+
+  boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
-  bool IsSelection(int pSelectionType);
-  boost::optional<selection_type> GetCurrentSelection() { return mCurrentSelection; }
-  void SetCurrentSelection (boost::optional<selection_type> entry) { mCurrentSelection = entry; }
-  void ResetSelection() { mCurrentSelection.reset(); }
+  bool is_selection(int pSelectionType, selection_type selection) const;
+  bool is_selected(selection_type selection) const;
+  std::vector<selection_type> const& current_selection() const { return _current_selection; }
+  boost::optional<selection_type> get_last_selected_model() const;
+  bool has_selection() const { return !_current_selection.empty(); }
+  bool has_multiple_model_selected() const { return _selected_model_count > 1; }
+  void set_current_selection(selection_type entry);
+  void add_to_selection(selection_type entry);
+  void remove_from_selection(selection_type entry);
+  void reset_selection();
+
+  enum class m2_scaling_type
+  {
+    set,
+    add,
+    mult
+  };
+
+  void scale_selected_models(float v, m2_scaling_type type);
+  void move_selected_models(float dx, float dy, float dz);
+  void move_selected_models(math::vector_3d const& delta)
+  {
+    move_selected_models(delta.x, delta.y, delta.z);
+  }
+  void set_selected_models_pos(float x, float y, float z, bool change_height = true)
+  {
+    return set_selected_models_pos({x,y,z}, change_height);
+  }
+  void set_selected_models_pos(math::vector_3d const& pos, bool change_height = true);
+  void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
+  void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
 
@@ -183,9 +218,10 @@ public:
 
   void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
   void changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
+  math::vector_3d pickShaderColor(math::vector_3d const& pos);
   void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture);
   bool sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
   bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture);
 
@@ -276,7 +312,6 @@ public:
 private:
   void warning_if_uid_in_use(uint32_t uid);
   void update_models_by_filename();
-  std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
 
   std::set<MapChunk*>& vertexBorderChunks();
 

@@ -21,14 +21,11 @@
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QOpenGLWidget>
+#include <QWidgetAction>
 
 #include <forward_list>
 #include <map>
 #include <unordered_set>
-
-#ifdef _WIN32
-#include <external/wacom/WINTAB.h>
-#endif
 
 
 class World;
@@ -50,6 +47,7 @@ namespace noggit
     class toolbar;    
     class water;
     class zone_id_browser;
+    class texture_palette_small;
     struct main_window;
     struct tileset_chooser;
   }
@@ -70,11 +68,13 @@ private:
   bool _mod_ctrl_down = false;
   bool _mod_shift_down = false;
   bool _mod_space_down = false;
+  bool _mod_num_down = false;
 
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
-  bool look;
+  bool look, freelook;
+  bool ui_hidden = false;
 
   noggit::camera _camera;
   bool _camera_moved_since_last_draw = true;
@@ -112,6 +112,8 @@ private:
 
   void createGUI();
 
+  QWidgetAction* createTextSeparator(const QString& text);
+
   float mTimespeed;
 
   void ResetSelectedObjectRotation();
@@ -125,19 +127,15 @@ private:
   float keyx = 0, keyy = 0, keyz = 0, keyr = 0, keys = 0;
 
   bool MoveObj;
+  float numpad_moveratio = 0.001f;
 
   math::vector_3d objMove;
-  math::vector_3d objMoveOffset;
-  math::vector_3d objRot;
-
-  boost::optional<selection_type> lastSelected;
-
-  bool TestSelection = false;
+  
+  std::vector<selection_type> lastSelected;
 
   bool  leftMouse = false;
   bool  leftClicked = false;
   bool  rightMouse = false;
-  bool  painting = false;
 
   // Vars for the ground editing toggle mode store the status of some
   // view settings when the ground editing mode is switched on to
@@ -202,7 +200,8 @@ private:
     MOD_alt = 0x04,
     MOD_meta = 0x08,
     MOD_space = 0x10,
-    MOD_none = 0x00,
+    MOD_num = 0x20,
+    MOD_none = 0x00
   };
   struct HotKey
   {
@@ -226,6 +225,7 @@ private:
 
   QTimer _update_every_event_loop;
 
+  virtual void tabletEvent(QTabletEvent* event) override;
   virtual void initializeGL() override;
   virtual void paintGL() override;
   virtual void resizeGL (int w, int h) override;
@@ -246,10 +246,6 @@ private:
 
   float _tablet_pressure;
   bool _tablet_active = false;
-#ifdef _WIN32
-  HCTX hCtx = nullptr;
-#endif
-  void init_tablet();
 
   QLabel* _status_position;
   QLabel* _status_selection;
@@ -259,6 +255,7 @@ private:
 
   noggit::bool_toggle_property _locked_cursor_mode = {false};
   noggit::bool_toggle_property _move_model_to_cursor_position = {true};
+  noggit::bool_toggle_property _use_median_pivot_point = {true};
   noggit::bool_toggle_property _display_all_water_layers = {true};
   noggit::unsigned_int_property _displayed_water_layer = {0};
   noggit::object_paste_params _object_paste_params;
@@ -268,31 +265,37 @@ private:
   noggit::bool_toggle_property _show_cursor_switcher_window = {false};
   noggit::bool_toggle_property _show_keybindings_window = {false};
   noggit::bool_toggle_property _show_texture_palette_window = {false};
+  noggit::bool_toggle_property _show_texture_palette_small_window = {false};
 
   noggit::ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
-  QDockWidget* _time_and_navigation_dock;
+  QDockWidget* _texture_palette_dock;
 
   void move_camera_with_auto_height (math::vector_3d const&);
 
+  void setToolPropertyWidgetVisibility(editing_mode mode);
+
   std::unique_ptr<noggit::ui::cursor_switcher> _cursor_switcher;
-  std::unique_ptr<noggit::ui::help> _keybindings;
+  noggit::ui::help* _keybindings;
+
+  std::unordered_set<QDockWidget*> _tool_properties_docks;
 
   noggit::ui::tileset_chooser* TexturePalette;
   noggit::ui::detail_infos* guidetailInfos;
   noggit::ui::zone_id_browser* ZoneIDBrowser;
-  QDockWidget* _areaid;
+  noggit::ui::texture_palette_small* _texture_palette_small;
+  QDockWidget* _areaid_editor_dock;
   noggit::ui::texture_picker* TexturePicker;
   noggit::ui::water* guiWater;
-  QDockWidget* _water;
+  QDockWidget* _water_editor_dock;
   noggit::ui::object_editor* objectEditor;
-  QDockWidget* _object;
+  QDockWidget* _object_editor_dock;
   noggit::ui::flatten_blur_tool* flattenTool;
-  QDockWidget* _flatten_blur;
+  QDockWidget* _flatten_blur_dock;
   noggit::ui::terrain_tool* terrainTool;
-  QDockWidget* _terrain;
+  QDockWidget* _terrain_tool_dock;
   noggit::ui::shader_tool* shaderTool;
-  QDockWidget* _vertex_shading;
+  QDockWidget* _vertex_shading_dock;
   noggit::ui::texturing_tool* texturingTool;
-  QDockWidget* _texturing;
+  QDockWidget* _texturing_dock;
 };

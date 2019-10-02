@@ -85,3 +85,11 @@ enum display_mode
   in_2D,
   in_3D
 };
+
+
+enum CurrentTextureDropBehavior
+{
+  none,
+  current_texture,
+  texture_swapper
+};

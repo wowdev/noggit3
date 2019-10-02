@@ -13,6 +13,7 @@
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGroupBox>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QRadioButton>
@@ -23,8 +24,9 @@ namespace noggit
   {
     water::water ( unsigned_int_property* current_layer
                  , bool_toggle_property* display_all_layers
+                 , QWidget* parent
                  )
-      : QWidget (nullptr)
+      : QWidget (parent)
       , _liquid_id(5)
       , _radius(10.0f)
       , _angle(10.0f)
@@ -51,40 +53,24 @@ namespace noggit
       _radius_spin->setValue(_radius);
       brush_layout->addRow ("Radius", _radius_spin);
 
-      waterType = new pushbutton
-        ( "Type: none"
-        , [this]
-          {
-            QListWidget* water_type_browser (new QListWidget (nullptr));
-            connect (this, &QObject::destroyed, water_type_browser, &QObject::deleteLater);
+      waterType = new QComboBox(this);
 
-            water_type_browser->setWindowTitle("Water type selector");
-            water_type_browser->setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
+      for (DBCFile::Iterator i = gLiquidTypeDB.begin(); i != gLiquidTypeDB.end(); ++i)
+      {
+        int liquid_id = i->getInt(LiquidTypeDB::ID);
 
-            for (DBCFile::Iterator i = gLiquidTypeDB.begin(); i != gLiquidTypeDB.end(); ++i)
-            {
-              int liquid_id = i->getInt(LiquidTypeDB::ID);
+        std::stringstream ss;
+        ss << liquid_id << "-" << LiquidTypeDB::getLiquidName(liquid_id);
+        waterType->addItem (QString::fromUtf8(ss.str().c_str()), QVariant (liquid_id));
 
-              std::stringstream ss;
-              ss << liquid_id << "-" << LiquidTypeDB::getLiquidName(liquid_id);
+      }
 
-              auto item (new QListWidgetItem (QString::fromUtf8 (ss.str().c_str()), water_type_browser));
-              item->setData (Qt::UserRole, QVariant (liquid_id));
-
-              water_type_browser->addItem(item);
-            }
-
-            connect ( water_type_browser, &QListWidget::itemClicked
-                    , [&] (QListWidgetItem* item)
-                      {
-                        changeWaterType(item->data(Qt::UserRole).toInt());
-                      }
-                    );
-
-            water_type_browser->show();
-          }
-        , this
-        );
+      connect (waterType, qOverload<int> (&QComboBox::currentIndexChanged)
+              , [&]
+                {
+                  changeWaterType(waterType->currentData().toInt());
+                }
+              );
 
       brush_layout->addRow (waterType);
 
@@ -93,7 +79,9 @@ namespace noggit
       auto angle_group (new QGroupBox ("Angled mode", this));
       angle_group->setCheckable (true);
       angle_group->setChecked (_angled_mode.get());
-      connect ( &_angled_mode, &bool_toggle_property::changed
+      
+      
+      ( &_angled_mode, &bool_toggle_property::changed
               , angle_group, &QGroupBox::setChecked
               );
       connect ( angle_group, &QGroupBox::toggled
@@ -239,6 +227,7 @@ namespace noggit
               );
 
       updateData();
+      setMinimumWidth(sizeHint().width());
     }
 
     void water::updatePos(tile_index const& newTile)
@@ -254,7 +243,7 @@ namespace noggit
     {
       std::stringstream mt;
       mt << _liquid_id << " - " << LiquidTypeDB::getLiquidName(_liquid_id);
-      waterType->setText (QString::fromStdString (mt.str()));
+      waterType->setCurrentText (QString::fromStdString (mt.str()));
     }
 
     void water::changeWaterType(int waterint)
@@ -346,6 +335,11 @@ namespace noggit
       case ocean_opacity:  return 0.007f;
       case custom_opacity: return _custom_opacity_factor;
       }
+    }
+
+    QSize water::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

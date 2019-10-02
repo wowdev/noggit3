@@ -110,7 +110,7 @@ void MapTile::finishLoading()
 
     while (lCurPos < lEnd)
     {
-      mTextureFilenames.push_back(std::string(lCurPos));
+      mTextureFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
       lCurPos += strlen(lCurPos) + 1;
     }
   }
@@ -131,7 +131,7 @@ void MapTile::finishLoading()
 
       while (lCurPos < lEnd)
       {
-        mModelFilenames.push_back(std::string(lCurPos));
+        mModelFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
         lCurPos += strlen(lCurPos) + 1;
       }
     }
@@ -150,7 +150,7 @@ void MapTile::finishLoading()
 
       while (lCurPos < lEnd)
       {
-        mWMOFilenames.push_back(std::string(lCurPos));
+        mWMOFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
         lCurPos += strlen(lCurPos) + 1;
       }
     }
@@ -341,7 +341,7 @@ void MapTile::draw ( math::frustum const& frustum
                    , bool draw_chunk_flag_overlay
                    , bool draw_areaid_overlay
                    , std::map<int, misc::random_color>& area_id_colors
-                   , boost::optional<selection_type> selection
+                   , std::vector<selection_type> selection
                    , int animtime
                    , display_mode display
                    )
@@ -366,7 +366,6 @@ void MapTile::draw ( math::frustum const& frustum
                           , draw_chunk_flag_overlay
                           , draw_areaid_overlay
                           , area_id_colors
-                          , selection
                           , animtime
                           , display
                           );

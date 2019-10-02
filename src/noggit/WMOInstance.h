@@ -85,6 +85,11 @@ public:
     std::swap(_transform_mat_transposed, other._transform_mat_transposed);
     return *this;
   }
+  /*
+  bool operator==(WMOInstance&& other) const
+  {
+      return this->mUniqueID == other.mUniqueID;
+  }*/
 
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
@@ -100,7 +105,7 @@ public:
             , math::vector_4d const& river_color_light
             , math::vector_4d const& river_color_dark
             , liquid_render& render
-            , boost::optional<selection_type> selection
+            , std::vector<selection_type> selection
             , int animtime
             , bool world_has_skies
             , display_mode display

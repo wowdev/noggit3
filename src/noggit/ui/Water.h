@@ -13,6 +13,7 @@ class QLabel;
 class QPushButton;
 class QSpinBox;
 class World;
+class QComboBox;
 
 namespace noggit
 {
@@ -25,6 +26,7 @@ namespace noggit
     public:
       water ( unsigned_int_property* current_layer
             , bool_toggle_property* display_all_layers
+            , QWidget* parent = nullptr
             );
 
       void updatePos(tile_index const& newTile);
@@ -49,6 +51,8 @@ namespace noggit
       bool angled_mode() const { return _angled_mode.get(); }
       bool use_ref_pos() const { return _locked.get(); }
       math::vector_3d ref_pos() const { return _lock_pos; }
+
+      QSize sizeHint() const override;
 
     signals:
       void regenerate_water_opacity (float factor);
@@ -82,8 +86,8 @@ namespace noggit
       QDoubleSpinBox* _z_spin;
       QDoubleSpinBox* _h_spin;
 
-      QPushButton *waterType;
-      QSpinBox *waterLayer;
+      QComboBox* waterType;
+      QSpinBox* waterLayer;
 
       tile_index tile;
     };

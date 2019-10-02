@@ -7,6 +7,10 @@
 
 #include <boost/optional.hpp>
 
+
+class QMouseEvent;
+class QListView;
+
 namespace noggit
 {
   namespace ui
@@ -22,6 +26,7 @@ namespace noggit
 
     signals:
       void selected (std::string);
+
     };
 
     class selected_texture

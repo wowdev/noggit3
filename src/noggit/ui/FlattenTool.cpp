@@ -15,8 +15,8 @@ namespace noggit
 {
   namespace ui
   {
-    flatten_blur_tool::flatten_blur_tool()
-      : QWidget(nullptr)
+    flatten_blur_tool::flatten_blur_tool(QWidget* parent)
+      : QWidget(parent)
       , _radius(10.0f)
       , _speed(2.0f)
       , _angle(45.0f)
@@ -24,6 +24,7 @@ namespace noggit
       , _flatten_type(eFlattenType_Linear)
       , _flatten_mode(eFlattenMode_Both)
     {
+      setMinimumWidth(sizeHint().width());
       auto layout (new QFormLayout (this));
 
       _type_button_box = new QButtonGroup (this);
@@ -310,6 +311,11 @@ namespace noggit
       _speed_spin->setValue(_speed + change);
     }
 
+    void flatten_blur_tool::setSpeed(float speed)
+    {
+      _speed_spin->setValue(speed);
+    }
+
     void flatten_blur_tool::changeOrientation(float change)
     {
       setOrientation(_orientation + change);
@@ -345,6 +351,11 @@ namespace noggit
     void flatten_blur_tool::setRadius(float radius)
     {
       _radius_spin->setValue(radius);
+    }
+
+    QSize flatten_blur_tool::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

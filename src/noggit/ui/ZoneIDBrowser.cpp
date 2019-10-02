@@ -16,13 +16,14 @@ namespace noggit
 {
   namespace ui
   {
-    zone_id_browser::zone_id_browser()
-      : QWidget(nullptr)
+    zone_id_browser::zone_id_browser(QWidget* parent)
+      : QWidget(parent)
       , _area_tree(new QTreeWidget())
       , mapID(-1)
     {
       new QVBoxLayout(this);
       this->layout()->addWidget(_area_tree);
+      
 
       connect ( _area_tree, &QTreeWidget::itemSelectionChanged
               , [this]

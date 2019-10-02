@@ -10,6 +10,8 @@
 #include <QtWidgets/QWidget>
 #include <QDockWidget>
 
+class World;
+
 namespace noggit
 {
   namespace ui
@@ -17,22 +19,16 @@ namespace noggit
     class rotation_editor : public QWidget
     {
     public:
-      rotation_editor(QWidget* parent);
+      rotation_editor(QWidget* parent, World* world);
 
-      void select(selection_type entry);
-      void updateValues();
-      bool hasSelection() const { return _selection; }
+      bool* use_median_pivot_point;
 
-      bool hasFocus() const {return false;}
-
+      void updateValues(World* world);
     private:
-      void update_model();
-      math::vector_3d* rotationVect;
-      math::vector_3d* posVect;
-      float* scale;
-
-      bool _selection;
-	  boost::optional<selection_type> _entry;
+      // for single selection
+      void set_model_rotation(World* world);
+      // for multi selection
+      void change_models_rotation(World* world);
 
       QDoubleSpinBox* _rotation_x;
       QDoubleSpinBox* _rotation_z;

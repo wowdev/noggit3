@@ -506,7 +506,6 @@ void MapChunk::draw ( math::frustum const& frustum
                     , bool draw_chunk_flag_overlay
                     , bool draw_areaid_overlay
                     , std::map<int, misc::random_color>& area_id_colors
-                    , boost::optional<selection_type> selection
                     , int animtime
                     , display_mode display
                     )
@@ -784,9 +783,9 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
       float edit = change * (1.0f - dist / radius);
       if (editMode)
       {
-        mccv[i].x += (color.x - mccv[i].x)* edit;
-        mccv[i].y += (color.y - mccv[i].y)* edit;
-        mccv[i].z += (color.z - mccv[i].z)* edit;
+        mccv[i].x += (color.x / 0.5f - mccv[i].x)* edit;
+        mccv[i].y += (color.y / 0.5f - mccv[i].y)* edit;
+        mccv[i].z += (color.z / 0.5f - mccv[i].z)* edit;
       }
       else
       {
@@ -809,6 +808,31 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   }
 
   return changed;
+}
+
+math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
+{
+  float dist;
+  float cur_dist = UNITSIZE;
+
+  if (!hasMCCV)
+  {
+    return math::vector_3d(1.0f, 1.0f, 1.0f);
+  }
+
+  int v_index = 0;
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    dist = misc::dist(mVertices[i], pos);
+    if (dist <= cur_dist)
+    {
+      cur_dist = dist;
+      v_index = i;
+    }
+  }
+
+  return mccv[v_index];
+
 }
 
 bool MapChunk::flattenTerrain ( math::vector_3d const& pos
@@ -957,7 +981,7 @@ void MapChunk::switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp
   texture_set->switchTexture(oldTexture, newTexture);
 }
 
-bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
+bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
 {
   return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
 }

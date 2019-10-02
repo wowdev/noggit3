@@ -5,6 +5,8 @@
 #include <math/vector_3d.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
+#include <noggit/tool_enums.hpp>
+
 #include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
@@ -28,7 +30,8 @@ namespace noggit
 
       auto layout (new QFormLayout (this));
 
-      _texture_to_swap_display = new current_texture;
+      _texture_to_swap_display = new current_texture(this, this);
+      _texture_to_swap_display->set_drop_behavior(CurrentTextureDropBehavior::texture_swapper);
 
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
@@ -96,6 +99,12 @@ namespace noggit
     void texture_swapper::change_radius(float change)
     {
       _radius_spin->setValue(_radius + change);
+    }
+
+    void texture_swapper::set_texture(std::string& filename)
+    {
+      _texture_to_swap = scoped_blp_texture_reference(filename);
+      _texture_to_swap_display->set_texture(filename);
     }
   }
 }

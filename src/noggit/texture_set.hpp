@@ -29,7 +29,7 @@ public:
   bool eraseUnusedTextures();
   void swapTexture(int id1, int id2);
   void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
-  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture);
   bool replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture);
   bool canPaintTexture(scoped_blp_texture_reference texture);
 
@@ -60,7 +60,7 @@ public:
 
 private:
   int get_texture_index(scoped_blp_texture_reference texture, float target);
-  bool change_texture(int texture_id, size_t offset, float strenght, float pressure);
+  bool change_texture(int texture_id, size_t offset, uint strength, float pressure);
 
   uint8_t sum_alpha(size_t offset) const;
 
