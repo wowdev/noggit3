@@ -313,10 +313,8 @@ void WMO::finishLoading ()
 void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , math::matrix_4x4 const& model_view
                , math::matrix_4x4 const& projection
-               , math::matrix_4x4 const& transform
-               , int doodadset
-               , const math::vector_3d &ofs
-               , math::degrees const angle
+               , math::matrix_4x4 const& transform_matrix
+               , math::matrix_4x4 const& transform_matrix_transposed
                , bool boundingbox
                , math::frustum const& frustum
                , const float& cull_distance
@@ -335,10 +333,9 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 { 
   wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
 
-
   for (auto& group : groups)
   {
-    if (!group.is_visible(ofs, angle, frustum, cull_distance, camera, display))
+    if (!group.is_visible(transform_matrix, frustum, cull_distance, camera, display))
     {
       continue;
     }
@@ -353,7 +350,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 
     group.drawLiquid ( model_view
                      , projection
-                     , transform
+                     , transform_matrix_transposed
                      , ocean_color_light
                      , ocean_color_dark
                      , river_color_light
@@ -370,14 +367,20 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (auto& group : groups)
-      opengl::primitives::wire_box (group.BoundingBoxMin, group.BoundingBoxMax)
-        .draw (model_view, projection, transform, {1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
+    {
+      opengl::primitives::wire_box(group.BoundingBoxMin, group.BoundingBoxMax)
+        .draw( model_view
+             , projection
+             , transform_matrix_transposed
+             , {1.0f, 1.0f, 1.0f, 1.0f}, 1.0f
+             );
+    }
 
     opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
                                  , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
                                  ).draw ( model_view
                                         , projection
-                                        , transform
+                                        , transform_matrix_transposed
                                         , {1.0f, 0.0f, 0.0f, 1.0f}
                                         , 2.0f
                                         );
@@ -1046,26 +1049,23 @@ void WMOGroup::fix_vertex_color_alpha()
   }
 }
 
-bool WMOGroup::is_visible( math::vector_3d const& ofs
-                         , math::degrees const& angle
+bool WMOGroup::is_visible( math::matrix_4x4 const& transform
                          , math::frustum const& frustum
                          , float const& cull_distance
                          , math::vector_3d const& camera
                          , display_mode display
                          ) const
 {
-  math::vector_3d pos = center + ofs;
-
-  math::rotate(ofs.x, ofs.z, &pos.x, &pos.z, angle);
+  math::vector_3d pos = transform * center;
 
   if (!frustum.intersectsSphere(pos, rad))
   {
     return false;
   }
 
-  float dist = display == display_mode::in_3D 
-             ? (pos - camera).length() - rad
-             : std::abs(pos.y - camera.y) - rad;
+  float dist = display == display_mode::in_3D
+    ? (pos - camera).length() - rad
+    : std::abs(pos.y - camera.y) - rad;
 
   return (dist < cull_distance);
 }

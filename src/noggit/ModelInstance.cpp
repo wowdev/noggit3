@@ -279,7 +279,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
     return;
   }  
 
-  world_pos = pos + wmo->pos;
+  world_pos = wmo->transform_matrix() * pos;
 
   math::matrix_4x4 m2_mat
   (
