@@ -1054,7 +1054,7 @@ void Model::calcBones( math::matrix_4x4 const& model_view
 
 void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time)
 {
-  if (_animations_seq_per_id.empty() || _animations_seq_per_id.at(anim_id).empty())
+  if (_animations_seq_per_id.empty() || _animations_seq_per_id[anim_id].empty())
   {
     return;
   }
