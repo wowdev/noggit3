@@ -76,10 +76,8 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
     wmo->draw ( wmo_shader
               , model_view
               , projection
+              , _transform_mat
               , _transform_mat_transposed
-              , _doodadset
-              , pos
-              , math::degrees (roty)
               , is_selected
               , frustum
               , cull_distance
@@ -271,7 +269,7 @@ std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
   {
     for (int i = 0; i < wmo->groups.size(); ++i)
     {
-      if (wmo->groups[i].is_visible(pos, math::degrees (dir.y - 90.f), frustum, cull_distance, camera, display))
+      if (wmo->groups[i].is_visible(_transform_mat, frustum, cull_distance, camera, display))
       {
         for (auto& doodad : _doodads_per_group[i])
         {

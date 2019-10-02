@@ -89,9 +89,9 @@ public:
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
-            , math::frustum const&
-            , const float&
-            , const math::vector_3d&
+            , math::frustum const& frustum
+            , const float& cull_distance
+            , const math::vector_3d& camera
             , bool force_box
             , bool draw_doodads
             , bool draw_fog

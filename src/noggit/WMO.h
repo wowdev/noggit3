@@ -130,8 +130,7 @@ public:
   void intersect (math::ray const&, std::vector<float>* results) const;
 
   // todo: portal culling
-  bool is_visible( math::vector_3d const& ofs
-                 , math::degrees const& angle
+  bool is_visible( math::matrix_4x4 const& transform_matrix
                  , math::frustum const& frustum
                  , float const& cull_distance
                  , math::vector_3d const& camera
@@ -252,10 +251,8 @@ public:
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
-            , math::matrix_4x4 const& transform
-            , int doodadset
-            , const math::vector_3d& ofs
-            , math::degrees const
+            , math::matrix_4x4 const& transform_matrix
+            , math::matrix_4x4 const& transform_matrix_transposed
             , bool boundingbox
             , math::frustum const& frustum
             , const float& cull_distance
