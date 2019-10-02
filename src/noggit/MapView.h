@@ -132,6 +132,8 @@ private:
   math::vector_3d objMove;
   
   std::vector<selection_type> lastSelected;
+  
+  bool _rotation_editor_need_update = false;
 
   bool  leftMouse = false;
   bool  leftClicked = false;

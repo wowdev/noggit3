@@ -79,6 +79,7 @@ void MapView::set_editing_mode (editing_mode mode)
 
   MoveObj = false;
   _world->reset_selection();
+  _rotation_editor_need_update = true;
 
   if (!ui_hidden)
   {
@@ -131,19 +132,21 @@ void MapView::ResetSelectedObjectRotation()
     if (_world->is_selection(eEntry_WMO, selection))
     {
       WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
-    _world->updateTilesWMO(wmo, model_update::remove);
-    wmo->resetDirection();
-    _world->updateTilesWMO(wmo, model_update::add);
-  }
+      _world->updateTilesWMO(wmo, model_update::remove);
+      wmo->resetDirection();
+      _world->updateTilesWMO(wmo, model_update::add);
+    }
     else if (_world->is_selection(eEntry_Model, selection))
-  {
+    {
       ModelInstance* m2 = boost::get<selected_model_type>(selection);
-    _world->updateTilesModel(m2, model_update::remove);
-    m2->resetDirection();
-    m2->recalcExtents();
-    _world->updateTilesModel(m2, model_update::add);
+      _world->updateTilesModel(m2, model_update::remove);
+      m2->resetDirection();
+      m2->recalcExtents();
+      _world->updateTilesModel(m2, model_update::add);
+    }
   }
-}
+
+  _rotation_editor_need_update = true;
 }
 
 void MapView::SnapSelectedObjectToGround()
@@ -153,22 +156,24 @@ void MapView::SnapSelectedObjectToGround()
     if (_world->is_selection(eEntry_WMO, selection))
     {
       WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
-    math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
-    _world->GetVertex(wmo->pos.x, wmo->pos.z, &t);
-    wmo->pos.y = t.y;
-	  wmo->recalcExtents();
-    _world->updateTilesWMO(wmo, model_update::none);
-  }
+      math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
+      _world->GetVertex(wmo->pos.x, wmo->pos.z, &t);
+      wmo->pos.y = t.y;
+      wmo->recalcExtents();
+      _world->updateTilesWMO(wmo, model_update::none);
+    }
     else if (_world->is_selection(eEntry_Model, selection))
-  {
+    {
       ModelInstance* m2 = boost::get<selected_model_type>(selection);
-    math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
-    _world->GetVertex(m2->pos.x, m2->pos.z, &t);
-    m2->pos.y = t.y;
-	  m2->recalcExtents();
-    _world->updateTilesModel(m2, model_update::none);
+      math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
+      _world->GetVertex(m2->pos.x, m2->pos.z, &t);
+      m2->pos.y = t.y;
+      m2->recalcExtents();
+      _world->updateTilesModel(m2, model_update::none);
+    }
   }
-}
+
+  _rotation_editor_need_update = true;
 }
 
 
@@ -182,13 +187,15 @@ void MapView::DeleteSelectedObject()
     if (_world->is_selection(eEntry_WMO, selection))
     {
       _world->deleteWMOInstance(boost::get<selected_wmo_type>(selection)->mUniqueID);
-  }
+    }
     else if (_world->is_selection(eEntry_Model, selection))
-  {
+    {
       _world->deleteModelInstance(boost::get<selected_model_type>(selection)->uid);
-    _world->need_model_updates = true;
+      _world->need_model_updates = true;
+    }
   }
-}
+
+  _rotation_editor_need_update = true;
 }
 
 
@@ -505,6 +512,7 @@ void MapView::createGUI()
                  makeCurrent();
                  opengl::context::scoped_setter const _ (::gl, context());
                  _world->reload_tile (_camera.position);
+                 _rotation_editor_need_update = true;
                }
              );
 
@@ -590,6 +598,7 @@ void MapView::createGUI()
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
                     _world->clearAllModelsOnADT(_camera.position);
+                    _rotation_editor_need_update = true;
                   }
                 );
   ADD_ACTION_NS ( assist_menu
@@ -1148,6 +1157,7 @@ void MapView::createGUI()
             , [&]
               {
                 _world->set_selected_models_pos(_cursor_pos);
+                _rotation_editor_need_update = true;
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
@@ -1529,7 +1539,7 @@ void MapView::tick (float dt)
     // update rotation editor if the selection has changed
     if (lastSelected != currentSelection)
     {
-      objectEditor->rotationEditor->updateValues(_world.get());
+      _rotation_editor_need_update = true;
     }
 
     bool canMoveObj = terrainMode == editing_mode::object;
@@ -1560,6 +1570,7 @@ void MapView::tick (float dt)
       if (keys != 0.f)
       {
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
+        _rotation_editor_need_update = true;
       }
       if (keyr != 0.f)
       {
@@ -1568,6 +1579,7 @@ void MapView::tick (float dt)
                                       , math::degrees(0.f)
                                       , _use_median_pivot_point.get()
                                       );
+        _rotation_editor_need_update = true;
       }
 
       if (MoveObj)
@@ -1592,11 +1604,14 @@ void MapView::tick (float dt)
             _world->set_selected_models_pos(_cursor_pos, false);
           }
         }
+
+        _rotation_editor_need_update = true;
       }
 
       if (keyx != 0.f || keyy != 0.f || keyz != 0.f)
       {
         _world->move_selected_models(keyx * numpad_moveratio, keyy * numpad_moveratio, keyz * numpad_moveratio);
+        _rotation_editor_need_update = true;
       }
 
       if (look)
@@ -1625,6 +1640,8 @@ void MapView::tick (float dt)
                                         , _use_median_pivot_point.get()
                                         );
         }
+
+        _rotation_editor_need_update = true;
       }
     }
 
@@ -1825,7 +1842,15 @@ void MapView::tick (float dt)
   }
 
   if (_world->has_selection())
+  {
     lastSelected = currentSelection;
+  }
+
+  if (_rotation_editor_need_update)
+  {
+    objectEditor->rotationEditor->updateValues(_world.get());
+    _rotation_editor_need_update = false;
+  }
 
   QString status;
   status += ( QString ("tile: %1 %2")
@@ -2122,12 +2147,13 @@ void MapView::doSelection (bool selectTerrainOnly)
       _world->add_to_selection(hit);
     }
 
-
     _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type>(hit)->pos
       : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type>(hit)->pos
       : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type>(hit).position
       : throw std::logic_error("bad variant");
   }
+
+  _rotation_editor_need_update = true;
 }
 
 void MapView::update_cursor_pos()
@@ -2618,14 +2644,15 @@ void MapView::selectModel(std::string const& model)
     WMOInstance wi(model);
     _world->set_current_selection(boost::get<selected_wmo_type>(&wi));
   }
+
   objectEditor->copy_current_selection(_world.get());
+  _rotation_editor_need_update = true;
 }
 
 void MapView::change_selected_wmo_doodadset(int set)
 {
   for (auto& selection : _world->current_selection())
   {
-
     if (selection.which() == eEntry_WMO)
     {
       auto wmo = boost::get<selected_wmo_type>(selection);
