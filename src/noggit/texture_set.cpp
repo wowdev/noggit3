@@ -460,6 +460,11 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
     new_tex_level = addTexture(new_texture);
   }
 
+  if (old_tex_level == new_tex_level)
+  {
+    return false;
+  }
+
   for (int j = 0; j < 64; j++)
   {
     x_pos = xbase;
