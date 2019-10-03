@@ -331,8 +331,6 @@ void liquid_layer::update_buffers()
 
 void liquid_layer::update_vao(opengl::scoped::use_program& water_shader)
 {
-  opengl::scoped::vao_binder const _ (_vao);
-
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
     water_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -372,6 +370,8 @@ void liquid_layer::draw ( liquid_render& render
     update_buffers();
   }
 
+  gl.bindVertexArray(_vao);
+
   if (_vao_need_update)
   {
     update_vao(water_shader);
@@ -387,8 +387,6 @@ void liquid_layer::draw ( liquid_render& render
       set_lod_level(new_lod);
     }
   }
-
-  opengl::scoped::vao_binder const _ (_vao);
 
   render.prepare_draw (water_shader, _liquid_id, animtime);
 
