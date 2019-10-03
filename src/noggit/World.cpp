@@ -1175,7 +1175,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
     water_shader.uniform ("river_color_light", river_color_light);
     water_shader.uniform ("river_color_dark",  river_color_dark);
-
     
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
@@ -1190,6 +1189,9 @@ void World::draw ( math::matrix_4x4 const& model_view
                       , display
                       );
     }
+
+    gl.bindVertexArray(0);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
   // draw last because of the transparency
