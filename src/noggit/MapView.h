@@ -172,6 +172,8 @@ private:
 
 signals:
   void uid_fix_failed();
+public slots:
+  void on_exit_prompt();
 
 public:
   math::vector_4d cursor_color;

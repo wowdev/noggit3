@@ -1222,6 +1222,23 @@ void MapView::createGUI()
   addHotkey(Qt::Key_7, MOD_ctrl, [this] { change_selected_wmo_doodadset(7); });
   addHotkey(Qt::Key_8, MOD_ctrl, [this] { change_selected_wmo_doodadset(8); });
   addHotkey(Qt::Key_9, MOD_ctrl, [this] { change_selected_wmo_doodadset(9); });
+
+  connect(_main_window, &noggit::ui::main_window::exit_prompt_opened, this, &MapView::on_exit_prompt);
+}
+
+void MapView::on_exit_prompt()
+{
+  // hide all popups
+  _cursor_switcher->hide();
+  _keybindings->hide();
+  _minimap_dock->hide();
+  _texture_palette_small->hide();
+  objectEditor->helper_models_widget->hide();
+  objectEditor->modelImport->hide();
+  objectEditor->rotationEditor->hide();
+  guidetailInfos->hide();
+  TexturePicker->hide();
+  TexturePalette->hide();
 }
 
 MapView::MapView( math::degrees camera_yaw0
