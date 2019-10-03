@@ -412,6 +412,7 @@ list (APPEND headers_to_moc
   src/noggit/ui/widget.hpp
   src/noggit/ui/texture_palette_small.hpp
   src/noggit/ui/TextureList.hpp
+  src/noggit/ui/main_window.hpp
   src/noggit/unsigned_int_property.hpp
 )
 qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})

@@ -308,6 +308,8 @@ namespace noggit
 
     void main_window::prompt_exit(QCloseEvent* event)
     {
+      emit exit_prompt_opened();
+
       QMessageBox prompt;
       prompt.setIcon (QMessageBox::Warning);
       prompt.setWindowFlags(Qt::WindowStaysOnTopHint);

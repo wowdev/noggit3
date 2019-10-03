@@ -18,12 +18,18 @@ namespace noggit
 
     struct main_window : QMainWindow
     {
+      Q_OBJECT
+
+    public:
       main_window();
 
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
 
       std::unordered_set<QWidget*> displayed_widgets;
+
+    signals:
+      void exit_prompt_opened();
 
     private:
       void loadMap (int mapID);
