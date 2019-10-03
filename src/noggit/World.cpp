@@ -1182,6 +1182,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       tile->drawWater ( frustum
                       , culldistance
                       , camera_pos
+                      , camera_moved
                       , _liquid_render.get()
                       , water_shader
                       , animtime

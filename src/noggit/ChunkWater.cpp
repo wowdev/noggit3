@@ -161,6 +161,7 @@ void ChunkWater::setType(int type, size_t layer)
 void ChunkWater::draw ( math::frustum const& frustum
                       , const float& cull_distance
                       , const math::vector_3d& camera
+                      , bool camera_moved
                       , liquid_render& render
                       , opengl::scoped::use_program& water_shader
                       , int animtime
@@ -177,12 +178,12 @@ void ChunkWater::draw ( math::frustum const& frustum
   {
     for (liquid_layer& lq_layer : _layers)
     {
-      lq_layer.draw (render, water_shader, camera, animtime);
+      lq_layer.draw (render, water_shader, camera, camera_moved, animtime);
     }
   }
   else if (layer < _layers.size())
   {
-    _layers[layer].draw (render, water_shader, camera, animtime);
+    _layers[layer].draw (render, water_shader, camera, camera_moved, animtime);
   }
 }
 

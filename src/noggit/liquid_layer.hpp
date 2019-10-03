@@ -29,6 +29,7 @@ public:
   void draw ( liquid_render& render
             , opengl::scoped::use_program& water_shader
             , math::vector_3d const& camera
+            , bool camera_moved
             , int animtime
             );
   void update_indices();
@@ -67,8 +68,12 @@ private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
   int get_lod_level(math::vector_3d const& camera_pos) const;
+  void set_lod_level(int lod_level);
 
   static int const lod_count = 4;
+
+  int _current_lod_level = -1;
+  int _current_lod_indices_count = 0;
 
   opengl::scoped::deferred_upload_buffers<lod_count> _index_buffer;
   opengl::scoped::deferred_upload_buffers<3> _buffers;
