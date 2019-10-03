@@ -74,6 +74,20 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
 # multi core building for visual studio
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
 
+
+if(WIN32)
+  # Disable opengl error log
+  OPTION(ADDITIONAL_OPTIMIZATION_FLAGS "Enable OpenGL error check ?" OFF)
+  IF(ADDITIONAL_OPTIMIZATION_FLAGS)
+    MESSAGE( STATUS "Enabled additional optimization flags for msvc.")
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ob2) # inline any suitable functions
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Oi)  # enable intrasic functions
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ot)  # favor fast code
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /GL)  # whole program optimization
+  ENDIF()
+endif(WIN32)
+
+
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
