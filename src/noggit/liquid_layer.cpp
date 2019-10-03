@@ -354,12 +354,17 @@ void liquid_layer::update_vao(opengl::scoped::use_program& water_shader)
 void liquid_layer::draw ( liquid_render& render
                         , opengl::scoped::use_program& water_shader
                         , math::vector_3d const& camera
+                        , bool camera_moved
                         , int animtime
                         )
 {
+  bool lod_changed = false;
+
   if (!_uploaded)
   {
     upload();
+    lod_changed = true;
+    set_lod_level(get_lod_level(camera));
   }
 
   if (_need_buffer_update)
@@ -372,16 +377,29 @@ void liquid_layer::draw ( liquid_render& render
     update_vao(water_shader);
   }
 
+  if (camera_moved)
+  {
+    int new_lod = get_lod_level(camera);
+
+    if (new_lod != _current_lod_level)
+    {
+      lod_changed = true;
+      set_lod_level(new_lod);
+    }
+  }
+
   opengl::scoped::vao_binder const _ (_vao);
 
   render.prepare_draw (water_shader, _liquid_id, animtime);
 
   water_shader.uniform ("tex_repeat", texRepeats);
 
-  int lod_level = get_lod_level(camera);
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(_index_buffer[lod_level]);
+  if (lod_changed)
+  {
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_buffer[_current_lod_level]);
+  }
   
-  gl.drawElements (GL_TRIANGLES, _indices_by_lod[lod_level].size(), GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, _current_lod_indices_count, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void liquid_layer::crop(MapChunk* chunk)
@@ -575,4 +593,10 @@ int liquid_layer::get_lod_level(math::vector_3d const& camera_pos) const
        : dist < 2000.f ? 1
        : dist < 4000.f ? 2
        : 3;
+}
+
+void liquid_layer::set_lod_level(int lod_level)
+{
+  _current_lod_level = lod_level;
+  _current_lod_indices_count = _indices_by_lod[lod_level].size();
 }
