@@ -375,6 +375,7 @@ void liquid_layer::draw ( liquid_render& render
   if (_vao_need_update)
   {
     update_vao(water_shader);
+    set_lod_level(get_lod_level(camera));
   }
 
   if (camera_moved)
