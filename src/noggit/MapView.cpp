@@ -1730,8 +1730,7 @@ void MapView::tick (float dt)
           // no undermap check here, else it's impossible to remove holes
           if (_mod_shift_down)
           {
-            auto pos(boost::get<selected_chunk_type>(selection).position);
-            _world->setHole(pos, _mod_alt_down, false);
+            _world->setHole(_cursor_pos, _mod_alt_down, false);
           }
           else if (_mod_ctrl_down && !underMap)
           {
