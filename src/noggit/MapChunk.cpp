@@ -452,7 +452,7 @@ bool MapChunk::is_visible ( const float& cull_distance
 
 void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const& tex_coord_vbo)
 {
-  opengl::scoped::vao_binder const _(_vao);
+  opengl::scoped::vao_binder const _ (_vao);
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
@@ -475,6 +475,7 @@ void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const
   }
 
   _need_vao_update = false;
+  _need_indice_buffer_update = true;
 }
 
 bool MapChunk::update_visibility ( const float& cull_distance
@@ -530,11 +531,6 @@ void MapChunk::draw ( math::frustum const& frustum
     update_visibility(cull_distance, frustum, camera, display);
   }
 
-  if (_need_indice_buffer_update)
-  {
-    update_indices_buffer();
-  }
-
   // todo update lod too
   if (_need_vao_update)
   {
@@ -578,6 +574,12 @@ void MapChunk::draw ( math::frustum const& frustum
   }
 
   gl.bindVertexArray(_vao);
+
+  if (_need_indice_buffer_update)
+  {
+    update_indices_buffer();
+    lod_changed = true;
+  }
 
   if (lod_changed)
   {
