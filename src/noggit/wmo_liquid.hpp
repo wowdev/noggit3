@@ -61,10 +61,10 @@ struct WMOMaterial
   uint32_t texture_offset_1; // Start position for the first texture filename in the MOTX data block
   CImVector sidn_color; // emissive color
   CImVector frame_sidn_color; // runtime value
-  uint32_t envNameIndex; 
+  uint32_t texture_offset_2; // Start position for the second texture filename in the MOTX data block
   CArgb diffuse_color;
   uint32_t ground_type;
-  uint32_t texture_offset_2; // Start position for the second texture filename in the MOTX data block
+  uint32_t texture_offset_3; 
   uint32_t color_2;
   uint32_t flag_2;
   uint32_t runtime_data[2];
