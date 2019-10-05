@@ -107,26 +107,42 @@ void WMO::finishLoading ()
 
   std::vector<int> texture_ofs;
 
+  auto load_texture
+    ( [&] (uint32_t const& ofs, uint32_t& id, bool optional) 
+      {
+        if(texbuf[ofs] == 0)
+        {
+          if (!optional)
+          {
+            id = textures.size();
+            textures.emplace_back("textures/shanecube.blp");
+          }
+        }
+        else
+        {
+          auto it = std::find(texture_ofs.begin(), texture_ofs.end(), ofs);
+
+          if (it == texture_ofs.end())
+          {
+            id = textures.size();
+            texture_ofs.emplace_back(ofs);
+            std::string const texpath(texbuf.data() + ofs);
+            textures.emplace_back(texpath);
+          }
+          else
+          {
+            id = std::distance(texture_ofs.begin(), it);
+          }
+        }
+      }
+    );
+
   for (size_t i (0); i < num_materials; ++i)
   {
     f.read (&materials[i], sizeof(WMOMaterial));
 
-    auto it = std::find(texture_ofs.begin(), texture_ofs.end(), materials[i].texture_offset_1);
-
-    // texture not loaded
-    if (it == texture_ofs.end())
-    {
-      materials[i].texture1 = textures.size();
-      texture_ofs.emplace_back(materials[i].texture_offset_1);
-      std::string const texpath (texbuf.data() + materials[i].texture_offset_1);
-      textures.emplace_back(texpath);
-    }
-    else
-    {
-      materials[i].texture1 = std::distance(texture_ofs.begin(), it);
-    }
-
-    // todo: load and use the 2nd texture if there's one
+    load_texture(materials[i].texture_offset_1, materials[i].texture1, false);
+    load_texture(materials[i].texture_offset_2, materials[i].texture2, true);
   }
 
   // - MOGN ----------------------------------------------
