@@ -1095,7 +1095,7 @@ void MapView::createGUI()
             , MOD_space
             , [&]
               {
-                _draw_hidden_models.set (!_draw_hidden_models.get());
+                _draw_hidden_models.toggle();
               }
             , [&] { return terrainMode == editing_mode::object; }
             );
