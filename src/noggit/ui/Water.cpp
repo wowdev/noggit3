@@ -318,12 +318,12 @@ namespace noggit
 
     void water::toggle_lock()
     {
-      _locked.set (!_locked.get());
+      _locked.toggle();
     }
 
     void water::toggle_angled_mode()
     {
-      _angled_mode.set (!_angled_mode.get());
+      _angled_mode.toggle();
     }
 
     float water::get_opacity_factor() const
