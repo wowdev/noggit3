@@ -765,7 +765,14 @@ void MapView::createGUI()
           , &_show_texture_palette_window, &noggit::bool_toggle_property::set
           );
 
-  ADD_TOGGLE(view_menu, "Small texture palette", Qt::Key_H, _show_texture_palette_small_window);
+  ADD_TOGGLE_NS(view_menu, "Small texture palette", _show_texture_palette_small_window);
+
+  addHotkey( Qt::Key_H
+           , MOD_none
+           , [this] { _show_texture_palette_small_window.toggle(); }
+           , [this] { return terrainMode == editing_mode::paint; }
+           );
+
   connect(&_show_texture_palette_small_window, &noggit::bool_toggle_property::changed
     , _texture_palette_dock, [this]
     {
