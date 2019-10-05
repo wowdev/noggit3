@@ -286,8 +286,8 @@ void main()
 
   pos.y += pos.x * tan(inclination) * radius;
 
-  pos.x = (position.x*cos_o + position.z * sin_o) * radius;
-  pos.z = (position.z*cos_o - position.x * sin_o) * radius;
+  pos.x = (position.x*cos_o - position.z * sin_o) * radius;
+  pos.z = (position.z*cos_o + position.x * sin_o) * radius;
 
   pos.xyz += origin;
   gl_Position = model_view_projection * pos;
