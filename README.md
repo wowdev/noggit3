@@ -21,6 +21,28 @@ Further following libraries are required for MySQL GUID Storage builts:
 * LibMySQL
 * MySQLCPPConn
 
+## Linux ##
+
+On **Ubuntu** you can install the building requirements using:
+
+```bash
+sudo apt install freeglut3-dev libboost-all-dev qt5-default libstorm-dev
+```
+
+Compile and build using:
+
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build . -j $(nproc)
+```
+
+You may want to replace `$(nproc)` with a number less hard on your CPU.
+
+If the build pass correctly without errors, you can go into the
+build/bin/ directory and run noggit.
+
 ## Windows ##
 
 * install msvc++
