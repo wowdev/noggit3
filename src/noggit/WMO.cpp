@@ -620,6 +620,8 @@ void WMOGroup::upload()
                                  , _texcoords.data()
                                  , GL_STATIC_DRAW
                                  );
+
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_buffer, _indices, GL_STATIC_DRAW);
   
   if (header.flags.has_two_motv)
   {
@@ -640,20 +642,25 @@ void WMOGroup::upload()
 
 void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
 {
-  opengl::scoped::vao_binder const _ (_vao);
-
-  wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-  if (header.flags.has_two_motv)
+  opengl::scoped::index_buffer_manual_binder indices (_indices_buffer);
   {
-    wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-  }
+    opengl::scoped::vao_binder const _ (_vao);
 
-  if (header.flags.has_vertex_color)
-  {
-    wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    if (header.flags.has_two_motv)
+    {
+      wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    if (header.flags.has_vertex_color)
+    {
+      wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    indices.bind();
   }
 
   _vao_is_setup = true;
@@ -1181,7 +1188,7 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
       wmo->textures[mat.texture2]->bind();
     }
 
-    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
+    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(sizeof(std::uint16_t)*batch.index_start));
   }
 }
 
