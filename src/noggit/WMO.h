@@ -176,12 +176,13 @@ private:
 
   opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
   GLuint const& _vao = _vertex_array[0];
-  opengl::scoped::deferred_upload_buffers<5> _buffers;
+  opengl::scoped::deferred_upload_buffers<6> _buffers;
   GLuint const& _vertices_buffer = _buffers[0];
   GLuint const& _normals_buffer = _buffers[1];
   GLuint const& _texcoords_buffer = _buffers[2];
   GLuint const& _texcoords_buffer_2 = _buffers[3];
   GLuint const& _vertex_colors_buffer = _buffers[4];
+  GLuint const& _indices_buffer = _buffers[5];
 
   bool _uploaded = false;
   bool _vao_is_setup = false;
