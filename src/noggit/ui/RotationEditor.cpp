@@ -70,13 +70,13 @@ namespace noggit
 
 
       connect ( _rotation_x, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&, world] (double v) { set_model_rotation(world); }
+              , [&, world] { set_model_rotation(world); }
               );
       connect ( _rotation_z, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&, world] (double v) { set_model_rotation(world); }
+              , [&, world] { set_model_rotation(world); }
               );
       connect ( _rotation_y, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&, world] (double v) { set_model_rotation(world); }
+              , [&, world] { set_model_rotation(world); }
               );
 
       connect ( _rotation_x, &QDoubleSpinBox::editingFinished

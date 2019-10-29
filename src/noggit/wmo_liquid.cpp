@@ -58,7 +58,7 @@ namespace
 }
 
 // todo: use material
-wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, int group_liquid, bool use_dbc_type, bool is_ocean)
+wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const&, int group_liquid, bool use_dbc_type, bool is_ocean)
   : pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
   , texRepeats(4.0f)
   , xtiles(header.A)

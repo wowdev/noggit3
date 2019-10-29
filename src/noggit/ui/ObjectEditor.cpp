@@ -320,7 +320,6 @@ namespace noggit
                                     )
     {
       auto last_entry = world->get_last_selected_model();
-      bool multi_selection = world->has_multiple_model_selected();
 
       for (auto& selection : selected)
       {

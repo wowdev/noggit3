@@ -525,12 +525,9 @@ void WMOLight::init(MPQFile* f)
   */
 }
 
-void WMOLight::setup(GLint light)
+void WMOLight::setup(GLint)
 {
   // not used right now -_-
-
-  GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
-  GLfloat LightPosition[] = { pos.x, pos.y, pos.z, 0.0f };
 }
 
 void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d light_color)
@@ -1299,7 +1296,7 @@ void WMOManager::report()
 
 void WMOManager::clear_hidden_wmos()
 {
-  _.apply ( [&] (std::string const& key, WMO& wmo)
+  _.apply ( [&] (std::string const&, WMO& wmo)
             {
               wmo.show();
             }

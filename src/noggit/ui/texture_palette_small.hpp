@@ -42,7 +42,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      texture_palette_small(QWidget* parent, current_texture* current_texture_window);
+      texture_palette_small (QWidget* parent);
 
       void addTexture();
       void addTextureByFilename(const std::string& filename);

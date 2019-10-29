@@ -67,8 +67,6 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                            std::find_if(selection.begin(), selection.end(), [id](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == id; }) != selection.end();
 
   {
-    const float roty = dir.y - 90.0f;
-
     wmo_shader.uniform("transform", _transform_mat_transposed);
 
     wmo->draw ( wmo_shader
