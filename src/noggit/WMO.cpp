@@ -335,7 +335,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , math::frustum const& frustum
                , const float& cull_distance
                , const math::vector_3d& camera
-               , bool draw_doodads
+               , bool // draw_doodads
                , bool draw_fog
                , math::vector_4d const& ocean_color_light
                , math::vector_4d const& ocean_color_dark
@@ -530,18 +530,16 @@ void WMOLight::setup(GLint)
   // not used right now -_-
 }
 
-void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d light_color)
+void WMOLight::setupOnce(GLint, math::vector_3d, math::vector_3d)
 {
-  math::vector_4d position(dir, 0);
+  //math::vector_4d position(dir, 0);
   //math::vector_4d position(0,1,0,0);
 
-  math::vector_4d ambient = math::vector_4d(light_color * 0.3f, 1);
-  //math::vector_4d ambient = math::vector_4d(0.101961f, 0.062776f, 0, 1);
-  math::vector_4d diffuse = math::vector_4d(light_color, 1);
-  //math::vector_4d diffuse = math::vector_4d(0.439216f, 0.266667f, 0, 1);
+  //math::vector_4d ambient = math::vector_4d(light_color * 0.3f, 1);
+  //math::vector_4d diffuse = math::vector_4d(light_color, 1);
 
 
-  gl.enable(light);
+  //gl.enable(light);
 }
 
 
@@ -1104,11 +1102,11 @@ bool WMOGroup::is_visible( math::matrix_4x4 const& transform
 }
 
 void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
-                   , math::frustum const& frustum
-                   , const float& cull_distance
-                   , const math::vector_3d& camera
-                   , bool draw_fog
-                   , bool world_has_skies
+                   , math::frustum const& // frustum
+                   , const float& //cull_distance
+                   , const math::vector_3d& //camera
+                   , bool // draw_fog
+                   , bool // world_has_skies
                    )
 {
   if (!_uploaded)
@@ -1229,7 +1227,7 @@ void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
                           , math::vector_4d const& river_color_light
                           , math::vector_4d const& river_color_dark
                           , liquid_render& render
-                          , bool draw_fog
+                          , bool // draw_fog
                           , int animtime
                           )
 {

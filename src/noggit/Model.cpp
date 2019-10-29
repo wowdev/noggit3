@@ -815,8 +815,8 @@ boost::optional<ModelPixelShader> GetPixelShader(uint16_t texture_count, uint16_
 {
   uint16_t texture1_fragment_mode = (shader_id >> 4) & 7;
   uint16_t texture2_fragment_mode = shader_id & 7;
-  uint16_t texture1_env_map = (shader_id >> 4) & 8;
-  uint16_t texture2_env_map = shader_id & 8;
+  // uint16_t texture1_env_map = (shader_id >> 4) & 8;
+  // uint16_t texture2_env_map = shader_id & 8;
 
   boost::optional<ModelPixelShader> pixel_shader;
 
@@ -1181,7 +1181,7 @@ ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
   , ambIntensity (mld.ambIntensity, f, global)
 {}
 
-void ModelLight::setup(int time, opengl::light l, int animtime)
+void ModelLight::setup(int time, opengl::light, int animtime)
 {
   math::vector_4d ambcol(ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime), 1.0f);
   math::vector_4d diffcol(diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime), 1.0f);
@@ -1322,8 +1322,8 @@ void Model::draw( math::matrix_4x4 const& model_view
                 , const float& cull_distance
                 , const math::vector_3d& camera
                 , int animtime
-                , bool draw_particles
-                , bool all_boxes
+                , bool // draw_particles
+                , bool // all_boxes
                 , display_mode display
                 )
 {
@@ -1382,7 +1382,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
                  , math::frustum const& frustum
                  , const float& cull_distance
                  , const math::vector_3d& camera
-                 , bool draw_fog
+                 , bool // draw_fog
                  , int animtime
                  , bool draw_particles
                  , bool all_boxes
