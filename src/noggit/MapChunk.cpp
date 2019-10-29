@@ -488,10 +488,9 @@ bool MapChunk::update_visibility ( const float& cull_distance
   _need_visibility_update = false;
 
   auto lod = get_lod_level(camera, display);
-  int new_lod_level = lod ? lod.get() : -1;
-  bool lod_changed = new_lod_level != _lod_level;
+  bool lod_changed = lod != _lod_level;
 
-  _lod_level = new_lod_level;
+  _lod_level = lod;
 
   return lod_changed;
 }
@@ -583,8 +582,8 @@ void MapChunk::draw ( math::frustum const& frustum
 
   if (lod_changed)
   {
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _lod_level == -1 ? _indices_buffer : lod_indices[_lod_level]);
-    _lod_level_indice_count = _lod_level == -1 ? strip_with_holes.size() : strip_lods[_lod_level].size();
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !_lod_level ? _indices_buffer : lod_indices[*_lod_level]);
+    _lod_level_indice_count = !_lod_level ? strip_with_holes.size() : strip_lods[*_lod_level].size();
   }
 
   gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);

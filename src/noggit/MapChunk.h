@@ -118,7 +118,7 @@ private:
 
   bool _is_visible = true; // visible by default
   bool _need_visibility_update = true;
-  int _lod_level = -1; // -1 = no lod
+  boost::optional<int> _lod_level = boost::none; // none = no lod
   size_t _lod_level_indice_count = 0;
 public:
 
