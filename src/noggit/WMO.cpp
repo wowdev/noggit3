@@ -105,35 +105,26 @@ void WMO::finishLoading ()
   std::size_t const num_materials (size / 0x40);
   materials.resize (num_materials);
 
-  std::vector<int> texture_ofs;
+  std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
 
   auto load_texture
-    ( [&] (uint32_t const& ofs, uint32_t& id, bool optional) 
+    ( [&] (std::uint32_t ofs, bool optional)
       {
-        if(texbuf[ofs] == 0)
+        if (texbuf[ofs] == '\0' && optional)
         {
-          if (!optional)
-          {
-            id = textures.size();
-            textures.emplace_back("textures/shanecube.blp");
-          }
+          return std::size_t (-1);
         }
-        else
-        {
-          auto it = std::find(texture_ofs.begin(), texture_ofs.end(), ofs);
 
-          if (it == texture_ofs.end())
-          {
-            id = textures.size();
-            texture_ofs.emplace_back(ofs);
-            std::string const texpath(texbuf.data() + ofs);
-            textures.emplace_back(texpath);
-          }
-          else
-          {
-            id = std::distance(texture_ofs.begin(), it);
-          }
+        char const* texture
+          (texbuf[ofs] ? &texbuf[ofs] : "textures/shanecube.blp");
+
+        auto const mapping
+          (texture_offset_to_inmem_index.emplace (ofs, textures.size()));
+        if (mapping.second)
+        {
+          textures.emplace_back (texture);
         }
+        return mapping.first->second;
       }
     );
 
@@ -141,8 +132,8 @@ void WMO::finishLoading ()
   {
     f.read (&materials[i], sizeof(WMOMaterial));
 
-    load_texture(materials[i].texture_offset_1, materials[i].texture1, false);
-    load_texture(materials[i].texture_offset_2, materials[i].texture2, true);
+    materials[i].texture1 = load_texture(materials[i].texture_offset_1, false);
+    materials[i].texture2 = load_texture(materials[i].texture_offset_2, true);
   }
 
   // - MOGN ----------------------------------------------
