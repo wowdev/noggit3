@@ -1068,7 +1068,7 @@ void World::draw ( math::matrix_4x4 const& model_view
         );
     }
 
-    opengl::scoped::bool_setter<GL_CULL_FACE, false> const cull;
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
     opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
@@ -1095,7 +1095,7 @@ void World::draw ( math::matrix_4x4 const& model_view
         );
     }
 
-    opengl::scoped::bool_setter<GL_CULL_FACE, false> const cull;
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
     opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
@@ -1117,7 +1117,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   if (draw_water)
   {
     // draw the water on both sides
-    opengl::scoped::bool_setter<GL_CULL_FACE, false> const cull;
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
 
     opengl::scoped::use_program water_shader{ _liquid_render->shader_program() };
 
