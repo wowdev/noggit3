@@ -74,30 +74,6 @@ namespace opengl
       GLboolean _was_enabled;
     };
 
-
-    template<GLint matrix_mode>
-    class matrix_mode_setter
-    {
-    public:
-      matrix_mode_setter()
-      {
-        gl.getIntegerv (GL_MATRIX_MODE, &_old_mode);
-        gl.matrixMode (matrix_mode);
-      }
-      ~matrix_mode_setter()
-      {
-        gl.matrixMode (_old_mode);
-      }
-
-      matrix_mode_setter (matrix_mode_setter const&) = delete;
-      matrix_mode_setter (matrix_mode_setter&&) = delete;
-      matrix_mode_setter& operator= (matrix_mode_setter const&) = delete;
-      matrix_mode_setter& operator= (matrix_mode_setter&&) = delete;
-
-    private:
-      GLint _old_mode;
-    };
-
     class vao_binder
     {
     public:
