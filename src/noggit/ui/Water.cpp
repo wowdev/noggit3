@@ -81,7 +81,7 @@ namespace noggit
       angle_group->setChecked (_angled_mode.get());
       
       
-      ( &_angled_mode, &bool_toggle_property::changed
+      connect ( &_angled_mode, &bool_toggle_property::changed
               , angle_group, &QGroupBox::setChecked
               );
       connect ( angle_group, &QGroupBox::toggled
