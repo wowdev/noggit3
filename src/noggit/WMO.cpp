@@ -379,7 +379,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 
   if (boundingbox)
   {
-    opengl::scoped::bool_setter<GL_BLEND, TRUE> const blend;
+    opengl::scoped::bool_setter<GL_BLEND, true> const blend;
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (auto& group : groups)
