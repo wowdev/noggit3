@@ -79,21 +79,24 @@ struct WMOLiquidHeader {
   int16_t material_id;
 };
 
+struct SMOWVert
+{
+  std::uint8_t flow1;
+  std::uint8_t flow2;
+  std::uint8_t flow1Pct;
+  std::uint8_t filler;
+};
+struct SMOMVert
+{
+  std::int16_t s;
+  std::int16_t t;
+};
+
 struct LiquidVertex {
   union
   {
-    struct SMOWVert
-    {
-      uint8_t flow1;
-      uint8_t flow2;
-      uint8_t flow1Pct;
-      uint8_t filler;
-    }  water_vertex;
-    struct SMOMVert
-    {
-      int16_t s;
-      int16_t t;
-    } magma_vertex;
+    SMOWVert water_vertex;
+    SMOMVert magma_vertex;
   };
   float height;
 };
