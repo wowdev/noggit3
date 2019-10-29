@@ -1064,7 +1064,7 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
 
   int tmax = _animation_length[anim_id];
   int t = anim_time % tmax;
-  int current_sub_anim;
+  int current_sub_anim = 0;
   int time_for_anim = t;
 
   for (auto const& sub_animation : _animations_seq_per_id[anim_id])
