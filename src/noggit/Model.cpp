@@ -809,6 +809,8 @@ FakeGeometry::FakeGeometry(Model* m)
   }; 
 }
 
+namespace
+{
 
 // https://wowdev.wiki/M2/.skin/WotLK_shader_selection
 boost::optional<ModelPixelShader> GetPixelShader(uint16_t texture_count, uint16_t shader_id)
@@ -945,6 +947,7 @@ boost::optional<ModelPixelShader> M2GetPixelShaderID (uint16_t texture_count, ui
   }
 
   return pixel_shader;
+}
 }
 
 void Model::compute_pixel_shader_ids()
