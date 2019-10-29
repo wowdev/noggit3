@@ -77,6 +77,9 @@ union wmo_group_flags
     uint32_t unused : 4;
   };
 };
+static_assert ( sizeof (wmo_group_flags) == sizeof (std::uint32_t)
+              , "bitfields shall be implemented packed"
+              );
 
 struct wmo_group_header
 {
@@ -243,6 +246,9 @@ union mohd_flags
     std::uint16_t unused : 12;
   };
 };
+static_assert ( sizeof (mohd_flags) == sizeof (std::uint16_t)
+              , "bitfields shall be implemented packed"
+              );
 
 class WMO : public AsyncObject
 {
