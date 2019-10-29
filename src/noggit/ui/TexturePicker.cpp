@@ -23,8 +23,8 @@ namespace noggit
     texture_picker::texture_picker
         (current_texture* current_texture_window, QWidget* parent)
       : widget (parent)
-      , _chunk (nullptr)
       , layout (new ::QGridLayout(this))
+      , _chunk (nullptr)
     {
       setWindowTitle ("Texture Picker");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
