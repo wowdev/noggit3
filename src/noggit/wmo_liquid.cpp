@@ -263,7 +263,7 @@ void wmo_liquid::draw ( math::matrix_4x4 const& model_view
     upload(water_shader);
   }
 
-  opengl::scoped::bool_setter<GL_CULL_FACE, FALSE> const cull;  
+  opengl::scoped::bool_setter<GL_CULL_FACE, false> const cull;
 
   water_shader.uniform ("model_view", model_view);
   water_shader.uniform ("projection", projection);
