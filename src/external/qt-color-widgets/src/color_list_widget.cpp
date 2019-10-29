@@ -77,7 +77,6 @@ void ColorListWidget::append()
     p->colors.push_back(Qt::black);
     append_widget(p->colors.size()-1);
     Q_EMIT colorsChanged(p->colors);
-    Q_EMIT colorAdded(p->colors);
 }
 
 void ColorListWidget::emit_changed()
@@ -101,7 +100,7 @@ void ColorListWidget::color_changed(int row)
     }
 }
 
-void ColorListWidget::setColorAt(int i, QColor& color)
+void ColorListWidget::setColorAt(int i, QColor const& color)
 {
   p->colors[i] = color;
   ColorSelector* cs = widget_cast<ColorSelector>(i);
