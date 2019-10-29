@@ -32,7 +32,6 @@ class Q_DECL_EXPORT ColorListWidget : public AbstractWidgetList
     Q_OBJECT
 
     Q_PROPERTY(QList<QColor> colors READ colors WRITE setColors NOTIFY colorsChanged )
-    Q_PROPERTY(QList<QColor> colors READ colors WRITE setColors NOTIFY colorAdded )
     Q_PROPERTY(ColorWheel::DisplayFlags wheelFlags READ wheelFlags WRITE setWheelFlags NOTIFY wheelFlagsChanged)
 
 public:
@@ -45,14 +44,13 @@ public:
     void swap(int a, int b);
 
     void append();
-    void setColorAt(int i, QColor& color);
+    void setColorAt(int i, QColor const& color);
 
 
     ColorWheel::DisplayFlags wheelFlags() const;
 
 Q_SIGNALS:
     void colorsChanged(const QList<QColor>&);
-    void colorAdded(QList<QColor>&);
     void wheelFlagsChanged(ColorWheel::DisplayFlags flags);
 
 public Q_SLOTS:

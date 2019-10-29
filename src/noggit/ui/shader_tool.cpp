@@ -114,8 +114,8 @@ namespace noggit
       QObject::connect(_spin_value, SIGNAL(valueChanged(int)), _slide_value, SLOT(setValue(int)));
 
 
-      connect(_color_palette, qOverload<QList<QColor>&>(&color_widgets::ColorListWidget::colorAdded)
-        , [&](QList<QColor> &colors)
+      connect ( _color_palette, &color_widgets::ColorListWidget::colorsChanged
+              , [&](QList<QColor> const& colors)
         {
           _color_palette->setColorAt(colors.length() - 1, color_wheel->color());
         }
