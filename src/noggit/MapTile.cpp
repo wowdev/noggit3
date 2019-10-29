@@ -40,7 +40,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
 MapTile::~MapTile()
 {
-  _world->remove_models_if_needed(uids, index);
+  _world->remove_models_if_needed(uids);
 }
 
 void MapTile::finishLoading()
@@ -341,7 +341,6 @@ void MapTile::draw ( math::frustum const& frustum
                    , bool draw_chunk_flag_overlay
                    , bool draw_areaid_overlay
                    , std::map<int, misc::random_color>& area_id_colors
-                   , std::vector<selection_type> selection
                    , int animtime
                    , display_mode display
                    )

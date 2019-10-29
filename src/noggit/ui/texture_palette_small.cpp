@@ -74,8 +74,7 @@ namespace noggit
 
     }
 
-    texture_palette_small::texture_palette_small
-    (QWidget* parent, current_texture* current_texture_window)
+    texture_palette_small::texture_palette_small (QWidget* parent)
       : widget(parent)
       , layout(new ::QGridLayout(this)
       )

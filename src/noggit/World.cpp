@@ -318,7 +318,6 @@ void World::move_selected_models(float dx, float dy, float dz)
 
 void World::set_selected_models_pos(math::vector_3d const& pos, bool change_height)
 {
-  bool multi_select = has_multiple_model_selected();
   // move models relative to the pivot when several are selected
   if (has_multiple_model_selected())
   {
@@ -775,7 +774,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , draw_chunk_flag_overlay
                  , draw_areaid_overlay
                  , area_id_colors
-                 , current_selection()
                  , animtime
                  , display
                  );
@@ -1656,7 +1654,7 @@ void World::convert_alphamap(bool to_big_alpha)
   mapIndex.save();
 }
 
-void World::saveMap (int width, int height)
+void World::saveMap (int, int)
 {
   throw std::runtime_error("minimap saving not implemented");
 }
@@ -1826,7 +1824,7 @@ void World::addWMO ( std::string const& filename
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
 
-void World::remove_models_if_needed(std::vector<uint32_t> const& uids, tile_index const& tile_unloading)
+void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 {
   for (uint32_t uid : uids)
   {

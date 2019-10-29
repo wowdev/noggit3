@@ -327,7 +327,7 @@ void MapView::createGUI()
 
   connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
 
-  _texture_palette_small = new noggit::ui::texture_palette_small(this, texturingTool->_current_texture);
+  _texture_palette_small = new noggit::ui::texture_palette_small (this);
   _texture_palette_small->hide();
 
   connect(_texture_palette_small, &noggit::ui::texture_palette_small::selected
@@ -1565,8 +1565,6 @@ void MapView::tick (float dt)
     {
       _rotation_editor_need_update = true;
     }
-
-    bool canMoveObj = terrainMode == editing_mode::object;
 
     if (terrainMode == editing_mode::object)
     {

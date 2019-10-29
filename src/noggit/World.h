@@ -246,7 +246,7 @@ public:
               , math::vector_3d rotation
               );
 
-  void remove_models_if_needed(std::vector<uint32_t> const& uids, tile_index const& tile_unloading);
+  void remove_models_if_needed(std::vector<uint32_t> const& uids);
 
   void reload_tile(tile_index const& tile);
 

@@ -51,7 +51,7 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
     // always use big alpha for editing / rendering
     if (!big_alphamap)
     {
-      convertToBigAlpha (true);
+      convertToBigAlpha();
     }
 
     _need_amap_update = true;
@@ -651,7 +651,7 @@ void TextureSet::alphas_to_big_alpha(uint8_t* dest)
   }
 }
 
-void TextureSet::convertToBigAlpha(bool loading)
+void TextureSet::convertToBigAlpha()
 {
   // nothing to do
   if (nTextures < 2)

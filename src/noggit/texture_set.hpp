@@ -46,7 +46,7 @@ public:
 
   std::vector<std::vector<uint8_t>> save_alpha(bool big_alphamap);
 
-  void convertToBigAlpha(bool loading = false);
+  void convertToBigAlpha();
   void convertToOldAlpha();
 
   void merge_layers(size_t id1, size_t id2);
