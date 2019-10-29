@@ -135,6 +135,44 @@ namespace opengl
     };
   }
 
+  context::scoped_setter::scoped_setter (context& context_, QOpenGLContext* current_context)
+    : _context (context_)
+    , _old_context (_context._current_context)
+    , _old_core_func (context_._3_3_core_func)
+  {
+    _context._current_context = current_context;
+    _context._3_3_core_func = current_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+
+    if (!_context._3_3_core_func)
+    {
+      throw std::runtime_error("Noggit requires OpenGL 3.3 core functions");
+    }
+  }
+  context::scoped_setter::~scoped_setter()
+  {
+    _context._current_context = _old_context;
+    _context._3_3_core_func = _old_core_func;
+  }
+  context::save_current_context::save_current_context (context& context_)
+    : _is_current ( context_._current_context
+                    && QOpenGLContext::currentContext() == context_._current_context
+                  )
+    , _gl_context (!_is_current ? nullptr : context_._current_context)
+    , _surface (!_is_current ? nullptr : context_._current_context->surface())
+  {
+    if (_is_current)
+    {
+      _gl_context->doneCurrent();
+    }
+  }
+  context::save_current_context::~save_current_context()
+  {
+    if (_is_current)
+    {
+      _gl_context->makeCurrent (_surface);
+    }
+  }
+
   void context::enable (GLenum target)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
