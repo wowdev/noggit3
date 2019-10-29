@@ -208,6 +208,7 @@ Noggit::Noggit(int argc, char *argv[])
   , doAntiAliasing(true)
 {
   InitLogging();
+  assert (argc >= 1); (void) argc;
   initPath(argv);
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
