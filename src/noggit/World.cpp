@@ -185,18 +185,18 @@ bool World::is_selected(selection_type selection) const
 
 boost::optional<selection_type> World::get_last_selected_model() const
 {
-  boost::optional<selection_type> selection;
+  auto const it
+    ( std::find_if ( _current_selection.rbegin()
+                   , _current_selection.rend()
+                   , [&] (selection_type const& entry)
+                     {
+                       return entry.which() != eEntry_MapChunk;
+                     }
+                   )
+    );
 
-  for (auto& it = _current_selection.rbegin(); it != _current_selection.rend(); it++)
-  {
-    if (it->which() != eEntry_MapChunk)
-    {
-      selection = *it;
-      break;
-    }
-  }
-
-  return selection;
+  return it == _current_selection.rend()
+    ? boost::optional<selection_type>() : *it;
 }
 
 void World::set_current_selection(selection_type entry)
