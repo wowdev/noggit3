@@ -108,32 +108,34 @@ void WMO::finishLoading ()
   std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
 
   auto load_texture
-    ( [&] (std::uint32_t ofs, bool optional)
+    ( [&] (std::uint32_t ofs)
       {
-        if (texbuf[ofs] == '\0' && optional)
-        {
-          return std::size_t (-1);
-        }
-
         char const* texture
           (texbuf[ofs] ? &texbuf[ofs] : "textures/shanecube.blp");
 
         auto const mapping
-          (texture_offset_to_inmem_index.emplace (ofs, textures.size()));
+          (texture_offset_to_inmem_index.emplace(ofs, textures.size()));
+
         if (mapping.second)
         {
-          textures.emplace_back (texture);
+          textures.emplace_back(texture);
         }
         return mapping.first->second;
       }
     );
 
-  for (size_t i (0); i < num_materials; ++i)
+  for (size_t i(0); i < num_materials; ++i)
   {
-    f.read (&materials[i], sizeof(WMOMaterial));
+    f.read(&materials[i], sizeof(WMOMaterial));
 
-    materials[i].texture1 = load_texture(materials[i].texture_offset_1, false);
-    materials[i].texture2 = load_texture(materials[i].texture_offset_2, true);
+    uint32_t shader = materials[i].shader;
+    bool use_second_texture = (shader == 6 || shader == 5 || shader == 3);
+
+    materials[i].texture1 = load_texture(materials[i].texture_offset_1);
+    if (use_second_texture)
+    {
+      materials[i].texture2 = load_texture(materials[i].texture_offset_2);
+    }
   }
 
   // - MOGN ----------------------------------------------
@@ -1179,13 +1181,13 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
     }
 
     opengl::texture::set_active_texture(0);
-    wmo->textures[mat.texture1]->bind();
+    wmo->textures.at(mat.texture1)->bind();
 
     // only shaders using 2 textures in wotlk
     if (mat.shader == 6 || mat.shader == 5 || mat.shader == 3)
     {
       opengl::texture::set_active_texture(1);
-      wmo->textures[mat.texture2]->bind();
+      wmo->textures.at(mat.texture2)->bind();
     }
 
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(sizeof(std::uint16_t)*batch.index_start));
