@@ -1059,6 +1059,15 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
 {
   if (_animations_seq_per_id.empty() || _animations_seq_per_id[anim_id].empty())
   {
+    // use "default" vertices if the animation hasn't been found
+    if (_current_vertices.empty())
+    {
+      _current_vertices = _vertices;
+
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+      gl.bufferData(GL_ARRAY_BUFFER, _current_vertices.size() * sizeof(ModelVertex), _current_vertices.data(), GL_STATIC_DRAW);
+    }
+
     return;
   }
 
