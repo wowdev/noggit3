@@ -199,7 +199,7 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
 
     if (size < lHeader->sizes[i])
     {
-      LogDebug << "mipmap size mismatch in '" << _filename << "'" << std::endl;
+      LogDebug << "mipmap size mismatch in '" << filename << "'" << std::endl;
       return;
     }
 
@@ -213,30 +213,24 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   }
 }
 
-const std::string& blp_texture::filename()
-{
-  return _filename;
-}
-
 blp_texture::blp_texture(const std::string& filenameArg)
   : AsyncObject(filenameArg)
-  , _filename(filenameArg)
 {
 }
 
 void blp_texture::finishLoading()
 {
-  bool exists = MPQFile::exists(_filename);
+  bool exists = MPQFile::exists(filename);
   if (!exists)
   {
-    LogError << "file not found: '" << _filename << "'" << std::endl;
+    LogError << "file not found: '" << filename << "'" << std::endl;
   }
 
-  MPQFile f(exists ? _filename : "textures/shanecube.blp");
+  MPQFile f(exists ? filename : "textures/shanecube.blp");
   if (f.isEof())
   {
     finished = true;
-    throw std::runtime_error ("File " + _filename + " does not exists");
+    throw std::runtime_error ("File " + filename + " does not exists");
   }
 
   char const* lData = f.getPointer();

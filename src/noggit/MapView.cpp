@@ -1986,7 +1986,7 @@ void MapView::tick (float dt)
 
         for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
         {
-          detailInfo << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename();
+          detailInfo << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename;
         }
         if (instance->model->header.nTextures > 25)
         {
@@ -2010,7 +2010,7 @@ void MapView::tick (float dt)
         const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
         for (unsigned int j = 0; j < texture_count; j++)
         {
-          detailInfo << "\n " << (j + 1) << ": " << instance->wmo->textures[j]->filename();
+          detailInfo << "\n " << (j + 1) << ": " << instance->wmo->textures[j]->filename;
         }
         if (instance->wmo->textures.size() > 25)
         {

@@ -199,7 +199,7 @@ bool TextureSet::canPaintTexture(scoped_blp_texture_reference texture)
 
 const std::string& TextureSet::filename(size_t id)
 {
-  return textures[id]->filename();
+  return textures[id]->filename;
 }
 
 void TextureSet::bindTexture(size_t id, size_t activeTexture)
