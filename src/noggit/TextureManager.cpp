@@ -196,6 +196,13 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
 
     // make sure the vector is of the right size, blizzard seems to fuck those up for some small mipmaps
     int size = std::floor((width + 3) / 4) * std::floor((height + 3) / 4) * blocksizes[alpha_type];
+
+    if (size < lHeader->sizes[i])
+    {
+      LogDebug << "mipmap size mismatch in '" << _filename << "'" << std::endl;
+      return;
+    }
+
     _compressed_data[i].resize(size);
 
     char const* start = lData + lHeader->offsets[i];
