@@ -908,6 +908,9 @@ void WMOGroup::load()
                                       , (bool)wmo->flags.use_liquid_type_dbc_id
                                       , (bool)header.flags.ocean
                                       );
+
+    // creating the wmo liquid doesn't move the position
+    f.seekRelative(size - 0x1E);
   }
   if (header.flags.has_mori_morb)
   {
