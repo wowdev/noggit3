@@ -205,7 +205,7 @@ void Model::initCommon(const MPQFile& f)
     if (texdef[i].type == 0)
     {
       _specialTextures[i] = -1;
-      _textureFilenames[i] = std::string(f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen);
+      _textureFilenames[i] = std::string(f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen - 1);
     }
     else
     {
