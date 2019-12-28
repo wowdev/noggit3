@@ -93,20 +93,20 @@ namespace noggit
 
 #ifdef USE_MYSQL_UID_STORAGE
       mysql_box->setCheckable (true);
+
+      _mysql_server_field = new QLineEdit(_settings->value("project/mysql/server").toString(), this);
+      _mysql_user_field = new QLineEdit(_settings->value("project/mysql/user").toString(), this);
+      _mysql_pwd_field = new QLineEdit(_settings->value("project/mysql/pwd").toString(), this);
+      _mysql_db_field = new QLineEdit(_settings->value("project/mysql/db").toString(), this);
+
+      mysql_layout->addRow("Server", _mysql_server_field);
+      mysql_layout->addRow("User", _mysql_user_field);
+      mysql_layout->addRow("Password", _mysql_pwd_field);
+      mysql_layout->addRow("Database", _mysql_db_field);
 #else
-      mysql_layout->addRow (new QLabel ("Warning /!\\"));
       mysql_layout->addRow (new QLabel ("Your noggit wasn't build with mysql, you can't use this feature"));
 #endif
 
-      _mysql_server_field = new QLineEdit (_settings->value ("project/mysql/server").toString(), this);
-      _mysql_user_field = new QLineEdit (_settings->value ("project/mysql/user").toString(), this);
-      _mysql_pwd_field = new QLineEdit (_settings->value ("project/mysql/pwd").toString(), this);
-      _mysql_db_field = new QLineEdit (_settings->value ("project/mysql/db").toString(), this);
-
-      mysql_layout->addRow ("Server", _mysql_server_field);
-      mysql_layout->addRow ("User", _mysql_user_field);
-      mysql_layout->addRow ("Password", _mysql_pwd_field);
-      mysql_layout->addRow ("Database", _mysql_db_field);
       layout->addRow (_mysql_box);
 
       auto wireframe_box (new QGroupBox ("Wireframe", this));
@@ -169,6 +169,8 @@ namespace noggit
       layout->addRow("Undock tool properties", _undock_tool_properties = new QCheckBox(this));
       layout->addRow("Undock quick access texture palette", _undock_small_texture_palette = new QCheckBox(this));
 
+      layout->addRow("Additional file loading log", _additional_file_loading_log = new QCheckBox(this));
+
       auto warning (new QWidget (this));
       new QHBoxLayout (warning);
       auto icon (new QLabel (warning));
@@ -223,12 +225,15 @@ namespace noggit
       _adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
       _adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
       _uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
+      _additional_file_loading_log->setChecked(_settings->value("additional_file_loading_log", false).toBool());
 
+#ifdef USE_MYSQL_UID_STORAGE
       _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
       _mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
       _mysql_user_field->setText(_settings->value ("project/mysql/user").toString());
       _mysql_pwd_field->setText (_settings->value ("project/mysql/pwd").toString());
       _mysql_db_field->setText (_settings->value ("project/mysql/db").toString());
+#endif
 
       _wireframe_type_group->button (_settings->value ("wireframe/type", 0).toInt())->toggle();
       _wireframe_radius->setValue (_settings->value ("wireframe/radius", 1.5f).toFloat());
@@ -253,12 +258,15 @@ namespace noggit
       _settings->setValue ("unload_dist", _adt_unload_dist->value());
       _settings->setValue ("unload_interval", _adt_unload_check_interval->value());
       _settings->setValue ("uid_startup_check", _uid_cb->isChecked());
+      _settings->setValue ("additional_file_loading_log", _additional_file_loading_log->isChecked());
 
+#ifdef USE_MYSQL_UID_STORAGE
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
       _settings->setValue ("project/mysql/server", _mysql_server_field->text());
       _settings->setValue ("project/mysql/user", _mysql_user_field->text());
       _settings->setValue ("project/mysql/pwd", _mysql_pwd_field->text());
       _settings->setValue ("project/mysql/db", _mysql_db_field->text());
+#endif
 
       _settings->setValue ("wireframe/type", _wireframe_type_group->checkedId());
       _settings->setValue ("wireframe/radius", _wireframe_radius->value());

@@ -3,6 +3,8 @@
 #include <noggit/AsyncLoader.h>
 #include <noggit/errorHandling.h>
 
+#include <QtCore/QSettings>
+
 #include <algorithm>
 #include <list>
 
@@ -10,6 +12,9 @@ void AsyncLoader::process()
 {
   noggit::RegisterErrorHandlers();
   AsyncObject* object = nullptr;
+
+  QSettings settings;
+  bool additional_log = settings.value("additional_file_loading_log", false).toBool();
 
   while (!_stop)
   {
@@ -48,7 +53,19 @@ void AsyncLoader::process()
 
     try
     {
+      if (additional_log)
+      {
+        std::lock_guard<std::mutex> const lock(_guard);
+        LogDebug << "Loading '" << object->filename << "'" << std::endl;
+      }
+
       object->finishLoading();
+
+      if (additional_log)
+      {
+        std::lock_guard<std::mutex> const lock(_guard);
+        LogDebug << "Loaded  '" << object->filename << "'" << std::endl;
+      }
 
       {
         std::lock_guard<std::mutex> const lock (_guard);

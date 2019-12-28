@@ -52,6 +52,8 @@ namespace noggit
       QCheckBox* _undock_small_texture_palette;
       QCheckBox* _vsync_cb;
 
+      QCheckBox* _additional_file_loading_log;
+
       QGroupBox* _mysql_box;
       QLineEdit* _mysql_server_field;
       QLineEdit* _mysql_user_field;
