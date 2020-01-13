@@ -75,6 +75,7 @@ void AsyncLoader::process()
     }
     catch (...)
     {
+      std::lock_guard<std::mutex> const lock(_guard);
       object->error_on_loading();
 
       if (object->is_required_when_saving())
