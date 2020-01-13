@@ -15,8 +15,8 @@
 
 #include <boost/optional.hpp>
 
+#include <QtCore/QElapsedTimer>
 #include <QtCore/QSettings>
-#include <QtCore/QTime>
 #include <QtCore/QTimer>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QLabel>
@@ -221,7 +221,7 @@ private:
 
   void addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
 
-  QTime _startup_time;
+  QElapsedTimer _startup_time;
   qreal _last_update = 0.f;
   std::list<qreal> _last_frame_durations;
 
