@@ -61,10 +61,10 @@ struct scoped_blp_texture_reference
   scoped_blp_texture_reference() = delete;
   scoped_blp_texture_reference (std::string const& filename);
   scoped_blp_texture_reference (scoped_blp_texture_reference const& other);
-  scoped_blp_texture_reference (scoped_blp_texture_reference&& other);
+  scoped_blp_texture_reference (scoped_blp_texture_reference&&) = default;
   scoped_blp_texture_reference& operator= (scoped_blp_texture_reference const&) = delete;
-  scoped_blp_texture_reference& operator= (scoped_blp_texture_reference&& other);
-  ~scoped_blp_texture_reference();
+  scoped_blp_texture_reference& operator= (scoped_blp_texture_reference&&) = default;
+  ~scoped_blp_texture_reference() = default;
 
   blp_texture* operator->() const;
   blp_texture* get() const;
@@ -72,8 +72,11 @@ struct scoped_blp_texture_reference
   bool operator== (scoped_blp_texture_reference const& other) const;
 
 private:
-  std::string _filename;
-  blp_texture* _blp_texture;
+  struct Deleter
+  {
+    void operator() (blp_texture*) const;
+  };
+  std::unique_ptr<blp_texture, Deleter> _blp_texture;
 };
 
 namespace noggit
