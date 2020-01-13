@@ -110,7 +110,7 @@ namespace noggit
                 }
               );
       connect ( _rotation_y, &QDoubleSpinBox::editingFinished
-              , [&, world] 
+              , [&, world]
                 {
                   // avoid rotation changes when losing focus
                   if(_rotation_y->hasFocus())
@@ -233,7 +233,7 @@ namespace noggit
             _position_z->setValue(wmo->pos.z);
             _rotation_x->setValue(wmo->dir.x);
             _rotation_y->setValue(wmo->dir.y);
-            _rotation_z->setValue(wmo->dir.z);            
+            _rotation_z->setValue(wmo->dir.z);
 
             _scale->setValue(1.f);
             _scale->setEnabled(false);

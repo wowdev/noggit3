@@ -217,7 +217,7 @@ Noggit::Noggit(int argc, char *argv[])
   QSettings settings;
   doAntiAliasing = settings.value("antialiasing", false).toBool();
   fullscreen = settings.value("fullscreen", false).toBool();
-  
+
 
   srand(::time(nullptr));
   QDir path (settings.value ("project/game_path").toString());
@@ -290,7 +290,7 @@ Noggit::Noggit(int argc, char *argv[])
   else
   {
     main_window->showMaximized();
-  }  
+  }
 }
 
 namespace

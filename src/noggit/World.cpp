@@ -637,7 +637,7 @@ void World::draw ( math::matrix_4x4 const& model_view
         {
           it->second.recalcExtents();
         }
-        
+
         hadSky = it->second.wmo->draw_skybox ( model_view
                                              , camera_pos
                                              , m2_shader
@@ -671,12 +671,12 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , outdoorLightStats
                  );
     }
-  }  
+  }
 
   culldistance = draw_fog ? fogdistance : _view_distance;
 
   // Draw verylowres heightmap
-  if (draw_fog && draw_terrain) 
+  if (draw_fog && draw_terrain)
   {
     _horizon_render->draw (model_view, projection, &mapIndex, skies->color_set[FOG_COLOR], culldistance, frustum, camera_pos, display);
   }
@@ -698,12 +698,12 @@ void World::draw ( math::matrix_4x4 const& model_view
             }
         );
     }
-    
+
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
     mcnk_shader.uniform("model_view", model_view);
     mcnk_shader.uniform("projection", projection);
-    
+
     mcnk_shader.uniform ("draw_lines", (int)draw_lines);
     mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
     mcnk_shader.uniform("draw_areaid_overlay", (int)draw_areaid_overlay);
@@ -716,14 +716,14 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
 
     mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
-    mcnk_shader.uniform ("wireframe_type", _settings->value("wireframe/type", 0).toInt()); 
+    mcnk_shader.uniform ("wireframe_type", _settings->value("wireframe/type", 0).toInt());
     mcnk_shader.uniform ("wireframe_radius", _settings->value("wireframe/radius", 1.5f).toFloat());
-    mcnk_shader.uniform ("wireframe_width", _settings->value ("wireframe/width", 1.f).toFloat());   
+    mcnk_shader.uniform ("wireframe_width", _settings->value ("wireframe/width", 1.f).toFloat());
     // !\ todo store the color somewhere ?
     QColor c = _settings->value("wireframe/color").value<QColor>();
     math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
     mcnk_shader.uniform ("wireframe_color", wireframe_color);
-    
+
     mcnk_shader.uniform ("draw_fog", (int)draw_fog);
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
     // !\ todo use light dbcs values
@@ -734,7 +734,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("light_dir", terrain_light_dir);
     mcnk_shader.uniform("diffuse_color", diffuse_color);
     mcnk_shader.uniform("ambient_color", ambient_color);
-    
+
 
     if (cursor_type == 4)
     {
@@ -782,7 +782,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     gl.bindVertexArray(0);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
-  
+
   // 4 = terrain shader cursor
   if(cursor_type != 4)
   {
@@ -793,7 +793,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
     {
-      mode = cursor_type == 2 
+      mode = cursor_type == 2
         ? noggit::cursor_render::mode::square
         : noggit::cursor_render::mode::cube;
     }
@@ -813,11 +813,11 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 2.f);
   }
-  
+
   if (use_ref_pos)
   {
-    _sphere_render.draw(mvp, ref_pos, cursor_color, 2.f);    
-  }  
+    _sphere_render.draw(mvp, ref_pos, cursor_color, 2.f);
+  }
 
   if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
   {
@@ -830,7 +830,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
 
     _sphere_render.draw(mvp, vertexCenter(), cursor_color, 2.f);
-  }  
+  }
 
   std::unordered_map<std::string, std::vector<ModelInstance*>> _wmo_doodads;
 
@@ -860,7 +860,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       update_models_by_filename();
     }
-    
+
     std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
     {
@@ -904,7 +904,7 @@ void World::draw ( math::matrix_4x4 const& model_view
           }
         }
       }
-      
+
       if (draw_doodads_wmo)
       {
         for (auto& it : _wmo_doodads)
@@ -925,8 +925,8 @@ void World::draw ( math::matrix_4x4 const& model_view
                                    );
         }
       }
-    } 
-    
+    }
+
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
       if (!_m2_box_program)
@@ -950,9 +950,9 @@ void World::draw ( math::matrix_4x4 const& model_view
 
       for (auto& it : model_boxes_to_draw)
       {
-        math::vector_4d color = it.first->is_hidden() 
-                              ? math::vector_4d(0.f, 0.f, 1.f, 1.f) 
-                              : ( it.first->use_fake_geometry() 
+        math::vector_4d color = it.first->is_hidden()
+                              ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
+                              : ( it.first->use_fake_geometry()
                                 ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
                                 : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
                                 )
@@ -975,7 +975,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       }
     }
   }
-  
+
   if (!_liquid_render)
   {
     _liquid_render.emplace();
@@ -1052,7 +1052,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       gl.enable(GL_BLEND);
       gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       gl.enable(GL_CULL_FACE);
-    }    
+    }
   }
 
   // model particles
@@ -1130,7 +1130,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
     water_shader.uniform ("river_color_light", river_color_light);
     water_shader.uniform ("river_color_dark",  river_color_dark);
-    
+
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawWater ( frustum
@@ -1245,7 +1245,7 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
     if (draw_models)
     {
       for (auto&& model_instance : mModelInstances)
-      {        
+      {
         if (draw_hidden_models || ! model_instance.second.model->is_hidden())
         {
           model_instance.second.intersect (model_view, ray, &results, animtime);
@@ -1584,7 +1584,7 @@ template<typename Fun>
   void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
 {
   MapTile* tile(mapIndex.getTile(pos));
-  
+
   if (tile && tile->finishedLoading())
   {
     mapIndex.setChanged(tile);
@@ -1662,12 +1662,12 @@ void World::saveMap (int, int)
 void World::deleteModelInstance(int pUniqueID)
 {
   std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
-  
+
   if (it == mModelInstances.end())
   {
     return;
-  } 
-  
+  }
+
   remove_from_selection(&it->second);
 
   updateTilesModel(&it->second, model_update::remove);
@@ -1677,7 +1677,7 @@ void World::deleteModelInstance(int pUniqueID)
 void World::deleteWMOInstance(int pUniqueID)
 {
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
-  
+
   if (it == mWMOInstances.end())
   {
     return;
@@ -1797,7 +1797,7 @@ void World::addM2 ( std::string const& filename
   updateTilesModel(&newModelis, model_update::add);
 
   warning_if_uid_in_use(newModelis.uid);
-  
+
   _models_by_filename[filename].push_back(&(mModelInstances.emplace(newModelis.uid, newModelis).first->second));
 }
 
@@ -1884,7 +1884,7 @@ void World::updateTilesWMO(WMOInstance* wmo, model_update type)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex.update_model_tile(tile_index(x, z), type, wmo->mUniqueID);     
+      mapIndex.update_model_tile(tile_index(x, z), type, wmo->mUniqueID);
     }
   }
 }
@@ -1913,7 +1913,7 @@ void World::clearTextures(math::vector_3d const& pos)
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     chunk->eraseTextures();
-  });  
+  });
 }
 
 void World::setBaseTexture(math::vector_3d const& pos)
@@ -2226,7 +2226,7 @@ std::set<MapChunk*>& World::vertexBorderChunks()
 void World::update_models_by_filename()
 {
   _models_by_filename.clear();
-  
+
   for (auto& it : mModelInstances)
   {
     _models_by_filename[it.second.model->filename].push_back(&it.second);

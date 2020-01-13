@@ -367,7 +367,7 @@ set ( opengl_headers
       src/opengl/texture.hpp
       src/opengl/types.hpp
     )
-    
+
 set ( shaders
       src/glsl/m2_vert.glsl
       src/glsl/m2_frag.glsl
@@ -455,7 +455,7 @@ ADD_EXECUTABLE ( noggit
                   ${compiled_resource_files}
                   ${shaders}
                 )
-                
+
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   StormLib

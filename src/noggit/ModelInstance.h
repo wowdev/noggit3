@@ -83,7 +83,7 @@ public:
                  , selection_result*
                  , int animtime
                  );
-  
+
 
   math::matrix_4x4 const& transform_matrix_transposed() const { return _transform_mat_transposed; }
 
