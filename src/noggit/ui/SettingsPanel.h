@@ -55,10 +55,12 @@ namespace noggit
       QCheckBox* _additional_file_loading_log;
 
       QGroupBox* _mysql_box;
+#ifdef USE_MYSQL_UID_STORAGE
       QLineEdit* _mysql_server_field;
       QLineEdit* _mysql_user_field;
       QLineEdit* _mysql_pwd_field;
       QLineEdit* _mysql_db_field;
+#endif
 
       QButtonGroup* _wireframe_type_group;
       QDoubleSpinBox* _wireframe_radius;
