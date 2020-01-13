@@ -4,6 +4,7 @@
 
 #include <QPaintEvent>
 #include <QPainter>
+#include <QToolTip>
 
 #include <noggit/Sky.h>
 #include <noggit/World.h>
@@ -20,6 +21,7 @@ namespace noggit
       , _draw_skies (false)
     {
       setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+      setMouseTracking(true);
     }
 
     QSize minimap_widget::sizeHint() const
@@ -189,6 +191,20 @@ namespace noggit
                                            , (event->pos().y() / float (tile_size)) * TILESIZE
                                            )
                        );
+    }
+
+    void minimap_widget::mouseMoveEvent(QMouseEvent* event)
+    {
+      if (world())
+      {
+        const int smaller_side((qMin(rect().width(), rect().height()) / 64) * 64);
+        const int tile_size(smaller_side / 64);
+        int x = event->pos().x(), y = event->pos().y();
+
+        std::string str("ADT: " + std::to_string(x / tile_size) + "_" + std::to_string(y / tile_size));
+
+        QToolTip::showText(mapToGlobal(QPoint(x, y+5)), QString::fromStdString(str));
+      }
     }
   }
 }
