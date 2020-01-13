@@ -410,12 +410,6 @@ scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_r
   : _filename (other._filename)
   , _blp_texture (other._blp_texture ? TextureManager::_.emplace (_filename) : nullptr)
 {}
-scoped_blp_texture_reference& scoped_blp_texture_reference::operator= (scoped_blp_texture_reference const& other)
-{
-  _filename = other._filename;
-  _blp_texture = other._blp_texture ? TextureManager::_.emplace (_filename) : nullptr;
-  return *this;
-}
 
 scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference&& other)
   : _filename (other._filename)
