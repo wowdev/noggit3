@@ -50,7 +50,6 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
                                         , projection
                                         , transform_matrix_transposed()
                                         , { 1.0f, 1.0f, 0.0f, 1.0f }
-                                        , 1.0f
                                         );
 
     opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
@@ -59,7 +58,6 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
                                         , projection
                                         , transform_matrix_transposed()
                                         , {1.0f, 1.0f, 1.0f, 1.0f}
-                                        , 1.0f
                                         );
   }
   else
@@ -70,7 +68,6 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
                                         , projection
                                         , transform_matrix_transposed()
                                         , {0.5f, 0.5f, 0.5f, 1.0f}
-                                        , 1.0f
                                         );
   }
 }

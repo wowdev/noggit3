@@ -946,7 +946,6 @@ void World::draw ( math::matrix_4x4 const& model_view
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-      gl.lineWidth (1.0f);
 
       for (auto& it : model_boxes_to_draw)
       {

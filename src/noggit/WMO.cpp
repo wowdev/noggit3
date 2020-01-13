@@ -381,7 +381,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
         .draw( model_view
              , projection
              , transform_matrix_transposed
-             , {1.0f, 1.0f, 1.0f, 1.0f}, 1.0f
+             , {1.0f, 1.0f, 1.0f, 1.0f}
              );
     }
 
@@ -391,7 +391,6 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                                         , projection
                                         , transform_matrix_transposed
                                         , {1.0f, 0.0f, 0.0f, 1.0f}
-                                        , 2.0f
                                         );
 
   }
