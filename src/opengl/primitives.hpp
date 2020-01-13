@@ -28,7 +28,6 @@ namespace opengl
                 , math::matrix_4x4 const& projection
                 , math::matrix_4x4 const& transform
                 , math::vector_4d const& color
-                , float line_width
                 ) const;
 
     private:

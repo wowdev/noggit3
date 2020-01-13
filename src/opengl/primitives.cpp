@@ -79,7 +79,6 @@ void main()
                         , math::matrix_4x4 const& projection
                         , math::matrix_4x4 const& transform
                         , math::vector_4d const& color
-                        , float line_width
                         ) const
     {
       opengl::scoped::use_program wire_box_shader {_program};
@@ -91,7 +90,6 @@ void main()
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-      gl.lineWidth(line_width);
       
       opengl::scoped::vao_binder const _(_vao[0]);
       scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices (_positions);

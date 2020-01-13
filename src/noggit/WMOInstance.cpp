@@ -97,7 +97,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
-    opengl::primitives::wire_box (extents[0], extents[1]).draw (model_view, projection, _transform_mat_transposed, color, 1.0f);
+    opengl::primitives::wire_box (extents[0], extents[1]).draw (model_view, projection, _transform_mat_transposed, color);
   }
 }
 
