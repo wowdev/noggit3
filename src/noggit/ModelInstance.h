@@ -19,8 +19,8 @@ class WMOInstance;
 class ModelInstance
 {
 public:
-  constexpr static float min_scale = 1.f / 1024.f;
-  constexpr static float max_scale = static_cast<float>((1 << 16) - 1) / 1024.f;
+  constexpr static float min_scale() { return 1.f / 1024.f; };
+  constexpr static float max_scale() { return static_cast<float>((1 << 16) - 1) / 1024.f; };
 
   scoped_model_reference model;
 

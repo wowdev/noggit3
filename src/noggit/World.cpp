@@ -265,13 +265,13 @@ void World::scale_selected_models(float v, m2_scaling_type type)
       }
 
       // if the change is too small, do nothing
-      if (std::abs(scale - mi->scale) < ModelInstance::min_scale)
+      if (std::abs(scale - mi->scale) < ModelInstance::min_scale())
       {
         continue;
       }
 
       updateTilesModel(mi, model_update::remove);
-      mi->scale = std::min(ModelInstance::max_scale, std::max(ModelInstance::min_scale, scale));
+      mi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
       mi->recalcExtents();
       updateTilesModel(mi, model_update::add);
     }
