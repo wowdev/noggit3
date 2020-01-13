@@ -75,7 +75,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
       alphamaps[texLevel - 1] = boost::in_place();
     }
   }
-  
+
   _need_amap_update = true;
 
   return texLevel;
@@ -84,7 +84,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
 void TextureSet::switchTexture (scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
   int texLevel = -1, new_tex_level = -1;
-  
+
   for (size_t i = 0; i < nTextures; ++i)
   {
     if (textures[i] == oldTexture)
@@ -126,7 +126,7 @@ void TextureSet::swapTexture(int id1, int id2)
     else
     {
       uint8_t alpha[4096];
-      
+
       for (int i = 0; i < 4096; ++i)
       {
         alpha[i] = 255 - sum_alpha(i);
@@ -154,7 +154,7 @@ void TextureSet::eraseTexture(size_t id)
   if (id >= nTextures)
   {
     return;
-  }    
+  }
 
   // shift textures above
   for (size_t i = id; i < nTextures - 1; i++)
@@ -339,7 +339,7 @@ bool TextureSet::change_texture(int texture_id, size_t offset, uint strength, fl
       float a = alphamaps[alpha_id]->getAlpha(offset);
       set_alpha(alpha_id, offset, a - (a / sum_other_alphas) * alpha_change);
     }
-  }  
+  }
 
   return true;
 }
@@ -384,7 +384,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   }
 
   //First Lets find out do we have the texture already
-  
+
   zPos = zbase;
 
   for (int j = 0; j < 64; j++)
@@ -610,7 +610,7 @@ std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
           amaps.back().push_back(combine_nibble(layer, i));
         }
       }
-    }    
+    }
   }
 
   return amaps;
@@ -625,8 +625,8 @@ scoped_blp_texture_reference TextureSet::texture(size_t id)
 // call only if nTextures > 1
 void TextureSet::alphas_to_big_alpha(uint8_t* dest)
 {
-  auto alpha 
-  ( 
+  auto alpha
+  (
     [&] (int layer, int pos = 0)
     {
       return dest + layer * 4096 + pos;
@@ -673,8 +673,8 @@ void TextureSet::convertToBigAlpha()
 // call only if nTextures > 1
 void TextureSet::alphas_to_old_alpha(uint8_t* dest)
 {
-  auto alpha 
-  ( 
+  auto alpha
+  (
     [&] (int layer, int pos = 0)
     {
       return dest + layer * 4096 + pos;
@@ -810,7 +810,7 @@ void TextureSet::bind_alpha(std::size_t id)
                                  ;
         }
       }
-    }    
+    }
 
     gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_UNSIGNED_BYTE, amap.data());
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -844,7 +844,7 @@ std::vector<uint8_t> TextureSet::lod_texture_map()
     update_lod_texture_map();
   }
 
-  return _lod_texture_map; 
+  return _lod_texture_map;
 }
 
 void TextureSet::update_lod_texture_map()

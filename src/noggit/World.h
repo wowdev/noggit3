@@ -308,7 +308,7 @@ public:
   void recalc_norms (MapChunk*) const;
 
   bool need_model_updates = false;
-  
+
 private:
   void warning_if_uid_in_use(uint32_t uid);
   void update_models_by_filename();
