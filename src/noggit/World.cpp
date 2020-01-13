@@ -1529,7 +1529,7 @@ bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strengt
   return succ;
 }
 
-bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture)
+bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
 {
   return for_all_chunks_in_range
     ( pos, radius
@@ -1545,9 +1545,9 @@ void World::eraseTextures(math::vector_3d const& pos)
   for_chunk_at(pos, [](MapChunk* chunk) {chunk->eraseTextures();});
 }
 
-void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
+void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
-  for_chunk_at(pos, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, newTexture);});
+  for_chunk_at(pos, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, std::move (newTexture));});
 }
 
 void World::setHole(math::vector_3d const& pos, bool big, bool hole)
@@ -1941,7 +1941,7 @@ void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
   for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->texture_set->removeDuplicate(); } );
 }
 
-void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference tex, std::size_t flag, bool add)
+void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
 {
   for_chunk_at(pos, [&] (MapChunk* chunk) { chunk->change_texture_flag(tex, flag, add); });
 }
