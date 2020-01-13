@@ -110,7 +110,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     char nor[3];
     math::vector_3d *ttn = mNormals;
-    for (int i = 0; i< mapbufsize; ++i) 
+    for (int i = 0; i< mapbufsize; ++i)
     {
       f->read(nor, 3);
       *ttn++ = math::vector_3d(nor[0] / 127.0f, nor[2] / 127.0f, nor[1] / 127.0f);
@@ -135,14 +135,14 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     uint8_t *p, *c;
     p = _shadow_map;
     c = compressed_shadow_map;
-    for (int i = 0; i<64 * 8; ++i) 
+    for (int i = 0; i<64 * 8; ++i)
     {
-      for (int b = 0x01; b != 0x100; b <<= 1) 
+      for (int b = 0x01; b != 0x100; b <<= 1)
       {
         *p++ = ((*c) & b) ? 85 : 0;
       }
       c++;
-    }    
+    }
   }
   else
   {
@@ -247,7 +247,7 @@ void MapChunk::upload()
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  
+
   // fill vertex buffers
   gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
@@ -278,7 +278,7 @@ void MapChunk::update_indices_buffer()
 
 boost::optional<int> MapChunk::get_lod_level(math::vector_3d const& camera_pos, display_mode display) const
 {
-  float dist = display == display_mode::in_2D 
+  float dist = display == display_mode::in_2D
              ? std::abs(camera_pos.y - vcenter.y)
              : (camera_pos - vcenter).length();
 
@@ -440,7 +440,7 @@ bool MapChunk::is_visible ( const float& cull_distance
                           ) const
 {
   static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
-  
+
   float dist = display == display_mode::in_3D
              ? (camera - vcenter).length() - chunk_radius
              : std::abs(camera.y - vmax.y);
@@ -539,7 +539,7 @@ void MapChunk::draw ( math::frustum const& frustum
   bool cantPaint = noggit::ui::selected_texture::get()
                  && !canPaintTexture(*noggit::ui::selected_texture::get())
                  && show_unpaintable_chunks
-                 && draw_paintability_overlay; 
+                 && draw_paintability_overlay;
 
   if (texture_set->num())
   {
@@ -558,14 +558,14 @@ void MapChunk::draw ( math::frustum const& frustum
 
   opengl::texture::set_active_texture(5);
   shadow.bind();
-  
+
   mcnk_shader.uniform("layer_count", (int)texture_set->num());
   mcnk_shader.uniform("cant_paint", (int)cantPaint);
-  
+
   if (draw_chunk_flag_overlay)
   {
     mcnk_shader.uniform ("draw_impassible_flag", (int)header_flags.flags.impass);
-  }  
+  }
 
   if (draw_areaid_overlay)
   {
@@ -588,14 +588,14 @@ void MapChunk::draw ( math::frustum const& frustum
 
   gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
 
-  
+
   for (int i = 0; i < texture_set->num(); ++i)
   {
     if (texture_set->is_animated(i))
     {
       mcnk_shader.uniform("tex_anim_" + std::to_string(i), math::vector_2d());
     }
-  }  
+  }
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)
@@ -686,7 +686,7 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
 
     mFakeShadows[j].w = ShadowAmount;
   }
-  
+
   if (_uploaded)
   {
     gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
@@ -1180,7 +1180,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set->num();
 
   std::vector<std::vector<uint8_t>> alphamaps = texture_set->save_alpha(use_big_alphamap);
-  int lMCAL_Size = 0; 
+  int lMCAL_Size = 0;
 
   // MCLY data
   for (size_t j = 0; j < texture_set->num(); ++j)
@@ -1194,7 +1194,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
     if (j == 0)
     {
-      lLayer->flags &= ~(FLAG_USE_ALPHA | FLAG_ALPHA_COMPRESSED);  
+      lLayer->flags &= ~(FLAG_USE_ALPHA | FLAG_ALPHA_COMPRESSED);
     }
     else
     {
@@ -1226,7 +1226,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
     if (wmo.isInsideRect(lChunkExtents))
     {
       lObjectIDs.push_back(lID);
-    }      
+    }
 
     lID++;
   }

@@ -74,7 +74,7 @@ private:
   opengl::texture amap_gl_tex;
   bool _need_amap_update = true;
   size_t nTextures;
-  
+
   std::vector<uint8_t> _lod_texture_map;
   bool _need_lod_texture_map_update = false;
 
