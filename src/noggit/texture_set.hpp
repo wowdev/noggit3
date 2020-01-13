@@ -28,10 +28,10 @@ public:
   // return true if at least 1 texture has been erased
   bool eraseUnusedTextures();
   void swapTexture(int id1, int id2);
-  void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
+  void switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
   bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture);
-  bool replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture);
-  bool canPaintTexture(scoped_blp_texture_reference texture);
+  bool replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
+  bool canPaintTexture(scoped_blp_texture_reference const& texture);
 
   const std::string& filename(size_t id);
 
@@ -39,7 +39,7 @@ public:
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
   bool is_animated(std::size_t id) const;
-  void change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add);
+  void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
   uint8_t getAlpha(size_t id, size_t offset);
   const uint8_t *getAlpha(size_t id);
@@ -59,7 +59,7 @@ public:
   std::vector<uint8_t> lod_texture_map();
 
 private:
-  int get_texture_index(scoped_blp_texture_reference texture, float target);
+  int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
   bool change_texture(int texture_id, size_t offset, uint strength, float pressure);
 
   uint8_t sum_alpha(size_t offset) const;

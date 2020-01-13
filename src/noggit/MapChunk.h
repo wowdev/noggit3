@@ -161,12 +161,12 @@ public:
 
   //! \todo implement Action stack for these
   bool paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture);
-  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture);
+  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
   bool canPaintTexture(scoped_blp_texture_reference texture);
   int addTexture(scoped_blp_texture_reference texture);
-  void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
+  void switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
   void eraseTextures();
-  void change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add);
+  void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
   //! \todo implement Action stack for these
   bool isHole(int i, int j);

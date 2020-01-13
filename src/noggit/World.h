@@ -223,15 +223,15 @@ public:
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
   bool paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture);
   bool sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
-  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture);
+  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
 
   void eraseTextures(math::vector_3d const& pos);
-  void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
+  void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
   void setBaseTexture(math::vector_3d const& pos);
   void clearTextures(math::vector_3d const& pos);
   void swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex);
   void removeTexDuplicateOnADT(math::vector_3d const& pos);
-  void change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference tex, std::size_t flag, bool add);
+  void change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
   void setHole(math::vector_3d const& pos, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);

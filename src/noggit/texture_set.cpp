@@ -58,7 +58,7 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
   }
 }
 
-int TextureSet::addTexture(scoped_blp_texture_reference texture)
+int TextureSet::addTexture (scoped_blp_texture_reference texture)
 {
   int texLevel = -1;
 
@@ -67,7 +67,7 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
     texLevel = nTextures;
     nTextures++;
 
-    textures.emplace_back (texture);
+    textures.emplace_back (std::move (texture));
     _layers_info[texLevel] = ENTRY_MCLY();
 
     if (texLevel)
@@ -81,7 +81,7 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
   return texLevel;
 }
 
-void TextureSet::switchTexture (scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
+void TextureSet::switchTexture (scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
   int texLevel = -1, new_tex_level = -1;
   
@@ -99,7 +99,7 @@ void TextureSet::switchTexture (scoped_blp_texture_reference oldTexture, scoped_
 
   if (texLevel != -1)
   {
-    textures[texLevel] = newTexture;
+    textures[texLevel] = std::move (newTexture);
 
     // prevent texture duplication
     if (new_tex_level != -1 && new_tex_level != texLevel)
@@ -179,7 +179,7 @@ void TextureSet::eraseTexture(size_t id)
   _need_amap_update = true;
 }
 
-bool TextureSet::canPaintTexture(scoped_blp_texture_reference texture)
+bool TextureSet::canPaintTexture(scoped_blp_texture_reference const& texture)
 {
   if (nTextures)
   {
@@ -269,7 +269,7 @@ bool TextureSet::eraseUnusedTextures()
   return false;
 }
 
-int TextureSet::get_texture_index(scoped_blp_texture_reference texture, float target)
+int TextureSet::get_texture_index_or_add (scoped_blp_texture_reference texture, float target)
 {
   for (int i = 0; i < nTextures; ++i)
   {
@@ -290,7 +290,7 @@ int TextureSet::get_texture_index(scoped_blp_texture_reference texture, float ta
     return -1;
   }
 
-  return addTexture(texture);
+  return addTexture (std::move (texture));
 }
 
 // assume nTextures > 1
@@ -369,8 +369,8 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     xbase += TEXDETAILSIZE;
   }
 
-  int tex_layer = get_texture_index(texture, strength);
-  
+  int tex_layer = get_texture_index_or_add (std::move (texture), strength);
+
   if (tex_layer == -1 || nTextures == 1)
   {
     return false;
@@ -418,7 +418,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   return true;
 }
 
-bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture)
+bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
 {
   float dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
@@ -430,7 +430,7 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
   // if the chunk is fully inside the brush, just swap the 2 textures
   if (misc::square_is_in_circle(x, z, radius, xbase, zbase, CHUNKSIZE))
   {
-    switchTexture(old_texture, new_texture);
+    switchTexture(old_texture, std::move (new_texture));
     return true;
   }
 
@@ -457,7 +457,7 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
 
   if (new_tex_level == -1)
   {
-    new_tex_level = addTexture(new_texture);
+    new_tex_level = addTexture(std::move (new_texture));
   }
 
   if (old_tex_level == new_tex_level)
@@ -530,7 +530,7 @@ bool TextureSet::is_animated(std::size_t id) const
   return (id < nTextures ? (_layers_info[id].flags & FLAG_ANIMATE) : false);
 }
 
-void TextureSet::change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add)
+void TextureSet::change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
 {
   for (size_t i = 0; i < nTextures; ++i)
   {

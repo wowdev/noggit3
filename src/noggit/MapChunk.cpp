@@ -967,29 +967,29 @@ void MapChunk::eraseTextures()
   texture_set->eraseTextures();
 }
 
-void MapChunk::change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add)
+void MapChunk::change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
 {
   texture_set->change_texture_flag(tex, flag, add);
 }
 
 int MapChunk::addTexture(scoped_blp_texture_reference texture)
 {
-  return texture_set->addTexture(texture);
+  return texture_set->addTexture(std::move (texture));
 }
 
-void MapChunk::switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
+void MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
-  texture_set->switchTexture(oldTexture, newTexture);
+  texture_set->switchTexture(oldTexture, std::move (newTexture));
 }
 
 bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
 {
-  return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
+  return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture));
 }
 
-bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference old_texture, scoped_blp_texture_reference new_texture)
+bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
 {
-  return texture_set->replaceTexture(xbase, zbase, pos.x, pos.z, radius, old_texture, new_texture);
+  return texture_set->replaceTexture(xbase, zbase, pos.x, pos.z, radius, old_texture, std::move (new_texture));
 }
 
 bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
