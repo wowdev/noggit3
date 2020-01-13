@@ -266,6 +266,8 @@ private:
 
   noggit::bool_toggle_property _show_detail_info_window = {false};
   noggit::bool_toggle_property _show_minimap_window = {false};
+  noggit::bool_toggle_property _show_minimap_borders = {true};
+  noggit::bool_toggle_property _show_minimap_skies = {false};
   noggit::bool_toggle_property _show_cursor_switcher_window = {false};
   noggit::bool_toggle_property _show_keybindings_window = {false};
   noggit::bool_toggle_property _show_texture_palette_window = {false};
