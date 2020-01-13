@@ -421,7 +421,6 @@ scoped_blp_texture_reference& scoped_blp_texture_reference::operator= (scoped_bl
 {
   std::swap (_filename, other._filename);
   std::swap (_blp_texture, other._blp_texture);
-  other._blp_texture = nullptr;
   return *this;
 }
 
