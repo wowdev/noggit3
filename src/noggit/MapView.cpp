@@ -666,6 +666,38 @@ void MapView::createGUI()
   ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
 
   view_menu->addSeparator();
+  view_menu->addAction(createTextSeparator("Minimap"));
+  view_menu->addSeparator();
+
+  ADD_TOGGLE (view_menu, "Show", Qt::Key_M, _show_minimap_window);
+  connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
+          , _minimap_dock, [this]
+                           {
+                             if (!ui_hidden)
+                               _minimap_dock->setVisible(_show_minimap_window.get());
+                           }
+          );
+  connect ( _minimap_dock, &QDockWidget::visibilityChanged
+          , &_show_minimap_window, &noggit::bool_toggle_property::set
+          );
+
+  ADD_TOGGLE_NS(view_menu, "Show ADT borders", _show_minimap_borders);
+  connect ( &_show_minimap_borders, &noggit::bool_toggle_property::changed
+          , [this]
+            {
+              _minimap->draw_boundaries(_show_minimap_borders.get());
+            }
+          );
+
+  ADD_TOGGLE_NS(view_menu, "Show light zones", _show_minimap_skies);
+  connect ( &_show_minimap_skies, &noggit::bool_toggle_property::changed
+          , [this]
+            {
+              _minimap->draw_skies(_show_minimap_skies.get());
+            }
+          );
+
+  view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Windows"));
   view_menu->addSeparator();
 
@@ -728,17 +760,6 @@ void MapView::createGUI()
           );
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
           , &_show_detail_info_window, &noggit::bool_toggle_property::set
-          );
-  ADD_TOGGLE (view_menu, "Minimap", Qt::Key_M, _show_minimap_window);
-  connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
-          , _minimap_dock, [this]
-                           {
-                             if (!ui_hidden)
-                               _minimap_dock->setVisible(_show_minimap_window.get());
-                           }
-          );
-  connect ( _minimap_dock, &QDockWidget::visibilityChanged
-          , &_show_minimap_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Cursor switcher", "Ctrl+Alt+C", _show_cursor_switcher_window);
   connect ( &_show_cursor_switcher_window, &noggit::bool_toggle_property::changed
@@ -1313,8 +1334,8 @@ MapView::MapView( math::degrees camera_yaw0
 
   _minimap->world (_world.get());
   _minimap->camera (&_camera);
-  _minimap->draw_skies (true);
-  _minimap->draw_boundaries (true);
+  _minimap->draw_boundaries (_show_minimap_borders.get());
+  _minimap->draw_skies (_show_minimap_skies.get());
 
   connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
           , [this] (math::vector_3d const& pos)
