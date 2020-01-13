@@ -66,8 +66,6 @@ struct scoped_blp_texture_reference
   scoped_blp_texture_reference& operator= (scoped_blp_texture_reference&& other);
   ~scoped_blp_texture_reference();
 
-  std::string get_filename() const;
-
   blp_texture* operator->() const;
   blp_texture* get() const;
 
