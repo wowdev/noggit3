@@ -62,7 +62,7 @@ struct scoped_blp_texture_reference
   scoped_blp_texture_reference (std::string const& filename);
   scoped_blp_texture_reference (scoped_blp_texture_reference const& other);
   scoped_blp_texture_reference (scoped_blp_texture_reference&& other);
-  scoped_blp_texture_reference& operator= (scoped_blp_texture_reference const& other);
+  scoped_blp_texture_reference& operator= (scoped_blp_texture_reference const&) = delete;
   scoped_blp_texture_reference& operator= (scoped_blp_texture_reference&& other);
   ~scoped_blp_texture_reference();
 

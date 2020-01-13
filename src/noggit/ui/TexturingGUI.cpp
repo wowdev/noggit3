@@ -236,7 +236,7 @@ namespace noggit
 
     void selected_texture::set (scoped_blp_texture_reference t)
     {
-      selected_texture::texture = t;
+      selected_texture::texture = std::move (t);
     }
   }
 }
