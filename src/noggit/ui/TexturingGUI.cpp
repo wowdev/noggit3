@@ -225,7 +225,7 @@ namespace noggit
 
       resize(155 * 5 + 35, height());
     }
-    
+
     // selected_texture:
     boost::optional<scoped_blp_texture_reference> selected_texture::texture = boost::none;
 
@@ -240,5 +240,3 @@ namespace noggit
     }
   }
 }
-
-
