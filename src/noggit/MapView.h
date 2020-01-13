@@ -44,7 +44,7 @@ namespace noggit
     class terrain_tool;
     class texture_picker;
     class texturing_tool;
-    class toolbar;    
+    class toolbar;
     class water;
     class zone_id_browser;
     class texture_palette_small;
@@ -130,9 +130,9 @@ private:
   float numpad_moveratio = 0.001f;
 
   math::vector_3d objMove;
-  
+
   std::vector<selection_type> lastSelected;
-  
+
   bool _rotation_editor_need_update = false;
 
   bool  leftMouse = false;
