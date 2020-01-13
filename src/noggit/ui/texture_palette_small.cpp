@@ -59,7 +59,7 @@ namespace noggit
 
       const QList<QListWidgetItem*> selected_items = selectedItems();
 
-      for (auto item : selected_items) 
+      for (auto item : selected_items)
       {
         QMimeData* mimeData = new QMimeData;
         mimeData->setText("tileset/" + item->toolTip());
@@ -86,7 +86,7 @@ namespace noggit
 
       _texture_paths = std::unordered_set<std::string>();
       _texture_list = new PaletteList(this);
-     
+
 
       layout->addWidget(_texture_list, 0, 0);
 
@@ -127,9 +127,9 @@ namespace noggit
         filename = noggit::ui::selected_texture::get().get()->filename;
       else
         filename = "tileset\\generic\\black.blp";
-      
+
       addTextureByFilename(filename);
-     
+
     }
 
     void texture_palette_small::addTextureByFilename(const std::string& filename)
@@ -207,8 +207,8 @@ namespace noggit
 
     void texture_palette_small::dragEnterEvent(QDragEnterEvent* event)
     {
-      if (event->mimeData()->hasText() 
-        && _texture_paths.size() < 12 
+      if (event->mimeData()->hasText()
+        && _texture_paths.size() < 12
         && (_texture_paths.find(event->mimeData()->text().remove("tileset/").toStdString()) == _texture_paths.end())
         )
           event->accept();
@@ -217,7 +217,7 @@ namespace noggit
     void texture_palette_small::dropEvent(QDropEvent* event)
     {
 
-      addTextureByFilename(event->mimeData()->text().toStdString());  
+      addTextureByFilename(event->mimeData()->text().toStdString());
       event->accept();
     }
 
