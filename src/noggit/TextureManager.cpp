@@ -77,7 +77,7 @@ void blp_texture::upload()
   {
     for (int i = 0; i < _data.size(); ++i)
     {
-      gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());   
+      gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
 
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);
@@ -282,7 +282,7 @@ namespace noggit
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
 
-    
+
     opengl::program program
     (
       {
@@ -327,11 +327,11 @@ void main()
     buffers.upload();
     GLuint const& indices_vbo = buffers[0];
     GLuint const& vertices_vbo = buffers[1];
-    GLuint const& texcoords_vbo = buffers[2];    
-    
+    GLuint const& texcoords_vbo = buffers[2];
+
     opengl::texture::set_active_texture(0);
     blp_texture texture(blp_filename);
-    texture.finishLoading();    
+    texture.finishLoading();
 
     width = width == -1 ? texture.width() : width;
     height = height == -1 ? texture.height() : height;
@@ -356,18 +356,18 @@ void main()
       ,{w, 0.f}
     };
     std::vector<std::uint16_t> indices = {0,1,2, 2,3,0};
-    
+
     gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(vertices_vbo, vertices, GL_STATIC_DRAW);
     gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(texcoords_vbo, texcoords, GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(indices_vbo, indices, GL_STATIC_DRAW);
 
     QOpenGLFramebufferObject pixel_buffer(width, height, fmt);
-    pixel_buffer.bind();  
+    pixel_buffer.bind();
 
     gl.viewport(0, 0, w, h);
     gl.clearColor(.0f, .0f, .0f, 1.f);
-    gl.clear(GL_COLOR_BUFFER_BIT);    
-    
+    gl.clear(GL_COLOR_BUFFER_BIT);
+
     opengl::scoped::use_program shader (program);
 
     shader.uniform("tex", 0);
@@ -383,11 +383,11 @@ void main()
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> texcoords_binder (texcoords_vbo);
       shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
     }
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(indices_vbo);    
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(indices_vbo);
 
     gl.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
-    QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));    
+    QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));
 
     pixel_buffer.release();
 
