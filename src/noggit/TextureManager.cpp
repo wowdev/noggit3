@@ -400,3 +400,61 @@ void main()
     return pixmap;
   }
 }
+
+scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename)
+  : _filename (filename)
+  , _blp_texture (TextureManager::_.emplace (_filename))
+{}
+
+scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
+  : _filename (other._filename)
+  , _blp_texture (other._blp_texture ? TextureManager::_.emplace (_filename) : nullptr)
+{}
+scoped_blp_texture_reference& scoped_blp_texture_reference::operator= (scoped_blp_texture_reference const& other)
+{
+  _filename = other._filename;
+  _blp_texture = other._blp_texture ? TextureManager::_.emplace (_filename) : nullptr;
+  return *this;
+}
+
+scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference&& other)
+  : _filename (other._filename)
+  , _blp_texture (other._blp_texture)
+{
+  other._blp_texture = nullptr;
+}
+scoped_blp_texture_reference& scoped_blp_texture_reference::operator= (scoped_blp_texture_reference&& other)
+{
+  std::swap (_filename, other._filename);
+  std::swap (_blp_texture, other._blp_texture);
+  other._blp_texture = nullptr;
+  return *this;
+}
+
+std::string scoped_blp_texture_reference::get_filename()
+{
+  return _filename;
+}
+
+
+scoped_blp_texture_reference::~scoped_blp_texture_reference()
+{
+  if (_blp_texture)
+  {
+    TextureManager::_.erase (_filename);
+  }
+}
+
+blp_texture* scoped_blp_texture_reference::operator->() const
+{
+  return _blp_texture;
+}
+blp_texture* scoped_blp_texture_reference::get() const
+{
+  return _blp_texture;
+}
+
+bool scoped_blp_texture_reference::operator== (scoped_blp_texture_reference const& other) const
+{
+  return std::tie (_filename, _blp_texture) == std::tie (other._filename, other._blp_texture);
+}
