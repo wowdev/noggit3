@@ -81,45 +81,57 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
   return texLevel;
 }
 
-void TextureSet::switchTexture (scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
+void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture)
 {
-  int texLevel = -1, new_tex_level = -1;
+  int texture_to_replace_level = -1, replacement_texture_level = -1;
 
   for (size_t i = 0; i < nTextures; ++i)
   {
-    if (textures[i] == oldTexture)
+    if (textures[i] == texture_to_replace)
     {
-      texLevel = i;
+      texture_to_replace_level = i;
     }
-    else if (textures[i] == newTexture)
+    else if (textures[i] == replacement_texture)
     {
-      new_tex_level = i;
+      replacement_texture_level = i;
     }
   }
 
-  if (texLevel != -1)
+  if (texture_to_replace_level != -1)
   {
-    textures[texLevel] = std::move (newTexture);
+    textures[texture_to_replace_level] = std::move (replacement_texture);
 
     // prevent texture duplication
-    if (new_tex_level != -1 && new_tex_level != texLevel)
+    if (replacement_texture_level != -1 && replacement_texture_level != texture_to_replace_level)
     {
-      merge_layers(texLevel, new_tex_level);
+      merge_layers(texture_to_replace_level, replacement_texture_level);
     }
   }
 }
 
-// swap 2 textures of a chunk with their alpha
-// assume id1 < id2
-void TextureSet::swapTexture(int id1, int id2)
+void TextureSet::swap_layers(int layer_1, int layer_2)
 {
-  if (id1 >= 0 && id2 >= 0 && id1 < nTextures && id2 < nTextures)
+  int lower_texture_id = std::min(layer_1, layer_2);
+  int upper_texture_id = std::max(layer_1, layer_2);
+
+  if (lower_texture_id == upper_texture_id)
   {
-    std::swap(textures[id1], textures[id2]);
+    return;
+  }
 
-    int a1 = id1 - 1, a2 = id2 - 1;
+  if (lower_texture_id < upper_texture_id)
+  {
+    std::swap(lower_texture_id, upper_texture_id);
+  }
 
-    if (id1)
+  if (lower_texture_id >= 0 && upper_texture_id >= 0 && lower_texture_id < nTextures && upper_texture_id < nTextures)
+  {
+    std::swap(textures[lower_texture_id], textures[upper_texture_id]);
+    std::swap(_layers_info[lower_texture_id], _layers_info[upper_texture_id]);
+
+    int a1 = lower_texture_id - 1, a2 = upper_texture_id - 1;
+
+    if (lower_texture_id)
     {
       std::swap(alphamaps[a1], alphamaps[a2]);
     }
@@ -175,6 +187,9 @@ void TextureSet::eraseTexture(size_t id)
 
   textures.erase(textures.begin()+id);
   nTextures--;
+
+  // erase the old info as a precaution but it's overriden when adding a new texture
+  _layers_info[nTextures] = ENTRY_MCLY();
 
   _need_amap_update = true;
 }
@@ -418,7 +433,14 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   return true;
 }
 
-bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
+bool TextureSet::replace_texture( float xbase
+                                , float zbase
+                                , float x
+                                , float z
+                                , float radius
+                                , scoped_blp_texture_reference const& texture_to_replace
+                                , scoped_blp_texture_reference replacement_texture
+                                )
 {
   float dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
@@ -430,7 +452,7 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
   // if the chunk is fully inside the brush, just swap the 2 textures
   if (misc::square_is_in_circle(x, z, radius, xbase, zbase, CHUNKSIZE))
   {
-    switchTexture(old_texture, std::move (new_texture));
+    replace_texture(texture_to_replace, std::move (replacement_texture));
     return true;
   }
 
@@ -440,11 +462,11 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
 
   for (int i=0; i<nTextures; ++i)
   {
-    if (textures[i] == old_texture)
+    if (textures[i] == texture_to_replace)
     {
       old_tex_level = i;
     }
-    if (textures[i] == new_texture)
+    if (textures[i] == replacement_texture)
     {
       new_tex_level = i;
     }
@@ -457,7 +479,7 @@ bool TextureSet::replaceTexture(float xbase, float zbase, float x, float z, floa
 
   if (new_tex_level == -1)
   {
-    new_tex_level = addTexture(std::move (new_texture));
+    new_tex_level = addTexture(std::move (replacement_texture));
   }
 
   if (old_tex_level == new_tex_level)
