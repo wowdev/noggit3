@@ -204,8 +204,17 @@ void Model::initCommon(const MPQFile& f)
   {
     if (texdef[i].type == 0)
     {
+      if (texdef[i].nameLen == 0)
+      {
+        LogDebug << "Texture " << i << " has a lenght of 0 for '" << filename << std::endl;
+        continue;
+      }
+
       _specialTextures[i] = -1;
-      _textureFilenames[i] = std::string(f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen - 1);
+      const char* blp_ptr = f.getBuffer() + texdef[i].nameOfs;
+      // some tools export the size without accounting for the \0
+      bool invalid_size = *(blp_ptr + texdef[i].nameLen-1) != '\0';
+      _textureFilenames[i] = std::string(blp_ptr, texdef[i].nameLen - (invalid_size ? 0 : 1));
     }
     else
     {
