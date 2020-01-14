@@ -107,7 +107,7 @@ namespace noggit
       {
         if (ts->texture(i) == selectedTexture)
         {
-          ts->swapTexture(i - 1, i);
+          ts->swap_layers(i - 1, i);
           update();
           return;
         }
@@ -122,7 +122,7 @@ namespace noggit
       {
         if (ts->texture(i) == selectedTexture)
         {
-          ts->swapTexture(i, i + 1);
+          ts->swap_layers(i, i + 1);
           update();
           return;
         }

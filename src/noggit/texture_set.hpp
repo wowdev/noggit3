@@ -27,10 +27,17 @@ public:
   void eraseTextures();
   // return true if at least 1 texture has been erased
   bool eraseUnusedTextures();
-  void swapTexture(int id1, int id2);
-  void switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
+  void swap_layers(int layer_1, int layer_2);
+  void replace_texture(scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture);
   bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture);
-  bool replaceTexture(float xbase, float zbase, float x, float z, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
+  bool replace_texture( float xbase
+                      , float zbase
+                      , float x
+                      , float z
+                      , float radius
+                      , scoped_blp_texture_reference const& texture_to_replace
+                      , scoped_blp_texture_reference replacement_texture
+                      );
   bool canPaintTexture(scoped_blp_texture_reference const& texture);
 
   const std::string& filename(size_t id);
