@@ -1507,6 +1507,8 @@ MapView::~MapView()
   _world.reset();
 
   AsyncLoader::instance().reset_object_fail();
+
+  noggit::ui::selected_texture::texture.reset();
 }
 
 void MapView::tick (float dt)
