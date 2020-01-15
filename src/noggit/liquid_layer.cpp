@@ -212,7 +212,7 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
 
   info.ofsHeightMap = current_pos - base_pos;
 
-  std::size_t heighmap_size = (info.width + 1) * (info.height +1) * (sizeof(char) + ((_liquid_id != 2) ? sizeof(float) : 0));
+  std::size_t heighmap_size = (info.width + 1) * (info.height +1) * (sizeof(char) + ((_liquid_vertex_format != 2) ? sizeof(float) : 0));
   adt.Extend(heighmap_size);
 
   if (_liquid_vertex_format != 2)
@@ -252,9 +252,6 @@ void liquid_layer::changeLiquidID(int id)
     // !\ todo: handle lava (type == 2) that use uv_mapping
     switch (lLiquidTypeRow.getInt(LiquidTypeDB::Type))
     {
-    case 1: // ocean
-      _liquid_vertex_format = 2;
-      break;
     default:
       _liquid_vertex_format = 0;
       break;
