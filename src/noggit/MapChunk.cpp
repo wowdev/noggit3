@@ -195,34 +195,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   initStrip();
 
   vcenter = (vmin + vmax) * 0.5f;
-
-  math::vector_3d *ttv = mMinimap;
-
-  // vertices
-  for (int j = 0; j < 17; ++j) {
-    for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
-      float xpos, zpos;
-
-      xpos = i * 0.125f;
-      zpos = j * 0.5f * 0.125f;
-
-      if (j % 2) {
-        xpos += 0.125f * 0.5f;
-      }
-
-      math::vector_3d v = math::vector_3d(xpos + px, zpos + py, -1);
-      *ttv++ = v;
-    }
-  }
-
-  float ShadowAmount;
-  for (int j = 0; j<mapbufsize; ++j)
-  {
-    ShadowAmount = 1.0f - (mNormals[j].x + mNormals[j].y + mNormals[j].z);
-    ShadowAmount = std::min(1.0f, std::max(0.0f, ShadowAmount)) * 0.5f;
-
-    mFakeShadows[j].w = ShadowAmount;
-  }
 }
 
 int MapChunk::indexLoD(int x, int y)
@@ -262,9 +234,6 @@ void MapChunk::upload()
   gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
-
-  gl.bufferData<GL_ARRAY_BUFFER> (minimap, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 
   update_indices_buffer();
   _uploaded = true;
@@ -688,20 +657,9 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
     mNormals[i] = {-Norm.z, Norm.y, -Norm.x};
   }
 
-  float ShadowAmount;
-  for (int j = 0; j<mapbufsize; ++j)
-  {
-    ShadowAmount = 1.0f - (-mNormals[j].x + mNormals[j].y - mNormals[j].z);
-    ShadowAmount = std::min(1.0f, std::max(0.0f, ShadowAmount)) * 0.5f;
-
-    mFakeShadows[j].w = ShadowAmount;
-  }
-
   if (_uploaded)
   {
     gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
-    gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
-
     _need_vao_update = true;
   }
 }
