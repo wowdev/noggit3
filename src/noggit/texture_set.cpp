@@ -13,7 +13,7 @@
 
 #include <boost/utility/in_place_factory.hpp>
 
-TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool big_alphamap, bool do_not_fix_alpha)
+TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map)
 {
   nTextures = header.nLayers;
   for (int i = 0; i < 64; ++i)
@@ -44,12 +44,12 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
       if (_layers_info[layer].flags & 0x100)
       {
         f->seek (alpha_base + _layers_info[layer].ofsAlpha);
-        alphamaps[layer - 1] = boost::in_place (f, _layers_info[layer].flags, big_alphamap, do_not_fix_alpha);
+        alphamaps[layer - 1] = boost::in_place (f, _layers_info[layer].flags, use_big_alphamaps, do_not_fix_alpha_map);
       }
     }
 
     // always use big alpha for editing / rendering
-    if (!big_alphamap)
+    if (!use_big_alphamaps)
     {
       convertToBigAlpha();
     }

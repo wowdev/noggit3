@@ -10,7 +10,7 @@ class Alphamap
 {
 public:
   Alphamap();
-  Alphamap(MPQFile* f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha);
+  Alphamap(MPQFile* f, unsigned int flags, bool use_big_alphamaps, bool do_not_fix_alpha_map);
 
   void setAlpha(size_t offset, unsigned char value);
   void setAlpha(unsigned char *pAmap);
@@ -23,7 +23,7 @@ public:
 private:
   void readCompressed(MPQFile *f);
   void readBigAlpha(MPQFile *f);
-  void readNotCompressed(MPQFile *f, bool doNotFixAlpha);
+  void readNotCompressed(MPQFile *f, bool do_not_fix_alpha_map);
 
   void createNew(); 
 
