@@ -306,6 +306,12 @@ namespace noggit
              );    
 
       setMinimumWidth(sizeHint().width());
+
+      auto mv_pos = mapView->pos();
+      auto mv_size = mapView->size();
+
+      // make sure the window doesn't show up halfway outside the screen
+      modelImport->move(mv_pos.x() + (mv_size.width() / 2), mv_pos.y() + (mv_size.height() / 2));
     }
 
     void object_editor::showImportModels()
