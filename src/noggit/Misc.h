@@ -40,6 +40,12 @@ namespace misc
   // normalize the filename used in adts since TC extractors don't accept /
   std::string normalize_adt_filename(std::string filename);
 
+  // see http://realtimecollisiondetection.net/blog/?p=89 for more info
+  inline bool float_equals(float const& a, float const& b)
+  {
+    return std::abs(a - b) < (std::max(1.f, std::max(a, b)) * std::numeric_limits<float>::epsilon());
+  }
+
   inline int rounded_int_div(int value, int div)
   {
     return value / div + (value % div <= (div >> 1) ? 0 : 1);
