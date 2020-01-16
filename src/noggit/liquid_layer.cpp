@@ -535,24 +535,10 @@ void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
                               , float opacity_factor
                               )
 {
-  bool ocean = _liquid_vertex_format == 2;
   math::vector_3d ref ( lock
                       ? origin
                       : math::vector_3d (cursor_pos.x, cursor_pos.y + 1.0f, cursor_pos.z)
                       );
-
-  // make sure the ocean layers are flat
-  if (add && ocean)
-  {
-    for (math::vector_3d& v : _vertices)
-    {
-      v.y = ref.y;
-    }
-    _minimum = ref.y;
-    _maximum = ref.y;
-
-    update_opacity(chunk, opacity_factor);
-  }
 
   int id = 0;
 
@@ -562,7 +548,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
     {
       if (misc::getShortestDist(cursor_pos, _vertices[id], UNITSIZE) <= radius)
       {
-        if (add && !ocean)
+        if (add)
         {
           for (int index : {id, id + 1, id + 9, id + 10})
           {
@@ -588,11 +574,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
     id++;
   }
 
-  // update done earlier for oceans
-  if (!ocean)
-  {
-    update_min_max();
-  }
+  update_min_max();
 }
 
 void liquid_layer::update_min_max()
@@ -616,10 +598,15 @@ void liquid_layer::update_min_max()
     }
   }
 
-  // LVF 2 => flat water (ocean)
-  if (_liquid_vertex_format == 2)
+  // lvf = 2 means the liquid height is 0, switch to lvf 0 when that's not the case
+  if (_liquid_vertex_format == 2 && (!misc::float_equals(0.f, _minimum) || !misc::float_equals(0.f, _maximum)))
   {
-    _maximum = _minimum;
+    _liquid_vertex_format = 0;
+  }
+  // use lvf 2 when possible to save space
+  else if (_liquid_vertex_format == 0 && misc::float_equals(0.f, _minimum) && misc::float_equals(0.f, _maximum))
+  {
+    _liquid_vertex_format = 2;
   }
 }
 
