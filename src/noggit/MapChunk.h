@@ -47,8 +47,6 @@ private:
   std::map<int, std::vector<StripType>> strip_lods;
 
   math::vector_3d mNormals[mapbufsize];
-  math::vector_3d mMinimap[mapbufsize];
-  math::vector_4d mFakeShadows[mapbufsize];
   math::vector_3d mccv[mapbufsize];
 
   std::vector<uint8_t> compressed_shadow_map() const;
@@ -76,13 +74,11 @@ private:
 
   opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
   GLuint const& _vao = _vertex_array[0];
-  opengl::scoped::deferred_upload_buffers<6> _buffers;
+  opengl::scoped::deferred_upload_buffers<4> _buffers;
   GLuint const& _vertices_vbo = _buffers[0];
   GLuint const& _normals_vbo = _buffers[1];
   GLuint const& _indices_buffer = _buffers[2];
   GLuint const& _mccv_vbo = _buffers[3];
-  GLuint const& minimap = _buffers[4];
-  GLuint const& minishadows = _buffers[5];
   opengl::scoped::deferred_upload_buffers<4> lod_indices;
 
 public:
