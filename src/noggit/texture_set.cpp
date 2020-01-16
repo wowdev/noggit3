@@ -77,6 +77,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
   }
 
   _need_amap_update = true;
+  _need_lod_texture_map_update = true;
 
   return texLevel;
 }
@@ -148,6 +149,7 @@ void TextureSet::swap_layers(int layer_1, int layer_2)
     }
 
     _need_amap_update = true;
+    _need_lod_texture_map_update = true;
   }
 }
 
@@ -159,6 +161,7 @@ void TextureSet::eraseTextures()
   }
 
   _need_amap_update = true;
+  _need_lod_texture_map_update = true;
 }
 
 void TextureSet::eraseTexture(size_t id)
@@ -192,6 +195,7 @@ void TextureSet::eraseTexture(size_t id)
   _layers_info[nTextures] = ENTRY_MCLY();
 
   _need_amap_update = true;
+  _need_lod_texture_map_update = true;
 }
 
 bool TextureSet::canPaintTexture(scoped_blp_texture_reference const& texture)
@@ -278,6 +282,7 @@ bool TextureSet::eraseUnusedTextures()
     }
 
     _need_amap_update = true;
+    _need_lod_texture_map_update = true;
     return true;
   }
 
@@ -429,6 +434,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   eraseUnusedTextures();
 
   _need_amap_update = true;
+  _need_lod_texture_map_update = true;
 
   return true;
 }
@@ -532,6 +538,7 @@ bool TextureSet::replace_texture( float xbase
   if (changed)
   {
     _need_amap_update = true;
+    _need_lod_texture_map_update = true;
   }
 
   return changed;
@@ -782,6 +789,7 @@ void TextureSet::merge_layers(size_t id1, size_t id2)
 
   eraseTexture(id2);
   _need_amap_update = true;
+  _need_lod_texture_map_update = true;
 }
 
 bool TextureSet::removeDuplicate()
