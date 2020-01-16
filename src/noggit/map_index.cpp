@@ -600,11 +600,6 @@ uint32_t MapIndex::newGUID()
   return ++highestGUID;
 }
 
-inline bool floatEqual(float const& a, float const& b)
-{
-  return std::abs(a - b) < 0.0001f;
-}
-
 uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_error)
 {
   // pre-cond: mTiles[z][x].flags are set
@@ -679,12 +674,12 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         for (ENTRY_MDDF& entry : modelEntries)
         {
           if ( mddf.nameID == entry.nameID
-            && floatEqual(mddf.pos[0], entry.pos[0])
-            && floatEqual(mddf.pos[1], entry.pos[1])
-            && floatEqual(mddf.pos[2], entry.pos[2])
-            && floatEqual(mddf.rot[0], entry.rot[0])
-            && floatEqual(mddf.rot[1], entry.rot[1])
-            && floatEqual(mddf.rot[2], entry.rot[2])
+            && misc::float_equals(mddf.pos[0], entry.pos[0])
+            && misc::float_equals(mddf.pos[1], entry.pos[1])
+            && misc::float_equals(mddf.pos[2], entry.pos[2])
+            && misc::float_equals(mddf.rot[0], entry.rot[0])
+            && misc::float_equals(mddf.rot[1], entry.rot[1])
+            && misc::float_equals(mddf.rot[2], entry.rot[2])
             && mddf.scale == entry.scale
             )
           {
@@ -721,12 +716,12 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         for (ENTRY_MODF& entry : wmoEntries)
         {
           if (modf.nameID == entry.nameID
-            && floatEqual(modf.pos[0], entry.pos[0])
-            && floatEqual(modf.pos[1], entry.pos[1])
-            && floatEqual(modf.pos[2], entry.pos[2])
-            && floatEqual(modf.rot[0], entry.rot[0])
-            && floatEqual(modf.rot[1], entry.rot[1])
-            && floatEqual(modf.rot[2], entry.rot[2])
+            && misc::float_equals(modf.pos[0], entry.pos[0])
+            && misc::float_equals(modf.pos[1], entry.pos[1])
+            && misc::float_equals(modf.pos[2], entry.pos[2])
+            && misc::float_equals(modf.rot[0], entry.rot[0])
+            && misc::float_equals(modf.rot[1], entry.rot[1])
+            && misc::float_equals(modf.rot[2], entry.rot[2])
             )
           {
             add = false;
