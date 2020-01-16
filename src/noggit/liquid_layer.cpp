@@ -20,13 +20,12 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
   , _maximum(height)
   , _subchunks(0)
   , pos(base)
-  , texRepeats(4.0f)
 {
   for (int z = 0; z < 9; ++z)
   {
     for (int x = 0; x < 9; ++x)
     {
-      _tex_coords.emplace_back(x, z);
+      _tex_coords.emplace_back(static_cast<float>(x * 4) / 9.f, static_cast<float>(z * 4) / 9.f);
       _depth.emplace_back(1.0f);
       _vertices.emplace_back(pos.x + UNITSIZE * x
         , height
@@ -38,14 +37,13 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
   changeLiquidID(_liquid_id);
 }
 
-liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
+liquid_layer::liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask)
   : _liquid_id(info.liquid_id)
   , _liquid_vertex_format(info.liquid_vertex_format)
   , _minimum(info.minHeight)
   , _maximum(info.maxHeight)
   , _subchunks(0)
   , pos(base)
-  , texRepeats(4.0f)
 {
   int offset = 0;
   for (int z = 0; z < info.height; ++z)
@@ -57,20 +55,65 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
     }
   }
 
+  // default values
   for (int z = 0; z < 9; ++z)
   {
     for (int x = 0; x < 9; ++x)
     {
-      _tex_coords.emplace_back(x, z);
-      _depth.emplace_back(heightmask.mTransparency[z][x]/255.0f);
-      _vertices.emplace_back( pos.x + UNITSIZE * x
-                            , std::min(_maximum, heightmask.mHeightValues[z][x]) // fix some lod problems
-                            , pos.z + UNITSIZE * z
-                            );
+      _tex_coords.emplace_back(static_cast<float>(x * 4) / 9.f, static_cast<float>(z * 4) / 9.f);
+      _depth.emplace_back(1.0f);
+      _vertices.emplace_back(pos.x + UNITSIZE * x
+        , _minimum
+        , pos.z + UNITSIZE * z
+      );
     }
   }
 
-  changeLiquidID(_liquid_id);
+  if (info.ofsHeightMap)
+  {
+    f.seek(base_pos + info.ofsHeightMap);
+
+    if (_liquid_vertex_format == 0 || _liquid_vertex_format == 1)
+    {
+
+      for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
+      {
+        for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
+        {
+          f.read(&_vertices[z * 9 + x].y, sizeof(float));
+        }
+      }
+    }
+
+    if (_liquid_vertex_format == 1)
+    {
+      for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
+      {
+        for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
+        {
+          mh2o_uv uv;
+          f.read(&uv, sizeof(mh2o_uv));
+          _tex_coords[z * 9 + x] = 
+            { static_cast<float>(uv.x) / 255.f
+            , static_cast<float>(uv.y) / 255.f
+            };
+        }
+      }
+    }
+
+    if (_liquid_vertex_format == 0 || _liquid_vertex_format == 2)
+    {
+      for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
+      {
+        for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
+        {
+          std::uint8_t depth;
+          f.read(&depth, sizeof(std::uint8_t));
+          _depth[z * 9 + x] = static_cast<float>(depth) / 255.f;
+        }
+      }
+    }
+  }
 }
 
 liquid_layer::liquid_layer(liquid_layer&& other)
@@ -85,7 +128,6 @@ liquid_layer::liquid_layer(liquid_layer&& other)
   , _indices_by_lod(other._indices_by_lod)
   , _need_buffer_update(true)
   , pos(other.pos)
-  , texRepeats(other.texRepeats)
 {
   changeLiquidID(_liquid_id);
 }
@@ -102,7 +144,6 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , _indices_by_lod(other._indices_by_lod)
   , _need_buffer_update(true)
   , pos(other.pos)
-  , texRepeats(other.texRepeats)
 {
   changeLiquidID(_liquid_id);
 }
@@ -118,7 +159,6 @@ liquid_layer& liquid_layer::operator= (liquid_layer&& other)
   std::swap(_depth, other._depth);
   std::swap(_tex_coords, other._tex_coords);
   std::swap(pos, other.pos);
-  std::swap(texRepeats, other.texRepeats);
   std::swap(_indices_by_lod, other._indices_by_lod);
 
   _need_buffer_update = true;
@@ -141,7 +181,6 @@ liquid_layer& liquid_layer::operator=(liquid_layer const& other)
   _depth = other._depth;
   _tex_coords = other._tex_coords;
   pos = other.pos;
-  texRepeats = other.texRepeats;
   _indices_by_lod = other._indices_by_lod;
   _need_buffer_update = true;
 
@@ -212,11 +251,12 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
 
   info.ofsHeightMap = current_pos - base_pos;
 
-  std::size_t heighmap_size = (info.width + 1) * (info.height +1) * (sizeof(char) + ((_liquid_vertex_format != 2) ? sizeof(float) : 0));
-  adt.Extend(heighmap_size);
+  int vertices_count = (info.width + 1) * (info.height + 1);
 
-  if (_liquid_vertex_format != 2)
+  if (_liquid_vertex_format == 0 || _liquid_vertex_format == 1)
   {
+    adt.Extend(vertices_count * sizeof(float));
+
     for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
     {
       for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
@@ -227,13 +267,36 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
     }
   }
 
-  for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
+  if (_liquid_vertex_format == 1)
   {
-    for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
+    adt.Extend(vertices_count * sizeof(mh2o_uv));
+
+    for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
     {
-      unsigned char depth = static_cast<unsigned char>(_depth[z * 9 + x] * 255.0f);
-      memcpy(adt.GetPointer<char>(current_pos), &depth, sizeof(char));
-      current_pos += sizeof(char);
+      for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
+      {
+        mh2o_uv uv;
+        uv.x = static_cast<std::uint16_t>(std::min(_tex_coords[z * 9 + x].x * 255.f, 65535.f));
+        uv.y = static_cast<std::uint16_t>(std::min(_tex_coords[z * 9 + x].y * 255.f, 65535.f));
+
+        memcpy(adt.GetPointer<char>(current_pos), &uv, sizeof(mh2o_uv));
+        current_pos += sizeof(mh2o_uv);
+      }
+    }
+  }
+
+  if (_liquid_vertex_format == 0 || _liquid_vertex_format == 2)
+  {
+    adt.Extend(vertices_count * sizeof(std::uint8_t));
+
+    for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
+    {
+      for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
+      {
+        std::uint8_t depth = static_cast<std::uint8_t>(std::min(_depth[z * 9 + x] * 255.0f, 255.f));
+        memcpy(adt.GetPointer<char>(current_pos), &depth, sizeof(std::uint8_t));
+        current_pos += sizeof(std::uint8_t);
+      }
     }
   }
 
@@ -249,15 +312,15 @@ void liquid_layer::changeLiquidID(int id)
   {
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(_liquid_id);
 
-    // !\ todo: handle lava (type == 2) that use uv_mapping
     switch (lLiquidTypeRow.getInt(LiquidTypeDB::Type))
     {
+    case 2: // magma/slime
+      _liquid_vertex_format = 1;
+      break;
     default:
       _liquid_vertex_format = 0;
       break;
     }
-
-    //! \todo  Get texRepeats too.
   }
   catch (...)
   {
@@ -387,8 +450,6 @@ void liquid_layer::draw ( liquid_render& render
   }
 
   render.prepare_draw (water_shader, _liquid_id, animtime);
-
-  water_shader.uniform ("tex_repeat", texRepeats);
 
   if (lod_changed)
   {

@@ -124,7 +124,6 @@ private:
   int initGeometry(MPQFile* f);
 
   math::vector_3d pos;
-  float texRepeats;
   bool mTransparency;
   int xtiles, ytiles;
   int _liquid_id;

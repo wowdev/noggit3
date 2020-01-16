@@ -34,7 +34,6 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
   for (std::size_t k = 0; k < header.nLayers; ++k)
   {
     MH2O_Information info;
-    MH2O_HeightMask heightmask;
     uint64_t infoMask = 0xFFFFFFFFFFFFFFFF; // default = all water
 
     //info
@@ -51,42 +50,8 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       f.read(&infoMask, bitmask_size);
     }
 
-    // set default value
-    for (int h = 0; h < 9; ++h)
-    {
-      for (int w = 0; w < 9; ++w)
-      {
-        heightmask.mHeightValues[w][h] = info.minHeight;
-        heightmask.mTransparency[w][h] = 255;
-      }
-    }
-
-    // load existing heightMap
-    if (info.ofsHeightMap)
-    {
-      f.seek(info.ofsHeightMap + basePos);
-
-      if (info.liquid_vertex_format != 2)
-      {
-        for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w)
-        {
-          for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
-          {
-            f.read(&heightmask.mHeightValues[w][h], sizeof(float));
-          }
-        }
-      }
-
-      for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w)
-      {
-        for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
-        {
-          f.read(&heightmask.mTransparency[w][h], sizeof(unsigned char));
-        }
-      }
-    }
-
-    _layers.emplace_back(math::vector_3d(xbase, 0.0f, zbase), info, heightmask, infoMask);
+    math::vector_3d pos(xbase, 0.0f, zbase);
+    _layers.emplace_back(f, basePos, pos, info, infoMask);
   }
 
   update_layers();
