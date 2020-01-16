@@ -1699,8 +1699,8 @@ void World::delete_duplicate_model_and_wmo_instances()
     {
       assert(lhs->first != rhs->first);
 
-      if ( lhs->second.pos == rhs->second.pos
-        && lhs->second.dir == rhs->second.dir
+      if ( misc::vec3d_equals(lhs->second.pos, rhs->second.pos)
+        && misc::vec3d_equals(lhs->second.dir, rhs->second.dir)
         && lhs->second.wmo->filename == rhs->second.wmo->filename
          )
       {
@@ -1715,8 +1715,8 @@ void World::delete_duplicate_model_and_wmo_instances()
     {
       assert(lhs->first != rhs->first);
 
-      if ( lhs->second.pos == rhs->second.pos
-        && lhs->second.dir == rhs->second.dir
+      if ( misc::vec3d_equals(lhs->second.pos, rhs->second.pos)
+        && misc::vec3d_equals(lhs->second.dir, rhs->second.dir)
         && lhs->second.scale == rhs->second.scale
         && lhs->second.model->filename == rhs->second.model->filename
         )
