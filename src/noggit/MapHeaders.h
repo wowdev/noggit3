@@ -156,7 +156,7 @@ struct ENTRY_MCLY
   uint32_t  textureID;
   uint32_t  flags;
   uint32_t  ofsAlpha;
-  uint32_t  effectID;
+  uint32_t  effectID = 0xFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
 };
 
 #include <string.h> // memcpy()
