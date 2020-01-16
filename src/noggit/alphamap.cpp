@@ -10,11 +10,11 @@ Alphamap::Alphamap()
   createNew();
 }
 
-Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha)
+Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool use_big_alphamaps, bool do_not_fix_alpha_map)
 {
   createNew();
 
-  if (mBigAlpha)
+  if (use_big_alphamaps)
   {
     // can only compress big alpha
     if (flags & 0x200)
@@ -28,7 +28,7 @@ Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFix
   }    
   else
   {
-    readNotCompressed(f, doNotFixAlpha);
+    readNotCompressed(f, do_not_fix_alpha_map);
   }
 }
 
@@ -64,7 +64,7 @@ void Alphamap::readBigAlpha(MPQFile *f)
   f->seekRelative(0x1000);
 }
 
-void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
+void Alphamap::readNotCompressed(MPQFile *f, bool do_not_fix_alpha_map)
 {
   char const* abuf = f->getPointer();
 
@@ -78,7 +78,7 @@ void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
     }
   }
 
-  if (doNotFixAlpha)
+  if (!do_not_fix_alpha_map)
   {
     for (std::size_t i(0); i < 64; ++i)
     {

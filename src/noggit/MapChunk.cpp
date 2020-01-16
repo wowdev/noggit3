@@ -60,7 +60,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
 
-  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha, !header_flags.flags.do_not_fix_alpha_map);
+  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha, !!header_flags.flags.do_not_fix_alpha_map);
 
   // - MCVT ----------------------------------------------
   {

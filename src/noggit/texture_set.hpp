@@ -16,7 +16,7 @@ class TextureSet
 {
 public:
   TextureSet() = delete;
-  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool big_alphamap, bool do_not_fix_alpha);
+  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map);
 
   math::vector_2d anim_uv_offset(int id, int animtime) const;
 
