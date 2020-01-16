@@ -75,8 +75,11 @@ namespace noggit
         if (std::regex_search(path, match, regex) && !regex_match(path, wmo_group))
         {
           _list->addItem (QString::fromStdString (match.str(0)));
-        }        
+        }
       }
+
+      _list->setMinimumWidth(_list->sizeHintForColumn(0));
+      setMinimumWidth(_list->width()+ _textBox->width());
     }
   }
 }
