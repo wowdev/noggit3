@@ -6,7 +6,6 @@ uniform vec4 ocean_color_light;
 uniform vec4 ocean_color_dark;
 uniform vec4 river_color_light;
 uniform vec4 river_color_dark;
-uniform float tex_repeat;
 
 uniform int type;
 
@@ -17,7 +16,7 @@ out vec4 out_color;
 
 void main()
 {
-  vec4 texel = texture2D (texture, tex_coord_ / tex_repeat);
+  vec4 texel = texture2D (texture, tex_coord_);
   // lava || slime
   if(type == 2 || type == 3)
   {

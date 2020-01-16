@@ -201,16 +201,12 @@ struct MH2O_Information{
   }
 };
 
-struct MH2O_HeightMask
+struct mh2o_uv
 {
-  float mHeightValues[9][9];
-  unsigned char mTransparency[9][9];
+  mh2o_uv(std::uint16_t x = 0, std::uint16_t y = 0) : x(x), y(y) {}
 
-  MH2O_HeightMask()
-  {
-    memset(mHeightValues, 0, 9 * 9 * sizeof(float));
-    memset(mTransparency, 0, 9 * 9 * sizeof(unsigned char));
-  }
+  std::uint16_t x;
+  std::uint16_t y;
 };
 
 struct MH2O_Render

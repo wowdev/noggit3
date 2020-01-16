@@ -60,7 +60,6 @@ namespace
 // todo: use material
 wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const&, int group_liquid, bool use_dbc_type, bool is_ocean)
   : pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
-  , texRepeats(4.0f)
   , xtiles(header.A)
   , ytiles(header.B)
 {
@@ -103,7 +102,6 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
 
 wmo_liquid::wmo_liquid(wmo_liquid const& other)
   : pos(other.pos)
-  , texRepeats(other.texRepeats)
   , mTransparency(other.mTransparency)
   , xtiles(other.xtiles)
   , ytiles(other.ytiles)
@@ -134,7 +132,7 @@ int wmo_liquid::initGeometry(MPQFile* f)
       size_t p = j*(xtiles + 1) + i;
       lVertices[p] = math::vector_3d( pos.x + UNITSIZE * i
                                     , map[p].height
-                                    , pos.z + -1.0f * UNITSIZE * j
+                                    , pos.z - UNITSIZE * j
                                     );
     }
   }
@@ -156,17 +154,23 @@ int wmo_liquid::initGeometry(MPQFile* f)
 
         if (!(tile.liquid & 2))
         {
+          // I don't know if those are the right values but it looks ok
+          float uv_x = static_cast<float>(i*8) / static_cast<float>(xtiles);
+          float uv_x_2 = static_cast<float>((i+1)*8) / static_cast<float>(xtiles);
+          float uv_y = static_cast<float>(j*8) / static_cast<float>(ytiles);
+          float uv_y_2 = static_cast<float>((j+1)*8) / static_cast<float>(ytiles);
+
           depths.emplace_back(static_cast<float>(map[p].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(i + 0.f, j + 0.f);
+          tex_coords.emplace_back(uv_x, uv_y);
 
           depths.emplace_back(static_cast<float>(map[p + 1].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(i + 1.f, j + 0.f);          
+          tex_coords.emplace_back(uv_x_2, uv_y);
 
           depths.emplace_back(static_cast<float>(map[p + xtiles + 1 + 1].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(i + 1.f, j + 1.f);
+          tex_coords.emplace_back(uv_x_2, uv_y_2);
 
           depths.emplace_back(static_cast<float>(map[p + xtiles + 1].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(i + 0.f, j + 1.f);
+          tex_coords.emplace_back(uv_x, uv_y_2);
         }
         else
         {
@@ -275,8 +279,6 @@ void wmo_liquid::draw ( math::matrix_4x4 const& model_view
   water_shader.uniform ("ocean_color_dark", ocean_color_dark);
   water_shader.uniform ("river_color_light", river_color_light);
   water_shader.uniform ("river_color_dark", river_color_dark);
-
-  water_shader.uniform("tex_repeat", texRepeats);
 
   opengl::scoped::vao_binder const _ (_vao);
 
