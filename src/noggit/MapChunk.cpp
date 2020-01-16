@@ -143,6 +143,16 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       }
       c++;
     }
+
+    if (!header_flags.flags.do_not_fix_alpha_map)
+    {
+      for (std::size_t i(0); i < 64; ++i)
+      {
+        _shadow_map[i * 64 + 63] = _shadow_map[i * 64 + 62];
+        _shadow_map[63 * 64 + i] = _shadow_map[62 * 64 + i];
+      }
+      _shadow_map[63 * 64 + 63] = _shadow_map[62 * 64 + 62];
+    }
   }
   else
   {
