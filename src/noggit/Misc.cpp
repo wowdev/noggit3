@@ -183,6 +183,11 @@ namespace misc
                    );
     return filename;
   }
+
+  bool vec3d_equals(math::vector_3d const& v1, math::vector_3d const& v2)
+  {
+    return float_equals(v1.x, v2.x) && float_equals(v1.y, v2.y) && float_equals(v1.z, v2.z);
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)

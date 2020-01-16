@@ -46,6 +46,8 @@ namespace misc
     return std::abs(a - b) < (std::max(1.f, std::max(a, b)) * std::numeric_limits<float>::epsilon());
   }
 
+  bool vec3d_equals(math::vector_3d const& v1, math::vector_3d const& v2);
+
   inline int rounded_int_div(int value, int div)
   {
     return value / div + (value % div <= (div >> 1) ? 0 : 1);
