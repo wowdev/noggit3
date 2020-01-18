@@ -155,13 +155,29 @@ void TextureSet::swap_layers(int layer_1, int layer_2)
 
 void TextureSet::eraseTextures()
 {
-  for (size_t i = nTextures-1; nTextures; --i)
+  if (nTextures == 0)
   {
-    eraseTexture(i);
+    return;
   }
 
+  textures.clear();
+  
+  for (int i = 0; i < 4; ++i)
+  {
+    if (i > 0)
+    {
+      alphamaps[i - 1].reset();
+    }
+    _layers_info[i] = ENTRY_MCLY();
+  }
+
+  nTextures = 0;
+
+  _lod_texture_map.resize(8 * 8);
+  memset(_lod_texture_map.data(), 0, 64 * sizeof(std::uint8_t));
+
   _need_amap_update = true;
-  _need_lod_texture_map_update = true;
+  _need_lod_texture_map_update = false;
 }
 
 void TextureSet::eraseTexture(size_t id)
@@ -371,22 +387,33 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   float zPos, xPos, dist, radius;
 
   // hacky fix to make sure textures are blended between 2 chunks
+  float x_ofs = 0.f;
+  float z_ofs = 0.f;
+  bool hacky_blend = false;
   if (z < zbase)
   {
-    zbase -= TEXDETAILSIZE;
+    //zbase -= TEXDETAILSIZE;
+    z_ofs = -TEXDETAILSIZE / 2.f;
+    hacky_blend = true;
   }
   else if (z > zbase + CHUNKSIZE)
   {
-    zbase += TEXDETAILSIZE;
+    //zbase += TEXDETAILSIZE;
+    z_ofs = TEXDETAILSIZE / 2.f;
+    hacky_blend = true;
   }
 
   if (x < xbase)
   {
-    xbase -= TEXDETAILSIZE;
+    //xbase -= TEXDETAILSIZE;
+    x_ofs = -TEXDETAILSIZE / 2.f;
+    hacky_blend = true;
   }
   else if (x > xbase + CHUNKSIZE)
   {
-    xbase += TEXDETAILSIZE;
+    //xbase += TEXDETAILSIZE;
+    x_ofs = TEXDETAILSIZE / 2.f;
+    hacky_blend = true;
   }
 
   int tex_layer = get_texture_index_or_add (std::move (texture), strength);
@@ -412,13 +439,15 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     xPos = xbase;
     for (int i = 0; i < 64; ++i)
     {
-      dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
+      dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);// -(hacky_blend ? TEXDETAILSIZE / 2.f : 0.f);
       xPos += TEXDETAILSIZE;
 
       if (dist>radius)
       {
         continue;
       }
+
+      dist = misc::dist(x, z, xPos + x_ofs + TEXDETAILSIZE / 2.0f, zPos + z_ofs + TEXDETAILSIZE / 2.0f);// -(hacky_blend ? TEXDETAILSIZE / 2.f : 0.f);
 
       changed |= change_texture(tex_layer, i + 64 * j, strength, pressure*brush->getValue(dist));
     }
