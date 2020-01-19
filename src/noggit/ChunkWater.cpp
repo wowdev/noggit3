@@ -6,29 +6,68 @@
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 
-ChunkWater::ChunkWater(float x, float z)
+ChunkWater::ChunkWater(float x, float z, bool use_mclq_green_lava)
   : xbase(x)
   , zbase(z)
   , vmin(x, 0.f, z)
   , vmax(x + CHUNKSIZE, 0.f, z + CHUNKSIZE)
+  , _use_mclq_green_lava(use_mclq_green_lava)
 {
+}
+
+void ChunkWater::from_mclq(mcnk_flags const& flags, std::vector<mclq>& layers)
+{
+  math::vector_3d pos(xbase, 0.0f, zbase);
+
+  for (mclq& liquid : layers)
+  {
+    std::uint8_t mclq_liquid_type = 0;
+
+    for (int z = 0; z < 8; ++z)
+    {
+      for (int x = 0; x < 8; ++x)
+      {
+        mclq_tile const& tile = liquid.tiles[z * 8 + x];
+
+        misc::bit_or(Render.fishable, x, z, tile.fishable);
+        misc::bit_or(Render.fatigue, x, z, tile.fatigue);
+
+        if (!tile.dont_render)
+        {
+          mclq_liquid_type = tile.liquid_type;
+        }
+      }
+    }
+
+    switch (mclq_liquid_type)
+    {
+      case 1:_layers.emplace_back(pos, liquid, 2); break;
+      case 3:_layers.emplace_back(pos, liquid, 4); break;
+      case 4:_layers.emplace_back(pos, liquid, 1); break;
+      case 6:_layers.emplace_back(pos, liquid, (_use_mclq_green_lava ? 15 : 3)); break;
+      default:
+        LogError << "Invalid/unhandled MCLQ liquid type" << std::endl;
+        break;
+    }
+  }
+  update_layers();
 }
 
 void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 {
   MH2O_Header header;
   f.read(&header, sizeof(MH2O_Header));
-  if (!header.nLayers) return;
+
+  if (!header.nLayers)
+  {
+    return;
+  }
 
   //render
   if (header.ofsRenderMask)
   {
     f.seek(basePos + header.ofsRenderMask + sizeof(MH2O_Render));
     f.read(&Render, sizeof(MH2O_Render));
-  }
-  else
-  {
-    memset(&Render.mask, 255, 8);
   }
 
   for (std::size_t k = 0; k < header.nLayers; ++k)

@@ -16,7 +16,7 @@ class sExtendableArray;
 class TileWater
 {
 public:
-  TileWater(MapTile *pTile, float pXbase, float pZbase);
+  TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_green_lava);
 
   ChunkWater* getChunk(int x, int z);
 

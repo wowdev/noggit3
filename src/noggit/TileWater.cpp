@@ -6,7 +6,7 @@
 #include <noggit/Misc.h>
 #include <noggit/TileWater.hpp>
 
-TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
+TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_green_lava)
   : tile(pTile)
   , xbase(pXbase)
   , zbase(pZbase)
@@ -15,7 +15,7 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
   {
     for (int x = 0; x < 16; ++x)
     {
-      chunks[z][x] = std::make_unique<ChunkWater> (xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z);
+      chunks[z][x] = std::make_unique<ChunkWater> (xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z, use_mclq_green_lava);
     }
   }
 }

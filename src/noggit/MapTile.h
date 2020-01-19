@@ -28,7 +28,7 @@ class MapTile : public AsyncObject
 {
 
 public:
-	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World*);
+	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, bool use_mclq_green_lava, World*);
   ~MapTile();
 
   void finishLoading();

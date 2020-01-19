@@ -27,14 +27,57 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
     {
       _tex_coords.emplace_back(static_cast<float>(x * 4) / 9.f, static_cast<float>(z * 4) / 9.f);
       _depth.emplace_back(1.0f);
-      _vertices.emplace_back(pos.x + UNITSIZE * x
-        , height
-        , pos.z + UNITSIZE * z
-      );
+      _vertices.emplace_back( pos.x + UNITSIZE * x
+                            , height
+                            , pos.z + UNITSIZE * z
+                            );
     }
   }
 
   changeLiquidID(_liquid_id);
+}
+
+liquid_layer::liquid_layer(math::vector_3d const& base, mclq& liquid, int liquid_id)
+  : _liquid_id(liquid_id)
+  , _minimum(liquid.min_height)
+  , _maximum(liquid.max_height)
+  , _subchunks(0)
+  , pos(base)
+{
+  changeLiquidID(_liquid_id);
+
+  for (int z = 0; z < 8; ++z)
+  {
+    for (int x = 0; x < 8; ++x)
+    {
+      misc::set_bit(_subchunks, x, z, !liquid.tiles[z * 8 + x].dont_render);
+    }
+  }
+
+  for (int z = 0; z < 9; ++z)
+  {
+    for (int x = 0; x < 9; ++x)
+    {
+      mclq_vertex const& v = liquid.vertices[z * 9 + x];
+
+      if (_liquid_vertex_format == 1)
+      {
+        _depth.emplace_back(1.0f);
+        _tex_coords.emplace_back(static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f);
+      }
+      else
+      {
+        _depth.emplace_back(static_cast<float>(v.water.depth) / 255.f);
+        _tex_coords.emplace_back(static_cast<float>(x * 4) / 9.f, static_cast<float>(z * 4) / 9.f);
+      }
+
+      _vertices.emplace_back( pos.x + UNITSIZE * x
+                            // sometimes there's garbage data on unused tiles that mess things up
+                            , std::max(std::min(v.height, _maximum), _minimum)
+                            , pos.z + UNITSIZE * z
+                            );
+    }
+  }
 }
 
 liquid_layer::liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask)
@@ -520,8 +563,7 @@ bool liquid_layer::hasSubchunk(int x, int z, int size) const
 
 void liquid_layer::setSubchunk(int x, int z, bool water)
 {
-  std::uint64_t v = std::uint64_t(1) << (z*8+x);
-  _subchunks = water ? (_subchunks | v) : (_subchunks & ~v);
+  misc::set_bit(_subchunks, x, z, water);
 }
 
 void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos

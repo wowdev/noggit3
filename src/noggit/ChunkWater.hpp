@@ -19,13 +19,14 @@ class ChunkWater
 {
 public:
   ChunkWater() = delete;
-  explicit ChunkWater(float x, float z);
+  explicit ChunkWater(float x, float z, bool use_mclq_green_lava);
 
   ChunkWater (ChunkWater const&) = delete;
   ChunkWater (ChunkWater&&) = delete;
   ChunkWater& operator= (ChunkWater const&) = delete;
   ChunkWater& operator= (ChunkWater&&) = delete;
 
+  void from_mclq(mcnk_flags const& flags, std::vector<mclq>& layers);
   void fromFile(MPQFile &f, size_t basePos);
   void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
@@ -74,6 +75,7 @@ private:
   std::vector<math::vector_3d> _intersect_points;
 
   math::vector_3d vmin, vmax, vcenter;
+  bool _use_mclq_green_lava;
 
   // remove empty layers
   void cleanup();

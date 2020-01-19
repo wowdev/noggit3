@@ -57,6 +57,17 @@ namespace misc
     return value / 255 + (value % 255 <= 127 ? 0 : 1);
   }
 
+  // treat the value as an 8x8 array of bit
+  inline void set_bit(std::uint64_t& value, int x, int y, bool on)
+  {
+    std::uint64_t bit = std::uint64_t(1) << (y * 8 + x);
+    value = on ? (value | bit) : (value & ~bit);
+  }
+  inline void bit_or(std::uint64_t& value, int x, int y, bool on)
+  {
+    value |= (std::uint64_t(1) << (y * 8 + x));
+  }
+
   struct random_color : math::vector_4d
   {
     random_color()

@@ -17,7 +17,7 @@ class liquid_layer
 public:
   liquid_layer() = delete;
   liquid_layer(math::vector_3d const& base, float height, int liquid_id);
-public:
+  liquid_layer(math::vector_3d const& base, mclq& liquid, int liquid_id);
   liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask);
 
   liquid_layer(liquid_layer const& other);

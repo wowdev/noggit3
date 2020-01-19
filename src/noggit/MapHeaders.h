@@ -211,14 +211,61 @@ struct mh2o_uv
 
 struct MH2O_Render
 {
-  unsigned char mask[8]; //render mask
-  unsigned char fatigue[8]; //fatigue mask?
+  // seems to be usable as visibility information (as per https://wowdev.wiki/ADT/v18#MH2O_chunk_.28WotLK.2B.29)
+  std::uint64_t fishable = 0xFFFFFFFFFFFFFFFF;
+  std::uint64_t fatigue = 0;
+};
 
-  MH2O_Render()
+struct mclq_vertex
+{
+  union
   {
-    memset(mask, 255, 8);
-    memset(fatigue, 0, 8);
-  }
+    struct water_vert
+    {
+      std::uint8_t depth;
+      std::uint8_t flow_0_pct;
+      std::uint8_t flow_1_pct;
+      std::uint8_t filler;
+    } water;
+    struct magma_vert
+    {
+      std::uint16_t x;
+      std::uint16_t y;
+    } magma;
+  };
+
+  float height;
+};
+
+struct mclq_tile
+{
+  std::uint8_t liquid_type : 3;
+  // it's technically the 4 first bits set to 1 (0xF) but it's easier to use this way
+  std::uint8_t dont_render : 1;
+  std::uint8_t flag_0x10 : 1;
+  std::uint8_t flag_0x20 : 1;
+  std::uint8_t fishable : 1;
+  std::uint8_t fatigue : 1;
+};
+
+struct mclq_flowvs
+{
+  float pos[3];
+  float radius;
+  float dir[3];
+  float velocity;
+  float amplitude;
+  float frequency;
+};
+
+struct mclq
+{
+  float min_height;
+  float max_height;
+  mclq_vertex vertices[9 * 9];
+  mclq_tile tiles[8 * 8];
+  std::uint32_t n_flowvs;
+  mclq_flowvs flowvs[2]; // always 2 regardless of the n_flowvs value
 };
 
 struct MPHD
