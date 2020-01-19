@@ -34,13 +34,15 @@ void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
 
     auto const& textures = _textures_by_liquid_id[liquid_id];
     water_shader.uniform("type", _liquid_id_types[liquid_id]);
+    water_shader.uniform("param", _float_param_by_liquid_id[liquid_id]);
 
     water_shader.sampler
     ("texture"
       , GL_TEXTURE0
-      , textures[static_cast<std::size_t> (animtime / 60.0f) % textures.size()].get()
+      , textures[static_cast<std::size_t> (animtime / 60) % textures.size()].get()
     );
-  }  
+  }
+  water_shader.uniform("animtime", static_cast<float>(animtime)/2880.f);
 }
 
 void liquid_render::add_liquid_id(int liquid_id)
@@ -55,6 +57,10 @@ void liquid_render::add_liquid_id(int liquid_id)
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(liquid_id);
 
     _liquid_id_types[liquid_id] = lLiquidTypeRow.getInt(LiquidTypeDB::Type);
+    _float_param_by_liquid_id[liquid_id] = 
+      math::vector_2d( lLiquidTypeRow.getFloat(LiquidTypeDB::AnimationX)
+                     , lLiquidTypeRow.getFloat(LiquidTypeDB::AnimationY)
+                     );
 
     // fix to now crash when using procedural water (id 100)
     if (lLiquidTypeRow.getInt(LiquidTypeDB::ShaderType) == 3)

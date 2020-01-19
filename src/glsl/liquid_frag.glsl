@@ -8,22 +8,31 @@ uniform vec4 river_color_light;
 uniform vec4 river_color_dark;
 
 uniform int type;
+uniform float animtime;
+uniform vec2 param;
 
 in float depth_;
 in vec2 tex_coord_;
 
 out vec4 out_color;
 
+vec2 rot2(vec2 p, float degree)
+{
+  float a = radians(degree);
+  return mat2(cos(a), -sin(a), sin(a), cos(a))*p;
+}
+
 void main()
 {
-  vec4 texel = texture2D (texture, tex_coord_);
   // lava || slime
   if(type == 2 || type == 3)
   {
-    out_color = texel;
+    out_color = texture2D (texture, tex_coord_ + vec2(param.x*animtime, param.y*animtime));
   }
   else
   {
+    vec2 uv = rot2(tex_coord_ * param.x, param.y);
+    vec4 texel = texture2D (texture, uv);
     vec4 lerp = (type == 1)
               ? mix (ocean_color_light, ocean_color_dark, depth_) 
               : mix (river_color_light, river_color_dark, depth_);

@@ -154,23 +154,17 @@ int wmo_liquid::initGeometry(MPQFile* f)
 
         if (!(tile.liquid & 2))
         {
-          // I don't know if those are the right values but it looks ok
-          float uv_x = static_cast<float>(i*8) / static_cast<float>(xtiles);
-          float uv_x_2 = static_cast<float>((i+1)*8) / static_cast<float>(xtiles);
-          float uv_y = static_cast<float>(j*8) / static_cast<float>(ytiles);
-          float uv_y_2 = static_cast<float>((j+1)*8) / static_cast<float>(ytiles);
-
           depths.emplace_back(static_cast<float>(map[p].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(uv_x, uv_y);
+          tex_coords.emplace_back(i, j);
 
           depths.emplace_back(static_cast<float>(map[p + 1].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(uv_x_2, uv_y);
+          tex_coords.emplace_back(i+1, j);
 
           depths.emplace_back(static_cast<float>(map[p + xtiles + 1 + 1].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(uv_x_2, uv_y_2);
+          tex_coords.emplace_back(i+1, j+1);
 
           depths.emplace_back(static_cast<float>(map[p + xtiles + 1].water_vertex.flow1) / 255.0f);
-          tex_coords.emplace_back(uv_x, uv_y_2);
+          tex_coords.emplace_back(i, j+1);
         }
         else
         {
