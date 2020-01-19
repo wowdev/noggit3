@@ -12,6 +12,13 @@
 #include <algorithm>
 #include <string>
 
+namespace
+{
+  inline math::vector_2d default_uv(int px, int pz)
+  {
+    return {static_cast<float>(px) / 4.f, static_cast<float>(pz) / 4.f};
+  }
+}
 
 liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid_id)
   : _liquid_id(liquid_id)
@@ -25,7 +32,7 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
   {
     for (int x = 0; x < 9; ++x)
     {
-      _tex_coords.emplace_back(static_cast<float>(x * 4) / 9.f, static_cast<float>(z * 4) / 9.f);
+      _tex_coords.emplace_back(default_uv(x, z));
       _depth.emplace_back(1.0f);
       _vertices.emplace_back( pos.x + UNITSIZE * x
                             , height
@@ -68,7 +75,7 @@ liquid_layer::liquid_layer(math::vector_3d const& base, mclq& liquid, int liquid
       else
       {
         _depth.emplace_back(static_cast<float>(v.water.depth) / 255.f);
-        _tex_coords.emplace_back(static_cast<float>(x * 4) / 9.f, static_cast<float>(z * 4) / 9.f);
+        _tex_coords.emplace_back(default_uv(x, z));
       }
 
       _vertices.emplace_back( pos.x + UNITSIZE * x
@@ -103,7 +110,7 @@ liquid_layer::liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d con
   {
     for (int x = 0; x < 9; ++x)
     {
-      _tex_coords.emplace_back(static_cast<float>(x * 4) / 9.f, static_cast<float>(z * 4) / 9.f);
+      _tex_coords.emplace_back(default_uv(x, z));
       _depth.emplace_back(1.0f);
       _vertices.emplace_back(pos.x + UNITSIZE * x
         , _minimum

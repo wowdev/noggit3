@@ -38,5 +38,6 @@ private:
     };
 
   std::map<int, int> _liquid_id_types;
+  std::map<int, math::vector_2d> _float_param_by_liquid_id;
   std::map<int, std::vector<scoped_blp_texture_reference>> _textures_by_liquid_id;
 };
