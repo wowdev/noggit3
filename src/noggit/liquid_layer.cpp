@@ -314,7 +314,8 @@ void liquid_layer::changeLiquidID(int id)
 
     switch (lLiquidTypeRow.getInt(LiquidTypeDB::Type))
     {
-    case 2: // magma/slime
+    case 2: // magma
+    case 3: // slime
       _liquid_vertex_format = 1;
       break;
     default:
