@@ -192,6 +192,22 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     }
   }
 
+  if (header.sizeLiquid > 8)
+  {
+    f->seek(base + header.ofsLiquid);
+
+    f->read(&fourcc, 4);
+    f->seekRelative(4); // ignore the size here, the valid size is in the header
+
+    assert(fourcc == 'MCLQ');
+
+    int layer_count = (header.sizeLiquid - 8) / sizeof(mclq);
+    std::vector<mclq> layers(layer_count);
+    f->read(layers.data(), sizeof(mclq)*layer_count);    
+    
+    mt->Water.getChunk(px, py)->from_mclq(header_flags, layers);
+  }
+
   initStrip();
 
   vcenter = (vmin + vmax) * 0.5f;

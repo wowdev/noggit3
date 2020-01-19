@@ -25,13 +25,13 @@
 #include <utility>
 #include <vector>
 
-MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World* world)
+MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, bool use_mclq_green_lava, World* world)
   : AsyncObject(pFilename)
   , index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , changed(0)
-  , Water (this, xbase, zbase)
+  , Water (this, xbase, zbase, use_mclq_green_lava)
   , mBigAlpha(pBigAlpha)
   , _load_models(pLoadModels)
   , _world(world)

@@ -203,6 +203,12 @@ public:
   void saveMaxUID();
   void loadMaxUID();
 
+  // todo: find out how wow choose to use the green lava in outland
+  inline bool use_mclq_green_lava() const
+  {
+    return _map_id == 530;
+  }
+
 private:
 	uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
 

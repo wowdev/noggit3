@@ -340,7 +340,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, _world);
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, use_mclq_green_lava(), _world);
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 
@@ -864,7 +864,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
       // load the tile without the models
-      MapTile tile(x, z, filename.str(), mBigAlpha, false, world);
+      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), world);
       tile.finishLoading();
 
       std::map<int, ModelInstance> modelInst;
