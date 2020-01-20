@@ -4,6 +4,7 @@
 
 #include <noggit/MPQ.h>
 #include <noggit/alphamap.hpp>
+#include <noggit/MapHeaders.h>
 
 #include <cstdint>
 #include <array>
@@ -14,60 +15,75 @@ class MapTile;
 class TextureSet
 {
 public:
-  void initTextures(MPQFile* f, MapTile *maintile, uint32_t size);
-  void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha);
+  TextureSet() = delete;
+  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map);
 
-  void startAnim(int id, int animtime);
-  void stopAnim(int id);
+  math::vector_2d anim_uv_offset(int id, int animtime) const;
 
   void bindTexture(size_t id, size_t activeTexture);
-  void bindAlphamap(size_t id, size_t activeTexture);
 
   int addTexture(scoped_blp_texture_reference texture);
   void eraseTexture(size_t id);
   void eraseTextures();
   // return true if at least 1 texture has been erased
   bool eraseUnusedTextures();
-  void swapTexture(int id1, int id2);
-  void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
-  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture);
-  bool canPaintTexture(scoped_blp_texture_reference texture);
+  void swap_layers(int layer_1, int layer_2);
+  void replace_texture(scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture);
+  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture);
+  bool replace_texture( float xbase
+                      , float zbase
+                      , float x
+                      , float z
+                      , float radius
+                      , scoped_blp_texture_reference const& texture_to_replace
+                      , scoped_blp_texture_reference replacement_texture
+                      );
+  bool canPaintTexture(scoped_blp_texture_reference const& texture);
 
   const std::string& filename(size_t id);
 
-  size_t num();
+  size_t const& num() const { return nTextures; }
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
   bool is_animated(std::size_t id) const;
-  void change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add);
+  void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
-  void setAlpha(size_t id, size_t offset, unsigned char value);
-  void setAlpha(size_t id, unsigned char *amap);
+  uint8_t getAlpha(size_t id, size_t offset);
+  const uint8_t *getAlpha(size_t id);
 
-  unsigned char getAlpha(size_t id, size_t offset);
-  const unsigned char *getAlpha(size_t id);
-
-  std::vector<std::vector<char>> get_compressed_alphamaps();
+  std::vector<std::vector<uint8_t>> save_alpha(bool big_alphamap);
 
   void convertToBigAlpha();
   void convertToOldAlpha();
 
-  void mergeAlpha(size_t id1, size_t id2);
+  void merge_layers(size_t id1, size_t id2);
   bool removeDuplicate();
 
   scoped_blp_texture_reference texture(size_t id);
 
+  void bind_alpha(std::size_t id);
+
+  std::vector<uint8_t> lod_texture_map();
+
 private:
-  void alphas_to_big_alpha(unsigned char* dest);
-  std::vector<char> get_compressed_alpha(std::size_t id, unsigned char* alphas);
+  int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
+  bool change_texture(int texture_id, size_t offset, uint strength, float pressure);
+
+  uint8_t sum_alpha(size_t offset) const;
+
+  void alphas_to_big_alpha(uint8_t* dest);
+  void alphas_to_old_alpha(uint8_t* dest);
+
+  void update_lod_texture_map();
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
+  opengl::texture amap_gl_tex;
+  bool _need_amap_update = true;
   size_t nTextures;
 
-  int tex[4];
+  std::vector<uint8_t> _lod_texture_map;
+  bool _need_lod_texture_map_update = false;
 
-  unsigned int texFlags[4];
-  unsigned int effectID[4];
-  unsigned int MCALoffset[4];
+  ENTRY_MCLY _layers_info[4];
 };

@@ -101,7 +101,7 @@ private:
     Private * const p;
 
     QWidget* create_button(QWidget* data, QSignalMapper*mapper,
-                           QString icon_name, QString text,
+                           QIcon icon, QString text,
                            QString tooltip = QString()) const;
 };
 

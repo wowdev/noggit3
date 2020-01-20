@@ -44,6 +44,8 @@ public:
     void swap(int a, int b);
 
     void append();
+    void setColorAt(int i, QColor const& color);
+
 
     ColorWheel::DisplayFlags wheelFlags() const;
 

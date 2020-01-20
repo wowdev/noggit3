@@ -4,6 +4,7 @@
 
 #include <math/frustum.hpp>
 #include <math/trig.hpp>
+#include <noggit/cursor_render.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
@@ -13,10 +14,17 @@
 #include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <opengl/primitives.hpp>
+#include <opengl/shader.fwd.hpp>
+
+#include <boost/optional/optional.hpp>
+
+#include <QtCore/QSettings>
 
 #include <map>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 namespace opengl
 {
@@ -40,13 +48,16 @@ using StripType = uint16_t;
 
 class World
 {
+private:
+  std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
+
 public:
+  //! \todo  Get these managed? ._.
+  std::map<int, ModelInstance> mModelInstances;
+  std::map<int, WMOInstance> mWMOInstances;
+
   MapIndex mapIndex;
   noggit::map_horizon horizon;
-
-  // Information about the currently selected model / WMO / triangle.
-  boost::optional<selection_type> mCurrentSelection;
-  bool SelectionMode;
 
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
@@ -58,8 +69,6 @@ public:
 
   // The lighting used.
   std::unique_ptr<OutdoorLighting> ol;
-
-  void outdoorLighting();
 
   unsigned int getMapID();
   // Time of the day.
@@ -75,25 +84,22 @@ public:
 
   std::unique_ptr<Skies> skies;
 
-  //! \todo  Get these managed? ._.
-  std::map<int, ModelInstance> mModelInstances;
-  std::map<int, WMOInstance> mWMOInstances;
-
   OutdoorLightStats outdoorLightStats;
 
   explicit World(const std::string& name, int map_id);
 
   void initDisplay();
 
-  void tick(float dt);
-  void draw ( math::vector_3d const& cursor_pos
+  void update_models_emitters(float dt);
+  void draw ( math::matrix_4x4 const& model_view
+            , math::matrix_4x4 const& projection
+            , math::vector_3d const& cursor_pos
             , math::vector_4d const& cursor_color
             , int cursor_type
-            , float brushRadius
-            , float hardness
+            , float brush_radius
             , bool show_unpaintable_chunks
             , bool draw_contour
-            , float innerRadius
+            , float inner_radius_ratio
             , math::vector_3d const& ref_pos
             , float angle
             , float orientation
@@ -105,6 +111,7 @@ public:
             //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
             , editing_mode
             , math::vector_3d const& camera_pos
+            , bool camera_moved
             , bool draw_mfbo
             , bool draw_wireframe
             , bool draw_lines
@@ -116,45 +123,71 @@ public:
             , bool draw_model_animations
             , bool draw_hole_lines
             , bool draw_models_with_box
-            , std::unordered_set<WMO*> const& hidden_map_objects
-            , std::unordered_set<Model*> const& hidden_models
+            , bool draw_hidden_models
             , std::map<int, misc::random_color>& area_id_colors
             , bool draw_fog
             , eTerrainType ground_editing_brush
             , int water_layer
+            , display_mode display
             );
-
-  void outdoorLights(bool on);
-  void setupFog (bool draw_fog);
 
   unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
-  selection_result intersect ( math::ray const&
+  selection_result intersect ( math::matrix_4x4 const& model_view
+                             , math::ray const&
                              , bool only_map
                              , bool do_objects
                              , bool draw_terrain
                              , bool draw_wmo
                              , bool draw_models
-                             , std::unordered_set<WMO*> const& hidden_map_objects
-                             , std::unordered_set<Model*> const& hidden_models
+                             , bool draw_hidden_models
                              );
-  void drawTileMode ( float ah
-                    , math::vector_3d const& camera_pos
-                    , bool draw_lines
-                    , float zoom
-                    , float aspect_ratio
-                    );
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
-  bool HasSelection();
+private:
+  // Information about the currently selected model / WMO / triangle.
+  std::vector<selection_type> _current_selection;
+  boost::optional<math::vector_3d> _multi_select_pivot;
+  int _selected_model_count = 0;
+  void update_selection_pivot();
+public:
+
+  boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
-  bool IsSelection(int pSelectionType);
-  boost::optional<selection_type> GetCurrentSelection() { return mCurrentSelection; }
-  void SetCurrentSelection (boost::optional<selection_type> entry) { mCurrentSelection = entry; }
-  void ResetSelection() { mCurrentSelection.reset(); }
+  bool is_selection(int pSelectionType, selection_type selection) const;
+  bool is_selected(selection_type selection) const;
+  std::vector<selection_type> const& current_selection() const { return _current_selection; }
+  boost::optional<selection_type> get_last_selected_model() const;
+  bool has_selection() const { return !_current_selection.empty(); }
+  bool has_multiple_model_selected() const { return _selected_model_count > 1; }
+  void set_current_selection(selection_type entry);
+  void add_to_selection(selection_type entry);
+  void remove_from_selection(selection_type entry);
+  void reset_selection();
+
+  enum class m2_scaling_type
+  {
+    set,
+    add,
+    mult
+  };
+
+  void scale_selected_models(float v, m2_scaling_type type);
+  void move_selected_models(float dx, float dy, float dz);
+  void move_selected_models(math::vector_3d const& delta)
+  {
+    move_selected_models(delta.x, delta.y, delta.z);
+  }
+  void set_selected_models_pos(float x, float y, float z, bool change_height = true)
+  {
+    return set_selected_models_pos({x,y,z}, change_height);
+  }
+  void set_selected_models_pos(math::vector_3d const& pos, bool change_height = true);
+  void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
+  void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
 
@@ -176,7 +209,7 @@ public:
     void for_all_chunks_on_tile (math::vector_3d const& pos, Fun&&);
 
   template<typename Fun>
-    auto for_chunk_at(math::vector_3d const& pos, Fun&& fun) -> decltype (fun (nullptr));
+    void for_chunk_at(math::vector_3d const& pos, Fun&& fun);
   template<typename Fun>
     auto for_maybe_chunk_at (math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>;
 
@@ -185,18 +218,21 @@ public:
 
   void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
   void changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
+  math::vector_3d pickShaderColor(math::vector_3d const& pos);
   void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture);
   bool sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
+  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
 
   void eraseTextures(math::vector_3d const& pos);
-  void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
+  void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
   void setBaseTexture(math::vector_3d const& pos);
+  void clear_shadows(math::vector_3d const& pos);
   void clearTextures(math::vector_3d const& pos);
   void swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex);
   void removeTexDuplicateOnADT(math::vector_3d const& pos);
-  void change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference tex, std::size_t flag, bool add);
+  void change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
   void setHole(math::vector_3d const& pos, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);
@@ -211,11 +247,13 @@ public:
               , math::vector_3d rotation
               );
 
+  void remove_models_if_needed(std::vector<uint32_t> const& uids);
+
   void reload_tile(tile_index const& tile);
 
-  void updateTilesEntry(selection_type const& entry);
-  void updateTilesWMO(WMOInstance* wmo);
-  void updateTilesModel(ModelInstance* m2);
+  void updateTilesEntry(selection_type const& entry, model_update type);
+  void updateTilesWMO(WMOInstance* wmo, model_update type);
+  void updateTilesModel(ModelInstance* m2, model_update type);
 
   void saveMap (int width, int height);
 
@@ -242,7 +280,6 @@ public:
                   , bool override_liquid_id
                   , float opacity_factor
                   );
-  bool canWaterSave(const tile_index& tile);
   void CropWaterADT(const tile_index& pos);
   void setWaterType(const tile_index& pos, int type, int layer);
   int getWaterType(const tile_index& tile, int layer);
@@ -271,8 +308,11 @@ public:
 
   void recalc_norms (MapChunk*) const;
 
+  bool need_model_updates = false;
+
 private:
-  void getSelection();
+  void warning_if_uid_in_use(uint32_t uid);
+  void update_models_by_filename();
 
   std::set<MapChunk*>& vertexBorderChunks();
 
@@ -287,4 +327,23 @@ private:
   std::unique_ptr<noggit::map_horizon::render> _horizon_render;
 
   bool _display_initialized = false;
+
+  QSettings* _settings;
+
+  float _view_distance;
+
+  std::unique_ptr<opengl::program> _mcnk_program;;
+  std::unique_ptr<opengl::program> _mfbo_program;
+  std::unique_ptr<opengl::program> _m2_program;
+  std::unique_ptr<opengl::program> _m2_instanced_program;
+  std::unique_ptr<opengl::program> _m2_particles_program;
+  std::unique_ptr<opengl::program> _m2_ribbons_program;
+  std::unique_ptr<opengl::program> _m2_box_program;
+  std::unique_ptr<opengl::program> _wmo_program;
+
+  noggit::cursor_render _cursor_render;
+  opengl::primitives::sphere _sphere_render;
+  opengl::primitives::square _square_render;
+
+  boost::optional<liquid_render> _liquid_render = boost::none;
 };

@@ -4,7 +4,6 @@
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
 #include <noggit/World.h>
-#include <noggit/Settings.h>
 #include <noggit/ui/About.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/SettingsPanel.h>
@@ -24,6 +23,8 @@
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
+
+  #include <QtCore/QSettings>
 #endif
 
 #include "revision.h"
@@ -53,7 +54,6 @@ namespace noggit
                        , []
                          {
                            auto window (new settings());
-                           window->readInValues();
                            window->show();
                          }
                        );
@@ -67,25 +67,82 @@ namespace noggit
                          }
                        );
 
-      auto mapmenu_action (file_menu->addAction ("Create Map Editor"));
+      auto mapmenu_action (file_menu->addAction ("Exit"));
       QObject::connect ( mapmenu_action, &QAction::triggered
                        , [this]
                          {
-                           build_menu();
+                            close();
                          }
                        );
 
       build_menu();
     }
 
+    void main_window::check_uid_then_enter_map
+                        ( math::vector_3d pos
+                        , math::degrees camera_pitch
+                        , math::degrees camera_yaw
+                        , bool from_bookmark
+                        )
+    {
+      QSettings settings;
+#ifdef USE_MYSQL_UID_STORAGE
+      bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
+
+      if ((use_myqsl && mysql::hasMaxUIDStoredDB(_world->getMapID()))
+        || uid_storage::hasMaxUIDStored(_world->getMapID())
+         )
+      {
+        _world->mapIndex.loadMaxUID();
+        enterMapAt(pos, camera_pitch, camera_yaw, from_bookmark);
+      }
+#else
+      if (uid_storage::hasMaxUIDStored(_world->getMapID()))
+      {
+        if (settings.value("uid_startup_check", true).toBool())
+        {
+          enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid, from_bookmark);
+        }
+        else
+        {
+          _world->mapIndex.loadMaxUID();
+          enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::none, from_bookmark);
+        }
+      }
+#endif
+      else
+      {
+        auto uidFixWindow(new uid_fix_window(pos, camera_pitch, camera_yaw));
+        uidFixWindow->show();
+
+        connect( uidFixWindow
+               , &noggit::ui::uid_fix_window::fix_uid
+               , [this, from_bookmark] 
+                   ( math::vector_3d pos
+                   , math::degrees camera_pitch
+                   , math::degrees camera_yaw
+                   , uid_fix_mode uid_fix
+                   )
+                 {
+                   enterMapAt(pos, camera_pitch, camera_yaw, uid_fix, from_bookmark);
+                 }
+               );
+      }
+    }
+
     void main_window::enterMapAt ( math::vector_3d pos
                                  , math::degrees camera_pitch
                                  , math::degrees camera_yaw
                                  , uid_fix_mode uid_fix
+                                 , bool from_bookmark
                                  )
     {
-      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix));
+      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
+      connect(mapview, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
+
       setCentralWidget (mapview);
+
+      map_loaded = true;
     }
 
     void main_window::loadMap(int mapID)
@@ -139,12 +196,11 @@ namespace noggit
         e.mapID = i->getInt(MapDB::MapID);
         e.name = i->getLocalizedString(MapDB::Name);
         e.areaType = i->getUInt(MapDB::AreaType);
-        if (e.areaType == 3) e.name = i->getString(MapDB::InternalName);
 
         if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
           continue;
 
-        auto item (new QListWidgetItem (QString::fromUtf8 (e.name.c_str()), type_to_table[e.areaType]));
+        auto item (new QListWidgetItem (QString::number(e.mapID) + " - " + QString::fromUtf8 (e.name.c_str()), type_to_table[e.areaType]));
         item->setData (Qt::UserRole, QVariant (e.mapID));
       }
 
@@ -177,10 +233,11 @@ namespace noggit
                              if (it->getInt(MapDB::MapID) == entry.mapID)
                              {
                                _world = std::make_unique<World> (it->getString(MapDB::InternalName), entry.mapID);
-                               enterMapAt ( entry.pos
-                                          , math::degrees (entry.camera_pitch)
-                                          , math::degrees (entry.camera_yaw)
-                                          );
+                               check_uid_then_enter_map ( entry.pos
+                                                        , math::degrees (entry.camera_pitch)
+                                                        , math::degrees (entry.camera_yaw)
+                                                        , true
+                                                        );
 
                                return;
                              }
@@ -196,38 +253,7 @@ namespace noggit
         ( _minimap,  &minimap_widget::map_clicked
         , [this] (::math::vector_3d const& pos)
           {
-#ifdef USE_MYSQL_UID_STORAGE
-            if ( Settings::getInstance()->mysql
-               && mysql::hasMaxUIDStoredDB (*Settings::getInstance()->mysql, _world->getMapID())
-               )
-            {
-              _world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
-            }
-            else
-#endif
-            if (uid_storage::getInstance()->hasMaxUIDStored (_world->getMapID()))
-            {
-              _world->mapIndex.loadMaxUID();
-              enterMapAt (pos, math::degrees (30.f), math::degrees (90.f));
-            }
-            else
-            {
-              auto uidFixWindow (new uid_fix_window (pos, math::degrees (30.f), math::degrees (90.f)));
-              uidFixWindow->show();
-
-              connect ( uidFixWindow
-                      , &noggit::ui::uid_fix_window::fix_uid
-                      , [this] ( math::vector_3d pos
-                               , math::degrees camera_pitch
-                               , math::degrees camera_yaw
-                               , uid_fix_mode uid_fix
-                               )
-                        {
-                          enterMapAt(pos, camera_pitch, camera_yaw, uid_fix);
-                        }
-                      );
-            }
+            check_uid_then_enter_map(pos, math::degrees(30.f), math::degrees(90.f));
           }
         );
 
@@ -248,13 +274,15 @@ namespace noggit
       }
 
       std::string basename;
-      int areaID;
+      std::size_t areaID;
       BookmarkEntry b;
       int mapID = -1;
       while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.camera_yaw >> b.camera_pitch >> areaID)
       {
         if (mapID == -1)
+        {
           continue;
+        }
 
         std::stringstream temp;
         temp << MapDB::getMapName(mapID) << ": " << AreaDB::getAreaName(areaID);
@@ -267,30 +295,73 @@ namespace noggit
 
     void main_window::closeEvent (QCloseEvent* event)
     {
-      if (centralWidget() != _null_widget)
+      if (map_loaded)
       {
         event->ignore();
-        prompt_exit();
+        prompt_exit(event);
+      }
+      else
+      {
+        event->accept();
       }
     }
 
-    void main_window::prompt_exit()
+    void main_window::prompt_exit(QCloseEvent* event)
     {
+      emit exit_prompt_opened();
+
       QMessageBox prompt;
       prompt.setIcon (QMessageBox::Warning);
-      prompt.setWindowTitle ("Exit current editor?");
-      prompt.setText ("Exit current editor?");
+      prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
+      prompt.setText ("Exit?");
       prompt.setInformativeText ("Any unsaved changes will be lost.");
-      prompt.addButton ("Exit", QMessageBox::AcceptRole);
-      prompt.setDefaultButton (prompt.addButton ("Continue Editing", QMessageBox::RejectRole));
+      prompt.addButton ("Exit", QMessageBox::DestructiveRole);
+      prompt.addButton ("Return to menu", QMessageBox::AcceptRole);
+      prompt.setDefaultButton (prompt.addButton ("Cancel", QMessageBox::RejectRole));
       prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
       prompt.exec();
 
-      if (prompt.buttonRole (prompt.clickedButton()) == QMessageBox::AcceptRole)
+      switch (prompt.buttonRole(prompt.clickedButton()))
       {
-        setCentralWidget (_null_widget = new QWidget (this));
+        case QMessageBox::AcceptRole:
+        {
+          // update bookmark list
+          createBookmarkList();
+          map_loaded = false;
+
+          build_menu();
+          break;
+        }
+
+        case QMessageBox::DestructiveRole:
+        {
+          build_menu();
+          event->accept();
+          break;
+        }
+
+        default:
+        {
+          event->ignore();
+          break;
+        }
+
       }
+
+    }
+
+    void main_window::prompt_uid_fix_failure()
+    {
+      QMessageBox::critical
+        (nullptr
+          , "UID fix failed"
+          , "The UID fix couldn't be done because some models were missing or fucked up.\n"
+            "The models are listed in the log file."
+          , QMessageBox::Ok
+        );
+
+      //!\ todo: rebuild/show the map selection menu
     }
   }
 }

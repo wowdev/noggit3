@@ -4,6 +4,7 @@
 
 #include <noggit/MapView.h>
 #include <noggit/TextureManager.h>
+#include <noggit/ui/ObjectEditor.h>
 
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
@@ -15,9 +16,10 @@ namespace noggit
 {
   namespace ui
   {
-    helper_models::helper_models(MapView *mapview)
-      : QWidget (nullptr)
+    helper_models::helper_models(object_editor* object_editor)
+      : QWidget (object_editor, Qt::Tool | Qt::WindowStaysOnTopHint)
     {
+      setWindowIcon (QIcon (":/icon"));
       auto layout (new QVBoxLayout (this));
       auto top_layout (new QHBoxLayout (nullptr));
       layout->addLayout (top_layout);
@@ -37,7 +39,7 @@ namespace noggit
             connect ( button, &QPushButton::clicked
                     , [=]
                       {
-                        mapview->insert_object_at_selection_position (path);
+                        object_editor->copy(path);
                       }
                     );
 

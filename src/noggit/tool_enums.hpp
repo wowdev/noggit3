@@ -69,3 +69,27 @@ enum water_opacity
   ocean_opacity,
   custom_opacity,
 };
+
+enum class cursor_mode : unsigned int
+{
+  none,
+  disk,
+  sphere,
+  triangle,
+  terrain,
+  mode_count
+};
+
+enum display_mode
+{
+  in_2D,
+  in_3D
+};
+
+
+enum CurrentTextureDropBehavior
+{
+  none,
+  current_texture,
+  texture_swapper
+};

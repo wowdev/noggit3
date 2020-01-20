@@ -24,7 +24,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      terrain_tool();
+      terrain_tool(QWidget* parent = nullptr);
 
       void changeTerrain (World*, math::vector_3d const& pos, float dt);
 
@@ -36,6 +36,7 @@ namespace noggit
       void setRadius (float radius);
       void setOrientation (float orientation);
       void setAngle (float angle);
+      void setSpeed (float speed);
 
       // vertex edit only functions
       void moveVertices (World*, float dt);
@@ -49,6 +50,8 @@ namespace noggit
       float innerRadius() const { return _inner_radius;  }
 
       void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
+
+      QSize sizeHint() const override;
 
       eTerrainType _edit_type;
 

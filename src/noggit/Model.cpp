@@ -1,11 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/AsyncLoader.h>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
+#include <noggit/ModelInstance.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -14,66 +16,64 @@
 #include <string>
 
 Model::Model(const std::string& filename)
-  : _filename(filename)
+  : AsyncObject(filename)
   , _finished_upload(false)
 {
   memset(&header, 0, sizeof(ModelHeader));
-
-  finished = false;
-
-  //! \note hack: we currently would never load them otherwise
-  finishLoading();
 }
 
 void Model::finishLoading()
 {
-  MPQFile f(_filename);
+  MPQFile f(filename);
 
   if (f.isEof())
   {
-    LogError << "Error loading file \"" << _filename << "\". Aborting to load model." << std::endl;
+    LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
     finished = true;
     return;
   }
 
-  //LogDebug << "Loading model \"" << _filename << "\"." << std::endl;
-
   memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
+
+  // blend mode override
+  if (header.Flags & 8)
+  {
+    // go to the end of the header (where the blend override data is)    
+    uint32_t const* blend_override_info = reinterpret_cast<uint32_t const*>(f.getBuffer() + sizeof(ModelHeader));
+    uint32_t n_blend_override = *blend_override_info++;
+    uint32_t ofs_blend_override = *blend_override_info;
+
+    blend_override = M2Array<uint16_t>(f, ofs_blend_override, n_blend_override);
+  }
+
+
+  _vertex_box_points = misc::box_points ( misc::transform_model_box_coords(header.bounding_box_min)
+                                        , misc::transform_model_box_coords(header.bounding_box_max)
+                                        );
 
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
-  anim = 0;
+  _current_anim_seq = 0;
 
-  rad = header.VertexBoxRadius;
+  rad = header.bounding_box_radius;
 
-  header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
-  header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   if (header.nGlobalSequences)
   {
-    _global_sequences.resize (header.nGlobalSequences);
-    memcpy(_global_sequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
+    _global_sequences = M2Array<int>(f, header.ofsGlobalSequences, header.nGlobalSequences);
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
   initCommon(f);
 
-  if(animated)
+  if (animated)
+  {
     initAnimated(f);
+  }
 
   f.close();
 
   finished = true;
-}
-
-Model::~Model()
-{
-  LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
-
-  _textures.clear();
-  _textureFilenames.clear();
-
-  gl.deleteBuffers (1, &_vertices_buffer);
 }
 
 
@@ -84,17 +84,24 @@ bool Model::isAnimated(const MPQFile& f)
 
   animGeometry = false;
   animBones = false;
-  mPerInstanceAnimation = false;
+  _per_instance_animation = false;
 
   ModelVertex const* verts = reinterpret_cast<ModelVertex const*>(f.getBuffer() + header.ofsVertices);
-  for (size_t i = 0; i<header.nVertices && !animGeometry; ++i) {
-    for (size_t b = 0; b<4; b++) {
-      if (verts[i].weights[b]>0) {
+  for (size_t i = 0; i<header.nVertices && !animGeometry; ++i) 
+  {
+    for (size_t b = 0; b<4; b++) 
+    {
+      if (verts[i].weights[b]>0) 
+      {
         ModelBoneDef const& bb = bo[verts[i].bones[b]];
-        if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & 8)) {
-          if (bb.flags & 8) {
+        bool billboard = (bb.flags & (0x78)); // billboard | billboard_lock_[xyz]
+
+        if ((bb.flags & 0x200) || billboard) 
+        {
+          if (billboard) 
+          {
             // if we have billboarding, the model will need per-instance animation
-            mPerInstanceAnimation = true;
+            _per_instance_animation = true;
           }
           animGeometry = true;
           break;
@@ -103,11 +110,17 @@ bool Model::isAnimated(const MPQFile& f)
     }
   }
 
-  if (animGeometry) animBones = true;
-  else {
-    for (size_t i = 0; i<header.nBones; ++i) {
+  if (animGeometry || header.nParticleEmitters || header.nRibbonEmitters || header.nLights)
+  {
+    animBones = true;
+  }
+  else
+  {
+    for (size_t i = 0; i<header.nBones; ++i)
+    {
       ModelBoneDef const& bb = bo[i];
-      if (bb.translation.type || bb.rotation.type || bb.scaling.type) {
+      if (bb.translation.type || bb.rotation.type || bb.scaling.type)
+      {
         animBones = true;
         break;
       }
@@ -116,37 +129,34 @@ bool Model::isAnimated(const MPQFile& f)
 
   animTextures = header.nTexAnims > 0;
 
-  bool animMisc = header.nCameras>0 || // why waste time, pretty much all models with cameras need animation
-    header.nLights>0 || // same here
-    header.nParticleEmitters>0 ||
-    header.nRibbonEmitters>0;
-
-  if (animMisc) animBones = true;
-
   // animated colors
-  if (header.nColors) {
+  if (header.nColors)
+  {
     ModelColorDef const* cols = reinterpret_cast<ModelColorDef const*>(f.getBuffer() + header.ofsColors);
-    for (size_t i = 0; i<header.nColors; ++i) {
-      if (cols[i].color.type != 0 || cols[i].opacity.type != 0) {
-        animMisc = true;
-        break;
+    for (size_t i = 0; i<header.nColors; ++i)
+    {
+      if (cols[i].color.type != 0 || cols[i].opacity.type != 0)
+      {
+        return true;
       }
     }
   }
 
   // animated opacity
-  if (header.nTransparency && !animMisc) {
+  if (header.nTransparency)
+  {
     ModelTransDef const* trs = reinterpret_cast<ModelTransDef const*>(f.getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i<header.nTransparency; ++i) {
-      if (trs[i].trans.type != 0) {
-        animMisc = true;
-        break;
+    for (size_t i = 0; i<header.nTransparency; ++i)
+    {
+      if (trs[i].trans.type != 0)
+      {
+        return true;
       }
     }
   }
 
   // guess not...
-  return animGeometry || animTextures || animMisc;
+  return animGeometry || animTextures || animBones;
 }
 
 
@@ -172,24 +182,17 @@ namespace
 void Model::initCommon(const MPQFile& f)
 {
   // vertices, normals, texcoords
-  ModelVertex const* vertices = reinterpret_cast<ModelVertex const*> (f.getBuffer() + header.ofsVertices);
+  _vertices = M2Array<ModelVertex>(f, header.ofsVertices, header.nVertices);
 
-  _vertices.resize (header.nVertices);
-  _vertices_parameters.resize (header.nVertices);
-
-  for (size_t i (0); i < header.nVertices; ++i)
+  for (auto& v : _vertices)
   {
-    _vertices[i].position = fixCoordSystem (vertices[i].pos);
-    _vertices[i].normal = fixCoordSystem (vertices[i].normal);
-    _vertices[i].texcoords = vertices[i].texcoords;
-
-    memcpy (_vertices_parameters[i].bones, vertices[i].bones, 4 * sizeof (uint8_t));
-    memcpy (_vertices_parameters[i].weights, vertices[i].weights, 4 * sizeof (uint8_t));
+    v.position = fixCoordSystem(v.position);
+    v.normal = fixCoordSystem(v.normal);
   }
-
+ 
   if (!animGeometry)
   {
-    _current_vertices.swap (_vertices);
+    _current_vertices.swap(_vertices);
   }
 
   // textures
@@ -201,8 +204,17 @@ void Model::initCommon(const MPQFile& f)
   {
     if (texdef[i].type == 0)
     {
+      if (texdef[i].nameLen == 0)
+      {
+        LogDebug << "Texture " << i << " has a lenght of 0 for '" << filename << std::endl;
+        continue;
+      }
+
       _specialTextures[i] = -1;
-      _textureFilenames[i] = std::string(f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen);
+      const char* blp_ptr = f.getBuffer() + texdef[i].nameOfs;
+      // some tools export the size without accounting for the \0
+      bool invalid_size = *(blp_ptr + texdef[i].nameLen-1) != '\0';
+      _textureFilenames[i] = std::string(blp_ptr, texdef[i].nameLen - (invalid_size ? 0 : 1));
     }
     else
     {
@@ -233,8 +245,10 @@ void Model::initCommon(const MPQFile& f)
       _colors.emplace_back (f, colorDefs[i], _global_sequences.data());
     }
   }
+
   // init transparency
-  int16_t const* transLookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTransparencyLookup);
+  _transparency_lookup = M2Array<int16_t>(f, header.ofsTransparencyLookup, header.nTransparencyLookup);
+
   if (header.nTransparency) {
     ModelTransDef const* trDefs = reinterpret_cast<ModelTransDef const*>(f.getBuffer() + header.ofsTransparency);
     for (size_t i = 0; i < header.nTransparency; ++i)
@@ -248,7 +262,7 @@ void Model::initCommon(const MPQFile& f)
 
   if (header.nViews > 0) {
     // indices - allocate space, too
-    std::string lodname = _filename.substr(0, _filename.length() - 3);
+    std::string lodname = filename.substr(0, filename.length() - 3);
     lodname.append("00.skin");
     MPQFile g(lodname.c_str());
     if (g.isEof()) {
@@ -256,137 +270,723 @@ void Model::initCommon(const MPQFile& f)
       g.close();
       return;
     }
+
     ModelView const* view = reinterpret_cast<ModelView const*>(g.getBuffer());
+    uint16_t const* indexLookup = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofs_index);
+    uint16_t const* triangles = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofs_triangle);
 
-    uint16_t const* indexLookup = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofsIndex);
-    uint16_t const* triangles = reinterpret_cast<uint16_t const*>(g.getBuffer() + view->ofsTris);
-
-    _indices.resize (view->nTris);
+    _indices.resize (view->n_triangle);
 
     for (size_t i (0); i < _indices.size(); ++i) {
       _indices[i] = indexLookup[triangles[i]];
     }
 
     // render ops
-    ModelGeoset const* ops = reinterpret_cast<ModelGeoset const*>(g.getBuffer() + view->ofsSub);
-    ModelTexUnit const* tex = reinterpret_cast<ModelTexUnit const*>(g.getBuffer() + view->ofsTex);
-    ModelRenderFlags const* renderFlags = reinterpret_cast<ModelRenderFlags const*>(f.getBuffer() + header.ofsTexFlags);
-    uint16_t const* texlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexLookup);
-    uint16_t const* texanimlookup = reinterpret_cast<uint16_t const*>(f.getBuffer() + header.ofsTexAnimLookup);
-    int16_t const* texunitlookup = reinterpret_cast<int16_t const*>(f.getBuffer() + header.ofsTexUnitLookup);
+    ModelGeoset const* model_geosets = reinterpret_cast<ModelGeoset const*>(g.getBuffer() + view->ofs_submesh);
+    ModelTexUnit const* texture_unit = reinterpret_cast<ModelTexUnit const*>(g.getBuffer() + view->ofs_texture_unit);
+    
+    _texture_lookup = M2Array<uint16_t>(f, header.ofsTexLookup, header.nTexLookup);
+    _texture_animation_lookups = M2Array<int16_t>(f, header.ofsTexAnimLookup, header.nTexAnimLookup);
+    _texture_unit_lookup = M2Array<int16_t>(f, header.ofsTexUnitLookup, header.nTexUnitLookup);
 
-    showGeosets.resize (view->nSub);
-    for (size_t i = 0; i<view->nSub; ++i) {
+    showGeosets.resize (view->n_submesh);
+    for (size_t i = 0; i<view->n_submesh; ++i) 
+    {
       showGeosets[i] = true;
     }
 
-    for (size_t j = 0; j<view->nTex; j++) {
-      ModelRenderPass pass;
+    _render_flags = M2Array<ModelRenderFlags>(f, header.ofsRenderFlags, header.nRenderFlags);
 
-      pass.usetex2 = false;
-      pass.useenvmap = false;
-      pass.cull = false;
-      pass.trans = false;
-      pass.unlit = false;
-      pass.nozwrite = false;
-      pass.billboard = false;
+    for (size_t j = 0; j<view->n_texture_unit; j++) 
+    {
+      size_t geoset = texture_unit[j].submesh;
 
-      size_t geoset = tex[j].op;
+      ModelRenderPass pass(texture_unit[j], this);
+      pass.ordering_thingy = model_geosets[geoset].BoundingBox[0].x;
 
-      pass.geoset = geoset;
+      pass.index_start = model_geosets[geoset].istart;
+      pass.index_count = model_geosets[geoset].icount;
+      pass.vertex_start = model_geosets[geoset].vstart;
+      pass.vertex_end = pass.vertex_start + model_geosets[geoset].vcount;   
 
-      pass.indexStart = ops[geoset].istart;
-      pass.indexCount = ops[geoset].icount;
-      pass.vertexStart = ops[geoset].vstart;
-      pass.vertexEnd = pass.vertexStart + ops[geoset].vcount;
-
-      pass.order = tex[j].shading;
-
-      //TextureID texid = textures[texlookup[tex[j].textureid]];
-      //pass.texture = texid;
-      pass.tex = texlookup[tex[j].textureid];
-
-      //! \todo figure out these flags properly -_-
-      ModelRenderFlags const& rf = renderFlags[tex[j].flagsIndex];
-
-
-      pass.blendmode = rf.blend;
-      pass.color = tex[j].colorIndex;
-      pass.opacity = transLookup[tex[j].transid];
-
-      enum RenderFlags
-      {
-        RENDERFLAGS_UNLIT = 1,
-        RENDERFLAGS_UNsGED = 2,
-        RENDERFLAGS_TWOSIDED = 4,
-        RENDERFLAGS_BILLBOARD = 8,
-        RENDERFLAGS_ZBUFFERED = 16
-      };
-
-      pass.unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
-      pass.cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0 && rf.blend == 0;
-
-      pass.billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
-
-      pass.useenvmap = (texunitlookup[tex[j].texunit] == -1) && pass.billboard && rf.blend>2;
-      pass.nozwrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
-
-      //! \todo Work out the correct way to get the true/false of transparency
-      pass.trans = (pass.blendmode>0) && (pass.opacity>0);  // Transparency - not the correct way to get transparency
-
-      pass.p = ops[geoset].BoundingBox[0].x;
-
-      // Texture flags
-      enum TextureFlags {
-        TEXTURE_WRAPX = 1,
-        TEXTURE_WRAPY
-      };
-
-      pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
-      pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
-
-      static const int TEXTUREUNIT_STATIC = 16;
-
-      if (animTextures) {
-        if (tex[j].flags & TEXTUREUNIT_STATIC) {
-          pass.texanim = -1; // no texture animation
-        }
-        else {
-          pass.texanim = texanimlookup[tex[j].texanimid];
-        }
-      }
-      else {
-        pass.texanim = -1; // no texture animation
-      }
-
-      _passes.push_back(pass);
+      _render_passes.push_back(pass);
     }
+
     g.close();
+
+    fix_shader_id_blend_override();
+    fix_shader_id_layer();
+    compute_pixel_shader_ids();
+
+    for (auto& pass : _render_passes)
+    {
+      pass.init_uv_types(this);
+    }
+    
     // transparent parts come later
-    std::sort(_passes.begin(), _passes.end());
+    std::sort(_render_passes.begin(), _render_passes.end());
+
+    // add fake geometry for selection
+    if (_render_passes.empty())
+    {
+      _fake_geometry.emplace(this);
+    }
+  }  
+}
+
+void Model::fix_shader_id_blend_override()
+{
+  for (auto& pass : _render_passes)
+  {
+    if (pass.shader_id & 0x8000)
+    {
+      continue; 
+    }
+
+    int shader = 0;
+    bool blend_mode_override = (header.Flags & 8);
+
+    if (!blend_mode_override)
+    {
+      uint16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];     
+
+      if (_render_flags[pass.renderflag_index].blend)
+      {
+        shader = 1;
+
+        if (texture_unit_lookup == 0xFFFF)
+        {
+          shader |= 0x8;
+        }
+      }      
+
+      shader <<= 4;
+
+      if (texture_unit_lookup == 1)
+      {
+        shader |= 0x4000;
+      }
+    }
+    else
+    {
+      uint16_t runtime_shader_val[2] = { 0, 0 };
+
+      for (int i = 0; i < pass.texture_count; ++i)
+      {
+        uint16_t override_blend = blend_override[pass.shader_id + i];
+        uint16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index + i];
+
+        if (i == 0 && _render_flags[pass.renderflag_index].blend == 0)
+        {
+          override_blend = 0;
+        }
+
+        runtime_shader_val[i] = override_blend;
+
+        if (texture_unit_lookup == 0xFFFF)
+        {
+          runtime_shader_val[i] |= 0x8;
+        }
+
+        if (texture_unit_lookup == 1 && i + 1 == pass.texture_count)
+        {
+          shader |= 0x4000;
+        }        
+      }
+
+      shader |= (runtime_shader_val[1] & 0xFFFF) | ((runtime_shader_val[0] << 4) & 0xFFFF);
+    }
+
+    pass.shader_id = shader;
+  }
+}
+
+void Model::fix_shader_id_layer()
+{
+  int non_layered_count = 0;
+
+  for (auto const& pass : _render_passes)
+  {
+    if (pass.material_layer <= 0)
+    {
+      non_layered_count++;
+    }
   }
 
-  // zomg done
+  if (non_layered_count < _render_passes.size())
+  {
+    std::vector<ModelRenderPass> passes;
+
+    ModelRenderPass* first_pass = nullptr;
+    bool need_reducing = false;
+    uint16_t previous_render_flag = -1, some_flags = 0;
+
+    for (auto& pass : _render_passes)
+    {
+      if (pass.renderflag_index == previous_render_flag)
+      {
+        need_reducing = true;
+        continue;
+      }
+
+      previous_render_flag = pass.renderflag_index;
+
+      uint8_t lower_bits = pass.shader_id & 0x7;
+
+      if (pass.material_layer == 0)
+      {
+        if (pass.texture_count >= 1 && _render_flags[pass.renderflag_index].blend == 0)
+        {
+          pass.shader_id &= 0xFF8F;
+        }
+
+        first_pass = &pass;
+      }
+
+      bool xor_unlit = ((_render_flags[pass.renderflag_index].flags.unlit ^ _render_flags[first_pass->renderflag_index].flags.unlit) & 1) == 0;
+
+      if ((some_flags & 0xFF) == 1)
+      {
+        if ((_render_flags[pass.renderflag_index].blend == 1 || _render_flags[pass.renderflag_index].blend == 2)
+          && pass.texture_count == 1
+          && xor_unlit
+          && pass.texture_combo_index == first_pass->texture_combo_index
+          )
+        {
+          if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+          {
+            pass.shader_id = 0x8000;
+            first_pass->shader_id = 0x8001;
+
+            some_flags = (some_flags & 0xFF00) | 3;
+
+            // current pass removed (not needed)
+            continue;
+          }
+        }
+
+        some_flags = (some_flags & 0xFF00);
+      }
+
+      int16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];
+
+      if ((some_flags & 0xFF) < 2)
+      {
+        if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 2) && ((lower_bits == 4) || (lower_bits == 6)))
+        {
+          if (texture_unit_lookup == 0 && (_texture_unit_lookup[pass.texture_coord_combo_index + 1] == -1))
+          {
+            some_flags = (some_flags & 0xFF00) | 1;
+          }
+        }
+      }
+
+      if ((some_flags >> 8) != 0)
+      {
+        if ((some_flags >> 8) == 1)
+        {
+          if (((_render_flags[pass.renderflag_index].blend != 4) && (_render_flags[pass.renderflag_index].blend != 6)) || (pass.texture_count != 1) || (texture_unit_lookup >= 0))
+          {
+            some_flags &= 0xFF00;
+          }
+          else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+          {
+            pass.shader_id = 0x8000;
+            first_pass->shader_id = _render_flags[pass.renderflag_index].blend != 4 ? 0xE : 0x8002;
+
+            some_flags = (some_flags & 0xFF) | (2 << 8);
+
+            first_pass->texture_count = 2;
+
+            first_pass->textures[1] = pass.texture_combo_index;
+            first_pass->uv_animations[1] = pass.animation_combo_index;
+
+            // current pass removed (merged with the previous one)
+            continue;
+          }
+        }
+        else
+        {
+          if ((some_flags >> 8) != 2)
+          {
+            continue;
+          }
+
+          if ( ((_render_flags[pass.renderflag_index].blend != 2) && (_render_flags[pass.renderflag_index].blend != 1))
+            || (pass.texture_count != 1)
+            || xor_unlit
+            || ((pass.texture_combo_index & 0xff) != (first_pass->texture_combo_index & 0xff))
+            )
+          {
+            some_flags &= 0xFF00;
+          }
+          else  if (_transparency_lookup[pass.transparency_combo_index] == _transparency_lookup[first_pass->transparency_combo_index])
+          {
+            // current pass ignored/removed
+            pass.shader_id = 0x8000;
+            first_pass->shader_id = ((first_pass->shader_id == 0x8002 ? 2 : 0) - 0x7FFF) & 0xFFFF;
+            some_flags = (some_flags & 0xFF) | (3 << 8);
+            continue;
+          }
+        }
+        some_flags = (some_flags & 0xFF);
+      }
+
+      if ((_render_flags[pass.renderflag_index].blend == 0) && (pass.texture_count == 1) && (texture_unit_lookup == 0))
+      {
+        some_flags = (some_flags & 0xFF) | (1 << 8);
+      }
+
+      // setup texture and anim lookup indices
+      pass.textures[0] = pass.texture_combo_index;
+      pass.textures[1] = pass.texture_count > 1 ? pass.texture_combo_index + 1 : 0;
+      pass.uv_animations[0] = pass.animation_combo_index;
+      pass.uv_animations[1] = pass.texture_count > 1 ? pass.animation_combo_index + 1 : 0;
+
+      passes.push_back(pass);
+    }
+
+    if (need_reducing)
+    {
+      previous_render_flag = -1;
+      for (int i = 0; i < passes.size(); ++i)
+      {
+        auto& pass = _render_passes[i];
+        uint16_t renderflag_index = pass.renderflag_index;
+
+        if (renderflag_index == previous_render_flag)
+        {
+          pass.shader_id = _render_passes[i - 1].shader_id;
+          pass.texture_count = _render_passes[i - 1].texture_count;
+          pass.texture_combo_index = _render_passes[i - 1].texture_combo_index;
+          pass.texture_coord_combo_index = _render_passes[i - 1].texture_coord_combo_index;
+        }
+        else
+        {
+          previous_render_flag = renderflag_index;
+        }
+      }
+    }
+
+    _render_passes = passes;
+  }
+  // no layering, just setting some infos
+  else
+  {
+    for (auto& pass : _render_passes)
+    {
+      pass.textures[0] = pass.texture_combo_index;
+      pass.textures[1] = pass.texture_count > 1 ? pass.texture_combo_index + 1 : 0;
+      pass.uv_animations[0] = pass.animation_combo_index;
+      pass.uv_animations[1] = pass.texture_count > 1 ? pass.animation_combo_index + 1 : 0;
+    }
+  }
+}
+
+
+ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
+  : ModelTexUnit(tex_unit)
+  , blend_mode(m->_render_flags[renderflag_index].blend)
+{
+}
+
+bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m)
+{
+  if (!m->showGeosets[submesh] || !pixel_shader)
+  {
+    return false;
+  }
+
+  // COLOUR
+  // Get the colour and transparency and check that we should even render
+  math::vector_4d mesh_color = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans); // ??
+  math::vector_4d emissive_color = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
+
+  auto const& renderflag(m->_render_flags[renderflag_index]);
+
+  // emissive colors
+  if (color_index != -1 && m->_colors[color_index].color.uses(0))
+  {
+    ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->_anim_time, m->_global_animtime));
+    if (m->_colors[color_index].opacity.uses (m->_current_anim_seq))
+    {
+      mesh_color.w = m->_colors[color_index].opacity.getValue (m->_current_anim_seq, m->_anim_time, m->_global_animtime);
+    }
+
+    if (renderflag.flags.unlit)
+    {
+      mesh_color.x = c.x; mesh_color.y = c.y; mesh_color.z = c.z;
+    }
+    else
+    {
+      mesh_color.x = mesh_color.y = mesh_color.z = 0;
+    }
+
+    emissive_color = math::vector_4d(c, mesh_color.w);
+  }
+
+  // opacity
+  if (transparency_combo_index != 0xFFFF)
+  {
+    auto& transparency (m->_transparency[m->_transparency_lookup[transparency_combo_index]].trans);
+    if (transparency.uses (0))
+    {
+      mesh_color.w = mesh_color.w * transparency.getValue(0, m->_anim_time, m->_global_animtime);
+    }
+  }
+
+  // exit and return false before affecting the opengl render state
+  if (!((mesh_color.w > 0) && (color_index == -1 || emissive_color.w > 0)))
+  {
+    return false;
+  }
+  
+  switch (static_cast<M2Blend>(renderflag.blend))
+  {
+  default:
+  case M2Blend::Opaque:
+    gl.disable(GL_BLEND);
+    m2_shader.uniform("alpha_test", -1.f);    
+    m2_shader.uniform("fog_mode", 1);
+    break;
+  case M2Blend::Alpha_Key:
+    gl.disable(GL_BLEND);
+    m2_shader.uniform("alpha_test", (224.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 1);
+    break;
+  case M2Blend::Alpha:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 1);
+    break;
+  case M2Blend::No_Add_Alpha:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_ONE, GL_ONE);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 2); // Warning: wiki is unsure on that
+    break;
+  case M2Blend::Add:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 2);
+    break;
+  case M2Blend::Mod:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_DST_COLOR, GL_ZERO);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 3);
+    break;
+  case M2Blend::Mod2x:
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
+    m2_shader.uniform("fog_mode", 4);
+    break;
+  }
+
+  if (renderflag.flags.two_sided)
+  {
+    gl.disable(GL_CULL_FACE);
+  }
+  else
+  {
+    gl.enable(GL_CULL_FACE);
+  }
+
+  if (renderflag.flags.z_buffered)
+  {
+    gl.depthMask(GL_FALSE);
+  }
+  else
+  {
+    gl.depthMask(GL_TRUE);
+  }
+
+  m2_shader.uniform("unfogged", (int)renderflag.flags.unfogged);
+  m2_shader.uniform("unlit", (int)renderflag.flags.unlit);
+
+  if (texture_count > 1)
+  {
+    bind_texture(1, m);
+  }
+
+  bind_texture(0, m);
+
+  GLint tu1 = static_cast<GLint>(tu_lookups[0]), tu2 = static_cast<GLint>(tu_lookups[1]);
+
+  m2_shader.uniform("tex_unit_lookup_1", tu1);
+  m2_shader.uniform("tex_unit_lookup_2", tu2);
+
+  int16_t tex_anim_lookup = m->_texture_animation_lookups[uv_animations[0]];
+  math::matrix_4x4 unit(math::matrix_4x4::unit);
+
+  if (tex_anim_lookup != -1)
+  {
+    m2_shader.uniform("tex_matrix_1", m->_texture_animations[tex_anim_lookup].mat);
+    if (texture_count > 1)
+    {
+      tex_anim_lookup = m->_texture_animation_lookups[uv_animations[1]];
+      if (tex_anim_lookup != -1)
+      {
+        m2_shader.uniform("tex_matrix_2", m->_texture_animations[tex_anim_lookup].mat);
+    }
+    else
+    {
+        m2_shader.uniform("tex_matrix_2", unit);
+    }
+  }
+  }
+  else
+  {
+    m2_shader.uniform("tex_matrix_1", unit);
+    m2_shader.uniform("tex_matrix_2", unit);
+  }
+  
+
+  m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader.get()));
+  m2_shader.uniform("mesh_color", mesh_color);
+
+  return true;
+}
+
+void ModelRenderPass::after_draw()
+{
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void ModelRenderPass::bind_texture(size_t index, Model* m)
+{
+  opengl::texture::set_active_texture(index);
+
+  uint16_t tex = m->_texture_lookup[textures[index]];
+  
+  if (m->_specialTextures[tex] == -1)
+  {
+    m->_textures[tex]->bind();
+  }
+  else
+  {
+    m->_replaceTextures.at (m->_specialTextures[tex])->bind();
+  }    
+}
+
+void ModelRenderPass::init_uv_types(Model* m)
+{
+  tu_lookups[0] = texture_unit_lookup::none;
+  tu_lookups[1] = texture_unit_lookup::none;
+
+  if (m->_texture_unit_lookup.size() < texture_coord_combo_index + texture_count)
+  {
+    throw std::out_of_range("model: texture_coord_combo_index out of range " + m->filename);
+  }
+
+  for (int i = 0; i < texture_count; ++i)
+  {
+    switch (m->_texture_unit_lookup[texture_coord_combo_index + i])
+    {
+      case (int16_t)(-1): tu_lookups[i] = texture_unit_lookup::environment; break;
+      case 0: tu_lookups[i] = texture_unit_lookup::t1; break;
+      case 1: tu_lookups[i] = texture_unit_lookup::t2; break;
+    }
+  }
+}
+
+FakeGeometry::FakeGeometry(Model* m)
+{
+  math::vector_3d min = m->header.bounding_box_min, max = m->header.bounding_box_max;
+
+  vertices.emplace_back(min.x, max.y, min.z);
+  vertices.emplace_back(min.x, max.y, max.z);
+  vertices.emplace_back(max.x, max.y, max.z);
+  vertices.emplace_back(max.x, max.y, min.z);
+
+  vertices.emplace_back(min.x, min.y, min.z);
+  vertices.emplace_back(min.x, min.y, max.z);
+  vertices.emplace_back(max.x, min.y, max.z);
+  vertices.emplace_back(max.x, min.y, min.z);
+
+  indices =
+  {
+    0,1,2,  2,3,0,
+    0,4,5,  5,1,0,
+    0,3,7,  7,4,0,
+    1,5,6,  6,2,1,
+    2,6,7,  7,3,2,
+    5,6,7,  7,4,5
+  }; 
+}
+
+namespace
+{
+
+// https://wowdev.wiki/M2/.skin/WotLK_shader_selection
+boost::optional<ModelPixelShader> GetPixelShader(uint16_t texture_count, uint16_t shader_id)
+{
+  uint16_t texture1_fragment_mode = (shader_id >> 4) & 7;
+  uint16_t texture2_fragment_mode = shader_id & 7;
+  // uint16_t texture1_env_map = (shader_id >> 4) & 8;
+  // uint16_t texture2_env_map = shader_id & 8;
+
+  boost::optional<ModelPixelShader> pixel_shader;
+
+  if (texture_count == 1)
+  {
+    switch (texture1_fragment_mode)
+    {
+    case 0:
+      pixel_shader = ModelPixelShader::Combiners_Opaque;
+      break;
+    case 2:
+      pixel_shader = ModelPixelShader::Combiners_Decal;
+      break;
+    case 3:
+      pixel_shader = ModelPixelShader::Combiners_Add;
+      break;
+    case 4:
+      pixel_shader = ModelPixelShader::Combiners_Mod2x;
+      break;
+    case 5:
+      pixel_shader = ModelPixelShader::Combiners_Fade;
+      break;
+    default:
+      pixel_shader = ModelPixelShader::Combiners_Mod;
+      break;
+    }
+  }
+  else
+  {
+    if (!texture1_fragment_mode)
+    {
+      switch (texture2_fragment_mode)
+      {
+      case 0:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Opaque;
+        break;
+      case 3:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Add;
+        break;
+      case 4:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2x;
+        break;
+      case 6:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA;
+        break;
+      case 7:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_AddNA;
+        break;
+      default:
+        pixel_shader = ModelPixelShader::Combiners_Opaque_Mod;
+        break;
+      }
+    }
+    else if (texture1_fragment_mode == 1)
+    {
+      switch (texture2_fragment_mode)
+      {
+      case 0:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Opaque;
+        break;
+      case 3:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Add;
+        break;
+      case 4:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
+        break;
+      case 6:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Mod2xNA;
+        break;
+      case 7:
+        pixel_shader = ModelPixelShader::Combiners_Mod_AddNA;
+        break;
+      default:
+        pixel_shader = ModelPixelShader::Combiners_Mod_Mod;
+        break;
+      }
+    }
+    else if (texture1_fragment_mode == 3)
+    {
+      if (texture2_fragment_mode == 1)
+      {
+        pixel_shader = ModelPixelShader::Combiners_Add_Mod;
+      }
+    }
+    else if (texture1_fragment_mode == 4 && texture2_fragment_mode == 4)
+    {
+      pixel_shader = ModelPixelShader::Combiners_Mod2x_Mod2x;
+    }
+    else if (texture2_fragment_mode == 1)
+    {
+      pixel_shader = ModelPixelShader::Combiners_Mod_Mod2x;
+    }
+  }
+ 
+
+  return pixel_shader;
+}
+
+boost::optional<ModelPixelShader> M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
+{
+  boost::optional<ModelPixelShader> pixel_shader;
+
+  if (!(shader_id & 0x8000))
+  {
+    pixel_shader = GetPixelShader(texture_count, shader_id);
+
+    if (!pixel_shader)
+    {
+      pixel_shader = GetPixelShader(texture_count, 0x11);
+    }
+  }
+  else
+  {
+    switch (shader_id & 0x7FFF)
+    {
+    case 1:
+      pixel_shader = ModelPixelShader::Combiners_Opaque_Mod2xNA_Alpha;
+      break;
+    case 2:
+      pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha;
+      break;
+    case 3:
+      pixel_shader = ModelPixelShader::Combiners_Opaque_AddAlpha_Alpha;
+      break;
+    }  
+  }
+
+  return pixel_shader;
+}
+}
+
+void Model::compute_pixel_shader_ids()
+{
+  for (auto& pass : _render_passes)
+  {
+    pass.pixel_shader = M2GetPixelShaderID(pass.texture_count, pass.shader_id);
+  }
 }
 
 void Model::initAnimated(const MPQFile& f)
 {
   std::vector<std::unique_ptr<MPQFile>> animation_files;
 
-  if (header.nAnimations > 0) {
-    _animations.resize (header.nAnimations);
-    memcpy(_animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
-    for (size_t i = 0; i < header.nAnimations; ++i)
-    {
-      //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
-      _animations[i].length = std::max(_animations[i].length, 1U);
-    }
+  if (header.nAnimations > 0) 
+  {
+    std::vector<ModelAnimation> animations(header.nAnimations);
 
-    for (size_t i = 0; i < header.nAnimations; ++i)
+    memcpy(animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+
+    for (auto& anim : animations)
     {
-      std::string lodname = _filename.substr(0, _filename.length() - 3);
+      anim.length = std::max(anim.length, 1U);
+
+      _animation_length[anim.animID] += anim.length;
+      _animations_seq_per_id[anim.animID][anim.subAnimID] = anim;
+
+      std::string lodname = filename.substr(0, filename.length() - 3);
       std::stringstream tempname;
-      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID << ".anim";
+      tempname << lodname << anim.animID << "-" << anim.subAnimID << ".anim";
       if (MPQFile::exists(tempname.str()))
       {
         animation_files.push_back(std::make_unique<MPQFile>(tempname.str()));
@@ -394,29 +994,42 @@ void Model::initAnimated(const MPQFile& f)
     }
   }
 
-  if (animBones) {
-    // init bones...
+  if (animBones)
+  {
     ModelBoneDef const* mb = reinterpret_cast<ModelBoneDef const*>(f.getBuffer() + header.ofsBones);
-    for (size_t i = 0; i<header.nBones; ++i) {
+    for (size_t i = 0; i<header.nBones; ++i)
+    {
       bones.emplace_back(f, mb[i], _global_sequences.data(), animation_files);
     }
-  }
+  }  
 
-  if (animTextures) {
+  if (animTextures) 
+  {
     ModelTexAnimDef const* ta = reinterpret_cast<ModelTexAnimDef const*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i=0; i<header.nTexAnims; ++i) {
       _texture_animations.emplace_back (f, ta[i], _global_sequences.data());
     }
   }
 
+  
   // particle systems
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef const* pdefs = reinterpret_cast<ModelParticleEmitterDef const*>(f.getBuffer() + header.ofsParticleEmitters);
-    for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-      _particles.emplace_back (this, f, pdefs[i], _global_sequences.data());
+    for (size_t i = 0; i<header.nParticleEmitters; ++i) 
+    {
+      try
+      {
+        _particles.emplace_back (this, f, pdefs[i], _global_sequences.data());
+      }
+      catch (std::logic_error error)
+      {
+        LogError << "Loading particles for '" << filename << "' " << error.what() << std::endl;
+      }      
     }
   }
+  
 
+  
   // ribbons
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef const* rdefs = reinterpret_cast<ModelRibbonEmitterDef const*>(f.getBuffer() + header.ofsRibbonEmitters);
@@ -424,12 +1037,7 @@ void Model::initAnimated(const MPQFile& f)
       _ribbons.emplace_back(this, f, rdefs[i], _global_sequences.data());
     }
   }
-
-  // just use the first camera, meh
-  if (header.nCameras>0) {
-    ModelCameraDef const* camDefs = reinterpret_cast<ModelCameraDef const*>(f.getBuffer() + header.ofsCameras);
-    cam = ModelCamera(f, camDefs[0], _global_sequences.data());
-  }
+  
 
   // init lights
   if (header.nLights) {
@@ -441,324 +1049,135 @@ void Model::initAnimated(const MPQFile& f)
   animcalc = false;
 }
 
-void Model::calcBones(int _anim, int time, int animtime)
+void Model::calcBones( math::matrix_4x4 const& model_view
+                     , int _anim
+                     , int time
+                     , int animation_time
+                     )
 {
   for (size_t i = 0; i<header.nBones; ++i) {
     bones[i].calc = false;
   }
 
   for (size_t i = 0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones.data(), _anim, time, animtime);
+    bones[i].calcMatrix(model_view, bones.data(), _anim, time, animation_time);
   }
 }
 
-void Model::animate(int _anim, int animtime_)
+void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time)
 {
-  this->anim = _anim;
-  ModelAnimation &a = _animations[anim];
+  if (_animations_seq_per_id.empty() || _animations_seq_per_id[anim_id].empty())
+  {
+    // use "default" vertices if the animation hasn't been found
+    if (_current_vertices.empty())
+    {
+      _current_vertices = _vertices;
 
-  if (_animations.empty())
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+      gl.bufferData(GL_ARRAY_BUFFER, _current_vertices.size() * sizeof(ModelVertex), _current_vertices.data(), GL_STATIC_DRAW);
+    }
+
     return;
-
-  int t = animtime_;
-  int tmax = a.length;
-  t %= tmax;
-  animtime = t;
-  _global_animtime = animtime_;
-
-  if (animBones) {
-    calcBones(anim, t, _global_animtime);
   }
 
-  if (animGeometry) {
-    // transform vertices
-    _current_vertices.resize (header.nVertices);
+  int tmax = _animation_length[anim_id];
+  int t = anim_time % tmax;
+  int current_sub_anim = 0;
+  int time_for_anim = t;
 
-    for (size_t i (0); i < header.nVertices; ++i)
+  for (auto const& sub_animation : _animations_seq_per_id[anim_id])
+  {
+    if (sub_animation.second.length > time_for_anim)
     {
-      model_vertex const& vertex (_vertices[i]);
-      model_vertex_parameter const& param (_vertices_parameters[i]);
+      current_sub_anim = sub_animation.first;
+      break;
+    }
 
-      ::math::vector_3d v(0,0,0), n(0,0,0);
+    time_for_anim -= sub_animation.second.length;
+  }
+
+  ModelAnimation const& a = _animations_seq_per_id[anim_id][current_sub_anim];
+
+  _current_anim_seq = a.Index;//_animations_seq_lookup[anim_id][current_sub_anim];
+  _anim_time = t;
+  _global_animtime = anim_time;
+
+  if (animBones) 
+  {
+    calcBones(model_view, _current_anim_seq, t, _global_animtime);
+  }
+
+  if (animGeometry) 
+  {
+    // transform vertices
+    _current_vertices = _vertices;
+
+    for (auto& vertex : _current_vertices)
+    {
+      ::math::vector_3d v(0, 0, 0), n(0, 0, 0);
 
       for (size_t b (0); b < 4; ++b)
       {
-        if (param.weights[b] <= 0)
+        if (vertex.weights[b] <= 0)
           continue;
 
-        ::math::vector_3d tv = bones[param.bones[b]].mat * vertex.position;
-        ::math::vector_3d tn = bones[param.bones[b]].mrot * vertex.normal;
+        ::math::vector_3d tv = bones[vertex.bones[b]].mat * vertex.position;
+        ::math::vector_3d tn = bones[vertex.bones[b]].mrot * vertex.normal;
 
-        v += tv * (static_cast<float> (param.weights[b]) / 255.0f);
-        n += tn * (static_cast<float> (param.weights[b]) / 255.0f);
+        v += tv * (static_cast<float> (vertex.weights[b]) / 255.0f);
+        n += tn * (static_cast<float> (vertex.weights[b]) / 255.0f);
       }
 
-      _current_vertices[i].position = v;
-      _current_vertices[i].normal = n.normalize();
-      _current_vertices[i].texcoords = vertex.texcoords;
+      vertex.position = v;
+      vertex.normal = n.normalized();
     }
 
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STREAM_DRAW);
+    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STREAM_DRAW);
   }
 
-  for (size_t i=0; i<header.nLights; ++i) {
-    if (_lights[i].parent>=0) {
+  for (size_t i=0; i<header.nLights; ++i) 
+  {
+    if (_lights[i].parent >= 0) 
+    {
       _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
       _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
     }
   }
 
-  for (size_t i = 0; i<header.nParticleEmitters; ++i) {
+  for (auto& particle : _particles)
+  {
     // random time distribution for teh win ..?
-    int pt = (t + static_cast<int>(tmax*_particles[i].tofs)) % tmax;
-    _particles[i].setup(anim, pt, _global_animtime);
+    int pt = (t + static_cast<int>(tmax*particle.tofs)) % tmax;
+    particle.setup(_current_anim_seq, pt, _global_animtime);
   }
 
-  for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-    _ribbons[i].setup(anim, t, _global_animtime);
+  for (size_t i = 0; i<header.nRibbonEmitters; ++i) 
+  {
+    _ribbons[i].setup(_current_anim_seq, t, _global_animtime);
   }
 
-  if (animTextures) {
-    for (size_t i=0; i<header.nTexAnims; ++i) {
-      _texture_animations[i].calc(anim, t, animtime);
-    }
+  for (auto& tex_anim : _texture_animations)
+  {
+    tex_anim.calc(_current_anim_seq, t, _anim_time);
   }
-}
-
-bool ModelRenderPass::init(Model *m)
-{
-  // May aswell check that we're going to render the geoset before doing all this crap.
-  if (m->showGeosets[geoset]) {
-
-    // COLOUR
-    // Get the colour and transparency and check that we should even render
-    ocol = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans);
-    ecol = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
-
-    //if (m->trans == 1.0f)
-    //  return false;
-
-    // emissive colors
-    if (color!=-1 && m->_colors[color].color.uses(0))
-    {
-      ::math::vector_3d c (m->_colors[color].color.getValue (0, m->animtime, m->_global_animtime));
-      if (m->_colors[color].opacity.uses (m->anim))
-      {
-        ocol.w = m->_colors[color].opacity.getValue (m->anim, m->animtime, m->_global_animtime);
-      }
-
-      if (unlit) {
-        ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
-      }
-      else {
-        ocol.x = ocol.y = ocol.z = 0;
-      }
-
-      ecol = math::vector_4d(c, ocol.w);
-      gl.materialfv(GL_FRONT, GL_EMISSION, ecol);
-    }
-
-    // opacity
-    if (opacity!=-1)
-    {
-      if (m->_transparency[opacity].trans.uses (0))
-      {
-        ocol.w = ocol.w * m->_transparency[opacity].trans.getValue (0, m->animtime, m->_global_animtime);
-      }
-    }
-
-    // exit and return false before affecting the opengl render state
-    if (!((ocol.w > 0) && (color == -1 || ecol.w > 0)))
-      return false;
-
-    // TEXTURE
-    if (m->_specialTextures[tex] == -1)
-      m->_textures[tex]->bind();
-    else
-      m->_replaceTextures.at (m->_specialTextures[tex])->bind();
-
-    //! \todo Add proper support for multi-texturing.
-
-    // blend mode
-    switch (blendmode) {
-    case BM_OPAQUE:  // 0
-      break;
-    case BM_TRANSPARENT: // 1
-      gl.enable(GL_ALPHA_TEST);
-      gl.alphaFunc(GL_GEQUAL, 0.7f);
-      break;
-    case BM_ALPHA_BLEND: // 2
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    case BM_ADDITIVE: // 3
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_COLOR, GL_ONE);
-      break;
-    case BM_ADDITIVE_ALPHA: // 4
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-      break;
-    case BM_MODULATE: // 5
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-      break;
-    case BM_MODULATE2: // 6
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-      break;
-    default:
-      LogError << "Unknown blendmode: " << blendmode << std::endl;
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    //if (cull)
-    //  gl.enable(GL_CULL_FACE);
-
-    // Texture wrapping around the geometry
-    if (swrap)
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    if (twrap)
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    // no writing to the depth buffer.
-    if (nozwrite)
-      gl.depthMask(GL_FALSE);
-
-    if (unlit) {
-      gl.disable(GL_LIGHTING);
-    }
-
-    // Environmental mapping, material, and effects
-    if (useenvmap) {
-      // Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
-      // This is now set in InitGL(); - no need to call it every render.
-      gl.materialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
-
-      // env mapping
-      gl.enable(GL_TEXTURE_GEN_S);
-      gl.enable(GL_TEXTURE_GEN_T);
-
-      const GLint maptype = GL_SPHERE_MAP;
-      //const GLint maptype = GL_REFLECTION_MAP_;
-
-      gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
-      gl.texGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
-    }
-
-    if (texanim != -1) {
-      gl.matrixMode(GL_TEXTURE);
-      gl.pushMatrix();
-
-      m->_texture_animations[texanim].setup(texanim);
-    }
-
-    // color
-    gl.color4fv(ocol);
-    //gl.materialfv(GL_FRONT, GL_SPECULAR, ocol);
-
-    // don't use lighting on the surface
-    if (unlit)
-      gl.disable(GL_LIGHTING);
-
-    if (blendmode <= 1 && ocol.w<1.0f)
-      gl.enable(GL_BLEND);
-
-    return true;
-  }
-
-  return false;
-}
-
-void ModelRenderPass::deinit()
-{
-  switch (blendmode) {
-  case BM_OPAQUE:
-    break;
-  case BM_TRANSPARENT:
-    break;
-  case BM_ALPHA_BLEND:
-    //gl.depthMask(GL_TRUE);
-    break;
-  default:
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // default blend func
-  }
-  if (nozwrite) {
-    gl.depthMask(GL_TRUE);
-  }
-  if (texanim != -1) {
-    gl.popMatrix();
-    gl.matrixMode(GL_MODELVIEW);
-  }
-  if (unlit) {
-    gl.enable(GL_LIGHTING);
-  }
-  if (useenvmap) {
-    gl.disable(GL_TEXTURE_GEN_S);
-    gl.disable(GL_TEXTURE_GEN_T);
-  }
-  if (usetex2) {
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (0);
-  }
-  //gl.color4f(1,1,1,1); //???
 }
 
 void TextureAnim::calc(int anim, int time, int animtime)
 {
-  if (trans.uses(anim)) {
-    tval = trans.getValue(anim, time, animtime);
+  mat = math::matrix_4x4::unit;
+  if (trans.uses(anim)) 
+  {  
+    mat *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue(anim, time, animtime));
   }
-  if (rot.uses(anim)) {
-    rval = rot.getValue(anim, time, animtime);
+  if (rot.uses(anim)) 
+  {
+    mat *= math::matrix_4x4 (math::matrix_4x4::rotation, rot.getValue(anim, time, animtime));
   }
-  if (scale.uses(anim)) {
-    sval = scale.getValue(anim, time, animtime);
+  if (scale.uses(anim)) 
+  {
+    mat *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue(anim, time, animtime));
   }
-}
-
-void TextureAnim::setup(int anim)
-{
-  gl.loadIdentity();
-  if (trans.uses(anim)) {
-    gl.translatef(tval.x, tval.y, tval.z);
-  }
-  if (rot.uses(anim)) {
-    gl.rotatef(rval.x, 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
-  }
-  if (scale.uses(anim)) {
-    gl.scalef(sval.x, sval.y, sval.z);
-  }
-}
-
-ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global)
-  : pos (fixCoordSystem(mcd.pos))
-  , target (fixCoordSystem(mcd.target))
-  , nearclip (mcd.nearclip)
-  , farclip (mcd.farclip)
-  , fov (mcd.fov)
-  , tPos (mcd.transPos, f, global)
-  , tTarget (mcd.transTarget, f, global)
-  , rot (mcd.rot, f, global)
-{
-  tPos.apply(fixCoordSystem);
-  tTarget.apply(fixCoordSystem);
-}
-
-void ModelCamera::setup (float aspect_ratio, int time, int animtime)
-{
-  gl.matrixMode (GL_PROJECTION);
-  gl.loadIdentity();
-  opengl::matrix::perspective
-    (math::radians (fov * 0.6f), aspect_ratio, nearclip, farclip);
-  gl.matrixMode (GL_MODELVIEW);
-  gl.loadIdentity();
-  opengl::matrix::look_at ( pos + tPos.getValue( 0, time, animtime )
-                          , target + tTarget.getValue( 0, time, animtime )
-                          , {0.0f, 1.0f, 0.0f}
-                          );
 }
 
 ModelColor::ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global)
@@ -783,7 +1202,7 @@ ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
   , ambIntensity (mld.ambIntensity, f, global)
 {}
 
-void ModelLight::setup(int time, opengl::light l, int animtime)
+void ModelLight::setup(int time, opengl::light, int animtime)
 {
   math::vector_4d ambcol(ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime), 1.0f);
   math::vector_4d diffcol(diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime), 1.0f);
@@ -806,24 +1225,16 @@ void ModelLight::setup(int time, opengl::light l, int animtime)
     p = math::vector_4d(tpos, 1.0f);
     LogError << "Light type " << type << " is unknown." << std::endl;
   }
-  //gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
-  gl.lightfv(l, GL_POSITION, p);
-  gl.lightfv(l, GL_DIFFUSE, diffcol);
-  gl.lightfv(l, GL_AMBIENT, ambcol);
-  gl.enable(l);
+ 
+  // todo: use models' light
 }
 
 TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *global)
   : trans (mta.trans, f, global)
   , rot (mta.rot, f, global)
   , scale (mta.scale, f, global)
+  , mat (math::matrix_4x4::uninitialized)
 {}
-
-namespace
-{
-  //! \todo other billboard types
-  static const int MODELBONE_BILLBOARD = 8;
-}
 
 Bone::Bone( const MPQFile& f,
             const ModelBoneDef &b,
@@ -834,21 +1245,32 @@ Bone::Bone( const MPQFile& f,
   , scale (b.scaling, f, global, animation_files)
   , pivot (fixCoordSystem (b.pivot))
   , parent (b.parent)
-  , billboard (b.flags & MODELBONE_BILLBOARD)
 {
+  memcpy(&flags, &b.flags, sizeof(uint32_t));
+
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
   scale.apply(fixCoordSystem2);
 }
 
-void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
+void Bone::calcMatrix( math::matrix_4x4 const& model_view
+                     , Bone *allbones
+                     , int anim
+                     , int time
+                     , int animtime
+                     )
 {
   if (calc) return;
 
   math::matrix_4x4 m {math::matrix_4x4::unit};
   math::quaternion q;
 
-  if (rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard)
+  if ( flags.transformed
+    || flags.billboard 
+    || flags.cylindrical_billboard_lock_x 
+    || flags.cylindrical_billboard_lock_y 
+    || flags.cylindrical_billboard_lock_z
+      )
   {
     m = {math::matrix_4x4::translation, pivot};
 
@@ -867,13 +1289,10 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
       m *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue (anim, time, animtime));
     }
 
-    if (billboard)
+    if (flags.billboard)
     {
-      float modelview[16];
-      gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
-
-      math::vector_3d vRight (modelview[0], modelview[4], modelview[8]);
-      math::vector_3d vUp (modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+      math::vector_3d vRight (model_view[0], model_view[4], model_view[8]);
+      math::vector_3d vUp (model_view[1], model_view[5], model_view[9]); // Spherical billboarding
       //math::vector_3d vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
       vRight = vRight * -1;
       m (0, 2, vRight.x);
@@ -889,7 +1308,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
 
   if (parent >= 0)
   {
-    allbones[parent].calcMatrix (allbones, anim, time, animtime);
+    allbones[parent].calcMatrix (model_view, allbones, anim, time, animtime);
     mat = allbones[parent].mat * m;
   }
   else
@@ -917,88 +1336,233 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time, int animtime)
   calc = true;
 }
 
-
-void Model::draw (bool draw_fog, int animtime)
+void Model::draw( math::matrix_4x4 const& model_view
+                , ModelInstance& instance
+                , opengl::scoped::use_program& m2_shader
+                , math::frustum const& frustum
+                , const float& cull_distance
+                , const math::vector_3d& camera
+                , int animtime
+                , bool // draw_particles
+                , bool // all_boxes
+                , display_mode display
+                )
 {
-  if (!finishedLoading())
-    return;
-
-  if (!_finished_upload) {
-    upload();
+  if (!finishedLoading() || loading_failed())
+  {
     return;
   }
 
-  if (draw_fog)
-    gl.enable(GL_FOG);
-  else
-    gl.disable(GL_FOG);
-
-  if (animated && (!animcalc || mPerInstanceAnimation))
+  if (!instance.is_visible(frustum, cull_distance, camera, display))
   {
-    animate(0, animtime);
+    return;
+  }
+
+  if (!_finished_upload)
+  {
+    upload();
+  }
+
+  if (animated && (!animcalc || _per_instance_animation))
+  {
+    animate(model_view, 0, animtime);
     animcalc = true;
   }
 
-  lightsOn(GL_LIGHT4);
+  opengl::scoped::vao_binder const _(_vao);
 
-  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
-  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-  gl.vertexPointer (3, GL_FLOAT, sizeof (model_vertex), 0);
-  gl.normalPointer (GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-  gl.texCoordPointer (2, GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
+  m2_shader.uniform("transform", instance.transform_matrix_transposed());
 
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.alphaFunc(GL_GREATER, 0.3f);
-
-  for (size_t i = 0; i < _passes.size(); ++i)
   {
-    ModelRenderPass& p = _passes[i];
-
-    // we don't want to render completely transparent parts
-    if (p.init(this))
-    {
-      //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-      // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
-      // I can't notice a difference but I guess it can't hurt
-      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
-
-      p.deinit();
-    }
-
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+    m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
+    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) + 8));
+    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8));
+    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
   }
-  // done with all render ops
 
-  gl.alphaFunc(GL_GREATER, 0.0f);
-  gl.disable(GL_ALPHA_TEST);
+  for (ModelRenderPass& p : _render_passes)
+  {
+    if (p.prepare_draw(m2_shader, this))
+    {
+      gl.drawElements(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start);
+      p.after_draw();
+    }
+  }
 
-  GLfloat czero[4] = { 0, 0, 0, 1 };
-  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
-  gl.color4f(1, 1, 1, 1);
+  gl.disable(GL_BLEND);
+  gl.enable(GL_CULL_FACE);
   gl.depthMask(GL_TRUE);
-
-  lightsOff(GL_LIGHT4);
-
-  // draw particle systems & _ribbons
-  for (size_t i = 0; i < header.nParticleEmitters; ++i)
-    _particles[i].draw();
-
-  for (size_t i = 0; i < header.nRibbonEmitters; ++i)
-    _ribbons[i].draw();
 }
 
-std::vector<float> Model::intersect (math::ray const& ray, int animtime)
+void Model::draw ( math::matrix_4x4 const& model_view
+                 , std::vector<ModelInstance*> instances
+                 , opengl::scoped::use_program& m2_shader
+                 , math::frustum const& frustum
+                 , const float& cull_distance
+                 , const math::vector_3d& camera
+                 , bool // draw_fog
+                 , int animtime
+                 , bool draw_particles
+                 , bool all_boxes
+                 , std::unordered_map<Model*, std::size_t>& models_with_particles
+                 , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
+                 , display_mode display
+                 )
+{
+  if (!finishedLoading() || loading_failed())
+  {
+    return;
+  }
+
+  if (!_finished_upload) 
+  {
+    upload();
+  }
+
+  if (animated && (!animcalc || _per_instance_animation))
+  {
+    animate(model_view, 0, animtime);
+    animcalc = true;
+  }
+
+  std::vector<math::matrix_4x4> transform_matrix;
+
+  for (ModelInstance* mi : instances)
+  {
+    if (mi->is_visible(frustum, cull_distance, camera, display))
+    {
+      transform_matrix.push_back(mi->transform_matrix_transposed());
+    }    
+  }
+
+  if (transform_matrix.empty())
+  {
+    return;
+  }
+
+  // store the model count to draw the bounding boxes later
+  if (all_boxes || _hidden)
+  {
+    model_boxes_to_draw.emplace(this, transform_matrix.size());    
+  }
+  if (draw_particles && (!_particles.empty() || !_ribbons.empty()))
+  {
+    models_with_particles.emplace(this, transform_matrix.size());
+  }  
+
+  opengl::scoped::vao_binder const _ (_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+    gl.bufferData(GL_ARRAY_BUFFER, transform_matrix.size() * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
+    m2_shader.attrib("transform", 0, 1);
+  }
+  
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+    m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
+    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
+    m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
+    m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+  }
+
+  for (ModelRenderPass& p : _render_passes)
+  {
+    if (p.prepare_draw(m2_shader, this))
+    {
+      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start, transform_matrix.size());
+      p.after_draw();
+    }
+  }
+
+  gl.disable(GL_BLEND);
+  gl.enable(GL_CULL_FACE);
+  gl.depthMask(GL_TRUE);
+}
+
+void Model::draw_particles( math::matrix_4x4 const& model_view
+                          , opengl::scoped::use_program& particles_shader
+                          , std::size_t instance_count
+                          )
+{
+  for (auto& p : _particles)
+  {
+    p.draw(model_view, particles_shader, _transform_buffer, instance_count);
+  }
+}
+
+void Model::draw_ribbons( opengl::scoped::use_program& ribbons_shader
+                        , std::size_t instance_count
+                        )
+{
+  for (auto& r : _ribbons)
+  {
+    r.draw(ribbons_shader, _transform_buffer, instance_count);
+  }
+}
+
+void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)
+{
+  static std::vector<uint16_t> const indices ({5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7});
+
+  opengl::scoped::vao_binder const _ (_box_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+    m2_box_shader.attrib("transform", 0, 1);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
+    m2_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), GL_UNSIGNED_SHORT, indices.data(), box_count);
+}
+
+
+std::vector<float> Model::intersect (math::matrix_4x4 const& model_view, math::ray const& ray, int animtime)
 {
   std::vector<float> results;
 
-  if (animated && (!animcalc || mPerInstanceAnimation))
+  if (!finishedLoading() || loading_failed())
   {
-    animate (0, animtime);
+    return results;
+  }
+
+  if (animated && (!animcalc || _per_instance_animation))
+  {
+    animate (model_view, 0, animtime);
     animcalc = true;
   }
 
-  for (auto&& pass : _passes)
+  if (use_fake_geometry())
   {
-    for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
+    auto& fake_geom = _fake_geometry.get();
+
+    for (size_t i = 0; i < fake_geom.indices.size(); i += 3)
+    {
+      if (auto distance
+        = ray.intersect_triangle(fake_geom.vertices[fake_geom.indices[i + 0]],
+          fake_geom.vertices[fake_geom.indices[i + 1]],
+          fake_geom.vertices[fake_geom.indices[i + 2]])
+        )
+      {
+        results.emplace_back (*distance);
+      }
+    }
+
+    return results;
+  }
+
+  for (auto&& pass : _render_passes)
+  {
+    for (size_t i (pass.index_start); i < pass.index_start + pass.index_count; i += 3)
     {
       if ( auto distance
           = ray.intersect_triangle( _current_vertices[_indices[i + 0]].position,
@@ -1017,7 +1581,7 @@ std::vector<float> Model::intersect (math::ray const& ray, int animtime)
 void Model::lightsOn(opengl::light lbase)
 {
   // setup lights
-  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(animtime, l++, _global_animtime);
+  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(_anim_time, l++, _global_animtime);
 }
 
 void Model::lightsOff(opengl::light lbase)
@@ -1030,12 +1594,18 @@ void Model::upload()
   for (std::string texture : _textureFilenames)
     _textures.emplace_back(texture);
 
-  gl.genBuffers (1, &_vertices_buffer);
+  _buffers.upload();
+  _vertex_arrays.upload();
 
   if (!animGeometry)
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STATIC_DRAW);
+    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STATIC_DRAW);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
+    gl.bufferData (GL_ARRAY_BUFFER, _vertex_box_points.size() * sizeof (math::vector_3d), _vertex_box_points.data(), GL_STATIC_DRAW);
   }
 
   _finished_upload = true;
@@ -1043,7 +1613,11 @@ void Model::upload()
 
 void Model::updateEmitters(float dt)
 {
-  for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-    _particles[i].update(dt);
+  if (finished)
+  {
+    for (auto& particle : _particles)
+    {
+      particle.update (dt);
+    }
   }
 }

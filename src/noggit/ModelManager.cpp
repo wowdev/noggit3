@@ -57,3 +57,12 @@ void ModelManager::updateEmitters(float dt)
             }
           );
 }
+
+void ModelManager::clear_hidden_models()
+{
+  _.apply ( [&] (std::string const&, Model& model)
+            {
+              model.show();
+            }
+          );
+}

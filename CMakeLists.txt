@@ -13,7 +13,11 @@ macro (add_compiler_flag_if_supported _VAR _FLAG)
   string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_FLAG}" _test_variable)
   check_cxx_compiler_flag ("${_FLAG}" ${_test_variable})
   if (${_test_variable})
-     set (${_VAR} "${${_VAR}} ${_FLAG}")
+    if ("${${_VAR}}" STREQUAL "")
+      set (${_VAR} "${_FLAG}")
+    else()
+      set (${_VAR} "${${_VAR}} ${_FLAG}")
+    endif()
   endif()
 endmacro()
 
@@ -74,9 +78,25 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
 # multi core building for visual studio
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
 
+
+if(WIN32)
+  # Disable opengl error log
+  OPTION(ADDITIONAL_OPTIMIZATION_FLAGS "Enable OpenGL error check ?" OFF)
+  IF(ADDITIONAL_OPTIMIZATION_FLAGS)
+    MESSAGE( STATUS "Enabled additional optimization flags for msvc.")
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ob2) # inline any suitable functions
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Oi)  # enable intrasic functions
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ot)  # favor fast code
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /GL)  # whole program optimization
+  ENDIF()
+endif(WIN32)
+
+
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
+
+OPTION(USE_SQL "Enable sql uid save ? (require mysql installed)" OFF)
 
 macro(includePlattform SUFFIX)
   if(UNIX)
@@ -107,27 +127,32 @@ FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test
 FIND_PACKAGE( StormLib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
-find_library(MYSQL_LIBRARY
-  NAMES libmysql
-  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql")
-find_library(MYSQLCPPCONN_LIBRARY
-  NAMES mysqlcppconn
-  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
-find_path (MYSQLCPPCONN_INCLUDE
-  NAMES cppconn/driver.h
-  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
 
-if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
-  add_definitions ( -DUSE_MYSQL_UID_STORAGE )
+if (USE_SQL)
+  find_library(MYSQL_LIBRARY
+    NAMES libmysql
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql")
+  find_library(MYSQLCPPCONN_LIBRARY
+    NAMES mysqlcppconn
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
+  find_path (MYSQLCPPCONN_INCLUDE
+    NAMES cppconn/driver.h
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
 
-  set ( mysql_sources
-        src/mysql/mysql.cpp
-      )
+  if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
+    add_definitions ( -DUSE_MYSQL_UID_STORAGE )
 
-  set ( mysql_headers
-        src/mysql/mysql.h
-      )
-  source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
+    set ( mysql_sources
+          src/mysql/mysql.cpp
+        )
+
+    set ( mysql_headers
+          src/mysql/mysql.h
+        )
+    source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
+  else()
+     message (FATAL_ERROR "MySQL lib or connector not found")
+  endif()
 endif()
 
 add_subdirectory (src/external/qt-color-widgets)
@@ -144,6 +169,13 @@ IF( NOGGIT_LOGTOCONSOLE )
   ADD_DEFINITIONS( -DDEBUG__LOGGINGTOCONSOLE )
 ENDIF( NOGGIT_LOGTOCONSOLE )
 
+# Disable opengl error log
+OPTION(NOGGIT_OPENGL_ERROR_CHECK "Enable OpenGL error check ?" ON)
+IF(NOT NOGGIT_OPENGL_ERROR_CHECK )
+  MESSAGE( STATUS "OpenGL error check disabled." )
+  ADD_DEFINITIONS( -DNOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS )
+ENDIF()
+
 includePlattform("postfind")
 
 # Find revision ID and hash of the sourcetree
@@ -157,7 +189,7 @@ set ( noggit_root_sources
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
       src/noggit/ChunkWater.cpp
-      src/noggit/ConfigFile.cpp
+      src/noggit/cursor_render.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
       src/noggit/Log.cpp
@@ -170,8 +202,6 @@ set ( noggit_root_sources
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
       src/noggit/Particle.cpp
-      src/noggit/Project.cpp
-      src/noggit/Settings.cpp
       src/noggit/Sky.cpp
       src/noggit/TextureManager.cpp
       src/noggit/TileWater.cpp
@@ -191,14 +221,6 @@ set ( noggit_root_sources
       src/noggit/wmo_liquid.cpp
     )
 
-if(APPLE)
-  list (APPEND noggit_root_sources src/noggit/NativeMac.mm)
-elseif(UNIX)
-  list (APPEND noggit_root_sources src/noggit/NativeLinux.cpp)
-elseif(WIN32)
-  list (APPEND noggit_root_sources src/noggit/NativeWindows.cpp)
-endif()
-
 set ( noggit_ui_sources
       src/noggit/ui/About.cpp
       src/noggit/ui/clickable_label.cpp
@@ -207,6 +229,7 @@ set ( noggit_ui_sources
       src/noggit/ui/DetailInfos.cpp
       src/noggit/ui/FlattenTool.cpp
       src/noggit/ui/font_awesome.cpp
+      src/noggit/ui/font_noggit.cpp
       src/noggit/ui/Help.cpp
       src/noggit/ui/HelperModels.cpp
       src/noggit/ui/ModelImport.cpp
@@ -219,13 +242,14 @@ set ( noggit_ui_sources
       src/noggit/ui/Toolbar.cpp
       src/noggit/ui/SettingsPanel.cpp
       src/noggit/ui/Water.cpp
-      src/noggit/ui/WaterSaveWarning.cpp
       src/noggit/ui/ZoneIDBrowser.cpp
       src/noggit/ui/main_window.cpp
       src/noggit/ui/minimap_widget.cpp
       src/noggit/ui/shader_tool.cpp
       src/noggit/ui/terrain_tool.cpp
       src/noggit/ui/uid_fix_window.cpp
+      src/noggit/ui/texture_palette_small.cpp
+      src/noggit/ui/TextureList.cpp
     )
 
 set ( math_sources
@@ -236,15 +260,14 @@ set ( math_sources
     )
 
 set ( opengl_sources
-      src/opengl/call_list.cpp
       src/opengl/context.cpp
       src/opengl/primitives.cpp
       src/opengl/shader.cpp
       src/opengl/texture.cpp
     )
 
-set ( external_sources
-      src/external/wacom/Utils.cpp
+set ( util_sources
+      src/util/exception_to_string.cpp
     )
 
 set ( noggit_root_headers
@@ -254,7 +277,7 @@ set ( noggit_root_headers
       src/noggit/Brush.h
       src/noggit/camera.hpp
       src/noggit/ChunkWater.hpp
-      src/noggit/ConfigFile.h
+      src/noggit/cursor_render.hpp
       src/noggit/DBC.h
       src/noggit/DBCFile.h
       src/noggit/Log.h
@@ -268,11 +291,8 @@ set ( noggit_root_headers
       src/noggit/ModelHeaders.h
       src/noggit/ModelInstance.h
       src/noggit/ModelManager.h
-      src/noggit/Native.hpp
       src/noggit/Particle.h
-      src/noggit/Project.h
       src/noggit/Selection.h
-      src/noggit/Settings.h
       src/noggit/Sky.h
       src/noggit/TextureManager.h
       src/noggit/TileWater.hpp
@@ -301,6 +321,7 @@ set ( noggit_ui_headers
       src/noggit/ui/DetailInfos.h
       src/noggit/ui/FlattenTool.hpp
       src/noggit/ui/font_awesome.hpp
+      src/noggit/ui/font_noggit.hpp
       src/noggit/ui/Help.h
       src/noggit/ui/HelperModels.h
       src/noggit/ui/ModelImport.h
@@ -313,13 +334,14 @@ set ( noggit_ui_headers
       src/noggit/ui/Toolbar.h
       src/noggit/ui/SettingsPanel.h
       src/noggit/ui/Water.h
-      src/noggit/ui/WaterSaveWarning.h
       src/noggit/ui/ZoneIDBrowser.h
       src/noggit/ui/main_window.hpp
       src/noggit/ui/minimap_widget.hpp
       src/noggit/ui/shader_tool.hpp
       src/noggit/ui/terrain_tool.hpp
       src/noggit/ui/uid_fix_window.hpp
+      src/noggit/ui/texture_palette_small.hpp
+      src/noggit/ui/TextureList.hpp
     )
 
 set ( math_headers
@@ -337,9 +359,7 @@ set ( math_headers
     )
 
 set ( opengl_headers
-      src/opengl/call_list.hpp
       src/opengl/context.hpp
-      src/opengl/matrix.hpp
       src/opengl/primitives.hpp
       src/opengl/scoped.hpp
       src/opengl/shader.fwd.hpp
@@ -348,11 +368,27 @@ set ( opengl_headers
       src/opengl/types.hpp
     )
 
-set ( external_headers
-      src/external/wacom/MSGPACK.H
-      src/external/wacom/PKTDEF.H
-      src/external/wacom/Utils.h
-      src/external/wacom/WINTAB.H
+set ( shaders
+      src/glsl/m2_vert.glsl
+      src/glsl/m2_frag.glsl
+      src/glsl/m2_box_vert.glsl
+      src/glsl/m2_box_frag.glsl
+      src/glsl/particle_vert.glsl
+      src/glsl/particle_frag.glsl
+      src/glsl/ribbon_vert.glsl
+      src/glsl/ribbon_frag.glsl
+      src/glsl/terrain_vert.glsl
+      src/glsl/terrain_frag.glsl
+      src/glsl/wmo_vert.glsl
+      src/glsl/wmo_frag.glsl
+      src/glsl/liquid_vert.glsl
+      src/glsl/liquid_frag.glsl
+      src/glsl/mfbo_vert.glsl
+      src/glsl/mfbo_frag.glsl
+      src/glsl/cursor_vert.glsl
+      src/glsl/cursor_frag.glsl
+      src/glsl/horizon_vert.glsl
+      src/glsl/horizon_frag.glsl
     )
 
 IF(WIN32)
@@ -367,6 +403,7 @@ ENDIF(WIN32)
 
 
 list (APPEND headers_to_moc
+  src/noggit/MapView.h
   src/noggit/bool_toggle_property.hpp
   src/noggit/ui/terrain_tool.hpp
   src/noggit/ui/TexturePicker.h
@@ -377,6 +414,9 @@ list (APPEND headers_to_moc
   src/noggit/ui/minimap_widget.hpp
   src/noggit/ui/uid_fix_window.hpp
   src/noggit/ui/widget.hpp
+  src/noggit/ui/texture_palette_small.hpp
+  src/noggit/ui/TextureList.hpp
+  src/noggit/ui/main_window.hpp
   src/noggit/unsigned_int_property.hpp
 )
 qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
@@ -387,6 +427,8 @@ source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
 source_group("math"  FILES ${math_sources} ${math_headers})
 source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
+source_group("util"  FILES ${util_sources})
+source_group("glsl"  FILES ${shaders})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
@@ -400,6 +442,7 @@ ADD_EXECUTABLE ( noggit
                   ${external_sources}
                   ${mysql_sources}
                   ${os_sources}
+                  ${util_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
@@ -410,6 +453,7 @@ ADD_EXECUTABLE ( noggit
                   ${ResFiles}
                   ${moced}
                   ${compiled_resource_files}
+                  ${shaders}
                 )
 
 TARGET_LINK_LIBRARIES (noggit

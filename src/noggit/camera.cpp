@@ -1,5 +1,7 @@
 #include <noggit/camera.hpp>
 
+#include <math/projection.hpp>
+
 namespace noggit
 {
   camera::camera ( math::vector_3d const& position
@@ -77,6 +79,11 @@ namespace noggit
                               )
            * forward
            ).normalize();
+  }
+
+  math::matrix_4x4 camera::look_at_matrix() const
+  {
+    return math::look_at(position, look_at(), {0.f, 1.f, 0.f});
   }
 
   void camera::move_forward (float sign, float dt)

@@ -12,15 +12,15 @@
 #include <noggit/DBC.h>
 #include <noggit/Misc.h>
 #include <noggit/MPQ.h>
-#include <noggit/Project.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/ui/TextureList.hpp>
 
 #include <unordered_set>
 
+#include <QtCore/QSettings>
 #include <QtCore/QSortFilterProxyModel>
 #include <QtGui/QStandardItemModel>
 #include <QtWidgets/QCheckBox>
-#include <QtWidgets/QListView>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QVBoxLayout>
 
@@ -60,10 +60,11 @@ namespace noggit
     };
 
     tileset_chooser::tileset_chooser (QWidget* parent)
-      : widget (parent)
+      : widget (parent, Qt::Window)
     {
       setWindowTitle ("Texture palette");
       setWindowIcon (QIcon (":/icon"));
+      setMinimumHeight(490);
 
       while (!MPQArchive::allFinishedLoading())
       {
@@ -94,8 +95,9 @@ namespace noggit
       }
 
       {
+        QSettings settings;
         auto const prefix
-          (boost::filesystem::path (Project::getInstance()->getPath()));
+          (boost::filesystem::path (settings.value("project/path").toString().toStdString()));
         auto const prefix_size (prefix.string().length());
 
         if (boost::filesystem::exists (prefix))
@@ -183,7 +185,7 @@ namespace noggit
 
 
 
-      auto list (new QListView);
+      auto list = new TextureList(this);
       list->setEditTriggers (QAbstractItemView::NoEditTriggers);
       list->setViewMode (QListView::IconMode);
       list->setMovement (QListView::Static);
@@ -193,7 +195,7 @@ namespace noggit
       list->setWrapping (true);
       list->setModel (search_filter);
 
-      connect ( list, &QAbstractItemView::doubleClicked
+      connect ( list, &QAbstractItemView::clicked
               , [=] (QModelIndex const& index)
                 {
                   emit selected
@@ -224,7 +226,6 @@ namespace noggit
       resize(155 * 5 + 35, height());
     }
 
-    
     // selected_texture:
     boost::optional<scoped_blp_texture_reference> selected_texture::texture = boost::none;
 
@@ -235,9 +236,7 @@ namespace noggit
 
     void selected_texture::set (scoped_blp_texture_reference t)
     {
-      selected_texture::texture = t;
+      selected_texture::texture = std::move (t);
     }
   }
 }
-
-

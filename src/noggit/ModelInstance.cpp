@@ -5,37 +5,14 @@
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/ModelInstance.h>
-#include <noggit/Settings.h>
+#include <noggit/WMOInstance.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
-
-namespace
-{
-  math::vector_3d TransformCoordsForModel(math::vector_3d pIn)
-  {
-    return {pIn.x, pIn.z, -pIn.y};
-  }
-}
+#include <opengl/shader.hpp>
 
 ModelInstance::ModelInstance(std::string const& filename)
   : model (filename)
 {
-}
-
-ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
-  : model (filename)
-{
-  float ff[4];
-
-  f->read(ff, 12);
-  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
-
-  f->read(ff, 16);
-  _wmo_orientation = math::quaternion (-ff[3], ff[1], ff[2], ff[0]);
-
-  f->read(&scale, 4);
-  f->read(&uid, 4);
-  lcol = math::vector_3d(((uid & 0xff0000) >> 16) / 255.0f, ((uid & 0x00ff00) >> 8) / 255.0f, (uid & 0x0000ff) / 255.0f);
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
@@ -47,178 +24,92 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
 
-  recalcExtents();
-}
-
-void ModelInstance::draw ( math::frustum const& frustum
-                         , const float& cull_distance
-                         , const math::vector_3d& camera
-                         , bool force_box
-                         , bool all_boxes
-                         , bool draw_fog
-                         , bool is_current_selection
-                         , int animtime
-                         )
-{
-  if(((pos - camera).length() - model->rad * scale) >= cull_distance)
-    return;
-
-  if (!frustum.intersectsSphere(pos, model->rad * scale))
-    return;
-
-  opengl::scoped::matrix_pusher const matrix;
-
-  math::matrix_4x4 const model_matrix
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-    );
-
-  gl.multMatrixf (model_matrix.transposed());
-
-  if (all_boxes)
+  if (model->finishedLoading())
   {
-    opengl::primitives::wire_box ( TransformCoordsForModel(model->header.VertexBoxMin)
-                                 , TransformCoordsForModel(model->header.VertexBoxMax)
-                                 ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 1.0f);
+    recalcExtents();
   }
-  model->draw (draw_fog, animtime);
-
-  if (is_current_selection || force_box)
+  else
   {
-    if (draw_fog)
-      gl.disable(GL_FOG);
-
-    gl.disable(GL_LIGHTING);
-
-    gl.disable(GL_COLOR_MATERIAL);
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(1.0f, 1.0f, 0.0f, 1.0f);
-
-    opengl::primitives::wire_box ( TransformCoordsForModel(model->header.BoundingBoxMin)
-                                 , TransformCoordsForModel(model->header.BoundingBoxMax)
-                                 ).draw (color, 1.0f);
-
-    if (is_current_selection)
-    {
-      opengl::primitives::wire_box ( TransformCoordsForModel(model->header.VertexBoxMin)
-                                   , TransformCoordsForModel(model->header.VertexBoxMax)
-                                   ).draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
-
-      gl.color4fv(math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f));
-      gl.begin(GL_LINES);
-      gl.vertex3f(0.0f, 0.0f, 0.0f);
-      gl.vertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
-      gl.end();
-
-      gl.color4fv(math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f));
-      gl.begin(GL_LINES);
-      gl.vertex3f(0.0f, 0.0f, 0.0f);
-      gl.vertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
-      gl.end();
-
-      gl.color4fv(math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f));
-      gl.begin(GL_LINES);
-      gl.vertex3f(0.0f, 0.0f, 0.0f);
-      gl.vertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
-      gl.end();
-    }
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (0);
-    opengl::texture::enable_texture();
-
-    gl.enable(GL_LIGHTING);
-
-    if (draw_fog)
-      gl.enable(GL_FOG);
+    _need_recalc_extents = true;
   }
 }
 
-//! \todo  Get this drawn on the 2D view.
-/*void ModelInstance::drawMapTile()
+void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
+                             , math::matrix_4x4 const& projection
+                             , bool is_current_selection
+                             )
 {
-if(CheckUniques(uid))
-return;
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-opengl::scoped::matrix_pusher const matrix;
+  if (is_current_selection)
+  {
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.collision_box_min)
+                                 , misc::transform_model_box_coords(model->header.collision_box_max)
+                                 ).draw ( model_view
+                                        , projection
+                                        , transform_matrix_transposed()
+                                        , { 1.0f, 1.0f, 0.0f, 1.0f }
+                                        );
 
-gl.translatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
-gl.rotatef(-90.0f, 1, 0, 0);
-gl.rotatef(dir.y - 90.0f, 0, 1, 0);
-gl.rotatef(-dir.x, 0, 0, 1);
-gl.rotatef(dir.z, 1, 0, 0);
-gl.scalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
-gl.scalef(sc,sc,sc);
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
+                                 , misc::transform_model_box_coords(model->header.bounding_box_max)
+                                 ).draw ( model_view
+                                        , projection
+                                        , transform_matrix_transposed()
+                                        , {1.0f, 1.0f, 1.0f, 1.0f}
+                                        );
+  }
+  else
+  {
+    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
+                                 , misc::transform_model_box_coords(model->header.bounding_box_max)
+                                 ).draw ( model_view
+                                        , projection
+                                        , transform_matrix_transposed()
+                                        , {0.5f, 0.5f, 0.5f, 1.0f}
+                                        );
+  }
+}
 
-model->draw();
-}*/
+void ModelInstance::update_transform_matrix()
+{
+  math::matrix_4x4 mat (math::matrix_4x4 (math::matrix_4x4::translation, pos)
+          * math::matrix_4x4 (math::matrix_4x4::rotation_yzx
+                              , { math::degrees (-dir.z)
+                              , math::degrees (dir.y - 90.0f)
+                              , math::degrees (dir.x)
+                              }
+          )
+          * math::matrix_4x4 (math::matrix_4x4::scale, scale)
+          );
 
-void ModelInstance::intersect ( math::ray const& ray
+  _transform_mat_inverted = mat.inverted();
+  _transform_mat_transposed = mat.transposed();
+}
+
+void ModelInstance::intersect ( math::matrix_4x4 const& model_view
+                              , math::ray const& ray
                               , selection_result* results
                               , int animtime
                               )
 {
-  math::matrix_4x4 const model_matrix
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-    );
+  math::ray subray (_transform_mat_inverted, ray);
 
-  math::ray subray (model_matrix.inverted(), ray);
-
-  if ( !subray.intersect_bounds ( fixCoordSystem (model->header.VertexBoxMin)
-                                , fixCoordSystem (model->header.VertexBoxMax)
+  if ( !subray.intersect_bounds ( fixCoordSystem (model->header.bounding_box_min)
+                                , fixCoordSystem (model->header.bounding_box_max)
                                 )
      )
   {
     return;
   }
 
-  for (auto&& result : model->intersect (subray, animtime))
+  for (auto&& result : model->intersect (model_view, subray, animtime))
   {
     //! \todo why is only sc important? these are relative to subray,
     //! so should be inverted by model_matrix?
     results->emplace_back (result * scale, selected_model_type (this));
   }
-}
-
-
-void ModelInstance::draw_wmo ( const math::vector_3d& ofs
-                             , const math::degrees rotation
-                             , math::frustum const& frustum
-                             , bool draw_fog
-                             , int animtime
-                             )
-{
-  math::vector_3d tpos(ofs + pos);
-  math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
-  if (!frustum.intersectsSphere(tpos, model->rad*scale)) return;
-
-  opengl::scoped::matrix_pusher const matrix;
-
-  gl.translatef(pos.x, pos.y, pos.z);
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
-  gl.scalef(scale, -scale, -scale);
-
-  model->draw (draw_fog, animtime);
 }
 
 void ModelInstance::resetDirection(){
@@ -229,44 +120,93 @@ void ModelInstance::resetDirection(){
 
 bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const
 {
-  return misc::rectOverlap(extents, rect);
+  return misc::rectOverlap(_extents.data(), rect);
+}
+
+bool ModelInstance::is_visible( math::frustum const& frustum
+                              , const float& cull_distance
+                              , const math::vector_3d& camera
+                              , display_mode display
+                              )
+{
+  if (_need_recalc_extents && model->finishedLoading())
+  {
+    recalcExtents();
+  }
+
+  float dist;
+  
+  if (display == display_mode::in_3D)
+  {
+    dist = (get_pos() - camera).length() - model->rad * scale;
+  }
+  else
+  {
+    dist = std::abs(get_pos().y - camera.y) - model->rad * scale;
+  }
+
+  if (dist >= cull_distance)
+  {
+    return false;
+  }
+
+  if (size_cat < 1.f && dist > 30.f)
+  {
+    return false;
+  }
+  else if (size_cat < 4.f && dist > 150.f)
+  {
+    return false;
+  }
+  else if (size_cat < 25.f && dist > 300.f)
+  {
+    return false;
+  }
+  
+  return frustum.intersectsSphere(get_pos(), model->rad * scale);
 }
 
 void ModelInstance::recalcExtents()
 {
+  if (!model->finishedLoading())
+  {
+    _need_recalc_extents = true;
+    return;
+  }
+
+  if (model->loading_failed())
+  {
+    _extents[0] = _extents[1] = pos;
+    _need_recalc_extents = false;
+    return;
+  }
+
+  update_transform_matrix();
+
   math::vector_3d min (math::vector_3d::max()), vertex_box_min (min);
   math::vector_3d max (math::vector_3d::min()), vertex_box_max (max);;
-  math::matrix_4x4 rot
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                       , { math::degrees (-dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (dir.x)
-                         }
-                       )
-    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-    );
+  math::matrix_4x4 rot (_transform_mat_transposed.transposed());
 
   math::vector_3d bounds[8 * 2];
   math::vector_3d *ptr = bounds;
 
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_max.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_max.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_min.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_min.y, model->header.collision_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_min.y, model->header.collision_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_max.y, model->header.collision_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_max.y, model->header.collision_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_min.y, model->header.collision_box_max.z));
 
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
-  *ptr++ = rot * TransformCoordsForModel(math::vector_3d(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_max.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_max.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_min.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_min.y, model->header.bounding_box_min.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_min.y, model->header.bounding_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_max.y, model->header.bounding_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_max.y, model->header.bounding_box_max.z));
+  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_min.y, model->header.bounding_box_max.z));
 
 
   for (int i = 0; i < 8 * 2; ++i)
@@ -279,12 +219,79 @@ void ModelInstance::recalcExtents()
     }
   }
 
-  extents[0] = min;
-  extents[1] = max;
+  _extents[0] = min;
+  _extents[1] = max;
 
-  size_cat = std::max( vertex_box_max.x - vertex_box_min.x
-                     , std::max( vertex_box_max.y - vertex_box_min.y
-                               , vertex_box_max.z - vertex_box_min.z
-                               )
-                     );
+  size_cat = (max - min).length();
+
+  _need_recalc_extents = false;
+}
+
+std::vector<math::vector_3d> const& ModelInstance::extents()
+{
+  if (_need_recalc_extents && model->finishedLoading())
+  {
+    recalcExtents();
+  }
+
+  return _extents;
+}
+
+
+wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f)
+  : ModelInstance (filename)
+{
+  float ff[4];
+
+  f->read(ff, 12);
+  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
+
+  f->read(ff, 16);
+  doodad_orientation = math::quaternion (-ff[0], -ff[2], ff[1], ff[3]);
+
+  f->read(&scale, 4);
+
+  union
+  {
+    uint32_t packed;
+    struct
+    {
+      uint8_t b, g, r, a;
+    }bgra;
+  } color;
+
+  f->read(&color.packed, 4);
+
+  light_color = math::vector_3d(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
+}
+
+void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
+{
+  if (!model->finishedLoading())
+  {
+    return;
+  }  
+
+  world_pos = wmo->transform_matrix() * pos;
+
+  math::matrix_4x4 m2_mat
+  (
+    math::matrix_4x4(math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 (math::matrix_4x4::rotation, doodad_orientation)
+    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
+  );
+
+  math::matrix_4x4 mat
+  (
+    wmo->transform_matrix()
+    * m2_mat
+  );
+
+  _transform_mat_inverted = mat.inverted();
+  _transform_mat_transposed = mat.transposed();
+
+  // to compute the size category (used in culling)
+  recalcExtents();
+
+  _need_matrix_update = false;
 }

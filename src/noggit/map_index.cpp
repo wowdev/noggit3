@@ -1,17 +1,19 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/AsyncLoader.h>
 #include <noggit/MPQ.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
-#include <noggit/Project.h>
 #include <noggit/World.h>
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
 #endif
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
+
+#include <QtCore/QSettings>
 
 #include <boost/range/adaptor/map.hpp>
 
@@ -20,17 +22,19 @@
 MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   : basename(pBasename)
   , _map_id (map_id)
+  , _last_unload_time((clock() / CLOCKS_PER_SEC)) // to not try to unload right away
   , mBigAlpha(false)
   , mHasAGlobalWMO(false)
   , noadt(false)
   , changed(false)
   , _sort_models_by_size_class(false)
-  , cx(-1)
-  , cz(-1)
   , highestGUID(0)
-  , highestGUIDDB(0)
   , _world (world)
 {
+
+  QSettings settings;
+  _unload_interval = settings.value("unload_interval", 5).toInt();
+  _unload_dist = settings.value("unload_dist", 5).toInt();
 
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
@@ -87,11 +91,11 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
       theFile.read(&mTiles[j][i].flags, 4);
       theFile.seekRelative(4);
 
-      std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
+      std::stringstream adt_filename;
+      adt_filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
       mTiles[j][i].tile = nullptr;
-      mTiles[j][i].onDisc = MPQFile::existsOnDisk(filename.str());
+      mTiles[j][i].onDisc = MPQFile::existsOnDisk(adt_filename.str());
 
 			if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
 			{
@@ -136,6 +140,8 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
 
 void MapIndex::saveall (World* world)
 {
+  saveMaxUID();
+
   for (MapTile* tile : loaded_tiles())
   {
     tile->saveTile (false, world);
@@ -231,8 +237,8 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 
   noadt = false;
-  cx = tile.x;
-  cz = tile.z;
+  int cx = tile.x;
+  int cz = tile.z;
 
   for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
   {
@@ -240,6 +246,32 @@ void MapIndex::enterTile(const tile_index& tile)
     {
       loadTile(tile_index(px, pz));
     }
+  }
+}
+
+void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint32_t uid)
+{
+  if (!hasTile(tile))
+  {
+    return;
+  }
+
+  MapTile* adt = loadTile(tile);
+
+  if (!adt->finishedLoading())
+  {
+    AsyncLoader::instance().ensure_loaded(adt);
+  }
+
+  adt->changed = 1;
+
+  if (type == model_update::add)
+  {
+    adt->add_model(uid);
+  }
+  else if(type == model_update::remove)
+  {
+    adt->remove_model(uid);
   }
 }
 
@@ -294,7 +326,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
     return nullptr;
   }
 
-  if (tileLoaded(tile))
+  if (tileLoaded(tile) || tileAwaitingLoading(tile))
   {
     return mTiles[tile.z][tile.x].tile.get();
   }
@@ -308,43 +340,41 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, _world);
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, use_mclq_green_lava(), _world);
 
-  return mTiles[tile.z][tile.x].tile.get();
+  MapTile* adt = mTiles[tile.z][tile.x].tile.get();
+
+  AsyncLoader::instance().queue_for_load(adt);
+
+  return adt;
 }
 
 void MapIndex::reloadTile(const tile_index& tile)
 {
   if (tileLoaded(tile))
   {
-    mTiles[tile.z][tile.x].tile = nullptr;
-
-    enterTile (tile);
+    mTiles[tile.z][tile.x].tile.reset();
+    loadTile(tile);
   }
 }
 
 void MapIndex::unloadTiles(const tile_index& tile)
 {
-  if ( ((clock() / CLOCKS_PER_SEC) - this->lastUnloadTime) > 5) // only unload every 5 seconds
+  if (((clock() / CLOCKS_PER_SEC) - _last_unload_time) > _unload_interval)
   {
-    int unloadBoundery = 6; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
-    for (int pz = 0; pz < 64; ++pz)
+    for (MapTile* adt : loaded_tiles())
     {
-      for (int px = 0; px < 64; ++px)
+      if (tile.dist(adt->index) > _unload_dist)
       {
-        if (std::abs(px - (int)tile.x) > unloadBoundery || std::abs(pz - (int)tile.z) > unloadBoundery)
+        //Only unload adts not marked to save
+        if (adt->changed == 0)
         {
-          tile_index id(px, pz);
-
-          //Only unload adts not marked to save
-          if (getChanged(id) == 0)
-          {
-            unloadTile(id);
-          }
+          unloadTile(adt->index);
         }
       }
     }
-    this->lastUnloadTime = clock() / CLOCKS_PER_SEC;
+
+    _last_unload_time = clock() / CLOCKS_PER_SEC;
   }
 }
 
@@ -410,9 +440,14 @@ bool MapIndex::hasTile(const tile_index& tile) const
   return tile.is_valid() && (mTiles[tile.z][tile.x].flags & 1);
 }
 
+bool MapIndex::tileAwaitingLoading(const tile_index& tile) const
+{
+  return hasTile(tile) && mTiles[tile.z][tile.x].tile && !mTiles[tile.z][tile.x].tile->finishedLoading();
+}
+
 bool MapIndex::tileLoaded(const tile_index& tile) const
 {
-  return hasTile(tile) && mTiles[tile.z][tile.x].tile;
+  return hasTile(tile) && mTiles[tile.z][tile.x].tile && mTiles[tile.z][tile.x].tile->finishedLoading();
 }
 
 bool MapIndex::hasAdt()
@@ -432,22 +467,38 @@ MapTile* MapIndex::getTile(const tile_index& tile) const
 
 MapTile* MapIndex::getTileAbove(MapTile* tile) const
 {
-  if (tile->index.z == 0 || !tileLoaded({tile->index.x, tile->index.z - 1}))
+  tile_index above(tile->index.x, tile->index.z - 1);
+  if (tile->index.z == 0 || (!tileLoaded(above) && !tileAwaitingLoading(above)))
   {
     return nullptr;
   }
 
-  return mTiles[tile->index.z - 1][tile->index.x].tile.get();
+  MapTile* tile_above = mTiles[tile->index.z - 1][tile->index.x].tile.get();
+
+  if (!tile_above->finishedLoading())
+  {
+    AsyncLoader::instance().ensure_loaded(tile_above);
+  }
+
+  return tile_above;
 }
 
 MapTile* MapIndex::getTileLeft(MapTile* tile) const
 {
-  if (tile->index.x == 0 || !tileLoaded({tile->index.x - 1, tile->index.z}))
+  tile_index left(tile->index.x - 1, tile->index.z);
+  if (tile->index.x == 0 || (!tileLoaded(left) && !tileAwaitingLoading(left)))
   {
     return nullptr;
   }
 
-  return mTiles[tile->index.z][tile->index.x - 1].tile.get();
+  MapTile* tile_left = mTiles[tile->index.z][tile->index.x - 1].tile.get();
+
+  if (!tile_left->finishedLoading())
+  {
+    AsyncLoader::instance().ensure_loaded(tile_left);
+  }
+
+  return tile_left;
 }
 
 uint32_t MapIndex::getFlag(const tile_index& tile) const
@@ -535,43 +586,20 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
     return highGUID;
 }
 
-#ifdef USE_MYSQL_UID_STORAGE
-uint32_t MapIndex::getHighestGUIDFromDB() const
-{
-	return mysql::getGUIDFromDB (*Settings::getInstance()->mysql, _map_id);
-}
-
-uint32_t MapIndex::newGUIDDB()
-{
-  highestGUIDDB = std::max(highestGUIDDB, getHighestGUIDFromDB());
-  highGUIDDB = std::max(highestGUID, highestGUIDDB);
-  highGUIDDB = ++highestGUIDDB;
-  highestGUID = highGUIDDB; // update local max uid too
-  mysql::updateUIDinDB(*Settings::getInstance()->mysql, _map_id, highGUIDDB);  // it's neccesary to update the uid in database after every place, other then in the file uid storage system, because of cloudworking
-  return highGUIDDB;
-}
-#endif
-
 uint32_t MapIndex::newGUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  if (Settings::getInstance()->mysql) {
-    return newGUIDDB();
+  QSettings settings;
+
+  if (settings->value ("project/mysql/enabled", false).toBool())
+  {
+    mysql::updateUIDinDB(_map_id, highestGUID + 1); // update the highest uid in db, note that if the user don't save these uid won't be used (not really a problem tho) 
   }
-  else {
-  return ++highestGUID;
-  }
-#else
-  return ++highestGUID;
 #endif
+  return ++highestGUID;
 }
 
-inline bool floatEqual(float const& a, float const& b)
-{
-  return std::abs(a - b) < 0.0001f;
-}
-
-void MapIndex::fixUIDs (World* world)
+uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_error)
 {
   // pre-cond: mTiles[z][x].flags are set
 
@@ -645,12 +673,12 @@ void MapIndex::fixUIDs (World* world)
         for (ENTRY_MDDF& entry : modelEntries)
         {
           if ( mddf.nameID == entry.nameID
-            && floatEqual(mddf.pos[0], entry.pos[0])
-            && floatEqual(mddf.pos[1], entry.pos[1])
-            && floatEqual(mddf.pos[2], entry.pos[2])
-            && floatEqual(mddf.rot[0], entry.rot[0])
-            && floatEqual(mddf.rot[1], entry.rot[1])
-            && floatEqual(mddf.rot[2], entry.rot[2])
+            && misc::float_equals(mddf.pos[0], entry.pos[0])
+            && misc::float_equals(mddf.pos[1], entry.pos[1])
+            && misc::float_equals(mddf.pos[2], entry.pos[2])
+            && misc::float_equals(mddf.rot[0], entry.rot[0])
+            && misc::float_equals(mddf.rot[1], entry.rot[1])
+            && misc::float_equals(mddf.rot[2], entry.rot[2])
             && mddf.scale == entry.scale
             )
           {
@@ -687,12 +715,12 @@ void MapIndex::fixUIDs (World* world)
         for (ENTRY_MODF& entry : wmoEntries)
         {
           if (modf.nameID == entry.nameID
-            && floatEqual(modf.pos[0], entry.pos[0])
-            && floatEqual(modf.pos[1], entry.pos[1])
-            && floatEqual(modf.pos[2], entry.pos[2])
-            && floatEqual(modf.rot[0], entry.rot[0])
-            && floatEqual(modf.rot[1], entry.rot[1])
-            && floatEqual(modf.rot[2], entry.rot[2])
+            && misc::float_equals(modf.pos[0], entry.pos[0])
+            && misc::float_equals(modf.pos[1], entry.pos[1])
+            && misc::float_equals(modf.pos[2], entry.pos[2])
+            && misc::float_equals(modf.rot[0], entry.rot[0])
+            && misc::float_equals(modf.rot[1], entry.rot[1])
+            && misc::float_equals(modf.rot[2], entry.rot[2])
             )
           {
             add = false;
@@ -759,15 +787,26 @@ void MapIndex::fixUIDs (World* world)
   std::map<std::size_t, std::map<std::size_t, std::forward_list<ModelInstance*>>> modelPerTile;
   std::map<std::size_t, std::map<std::size_t, std::forward_list<WMOInstance*>>> wmoPerTile;
 
+  bool loading_error = false;
+
   for (ModelInstance& instance : models)
   {
     instance.uid = uid++;
 
+    if (!instance.model->finishedLoading())
+    {
+      AsyncLoader::instance().ensure_loaded(instance.model.get());
+    }
+
+    loading_error |= instance.model->loading_failed();
+
+    auto const& extents(instance.extents());
+
     // to avoid going outside of bound
-    std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
-    std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
-    std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
-    std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
+    std::size_t sx = std::max((std::size_t)(extents[0].x / TILESIZE), (std::size_t)0);
+    std::size_t sz = std::max((std::size_t)(extents[0].z / TILESIZE), (std::size_t)0);
+    std::size_t ex = std::min((std::size_t)(extents[1].x / TILESIZE), (std::size_t)63);
+    std::size_t ez = std::min((std::size_t)(extents[1].z / TILESIZE), (std::size_t)63);
 
 
     for (std::size_t z = sz; z <= ez; ++z)
@@ -782,7 +821,7 @@ void MapIndex::fixUIDs (World* world)
   for (WMOInstance& instance : wmos)
   {
     instance.mUniqueID = uid++;
-
+    // no need to check if the loading is finished since the extents are stored inside the adt
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
     std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
@@ -798,8 +837,13 @@ void MapIndex::fixUIDs (World* world)
     }
   }
 
+  if (cancel_on_model_loading_error && loading_error)
+  {
+    return uid_fix_status::failed;
+  }
+
   // save the current highest guid
-  highestGUID = uid - 1;
+  highestGUID = uid ? uid - 1 : 0;
 
   // load each tile without the models and
   // save them with the models from modelPerTile / wmoPerTile
@@ -807,7 +851,7 @@ void MapIndex::fixUIDs (World* world)
   {
     for (int x = 0; x < 64; ++x)
     {
-      if (!mTiles[z][x].flags & 1)
+      if (!(mTiles[z][x].flags & 1))
       {
         continue;
       }
@@ -819,7 +863,8 @@ void MapIndex::fixUIDs (World* world)
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
       // load the tile without the models
-      MapTile tile(x, z, filename.str(), mBigAlpha, false, world);
+      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), world);
+      tile.finishLoading();
 
       std::map<int, ModelInstance> modelInst;
       std::map<int, WMOInstance> wmoInst;
@@ -843,10 +888,14 @@ void MapIndex::fixUIDs (World* world)
       // restore the original map in World
       std::swap(world->mModelInstances, modelInst);
       std::swap(world->mWMOInstances, wmoInst);
+      
     }
   }
 
+  // override the db highest uid if used
   saveMaxUID();
+
+  return loading_error ? uid_fix_status::done_with_errors : uid_fix_status::done;
 }
 
 void MapIndex::searchMaxUID()
@@ -865,44 +914,42 @@ void MapIndex::searchMaxUID()
       highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
     }
   }
+
   saveMaxUID();
 }
 
 void MapIndex::saveMaxUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  if (Settings::getInstance()->mysql) {
-  if (mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, _map_id))
+  QSettings settings;
+
+  if (settings->value ("project/mysql/enabled", false).toBool())
   {
-	  mysql::updateUIDinDB(*Settings::getInstance()->mysql, _map_id, highestGUID);
+    if (mysql::hasMaxUIDStoredDB(_map_id))
+    {
+	    mysql::updateUIDinDB(_map_id, highestGUID);
+    }
+    else
+    {
+	    mysql::insertUIDinDB(_map_id, highestGUID);
+    }
   }
-  else
-  {
-	  mysql::insertUIDinDB(*Settings::getInstance()->mysql, _map_id, highestGUID);
-  }
-  }
-  else
-  {
-    // save the max UID on the disc
-    uid_storage::getInstance()->saveMaxUID (_map_id, highestGUID);
-  }
-#else
-  // save the max UID on the disc
-  uid_storage::getInstance()->saveMaxUID (_map_id, highestGUID);
 #endif
+  // save the max UID on the disk (always save to sync with the db if used
+  uid_storage::saveMaxUID (_map_id, highestGUID);
 }
 
 void MapIndex::loadMaxUID()
 {
+  highestGUID = uid_storage::getMaxUID (_map_id);
 #ifdef USE_MYSQL_UID_STORAGE
-if (Settings::getInstance()->mysql) {
-  highestGUID = mysql::getGUIDFromDB(*Settings::getInstance()->mysql, _map_id);
-}
-else
-{
-  highestGUID = uid_storage::getInstance()->getMaxUID (_map_id);
-}
-#else
-  highestGUID = uid_storage::getInstance()->getMaxUID (_map_id);
+  QSettings settings;
+
+  if (settings->value ("project/mysql/enabled", false).toBool())
+  {
+    highestGUID = std::max(mysql::getGUIDFromDB(map_id), highestGUID);
+    // save to make sure the db and disk uid are synced
+    saveMaxUID();
+  }
 #endif
 }

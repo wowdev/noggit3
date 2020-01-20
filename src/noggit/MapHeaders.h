@@ -4,16 +4,24 @@
 
 #include <cstdint>
 
-enum eMCNKFlags
+union mcnk_flags
 {
-  FLAG_SHADOW = 0x1,
-  FLAG_IMPASS = 0x2,
-  FLAG_LQ_RIVER = 0x4,
-  FLAG_LQ_OCEAN = 0x8,
-  FLAG_LQ_MAGMA = 0x10,
-  FLAG_LQ_SLIME = 0x20,
-  FLAG_MCCV = 0x40,
-  FLAG_do_not_fix_alpha_map = 0x8000
+  uint32_t value;
+  struct
+  {
+    uint32_t has_mcsh : 1;
+    uint32_t impass : 1;
+    uint32_t lq_river : 1;
+    uint32_t lq_ocean : 1;
+    uint32_t lq_magma : 1;
+    uint32_t lq_slime : 1;
+    uint32_t has_mccv : 1;
+    uint32_t unknown_0x80 : 1;
+    uint32_t : 7;
+    uint32_t do_not_fix_alpha_map : 1;
+    uint32_t high_res_holes : 1;
+    uint32_t : 15;
+  }flags;
 };
 
 enum eMPHDFlags
@@ -148,7 +156,7 @@ struct ENTRY_MCLY
   uint32_t  textureID;
   uint32_t  flags;
   uint32_t  ofsAlpha;
-  uint32_t  effectID;
+  uint32_t  effectID = 0xFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
 };
 
 #include <string.h> // memcpy()
@@ -193,28 +201,71 @@ struct MH2O_Information{
   }
 };
 
-struct MH2O_HeightMask
+struct mh2o_uv
 {
-  float mHeightValues[9][9];
-  unsigned char mTransparency[9][9];
+  mh2o_uv(std::uint16_t x = 0, std::uint16_t y = 0) : x(x), y(y) {}
 
-  MH2O_HeightMask()
-  {
-    memset(mHeightValues, 0, 9 * 9 * sizeof(float));
-    memset(mTransparency, 0, 9 * 9 * sizeof(unsigned char));
-  }
+  std::uint16_t x;
+  std::uint16_t y;
 };
 
 struct MH2O_Render
 {
-  unsigned char mask[8]; //render mask
-  unsigned char fatigue[8]; //fatigue mask?
+  // seems to be usable as visibility information (as per https://wowdev.wiki/ADT/v18#MH2O_chunk_.28WotLK.2B.29)
+  std::uint64_t fishable = 0xFFFFFFFFFFFFFFFF;
+  std::uint64_t fatigue = 0;
+};
 
-  MH2O_Render()
+struct mclq_vertex
+{
+  union
   {
-    memset(mask, 255, 8);
-    memset(fatigue, 0, 8);
-  }
+    struct water_vert
+    {
+      std::uint8_t depth;
+      std::uint8_t flow_0_pct;
+      std::uint8_t flow_1_pct;
+      std::uint8_t filler;
+    } water;
+    struct magma_vert
+    {
+      std::uint16_t x;
+      std::uint16_t y;
+    } magma;
+  };
+
+  float height;
+};
+
+struct mclq_tile
+{
+  std::uint8_t liquid_type : 3;
+  // it's technically the 4 first bits set to 1 (0xF) but it's easier to use this way
+  std::uint8_t dont_render : 1;
+  std::uint8_t flag_0x10 : 1;
+  std::uint8_t flag_0x20 : 1;
+  std::uint8_t fishable : 1;
+  std::uint8_t fatigue : 1;
+};
+
+struct mclq_flowvs
+{
+  float pos[3];
+  float radius;
+  float dir[3];
+  float velocity;
+  float amplitude;
+  float frequency;
+};
+
+struct mclq
+{
+  float min_height;
+  float max_height;
+  mclq_vertex vertices[9 * 9];
+  mclq_tile tiles[8 * 8];
+  std::uint32_t n_flowvs;
+  mclq_flowvs flowvs[2]; // always 2 regardless of the n_flowvs value
 };
 
 struct MPHD

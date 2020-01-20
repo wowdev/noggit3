@@ -1,12 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Misc.h>
+#include <noggit/Selection.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/WMOInstance.h>
 
 #include <iomanip>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 namespace misc
 {
@@ -78,6 +82,33 @@ namespace misc
     return getShortestDist(pos.x, pos.z, square_pos.x, square_pos.z, unitSize);
   }
 
+  bool square_is_in_circle(float x, float z, float radius, float square_x, float square_z, float square_size)
+  {
+    float px, pz;
+
+    if (std::abs(square_x - x) < std::abs(square_x + square_size - x))
+    {
+      px = square_x + square_size;
+    }
+    else
+    {
+      px = square_x;
+    }
+
+    if (std::abs(square_z - z) < std::abs(square_z + square_size - z))
+    {
+      pz = square_z + square_size;
+    }
+    else
+    {
+      pz = square_z;
+    }
+
+    // check if the furthest is in the circle
+    float d = dist(x, z, px, pz);
+    return d <= radius;
+  }
+
   bool rectOverlap(math::vector_3d const* r1, math::vector_3d const* r2)
   {
     return r1[0].x <= r2[1].x
@@ -103,6 +134,60 @@ namespace misc
     min.z = std::min(min.z, point.z);
     max.z = std::max(max.z, point.z);
   }
+
+  std::vector<math::vector_3d> intersection_points(math::vector_3d const& vmin, math::vector_3d const& vmax)
+  {
+    std::vector<math::vector_3d> points;
+
+    points.emplace_back (vmin.x, vmin.y, vmin.z);
+    points.emplace_back (vmin.x, vmin.y, vmax.z);
+    points.emplace_back (vmin.x, vmax.y, vmin.z);
+    points.emplace_back (vmin.x, vmax.y, vmax.z);
+    points.emplace_back (vmax.x, vmin.y, vmin.z);
+    points.emplace_back (vmax.x, vmin.y, vmax.z);
+    points.emplace_back (vmax.x, vmax.y, vmin.z);
+    points.emplace_back (vmax.x, vmax.y, vmax.z);
+
+    return points;
+  }
+
+  std::vector<math::vector_3d> box_points(math::vector_3d const& box_min, math::vector_3d const& box_max)
+  {
+    std::vector<math::vector_3d> points;
+
+    points.emplace_back (box_max.x, box_max.y, box_max.z);
+    points.emplace_back (box_max.x, box_max.y, box_min.z);
+    points.emplace_back (box_max.x, box_min.y, box_max.z);
+    points.emplace_back (box_max.x, box_min.y, box_min.z);
+    points.emplace_back (box_min.x, box_max.y, box_max.z);
+    points.emplace_back (box_min.x, box_max.y, box_min.z);
+    points.emplace_back (box_min.x, box_min.y, box_max.z);
+    points.emplace_back (box_min.x, box_min.y, box_min.z);
+
+    return points;
+  }
+
+  math::vector_3d transform_model_box_coords(math::vector_3d const& pos)
+  {
+    return {pos.x, pos.z, -pos.y};
+  }
+
+  std::string normalize_adt_filename(std::string filename)
+  {
+    std::transform (filename.begin(), filename.end(), filename.begin(), ::toupper);
+    std::transform ( filename.begin(), filename.end(), filename.begin()
+                   , [](char c)
+                     {
+                       return c == '/' ? '\\' : c;
+                     }
+                   );
+    return filename;
+  }
+
+  bool vec3d_equals(math::vector_3d const& v1, math::vector_3d const& v2)
+  {
+    return float_equals(v1.x, v2.x) && float_equals(v1.y, v2.y) && float_equals(v1.z, v2.z);
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)
@@ -124,36 +209,14 @@ void minmax(math::vector_3d* a, math::vector_3d* b)
 {
   if (a->x > b->x)
   {
-    float t = b->x;
-    b->x = a->x;
-    a->x = t;
+    std::swap(a->x, b->x);
   }
   if (a->y > b->y)
   {
-    float t = b->y;
-    b->y = a->y;
-    a->y = t;
+    std::swap(a->y, b->y);
   }
   if (a->z > b->z)
   {
-    float t = b->z;
-    b->z = a->z;
-    a->z = t;
+    std::swap(a->z, b->z);
   }
-}
-
-bool checkInside(math::vector_3d extentA[2], math::vector_3d extentB[2])
-{
-  minmax(&extentA[0], &extentA[1]);
-  minmax(&extentB[0], &extentB[1]);
-
-  return pointInside(extentA[0], extentB) ||
-    pointInside(extentA[1], extentB) ||
-    pointInside(extentB[0], extentA) ||
-    pointInside(extentB[1], extentA);
-}
-
-bool checkOriginInside(math::vector_3d extentA[2], math::vector_3d modelPos)
-{
-  return pointInside(modelPos, extentA);
 }

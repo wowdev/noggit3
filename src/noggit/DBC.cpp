@@ -37,8 +37,10 @@ void OpenDBs()
 
 std::string AreaDB::getAreaName(int pAreaID)
 {
-  if (!pAreaID)
+  if (!pAreaID || pAreaID == -1)
+  {
     return "Unknown location";
+  }    
 
   unsigned int regionID = 0;
   std::string areaName = "";
@@ -66,6 +68,25 @@ std::string AreaDB::getAreaName(int pAreaID)
   }
 
   return areaName;
+}
+
+std::uint32_t AreaDB::get_area_parent(int area_id)
+{
+  // todo: differentiate between no parent and error ?
+  if (!area_id || area_id == -1)
+  {
+    return 0;
+  }
+
+  try
+  {
+    AreaDB::Record rec = gAreaDB.getByID(area_id);
+    return rec.getUInt(AreaDB::Region);
+  }
+  catch (AreaDB::NotFound)
+  {
+    return 0;
+  }
 }
 
 std::string MapDB::getMapName(int pMapID)

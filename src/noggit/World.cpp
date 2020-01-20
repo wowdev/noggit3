@@ -6,15 +6,12 @@
 #include <math/frustum.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/ChunkWater.hpp>
-#include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Project.h>
-#include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
 #include <noggit/TileWater.hpp>// tile water
 #include <noggit/WMOInstance.h> // WMOInstance
@@ -23,13 +20,14 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
+
+#include <QtWidgets/QMessageBox>
 
 #include <algorithm>
 #include <cassert>
@@ -43,171 +41,6 @@
 #include <unordered_set>
 #include <utility>
 
-namespace
-{
-  void render_line (math::vector_3d const& p1, math::vector_3d const& p2)
-  {
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-
-    gl.lineWidth(2.5);
-
-    gl.begin(GL_LINES);
-    gl.vertex3fv (p1);
-    gl.vertex3fv (p2);
-    gl.end();
-  }
-
-  void draw_square(math::vector_3d const& pos, float size, float orientation)
-  {
-    float dx1 = size*cos(orientation) - size*sin(orientation);
-    float dx2 = size*cos(orientation + math::constants::pi / 2) - size*sin(orientation + math::constants::pi / 2);
-    float dz1 = size*sin(orientation) + size*cos(orientation);
-    float dz2 = size*sin(orientation + math::constants::pi / 2) + size*cos(orientation + math::constants::pi / 2);
-
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-
-    gl.begin(GL_QUADS);
-    gl.vertex3f(pos.x + dx1, pos.y, pos.z + dz1);
-    gl.vertex3f(pos.x + dx2, pos.y, pos.z + dz2);
-    gl.vertex3f(pos.x - dx1, pos.y, pos.z - dz1);
-    gl.vertex3f(pos.x - dx2, pos.y, pos.z - dz2);
-    gl.vertex3f(pos.x + dx1, pos.y, pos.z + dz1);
-    gl.end();
-  }
-
-  void render_square(math::vector_3d const& pos, float radius, float orientation, float inner_radius = 0.0f, bool useInnerRadius = true)
-  {
-    draw_square(pos, radius, orientation);
-
-    if (useInnerRadius)
-    {
-      draw_square(pos, inner_radius, orientation);
-    }
-  }
-
-
-  std::size_t const sphere_segments (15);
-  void draw_sphere_point (int i, int j, float radius)
-  {
-    static math::radians const drho (math::constants::pi / sphere_segments);
-    static math::radians const dtheta (2.0f * drho._);
-
-    math::radians const rho (i * drho._);
-    math::radians const theta (j * dtheta._);
-    gl.vertex3f ( math::cos (theta) * math::sin (rho) * radius
-                , math::sin (theta) * math::sin (rho) * radius
-                , math::cos (rho) * radius
-                );
-  }
-  void draw_sphere (float radius)
-  {
-    for (int i = 1; i < sphere_segments; i++)
-    {
-      gl.begin (GL_LINE_LOOP);
-      for (int j = 0; j < sphere_segments; j++)
-      {
-        draw_sphere_point (i, j, radius);
-      }
-      gl.end();
-    }
-
-    for (int j = 0; j < sphere_segments; j++)
-    {
-      gl.begin(GL_LINE_STRIP);
-      for (int i = 0; i <= sphere_segments; i++)
-      {
-        draw_sphere_point (i, j, radius);
-      }
-      gl.end();
-    }
-  }
-  void render_sphere (::math::vector_3d const& position, float radius, math::vector_4d const& color)
-  {
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-
-    gl.color4f(color.x, color.y, color.z, color.w);
-
-    opengl::scoped::matrix_pusher matrix;
-
-    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
-
-    draw_sphere (0.3f);
-    draw_sphere (radius);
-  }
-
-  void draw_disk_point (float radius, math::radians& arc, math::radians const& angle, math::radians const& orientation)
-  {
-    float x = radius * math::sin(arc);
-    float y = radius * math::cos(arc);
-    float z = (y * math::cos(orientation) + x * math::sin(orientation)) * math::tan(angle);;
-    gl.vertex3f (x, y, z);
-  }
-  void draw_disk (float radius, bool stipple, math::radians const& angle, math::radians const& orientation)
-  {
-    int const slices (std::max (35.0f, radius * 1.5f));
-    static math::radians const max (2.0f * math::constants::pi);
-
-    float const stride (max._ / slices);
-
-    if (stipple)
-    {
-      gl.enable(GL_LINE_STIPPLE);
-      gl.lineStipple(10, 0xAAAA);
-    }
-
-	  gl.lineWidth(3.0f);
-
-      gl.begin (GL_LINE_LOOP);
-      for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
-      {
-        draw_disk_point (radius, arc, angle, orientation);
-      }
-      gl.end();
-
-	  gl.lineWidth(1.0f);
-
-    if (stipple)
-    {
-      gl.disable(GL_LINE_STIPPLE);
-    }
-  }
-
-  void render_disk( ::math::vector_3d const& position
-                  , float radius
-                  , math::vector_4d const& color
-                  , bool stipple = false
-                  , math::radians const& angle = math::radians(0.0f)
-                  , math::radians const& orientation = math::radians(0.0f)
-                  )
-  {
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
-
-    {
-      opengl::scoped::matrix_pusher matrix;
-      opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-      gl.colorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-      opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_TRUE> color_material;
-
-      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
-      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation_xyz, math::degrees::vec3 {math::degrees (90.0f), math::degrees (0.0f), math::degrees (0.0f)}).transposed());
-
-      gl.color4f(color.x, color.y, color.z, color.w);
-
-      draw_disk (radius, stipple, angle, orientation);
-    }
-
-    {
-      opengl::scoped::matrix_pusher matrix;
-
-      gl.multMatrixf(math::matrix_4x4(math::matrix_4x4::translation, position).transposed());
-
-      draw_sphere(0.3f);
-    }
-
-  }
-}
 
 bool World::IsEditableWorld(int pMapId)
 {
@@ -258,8 +91,6 @@ bool World::IsEditableWorld(int pMapId)
 World::World(const std::string& name, int map_id)
   : mapIndex (name, map_id, this)
   , horizon(name)
-  , mCurrentSelection()
-  , SelectionMode(false)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
   , detailtexcoords(0)
@@ -272,18 +103,361 @@ World::World(const std::string& name, int map_id)
   , culldistance(fogdistance)
   , skies(nullptr)
   , outdoorLightStats(OutdoorLightStats())
+  , _current_selection()
+  , _settings (new QSettings())
+  , _view_distance(_settings->value ("view_distance", 1000.f).toFloat())
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
 
-bool World::IsSelection(int pSelectionType)
+void World::update_selection_pivot()
 {
-  return HasSelection() && mCurrentSelection->which() == pSelectionType;
+  if (has_multiple_model_selected())
+  {
+    math::vector_3d pivot;
+    int model_count = 0;
+
+    for (auto const& entry : _current_selection)
+    {
+      if (entry.which() == eEntry_Model)
+      {
+        pivot += boost::get<selected_model_type>(entry)->pos;
+        model_count++;
+      }
+      else if (entry.which() == eEntry_WMO)
+      {
+        pivot += boost::get<selected_wmo_type>(entry)->pos;
+        model_count++;
+      }
+    }
+
+    _multi_select_pivot = pivot / static_cast<float>(model_count);
+  }
+  else
+  {
+    _multi_select_pivot = boost::none;
+  }
 }
 
-bool World::HasSelection()
+bool World::is_selection(int pSelectionType, selection_type selection) const
 {
-  return !!mCurrentSelection;
+  return has_selection() && selection.which() == pSelectionType;
+}
+
+bool World::is_selected(selection_type selection) const
+{
+  if (selection.which() == eEntry_Model)
+  {
+    uint uid = boost::get<selected_model_type>(selection)->uid;
+    auto const& it = std::find_if(_current_selection.begin()
+                                  , _current_selection.end()
+                                  , [uid] (selection_type type)
+    {
+      return type.type() == typeid(selected_model_type)
+        && boost::get<selected_model_type>(type)->uid == uid;
+    }
+    );
+
+    if (it != _current_selection.end())
+    {
+      return true;
+    }
+  }
+  else if (selection.which() == eEntry_WMO)
+  {
+    uint uid = boost::get<selected_wmo_type>(selection)->mUniqueID;
+    auto const& it = std::find_if(_current_selection.begin()
+                            , _current_selection.end()
+                            , [uid] (selection_type type)
+    {
+      return type.type() == typeid(selected_wmo_type)
+        && boost::get<selected_wmo_type>(type)->mUniqueID == uid;
+    }
+    );
+    if (it != _current_selection.end())
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+boost::optional<selection_type> World::get_last_selected_model() const
+{
+  auto const it
+    ( std::find_if ( _current_selection.rbegin()
+                   , _current_selection.rend()
+                   , [&] (selection_type const& entry)
+                     {
+                       return entry.which() != eEntry_MapChunk;
+                     }
+                   )
+    );
+
+  return it == _current_selection.rend()
+    ? boost::optional<selection_type>() : *it;
+}
+
+void World::set_current_selection(selection_type entry)
+{
+  _current_selection.clear();
+  _current_selection.push_back(entry);
+  _multi_select_pivot = boost::none;
+
+  _selected_model_count = entry.which() == eEntry_MapChunk ? 0 : 1;
+}
+
+void World::add_to_selection(selection_type entry)
+{
+  if (entry.which() != eEntry_MapChunk)
+  {
+    _selected_model_count++;
+  }
+
+  _current_selection.push_back(entry);
+  update_selection_pivot();
+}
+
+void World::remove_from_selection(selection_type entry)
+{
+  std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
+  if (position != _current_selection.end())
+  {
+    if (entry.which() != eEntry_MapChunk)
+    {
+      _selected_model_count--;
+    }
+
+    _current_selection.erase(position);
+    update_selection_pivot();
+  }
+}
+
+void World::reset_selection()
+{
+  _current_selection.clear();
+  _multi_select_pivot = boost::none;
+  _selected_model_count = 0;
+}
+
+void World::scale_selected_models(float v, m2_scaling_type type)
+{
+  for (auto& entry : _current_selection)
+  {
+    if (entry.which() == eEntry_Model)
+    {
+      ModelInstance* mi = boost::get<selected_model_type>(entry);
+
+      float scale = mi->scale;
+
+      switch (type)
+      {
+        case World::m2_scaling_type::set:
+          scale = v;
+          break;
+        case World::m2_scaling_type::add:
+          scale += v;
+          break;
+        case World::m2_scaling_type::mult:
+          scale *= v;
+          break;
+      }
+
+      // if the change is too small, do nothing
+      if (std::abs(scale - mi->scale) < ModelInstance::min_scale())
+      {
+        continue;
+      }
+
+      updateTilesModel(mi, model_update::remove);
+      mi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
+      mi->recalcExtents();
+      updateTilesModel(mi, model_update::add);
+    }
+  }
+}
+
+void World::move_selected_models(float dx, float dy, float dz)
+{
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    math::vector_3d& pos = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->pos
+      : boost::get<selected_wmo_type>(entry)->pos
+      ;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    pos.x += dx;
+    pos.y += dy;
+    pos.z += dz;
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+
+  update_selection_pivot();
+}
+
+void World::set_selected_models_pos(math::vector_3d const& pos, bool change_height)
+{
+  // move models relative to the pivot when several are selected
+  if (has_multiple_model_selected())
+  {
+    math::vector_3d diff = pos - _multi_select_pivot.get();
+
+    if (change_height)
+    {
+      move_selected_models(diff);
+    }
+    else
+    {
+      move_selected_models(diff.x, 0.f, diff.z);
+    }
+
+    return;
+  }
+
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    if (entry_is_m2)
+    {
+      ModelInstance* mi = boost::get<selected_model_type>(entry);
+      mi->pos = pos;
+      mi->recalcExtents();
+    }
+    else
+    {
+      WMOInstance* wi = boost::get<selected_wmo_type>(entry);
+      wi->pos = pos;
+      wi->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+
+  update_selection_pivot();
+}
+
+void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
+{
+  math::vector_3d dir_change(rx._, ry._, rz._);
+  bool has_multi_select = has_multiple_model_selected();
+
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    if (use_pivot && has_multi_select)
+    {
+      math::vector_3d& pos = entry_is_m2
+        ? boost::get<selected_model_type>(entry)->pos
+        : boost::get<selected_wmo_type>(entry)->pos
+        ;
+
+      math::vector_3d& dir = entry_is_m2
+        ? boost::get<selected_model_type>(entry)->dir
+        : boost::get<selected_wmo_type>(entry)->dir
+        ;
+
+      math::vector_3d diff_pos = pos - _multi_select_pivot.get();
+      math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
+
+      pos += rot_result - diff_pos;
+      dir += dir_change;
+    }
+    else
+    {
+      math::vector_3d& dir = entry_is_m2
+        ? boost::get<selected_model_type>(entry)->dir
+        : boost::get<selected_wmo_type>(entry)->dir
+        ;
+
+      dir += dir_change;
+    }
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+}
+
+void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
+{
+  math::vector_3d new_dir(rx._, ry._, rz._);
+
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    math::vector_3d& dir = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->dir
+      : boost::get<selected_wmo_type>(entry)->dir
+      ;
+
+    dir = new_dir;
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
 }
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
@@ -355,89 +529,15 @@ void World::initDisplay()
   ol = std::make_unique<OutdoorLighting> ("World\\dnc.db");
 }
 
-void World::outdoorLighting()
-{
-  math::vector_4d black(0, 0, 0, 0);
-  math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-
-  float di = outdoorLightStats.dayIntensity;
-  //float ni = outdoorLightStats.nightIntensity;
-
-  math::vector_3d dd = outdoorLightStats.dayDir;
-  // HACK: let's just keep the light source in place for now
-  //math::vector_4d pos(-1, 1, -1, 0);
-  math::vector_4d pos(-dd.x, -dd.z, dd.y, 0.0f);
-  math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
-  gl.lightfv(GL_LIGHT0, GL_AMBIENT, black);
-  gl.lightfv(GL_LIGHT0, GL_DIFFUSE, col);
-  gl.lightfv(GL_LIGHT0, GL_POSITION, pos);
-}
-
-void World::outdoorLights(bool on)
-{
-  float di = outdoorLightStats.dayIntensity;
-  float ni = outdoorLightStats.nightIntensity;
-
-  if (on) {
-    math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    if (di>0) {
-      gl.enable(GL_LIGHT0);
-    }
-    else {
-      gl.disable(GL_LIGHT0);
-    }
-    if (ni>0) {
-      gl.enable(GL_LIGHT1);
-    }
-    else {
-      gl.disable(GL_LIGHT1);
-    }
-  }
-  else {
-    math::vector_4d ambient(0, 0, 0, 1);
-    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    gl.disable(GL_LIGHT0);
-    gl.disable(GL_LIGHT1);
-  }
-}
-
-void World::setupFog (bool draw_fog)
-{
-  if (draw_fog) {
-
-    //float fogdist = 357.0f; // minimum draw distance in wow
-    //float fogdist = 777.0f; // maximum draw distance in wow
-
-    float fogdist = fogdistance;
-    float fogstart = 0.5f;
-
-    culldistance = fogdist;
-
-    //FOG_COLOR
-    math::vector_4d fogcolor(skies->colorSet[FOG_COLOR], 1);
-    gl.fogfv(GL_FOG_COLOR, fogcolor);
-    //! \todo  retreive fogstart and fogend from lights.lit somehow
-    gl.fogf(GL_FOG_END, fogdist);
-    gl.fogf(GL_FOG_START, fogdist * fogstart);
-
-    gl.enable(GL_FOG);
-  }
-  else {
-    gl.disable(GL_FOG);
-    culldistance = Settings::getInstance()->mapDrawDistance;
-  }
-}
-
-void World::draw ( math::vector_3d const& cursor_pos
+void World::draw ( math::matrix_4x4 const& model_view
+                 , math::matrix_4x4 const& projection
+                 , math::vector_3d const& cursor_pos
                  , math::vector_4d const& cursor_color
                  , int cursor_type
-                 , float brushRadius
-                 , float hardness
+                 , float brush_radius
                  , bool show_unpaintable_chunks
                  , bool draw_contour
-                 , float innerRadius
+                 , float inner_radius_ratio
                  , math::vector_3d const& ref_pos
                  , float angle
                  , float orientation
@@ -448,6 +548,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_areaid_overlay
                  , editing_mode terrainMode
                  , math::vector_3d const& camera_pos
+                 , bool camera_moved
                  , bool draw_mfbo
                  , bool draw_wireframe
                  , bool draw_lines
@@ -459,12 +560,12 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_model_animations
                  , bool draw_hole_lines
                  , bool draw_models_with_box
-                 , std::unordered_set<WMO*> const& hidden_map_objects
-                 , std::unordered_set<Model*> const& hidden_models
+                 , bool draw_hidden_models
                  , std::map<int, misc::random_color>& area_id_colors
                  , bool draw_fog
                  , eTerrainType ground_editing_brush
                  , int water_layer
+                 , display_mode display
                  )
 {
   if (!_display_initialized)
@@ -473,427 +574,666 @@ void World::draw ( math::vector_3d const& cursor_pos
     _display_initialized = true;
   }
 
-  math::frustum const frustum
-    (::opengl::matrix::model_view() * ::opengl::matrix::projection());
+  math::matrix_4x4 const mvp(model_view * projection);
+  math::frustum const frustum (mvp);
 
-  bool hadSky = false;
-  if (draw_wmo || mapIndex.hasAGlobalWMO())
+  if (!_m2_program)
   {
-    for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-    {
-      hadSky = it->second.wmo->drawSkybox ( camera_pos
-                                          , it->second.extents[0]
-                                          , it->second.extents[1]
-                                          , draw_fog
-                                          , animtime
-                                          );
-      if (hadSky)
-      {
-        break;
-      }
-    }
+    _m2_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+          }
+      );
+
+    _m2_instanced_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+          }
+      );
   }
 
-  gl.enable(GL_CULL_FACE);
-  gl.disable(GL_BLEND);
-  opengl::texture::disable_texture();
   gl.disable(GL_DEPTH_TEST);
-  gl.disable(GL_FOG);
 
   int daytime = static_cast<int>(time) % 2880;
   outdoorLightStats = ol->getLightStats(daytime);
-  skies->initSky(camera_pos, daytime);
 
-  if (!hadSky)
-    hadSky = skies->drawSky ( camera_pos
-                            , outdoorLightStats.nightIntensity
-                            , draw_fog
-                            , animtime
-                            );
+  math::vector_3d light_dir = outdoorLightStats.dayDir;
+  light_dir = {-light_dir.y, -light_dir.z, -light_dir.x};
+  // todo: figure out why I need to use a different light vector for the terrain
+  math::vector_3d terrain_light_dir = {-light_dir.z, light_dir.y, -light_dir.x};
 
-  // clearing the depth buffer only - color buffer is/has been overwritten anyway
-  // unless there is no sky OR skybox
-  GLbitfield clearmask = GL_DEPTH_BUFFER_BIT;
-  if (!hadSky)   clearmask |= GL_COLOR_BUFFER_BIT;
-  gl.clear(clearmask);
+  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
+  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
 
-  opengl::texture::disable_texture();
-
-  outdoorLighting();
-  outdoorLights(true);
-
-  gl.fogi(GL_FOG_MODE, GL_LINEAR);
-  setupFog (draw_fog);
-
-  // Draw verylowres heightmap
-  if (draw_fog && draw_terrain) {
-    _horizon_render->draw (&mapIndex, skies->colorSet[FOG_COLOR], culldistance, frustum, camera_pos);
-  }
-
-  // Draw height map
-  gl.enableClientState(GL_VERTEX_ARRAY);
-  gl.enableClientState(GL_NORMAL_ARRAY);
-
-  gl.enable(GL_DEPTH_TEST);
-  gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
-  gl.enable(GL_LIGHTING);
-
-  gl.enable(GL_COLOR_MATERIAL);
-  //gl.colorMaterial(GL_FRONT, GL_DIFFUSE);
-  gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  gl.color4f(1, 1, 1, 1);
-
-  gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.1f, 0.1f, 0.1f, 0.1f));
-  gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 64);
-
-  gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  gl.clientActiveTexture(GL_TEXTURE0);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  gl.texCoordPointer (detailtexcoords, 2, GL_FLOAT, 0, 0);
-
-  gl.clientActiveTexture(GL_TEXTURE1);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  gl.texCoordPointer (alphatexcoords, 2, GL_FLOAT, 0, 0);
-
-  gl.clientActiveTexture(GL_TEXTURE0);
-
-  // height map w/ a zillion texture passes
-  if (draw_terrain)
+  // only draw the sky in 3D
+  if(display == display_mode::in_3D)
   {
-    for (MapTile* tile : mapIndex.loaded_tiles())
+    opengl::scoped::use_program m2_shader {*_m2_program.get()};
+
+    m2_shader.uniform("model_view", model_view);
+    m2_shader.uniform("projection", projection);
+    m2_shader.uniform("tex1", 0);
+    m2_shader.uniform("tex2", 1);
+
+    m2_shader.uniform("draw_fog", 0);
+
+    m2_shader.uniform("light_dir", light_dir);
+    m2_shader.uniform("diffuse_color", diffuse_color);
+    m2_shader.uniform("ambient_color", ambient_color);
+
+    bool hadSky = false;
+
+    if (draw_wmo || mapIndex.hasAGlobalWMO())
     {
-      tile->draw ( frustum
-                 , culldistance
+      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+      {
+        if (!it->second.wmo->finishedLoading() || !it->second.wmo->skybox)
+        {
+          continue;
+        }
+        if (it->second.group_extents.empty())
+        {
+          it->second.recalcExtents();
+        }
+
+        hadSky = it->second.wmo->draw_skybox ( model_view
+                                             , camera_pos
+                                             , m2_shader
+                                             , frustum
+                                             , culldistance
+                                             , animtime
+                                             , draw_model_animations
+                                             , it->second.extents[0]
+                                             , it->second.extents[1]
+                                             , it->second.group_extents
+                                             );
+        if (hadSky)
+        {
+          break;
+        }
+      }
+    }
+
+    skies->update_sky_colors(camera_pos, daytime);
+
+    if (!hadSky)
+    {
+      skies->draw( model_view
+                 , projection
                  , camera_pos
-                 , show_unpaintable_chunks
-                 , draw_contour
-                 , draw_paintability_overlay
-                 , draw_chunk_flag_overlay
-                 , draw_areaid_overlay
-                 , draw_wireframe
-                 , cursor_type
-                 , area_id_colors
-                 , math::vector_4d {skies->colorSet[WATER_COLOR_DARK] * 0.3f, 1.f}
-                 , mCurrentSelection
+                 , m2_shader
+                 , frustum
+                 , culldistance
                  , animtime
+                 , draw_model_animations
+                 , outdoorLightStats
                  );
     }
   }
 
-  // Selection circle
-  if (this->IsSelection(eEntry_MapChunk))
+  culldistance = draw_fog ? fogdistance : _view_distance;
+
+  // Draw verylowres heightmap
+  if (draw_fog && draw_terrain)
   {
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    _horizon_render->draw (model_view, projection, &mapIndex, skies->color_set[FOG_COLOR], culldistance, frustum, camera_pos, display);
+  }
 
-    gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-    gl.disable(GL_CULL_FACE);
-    //gl.depthMask(false);
-    //gl.disable(GL_DEPTH_TEST);
+  gl.enable(GL_DEPTH_TEST);
+  gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
+  // height map w/ a zillion texture passes
+  if (draw_terrain)
+  {
+    if (!_mcnk_program)
     {
-      render_square(cursor_pos, brushRadius / 2.0f, 0.0f, brushRadius / 2.0f * innerRadius, true);
+      _mcnk_program.reset
+        ( new opengl::program
+            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("terrain_vs") }
+            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("terrain_fs") }
+            }
+        );
+    }
+
+    opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
+
+    mcnk_shader.uniform("model_view", model_view);
+    mcnk_shader.uniform("projection", projection);
+
+    mcnk_shader.uniform ("draw_lines", (int)draw_lines);
+    mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
+    mcnk_shader.uniform("draw_areaid_overlay", (int)draw_areaid_overlay);
+    mcnk_shader.uniform ("draw_terrain_height_contour", (int)draw_contour);
+
+    // the flag stays on if the last chunk drawn before leaving the editing tool has it
+    if (!draw_chunk_flag_overlay)
+    {
+      mcnk_shader.uniform ("draw_impassible_flag", 0);
+    }
+
+    mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
+    mcnk_shader.uniform ("wireframe_type", _settings->value("wireframe/type", 0).toInt());
+    mcnk_shader.uniform ("wireframe_radius", _settings->value("wireframe/radius", 1.5f).toFloat());
+    mcnk_shader.uniform ("wireframe_width", _settings->value ("wireframe/width", 1.f).toFloat());
+    // !\ todo store the color somewhere ?
+    QColor c = _settings->value("wireframe/color").value<QColor>();
+    math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+    mcnk_shader.uniform ("wireframe_color", wireframe_color);
+
+    mcnk_shader.uniform ("draw_fog", (int)draw_fog);
+    mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
+    // !\ todo use light dbcs values
+    mcnk_shader.uniform ("fog_end", fogdistance);
+    mcnk_shader.uniform ("fog_start", 0.5f);
+    mcnk_shader.uniform ("camera", camera_pos);
+
+    mcnk_shader.uniform("light_dir", terrain_light_dir);
+    mcnk_shader.uniform("diffuse_color", diffuse_color);
+    mcnk_shader.uniform("ambient_color", ambient_color);
+
+
+    if (cursor_type == 4)
+    {
+      mcnk_shader.uniform ("draw_cursor_circle", 1);
+      mcnk_shader.uniform ("cursor_position", cursor_pos);
+      mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
+      mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
+      mcnk_shader.uniform ("cursor_color", cursor_color);
     }
     else
     {
-      if (cursor_type == 1)
-      {
-        render_disk(cursor_pos, brushRadius, cursor_color);
-        if (innerRadius >= 0.01f)
-        {
-          render_disk(cursor_pos, brushRadius * innerRadius, cursor_color, true);
-        }
-        if (hardness >= 0.01f)
-        {
-          render_disk(cursor_pos, brushRadius * hardness, cursor_color, true);
-        }
-      }
-      else if (cursor_type == 2)
-      {
-        render_sphere(cursor_pos, brushRadius, cursor_color);
-      }
+      mcnk_shader.uniform ("draw_cursor_circle", 0);
     }
-    if (angled_mode && !use_ref_pos)
+
+    mcnk_shader.uniform("alphamap", 0);
+    mcnk_shader.uniform("tex0", 1);
+    mcnk_shader.uniform("tex1", 2);
+    mcnk_shader.uniform("tex2", 3);
+    mcnk_shader.uniform("tex3", 4);
+    mcnk_shader.uniform("shadow_map", 5);
+
+    mcnk_shader.uniform("tex_anim_0", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_1", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_2", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_3", math::vector_2d());
+
+    for (MapTile* tile : mapIndex.loaded_tiles())
     {
-      math::degrees o = math::degrees(orientation);
-      float x = brushRadius * cos(o);
-      float z = brushRadius * sin(o);
-      float h = brushRadius * tan(math::degrees(angle));
-      math::vector_3d const dest1 = cursor_pos + math::vector_3d(x, 0.f, z);
-      math::vector_3d const dest2 = cursor_pos + math::vector_3d(x, h, z);
-      render_line(cursor_pos, dest1);
-      render_line(cursor_pos, dest2);
-      render_line(dest1, dest2);
+      tile->draw ( frustum
+                 , mcnk_shader
+                 , detailtexcoords
+                 , culldistance
+                 , camera_pos
+                 , camera_moved
+                 , show_unpaintable_chunks
+                 , draw_paintability_overlay
+                 , draw_chunk_flag_overlay
+                 , draw_areaid_overlay
+                 , area_id_colors
+                 , animtime
+                 , display
+                 );
     }
 
-    if (use_ref_pos)
-    {
-      render_sphere(ref_pos, 1.0f, cursor_color);
-
-      math::vector_3d pos = cursor_pos;
-
-      if (angled_mode)
-      {
-        // orient + 90.0f because of the rotation done in render_disk
-        math::degrees a(angle), o(orientation+90.0f);
-        pos.y = misc::angledHeight(ref_pos, pos, a, math::degrees(orientation));
-        render_disk(pos, brushRadius, cursor_color, false, a, o);
-        render_line(ref_pos, cursor_pos);
-        render_line(ref_pos, pos);
-      }
-      else
-      {
-        pos.y = ref_pos.y;
-        render_disk(pos, brushRadius, cursor_color);
-      }
-
-      render_line(cursor_pos, pos);
-    }
-
-
-    gl.enable(GL_CULL_FACE);
-    gl.enable(GL_DEPTH_TEST);
-    //GlDepthMask(true);
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+    gl.bindVertexArray(0);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-  if ( terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex )
+  // 4 = terrain shader cursor
+  if(cursor_type != 4)
+  {
+    opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+    gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    noggit::cursor_render::mode mode;
+
+    if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
+    {
+      mode = cursor_type == 2
+        ? noggit::cursor_render::mode::square
+        : noggit::cursor_render::mode::cube;
+    }
+    else if (cursor_type == 2)
+    {
+      mode = noggit::cursor_render::mode::sphere;
+    }
+    else
+    {
+      mode = noggit::cursor_render::mode::circle;
+    }
+
+    _cursor_render.draw(mode, mvp, cursor_color, cursor_pos, brush_radius, inner_radius_ratio);
+  }
+
+  if (terrainMode == editing_mode::object && has_multiple_model_selected())
+  {
+    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 2.f);
+  }
+
+  if (use_ref_pos)
+  {
+    _sphere_render.draw(mvp, ref_pos, cursor_color, 2.f);
+  }
+
+  if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
   {
     float size = (vertexCenter() - camera_pos).length();
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
-    gl.color3f(1.0f, 0.0f, 0.0f);
-    gl.begin(GL_POINTS);
 
     for (math::vector_3d const* pos : _vertices_selected)
     {
-      gl.vertex3f(pos->x, pos->y + 0.1f, pos->z);
+      _sphere_render.draw(mvp, *pos, math::vector_4d(1.f, 0.f, 0.f, 1.f), 0.5f);
     }
-    gl.end();
 
-    gl.color3f(0.0f, 0.0f, 1.0f);
-    render_sphere(vertexCenter(), 2.0f, cursor_color);
-    gl.color3f(1.0f, 1.0f, 1.0f);
+    _sphere_render.draw(mvp, vertexCenter(), cursor_color, 2.f);
   }
 
+  std::unordered_map<std::string, std::vector<ModelInstance*>> _wmo_doodads;
 
-  if (draw_lines)
+  bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
+  if (draw_doodads_wmo)
   {
-    opengl::program program { { GL_VERTEX_SHADER
-                              , R"code(
-#version 110
-
-attribute vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-void main()
-{
-  gl_Position = projection * model_view * (position + vec4 (0.0, 0.5, 0.0, 0.0));
-}
-)code"
-                              }
-                            , { GL_FRAGMENT_SHADER
-                              , R"code(
-#version 110
-
-uniform vec4 color;
-
-void main()
-{
-  gl_FragColor = color;
-}
-)code"
-                              }
-                            };
-
-
-    opengl::scoped::use_program line_shader {program};
-
-    line_shader.uniform ("model_view", opengl::matrix::model_view());
-    line_shader.uniform ("projection", opengl::matrix::projection());
-
-    setupFog (draw_fog);
-    for (MapTile* tile : mapIndex.loaded_tiles())
+    for (auto& wmo : mWMOInstances)
     {
-      tile->drawLines (line_shader, frustum, culldistance, camera_pos, draw_hole_lines);
-    }
-  }
-
-  if (draw_mfbo)
-  {
-    //! \todo don't compile on every frame
-    opengl::program const program
-      { { GL_VERTEX_SHADER
-        , R"code(
-#version 110
-
-attribute vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-void main()
-{
-  gl_Position = projection * model_view * position;
-}
-)code"
-        }
-      , { GL_FRAGMENT_SHADER
-        , R"code(
-#version 110
-
-uniform vec4 color;
-
-void main()
-{
-  gl_FragColor = color;
-}
-)code"
-        }
-      };
-    opengl::scoped::use_program mfbo_shader {program};
-
-    mfbo_shader.uniform ("model_view", opengl::matrix::model_view());
-    mfbo_shader.uniform ("projection", opengl::matrix::projection());
-
-    for (MapTile* tile : mapIndex.loaded_tiles())
-    {
-      tile->drawMFBO (mfbo_shader);
-    }
-  }
-
-  opengl::texture::set_active_texture (1);
-  opengl::texture::disable_texture();
-  opengl::texture::set_active_texture (0);
-  opengl::texture::enable_texture();
-
-  gl.color4f(1, 1, 1, 1);
-  gl.enable(GL_BLEND);
-
-  gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
-  gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
-
-  gl.enable(GL_CULL_FACE);
-
-  gl.disable(GL_BLEND);
-  gl.disable(GL_ALPHA_TEST);
-
-  // TEMP: for fucking around with lighting
-  for (opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
-  {
-    const float l_const( 0.0f );
-    const float l_linear( 0.7f );
-    const float l_quadratic( 0.03f );
-
-    gl.lightf(light, GL_CONSTANT_ATTENUATION, l_const);
-    gl.lightf(light, GL_LINEAR_ATTENUATION, l_linear);
-    gl.lightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
-  }
-
-
-  // M2s / models
-  if (draw_models)
-  {
-    if (draw_model_animations)
-      ModelManager::resetAnim();
-
-    gl.enable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
-    for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
-    {
-      bool const is_hidden (hidden_models.count (it->second.model.get()));
-      if (!is_hidden)
+      for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models, display))
       {
-        it->second.draw ( frustum
-                        , culldistance
-                        , camera_pos
-                        , is_hidden
-                        , draw_models_with_box
-                        , draw_fog
-                        , IsSelection (eEntry_Model) && boost::get<selected_model_type> (*GetCurrentSelection())->uid == it->second.uid
-                        , animtime
-                        );
+        _wmo_doodads[doodad->model->filename].push_back(doodad);
       }
     }
   }
 
+  std::unordered_map<Model*, std::size_t> model_with_particles;
 
+  // M2s / models
+  if (draw_models || draw_doodads_wmo)
+  {
+    if (draw_model_animations)
+    {
+      ModelManager::resetAnim();
+    }
 
+    if (need_model_updates)
+    {
+      update_models_by_filename();
+    }
+
+    std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
+
+    {
+      opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
+
+      m2_shader.uniform("model_view", model_view);
+      m2_shader.uniform("projection", projection);
+      m2_shader.uniform("tex1", 0);
+      m2_shader.uniform("tex2", 1);
+
+      m2_shader.uniform("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
+      // !\ todo use light dbcs values
+      m2_shader.uniform("fog_end", fogdistance);
+      m2_shader.uniform("fog_start", 0.5f);
+      m2_shader.uniform("draw_fog", (int)draw_fog);
+
+      m2_shader.uniform("light_dir", light_dir);
+      m2_shader.uniform("diffuse_color", diffuse_color);
+      m2_shader.uniform("ambient_color", ambient_color);
+
+      if (draw_models)
+      {
+        for (auto& it : _models_by_filename)
+        {
+          if (draw_hidden_models || !it.second[0]->model->is_hidden())
+          {
+            it.second[0]->model->draw( model_view
+                                     , it.second
+                                     , m2_shader
+                                     , frustum
+                                     , culldistance
+                                     , camera_pos
+                                     , false
+                                     , animtime
+                                     , draw_model_animations
+                                     , draw_models_with_box
+                                     , model_with_particles
+                                     , model_boxes_to_draw
+                                     , display
+                                     );
+          }
+        }
+      }
+
+      if (draw_doodads_wmo)
+      {
+        for (auto& it : _wmo_doodads)
+        {
+          it.second[0]->model->draw( model_view
+                                   , it.second
+                                   , m2_shader
+                                   , frustum
+                                   , culldistance
+                                   , camera_pos
+                                   , false
+                                   , animtime
+                                   , draw_model_animations
+                                   , draw_models_with_box
+                                   , model_with_particles
+                                   , model_boxes_to_draw
+                                   , display
+                                   );
+        }
+      }
+    }
+
+    if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
+    {
+      if (!_m2_box_program)
+      {
+        _m2_box_program.reset
+          ( new opengl::program
+              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
+              , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
+              }
+          );
+      }
+
+      opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
+
+      m2_box_shader.uniform ("model_view", model_view);
+      m2_box_shader.uniform ("projection", projection);
+
+      opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+      gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+      for (auto& it : model_boxes_to_draw)
+      {
+        math::vector_4d color = it.first->is_hidden()
+                              ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
+                              : ( it.first->use_fake_geometry()
+                                ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
+                                : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
+                                )
+                              ;
+
+        m2_box_shader.uniform("color", color);
+        it.first->draw_box(m2_box_shader, it.second);
+      }
+    }
+
+    for (auto& selection : current_selection())
+    {
+      if (is_selection(eEntry_Model, selection))
+      {
+        auto model = boost::get<selected_model_type>(selection);
+        if (model->is_visible(frustum, culldistance, camera_pos, display))
+        {
+          model->draw_box(model_view, projection, true);
+        }
+      }
+    }
+  }
+
+  if (!_liquid_render)
+  {
+    _liquid_render.emplace();
+  }
+  // set anim time only once per frame
+  {
+    opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
+    water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
+  }
+
+  // todo: find the correct alpha values
+  math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], 0.7f);
+  math::vector_4d ocean_color_dark (skies->color_set[OCEAN_COLOR_DARK], 0.9f);
+  math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], 0.7f);
+  math::vector_4d river_color_dark (skies->color_set[RIVER_COLOR_DARK], 0.9f);
 
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
-    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (1.0f, 1.0f, 1.0f, 1.0f));
-    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
-
-    gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-
-    for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
-      bool const is_hidden (hidden_map_objects.count (it->second.wmo.get()));
-      if (!is_hidden)
+      if (!_wmo_program)
       {
-        it->second.draw ( frustum
-                        , culldistance
-                        , camera_pos
-                        , is_hidden
-                        , draw_wmo_doodads
-                        , draw_fog
-                        , skies->colorSet[WATER_COLOR_LIGHT]
-                        , skies->colorSet[WATER_COLOR_DARK]
-                        , mCurrentSelection
-                        , animtime
-                        , [this] (bool on) { return outdoorLights (on); }
-                        , skies->hasSkies()
-                        , [this] (bool on) { return setupFog (on); }
-                        );
+        _wmo_program.reset
+          ( new opengl::program
+              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
+              , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
+              }
+          );
       }
-    }
 
-    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
-    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
+      opengl::scoped::use_program wmo_program {*_wmo_program.get()};
+
+      wmo_program.uniform("model_view", model_view);
+      wmo_program.uniform("projection", projection);
+      wmo_program.uniform("tex1", 0);
+      wmo_program.uniform("tex2", 1);
+
+      wmo_program.uniform("draw_fog", (int)draw_fog);
+
+      if (draw_fog)
+      {
+        wmo_program.uniform("fog_end", fogdistance);
+        wmo_program.uniform("fog_start", 0.5f);
+        wmo_program.uniform("fog_color", skies->color_set[FOG_COLOR]);
+        wmo_program.uniform("camera", camera_pos);
+      }
+
+      wmo_program.uniform("exterior_light_dir", light_dir);
+      wmo_program.uniform("exterior_diffuse_color", diffuse_color);
+      wmo_program.uniform("exterior_ambient_color", ambient_color);
+
+      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+      {
+        bool is_hidden = it->second.wmo->is_hidden();
+        if (draw_hidden_models || !is_hidden)
+        {
+          it->second.draw( wmo_program
+                         , model_view
+                         , projection
+                         , frustum
+                         , culldistance
+                         , camera_pos
+                         , is_hidden
+                         , draw_wmo_doodads
+                         , draw_fog
+                         , ocean_color_light
+                         , ocean_color_dark
+                         , river_color_light
+                         , river_color_dark
+                         , _liquid_render.get()
+                         , current_selection()
+                         , animtime
+                         , skies->hasSkies()
+                         , display
+          );
+        }
+      }
+
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      gl.enable(GL_CULL_FACE);
+    }
   }
 
-  outdoorLights(true);
-  setupFog (draw_fog);
+  // model particles
+  if (draw_model_animations && !model_with_particles.empty())
+  {
+    if (!_m2_particles_program)
+    {
+      _m2_particles_program.reset
+        ( new opengl::program
+            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
+            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
+            }
+        );
+    }
 
-  gl.color4f(1, 1, 1, 1);
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
+
+    particles_shader.uniform("model_view_projection", mvp);
+    particles_shader.uniform("tex", 0);
+    opengl::texture::set_active_texture(0);
+
+    for (auto& it : model_with_particles)
+    {
+      it.first->draw_particles(model_view, particles_shader, it.second);
+    }
+  }
+
+  if (draw_model_animations && !model_with_particles.empty())
+  {
+    if (!_m2_ribbons_program)
+    {
+      _m2_ribbons_program.reset
+        ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
+          }
+        );
+    }
+
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
+
+    ribbon_shader.uniform("model_view_projection", mvp);
+    ribbon_shader.uniform("tex", 0);
+
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    for (auto& it : model_with_particles)
+    {
+      it.first->draw_ribbons(ribbon_shader, it.second);
+    }
+  }
+
   gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   if (draw_water)
   {
-    liquid_render liquid_renderer;
+    _liquid_render->force_texture_update();
 
-    opengl::scoped::use_program water_shader {liquid_renderer.shader_program()};
+    // draw the water on both sides
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
 
-    water_shader.uniform ("model_view", opengl::matrix::model_view());
-    water_shader.uniform ("projection", opengl::matrix::projection());
+    opengl::scoped::use_program water_shader{ _liquid_render->shader_program() };
+
+    water_shader.uniform ("model_view", model_view);
+    water_shader.uniform ("projection", projection);
+
+    water_shader.uniform ("use_transform", 0);
+
+    water_shader.uniform ("ocean_color_light", ocean_color_light);
+    water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
+    water_shader.uniform ("river_color_light", river_color_light);
+    water_shader.uniform ("river_color_dark",  river_color_dark);
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
-      tile->drawWater ( water_shader
-                      , skies->colorSet[WATER_COLOR_LIGHT]
-                      , skies->colorSet[WATER_COLOR_DARK]
+      tile->drawWater ( frustum
+                      , culldistance
+                      , camera_pos
+                      , camera_moved
+                      , _liquid_render.get()
+                      , water_shader
                       , animtime
                       , water_layer
+                      , display
                       );
+    }
+
+    gl.bindVertexArray(0);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+
+  if (angled_mode || use_ref_pos)
+  {
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    math::degrees orient = math::degrees(orientation);
+    math::degrees incl = math::degrees(angle);
+    math::vector_4d color = cursor_color;
+    // always half transparent regardless or the cursor transparency
+    color.w = 0.5f;
+
+    float radius = 1.2f * brush_radius;
+
+    if (angled_mode && !use_ref_pos)
+    {
+      math::vector_3d pos = cursor_pos;
+      pos.y += 0.1f; // to avoid z-fighting with the ground
+      _square_render.draw(mvp, pos, radius, incl, orient, color);
+    }
+    else if (use_ref_pos)
+    {
+      if (angled_mode)
+      {
+        math::vector_3d pos = cursor_pos;
+        pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
+        pos.y += 0.1f;
+        _square_render.draw(mvp, pos, radius, incl, orient, color);
+
+        // display the plane when the cursor is far from ref_point
+        if (misc::dist(pos.x, pos.z, ref_pos.x, ref_pos.z) > 10.f + radius)
+        {
+          math::vector_3d ref = ref_pos;
+          ref.y += 0.1f;
+          _square_render.draw(mvp, ref, 10.f, incl, orient, color);
+        }
+      }
+      else
+      {
+        math::vector_3d pos = cursor_pos;
+        pos.y = ref_pos.y + 0.1f;
+        _square_render.draw(mvp, pos, radius, math::degrees(0.f), math::degrees(0.f), color);
+      }
+    }
+  }
+
+  // draw last because of the transparency
+  if (draw_mfbo)
+  {
+    // don't write on the depth buffer
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    if (!_mfbo_program)
+    {
+      _mfbo_program.reset
+        ( new opengl::program
+            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("mfbo_vs") }
+            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("mfbo_fs") }
+            }
+        );
+    }
+    opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
+
+    mfbo_shader.uniform("model_view_projection", model_view * projection);
+
+    for (MapTile* tile : mapIndex.loaded_tiles())
+    {
+      tile->drawMFBO(mfbo_shader);
     }
   }
 }
 
-selection_result World::intersect ( math::ray const& ray
+selection_result World::intersect ( math::matrix_4x4 const& model_view
+                                  , math::ray const& ray
                                   , bool pOnlyMap
                                   , bool do_objects
                                   , bool draw_terrain
                                   , bool draw_wmo
                                   , bool draw_models
-                                  , std::unordered_set<WMO*> const& hidden_map_objects
-                                  , std::unordered_set<Model*> const& hidden_models
+                                  , bool draw_hidden_models
                                   )
 {
   selection_result results;
@@ -912,10 +1252,9 @@ selection_result World::intersect ( math::ray const& ray
     {
       for (auto&& model_instance : mModelInstances)
       {
-        bool const is_hidden (hidden_models.count (model_instance.second.model.get()));
-        if (!is_hidden)
+        if (draw_hidden_models || ! model_instance.second.model->is_hidden())
         {
-          model_instance.second.intersect (ray, &results, animtime);
+          model_instance.second.intersect (model_view, ray, &results, animtime);
         }
       }
     }
@@ -924,8 +1263,7 @@ selection_result World::intersect ( math::ray const& ray
     {
       for (auto&& wmo_instance : mWMOInstances)
       {
-        bool const is_hidden (hidden_map_objects.count (wmo_instance.second.wmo.get()));
-        if (!is_hidden)
+        if (draw_hidden_models || ! wmo_instance.second.wmo->is_hidden())
         {
           wmo_instance.second.intersect (ray, &results);
         }
@@ -936,9 +1274,10 @@ selection_result World::intersect ( math::ray const& ray
   return results;
 }
 
-void World::tick(float dt)
+void World::update_models_emitters(float dt)
 {
-  while (dt > 0.1f) {
+  while (dt > 0.1f)
+  {
     ModelManager::updateEmitters(0.1f);
     dt -= 0.1f;
   }
@@ -988,6 +1327,8 @@ void World::clearAllModelsOnADT(tile_index const& tile)
   {
     deleteModelInstance(uid);
   }
+
+  update_models_by_filename();
 }
 
 void World::CropWaterADT(const tile_index& pos)
@@ -1007,79 +1348,6 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
   }
 }
 
-void World::drawTileMode ( float /*ah*/
-                         , math::vector_3d const& camera_pos
-                         , bool draw_lines
-                         , float zoom
-                         , float aspect_ratio
-                         )
-{
-  gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-  gl.enable(GL_BLEND);
-
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  opengl::scoped::matrix_pusher const matrix_outer;
-  gl.scalef(zoom, zoom, 1.0f);
-
-  {
-    opengl::scoped::matrix_pusher const matrix;
-    gl.translatef(-camera_pos.x / CHUNKSIZE, -camera_pos.z / CHUNKSIZE, 0);
-
-    float minX = camera_pos.x / CHUNKSIZE - 2.0f * aspect_ratio / zoom;
-    float maxX = camera_pos.x / CHUNKSIZE + 2.0f * aspect_ratio / zoom;
-    float minY = camera_pos.z / CHUNKSIZE - 2.0f / zoom;
-    float maxY = camera_pos.z / CHUNKSIZE + 2.0f / zoom;
-
-    gl.enableClientState(GL_COLOR_ARRAY);
-    gl.disableClientState(GL_NORMAL_ARRAY);
-    gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
-    gl.disable(GL_CULL_FACE);
-    gl.depthMask(GL_FALSE);
-
-    for (MapTile* tile : mapIndex.loaded_tiles())
-    {
-      tile->drawTextures (minX, minY, maxX, maxY, animtime);
-    }
-
-    gl.disableClientState(GL_COLOR_ARRAY);
-
-    gl.enableClientState(GL_NORMAL_ARRAY);
-    gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  }
-
-  if (draw_lines) {
-    gl.translatef((GLfloat)fmod(-camera_pos.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera_pos.z / CHUNKSIZE, 16), 0);
-    /*  for(int x=-32;x<=48;x++)
-    {
-    if(x%16==0)
-    gl.color4f(0.0f,1.0f,0.0f,0.5f);
-    else
-    gl.color4f(1.0f,0.0f,0.0f,0.5f);
-    gl.begin(GL_LINES);
-    gl.vertex3f(-32.0f,(float)x,-1);
-    gl.vertex3f(48.0f,(float)x,-1);
-    gl.vertex3f((float)x,-32.0f,-1);
-    gl.vertex3f((float)x,48.0f,-1);
-    gl.end();
-    }*/
-
-    for (float x = -32.0f; x <= 48.0f; x += 1.0f)
-    {
-      if (static_cast<int>(x) % 16)
-        gl.color4f(1.0f, 0.0f, 0.0f, 0.5f);
-      else
-        gl.color4f(0.0f, 1.0f, 0.0f, 0.5f);
-      gl.begin(GL_LINES);
-      gl.vertex3f(-32.0f, x, -1);
-      gl.vertex3f(48.0f, x, -1);
-      gl.vertex3f(x, -32.0f, -1);
-      gl.vertex3f(x, 48.0f, -1);
-      gl.end();
-    }
-  }
-}
-
 bool World::GetVertex(float x, float z, math::vector_3d *V) const
 {
   tile_index tile({x, 0, z});
@@ -1089,7 +1357,9 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
     return false;
   }
 
-  return mapIndex.getTile(tile)->GetVertex(x, z, V);
+  MapTile* adt = mapIndex.getTile(tile);
+
+  return adt->finishedLoading() && adt->GetVertex(x, z, V);
 }
 
 template<typename Fun>
@@ -1099,6 +1369,11 @@ template<typename Fun>
 
   for (MapTile* tile : mapIndex.tiles_in_range (pos, radius))
   {
+    if (!tile->finishedLoading())
+    {
+      continue;
+    }
+
     for (MapChunk* chunk : tile->chunks_in_range (pos, radius))
     {
       if (fun (chunk))
@@ -1138,7 +1413,6 @@ template<typename Fun, typename Post>
   return changed;
 }
 
-
 void World::changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
   for_all_chunks_in_range
@@ -1148,6 +1422,21 @@ void World::changeShader(math::vector_3d const& pos, math::vector_4d const& colo
         return chunk->ChangeMCCV(pos, color, change, radius, editMode);
       }
     );
+}
+
+math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
+{
+  math::vector_3d color = math::vector_3d(1.0f, 1.0f, 1.0f);
+  for_all_chunks_in_range
+  (pos, 0.1f
+    , [&] (MapChunk* chunk)
+  {
+    color = chunk->pickMCCV(pos);
+    return true;
+  }
+  );
+
+  return color;
 }
 
 void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
@@ -1216,7 +1505,7 @@ void World::recalc_norms (MapChunk* chunk) const
                      );
 }
 
-bool World::paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture)
+bool World::paintTexture(math::vector_3d const& pos, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
 {
   return for_all_chunks_in_range
     ( pos, brush->getRadius()
@@ -1246,14 +1535,25 @@ bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strengt
   return succ;
 }
 
+bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
+{
+  return for_all_chunks_in_range
+    ( pos, radius
+      , [&](MapChunk* chunk)
+      {
+        return chunk->replaceTexture(pos, radius, old_texture, new_texture);
+      }
+    );
+}
+
 void World::eraseTextures(math::vector_3d const& pos)
 {
   for_chunk_at(pos, [](MapChunk* chunk) {chunk->eraseTextures();});
 }
 
-void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
+void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
-  for_chunk_at(pos, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, newTexture);});
+  for_chunk_at(pos, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, std::move (newTexture));});
 }
 
 void World::setHole(math::vector_3d const& pos, bool big, bool hole)
@@ -1271,31 +1571,38 @@ template<typename Fun>
   void World::for_all_chunks_on_tile (math::vector_3d const& pos, Fun&& fun)
 {
   MapTile* tile (mapIndex.getTile (pos));
-  mapIndex.setChanged (tile);
 
-  for (size_t ty = 0; ty < 16; ++ty)
+  if (tile && tile->finishedLoading())
   {
-    for (size_t tx = 0; tx < 16; ++tx)
+    mapIndex.setChanged(tile);
+
+    for (size_t ty = 0; ty < 16; ++ty)
     {
-      fun (tile->getChunk (ty, tx));
+      for (size_t tx = 0; tx < 16; ++tx)
+      {
+        fun(tile->getChunk(ty, tx));
+      }
     }
   }
 }
 
 template<typename Fun>
-  auto World::for_chunk_at(math::vector_3d const& pos, Fun&& fun) -> decltype (fun (nullptr))
-  {
-    MapTile* tile(mapIndex.getTile(pos));
-    mapIndex.setChanged(tile);
+  void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
+{
+  MapTile* tile(mapIndex.getTile(pos));
 
-    return fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
+  if (tile && tile->finishedLoading())
+  {
+    mapIndex.setChanged(tile);
+    fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }
+}
 
 template<typename Fun>
   auto World::for_maybe_chunk_at(math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
 {
   MapTile* tile (mapIndex.getTile (pos));
-  if (tile)
+  if (tile && tile->finishedLoading())
   {
     return fun (tile->getChunk ((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }
@@ -1309,7 +1616,7 @@ template<typename Fun>
   void World::for_tile_at(tile_index const& pos, Fun&& fun)
   {
     MapTile* tile(mapIndex.getTile(pos));
-    if (tile)
+    if (tile && tile->finishedLoading())
     {
       mapIndex.setChanged(tile);
       fun(tile);
@@ -1329,12 +1636,13 @@ void World::convert_alphamap(bool to_big_alpha)
     {
       tile_index tile(x, z);
 
-      bool unload = !mapIndex.tileLoaded(tile);
-
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
 
       if (mTile)
       {
+        AsyncLoader::instance().ensure_loaded(mTile);
+
         mTile->convert_alphamap(to_big_alpha);
         mTile->saveTile (false, this);
         mapIndex.markOnDisc (tile, true);
@@ -1352,81 +1660,39 @@ void World::convert_alphamap(bool to_big_alpha)
   mapIndex.save();
 }
 
-void World::saveMap (int width, int height)
+void World::saveMap (int, int)
 {
-  //! \todo  Output as BLP.
-  unsigned char image[256 * 256 * 3];
-  MapTile *ATile;
-  FILE *fid;
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.readBuffer(GL_BACK);
-
-  float minX = -64 * 16;
-  float maxX = 64 * 16;
-  float minY = -64 * 16;
-  float maxY = 64 * 16;
-
-  gl.enableClientState(GL_COLOR_ARRAY);
-  gl.disableClientState(GL_NORMAL_ARRAY);
-  gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
-
-  for (int y = 0; y<64; y++)
-  {
-    for (int x = 0; x<64; x++)
-    {
-      tile_index tile(x, y);
-
-      if (!mapIndex.hasTile(tile))
-      {
-        continue;
-      }
-
-      ATile = mapIndex.loadTile(tile);
-      gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-      opengl::scoped::matrix_pusher const matrix;
-      gl.scalef(0.08333333f, 0.08333333f, 1.0f);
-
-      //gl.translatef(-camera_pos.x/CHUNKSIZE,-camera_pos.z/CHUNKSIZE,0);
-      gl.translatef(x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f);
-
-
-      ATile->drawTextures (minX, minY, maxX, maxY, animtime);
-      gl.readPixels(width / 2 - 128, height / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-      std::stringstream ss;
-      ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
-      fid = fopen(ss.str().c_str(), "wb");
-      fwrite(image, 256 * 3, 256, fid);
-      fclose(fid);
-    }
-  }
-
-  gl.disableClientState(GL_COLOR_ARRAY);
-
-  gl.enableClientState(GL_NORMAL_ARRAY);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
+  throw std::runtime_error("minimap saving not implemented");
 }
 
 void World::deleteModelInstance(int pUniqueID)
 {
   std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
-  if (it == mModelInstances.end()) return;
 
-  updateTilesModel(&it->second);
+  if (it == mModelInstances.end())
+  {
+    return;
+  }
+
+  remove_from_selection(&it->second);
+
+  updateTilesModel(&it->second, model_update::remove);
   mModelInstances.erase(it);
-  ResetSelection();
 }
 
 void World::deleteWMOInstance(int pUniqueID)
 {
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
-  if (it == mWMOInstances.end()) return;
 
-  updateTilesWMO(&it->second);
+  if (it == mWMOInstances.end())
+  {
+    return;
+  }
+
+  remove_from_selection(&it->second);
+
+  updateTilesWMO(&it->second, model_update::remove);
   mWMOInstances.erase(it);
-  ResetSelection();
 }
 
 void World::delete_duplicate_model_and_wmo_instances()
@@ -1440,9 +1706,9 @@ void World::delete_duplicate_model_and_wmo_instances()
     {
       assert(lhs->first != rhs->first);
 
-      if ( lhs->second.pos == rhs->second.pos
-        && lhs->second.dir == rhs->second.dir
-        && lhs->second.wmo->_filename == rhs->second.wmo->_filename
+      if ( misc::vec3d_equals(lhs->second.pos, rhs->second.pos)
+        && misc::vec3d_equals(lhs->second.dir, rhs->second.dir)
+        && lhs->second.wmo->filename == rhs->second.wmo->filename
          )
       {
         wmos_to_remove.emplace(rhs->second.mUniqueID);
@@ -1456,10 +1722,10 @@ void World::delete_duplicate_model_and_wmo_instances()
     {
       assert(lhs->first != rhs->first);
 
-      if ( lhs->second.pos == rhs->second.pos
-        && lhs->second.dir == rhs->second.dir
+      if ( misc::vec3d_equals(lhs->second.pos, rhs->second.pos)
+        && misc::vec3d_equals(lhs->second.dir, rhs->second.dir)
         && lhs->second.scale == rhs->second.scale
-        && lhs->second.model->_filename == rhs->second.model->_filename
+        && lhs->second.model->filename == rhs->second.model->filename
         )
       {
         models_to_remove.emplace(rhs->second.uid);
@@ -1476,8 +1742,23 @@ void World::delete_duplicate_model_and_wmo_instances()
     deleteModelInstance(uid);
   }
 
+  update_models_by_filename();
+
   Log << "Deleted " << wmos_to_remove.size() << " duplicate WMOs" << std::endl;
   Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
+}
+
+void World::warning_if_uid_in_use(uint32_t uid)
+{
+  if(mModelInstances.find(uid) != mModelInstances.end() || mWMOInstances.find(uid) != mWMOInstances.end())
+  {
+    QMessageBox::critical( nullptr
+                         , "UID ALREADY IN USE"
+                         , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
+                           "uid.ini file if you're sharing the map between several mappers.\n"
+                           "Use 'Editor > Force uid check on next opening' to fix the issue."
+                         );
+  }
 }
 
 void World::addM2 ( std::string const& filename
@@ -1494,14 +1775,14 @@ void World::addM2 ( std::string const& filename
   newModelis.scale = scale;
   newModelis.dir = rotation;
 
-  if (Settings::getInstance()->random_rotation)
+  if (_settings->value("model/random_rotation", false).toBool())
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
     newModelis.dir.y += misc::randfloat(min, max);
   }
 
-  if (Settings::getInstance()->random_tilt)
+  if (_settings->value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
@@ -1509,16 +1790,21 @@ void World::addM2 ( std::string const& filename
     newModelis.dir.z += misc::randfloat(min, max);
   }
 
-  if (Settings::getInstance()->random_size)
+  if (_settings->value ("model/random_size", false).toBool ())
   {
     float min = paste_params->minScale;
     float max = paste_params->maxScale;
     newModelis.scale = misc::randfloat(min, max);
   }
 
+  // to ensure the tiles are updated correctly
+  AsyncLoader::instance().ensure_loaded(newModelis.model.get());
   newModelis.recalcExtents();
-  updateTilesModel(&newModelis);
-  mModelInstances.emplace(newModelis.uid, newModelis);
+  updateTilesModel(&newModelis, model_update::add);
+
+  warning_if_uid_in_use(newModelis.uid);
+
+  _models_by_filename[filename].push_back(&(mModelInstances.emplace(newModelis.uid, newModelis).first->second));
 }
 
 void World::addWMO ( std::string const& filename
@@ -1532,53 +1818,91 @@ void World::addWMO ( std::string const& filename
   newWMOis.pos = newPos;
   newWMOis.dir = rotation;
 
+  // to ensure the tiles are updated correctly
+  AsyncLoader::instance().ensure_loaded(newWMOis.wmo.get());
+
   // recalc the extends
   newWMOis.recalcExtents();
-  updateTilesWMO(&newWMOis);
+  updateTilesWMO(&newWMOis, model_update::add);
+
+  warning_if_uid_in_use(newWMOis.mUniqueID);
 
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
 
+void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
+{
+  for (uint32_t uid : uids)
+  {
+    bool remove = true;
+
+    for (MapTile* tile : mapIndex.loaded_tiles())
+    {
+      if (tile->has_model(uid))
+      {
+        remove = false;
+        break;
+      }
+    }
+
+    if (remove)
+    {
+      if (mModelInstances.find(uid) != mModelInstances.end())
+      {
+        mModelInstances.erase(uid);
+      }
+      else
+      {
+        mWMOInstances.erase(uid);
+      }
+    }
+  }
+
+  // todo: only reset if the selected model has been unloaded
+  reset_selection();
+  update_models_by_filename();
+}
+
 void World::reload_tile(tile_index const& tile)
 {
-  ResetSelection();
-  // to remove the new models and reload the old ones
-  clearAllModelsOnADT(tile);
+  reset_selection();
   mapIndex.reloadTile(tile);
 }
 
-void World::updateTilesEntry(selection_type const& entry)
+void World::updateTilesEntry(selection_type const& entry, model_update type)
 {
   if (entry.which() == eEntry_WMO)
   {
-    updateTilesWMO (boost::get<selected_wmo_type> (entry));
+    updateTilesWMO (boost::get<selected_wmo_type> (entry), type);
   }
   else if (entry.which() == eEntry_Model)
   {
-    updateTilesModel (boost::get<selected_model_type> (entry));
+    updateTilesModel (boost::get<selected_model_type> (entry), type);
   }
 }
 
-void World::updateTilesWMO(WMOInstance* wmo)
+void World::updateTilesWMO(WMOInstance* wmo, model_update type)
 {
   tile_index start(wmo->extents[0]), end(wmo->extents[1]);
   for (int z = start.z; z <= end.z; ++z)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex.setChanged(tile_index(x, z));
+      mapIndex.update_model_tile(tile_index(x, z), type, wmo->mUniqueID);
     }
   }
 }
 
-void World::updateTilesModel(ModelInstance* m2)
+void World::updateTilesModel(ModelInstance* m2, model_update type)
 {
-  tile_index start(m2->extents[0]), end(m2->extents[1]);
+  auto const& extents(m2->extents());
+  tile_index start(extents[0]), end(extents[1]);
+
   for (int z = start.z; z <= end.z; ++z)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex.setChanged(tile_index(x, z));
+      mapIndex.update_model_tile(tile_index(x, z), type, m2->uid);
     }
   }
 }
@@ -1593,7 +1917,7 @@ void World::clearTextures(math::vector_3d const& pos)
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     chunk->eraseTextures();
-  });  
+  });
 }
 
 void World::setBaseTexture(math::vector_3d const& pos)
@@ -1608,6 +1932,14 @@ void World::setBaseTexture(math::vector_3d const& pos)
   });
 }
 
+void World::clear_shadows(math::vector_3d const& pos)
+{
+  for_all_chunks_on_tile(pos, [] (MapChunk* chunk)
+  {
+    chunk->clear_shadows();
+  });
+}
+
 void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex)
 {
   if (!!noggit::ui::selected_texture::get())
@@ -1618,10 +1950,10 @@ void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference
 
 void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
 {
-  for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->_texture_set.removeDuplicate(); } );
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->texture_set->removeDuplicate(); } );
 }
 
-void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference tex, std::size_t flag, bool add)
+void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
 {
   for_chunk_at(pos, [&] (MapChunk* chunk) { chunk->change_texture_flag(tex, flag, add); });
 }
@@ -1644,12 +1976,6 @@ void World::paintLiquid( math::vector_3d const& pos
     chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add, angle, orientation, lock, origin, override_height, override_liquid_id, chunk, opacity_factor);
     return true;
   });
-}
-
-bool World::canWaterSave(const tile_index& tile)
-{
-  MapTile* mt = mapIndex.getTile(tile);
-  return !!mt && mt->canWaterSave();
 }
 
 void World::setWaterType(const tile_index& pos, int type, int layer)
@@ -1907,4 +2233,18 @@ std::set<MapChunk*>& World::vertexBorderChunks()
     }
   }
   return _vertex_border_chunks;
+}
+
+void World::update_models_by_filename()
+{
+  _models_by_filename.clear();
+
+  for (auto& it : mModelInstances)
+  {
+    _models_by_filename[it.second.model->filename].push_back(&it.second);
+    // to make sure the transform matrix are up to date
+    it.second.recalcExtents();
+  }
+
+  need_model_updates = false;
 }

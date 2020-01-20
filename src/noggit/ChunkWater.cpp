@@ -6,17 +6,62 @@
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 
-ChunkWater::ChunkWater(float x, float z)
+ChunkWater::ChunkWater(float x, float z, bool use_mclq_green_lava)
   : xbase(x)
   , zbase(z)
+  , vmin(x, 0.f, z)
+  , vmax(x + CHUNKSIZE, 0.f, z + CHUNKSIZE)
+  , _use_mclq_green_lava(use_mclq_green_lava)
 {
+}
+
+void ChunkWater::from_mclq(mcnk_flags const& flags, std::vector<mclq>& layers)
+{
+  math::vector_3d pos(xbase, 0.0f, zbase);
+
+  for (mclq& liquid : layers)
+  {
+    std::uint8_t mclq_liquid_type = 0;
+
+    for (int z = 0; z < 8; ++z)
+    {
+      for (int x = 0; x < 8; ++x)
+      {
+        mclq_tile const& tile = liquid.tiles[z * 8 + x];
+
+        misc::bit_or(Render.fishable, x, z, tile.fishable);
+        misc::bit_or(Render.fatigue, x, z, tile.fatigue);
+
+        if (!tile.dont_render)
+        {
+          mclq_liquid_type = tile.liquid_type;
+        }
+      }
+    }
+
+    switch (mclq_liquid_type)
+    {
+      case 1:_layers.emplace_back(pos, liquid, 2); break;
+      case 3:_layers.emplace_back(pos, liquid, 4); break;
+      case 4:_layers.emplace_back(pos, liquid, 1); break;
+      case 6:_layers.emplace_back(pos, liquid, (_use_mclq_green_lava ? 15 : 3)); break;
+      default:
+        LogError << "Invalid/unhandled MCLQ liquid type" << std::endl;
+        break;
+    }
+  }
+  update_layers();
 }
 
 void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 {
   MH2O_Header header;
   f.read(&header, sizeof(MH2O_Header));
-  if (!header.nLayers) return;
+
+  if (!header.nLayers)
+  {
+    return;
+  }
 
   //render
   if (header.ofsRenderMask)
@@ -24,16 +69,11 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     f.seek(basePos + header.ofsRenderMask + sizeof(MH2O_Render));
     f.read(&Render, sizeof(MH2O_Render));
   }
-  else
-  {
-    memset(&Render.mask, 255, 8);
-  }
 
   for (std::size_t k = 0; k < header.nLayers; ++k)
   {
     MH2O_Information info;
-    MH2O_HeightMask heightmask;
-    uint64_t infoMask = -1; // default = all water
+    uint64_t infoMask = 0xFFFFFFFFFFFFFFFF; // default = all water
 
     //info
     f.seek(basePos + header.ofsInformation + sizeof(MH2O_Information)* k);
@@ -42,48 +82,15 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     //mask
     if (info.ofsInfoMask > 0 && info.height > 0)
     {
+      size_t bitmask_size = static_cast<size_t>(std::ceil(info.height * info.width / 8.0f));
+
       f.seek(info.ofsInfoMask + basePos);
-      f.read(&infoMask, 8);
+      // only read the relevant data
+      f.read(&infoMask, bitmask_size);
     }
 
-    // set default value
-    for (int h = 0; h < 9; ++h)
-    {
-      for (int w = 0; w < 9; ++w)
-      {
-        heightmask.mHeightValues[w][h] = info.minHeight;
-        heightmask.mTransparency[w][h] = 255;
-      }
-    }
-
-    // load existing heightMap
-    if (info.ofsHeightMap)
-    {
-      f.seek(info.ofsHeightMap + basePos);
-
-      if (info.liquid_vertex_format != 2)
-      {
-        for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w)
-        {
-          for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
-          {
-            f.read(&heightmask.mHeightValues[w][h], sizeof(float));
-          }
-        }
-      }
-
-      for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w)
-      {
-        for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
-        {
-
-          f.read(&heightmask.mTransparency[w][h], sizeof(unsigned char));
-
-        }
-      }
-    }
-
-    _layers.emplace_back(math::vector_3d(xbase, 0.0f, zbase), info, heightmask, infoMask);
+    math::vector_3d pos(xbase, 0.0f, zbase);
+    _layers.emplace_back(f, basePos, pos, info, infoMask);
   }
 
   update_layers();
@@ -93,10 +100,13 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
 {
   MH2O_Header header;
-  header.nLayers = _layers.size();
+
+  // remove empty layers
+  cleanup();
 
   if (hasData(0))
   {
+    header.nLayers = _layers.size();
     header.ofsRenderMask = current_pos - base_pos;
     adt.Insert(current_pos, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render));
     current_pos += sizeof(MH2O_Render);
@@ -152,37 +162,64 @@ void ChunkWater::setType(int type, size_t layer)
   }
 }
 
-void ChunkWater::draw ( opengl::scoped::use_program& water_shader
-                      , math::vector_3d water_color_light
-                      , math::vector_3d water_color_dark
+void ChunkWater::draw ( math::frustum const& frustum
+                      , const float& cull_distance
+                      , const math::vector_3d& camera
+                      , bool camera_moved
+                      , liquid_render& render
+                      , opengl::scoped::use_program& water_shader
                       , int animtime
                       , int layer
+                      , display_mode display
                       )
 {
+  if (!is_visible (cull_distance, frustum, camera, display))
+  {
+    return;
+  }
+
   if (layer == -1)
   {
-    for (liquid_layer& layer : _layers)
+    for (liquid_layer& lq_layer : _layers)
     {
-      layer.draw ( water_shader
-                 , water_color_light
-                 , water_color_dark
-                 , animtime
-                 );
+      lq_layer.draw (render, water_shader, camera, camera_moved, animtime);
     }
   }
   else if (layer < _layers.size())
   {
-    _layers[layer].draw
-      (water_shader, water_color_light, water_color_dark, animtime);
+    _layers[layer].draw (render, water_shader, camera, camera_moved, animtime);
   }
+}
+
+bool ChunkWater::is_visible ( const float& cull_distance
+                            , const math::frustum& frustum
+                            , const math::vector_3d& camera
+                            , display_mode display
+                            ) const
+{
+  static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f);
+
+  float dist = display == display_mode::in_3D
+             ? (camera - vcenter).length() - chunk_radius
+             : std::abs(camera.y - vmax.y);
+
+  return frustum.intersects (_intersect_points)
+      && dist < cull_distance;
 }
 
 void ChunkWater::update_layers()
 {
   for (liquid_layer& layer : _layers)
   {
-    layer.updateRender();
+    layer.update_indices();
+    vmin.y = std::min (vmin.y, layer.min());
+    vmax.y = std::max (vmax.y, layer.max());
   }
+
+  vcenter = (vmin + vmax) * 0.5f;
+
+  _intersect_points.clear();
+  _intersect_points = misc::intersection_points(vmin, vmax);
 }
 
 bool ChunkWater::hasData(size_t layer) const

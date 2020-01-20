@@ -15,21 +15,26 @@ class sExtendableArray;
 class liquid_layer
 {
 public:
-
+  liquid_layer() = delete;
   liquid_layer(math::vector_3d const& base, float height, int liquid_id);
-  liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask);
-  liquid_layer(liquid_layer const& other);
+  liquid_layer(math::vector_3d const& base, mclq& liquid, int liquid_id);
+  liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask);
 
+  liquid_layer(liquid_layer const& other);
+  liquid_layer (liquid_layer&&);
+
+  liquid_layer& operator=(liquid_layer&&);
   liquid_layer& operator=(liquid_layer const& other);
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
 
-  void draw ( opengl::scoped::use_program& water_shader
-            , math::vector_3d water_color_light
-            , math::vector_3d water_color_dark
+  void draw ( liquid_render& render
+            , opengl::scoped::use_program& water_shader
+            , math::vector_3d const& camera
+            , bool camera_moved
             , int animtime
             );
-  void updateRender();
+  void update_indices();
   void changeLiquidID(int id);
 
   void crop(MapChunk* chunk);
@@ -40,7 +45,7 @@ public:
   float max() const { return _maximum; }
   int liquidID() const { return _liquid_id; }
 
-  bool hasSubchunk(int x, int z) const;
+  bool hasSubchunk(int x, int z, int size = 1) const;
   void setSubchunk(int x, int z, bool water);
 
   bool empty() const { return !_subchunks; }
@@ -64,13 +69,21 @@ public:
 private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
+  int get_lod_level(math::vector_3d const& camera_pos) const;
+  void set_lod_level(int lod_level);
 
-  opengl::scoped::buffers<1> _index_buffer;
-  std::vector<float> depths;
-  std::vector<math::vector_2d> tex_coords;
-  std::vector<math::vector_3d> vertices;
-  std::vector<std::uint16_t> indices;
-  void draw_actual (opengl::scoped::use_program&);
+  static int const lod_count = 4;
+
+  int _current_lod_level = -1;
+  int _current_lod_indices_count = 0;
+
+  opengl::scoped::deferred_upload_buffers<lod_count> _index_buffer;
+  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  GLuint const& _vertices_vbo = _buffers[0];
+  GLuint const& _depth_vbo = _buffers[1];
+  GLuint const& _tex_coord_vbo = _buffers[2];
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
 
   int _liquid_id;
   int _liquid_vertex_format;
@@ -79,10 +92,17 @@ private:
   std::uint64_t _subchunks;
   std::vector<math::vector_3d> _vertices;
   std::vector<float> _depth;
+  std::vector<math::vector_2d> _tex_coords;
+  std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
+
+  bool _need_buffer_update = true;
+  bool _vao_need_update = true;
+  bool _uploaded = false;
+
+  void upload();
+  void update_buffers();
+  void update_vao(opengl::scoped::use_program& water_shader);
 
 private:
   math::vector_3d pos;
-  float texRepeats;
-
-  liquid_render _render;
 };

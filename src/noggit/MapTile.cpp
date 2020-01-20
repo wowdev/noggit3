@@ -6,16 +6,16 @@
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Settings.h>
 #include <noggit/TileWater.hpp>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/alphamap.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
-#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+
+#include <QtCore/QSettings>
 
 #include <algorithm>
 #include <cassert>
@@ -25,18 +25,29 @@
 #include <utility>
 #include <vector>
 
-MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World* world)
-  : index(tile_index(pX, pZ))
+MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, bool use_mclq_green_lava, World* world)
+  : AsyncObject(pFilename)
+  , index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , changed(0)
-  , Water (this, xbase, zbase)
+  , Water (this, xbase, zbase, use_mclq_green_lava)
   , mBigAlpha(pBigAlpha)
-  , mFilename(pFilename)
+  , _load_models(pLoadModels)
+  , _world(world)
 {
-  MPQFile theFile(mFilename);
+}
 
-  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << mFilename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
+MapTile::~MapTile()
+{
+  _world->remove_models_if_needed(uids);
+}
+
+void MapTile::finishLoading()
+{
+  MPQFile theFile(filename);
+
+  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
 
   // - Parsing the file itself. --------------------------
 
@@ -99,12 +110,12 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
     while (lCurPos < lEnd)
     {
-      mTextureFilenames.push_back(std::string(lCurPos));
+      mTextureFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
       lCurPos += strlen(lCurPos) + 1;
     }
   }
 
-  if (pLoadModels)
+  if (_load_models)
   {
     // - MMDX ----------------------------------------------
 
@@ -120,7 +131,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
       while (lCurPos < lEnd)
       {
-        mModelFilenames.push_back(std::string(lCurPos));
+        mModelFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
         lCurPos += strlen(lCurPos) + 1;
       }
     }
@@ -139,7 +150,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
       while (lCurPos < lEnd)
       {
-        mWMOFilenames.push_back(std::string(lCurPos));
+        mWMOFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
         lCurPos += strlen(lCurPos) + 1;
       }
     }
@@ -211,8 +222,11 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
       for (int x = 0; x < 3; x++)
       {
         int pos = x + y * 3;
-        mMinimumValues[pos] = {xPositions[x], static_cast<float> (mMinimum[pos]), yPositions[y]};
-        mMaximumValues[pos] = {xPositions[x], static_cast<float> (mMaximum[pos]), yPositions[y]};
+        // fix bug with old noggit version inverting values
+        auto&& z{ std::minmax (mMinimum[pos], mMaximum[pos]) };
+
+        mMinimumValues[pos] = { xPositions[x], static_cast<float>(z.first), yPositions[y] };
+        mMaximumValues[pos] = { xPositions[x], static_cast<float>(z.second), yPositions[y] };
       }
     }
   }
@@ -252,22 +266,25 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
   //! \note We no longer pre load textures but the chunks themselves do.
 
-  if (pLoadModels)
+  if (_load_models)
   {
-
     // - Load WMOs -----------------------------------------
 
     for (auto const& object : lWMOInstances)
     {
-      world->mWMOInstances.emplace(object.uniqueID, WMOInstance(mWMOFilenames[object.nameID], &object));
+      _world->mWMOInstances.emplace(object.uniqueID, WMOInstance(mWMOFilenames[object.nameID], &object));
+      uids.push_back(object.uniqueID);
     }
 
     // - Load M2s ------------------------------------------
 
     for (auto const& model : lModelInstances)
     {
-      world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
+      _world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
+      uids.push_back(model.uniqueID);
     }
+
+    _world->need_model_updates = true;
   }
 
   // - Load chunks ---------------------------------------
@@ -283,6 +300,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   // - Really done. --------------------------------------
 
   LogDebug << "Done loading tile " << index.x << "," << index.z << "." << std::endl;
+  finished = true;
 }
 
 bool MapTile::isTile(int pX, int pZ)
@@ -313,41 +331,42 @@ void MapTile::convert_alphamap(bool to_big_alpha)
 }
 
 void MapTile::draw ( math::frustum const& frustum
+                   , opengl::scoped::use_program& mcnk_shader
+                   , GLuint const& tex_coord_vbo
                    , const float& cull_distance
                    , const math::vector_3d& camera
+                   , bool need_visibility_update
                    , bool show_unpaintable_chunks
-                   , bool draw_contour
                    , bool draw_paintability_overlay
                    , bool draw_chunk_flag_overlay
                    , bool draw_areaid_overlay
-                   , bool draw_wireframe_overlay
-                   , int cursor_type
                    , std::map<int, misc::random_color>& area_id_colors
-                   , math::vector_4d shadow_color
-                   , boost::optional<selection_type> selection
                    , int animtime
+                   , display_mode display
                    )
 {
-  gl.color4f(1, 1, 1, 1);
+  if (!finished)
+  {
+    return;
+  }
 
   for (int j = 0; j<16; ++j)
   {
     for (int i = 0; i<16; ++i)
     {
       mChunks[j][i]->draw ( frustum
+                          , mcnk_shader
+                          , tex_coord_vbo
                           , cull_distance
                           , camera
+                          , need_visibility_update
                           , show_unpaintable_chunks
-                          , draw_contour
                           , draw_paintability_overlay
                           , draw_chunk_flag_overlay
                           , draw_areaid_overlay
-                          , draw_wireframe_overlay
-                          , cursor_type
                           , area_id_colors
-                          , shadow_color
-                          , selection
                           , animtime
+                          , display
                           );
     }
   }
@@ -355,6 +374,11 @@ void MapTile::draw ( math::frustum const& frustum
 
 void MapTile::intersect (math::ray const& ray, selection_result* results) const
 {
+  if (!finished)
+  {
+    return;
+  }
+
   for (size_t j (0); j < 16; ++j)
   {
     for (size_t i (0); i < 16; ++i)
@@ -364,36 +388,66 @@ void MapTile::intersect (math::ray const& ray, selection_result* results) const
   }
 }
 
-void MapTile::drawLines ( opengl::scoped::use_program& line_shader
-                        , math::frustum const& frustum
-                        , const float& cull_distance
-                        , const math::vector_3d& camera
-                        , bool draw_hole_lines
-                        )
-{
-  for (int j = 0; j<16; ++j)
-    for (int i = 0; i<16; ++i)
-      mChunks[j][i]->drawLines (line_shader, frustum, cull_distance, camera, draw_hole_lines);
-}
 
 void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 {
-  static unsigned char const indices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
+  static std::vector<std::uint8_t> const indices = {4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1};
 
-  mfbo_shader.attrib ("position", mMaximumValues);
-  mfbo_shader.uniform ("color", math::vector_4d (0.0f, 1.0f, 1.0f, 0.2f));
-  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
+  if (!_mfbo_buffer_are_setup)
+  {
+    _mfbo_vbos.upload();
+    _mfbo_vaos.upload();
 
-  mfbo_shader.attrib ("position", mMinimumValues);
-  mfbo_shader.uniform ("color", math::vector_4d (1.0f, 1.0f, 0.0f, 0.2f));
-  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
+    
+
+    gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_bottom_vbo
+                                  , 9 * sizeof(math::vector_3d)
+                                  , mMinimumValues
+                                  , GL_STATIC_DRAW
+                                  );
+    gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_top_vbo
+                                  , 9 * sizeof(math::vector_3d)
+                                  , mMaximumValues
+                                  , GL_STATIC_DRAW
+                                  );    
+
+    {
+      opengl::scoped::vao_binder const _ (_mfbo_bottom_vao);
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder (_mfbo_bottom_vbo);
+      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    {
+      opengl::scoped::vao_binder const _(_mfbo_top_vao);
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder(_mfbo_top_vbo);
+      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    _mfbo_buffer_are_setup = true;
+  }
+
+  {
+    opengl::scoped::vao_binder const _(_mfbo_bottom_vao);
+    mfbo_shader.uniform("color", math::vector_4d(1.0f, 1.0f, 0.0f, 0.2f));
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+  }
+
+  {
+    opengl::scoped::vao_binder const _(_mfbo_top_vao);
+    mfbo_shader.uniform("color", math::vector_4d(0.0f, 1.0f, 1.0f, 0.2f));
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+  }
 }
 
-void MapTile::drawWater ( opengl::scoped::use_program& water_shader
-                        , math::vector_3d water_color_light
-                        , math::vector_3d water_color_dark
+void MapTile::drawWater ( math::frustum const& frustum
+                        , const float& cull_distance
+                        , const math::vector_3d& camera
+                        , bool camera_moved
+                        , liquid_render& render
+                        , opengl::scoped::use_program& water_shader
                         , int animtime
                         , int layer
+                        , display_mode display
                         )
 {
   if (!Water.hasData(0))
@@ -401,76 +455,16 @@ void MapTile::drawWater ( opengl::scoped::use_program& water_shader
     return; //no need to draw water on tile without water =)
   }
 
-  gl.disable(GL_COLOR_MATERIAL);
-  gl.disable(GL_LIGHTING);
-
-  Water.draw ( water_shader
-             , water_color_light
-             , water_color_dark
+  Water.draw ( frustum
+             , cull_distance
+             , camera
+             , camera_moved
+             , render
+             , water_shader
              , animtime
              , layer
+             , display
              );
-
-  gl.enable(GL_LIGHTING);
-  gl.enable(GL_COLOR_MATERIAL);
-}
-
-bool MapTile::canWaterSave() {
-  return true;
-}
-
-void MapTile::getAlpha(size_t id, unsigned char *amap)
-{
-  int index = 0;
-  int offsetIndex = 0;
-
-  for (size_t j = 0; j < 1024; ++j)
-  {
-    index = (int)j / 64;
-
-    for (int i = 0; i < 16; ++i)
-    {
-      if (mChunks[index][i]->_texture_set.num() > id + 1)
-      {
-        memcpy(amap + j * 1024 + i * 64, mChunks[index][i]->_texture_set.getAlpha(id) + offsetIndex * 64, 64);
-      }
-      else
-      {
-        memset(amap + j * 1024 + i * 64, 1, 64);
-      }
-    }
-
-    if (offsetIndex == 63)
-      offsetIndex = 0;
-    else
-      offsetIndex++;
-  }
-}
-
-// This is for the 2D mode only.
-void MapTile::drawTextures ( float minX
-                           , float minY
-                           , float maxX
-                           , float maxY
-                           , int animtime
-                           )
-{
-  float xOffset, yOffset;
-
-  opengl::scoped::matrix_pusher const matrix;
-
-  yOffset = zbase / CHUNKSIZE;
-  xOffset = xbase / CHUNKSIZE;
-  gl.translatef(xOffset, yOffset, 0);
-
-  //gl.translatef(-8,-8,0);
-
-  for (int j = 0; j<16; ++j) {
-    for (int i = 0; i<16; ++i) {
-      if (((i + 1 + xOffset)>minX) && ((j + 1 + yOffset)>minY) && ((i + xOffset)<maxX) && ((j + yOffset)<maxY))
-        mChunks[j][i]->drawTextures (animtime);
-    }
-  }
 }
 
 MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
@@ -516,25 +510,11 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 
 void MapTile::saveTile(bool saveAllModels, World* world)
 {
+  Log << "Saving ADT \"" << filename << "\"." << std::endl;
 
-  Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
-  LogDebug << "CHANGED FLAG " << changed << std::endl;
   int lID;  // This is a global counting variable. Do not store something in here you need later.
-
-            // if wod output path is set creat also wod map files and save them in this alternate path.
-  bool wodSave = false;
-  std::string wodSavePath = "";
-  if (Settings::getInstance()->wodSavePath != "")
-  {
-    wodSave = true;
-    wodSavePath = Settings::getInstance()->wodSavePath;
-    LogDebug << "WOD Save path is set to : " << wodSavePath << std::endl;
-  }
-
   std::vector<WMOInstance> lObjectInstances;
   std::vector<ModelInstance> lModelInstances;
-
-  // Collect some information we need later.
 
   // Check which doodads and WMOs are on this ADT.
   math::vector_3d lTileExtents[2];
@@ -544,14 +524,21 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (auto const& object : world->mWMOInstances)
   {
+    // no need to check if wmos are loaded since if they aren't their extents hasn't changed and thus can be saved as is
     if (saveAllModels || object.second.isInsideRect(lTileExtents))
     {
       lObjectInstances.emplace_back(object.second);
     }
   }
 
-  for (auto const& model : world->mModelInstances)
+  for (auto& model : world->mModelInstances)
   {
+    // todo: move that somewhere to not check for each time ?
+    if (!model.second.model->finishedLoading())
+    {
+      AsyncLoader::instance().ensure_loaded(model.second.model.get());
+      model.second.recalcExtents();
+    }
     if (saveAllModels || model.second.isInsideRect(lTileExtents))
     {
       lModelInstances.emplace_back(model.second);
@@ -570,9 +557,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (auto const& model : lModelInstances)
   {
-    if (lModels.find(model.model->_filename) == lModels.end())
+    if (lModels.find(model.model->filename) == lModels.end())
     {
-      lModels.emplace (model.model->_filename, nullyThing);
+      lModels.emplace (model.model->filename, nullyThing);
     }
   }
 
@@ -584,9 +571,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (auto const& object : lObjectInstances)
   {
-    if (lObjects.find(object.wmo->_filename) == lObjects.end())
+    if (lObjects.find(object.wmo->filename) == lObjects.end())
     {
-      lObjects.emplace (object.wmo->_filename, nullyThing);
+      lObjects.emplace (object.wmo->filename, nullyThing);
     }
   }
 
@@ -599,9 +586,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   for (int i = 0; i < 16; ++i)
     for (int j = 0; j < 16; ++j)
-      for (size_t tex = 0; tex < mChunks[i][j]->_texture_set.num(); tex++)
-        if (lTextures.find(mChunks[i][j]->_texture_set.filename(tex)) == lTextures.end())
-          lTextures.emplace (mChunks[i][j]->_texture_set.filename(tex), -1);
+      for (size_t tex = 0; tex < mChunks[i][j]->texture_set->num(); tex++)
+        if (lTextures.find(mChunks[i][j]->texture_set->filename(tex)) == lTextures.end())
+          lTextures.emplace (mChunks[i][j]->texture_set->filename(tex), -1);
 
   lID = 0;
   for (auto& texture : lTextures)
@@ -610,50 +597,15 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   // Now write the file.
   sExtendableArray lADTFile;
 
-
-  // Create the other files for wod saving
-  int lADTRootFileCurrentPosition = 0;
-  sExtendableArray lADTRootFile;
-  int lADTObjFileCurrentPosition = 0;
-  sExtendableArray lADTObjFile;
-  int lADTTexFileCurrentPosition = 0;
-  sExtendableArray lADTTexFile;
-
-
-
-
   int lCurrentPosition = 0;
 
   // MVER
   lADTFile.Extend(8 + 0x4);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MVER', 4);
 
-  if (wodSave)
-  {
-    // WOD ALL
-    lADTRootFile.Extend(8 + 0x4);
-    SetChunkHeader(lADTRootFile, lADTRootFileCurrentPosition, 'MVER', 4);
-    lADTObjFile.Extend(8 + 0x4);
-    SetChunkHeader(lADTObjFile, lADTObjFileCurrentPosition, 'MVER', 4);
-    lADTTexFile.Extend(8 + 0x4);
-    SetChunkHeader(lADTTexFile, lADTTexFileCurrentPosition, 'MVER', 4);
-  }
-
   // MVER data
   *(lADTFile.GetPointer<int>(8)) = 18;
   lCurrentPosition += 8 + 0x4;
-
-  if (wodSave)
-  {
-    // WOD ALL
-    *(lADTRootFile.GetPointer<int>(8)) = 18;
-    lADTRootFileCurrentPosition += 8 + 0x4;
-    *(lADTObjFile.GetPointer<int>(8)) = 18;
-    lADTObjFileCurrentPosition += 8 + 0x4;
-    *(lADTTexFile.GetPointer<int>(8)) = 18;
-    lADTTexFileCurrentPosition += 8 + 0x4;
-  }
-
 
   // MHDR
   int lMHDR_Position = lCurrentPosition;
@@ -665,17 +617,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lCurrentPosition += 8 + 0x40;
 
 
-  if (wodSave)
-  {
-    // WOD ROOT
-    int ROOT_lMHDR_Position = lADTRootFileCurrentPosition;
-    lADTRootFile.Extend(8 + 0x40);
-    SetChunkHeader(lADTRootFile, lADTRootFileCurrentPosition, 'MHDR', 0x40);
-    lADTRootFile.GetPointer<MHDR>(ROOT_lMHDR_Position + 8)->flags = mFlags;
-    lADTRootFileCurrentPosition += 8 + 0x40;
-  }
-
-
   // MCIN
   int lMCIN_Position = lCurrentPosition;
 
@@ -685,10 +626,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   lCurrentPosition += 8 + 256 * 0x10;
 
-  // MCIN dont exist in wod so no save
-
-  // MAMP TODO:need implementation for WOD here!!!!!
-
   // MTEX
   int lMTEX_Position = lCurrentPosition;
   lADTFile.Extend(8 + 0);  // We don't yet know how big this will be.
@@ -696,19 +633,6 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtex = lCurrentPosition - 0x14;
 
   lCurrentPosition += 8 + 0;
-
-  int TEX_lMTEX_Position = 0;
-  if (wodSave)
-  {
-    // WOD TEX
-    TEX_lMTEX_Position = lADTTexFileCurrentPosition;
-    lADTTexFile.Extend(8 + 0);  // We don't yet know how big this will be.
-    SetChunkHeader(lADTTexFile, lADTTexFileCurrentPosition, 'MTEX');
-    lADTTexFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtex = lADTTexFileCurrentPosition - 0x14;
-
-    lADTTexFileCurrentPosition += 8 + 0;
-  }
-
 
   // MTEX data
   for (auto const& texture : lTextures)
@@ -718,18 +642,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     lCurrentPosition += texture.first.size() + 1;
     lADTFile.GetPointer<sChunkHeader>(lMTEX_Position)->mSize += texture.first.size() + 1;
     LogDebug << "Added texture \"" << texture.first << "\"." << std::endl;
-
-    if (wodSave)
-    {
-      // WOD TEX
-      lADTTexFile.Insert(lADTTexFileCurrentPosition, texture.first.size() + 1, texture.first.c_str());
-      lADTTexFileCurrentPosition += texture.first.size() + 1;
-      lADTTexFile.GetPointer<sChunkHeader>(TEX_lMTEX_Position)->mSize += texture.first.size() + 1;
-    }
   }
-
-
-
 
   // MMDX
   int lMMDX_Position = lCurrentPosition;
@@ -739,38 +652,14 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   lCurrentPosition += 8 + 0;
 
-
-  int OBJ_lMMDX_Position (lADTObjFileCurrentPosition);
-  if (wodSave)
-  {
-    // WOD OBJ
-    lADTObjFile.Extend(8 + 0);  // We don't yet know how big this will be.
-    SetChunkHeader(lADTObjFile, lADTObjFileCurrentPosition, 'MMDX');
-    lADTRootFile.GetPointer<MHDR>(OBJ_lMMDX_Position + 8)->mmdx = lADTObjFileCurrentPosition - 0x14; //ISTHISRIGHT ???MHDR is in root so I set the mmdx value there not in obj
-
-    lADTObjFileCurrentPosition += 8 + 0;
-  }
-
-
   // MMDX data
   for (auto it = lModels.begin(); it != lModels.end(); ++it)
   {
     it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize;
-    lADTFile.Insert(lCurrentPosition, it->first.size() + 1, it->first.c_str());
+    lADTFile.Insert(lCurrentPosition, it->first.size() + 1, misc::normalize_adt_filename(it->first).c_str());
     lCurrentPosition += it->first.size() + 1;
     lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize += it->first.size() + 1;
     LogDebug << "Added model \"" << it->first << "\"." << std::endl;
-
-    if (wodSave)
-    {
-      // WOD OBJ
-      it->second.filenamePosition = lADTObjFile.GetPointer<sChunkHeader>(OBJ_lMMDX_Position)->mSize;
-      lADTObjFile.Insert(lADTObjFileCurrentPosition, it->first.size() + 1, it->first.c_str());
-      lADTObjFileCurrentPosition += it->first.size() + 1;
-      lADTObjFile.GetPointer<sChunkHeader>(OBJ_lMMDX_Position)->mSize += it->first.size() + 1;
-    }
-
-
   }
 
   // MMID
@@ -780,30 +669,19 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   SetChunkHeader(lADTFile, lCurrentPosition, 'MMID', lMMID_Size);
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mmid = lCurrentPosition - 0x14;
 
-  if (wodSave)
-  {
-    // WOD OBJ
-    lADTObjFile.Extend(8 + lMMID_Size);
-    SetChunkHeader(lADTObjFile, lADTObjFileCurrentPosition, 'MMID', lMMID_Size);
-    lADTRootFile.GetPointer<MHDR>(lMHDR_Position + 8)->mmid = lADTObjFileCurrentPosition - 0x14;
-  }
-
   // MMID data
   // WMO model names
   int * lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
-  int * OBJlMMID_Data = lADTObjFile.GetPointer<int>(lADTObjFileCurrentPosition + 8); // WOD OBJ
 
   lID = 0;
   for (auto const& model : lModels)
   {
     lMMID_Data[lID] = model.second.filenamePosition;
-    if (wodSave) OBJlMMID_Data[lID] = model.second.filenamePosition; // WOD OBJ
     lID++;
   }
   lCurrentPosition += 8 + lMMID_Size;
-  if (wodSave) lADTObjFileCurrentPosition += 8 + lMMID_Size; // WOD OBJ
-
-                                                             // MWMO
+  
+  // MWMO
   int lMWMO_Position = lCurrentPosition;
   lADTFile.Extend(8 + 0);  // We don't yet know how big this will be.
   SetChunkHeader(lADTFile, lCurrentPosition, 'MWMO');
@@ -815,7 +693,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   for (auto& object : lObjects)
   {
     object.second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize;
-    lADTFile.Insert(lCurrentPosition, object.first.size() + 1, object.first.c_str());
+    lADTFile.Insert(lCurrentPosition, object.first.size() + 1, misc::normalize_adt_filename(object.first).c_str());
     lCurrentPosition += object.first.size() + 1;
     lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize += object.first.size() + 1;
     LogDebug << "Added object \"" << object.first << "\"." << std::endl;
@@ -856,7 +734,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lID = 0;
   for (auto const& model : lModelInstances)
   {
-    auto filename_to_offset_and_name = lModels.find(model.model->_filename);
+    auto filename_to_offset_and_name = lModels.find(model.model->filename);
     if (filename_to_offset_and_name == lModels.end())
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -892,7 +770,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lID = 0;
   for (auto const& object : lObjectInstances)
   {
-    auto filename_to_offset_and_name = lObjects.find(object.wmo->_filename);
+    auto filename_to_offset_and_name = lObjects.find(object.wmo->filename);
     if (filename_to_offset_and_name == lObjects.end())
     {
       LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -917,7 +795,7 @@ void MapTile::saveTile(bool saveAllModels, World* world)
     lMODF_Data[lID].extents[1][2] = object.extents[1].z;
 
     lMODF_Data[lID].flags = object.mFlags;
-    lMODF_Data[lID].doodadSet = object.doodadset;
+    lMODF_Data[lID].doodadSet = object.doodadset();
     lMODF_Data[lID].nameSet = object.mNameset;
     lMODF_Data[lID].unknown = object.mUnknown;
     lID++;
@@ -985,53 +863,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
 
   {
-    MPQFile f(mFilename);
+    MPQFile f(filename);
     f.setBuffer(lADTFile.data);
     f.SaveFile();
-  }
-
-  // save wod files
-  if (wodSave)
-  {
-    // ADT root file
-    MPQFile f1 (mFilename, wodSavePath);
-    f1.setBuffer(lADTRootFile.data);
-    f1.SaveFile();
-    f1.close();
-
-    // both tex files
-    std::stringstream texFilename1;
-    texFilename1 << mFilename.substr(0, mFilename.size() - 4) << "_tex0.adt";
-    std::stringstream texFilename2;
-    texFilename2 << mFilename.substr(0, mFilename.size() - 4) << "_tex1.adt";
-
-
-    MPQFile f2 (texFilename1.str(), wodSavePath);
-    f2.setBuffer(lADTTexFile.data);
-    f2.SaveFile();
-    f2.close();
-
-    MPQFile f3 (texFilename2.str(), wodSavePath);
-    f3.setBuffer(lADTTexFile.data);
-    f3.SaveFile();
-    f3.close();
-
-    // both obj files
-    std::stringstream objFilename1;
-    objFilename1 << mFilename.substr(0, mFilename.size() - 4) << "_obj0.adt";
-    std::stringstream objFilename2;
-    objFilename2 << mFilename.substr(0, mFilename.size() - 4) << "_obj1.adt";
-
-
-    MPQFile f4 (objFilename1.str(), wodSavePath);
-    f4.setBuffer(lADTObjFile.data);
-    f4.SaveFile();
-    f4.close();
-
-    MPQFile f5 (objFilename2.str(), wodSavePath);
-    f5.setBuffer(lADTObjFile.data);
-    f5.SaveFile();
-    f5.close();
   }
 
   lObjectInstances.clear();
@@ -1048,5 +882,15 @@ void MapTile::CropWater()
     {
       Water.CropMiniChunk(x, z, mChunks[z][x].get());
     }
+  }
+}
+
+void MapTile::remove_model(uint32_t uid)
+{
+  auto it = std::find(uids.begin(), uids.end(), uid);
+
+  if (it != uids.end())
+  {
+    uids.erase(it);
   }
 }

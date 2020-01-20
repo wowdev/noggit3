@@ -8,6 +8,7 @@
 
 #include <QLabel>
 #include <QWidget>
+#include <QSettings>
 
 #include <boost/optional.hpp>
 
@@ -21,6 +22,7 @@ namespace noggit
   {
     class model_import;
     class rotation_editor;
+    class helper_models;
   }
 }
 
@@ -52,11 +54,14 @@ namespace noggit
       object_editor ( MapView*
                     , World*
                     , bool_toggle_property* move_model_to_cursor_position
+                    , bool_toggle_property* use_median_pivot_point
                     , object_paste_params*
+                    , QWidget* parent = nullptr
                     );
 
-      bool hasSelection() const;
-      void copy(selection_type entry);
+      void import_last_model_from_wmv(int type);
+      void copy(std::string const& filename);
+      void copy_current_selection(World* world);
       void pasteObject ( math::vector_3d cursor_pos
                        , math::vector_3d camera_pos
                        , World*
@@ -66,16 +71,24 @@ namespace noggit
 
       model_import *modelImport;
       rotation_editor* rotationEditor;
+      helper_models* helper_models_widget;
+      QSize sizeHint() const override;
+
     private:
+      QSettings* _settings;
+
       QButtonGroup* pasteModeGroup;
       QLabel* _filename;
 
       bool _copy_model_stats;
+      bool _use_median_pivot_point;
 
-      boost::optional<selection_type> selected;
+      std::vector<selection_type> selected;
+      
+      void replace_selection(std::vector<selection_type> new_selection);
+
       void showImportModels();
       void SaveObjecttoTXT (World*);
-      void setModelName(const std::string &name);
       int pasteMode;
     };
   }

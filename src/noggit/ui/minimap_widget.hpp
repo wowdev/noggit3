@@ -44,6 +44,7 @@ namespace noggit
     protected:
       virtual void paintEvent (QPaintEvent*) override;
       virtual void mouseDoubleClickEvent (QMouseEvent*) override;
+      virtual void mouseMoveEvent(QMouseEvent*) override;
 
     signals:
       void map_clicked (const ::math::vector_3d&);

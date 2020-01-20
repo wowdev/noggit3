@@ -15,56 +15,10 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <opengl/scoped.hpp>
-#include <opengl/matrix.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <map>
-
-namespace
-{
-  GLuint Contour = 0;
-  float CoordGen[4];
-}
-static const int CONTOUR_WIDTH = 128;
-
-static const float texDetail = 8.0f;
-
-static const float TEX_RANGE = 1.0f;
-
-namespace
-{
-  void GenerateContourMap()
-  {
-    unsigned char CTexture[CONTOUR_WIDTH * 4];
-
-    CoordGen[0] = 0.0f;
-    CoordGen[1] = 0.25f;
-    CoordGen[2] = 0.0f;
-    CoordGen[3] = 0.0f;
-
-    for (int i = 0; i<(CONTOUR_WIDTH * 4); ++i)
-      CTexture[i] = 0;
-    CTexture[3 + CONTOUR_WIDTH / 2] = 0xff;
-    CTexture[7 + CONTOUR_WIDTH / 2] = 0xff;
-    CTexture[11 + CONTOUR_WIDTH / 2] = 0xff;
-
-    opengl::scoped::bool_setter<GL_TEXTURE_2D, GL_TRUE> const texture_2d;
-    gl.genTextures(1, &Contour);
-    gl.bindTexture(GL_TEXTURE_2D, Contour);
-
-    gl.texImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, CONTOUR_WIDTH, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
-    gl.generateMipmap (GL_TEXTURE_2D);
-
-    opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
-    gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-    gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
-
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  }
-}
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   : mt(maintile)
@@ -86,7 +40,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     f->read(&header, 0x80);
 
-    Flags = header.flags;
+    header_flags.value = header.flags;
     areaID = header.areaid;
 
     zbase = header.zpos;
@@ -105,6 +59,9 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
     vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
+
+  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha, !!header_flags.flags.do_not_fix_alpha_map);
+
   // - MCVT ----------------------------------------------
   {
     f->seek(base + header.ofsHeight);
@@ -137,6 +94,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     vmax.x = xbase + 8 * UNITSIZE;
     vmax.z = zbase + 8 * UNITSIZE;
 
+    update_intersect_points();
+
     // use absolute y pos in vertices
     ybase = 0.0f;
     header.ypos = 0.0f;
@@ -151,21 +110,11 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     char nor[3];
     math::vector_3d *ttn = mNormals;
-    for (int i = 0; i< mapbufsize; ++i) 
+    for (int i = 0; i< mapbufsize; ++i)
     {
       f->read(nor, 3);
       *ttn++ = math::vector_3d(nor[0] / 127.0f, nor[2] / 127.0f, nor[1] / 127.0f);
     }
-  }
-  // - MCLY ----------------------------------------------
-  {
-    f->seek(base + header.ofsLayer);
-    f->read(&fourcc, 4);
-    f->read(&size, 4);
-
-    assert(fourcc == 'MCLY');
-
-    _texture_set.initTextures(f, mt, size);
   }
   // - MCSH ----------------------------------------------
   if(header.ofsShadow && header.sizeShadow)
@@ -176,36 +125,40 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     assert(fourcc == 'MCSH');
 
+
+    uint8_t compressed_shadow_map[64 * 64 / 8];
+
     // shadow map 64 x 64
-    f->read(mShadowMap, 0x200);
+    f->read(compressed_shadow_map, 0x200);
     f->seekRelative(-0x200);
 
-    unsigned char sbuf[64 * 64], *p, c[8];
-    p = sbuf;
-    for (int j = 0; j<64; ++j) {
-      f->read(c, 8);
-      for (int i = 0; i<8; ++i) {
-        for (int b = 0x01; b != 0x100; b <<= 1) {
-          *p++ = (c[i] & b) ? 85 : 0;
-        }
+    uint8_t *p, *c;
+    p = _shadow_map;
+    c = compressed_shadow_map;
+    for (int i = 0; i<64 * 8; ++i)
+    {
+      for (int b = 0x01; b != 0x100; b <<= 1)
+      {
+        *p++ = ((*c) & b) ? 85 : 0;
       }
+      c++;
     }
-    shadow.bind();
-    gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    if (!header_flags.flags.do_not_fix_alpha_map)
+    {
+      for (std::size_t i(0); i < 64; ++i)
+      {
+        _shadow_map[i * 64 + 63] = _shadow_map[i * 64 + 62];
+        _shadow_map[63 * 64 + i] = _shadow_map[62 * 64 + i];
+      }
+      _shadow_map[63 * 64 + 63] = _shadow_map[62 * 64 + 62];
+    }
   }
-  // - MCAL ----------------------------------------------
+  else
   {
-    f->seek(base + header.ofsAlpha);
-    f->read(&fourcc, 4);
-    f->read(&size, 4);
-
-    assert(fourcc == 'MCAL');
-
-    _texture_set.initAlphamaps(f, header.nLayers, use_big_alphamap, (header.flags & FLAG_do_not_fix_alpha_map) == 0);
+    /** We have no shadow map (MCSH), so we got no shadows at all!  **
+    ** This results in everything being black.. Yay. Lets fake it! **/
+    memset(_shadow_map, 0, 64 * 64);
   }
   // - MCCV ----------------------------------------------
   if(header.ofsMCCV)
@@ -216,8 +169,10 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
     assert(fourcc == 'MCCV');
 
-    if (!(Flags & FLAG_MCCV))
-      Flags |= FLAG_MCCV;
+    if (!(header_flags.flags.has_mccv))
+    {
+      header_flags.flags.has_mccv = 1;
+    }
 
     hasMCCV = true;
 
@@ -228,158 +183,36 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       mccv[i] = math::vector_3d((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
     }
   }
+  else
+  {
+    math::vector_3d mccv_default(1.f, 1.f, 1.f);
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      mccv[i] = mccv_default;
+    }
+  }
 
-  // create vertex buffers
-  gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  if (header.sizeLiquid > 8)
+  {
+    f->seek(base + header.ofsLiquid);
+
+    f->read(&fourcc, 4);
+    f->seekRelative(4); // ignore the size here, the valid size is in the header
+
+    assert(fourcc == 'MCLQ');
+
+    int layer_count = (header.sizeLiquid - 8) / sizeof(mclq);
+    std::vector<mclq> layers(layer_count);
+    f->read(layers.data(), sizeof(mclq)*layer_count);    
+    
+    mt->Water.getChunk(px, py)->from_mclq(header_flags, layers);
+    // remove the liquid flags as it'll be saved as MH2O
+    header_flags.value &= ~(0xF << 2);
+  }
 
   initStrip();
 
   vcenter = (vmin + vmax) * 0.5f;
-
-  math::vector_3d *ttv = mMinimap;
-
-  // vertices
-  for (int j = 0; j < 17; ++j) {
-    for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
-      float xpos, zpos;
-
-      xpos = i * 0.125f;
-      zpos = j * 0.5f * 0.125f;
-
-      if (j % 2) {
-        xpos += 0.125f * 0.5f;
-      }
-
-      math::vector_3d v = math::vector_3d(xpos + px, zpos + py, -1);
-      *ttv++ = v;
-    }
-  }
-
-  if ((Flags & 1) == 0)
-  {
-    /** We have no shadow map (MCSH), so we got no shadows at all!  **
-    ** This results in everything being black.. Yay. Lets fake it! **/
-    for (size_t i = 0; i < 512; ++i)
-      mShadowMap[i] = 0;
-
-    unsigned char sbuf[64 * 64];
-    for (size_t j = 0; j < 4096; ++j)
-      sbuf[j] = 0;
-
-    shadow.bind();
-    gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  }
-
-  float ShadowAmount;
-  for (int j = 0; j<mapbufsize; ++j)
-  {
-    ShadowAmount = 1.0f - (mNormals[j].x + mNormals[j].y + mNormals[j].z);
-    ShadowAmount = std::min(1.0f, std::max(0.0f, ShadowAmount)) * 0.5f;
-
-    mFakeShadows[j].w = ShadowAmount;
-  }
-
-  gl.genBuffers(1, &minimap);
-  gl.genBuffers(1, &minishadows);
-
-  gl.bufferData<GL_ARRAY_BUFFER> (minimap, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
-}
-
-
-void MapChunk::drawTextures (int animtime)
-{
-  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-  if (_texture_set.num() > 0U)
-  {
-    _texture_set.bindTexture(0, 0);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-  }
-  else
-  {
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-  }
-
-  _texture_set.startAnim(0, animtime);
-  gl.begin(GL_TRIANGLE_STRIP);
-  gl.texCoord2f(0.0f, texDetail);
-  gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
-  gl.texCoord2f(0.0f, 0.0f);
-  gl.vertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
-  gl.texCoord2f(texDetail, texDetail);
-  gl.vertex3f(px + 1.0f, py + 1.0f, -2.0f);
-  gl.texCoord2f(texDetail, 0.0f);
-  gl.vertex3f(px + 1.0f, static_cast<float>(py), -2.0f);
-  gl.end();
-  _texture_set.stopAnim(0);
-
-  if (_texture_set.num() > 1U)
-  {
-    //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-    gl.depthMask(GL_FALSE);
-  }
-
-  for (size_t i = 1; i < _texture_set.num(); ++i)
-  {
-    _texture_set.bindTexture(i, 0);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    _texture_set.bindAlphamap(i - 1, 1);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    _texture_set.startAnim(i, animtime);
-
-    gl.begin(GL_TRIANGLE_STRIP);
-    gl.multiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
-    gl.multiTexCoord2f(GL_TEXTURE1, TEX_RANGE, 0.0f);
-    gl.vertex3f(px + 1.0f, static_cast<float>(py), -2.0f);
-    gl.multiTexCoord2f(GL_TEXTURE0, 0.0f, 0.0f);
-    gl.multiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f);
-    gl.vertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
-    gl.multiTexCoord2f(GL_TEXTURE0, texDetail, texDetail);
-    gl.multiTexCoord2f(GL_TEXTURE1, TEX_RANGE, TEX_RANGE);
-    gl.vertex3f(px + 1.0f, py + 1.0f, -2.0f);
-    gl.multiTexCoord2f(GL_TEXTURE0, 0.0f, texDetail);
-    gl.multiTexCoord2f(GL_TEXTURE1, 0.0f, TEX_RANGE);
-    gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
-    gl.end();
-
-    _texture_set.stopAnim(i);
-  }
-
-  opengl::texture::set_active_texture (0);
-  opengl::texture::disable_texture();
-
-  opengl::texture::set_active_texture (1);
-  opengl::texture::disable_texture();
-
-  gl.vertexPointer (minimap, 3, GL_FLOAT, 0, 0);
-  gl.colorPointer (minishadows, 4, GL_FLOAT, 0, 0);
-
-  gl.drawElements(GL_TRIANGLES, strip_without_holes.size(), GL_UNSIGNED_SHORT, strip_without_holes.data());
-
-  if (_texture_set.num() > 1U)
-  {
-    //gl.depthFunc(GL_LEQUAL);
-    gl.depthMask(GL_TRUE);
-  }
 }
 
 int MapChunk::indexLoD(int x, int y)
@@ -392,10 +225,110 @@ int MapChunk::indexNoLoD(int x, int y)
   return x * 8 + x * 9 + y;
 }
 
+void MapChunk::update_intersect_points()
+{
+  // update the center of the chunk and visibility when the vertices changed
+  vcenter = (vmin + vmax) * 0.5f;
+  _need_visibility_update = true;
+
+  _intersect_points.clear();
+  _intersect_points = misc::intersection_points(vmin, vmax);
+}
+
+void MapChunk::upload()
+{
+  _vertex_array.upload();
+  _buffers.upload();
+  lod_indices.upload();
+
+  update_shadows();
+
+  // fill vertex buffers
+  gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+
+  update_indices_buffer();
+  _uploaded = true;
+}
+
+void MapChunk::update_indices_buffer()
+{
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
+  }
+
+  for (int lod_level = 0; lod_level < 4; ++lod_level)
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (lod_indices[lod_level]);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_lods[lod_level].size() * sizeof (StripType), strip_lods[lod_level].data(), GL_STATIC_DRAW);
+  }
+
+  _need_indice_buffer_update = false;
+}
+
+boost::optional<int> MapChunk::get_lod_level(math::vector_3d const& camera_pos, display_mode display) const
+{
+  float dist = display == display_mode::in_2D
+             ? std::abs(camera_pos.y - vcenter.y)
+             : (camera_pos - vcenter).length();
+
+  if (dist < 500.f)
+  {
+    return boost::none;
+  }
+  else if (dist < 1000.f)
+  {
+    return 0;
+  }
+  else if (dist < 2000.f)
+  {
+    return 1;
+  }
+  else if (dist < 4000.f)
+  {
+    return 2;
+  }
+  else
+  {
+    return 3;
+  }
+}
+
+std::vector<uint8_t> MapChunk::compressed_shadow_map() const
+{
+  std::vector<uint8_t> shadow_map(64 * 64 / 8);
+
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    if (_shadow_map[i])
+    {
+      shadow_map[i / 8] |= 1 << i % 8;
+    }
+  }
+
+  return shadow_map;
+}
+
+bool MapChunk::has_shadows() const
+{
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    if (_shadow_map[i])
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void MapChunk::initStrip()
 {
   strip_with_holes.clear();
   strip_without_holes.clear();
+  strip_lods.clear();
 
   for (int x = 0; x<8; ++x)
   {
@@ -417,6 +350,21 @@ void MapChunk::initStrip()
       if (isHole(x / 2, y / 2))
         continue;
 
+      // todo: better hole check ?
+      for (int lod_level = 0; lod_level < 4; ++lod_level)
+      {
+        int n = 1 << lod_level;
+        if ((x % n) == 0 && (y % n) == 0)
+        {
+          strip_lods[lod_level].emplace_back (indexNoLoD(y, x)); //0
+          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x)); //17
+          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x + n)); //18
+          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x + n)); //18
+          strip_lods[lod_level].emplace_back (indexNoLoD(y, x + n)); //1
+          strip_lods[lod_level].emplace_back (indexNoLoD(y, x)); //0
+        }
+      }
+
       strip_with_holes.emplace_back (indexLoD(y, x)); //9
       strip_with_holes.emplace_back (indexNoLoD(y, x)); //0
       strip_with_holes.emplace_back (indexNoLoD(y + 1, x)); //17
@@ -432,42 +380,7 @@ void MapChunk::initStrip()
     }
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
-  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
-
-  for (int i = 0; i < 32; ++i)
-  {
-    if (i < 9)
-      LineStrip[i] = i;
-    else if (i < 17)
-      LineStrip[i] = 8 + (i - 8) * 17;
-    else if (i < 25)
-      LineStrip[i] = 145 - (i - 15);
-    else
-      LineStrip[i] = (32 - i) * 17;
-  }
-
-  LineStrip[31] = 0;
-
-  int iferget = 0;
-
-  for (size_t i = 34; i < 43; ++i)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 68; i < 77; ++i)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 102; i < 111; ++i)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 2; i < 139; i += 17)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 4; i < 141; i += 17)
-    HoleStrip[iferget++] = i;
-
-  for (size_t i = 6; i < 143; i += 17)
-    HoleStrip[iferget++] = i;
+  _need_indice_buffer_update = true;
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
@@ -514,280 +427,180 @@ void MapChunk::clearHeight()
   vmin.y = 0.0f;
   vmax.y = 0.0f;
 
-  gl.bufferData<GL_ARRAY_BUFFER>
-    (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  update_intersect_points();
 
+  if (_uploaded)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER>
+      (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+
+    _need_vao_update = true;
+  }
 }
 
 bool MapChunk::is_visible ( const float& cull_distance
                           , const math::frustum& frustum
                           , const math::vector_3d& camera
+                          , display_mode display
                           ) const
 {
   static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
 
-  return frustum.intersects (vmin, vmax)
-      && (((camera - vcenter).length() - chunk_radius) < cull_distance);
+  float dist = display == display_mode::in_3D
+             ? (camera - vcenter).length() - chunk_radius
+             : std::abs(camera.y - vmax.y);
+
+  return frustum.intersects (_intersect_points)
+      && dist < cull_distance;
 }
 
-void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
-                         , math::frustum const& frustum
-                         , const float& cull_distance
-                         , const math::vector_3d& camera
-                         , bool draw_hole_lines
-                         )
+
+void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const& tex_coord_vbo)
 {
-  if (!is_visible (cull_distance, frustum, camera))
-    return;
+  opengl::scoped::vao_binder const _ (_vao);
 
-  opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
-  gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-  gl.lineWidth (1.5);
-
-  line_shader.attrib ("position", vertices, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-  if ((px != 15) && (py != 0))
   {
-    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
-  }
-  else if ((px == 15) && (py == 0))
-  {
-    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
-  }
-  else if (px == 15)
-  {
-    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
-  }
-  else if (py == 0)
-  {
-    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
+    mcnk_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
-  if (draw_hole_lines)
   {
-    // Draw hole lines if view_subchunk_lines is true
-    line_shader.uniform ("color", math::vector_4d (0.f, 0.f, 1.f, 0.5f));
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
-    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_normals_vbo);
+    mcnk_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mccv_vbo);
+    mcnk_shader.attrib("mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(tex_coord_vbo);
+    mcnk_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  _need_vao_update = false;
+  _need_indice_buffer_update = true;
 }
 
-void MapChunk::drawContour()
+bool MapChunk::update_visibility ( const float& cull_distance
+                                 , const math::frustum& frustum
+                                 , const math::vector_3d& camera
+                                 , display_mode display
+                                 )
 {
-  gl.color4f(1, 1, 1, 1);
-  opengl::scoped::texture_setter<0, GL_TRUE> const texture;
-  opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  opengl::scoped::bool_setter<GL_ALPHA_TEST, GL_FALSE> const alpha_test;
-  if (Contour == 0)
-    GenerateContourMap();
-  gl.bindTexture(GL_TEXTURE_2D, Contour);
+  _is_visible = is_visible(cull_distance, frustum, camera, display);
+  _need_visibility_update = false;
 
-  opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
-  gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
+  auto lod = get_lod_level(camera, display);
+  bool lod_changed = lod != _lod_level;
 
-  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
+  _lod_level = lod;
+
+  return lod_changed;
 }
 
 void MapChunk::draw ( math::frustum const& frustum
+                    , opengl::scoped::use_program& mcnk_shader
+                    , GLuint const& tex_coord_vbo
                     , const float& cull_distance
                     , const math::vector_3d& camera
+                    , bool need_visibility_update
                     , bool show_unpaintable_chunks
-                    , bool draw_contour
                     , bool draw_paintability_overlay
                     , bool draw_chunk_flag_overlay
                     , bool draw_areaid_overlay
-                    , bool draw_wireframe_overlay
-                    , int cursor_type
                     , std::map<int, misc::random_color>& area_id_colors
-                    , math::vector_4d shadow_color
-                    , boost::optional<selection_type> selection
                     , int animtime
+                    , display_mode display
                     )
 {
-  if (!is_visible (cull_distance, frustum, camera))
+  bool lod_changed = false;
+
+  if (need_visibility_update || _need_visibility_update)
+  {
+    lod_changed = update_visibility(cull_distance, frustum, camera, display);
+  }
+
+  if (!_is_visible)
+  {
     return;
+  }
+
+  if (!_uploaded)
+  {
+    upload();
+    // force lod update on upload
+    lod_changed = true;
+    update_visibility(cull_distance, frustum, camera, display);
+  }
+
+  // todo update lod too
+  if (_need_vao_update)
+  {
+    update_vao(mcnk_shader, tex_coord_vbo);
+  }
 
   bool cantPaint = noggit::ui::selected_texture::get()
                  && !canPaintTexture(*noggit::ui::selected_texture::get())
                  && show_unpaintable_chunks
                  && draw_paintability_overlay;
 
-  if (cantPaint)
+  if (texture_set->num())
   {
-    gl.color4f(1, 0, 0, 1);
+    texture_set->bind_alpha(0);
+
+    for (int i = 0; i < texture_set->num(); ++i)
+    {
+      texture_set->bindTexture(i, i + 1);
+
+      if (texture_set->is_animated(i))
+      {
+        mcnk_shader.uniform("tex_anim_"+ std::to_string(i), texture_set->anim_uv_offset(i, animtime));
+      }
+    }
   }
 
-  // setup vertex buffers
-  gl.vertexPointer (vertices, 3, GL_FLOAT, 0, 0);
-  gl.normalPointer (normals, GL_FLOAT, 0, 0);
-
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (indices);
-
-  if (hasMCCV)
-  {
-    gl.colorPointer (mccvEntry, 3, GL_FLOAT, 0, 0);
-    gl.enableClientState(GL_COLOR_ARRAY);
-  }
-
-  // ASSUME: texture coordinates set up already
-
-  // first pass: base texture
-
-  if (_texture_set.num() == 0U)
-  {
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-
-    gl.color3f(1.0f, 1.0f, 1.0f);
-  }
-  else
-  {
-    _texture_set.bindTexture(0, 0);
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-  }
-
-  //! \todo: increase textures brightness when FLAG_GLOW is set (also in 2D mode)
-
-  gl.enable(GL_LIGHTING);
-  _texture_set.startAnim (0, animtime);
-  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-  _texture_set.stopAnim (0);
-
-  if (_texture_set.num() > 1U) {
-    //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-    gl.depthMask(GL_FALSE);
-  }
-
-  // additional passes: if required
-  for (size_t i = 1; i < _texture_set.num(); ++i)
-  {
-    // this time, use blending:
-    _texture_set.bindTexture(i, 0);
-    _texture_set.bindAlphamap(i - 1, 1);
-
-    _texture_set.startAnim (i, animtime);
-    gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    _texture_set.stopAnim (i);
-  }
-
-  if (_texture_set.num() > 1U)
-  {
-    //gl.depthFunc(GL_LEQUAL);
-    gl.depthMask(GL_TRUE);
-  }
-
-  if (hasMCCV)
-    gl.disableClientState(GL_COLOR_ARRAY);
-
-  if (cantPaint)
-  {
-    gl.color4f(1, 1, 1, 1);
-  }
-
-  // shadow map
-  opengl::texture::set_active_texture (0);
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-
-  gl.color4fv (shadow_color);
-
-  //gl.color4f(1,1,1,1);
-
-  opengl::texture::enable_texture (1);
+  opengl::texture::set_active_texture(5);
   shadow.bind();
 
-  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-
-  if (draw_contour)
-  {
-    drawContour();
-  }
+  mcnk_shader.uniform("layer_count", (int)texture_set->num());
+  mcnk_shader.uniform("cant_paint", (int)cantPaint);
 
   if (draw_chunk_flag_overlay)
   {
-    // draw chunk white if impassible flag is set
-    if (Flags & FLAG_IMPASS)
-    {
-      gl.color4f(1, 1, 1, 0.6f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
+    mcnk_shader.uniform ("draw_impassible_flag", (int)header_flags.flags.impass);
   }
 
   if (draw_areaid_overlay)
   {
-    // draw chunks in color depending on AreaID and list color from environment
-    gl.color4fv (area_id_colors[areaID]);
-    gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
+    mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
   }
 
-  if (cursor_type == 3 && selection)
+  gl.bindVertexArray(_vao);
+
+  if (_need_indice_buffer_update)
   {
-    selected_chunk_type const* chunk (nullptr);
-    if ((chunk = boost::get<selected_chunk_type> (&*selection)) && chunk->chunk == this)
-    {
-      gl.color4f(1.0f, 1.0f, 0.0f, 1.0f);
-
-      opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
-      opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
-      opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
-
-      gl.begin(GL_TRIANGLES);
-      gl.vertex3fv(mVertices[strip_without_holes[chunk->triangle + 0]]);
-      gl.vertex3fv(mVertices[strip_without_holes[chunk->triangle + 1]]);
-      gl.vertex3fv(mVertices[strip_without_holes[chunk->triangle + 2]]);
-      gl.end();
-    }
+    update_indices_buffer();
+    lod_changed = true;
   }
 
-  if (draw_wireframe_overlay)
+  if (lod_changed)
   {
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
-    opengl::texture::disable_texture();
-
-    {
-      opengl::scoped::bool_setter<GL_POLYGON_OFFSET_LINE, GL_TRUE> const polygon_offset_line;
-      gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      gl.lineWidth(1);
-      gl.polygonOffset(-1, -1);
-      gl.color4f(1, 1, 1, 0.2f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
-    {
-      opengl::scoped::bool_setter<GL_POLYGON_OFFSET_POINT, GL_TRUE> const polygon_offset_point;
-      gl.polygonMode(GL_FRONT_AND_BACK, GL_POINT);
-      gl.pointSize(2);
-      gl.polygonOffset(-1, -1);
-      gl.color4f(1, 1, 1, 0.5f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
-
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !_lod_level ? _indices_buffer : lod_indices[*_lod_level]);
+    _lod_level_indice_count = !_lod_level ? strip_with_holes.size() : strip_lods[*_lod_level].size();
   }
 
-  gl.enable(GL_LIGHTING);
-  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+  gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
+
+
+  for (int i = 0; i < texture_set->num(); ++i)
+  {
+    if (texture_set->is_animated(i))
+    {
+      mcnk_shader.uniform("tex_anim_" + std::to_string(i), math::vector_2d());
+    }
+  }
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)
@@ -822,7 +635,13 @@ void MapChunk::updateVerticesData()
     vmax.y = std::max(vmax.y, mVertices[i].y);
   }
 
-  gl.bufferData<GL_ARRAY_BUFFER>(vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  update_intersect_points();
+
+  if (_uploaded)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    _need_vao_update = true;
+  }
 }
 
 void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)> height)
@@ -863,18 +682,12 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
     //! \todo: find out why recalculating normals without changing the terrain result in slightly different normals
     mNormals[i] = {-Norm.z, Norm.y, -Norm.x};
   }
-  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
-  float ShadowAmount;
-  for (int j = 0; j<mapbufsize; ++j)
+  if (_uploaded)
   {
-    ShadowAmount = 1.0f - (-mNormals[j].x + mNormals[j].y - mNormals[j].z);
-    ShadowAmount = std::min(1.0f, std::max(0.0f, ShadowAmount)) * 0.5f;
-
-    mFakeShadows[j].w = ShadowAmount;
+    gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+    _need_vao_update = true;
   }
-
-  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
 bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
@@ -953,7 +766,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
     }
 
     changed = true;
-    Flags |= FLAG_MCCV;
+    header_flags.flags.has_mccv = 1;
     hasMCCV = true;
   }
 
@@ -965,9 +778,9 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
       float edit = change * (1.0f - dist / radius);
       if (editMode)
       {
-        mccv[i].x += (color.x - mccv[i].x)* edit;
-        mccv[i].y += (color.y - mccv[i].y)* edit;
-        mccv[i].z += (color.z - mccv[i].z)* edit;
+        mccv[i].x += (color.x / 0.5f - mccv[i].x)* edit;
+        mccv[i].y += (color.y / 0.5f - mccv[i].y)* edit;
+        mccv[i].z += (color.z / 0.5f - mccv[i].z)* edit;
       }
       else
       {
@@ -983,11 +796,38 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
       changed = true;
     }
   }
-  if (changed)
+  if (changed && _uploaded)
   {
-    gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    _need_vao_update = true;
   }
+
   return changed;
+}
+
+math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
+{
+  float dist;
+  float cur_dist = UNITSIZE;
+
+  if (!hasMCCV)
+  {
+    return math::vector_3d(1.0f, 1.0f, 1.0f);
+  }
+
+  int v_index = 0;
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    dist = misc::dist(mVertices[i], pos);
+    if (dist <= cur_dist)
+    {
+      cur_dist = dist;
+      v_index = i;
+    }
+  }
+
+  return mccv[v_index];
+
 }
 
 bool MapChunk::flattenTerrain ( math::vector_3d const& pos
@@ -1118,32 +958,57 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
 
 void MapChunk::eraseTextures()
 {
-  _texture_set.eraseTextures();
+  texture_set->eraseTextures();
 }
 
-void MapChunk::change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add)
+void MapChunk::change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
 {
-  _texture_set.change_texture_flag(tex, flag, add);
+  texture_set->change_texture_flag(tex, flag, add);
 }
 
 int MapChunk::addTexture(scoped_blp_texture_reference texture)
 {
-  return _texture_set.addTexture(texture);
+  return texture_set->addTexture(std::move (texture));
 }
 
-void MapChunk::switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
+void MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
-  _texture_set.switchTexture(oldTexture, newTexture);
+  texture_set->replace_texture(oldTexture, std::move (newTexture));
 }
 
-bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
+bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
 {
-  return _texture_set.paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
+  return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture));
+}
+
+bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
+{
+  return texture_set->replace_texture(xbase, zbase, pos.x, pos.z, radius, old_texture, std::move (new_texture));
 }
 
 bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
 {
-  return _texture_set.canPaintTexture(texture);
+  return texture_set->canPaintTexture(texture);
+}
+
+void MapChunk::update_shadows()
+{
+  shadow.bind();
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RED, 64, 64, 0, GL_RED, GL_UNSIGNED_BYTE, _shadow_map);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void MapChunk::clear_shadows()
+{
+  memset(_shadow_map, 0, 64 * 64);
+
+  if (_uploaded)
+  {
+    update_shadows();
+  }
 }
 
 bool MapChunk::isHole(int i, int j)
@@ -1180,14 +1045,13 @@ int MapChunk::getAreaID()
 void MapChunk::setFlag(bool changeto, uint32_t flag)
 {
   if (changeto)
-    this->Flags = this->Flags | (flag);
+  {
+    header_flags.value |= flag;
+  }
   else
-    this->Flags = this->Flags & ~(flag);
-}
-
-int MapChunk::getFlag()
-{
-  return this->Flags;
+  {
+    header_flags.value &= ~flag;
+  }
 }
 
 void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
@@ -1203,7 +1067,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
   MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
-  lMCNK_header->flags = Flags | FLAG_do_not_fix_alpha_map;
+  header_flags.flags.do_not_fix_alpha_map = 1;
+
+  lMCNK_header->flags = header_flags.value;
   lMCNK_header->holes = holes;
   lMCNK_header->areaid = areaID;
 
@@ -1232,53 +1098,16 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   memset(lMCNK_header->low_quality_texture_map, 0, 0x10);
 
-  static const size_t minimum_value_to_overwrite(128);
+  std::vector<uint8_t> lod_texture_map = texture_set->lod_texture_map();
 
-  for (size_t y(0); y < 8; ++y)
+  for (int i = 0; i < lod_texture_map.size(); ++i)
   {
-    for (size_t x(0); x < 8; ++x)
-    {
-      size_t winning_layer(0);
-      std::map<std::size_t, float> alpha_visibility;
+    const size_t array_index(i / 4);
+    // it's a uint2 array so we need to write the uint2 in the order they will be on disk,
+    // this means writing to the highest bits of the uint8 first
+    const size_t bit_index((3 - ((i) % 4)) * 2);
 
-      for (size_t j(0); j < 8; ++j)
-      {
-        for (size_t i(0); i < 8; ++i)
-        {
-          float alphas[4] = { 255.f, 0.f, 0.f, 0.f };
-
-          for (size_t layer(1); layer < _texture_set.num(); ++layer)
-          {            
-            float a = static_cast<float>(_texture_set.getAlpha(layer - 1, (y * 8 + j) * 64 + (x * 8 + i)));
-            alphas[layer] = a;
-            a /= 255.f;
-
-            for (size_t n = 0; n < layer; n++)
-            {
-              alphas[n] = (alphas[n] * (1.f - a));
-            }              
-          }
-
-          for (int k = 0; k < 4; ++k)
-          {
-            alpha_visibility[k] += alphas[k];
-          }
-        }
-      }
-
-      for (std::size_t i = 1; i < 4; ++i)
-      {
-        if (alpha_visibility[i] > alpha_visibility[winning_layer])
-        {
-          winning_layer = i;
-        }
-      }
-
-      const size_t array_index((y * 8 + x) / 4);
-      const size_t bit_index(((y * 8 + x) % 4) * 2);
-
-      lMCNK_header->low_quality_texture_map[array_index] |= ((winning_layer & 3) << bit_index);
-    }
+    lMCNK_header->low_quality_texture_map[array_index] |= ((lod_texture_map[i] & 3) << bit_index);
   }
 
   lCurrentPosition += 8 + 0x80;
@@ -1356,51 +1185,38 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   // MCLY
   //        {
-  size_t lMCLY_Size = _texture_set.num() * 0x10;
+  size_t lMCLY_Size = texture_set->num() * 0x10;
 
   lADTFile.Extend(8 + lMCLY_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size);
 
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = _texture_set.num();
+  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set->num();
 
-  std::vector<std::vector<char>> compressed_alphamaps;
+  std::vector<std::vector<uint8_t>> alphamaps = texture_set->save_alpha(use_big_alphamap);
   int lMCAL_Size = 0;
 
-  // convert bigAlpha to the correct format for saving
-  // moved here since the alphamap are compressed now and require to be in the right format
-  if (use_big_alphamap)
-  {
-    compressed_alphamaps = _texture_set.get_compressed_alphamaps();
-  }    
-
   // MCLY data
-  for (size_t j = 0; j < _texture_set.num(); ++j)
+  for (size_t j = 0; j < texture_set->num(); ++j)
   {
     ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * j);
 
-    lLayer->textureID = lTextures.find(_texture_set.filename(j))->second;
-    lLayer->flags = _texture_set.flag(j);
+    lLayer->textureID = lTextures.find(texture_set->filename(j))->second;
+    lLayer->flags = texture_set->flag(j);
     lLayer->ofsAlpha = lMCAL_Size;
-    lLayer->effectID = _texture_set.effect(j);
+    lLayer->effectID = texture_set->effect(j);
 
     if (j == 0)
     {
-      lLayer->flags &= ~(FLAG_USE_ALPHA | FLAG_ALPHA_COMPRESSED);  
+      lLayer->flags &= ~(FLAG_USE_ALPHA | FLAG_ALPHA_COMPRESSED);
     }
     else
     {
       lLayer->flags |= FLAG_USE_ALPHA;
-      // always compress big alpha
-      if (use_big_alphamap)
-      {
-        lLayer->flags |= FLAG_ALPHA_COMPRESSED;
-        lMCAL_Size += compressed_alphamaps[j - 1].size();
-      }
-      else
-      {
-        lMCAL_Size += 2048;
-      }
+      //! \todo find out why compression fuck up textures ingame
+      lLayer->flags &= ~FLAG_ALPHA_COMPRESSED;
+
+      lMCAL_Size += alphamaps[j - 1].size();
     }
   }
 
@@ -1424,7 +1240,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
     if (wmo.isInsideRect(lChunkExtents))
     {
       lObjectIDs.push_back(lID);
-    }      
+    }
 
     lID++;
   }
@@ -1469,11 +1285,10 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //        }
 
   // MCSH
-  //        {
-  //! \todo  Somehow determine if we need to write this or not?
-  //! \todo  This sometime gets all shadows black.
-  if (Flags & 1)
+  if (has_shadows())
   {
+    header_flags.flags.has_mcsh = 1;
+
     int lMCSH_Size = 0x200;
     lADTFile.Extend(8 + lMCSH_Size);
     SetChunkHeader(lADTFile, lCurrentPosition, 'MCSH', lMCSH_Size);
@@ -1483,20 +1298,20 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
     char * lLayer = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
-    memcpy(lLayer, mShadowMap, 0x200);
+    auto shadow_map = compressed_shadow_map();
+    memcpy(lLayer, shadow_map.data(), 0x200);
 
     lCurrentPosition += 8 + lMCSH_Size;
     lMCNK_Size += 8 + lMCSH_Size;
   }
   else
   {
+    header_flags.flags.has_mcsh = 0;
     lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsShadow = 0;
     lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->sizeShadow = 0;
   }
 
   // MCAL
-  size_t lMaps = _texture_set.num() ? _texture_set.num() - 1U : 0U;
-
   lADTFile.Extend(8 + lMCAL_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCAL', lMCAL_Size);
 
@@ -1505,27 +1320,10 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   char * lAlphaMaps = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
-  // always compress big alpha
-  if (use_big_alphamap)
+  for (auto alpha : alphamaps)
   {
-    for (auto alpha : compressed_alphamaps)
-    {
-      memcpy(lAlphaMaps, alpha.data(), alpha.size());
-      lAlphaMaps += alpha.size();
-    }
-  }
-  else
-  {
-    for (size_t j = 0; j < lMaps; j++)
-    {
-      unsigned char upperNibble, lowerNibble;
-      for (int k = 0; k < 2048; k++)
-      {
-        lowerNibble = (_texture_set.getAlpha(j, k * 2 + 0) & 0xF0);
-        upperNibble = (_texture_set.getAlpha(j, k * 2 + 1) & 0xF0);
-        lAlphaMaps[2048 * j + k] = (upperNibble)+(lowerNibble >> 4);
-      }
-    }
+    memcpy(lAlphaMaps, alpha.data(), alpha.size());
+    lAlphaMaps += alpha.size();
   }
 
   lCurrentPosition += 8 + lMCAL_Size;
@@ -1533,6 +1331,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //        }
 
   //! Don't write anything MCLQ related anymore...
+
 
   // MCSE
   int lMCSE_Size = 0;

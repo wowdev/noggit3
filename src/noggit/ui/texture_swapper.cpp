@@ -3,9 +3,11 @@
 #include <noggit/ui/texture_swapper.hpp>
 
 #include <math/vector_3d.hpp>
-#include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
+#include <noggit/tool_enums.hpp>
+
+#include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
@@ -21,29 +23,49 @@ namespace noggit
                                      )
       : QWidget (parent)
       , _texture_to_swap()
+      , _radius(15.f)
     {
       setWindowTitle ("Swap");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
 
       auto layout (new QFormLayout (this));
 
-      auto texture_display (new noggit::ui::current_texture);
-      texture_display->set_texture("tileset\\generic\\black.blp");
-      
+      _texture_to_swap_display = new current_texture(this, this);
+      _texture_to_swap_display->set_drop_behavior(CurrentTextureDropBehavior::texture_swapper);
 
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
 
       layout->addRow(new QLabel("Texture to swap"));
-      layout->addRow(texture_display);
+      layout->addRow(_texture_to_swap_display);
       layout->addRow(select);
       layout->addRow(swap_adt);
 
-      connect(select, &QPushButton::clicked, [this, texture_display]() {
-        _texture_to_swap = *selected_texture::get();
+      _brush_mode_group = new QGroupBox("Brush mode", this);
+      _brush_mode_group->setCheckable(true);
+      _brush_mode_group->setChecked(false);
+      layout->addRow(_brush_mode_group);
+
+      auto brush_content (new QWidget(_brush_mode_group));
+      auto brush_layout (new QFormLayout(brush_content));
+      _brush_mode_group->setLayout(brush_layout);
+
+      _radius_spin = new QDoubleSpinBox(brush_content);
+      _radius_spin->setRange (0.f, 100.f);
+      _radius_spin->setDecimals (2);
+      _radius_spin->setValue (_radius);
+      brush_layout->addRow ("Radius:", _radius_spin);
+
+      _radius_slider = new QSlider (Qt::Orientation::Horizontal, brush_content);
+      _radius_slider->setRange (0, 100);
+      _radius_slider->setSliderPosition (_radius);
+      brush_layout->addRow (_radius_slider);      
+      
+      connect(select, &QPushButton::clicked, [&]() {
+        _texture_to_swap = selected_texture::get();
         if (_texture_to_swap)
         {
-          texture_display->set_texture(_texture_to_swap.get()->filename());
+          _texture_to_swap_display->set_texture(_texture_to_swap.get()->filename);
         }
       });
 
@@ -53,6 +75,36 @@ namespace noggit
           world->swapTexture (*camera_pos, _texture_to_swap.get());
         }
       });
+
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+              , [&](double v)
+                {
+                  QSignalBlocker const blocker (_radius_slider);
+                  _radius = v;
+                  _radius_slider->setSliderPosition ((int)std::round (v));
+
+                }
+              );
+
+      connect ( _radius_slider, &QSlider::valueChanged
+              , [&](int v)
+                {
+                  QSignalBlocker const blocker (_radius_spin);
+                  _radius = v;
+                  _radius_spin->setValue(v);
+                }
+              );
+    }
+
+    void texture_swapper::change_radius(float change)
+    {
+      _radius_spin->setValue(_radius + change);
+    }
+
+    void texture_swapper::set_texture(std::string& filename)
+    {
+      _texture_to_swap = scoped_blp_texture_reference(filename);
+      _texture_to_swap_display->set_texture(filename);
     }
   }
 }

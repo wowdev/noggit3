@@ -33,6 +33,27 @@ namespace math
     return true;
   }
 
+  bool frustum::intersects (const std::vector<vector_3d>& intersect_points) const
+  {
+    for (auto const& plane : _planes)
+    {
+      for (auto const& point : intersect_points)
+      {
+        if (plane.normal() * point > -plane.distance())
+        {
+          //! \note C does not know how to continue out of two loops otherwise.
+          goto intersects_next_side;
+        }
+      }
+
+      return false;
+
+    intersects_next_side:;
+    }
+
+    return true;
+  }
+
   bool frustum::intersects ( const vector_3d& v1
                            , const vector_3d& v2
                            ) const
@@ -47,23 +68,7 @@ namespace math
     points.emplace_back (v2.x, v2.y, v1.z);
     points.emplace_back (v2.x, v2.y, v2.z);
 
-    for (auto const& plane : _planes)
-    {
-      for (auto const& point : points)
-      {
-        if (plane.normal() * point > -plane.distance())
-        {
-          //! \note C does not know how to continue out of two loops otherwise.
-          goto intersects_next_side;
-        }
-      }
-
-      return false;
-
-    intersects_next_side: ;
-    }
-
-    return true;
+    return intersects (points);
   }
 
 

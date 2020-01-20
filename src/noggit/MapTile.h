@@ -8,6 +8,7 @@
 #include <noggit/Selection.h>
 #include <noggit/TileWater.hpp>
 #include <noggit/tile_index.hpp>
+#include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <noggit/Misc.h>
 
@@ -23,11 +24,14 @@ namespace math
 
 class World;
 
-class MapTile
+class MapTile : public AsyncObject
 {
 
 public:
-	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, World*);
+	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, bool use_mclq_green_lava, World*);
+  ~MapTile();
+
+  void finishLoading();
 
   //! \todo on destruction, unload ModelInstances and WMOInstances on this tile:
   // a) either keep up the information what tiles the instances are on at all times
@@ -59,39 +63,31 @@ public:
   int changed;
 
   void draw ( math::frustum const& frustum
+            , opengl::scoped::use_program& mcnk_shader
+            , GLuint const& tex_coord_vbo
             , const float& cull_distance
             , const math::vector_3d& camera
+            , bool need_visibility_update
             , bool show_unpaintable_chunks
-            , bool draw_contour
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay
             , bool draw_areaid_overlay
-            , bool draw_wireframe_overlay
-            , int cursor_type
             , std::map<int, misc::random_color>& area_id_colors
-            , math::vector_4d shadow_color
-            , boost::optional<selection_type> selection
             , int animtime
+            , display_mode display
             );
   void intersect (math::ray const&, selection_result*) const;
-  void drawLines ( opengl::scoped::use_program& line_shader
-                 , math::frustum const& frustum
+  void drawWater ( math::frustum const& frustum
                  , const float& cull_distance
                  , const math::vector_3d& camera
-                 , bool draw_hole_lines
-                 );
-  void drawWater ( opengl::scoped::use_program& water_shader
-                 , math::vector_3d water_color_light
-                 , math::vector_3d water_color_dark
+                 , bool camera_moved
+                 , liquid_render& render
+                 , opengl::scoped::use_program& water_shader
                  , int animtime
                  , int layer
+                 , display_mode display
                  );
-  void drawTextures ( float minX
-                    , float minY
-                    , float maxX
-                    , float maxY
-                    , int animtime
-                    );
+
   void drawMFBO (opengl::scoped::use_program&);
 
   bool GetVertex(float x, float z, math::vector_3d *V);
@@ -101,9 +97,18 @@ public:
 
   bool isTile(int pX, int pZ);
 
-  bool canWaterSave();
+  virtual async_priority loading_priority() const
+  {
+    return async_priority::high;
+  }
 
-  void getAlpha(size_t id, unsigned char *amap);
+  bool has_model(uint32_t uid) const
+  {
+    return std::find(uids.begin(), uids.end(), uid) != uids.end();
+  }
+
+  void remove_model(uint32_t uid);
+  void add_model(uint32_t uid) { uids.push_back(uid); }
 
   TileWater Water;
 private:
@@ -111,6 +116,14 @@ private:
   // MFBO:
   math::vector_3d mMinimumValues[3 * 3];
   math::vector_3d mMaximumValues[3 * 3];
+
+  bool _mfbo_buffer_are_setup = false;
+  opengl::scoped::deferred_upload_vertex_arrays<2> _mfbo_vaos;
+  GLuint const& _mfbo_bottom_vao = _mfbo_vaos[0];
+  GLuint const& _mfbo_top_vao = _mfbo_vaos[1];
+  opengl::scoped::deferred_upload_buffers<2> _mfbo_vbos;
+  GLuint const& _mfbo_bottom_vbo = _mfbo_vbos[0];
+  GLuint const& _mfbo_top_vbo = _mfbo_vbos[1];
 
   // MHDR:
   int mFlags;
@@ -120,11 +133,14 @@ private:
   std::vector<std::string> mTextureFilenames;
   std::vector<std::string> mModelFilenames;
   std::vector<std::string> mWMOFilenames;
-
-  std::string mFilename;
+  
+  std::vector<uint32_t> uids;
 
   std::unique_ptr<MapChunk> mChunks[16][16];
   std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
+
+  bool _load_models;
+  World* _world;
 
   friend class MapChunk;
   friend class TextureSet;
