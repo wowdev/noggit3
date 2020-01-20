@@ -1932,6 +1932,14 @@ void World::setBaseTexture(math::vector_3d const& pos)
   });
 }
 
+void World::clear_shadows(math::vector_3d const& pos)
+{
+  for_all_chunks_on_tile(pos, [] (MapChunk* chunk)
+  {
+    chunk->clear_shadows();
+  });
+}
+
 void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex)
 {
   if (!!noggit::ui::selected_texture::get())
