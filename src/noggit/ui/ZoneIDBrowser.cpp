@@ -84,28 +84,50 @@ namespace noggit
       {
         if (i->getInt(AreaDB::Continent) == mapID)
         {
-          int area = i->getInt(AreaDB::AreaID);
-          int parent = i->getInt(AreaDB::Region);
-
-          std::stringstream ss;
-          ss << area << "-" << gAreaDB.getAreaName(area);
-          QTreeWidgetItem* item = (_items.find(area) != _items.end()) ? _items.at(area) : new QTreeWidgetItem();
-          item->setData(0, 1, QVariant(area));
-          item->setText(0, QString(ss.str().c_str()));
-          _items.emplace(area, item);
-
-          if (parent)
-          {
-            QTreeWidgetItem* parent_item(nullptr);
-            parent_item = (_items.find(parent) != _items.end()) ? _items.at(parent) : new QTreeWidgetItem();
-            parent_item->addChild(item);
-          }
-          else
-          {
-            _area_tree->addTopLevelItem(item);
-          }
+          add_area(i->getInt(AreaDB::AreaID));
         }
       }
+    }
+
+    QTreeWidgetItem* zone_id_browser::create_or_get_tree_widget_item(int area_id)
+    {
+      auto it = _items.find(area_id);
+
+      if (it != _items.end())
+      {
+        return _items.at(area_id);
+      }
+      else
+      {
+        QTreeWidgetItem* item = new QTreeWidgetItem();
+
+        std::stringstream ss;
+        ss << area_id << "-" << gAreaDB.getAreaName(area_id);
+        item->setData(0, 1, QVariant(area_id));
+        item->setText(0, QString(ss.str().c_str()));
+        _items.emplace(area_id, item);
+
+        return item;
+      }
+    }
+
+    QTreeWidgetItem* zone_id_browser::add_area(int area_id)
+    {
+      QTreeWidgetItem* item = create_or_get_tree_widget_item(area_id);
+
+      std::uint32_t parent_area_id = gAreaDB.get_area_parent(area_id);
+      
+      if (parent_area_id && parent_area_id != area_id)
+      {
+        QTreeWidgetItem* parent_item = add_area(parent_area_id);
+        parent_item->addChild(item);
+      }
+      else
+      {
+        _area_tree->addTopLevelItem(item);
+      }
+
+      return item;
     }
   }
 }

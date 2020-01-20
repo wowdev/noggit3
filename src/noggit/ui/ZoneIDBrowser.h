@@ -30,6 +30,8 @@ namespace noggit
       int mapID;
 
       void buildAreaList();
+      QTreeWidgetItem* create_or_get_tree_widget_item(int area_id);
+      QTreeWidgetItem* add_area(int area_id);
     };
   }
 }

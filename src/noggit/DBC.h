@@ -21,6 +21,7 @@ public:
   static const size_t Name = 11;    // localisation string
 
   static std::string getAreaName(int pAreaID);
+  static std::uint32_t get_area_parent(int area_id);
 };
 
 class MapDB : public DBCFile
