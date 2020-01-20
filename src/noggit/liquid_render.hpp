@@ -18,7 +18,6 @@ public:
   void prepare_draw ( opengl::scoped::use_program& water_shader
                     , int liquid_id
                     , int animtime
-                    , bool wmo = false
                     );
 
   opengl::program const& shader_program() const
@@ -26,10 +25,13 @@ public:
     return program;
   }
 
+  void force_texture_update();
+  std::size_t get_texture_index(int liquid_id, int animtime) const;
+
 private:
   void add_liquid_id(int liquid);
 
-  int _current_liquid_id = -1;
+  boost::optional<int> _current_liquid_id;
   int _current_anim_time = 0;
 
   opengl::program program

@@ -18,11 +18,12 @@
 void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
                                  , int liquid_id
                                  , int animtime
-                                 , bool wmo
                                  )
 {
-  // always bind the texture again for wmo liquids since it got overriden previously by the wmo group texture
-  if (wmo || _current_anim_time != animtime || liquid_id != _current_liquid_id)
+  std::size_t texture_index = 0;
+  bool need_texture_update = false;
+
+  if (!_current_liquid_id || liquid_id != _current_liquid_id)
   {
     _current_anim_time = animtime;
     _current_liquid_id = liquid_id;
@@ -32,17 +33,37 @@ void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
       add_liquid_id(liquid_id);
     }
 
-    auto const& textures = _textures_by_liquid_id[liquid_id];
+    texture_index = get_texture_index(liquid_id, animtime);
+    need_texture_update = true;
+    
     water_shader.uniform("type", _liquid_id_types[liquid_id]);
     water_shader.uniform("param", _float_param_by_liquid_id[liquid_id]);
+  }
+  else
+  {
+    texture_index = get_texture_index(liquid_id, animtime);
+    need_texture_update = texture_index != get_texture_index(liquid_id, animtime);
+  }
 
+  if (need_texture_update)
+  {
+    auto const& textures = _textures_by_liquid_id[liquid_id];
     water_shader.sampler
     ("texture"
       , GL_TEXTURE0
-      , textures[static_cast<std::size_t> (animtime / 60) % textures.size()].get()
+      , textures[texture_index].get()
     );
   }
-  water_shader.uniform("animtime", static_cast<float>(animtime)/2880.f);
+}
+
+void liquid_render::force_texture_update()
+{
+  _current_liquid_id.reset();
+}
+
+std::size_t liquid_render::get_texture_index(int liquid_id, int animtime) const
+{
+  return static_cast<std::size_t> (animtime / 60) % _textures_by_liquid_id.at(liquid_id).size();
 }
 
 void liquid_render::add_liquid_id(int liquid_id)
