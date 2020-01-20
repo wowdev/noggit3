@@ -243,13 +243,7 @@ void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
   _uploaded = true;
 }
 
-void wmo_liquid::draw ( math::matrix_4x4 const& model_view
-                      , math::matrix_4x4 const& projection
-                      , math::matrix_4x4 const& transform
-                      , math::vector_4d const& ocean_color_light
-                      , math::vector_4d const& ocean_color_dark
-                      , math::vector_4d const& river_color_light
-                      , math::vector_4d const& river_color_dark
+void wmo_liquid::draw ( math::matrix_4x4 const& transform
                       , liquid_render& render
                       , int animtime
                       )
@@ -263,16 +257,7 @@ void wmo_liquid::draw ( math::matrix_4x4 const& model_view
 
   opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
 
-  water_shader.uniform ("model_view", model_view);
-  water_shader.uniform ("projection", projection);
   water_shader.uniform ("transform", transform);
-
-  water_shader.uniform ("use_transform", 1);
-
-  water_shader.uniform ("ocean_color_light", ocean_color_light);
-  water_shader.uniform ("ocean_color_dark", ocean_color_dark);
-  water_shader.uniform ("river_color_light", river_color_light);
-  water_shader.uniform ("river_color_dark", river_color_dark);
 
   opengl::scoped::vao_binder const _ (_vao);
 

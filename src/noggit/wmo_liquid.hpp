@@ -107,13 +107,7 @@ public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, int group_liquid, bool use_dbc_type, bool is_ocean);
   wmo_liquid(wmo_liquid const& other);
 
-  void draw ( math::matrix_4x4 const& model_view
-            , math::matrix_4x4 const& projection
-            , math::matrix_4x4 const& transform
-            , math::vector_4d const& ocean_color_light
-            , math::vector_4d const& ocean_color_dark
-            , math::vector_4d const& river_color_light
-            , math::vector_4d const& river_color_dark
+  void draw ( math::matrix_4x4 const& transform
             , liquid_render& render
             , int animtime
             );

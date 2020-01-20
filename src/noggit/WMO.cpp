@@ -330,10 +330,6 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , const math::vector_3d& camera
                , bool // draw_doodads
                , bool draw_fog
-               , math::vector_4d const& ocean_color_light
-               , math::vector_4d const& ocean_color_dark
-               , math::vector_4d const& river_color_light
-               , math::vector_4d const& river_color_dark
                , liquid_render& render
                , int animtime
                , bool world_has_skies
@@ -357,13 +353,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , world_has_skies
                );
 
-    group.drawLiquid ( model_view
-                     , projection
-                     , transform_matrix_transposed
-                     , ocean_color_light
-                     , ocean_color_dark
-                     , river_color_light
-                     , river_color_dark
+    group.drawLiquid ( transform_matrix_transposed
                      , render
                      , draw_fog
                      , animtime
@@ -1221,13 +1211,7 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 }
 
-void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
-                          , math::matrix_4x4 const& projection
-                          , math::matrix_4x4 const& transform
-                          , math::vector_4d const& ocean_color_light
-                          , math::vector_4d const& ocean_color_dark
-                          , math::vector_4d const& river_color_light
-                          , math::vector_4d const& river_color_dark
+void WMOGroup::drawLiquid ( math::matrix_4x4 const& transform
                           , liquid_render& render
                           , bool // draw_fog
                           , int animtime
@@ -1240,16 +1224,7 @@ void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
     gl.disable(GL_BLEND);
     gl.depthMask(GL_TRUE);
 
-    lq->draw ( model_view
-             , projection
-             , transform
-             , ocean_color_light
-             , ocean_color_dark
-             , river_color_light
-             , river_color_dark
-             , render
-             , animtime
-             );
+    lq->draw ( transform, render, animtime);
   }
 }
 
