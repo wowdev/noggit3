@@ -76,6 +76,17 @@ public:
     else if (s.global) return true;
     else return r2 < s.r2;
   }
+
+  float river_shallow_alpha() const { return _river_shallow_alpha; }
+  float river_deep_alpha() const { return _river_deep_alpha; }
+  float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
+  float ocean_deep_alpha() const { return _ocean_deep_alpha; }
+
+private:
+  float _river_shallow_alpha;
+  float _river_deep_alpha;
+  float _ocean_shallow_alpha;
+  float _ocean_deep_alpha;
 };
 
 enum SkyColorNames 
@@ -111,6 +122,10 @@ private:
   int _last_time = -1;
   math::vector_3d _last_pos;
 
+  float _river_shallow_alpha;
+  float _river_deep_alpha;
+  float _ocean_shallow_alpha;
+  float _ocean_deep_alpha;
 public:
   std::vector<Sky> skies;
   std::vector<math::vector_3d> color_set = std::vector<math::vector_3d>(NUM_SkyColorNames);
@@ -131,6 +146,11 @@ public:
             , OutdoorLightStats const& light_stats
             );
   bool hasSkies() { return numSkies > 0; }
+
+  float river_shallow_alpha() const { return _river_shallow_alpha; }
+  float river_deep_alpha() const { return _river_deep_alpha; }
+  float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
+  float ocean_deep_alpha() const { return _ocean_deep_alpha; }
 
 private:
   bool _uploaded = false;

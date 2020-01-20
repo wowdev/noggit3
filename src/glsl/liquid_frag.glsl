@@ -35,10 +35,10 @@ void main()
     vec4 texel = texture2D (texture, uv);
     vec4 lerp = (type == 1)
               ? mix (ocean_color_light, ocean_color_dark, depth_) 
-              : mix (river_color_light, river_color_dark, depth_);
+              : mix (river_color_light, river_color_dark, depth_)
+              ;
               
-    vec4 tResult = clamp (texel + lerp, 0.0, 1.0); //clamp shouldn't be needed
-    vec4 oColor = clamp (texel + tResult, 0.0, 1.0);
-    out_color = vec4 (oColor.rgb, lerp.a);
+    //clamp shouldn't be needed
+    out_color = vec4 (clamp(texel + lerp, 0.0, 1.0).rgb, lerp.a);
   }  
 }

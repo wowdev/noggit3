@@ -85,6 +85,11 @@ Sky::Sky(DBCFile::Iterator data)
     DBCFile::Record light_param = gLightParamsDB.getByID(light_param_0);
     int skybox_id = light_param.getInt(LightParamsDB::skybox);
 
+    _river_shallow_alpha = light_param.getFloat(LightParamsDB::water_shallow_alpha);
+    _river_deep_alpha = light_param.getFloat(LightParamsDB::water_deep_alpha);
+    _ocean_shallow_alpha = light_param.getFloat(LightParamsDB::ocean_shallow_alpha);
+    _ocean_deep_alpha = light_param.getFloat(LightParamsDB::ocean_deep_alpha);
+
     if (skybox_id)
     {
       skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename));
@@ -230,21 +235,33 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
     color_set[i] = math::vector_3d(1, 1, 1);
   }
 
+  _river_shallow_alpha = 0.f;
+  _river_deep_alpha = 0.f;
+  _ocean_shallow_alpha = 0.f;
+  _ocean_deep_alpha = 0.f;
+
   // interpolation
   for (size_t j = 0; j<skies.size(); j++) 
   {
-    if (skies[j].weight>0) 
+    Sky const& sky = skies[j];
+
+    if (sky.weight>0)
     {
       // now calculate the color rows
       for (int i = 0; i<NUM_SkyColorNames; ++i) 
       {
-        if ((skies[j].colorFor(i, time).x>1.0f) || (skies[j].colorFor(i, time).y>1.0f) || (skies[j].colorFor(i, time).z>1.0f))
+        if ((sky.colorFor(i, time).x>1.0f) || (sky.colorFor(i, time).y>1.0f) || (sky.colorFor(i, time).z>1.0f))
         {
           LogDebug << "Sky " << j << " " << i << " is out of bounds!" << std::endl;
           continue;
         }
-        color_set[i] += skies[j].colorFor(i, time) * skies[j].weight;
+        color_set[i] += sky.colorFor(i, time) * sky.weight;
       }
+
+      _river_shallow_alpha += sky.weight * sky.river_shallow_alpha();
+      _river_deep_alpha += sky.weight * sky.river_deep_alpha();
+      _ocean_shallow_alpha += sky.weight * sky.ocean_shallow_alpha();
+      _ocean_deep_alpha += sky.weight * sky.ocean_deep_alpha();
     }
   }
   for (int i = 0; i<NUM_SkyColorNames; ++i)
