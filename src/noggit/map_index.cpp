@@ -353,9 +353,8 @@ void MapIndex::reloadTile(const tile_index& tile)
 {
   if (tileLoaded(tile))
   {
-    mTiles[tile.z][tile.x].tile = nullptr;
-
-    enterTile (tile);
+    mTiles[tile.z][tile.x].tile.reset();
+    loadTile(tile);
   }
 }
 
