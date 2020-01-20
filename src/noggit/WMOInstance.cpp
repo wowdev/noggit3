@@ -20,8 +20,8 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
   extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
 
-  change_doodadset(_doodadset);
   update_transform_matrix();
+  change_doodadset(_doodadset);
 }
 
 WMOInstance::WMOInstance(std::string const& filename)
