@@ -241,12 +241,7 @@ void MapChunk::upload()
   _buffers.upload();
   lod_indices.upload();
 
-  shadow.bind();
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RED, 64, 64, 0, GL_RED, GL_UNSIGNED_BYTE, _shadow_map);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  update_shadows();
 
   // fill vertex buffers
   gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
@@ -981,6 +976,26 @@ bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_b
 bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
 {
   return texture_set->canPaintTexture(texture);
+}
+
+void MapChunk::update_shadows()
+{
+  shadow.bind();
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RED, 64, 64, 0, GL_RED, GL_UNSIGNED_BYTE, _shadow_map);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void MapChunk::clear_shadows()
+{
+  memset(_shadow_map, 0, 64 * 64);
+
+  if (_uploaded)
+  {
+    update_shadows();
+  }
 }
 
 bool MapChunk::isHole(int i, int j)

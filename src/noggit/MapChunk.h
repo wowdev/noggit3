@@ -39,6 +39,8 @@ private:
 
   unsigned int areaID;
 
+  void update_shadows();
+
   uint8_t _shadow_map[64 * 64];
   opengl::texture shadow;
 
@@ -163,6 +165,8 @@ public:
   void switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
   void eraseTextures();
   void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
+
+  void clear_shadows();
 
   //! \todo implement Action stack for these
   bool isHole(int i, int j);

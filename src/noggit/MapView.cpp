@@ -591,6 +591,15 @@ void MapView::createGUI()
                     _world->setBaseTexture(_camera.position);
                   }
                 );
+    ADD_ACTION_NS ( assist_menu
+                , "Clear shadows"
+                , [this]
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->clear_shadows(_camera.position);
+                  }
+                );
   ADD_ACTION_NS ( assist_menu
                 , "Clear models"
                 , [this]
