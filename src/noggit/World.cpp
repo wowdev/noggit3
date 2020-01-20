@@ -597,6 +597,8 @@ void World::draw ( math::matrix_4x4 const& model_view
   gl.disable(GL_DEPTH_TEST);
 
   int daytime = static_cast<int>(time) % 2880;
+
+  skies->update_sky_colors(camera_pos, daytime);
   outdoorLightStats = ol->getLightStats(daytime);
 
   math::vector_3d light_dir = outdoorLightStats.dayDir;
