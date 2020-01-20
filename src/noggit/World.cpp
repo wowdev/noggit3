@@ -975,6 +975,9 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
+
+  
+
   if (!_liquid_render)
   {
     _liquid_render.emplace();
@@ -983,12 +986,25 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
     water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
-  }
 
-  math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
-  math::vector_4d ocean_color_dark (skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
-  math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha());
-  math::vector_4d river_color_dark (skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha());
+    water_shader.uniform("model_view", model_view);
+    water_shader.uniform("projection", projection);
+
+    math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
+    math::vector_4d ocean_color_dark(skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
+    math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha());
+    math::vector_4d river_color_dark(skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha());
+
+    water_shader.uniform("ocean_color_light", ocean_color_light);
+    water_shader.uniform("ocean_color_dark", ocean_color_dark);
+    water_shader.uniform("river_color_light", river_color_light);
+    water_shader.uniform("river_color_dark", river_color_dark);
+
+    if (draw_wmo || mapIndex.hasAGlobalWMO())
+    {
+      water_shader.uniform("use_transform", 1);
+    }
+  }  
 
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
@@ -1039,10 +1055,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                          , is_hidden
                          , draw_wmo_doodads
                          , draw_fog
-                         , ocean_color_light
-                         , ocean_color_dark
-                         , river_color_light
-                         , river_color_dark
                          , _liquid_render.get()
                          , current_selection()
                          , animtime
@@ -1126,15 +1138,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     opengl::scoped::use_program water_shader{ _liquid_render->shader_program() };
 
-    water_shader.uniform ("model_view", model_view);
-    water_shader.uniform ("projection", projection);
-
     water_shader.uniform ("use_transform", 0);
-
-    water_shader.uniform ("ocean_color_light", ocean_color_light);
-    water_shader.uniform ("ocean_color_dark",  ocean_color_dark);
-    water_shader.uniform ("river_color_light", river_color_light);
-    water_shader.uniform ("river_color_dark",  river_color_dark);
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {

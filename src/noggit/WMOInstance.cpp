@@ -46,10 +46,6 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                        , bool force_box
                        , bool draw_doodads
                        , bool draw_fog
-                       , math::vector_4d const& ocean_color_light
-                       , math::vector_4d const& ocean_color_dark
-                       , math::vector_4d const& river_color_light
-                       , math::vector_4d const& river_color_dark
                        , liquid_render& render
                        , std::vector<selection_type> selection
                        , int animtime
@@ -80,10 +76,6 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
               , camera
               , draw_doodads
               , draw_fog
-              , ocean_color_light
-              , ocean_color_dark
-              , river_color_light
-              , river_color_dark
               , render
               , animtime
               , world_has_skies
