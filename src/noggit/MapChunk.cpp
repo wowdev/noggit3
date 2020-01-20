@@ -311,6 +311,19 @@ std::vector<uint8_t> MapChunk::compressed_shadow_map() const
   return shadow_map;
 }
 
+bool MapChunk::has_shadows() const
+{
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    if (_shadow_map[i])
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void MapChunk::initStrip()
 {
   strip_with_holes.clear();
@@ -1272,11 +1285,10 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //        }
 
   // MCSH
-  //        {
-  //! \todo  Somehow determine if we need to write this or not?
-  //! \todo  This sometime gets all shadows black.
-  if (header_flags.flags.has_mcsh)
+  if (has_shadows())
   {
+    header_flags.flags.has_mcsh = 1;
+
     int lMCSH_Size = 0x200;
     lADTFile.Extend(8 + lMCSH_Size);
     SetChunkHeader(lADTFile, lCurrentPosition, 'MCSH', lMCSH_Size);
@@ -1294,6 +1306,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   }
   else
   {
+    header_flags.flags.has_mcsh = 0;
     lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsShadow = 0;
     lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->sizeShadow = 0;
   }
