@@ -979,6 +979,11 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     _liquid_render.emplace();
   }
+  // set anim time only once per frame
+  {
+    opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
+    water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
+  }
 
   // todo: find the correct alpha values
   math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], 0.7f);
@@ -1115,6 +1120,8 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (draw_water)
   {
+    _liquid_render->force_texture_update();
+
     // draw the water on both sides
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
 
