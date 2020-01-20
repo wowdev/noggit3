@@ -70,6 +70,25 @@ std::string AreaDB::getAreaName(int pAreaID)
   return areaName;
 }
 
+std::uint32_t AreaDB::get_area_parent(int area_id)
+{
+  // todo: differentiate between no parent and error ?
+  if (!area_id || area_id == -1)
+  {
+    return 0;
+  }
+
+  try
+  {
+    AreaDB::Record rec = gAreaDB.getByID(area_id);
+    return rec.getUInt(AreaDB::Region);
+  }
+  catch (AreaDB::NotFound)
+  {
+    return 0;
+  }
+}
+
 std::string MapDB::getMapName(int pMapID)
 {
   if (pMapID<0) return "Unknown map";
