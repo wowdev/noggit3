@@ -1866,8 +1866,6 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 void World::reload_tile(tile_index const& tile)
 {
   reset_selection();
-  // to remove the new models and reload the old ones
-  clearAllModelsOnADT(tile);
   mapIndex.reloadTile(tile);
 }
 
