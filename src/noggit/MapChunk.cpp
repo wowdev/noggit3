@@ -206,6 +206,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     f->read(layers.data(), sizeof(mclq)*layer_count);    
     
     mt->Water.getChunk(px, py)->from_mclq(header_flags, layers);
+    // remove the liquid flags as it'll be saved as MH2O
+    header_flags.value &= ~(0xF << 2);
   }
 
   initStrip();
