@@ -9,11 +9,13 @@
 #include <noggit/TextureManager.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/texture_set.hpp>
+#include <noggit/tool_enums.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>
 
 #include <map>
+#include <memory>
 
 class MPQFile;
 namespace math
@@ -22,7 +24,6 @@ namespace math
   struct vector_4d;
 }
 class Brush;
-class Alphamap;
 class ChunkWater;
 class sExtendableArray;
 
@@ -38,23 +39,50 @@ private:
 
   unsigned int areaID;
 
-  unsigned char mShadowMap[8 * 64];
+  void update_shadows();
+
+  uint8_t _shadow_map[64 * 64];
   opengl::texture shadow;
 
   std::vector<StripType> strip_with_holes;
   std::vector<StripType> strip_without_holes;
-  StripType LineStrip[32];
-  StripType HoleStrip[128];
+  std::map<int, std::vector<StripType>> strip_lods;
 
   math::vector_3d mNormals[mapbufsize];
-  math::vector_3d mMinimap[mapbufsize];
-  math::vector_4d mFakeShadows[mapbufsize];
   math::vector_3d mccv[mapbufsize];
+
+  std::vector<uint8_t> compressed_shadow_map() const;
+  bool has_shadows() const;
 
   void initStrip();
 
   int indexNoLoD(int x, int y);
   int indexLoD(int x, int y);
+
+  std::vector<math::vector_3d> _intersect_points;
+
+  void update_intersect_points();
+
+  boost::optional<int> get_lod_level( math::vector_3d const& camera_pos
+                                    , display_mode display
+                                    ) const;
+
+  bool _uploaded = false;
+  bool _need_indice_buffer_update = true;
+  bool _need_vao_update = true;
+
+  void upload();
+  void update_indices_buffer();
+  void update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const& tex_coord_vbo);
+
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  GLuint const& _vao = _vertex_array[0];
+  opengl::scoped::deferred_upload_buffers<4> _buffers;
+  GLuint const& _vertices_vbo = _buffers[0];
+  GLuint const& _normals_vbo = _buffers[1];
+  GLuint const& _indices_buffer = _buffers[2];
+  GLuint const& _mccv_vbo = _buffers[3];
+  opengl::scoped::deferred_upload_buffers<4> lod_indices;
 
 public:
   MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha);
@@ -67,53 +95,51 @@ public:
 
   float xbase, ybase, zbase;
 
-  unsigned int Flags;
+  mcnk_flags header_flags;
   bool use_big_alphamap;
 
-  TextureSet _texture_set;
-
-  opengl::scoped::buffers<4> _buffers;
-  GLuint const& vertices = _buffers[0];
-  GLuint const& normals = _buffers[1];
-  GLuint const& indices = _buffers[2];
-  GLuint const& mccvEntry = _buffers[3];
-
-  GLuint minimap, minishadows;
+  std::unique_ptr<TextureSet> texture_set;
 
   math::vector_3d mVertices[mapbufsize];
 
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
                   , const math::vector_3d& camera
+                  , display_mode display
                   ) const;
+private:
+  // return true if the lod level changed
+  bool update_visibility ( const float& cull_distance
+                         , const math::frustum& frustum
+                         , const math::vector_3d& camera
+                         , display_mode display
+                         );
+
+  bool _is_visible = true; // visible by default
+  bool _need_visibility_update = true;
+  boost::optional<int> _lod_level = boost::none; // none = no lod
+  size_t _lod_level_indice_count = 0;
+public:
 
   void draw ( math::frustum const& frustum
+            , opengl::scoped::use_program& mcnk_shader
+            , GLuint const& tex_coord_vbo
             , const float& cull_distance
             , const math::vector_3d& camera
+            , bool need_visibility_update
             , bool show_unpaintable_chunks
-            , bool draw_contour
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay
             , bool draw_areaid_overlay
-            , bool draw_wireframe_overlay
-            , int cursor_type
             , std::map<int, misc::random_color>& area_id_colors
-            , math::vector_4d shadow_color
-            , boost::optional<selection_type> selection
             , int animtime
+            , display_mode display
             );
   //! \todo only this function should be public, all others should be called from it
 
-  void drawContour();
   void intersect (math::ray const&, selection_result*);
-  void drawLines ( opengl::scoped::use_program&
-                 , math::frustum const& frustum
-                 , const float& cull_distance
-                 , const math::vector_3d& camera
-                 , bool draw_hole_lines
-                 );
-  void drawTextures (int animtime);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
+  math::vector_3d pickMCCV(math::vector_3d const& pos);
 
   ChunkWater* liquid_chunk() const;
 
@@ -133,19 +159,21 @@ public:
   bool isBorderChunk(std::set<math::vector_3d*>& selected);
 
   //! \todo implement Action stack for these
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool paintTexture(math::vector_3d const& pos, Brush *brush, uint strength, float pressure, scoped_blp_texture_reference texture);
+  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
   bool canPaintTexture(scoped_blp_texture_reference texture);
   int addTexture(scoped_blp_texture_reference texture);
-  void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
+  void switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
   void eraseTextures();
-  void change_texture_flag(scoped_blp_texture_reference tex, std::size_t flag, bool add);
+  void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
+
+  void clear_shadows();
 
   //! \todo implement Action stack for these
   bool isHole(int i, int j);
   void setHole(math::vector_3d const& pos, bool big, bool add);
 
   void setFlag(bool value, uint32_t);
-  int getFlag();
 
   int getAreaID();
   void setAreaID(int ID);

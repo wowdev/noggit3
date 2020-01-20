@@ -4,8 +4,11 @@
 
 #include <math/frustum.hpp>
 
+#include <noggit/tool_enums.hpp>
+
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.fwd.hpp>
 
 #include <QtGui/QImage>
 
@@ -45,17 +48,24 @@ public:
   {
     render(const map_horizon& horizon);
 
-    void draw( MapIndex *index
+    void draw( math::matrix_4x4 const& model_view
+             , math::matrix_4x4 const& projection
+             , MapIndex *index
              , const math::vector_3d& color
              , const float& cull_distance
              , const math::frustum& frustum
-             , const math::vector_3d& camera );
+             , const math::vector_3d& camera 
+             , display_mode display
+             );
 
     map_horizon_batch _batches[64][64];
 
+    opengl::scoped::deferred_upload_vertex_arrays<1> _vaos;
+    GLuint const& _vao = _vaos[0];
     opengl::scoped::buffers<2> _buffers;
     GLuint const& _index_buffer = _buffers[0];
     GLuint const& _vertex_buffer = _buffers[1];
+    std::unique_ptr<opengl::program> _map_horizon_program;
   };
 
   class minimap : public opengl::texture

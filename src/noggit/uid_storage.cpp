@@ -2,87 +2,44 @@
 
 #include <noggit/uid_storage.hpp>
 
-#include <noggit/Log.h>
-
 #include <boost/filesystem.hpp>
 
+#include <QtCore/QSettings>
 
-uid_storage::uid_storage()
+namespace
 {
-  // create the file if not exists
-  if (!boost::filesystem::exists("uid.txt"))
+  QString uid_file_path()
   {
-    std::ofstream fs;
-    fs.open("uid.txt", std::ios::out);
-    fs << "# UID storage file" << std::endl;
-    fs << "# map_id,max_id" << std::endl;
-    fs.close();
+    QSettings settings;
+    QString str = settings.value ("project/path").toString();
+    if (!(str.endsWith('\\') || str.endsWith('/')))
+    {
+      str += "/";
+    }
+    return str + "/uid.ini";
   }
-  _uidFile = ConfigFile("uid.txt", ",");
 }
 
-uid_storage* uid_storage::instance = nullptr;
-
-uid_storage* uid_storage::getInstance()
+bool uid_storage::hasMaxUIDStored(uint32_t mapID)
 {
-  if (!instance)
-  {
-    instance = new uid_storage();
-  }
-  return instance;
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  return uid_file.value (QString::number(mapID), -1).toUInt () != -1;
 }
 
-inline std::string to_str(std::size_t v)
+uint32_t uid_storage::getMaxUID(uint32_t mapID)
 {
-  std::stringstream ss;
-  ss << v;
-  return ss.str();
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  return uid_file.value (QString::number(mapID), 0).toUInt();
 }
 
-bool uid_storage::hasMaxUIDStored(std::size_t mapID) const
+void uid_storage::saveMaxUID(uint32_t mapID, uint32_t uid)
 {
-  return _uidFile.keyExists(to_str(mapID));
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  uid_file.setValue (QString::number(mapID), uid);
 }
 
-uint32_t uid_storage::getMaxUID(std::size_t mapID) const
+void uid_storage::remove_uid_for_map(uint32_t map_id)
 {
-  if (!hasMaxUIDStored(mapID))
-  {
-    return 0;
-  }
-
-  return _uidFile.read<uint32_t>(to_str(mapID));
-}
-
-void uid_storage::saveMaxUID(std::size_t mapID, uint32_t uid)
-{
-  _uidFile.add<uint32_t>(to_str(mapID), uid);
-  save();
-}
-
-void uid_storage::save()
-{
-  // create the file if not exists
-  std::ofstream fs;
-
-  if (!boost::filesystem::exists("uid.txt"))
-  {
-    fs.open("uid.txt", std::ios::out);
-  }
-  else
-  {
-    fs.open("uid.txt", std::ios::trunc);
-  }
-
-  if (!fs.is_open())
-  {
-    LogError << "Could not open uid.txt" << std::endl;
-    return;
-  }
-
-  fs << "# UID storage file" << std::endl;
-  fs << "# map_id,max_id" << std::endl;
-  fs << _uidFile;
-
-  fs.close();
+  QSettings uid_file(uid_file_path(), QSettings::Format::IniFormat);
+  uid_file.remove(QString::number(map_id));
 }

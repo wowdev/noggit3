@@ -2,30 +2,45 @@
 
 #pragma once
 
-#include <boost/thread.hpp>
+#include <noggit/AsyncObject.h>
 
+#include <array>
+#include <atomic>
+#include <condition_variable>
 #include <list>
-
-class AsyncObject;
+#include <memory>
+#include <thread>
 
 class AsyncLoader
 {
 public:
+  static AsyncLoader& instance()
+  {
+    static AsyncLoader async_loader(2);
+    return async_loader;
+  }
+
+  //! Ownership is _not_ transferred. Call ensure_deletable to ensure 
+  //! that a previously enqueued object can be destroyed.
+  void queue_for_load (AsyncObject*);
+  
+  void ensure_loaded (AsyncObject*);
+  void ensure_deletable (AsyncObject*);
+
+  AsyncLoader(int numThreads);
   ~AsyncLoader();
 
+  bool important_object_failed_loading() const { return _important_object_failed_loading; }
+  void reset_object_fail() { _important_object_failed_loading = false; }
+
+private:
   void process();
 
-  AsyncObject* nextObjectToLoad();
-
-  void addObject(AsyncObject* _pObject);
-  void removeObject(AsyncObject* _pObject);
-
-  void start(int _numThreads = 1);
-  void stop();
-
-  void join();
-private:
-  std::list<AsyncObject*> m_objects;
-  boost::thread_group m_threads;
-  boost::mutex m_loadingMutex;
+  std::mutex _guard;
+  std::condition_variable _state_changed;
+  std::atomic<bool> _stop;
+  std::array<std::list<AsyncObject*>, (size_t)async_priority::count> _to_load;
+  std::list<AsyncObject*> _currently_loading;
+  std::list<std::thread> _threads;
+  bool _important_object_failed_loading = false;
 };

@@ -21,6 +21,7 @@ public:
   static const size_t Name = 11;    // localisation string
 
   static std::string getAreaName(int pAreaID);
+  static std::uint32_t get_area_parent(int area_id);
 };
 
 class MapDB : public DBCFile
@@ -34,8 +35,8 @@ public:
   static const size_t MapID = 0;        // uint
   static const size_t InternalName = 1;    // string
   static const size_t AreaType = 2;      // uint
-  static const size_t IsBattleground = 3;    // uint
-  static const size_t Name = 4;        // loc
+  static const size_t IsBattleground = 4;    // uint
+  static const size_t Name = 5;        // loc
 
   static const size_t LoadingScreen = 57;    // uint [LoadingScreen]
   static std::string getMapName(int pMapID);
@@ -163,8 +164,12 @@ public:
   static const size_t ID = 0;        // uint
   static const size_t Name = 1;      // string
   static const size_t Type = 3;      // uint
-  static const size_t ShaderType = 15;  // uint
-  static const size_t TextureFilenames = 16;    // string[8]
+  static const size_t ShaderType = 14;  // uint
+  static const size_t TextureFilenames = 15;    // string[6]
+  static const size_t TextureTilesPerBlock = 23;  // uint
+  static const size_t Rotation = 24;  // uint
+  static const size_t AnimationX = 23;  // uint
+  static const size_t AnimationY = 24;  // uint
 
   static int getLiquidType(int pID);
   static std::string getLiquidName(int pID);

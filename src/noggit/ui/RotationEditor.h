@@ -4,11 +4,13 @@
 
 #include <noggit/Selection.h>
 
+#include <boost/optional.hpp>
+
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QWidget>
 #include <QDockWidget>
 
-class WMOInstance;
+class World;
 
 namespace noggit
 {
@@ -17,22 +19,16 @@ namespace noggit
     class rotation_editor : public QWidget
     {
     public:
-      rotation_editor();
+      rotation_editor(QWidget* parent, World* world);
 
-      void select(selection_type entry);
-      void updateValues();
-      bool hasSelection() const { return _selection; }
+      bool* use_median_pivot_point;
 
-      bool hasFocus() const {return false;}
-
+      void updateValues(World* world);
     private:
-      void maybe_updateWMO();
-      math::vector_3d* rotationVect;
-      math::vector_3d* posVect;
-      float* scale;
-
-      bool _selection;
-      WMOInstance* _wmoInstance;
+      // for single selection
+      void set_model_rotation(World* world);
+      // for multi selection
+      void change_models_rotation(World* world);
 
       QDoubleSpinBox* _rotation_x;
       QDoubleSpinBox* _rotation_z;

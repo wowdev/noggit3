@@ -5,11 +5,12 @@
 #include <noggit/MapView.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/Settings.h>
 #include <noggit/WMOInstance.h>
+#include <noggit/ui/ObjectEditor.h>
 
-#include <string>
 #include <fstream>
+#include <regex>
+#include <string>
 
 #include <QtWidgets/QFormLayout>
 
@@ -17,10 +18,10 @@ namespace noggit
 {
   namespace ui
   {
-    model_import::model_import (MapView* mapview)
-      : QWidget (nullptr)
+    model_import::model_import (noggit::ui::object_editor* object_editor)
+      : QWidget (object_editor, Qt::Tool | Qt::WindowStaysOnTopHint)
     {
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
+      setWindowIcon (QIcon (":/icon"));
       auto layout (new QFormLayout (this));
 
       layout->addRow ("Filter", _textBox = new QLineEdit (this));
@@ -36,18 +37,9 @@ namespace noggit
       buildModelList();
 
       connect ( _list, &QListWidget::itemDoubleClicked
-              , [mapview] (QListWidgetItem* item)
+              , [object_editor] (QListWidgetItem* item)
                 {
-                  if (item->text().endsWith (".m2"))
-                  {
-                    auto mi (new ModelInstance (item->text().toStdString()));
-                    mi->scale = 1.0f;
-                    mapview->selectModel(mi);
-                  }
-                  else if (item->text().endsWith (".wmo"))
-                  {
-                    mapview->selectModel (new WMOInstance (item->text().toStdString()));
-                  }
+                  object_editor->copy(item->text().toStdString());
                 }
               );
     }
@@ -56,7 +48,9 @@ namespace noggit
     {
       _list->clear();
 
-      std::ifstream fileReader (Settings::getInstance()->importFile);
+      QSettings settings;
+
+      std::ifstream fileReader (settings.value ("project/import_file", "import.txt").toString().toStdString());
       std::string const filter
         (mpq::normalized_filename (_textBox->text().toStdString()));
 
@@ -75,8 +69,17 @@ namespace noggit
           continue;
         }
 
-        _list->addItem (QString::fromStdString (path));
+        std::regex regex("[^\\.]+\\.(m2|wmo)"), wmo_group(".*_[0-9]{3}\\.wmo");
+        std::smatch match;
+
+        if (std::regex_search(path, match, regex) && !regex_match(path, wmo_group))
+        {
+          _list->addItem (QString::fromStdString (match.str(0)));
+        }
       }
+
+      _list->setMinimumWidth(_list->sizeHintForColumn(0));
+      setMinimumWidth(_list->width()+ _textBox->width());
     }
   }
 }

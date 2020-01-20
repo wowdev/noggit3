@@ -3,24 +3,33 @@
 #include <noggit/alphamap.hpp>
 #include <opengl/context.hpp>
 
+#include <boost/optional/optional.hpp>
+
 Alphamap::Alphamap()
 {
   createNew();
-  genTexture();
 }
 
-Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha)
+Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool use_big_alphamaps, bool do_not_fix_alpha_map)
 {
   createNew();
 
-  if(flags & 0x200 )
-    readCompressed(f);
-  else if(mBigAlpha)
-    readBigAlpha(f);
+  if (use_big_alphamaps)
+  {
+    // can only compress big alpha
+    if (flags & 0x200)
+    {
+      readCompressed(f);
+    }
+    else
+    {
+      readBigAlpha(f);
+    }    
+  }    
   else
-    readNotCompressed(f, doNotFixAlpha);
-
-  genTexture();
+  {
+    readNotCompressed(f, do_not_fix_alpha_map);
+  }
 }
 
 void Alphamap::readCompressed(MPQFile *f)
@@ -55,12 +64,9 @@ void Alphamap::readBigAlpha(MPQFile *f)
   f->seekRelative(0x1000);
 }
 
-void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
+void Alphamap::readNotCompressed(MPQFile *f, bool do_not_fix_alpha_map)
 {
-  // not compressed
-  unsigned char *p;
   char const* abuf = f->getPointer();
-  p = amap;
 
   for (std::size_t x(0); x < 64; ++x)
   {
@@ -72,7 +78,7 @@ void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
     }
   }
 
-  if (doNotFixAlpha)
+  if (!do_not_fix_alpha_map)
   {
     for (std::size_t i(0); i < 64; ++i)
     {
@@ -89,26 +95,6 @@ void Alphamap::createNew()
   memset(amap, 0, 64 * 64);
 }
 
-void Alphamap::loadTexture()
-{
-  bind();
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap);
-}
-
-void Alphamap::genTexture()
-{
-  loadTexture();
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-void Alphamap::bind()
-{
-  map.bind();
-}
-
 void Alphamap::setAlpha(size_t offset, unsigned char value)
 {
   amap[offset] = value;
@@ -119,7 +105,7 @@ void Alphamap::setAlpha(unsigned char *pAmap)
   memcpy(amap, pAmap, 64*64);
 }
 
-unsigned char Alphamap::getAlpha(size_t offset)
+unsigned char Alphamap::getAlpha(size_t offset) const
 {
   return amap[offset];
 }
@@ -127,4 +113,102 @@ unsigned char Alphamap::getAlpha(size_t offset)
 const unsigned char *Alphamap::getAlpha()
 {
   return amap;
+}
+
+std::vector<uint8_t> Alphamap::compress() const
+{
+  struct entry
+  {
+    enum mode_t
+    {
+      copy = 0,              // append value[0..count - 1]
+      fill = 1,              // append value[0] count times
+    };    
+    uint8_t count : 7;
+    uint8_t mode : 1;
+
+    uint8_t value[];
+  };
+
+  std::vector<uint8_t> data(amap, amap+4096);
+  auto current (data.begin());
+  auto const end (data.end());
+  int column_pos = 0;
+
+  auto const consume_fill
+  ( 
+    [&]
+  {
+    int8_t count (0);
+    column_pos %= 64;
+
+    while ((current + 1 < end) && *current == *(current + 1) && column_pos < 63)
+    {
+      ++current;
+      ++count;
+      ++column_pos;
+    }
+
+    // include current (current is incremented in the for loop)
+    if (count)
+    {
+      ++count;
+      ++column_pos;
+    }
+
+    return count;
+  }
+  );
+
+  std::vector<uint8_t> result;
+  boost::optional<std::size_t> current_copy_entry_offset (boost::none);
+  auto const current_copy_entry
+  ( 
+    [&]
+  {
+    return reinterpret_cast<entry*> (&*(result.begin() + *current_copy_entry_offset));
+  }
+  );
+
+  for (; current != end; ++current)
+  {
+    auto const fill (consume_fill());
+    if (fill)
+    {
+      current_copy_entry_offset = boost::none;
+
+      result.emplace_back();
+      result.emplace_back(*current);
+
+      entry* e (reinterpret_cast<entry*> (&*(result.rbegin() + 1)));
+      e->mode = entry::fill;
+      e->count = fill;
+
+      column_pos %= 64;
+    }
+    else
+    {
+      if ( current_copy_entry_offset == boost::none
+          || column_pos == 64
+          )
+      {
+        current_copy_entry_offset = result.size();
+        result.emplace_back();
+        result.emplace_back(*current);
+        current_copy_entry()->mode = entry::copy;
+        current_copy_entry()->count = 1;
+
+        column_pos %= 64;
+      }
+      else
+      {
+        result.emplace_back(*current);
+        current_copy_entry()->count++;
+      }
+
+      column_pos++;
+    }
+  }
+
+  return result;
 }

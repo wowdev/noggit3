@@ -17,12 +17,8 @@ namespace opengl
     texture& operator= (texture const&) = delete;
     texture& operator= (texture&&);
 
-    void bind() const;
+    virtual void bind();
 
-    static void enable_texture();
-    static void enable_texture (size_t num);
-    static void disable_texture();
-    static void disable_texture (size_t num);
     static void set_active_texture (size_t num = 0);
 
   protected:

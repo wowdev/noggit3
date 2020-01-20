@@ -49,8 +49,8 @@ struct ModelHeader {
   uint32_t nTexReplace;
   uint32_t ofsTexReplace;
 
-  uint32_t nTexFlags; // Render Flags
-  uint32_t ofsTexFlags; // Blending modes / render flags.
+  uint32_t nRenderFlags; // Render Flags
+  uint32_t ofsRenderFlags; // Blending modes / render flags.
   uint32_t nBoneLookup; // BonesAndLookups
   uint32_t ofsBoneLookup; // A bone lookup table.
 
@@ -64,13 +64,12 @@ struct ModelHeader {
   uint32_t nTexAnimLookup;
   uint32_t ofsTexAnimLookup;
 
-  //not sure about these :/
-  math::vector_3d VertexBoxMin;//?
-  math::vector_3d VertexBoxMax;//?
-  float VertexBoxRadius;
-  math::vector_3d BoundingBoxMin;//?
-  math::vector_3d BoundingBoxMax;//?
-  float BoundingBoxRadius;
+  math::vector_3d bounding_box_min;
+  math::vector_3d bounding_box_max;
+  float bounding_box_radius;
+  math::vector_3d collision_box_min;
+  math::vector_3d collision_box_max;
+  float collision_box_radius;
 
   uint32_t nBoundingTriangles;
   uint32_t ofsBoundingTriangles;
@@ -157,21 +156,20 @@ struct ModelTexAnimDef {
 };
 
 struct ModelVertex {
-  math::vector_3d pos;
+  math::vector_3d position;
   uint8_t weights[4];
   uint8_t bones[4];
   math::vector_3d normal;
-  math::vector_2d texcoords;
-  int unk1, unk2; // always 0,0 so this is probably unused
+  math::vector_2d texcoords[2];
 };
 
 struct ModelView {
   char id[4]; // Signature
-  uint32_t nIndex, ofsIndex; // Vertices in this model (index into vertices[])
-  uint32_t nTris, ofsTris; // indices
-  uint32_t nProps, ofsProps; // additional vtx properties
-  uint32_t nSub, ofsSub; // materials/renderops/submeshes
-  uint32_t nTex, ofsTex; // material properties/textures
+  uint32_t n_index, ofs_index; // Vertices in this model (index into vertices[])
+  uint32_t n_triangle, ofs_triangle; // indices
+  uint32_t n_vertex_property, ofs_vertex_property; // additional vtx properties
+  uint32_t n_submesh, ofs_submesh; // materials/renderops/submeshes
+  uint32_t n_texture_unit, ofs_texture_unit; // material properties/textures
   int32_t lod; // LOD bones
 };
 
@@ -195,25 +193,32 @@ struct ModelGeoset {
 struct ModelTexUnit {
   // probably the texture units
   // size always >=number of materials it seems
-  uint16_t flags;    // Flags
-  uint16_t shading;    // If set to 0x8000: shaders. Used in skyboxes to ditch the need for depth buffering. See below.
-  uint16_t op;      // Material this texture is part of (index into mat)
-  uint16_t op2;      // Always same as above?
-  int16_t colorIndex;  // color or -1
-  uint16_t flagsIndex;  // more flags...
-  uint16_t texunit;    // Texture unit (0 or 1)
-  uint16_t mode;      // ? (seems to be always 1)
-  uint16_t textureid;  // Texture id (index into global texture list)
-  uint16_t texunit2;  // copy of texture unit value?
-  uint16_t transid;    // transparency id (index into transparency list)
-  uint16_t texanimid;  // texture animation id
+  uint8_t flags;    // Flags
+  uint8_t priority_plane;
+  uint16_t shader_id;    // If set to 0x8000: shaders. Used in skyboxes to ditch the need for depth buffering. See below.
+  uint16_t submesh;      
+  uint16_t geoset_index;  
+  int16_t color_index;  // color or -1
+  uint16_t renderflag_index;  // more flags...
+  uint16_t material_layer;    // Texture unit (0 or 1)
+  uint16_t texture_count;      // ? (seems to be always 1)
+  uint16_t texture_combo_index;  // Texture id (index into global texture list)
+  uint16_t texture_coord_combo_index;  
+  uint16_t transparency_combo_index;    // transparency id (index into transparency list)
+  uint16_t animation_combo_index;  // texture animation id
 };
 
 // block X - render flags
 struct ModelRenderFlags {
-  uint16_t flags;
-  //unsigned char f1;
-  //unsigned char f2;
+  struct 
+  {
+    uint16_t unlit : 1;
+    uint16_t unfogged : 1;
+    uint16_t two_sided : 1;
+    uint16_t billboard : 1;
+    uint16_t z_buffered : 1;
+    uint16_t unused : 11;
+  }flags;
   uint16_t blend;
 };
 
@@ -321,8 +326,8 @@ struct ModelRibbonEmitterDef {
   math::vector_3d pos;
   int32_t nTextures;
   int32_t ofsTextures;
-  int32_t nUnknown;
-  int32_t ofsUnknown;
+  int32_t nMaterials;
+  int32_t ofsMaterials;
   AnimationBlock color;
   AnimationBlock opacity;
   AnimationBlock above;

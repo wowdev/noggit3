@@ -1,84 +1,153 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/AsyncLoader.h>
-#include <noggit/AsyncObject.h>
+#include <noggit/errorHandling.h>
 
+#include <QtCore/QSettings>
+
+#include <algorithm>
 #include <list>
-
-namespace
-{
-  bool isFinished(AsyncObject* object)
-  {
-    return object->finishedLoading();
-  }
-}
 
 void AsyncLoader::process()
 {
-  while (true)
+  noggit::RegisterErrorHandlers();
+  AsyncObject* object = nullptr;
+
+  QSettings settings;
+  bool additional_log = settings.value("additional_file_loading_log", false).toBool();
+
+  while (!_stop)
   {
-    AsyncObject* object = nextObjectToLoad();
-    if (object)
+    {    
+      std::unique_lock<std::mutex> lock (_guard);
+
+      _state_changed.wait 
+      ( lock
+      , [&]
+        {
+          return !!_stop || std::any_of ( _to_load.begin(), _to_load.end()
+                                        , [](auto const& to_load) { return !to_load.empty(); }
+                                        );
+        }
+      );
+
+      if (_stop)
+      {
+        return;
+      }
+
+      for (auto& to_load : _to_load)
+      {
+        if (to_load.empty())
+        {
+          continue;
+        }
+
+        object = to_load.front();
+        _currently_loading.emplace_back (object);
+        to_load.pop_front();
+
+        break;
+      }
+    }
+
+    try
     {
+      if (additional_log)
+      {
+        std::lock_guard<std::mutex> const lock(_guard);
+        LogDebug << "Loading '" << object->filename << "'" << std::endl;
+      }
+
       object->finishLoading();
+
+      if (additional_log)
+      {
+        std::lock_guard<std::mutex> const lock(_guard);
+        LogDebug << "Loaded  '" << object->filename << "'" << std::endl;
+      }
+
+      {
+        std::lock_guard<std::mutex> const lock (_guard);
+        _currently_loading.remove (object);
+        _state_changed.notify_all();
+      }
     }
-    else
+    catch (...)
     {
-      boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+      std::lock_guard<std::mutex> const lock(_guard);
+      object->error_on_loading();
+
+      if (object->is_required_when_saving())
+      {
+        _important_object_failed_loading = true;
+      }
     }
   }
 }
 
-AsyncObject* AsyncLoader::nextObjectToLoad()
+void AsyncLoader::queue_for_load (AsyncObject* object)
 {
-  boost::mutex::scoped_lock lock(m_loadingMutex);
-
-  m_objects.remove_if(isFinished);
-
-  std::list<AsyncObject*>::iterator it = m_objects.begin();
-
-  if (it == m_objects.end())
-  {
-    return nullptr;
-  }
-  else
-  {
-    return *it;
-  }
+  std::lock_guard<std::mutex> const lock (_guard);
+  _to_load[(size_t)object->loading_priority()].push_back (object);
+  _state_changed.notify_one();
 }
 
-void AsyncLoader::addObject(AsyncObject* _pObject)
+void AsyncLoader::ensure_loaded (AsyncObject* object)
 {
-  boost::mutex::scoped_lock lock(m_loadingMutex);
-  m_objects.push_back(_pObject);
+  std::unique_lock<std::mutex> lock (_guard);
+  _state_changed.wait 
+  ( lock
+  , [&]
+    {
+      auto const& to_load = _to_load[(size_t)object->loading_priority()];
+      return std::find (to_load.begin(), to_load.end(), object) == to_load.end()
+        && std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end()
+        ;
+    }
+  );
 }
 
-void AsyncLoader::removeObject(AsyncObject* _pObject)
+void AsyncLoader::ensure_deletable (AsyncObject* object)
 {
-  boost::mutex::scoped_lock lock(m_loadingMutex);
-  m_objects.remove(_pObject);
+  std::unique_lock<std::mutex> lock (_guard);
+  _state_changed.wait
+  ( lock
+  , [&]
+    {
+      auto& to_load = _to_load[(size_t)object->loading_priority()];
+      auto const& it = std::find (to_load.begin(), to_load.end(), object);
+      
+      // don't load it if it's just to delete it afterward
+      if (it != to_load.end())
+      {
+        to_load.erase(it);
+        return true;
+      }
+      else
+      {
+        return std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end();
+      }
+    }
+  );
 }
 
-void AsyncLoader::start(int _numThreads)
+AsyncLoader::AsyncLoader(int numThreads)
+  : _stop (false)
 {
-  for (int i = 0; i < _numThreads; ++i)
+  for (int i = 0; i < numThreads; ++i)
   {
-    m_threads.add_thread(new boost::thread(&AsyncLoader::process, this));
+    _threads.emplace_back (&AsyncLoader::process, this);
   }
 }
 
 AsyncLoader::~AsyncLoader()
 {
-  stop();
-  join();
-}
+  _stop = true;
+  _state_changed.notify_all();
 
-void AsyncLoader::stop()
-{
-  m_threads.interrupt_all();
-}
-
-void AsyncLoader::join()
-{
-  m_threads.join_all();
+  for (auto& thread : _threads)
+  {
+    thread.join();
+  }
 }

@@ -4,6 +4,7 @@
 
 #include <QPaintEvent>
 #include <QPainter>
+#include <QToolTip>
 
 #include <noggit/Sky.h>
 #include <noggit/World.h>
@@ -20,11 +21,12 @@ namespace noggit
       , _draw_skies (false)
     {
       setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+      setMouseTracking(true);
     }
 
     QSize minimap_widget::sizeHint() const
     {
-      return QSize (512, 512);
+      return QSize (700, 700);
     }
 
     //! \todo Only redraw stuff as told in event.
@@ -49,29 +51,6 @@ namespace noggit
 
         if (draw_boundaries())
         {
-          painter.setPen (QColor (255, 255, 0));
-
-          for (size_t i (0); i < 64; ++i)
-          {
-            for (size_t j (0); j < 64; ++j)
-            {
-              //! \todo Check, if correct order!
-              if (world()->mapIndex.getChanged (tile_index (i, j)))
-              {
-                painter.drawLine ( tile_size * i
-                                 , tile_size * j
-                                 , tile_size * (i + 1) - 1
-                                 , tile_size * j
-                                 );
-                painter.drawLine ( tile_size * i
-                                 , tile_size * j
-                                 , tile_size * i
-                                 , tile_size * (j + 1) - 1
-                                 );
-              }
-            }
-          }
-
           //! \todo Draw non-existing tiles aswell?
           painter.setBrush (QColor (255, 255, 255, 30));
           for (size_t i (0); i < 64; ++i)
@@ -79,6 +58,7 @@ namespace noggit
             for (size_t j (0); j < 64; ++j)
             {
               tile_index const tile (i, j);
+              bool changed = false;
 
               if (world()->mapIndex.hasTile (tile))
               {
@@ -88,7 +68,12 @@ namespace noggit
                 }
                 else if (world()->mapIndex.tileLoaded (tile))
                 {
-                  painter.setPen (QColor::fromRgbF (0.0f, 1.0f, 1.0f, 0.4f));
+                  if (world()->mapIndex.getChanged(tile))
+                  {
+                    changed = true;
+                  }
+
+                  painter.setPen(QColor::fromRgbF(0.f, 0.f, 0.f, 0.6f));
                 }
                 else
                 {
@@ -100,12 +85,23 @@ namespace noggit
                 painter.setPen (QColor::fromRgbF (1.0f, 1.0f, 1.0f, 0.05f));
               }
 
-              painter.drawRect ( QRect ( tile_size * i + 1
-                                       , tile_size * j + 1
-                                       , tile_size - 2
-                                       , tile_size - 2
+              painter.drawRect ( QRect ( tile_size * i
+                                       , tile_size * j
+                                       , tile_size
+                                       , tile_size
                                        )
                                );
+
+              if (changed)
+              {
+                painter.setPen(QColor::fromRgbF(1.0f, 1.0f, 0.0f, 1.f));
+                painter.drawRect ( QRect ( tile_size * i + 1
+                                         , tile_size * j + 1
+                                         , tile_size - 2
+                                         , tile_size - 2
+                                         )
+                                 );
+              }
             }
           }
         }
@@ -189,6 +185,20 @@ namespace noggit
                                            , (event->pos().y() / float (tile_size)) * TILESIZE
                                            )
                        );
+    }
+
+    void minimap_widget::mouseMoveEvent(QMouseEvent* event)
+    {
+      if (world())
+      {
+        const int smaller_side((qMin(rect().width(), rect().height()) / 64) * 64);
+        const int tile_size(smaller_side / 64);
+        int x = event->pos().x(), y = event->pos().y();
+
+        std::string str("ADT: " + std::to_string(x / tile_size) + "_" + std::to_string(y / tile_size));
+
+        QToolTip::showText(mapToGlobal(QPoint(x, y+5)), QString::fromStdString(str));
+      }
     }
   }
 }

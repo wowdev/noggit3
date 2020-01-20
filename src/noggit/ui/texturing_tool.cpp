@@ -20,19 +20,20 @@ namespace noggit
   {
     texturing_tool::texturing_tool ( const math::vector_3d* camera_pos
                                    , World* world
+                                   , QWidget* parent
                                    )
-      : QWidget(nullptr)
-      , _brush_level(255.0f)
+      : QWidget(parent)
+      , _brush_level(255)
       , _hardness(0.5f)
       , _pressure(0.9f)
-      , _show_unpaintable_chunks(true)
+      , _show_unpaintable_chunks(false)
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
-      , _texturing_mode(texturing_mode::paint)
       , _anim_prop(true)
       , _anim_speed_prop(1)
       , _anim_rotation_prop(4)
       , _overbright_prop(false)
+      , _texturing_mode(texturing_mode::paint)
     {
       auto layout (new QFormLayout (this));
 
@@ -40,63 +41,87 @@ namespace noggit
       _inner_brush.init();
       _spray_brush.init();
 
-      _current_texture = new current_texture;
+      _current_texture = new current_texture(this);
+      _current_texture->resize(QSize(225, 225));
       layout->addRow (_current_texture);
+      layout->setAlignment(_current_texture, Qt::AlignHCenter);
 
       auto tabs (new QTabWidget(this));
 
       auto tool_widget (new QWidget (this));
       auto tool_layout (new QFormLayout (tool_widget));
 
+      auto slider_layout (new QGridLayout);
+      tool_layout->addRow(slider_layout);
+      auto slider_layout_left (new QFormLayout(tool_widget));
+      slider_layout->addLayout(slider_layout_left, 0, 0);
+      auto slider_layout_right(new QVBoxLayout(tool_widget));
+      slider_layout->addLayout(slider_layout_right, 0, 1);
+
       _hardness_spin = new QDoubleSpinBox (tool_widget);
       _hardness_spin->setRange (0.0f, 1.0f);
       _hardness_spin->setDecimals (2);
       _hardness_spin->setValue (_hardness);
       _hardness_spin->setSingleStep(0.05f);
-      tool_layout->addRow ("Hardness:", _hardness_spin);
+      slider_layout_left->addRow("Hardness:", _hardness_spin);
 
       _hardness_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _hardness_slider->setRange (0, 100);
       _hardness_slider->setSliderPosition (_hardness * 100);
-      tool_layout->addRow (_hardness_slider);
+      slider_layout_left->addRow (_hardness_slider);
 
       _radius_spin = new QDoubleSpinBox (tool_widget);
       _radius_spin->setRange (0.0f, 100.0f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_texture_brush.getRadius());
-      tool_layout->addRow ("Radius:", _radius_spin);
+      slider_layout_left->addRow ("Radius:", _radius_spin);
 
       _radius_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _radius_slider->setRange (0, 100);
       _radius_slider->setSliderPosition (_texture_brush.getRadius());
-      tool_layout->addRow (_radius_slider);
+      slider_layout_left->addRow (_radius_slider);
 
       _pressure_spin = new QDoubleSpinBox (tool_widget);
       _pressure_spin->setRange (0.0f, 1.0);
       _pressure_spin->setDecimals (2);
       _pressure_spin->setValue (_pressure);
       _pressure_spin->setSingleStep(0.05f);
-      tool_layout->addRow ("Pressure:", _pressure_spin);
+      slider_layout_left->addRow ("Pressure:", _pressure_spin);
 
       _pressure_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
       _pressure_slider->setRange (0, 100);
       _pressure_slider->setSliderPosition (std::round(_pressure * 100));
-      tool_layout->addRow (_pressure_slider);
+      slider_layout_left->addRow (_pressure_slider);
 
-      _brush_level_spin = new QDoubleSpinBox (tool_widget);
-      _brush_level_spin->setRange (0.0f, 255.0f);
-      _brush_level_spin->setDecimals (2);
-      _brush_level_spin->setValue (_brush_level);
-      _brush_level_spin->setSingleStep(5.0f);
-      tool_layout->addRow ("Level:", _brush_level_spin);
-
-      _brush_level_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
+      _brush_level_slider = new QSlider (Qt::Orientation::Vertical, tool_widget);
       _brush_level_slider->setRange (0, 255);
       _brush_level_slider->setSliderPosition (_brush_level);
-      tool_layout->addRow (_brush_level_slider);
+
+      QString _brush_level_slider_style = 
+        "QSlider::groove:vertical { \n "
+        "  background-color: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop: 0 black, stop: 1 #FFFFFF); \n "
+        "  width: 35px; \n"
+        "  margin: 0 0 0 0; \n "
+        "} \n "
+        "QSlider::handle:vertical { \n"
+        "  background-color: red; \n"
+        "  height: 5px; \n" 
+        "} \n"
+        "QSlider::vertical { \n"
+        "  width: 35px; \n"
+        "} \n";
+
+      _brush_level_slider->setStyleSheet(_brush_level_slider_style);
+      slider_layout_right->addWidget(_brush_level_slider, 0, Qt::AlignHCenter);
+
+      _brush_level_spin = new QSpinBox(tool_widget);
+      _brush_level_spin->setRange(0, 255);
+      _brush_level_spin->setValue(_brush_level);
+      _brush_level_spin->setSingleStep(5);
+      slider_layout_right->addWidget(_brush_level_spin);
 
       _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", tool_widget);
-      _show_unpaintable_chunks_cb->setChecked(true);
+      _show_unpaintable_chunks_cb->setChecked(false);
       tool_layout->addRow(_show_unpaintable_chunks_cb);
 
       // spray
@@ -140,13 +165,13 @@ namespace noggit
       auto anim_widget (new QWidget (this));
       auto anim_layout (new QFormLayout (anim_widget));
 
-      auto anim_group (new QGroupBox("Add anim", anim_widget));
-      anim_group->setCheckable(true);
-      anim_group->setChecked(_anim_prop.get());
+      _anim_group = new QGroupBox("Add anim", anim_widget);
+      _anim_group->setCheckable(true);
+      _anim_group->setChecked(_anim_prop.get());
 
-      auto anim_group_layout (new QFormLayout (anim_group));
+      auto anim_group_layout (new QFormLayout (_anim_group));
 
-      auto anim_speed_slider = new QSlider(Qt::Orientation::Horizontal, anim_group);
+      auto anim_speed_slider = new QSlider(Qt::Orientation::Horizontal, _anim_group);
       anim_speed_slider->setRange(0, 7);
       anim_speed_slider->setSingleStep(1);
       anim_speed_slider->setTickInterval(1);
@@ -154,16 +179,16 @@ namespace noggit
       anim_speed_slider->setValue(_anim_speed_prop.get());
       anim_group_layout->addRow("Speed:", anim_speed_slider);
 
-      anim_group_layout->addRow(new QLabel("Orientation:", anim_group));
+      anim_group_layout->addRow(new QLabel("Orientation:", _anim_group));
 
-      auto anim_orientation_dial = new QDial(anim_group);
+      auto anim_orientation_dial = new QDial(_anim_group);
       anim_orientation_dial->setRange(0, 8);
       anim_orientation_dial->setSingleStep(1);
       anim_orientation_dial->setValue(_anim_rotation_prop.get());
       anim_orientation_dial->setWrapping(true);
       anim_group_layout->addRow(anim_orientation_dial);
 
-      anim_layout->addRow(anim_group);
+      anim_layout->addRow(_anim_group);
 
       auto overbright_cb = new checkbox("Overbright", &_overbright_prop, anim_widget);
       anim_layout->addRow(overbright_cb);
@@ -174,7 +199,14 @@ namespace noggit
       
       layout->addRow(tabs);
 
-      connect (anim_group, &QGroupBox::toggled, &_anim_prop, &noggit::bool_toggle_property::set);
+      connect ( _anim_group, &QGroupBox::toggled
+              , [&](bool b)
+                {
+                  _anim_group->setTitle(QString(b ? "Add anim" : "Remove anim"));
+                  _anim_prop.set(b);
+                }
+              );
+
       connect (anim_speed_slider, &QSlider::valueChanged, &_anim_speed_prop, &noggit::unsigned_int_property::set);
       connect (anim_orientation_dial, &QDial::valueChanged, &_anim_rotation_prop, &noggit::unsigned_int_property::set);
 
@@ -247,12 +279,12 @@ namespace noggit
                 }
               );
 
-      connect ( _brush_level_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
+      connect ( _brush_level_spin, qOverload<int> (&QSpinBox::valueChanged)
+              , [&] (int v)
                 {
                   QSignalBlocker const blocker (_brush_level_slider);
                   _brush_level = v;
-                  _brush_level_slider->setSliderPosition ((int)std::round (v));
+                  _brush_level_slider->setSliderPosition (v);
                 }
               );
 
@@ -314,7 +346,6 @@ namespace noggit
               , [&] (bool b)
                 {
                   _spray_content->setVisible(b);
-                  adjustSize();
                 }
               );
 
@@ -322,7 +353,9 @@ namespace noggit
       update_brush_hardness();
       update_spray_brush();
       set_radius(15.0f);
-      toggle_spray(); // to disable
+      toggle_tool(); // to disable
+
+      setMinimumWidth(sizeHint().width());
     }
 
     void texturing_tool::update_brush_hardness()
@@ -346,11 +379,19 @@ namespace noggit
       }
     }
 
-    void texturing_tool::toggle_spray()
+    void texturing_tool::toggle_tool()
     {
       if (_texturing_mode == texturing_mode::paint)
       {
         _spray_mode_group->setChecked(!_spray_mode_group->isChecked());
+      }
+      else if (_texturing_mode == texturing_mode::swap)
+      {
+        _texture_switcher->toggle_brush_mode();
+      }
+      else if (_texturing_mode == texturing_mode::anim)
+      {
+        _anim_group->setChecked(!_anim_group->isChecked());
       }
     }
 
@@ -359,6 +400,10 @@ namespace noggit
       if (_texturing_mode == texturing_mode::paint)
       {
         _radius_spin->setValue(_texture_brush.getRadius() + change);
+      }
+      else if (_texturing_mode == texturing_mode::swap)
+      {
+        _texture_switcher->change_radius(change);
       }
     }
 
@@ -382,7 +427,7 @@ namespace noggit
     {
       if (_texturing_mode == texturing_mode::paint)
       {
-        _brush_level_spin->setValue(_brush_level + change);
+        _brush_level_spin->setValue(std::ceil(_brush_level + change));
       }
     }
 
@@ -393,6 +438,13 @@ namespace noggit
         _brush_level_spin->setValue(level);
       }
     }
+
+	void texturing_tool::toggle_brush_level_min_max()
+	{
+		if(_brush_level_spin->value() > _brush_level_spin->minimum())
+			_brush_level_spin->setValue(_brush_level_spin->minimum());
+		else _brush_level_spin->setValue(_brush_level_spin->maximum());
+	}
 
     void texturing_tool::change_spray_size(float change)
     {
@@ -410,10 +462,32 @@ namespace noggit
       }
     }
 
+    void texturing_tool::set_pressure(float pressure)
+    {
+      if (_texturing_mode == texturing_mode::paint)
+      {
+        _pressure_spin->setValue(pressure);
+      }
+    }
+
     float texturing_tool::brush_radius() const
     {
       // show only a dot when using the anim / swap mode
-      return (_texturing_mode == texturing_mode::paint ? _texture_brush.getRadius() : 0.0f);
+      switch (_texturing_mode)
+      {
+        case texturing_mode::paint: return _texture_brush.getRadius();
+        case texturing_mode::swap: return (_texture_switcher->brush_mode() ? _texture_switcher->radius() : 0.f);
+        default: return 0.f;
+      }
+    }
+
+    float texturing_tool::hardness() const
+    { 
+      switch (_texturing_mode)
+      {
+        case texturing_mode::paint: return _hardness;
+        default: return 0.f;
+      }
     }
 
     bool texturing_tool::show_unpaintable_chunks() const
@@ -430,7 +504,14 @@ namespace noggit
         auto to_swap (_texture_switcher->texture_to_swap());
         if (to_swap)
         {
-          world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
+          if (_texture_switcher->brush_mode())
+          {
+            world->replaceTexture(pos, _texture_switcher->radius(), to_swap.get(), texture);
+          }
+          else
+          {
+            world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
+          }          
         }
       }
       else if (_texturing_mode == texturing_mode::paint)
@@ -449,30 +530,43 @@ namespace noggit
           world->paintTexture(pos, &_texture_brush, _brush_level, strength, texture);
         }
       }
+      else if (_texturing_mode == texturing_mode::anim)
+      {
+        change_tex_flag(world, pos, _anim_prop.get(), texture);
+      }
     }
 
     void texturing_tool::change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture)
     {
-      if (_texturing_mode == texturing_mode::anim)
-      {
-        std::size_t flag = 0;
-        if (_anim_prop.get())
-        {
-          flag |= FLAG_ANIMATE;
-          if (add)
-          {
-            // the qdial in inverted compared to the anim rotation
-            flag |= ( _anim_rotation_prop.get() + 4 ) % 8;
-            flag |= _anim_speed_prop.get() << 3;
-          }
-        }
-        if (_overbright_prop.get())
-        {
-          flag |= FLAG_GLOW;
-        }
+      
+      std::size_t flag = 0;
 
-        world->change_texture_flag(pos, texture, flag, add);
+      flag |= FLAG_ANIMATE;
+
+      // if add == true => flag to add, else it's the flags to remove
+      if (add)
+      {
+        // the qdial in inverted compared to the anim rotation
+        flag |= (_anim_rotation_prop.get() + 4) % 8;
+        flag |= _anim_speed_prop.get() << 3;
       }
+      else
+      {
+        flag |= 0xF;
+      }      
+
+      // the texture's flag glow is set if the property is true, removed otherwise
+      if (_overbright_prop.get())
+      {
+        flag |= FLAG_GLOW;
+      }
+
+      world->change_texture_flag(pos, texture, flag, add);
+    }
+
+    QSize texturing_tool::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

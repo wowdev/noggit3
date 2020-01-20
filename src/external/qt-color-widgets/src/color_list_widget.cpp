@@ -100,6 +100,14 @@ void ColorListWidget::color_changed(int row)
     }
 }
 
+void ColorListWidget::setColorAt(int i, QColor const& color)
+{
+  p->colors[i] = color;
+  ColorSelector* cs = widget_cast<ColorSelector>(i);
+  cs->setColor(color);
+  Q_EMIT colorsChanged(p->colors);
+}
+
 void ColorListWidget::append_widget(int col)
 {
     ColorSelector* cbs = new ColorSelector;

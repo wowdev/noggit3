@@ -16,8 +16,8 @@ namespace noggit
 {
   namespace ui
   {
-    terrain_tool::terrain_tool()
-      : QWidget(nullptr)
+    terrain_tool::terrain_tool(QWidget* parent)
+      : QWidget(parent)
       , _edit_type (eTerrainType_Linear)
       , _radius(15.0f)
       , _speed(2.0f)
@@ -27,6 +27,7 @@ namespace noggit
       , _cursor_pos(nullptr)
       , _vertex_mode(eVertexMode_Center)
     {
+
       auto layout (new QFormLayout (this));
 
       _type_button_group = new QButtonGroup (this);
@@ -229,6 +230,8 @@ namespace noggit
                     setOrientation (v + 90.0f);
                   }
                 );
+
+      setMinimumWidth(sizeHint().width());
     }
 
     void terrain_tool::changeTerrain
@@ -297,6 +300,11 @@ namespace noggit
       _speed_spin->setValue(_speed + change);
     }
 
+    void terrain_tool::setSpeed(float speed)
+    {
+      _speed_spin->setValue(speed);
+    }
+
     void terrain_tool::changeOrientation (float change)
     {
       setOrientation (_vertex_orientation._ + change);
@@ -362,7 +370,11 @@ namespace noggit
         _vertex_type_group->show();
         _speed_box->hide();
       }
-      adjustSize();
+    }
+
+    QSize terrain_tool::sizeHint() const
+    {
+      return QSize(215, height());
     }
   }
 }

@@ -16,12 +16,13 @@ class ModelManager
 public:
   static void resetAnim();
   static void updateEmitters(float dt);
+  static void clear_hidden_models();
 
   static void report();
 
 private:
   friend struct scoped_model_reference;
-  static noggit::multimap_with_normalized_key<Model> _;
+  static noggit::async_object_multimap_with_normalized_key<Model> _;
 };
 
 struct scoped_model_reference

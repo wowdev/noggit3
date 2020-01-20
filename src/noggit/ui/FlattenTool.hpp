@@ -20,7 +20,7 @@ namespace noggit
     class flatten_blur_tool : public QWidget
     {
     public:
-      flatten_blur_tool();
+      flatten_blur_tool(QWidget* parent = nullptr);
 
       void flatten (World* world, math::vector_3d const& cursor_pos, float dt);
       void blur (World* world, math::vector_3d const& cursor_pos, float dt);
@@ -38,6 +38,7 @@ namespace noggit
       void changeHeight(float change);
 
       void setRadius(float radius);
+      void setSpeed(float speed);
       void setOrientation(float orientation);
 
       float brushRadius() const { return _radius; }
@@ -46,6 +47,8 @@ namespace noggit
       bool angled_mode() const { return _angle_group->isChecked(); }
       bool use_ref_pos() const  { return _lock_group->isChecked(); }
       math::vector_3d ref_pos() const { return _lock_pos; }
+
+      QSize sizeHint() const override;
 
     private:
 

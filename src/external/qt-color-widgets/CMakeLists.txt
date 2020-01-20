@@ -66,3 +66,6 @@ add_library(ColorWidgets-qt5 ${SOURCES})
 target_link_libraries(ColorWidgets-qt5 Qt5::Widgets)
 target_include_directories (ColorWidgets-qt5 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories (ColorWidgets-qt5 PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+add_compiler_flag_if_supported (ColorWidgets_CXX_FLAGS "-Wno-error=deprecated-declarations")
+target_compile_options (ColorWidgets-qt5 PRIVATE ${ColorWidgets_CXX_FLAGS})

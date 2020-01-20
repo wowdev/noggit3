@@ -74,86 +74,25 @@ namespace opengl
       GLboolean _was_enabled;
     };
 
-    template<std::size_t texture_number, GLboolean value>
-    class texture_setter
+    class vao_binder
     {
     public:
-      texture_setter()
-        : _was_enabled (false)
+      vao_binder(GLuint vao)
       {
-        texture::set_active_texture (texture_number);
-        _was_enabled = (gl.isEnabled (GL_TEXTURE_2D) == GL_TRUE);
-        if (value == GL_TRUE)
-        {
-          texture::enable_texture();
-        }
-        else
-        {
-          texture::disable_texture();
-        }
+        gl.getIntegerv(GL_VERTEX_ARRAY_BINDING, &_old);
+        gl.bindVertexArray(vao);
+      }
+      ~vao_binder()
+      {
+        gl.bindVertexArray(_old);
       }
 
-      ~texture_setter()
-      {
-        texture::set_active_texture (texture_number);
-        if (_was_enabled == GL_TRUE)
-        {
-          texture::enable_texture();
-        }
-        else
-        {
-          texture::disable_texture();
-        }
-      }
-
-      texture_setter (texture_setter const&) = delete;
-      texture_setter (texture_setter&&) = delete;
-      texture_setter& operator= (texture_setter const&) = delete;
-      texture_setter& operator= (texture_setter&&) = delete;
-
+      vao_binder (vao_binder const&) = delete;
+      vao_binder (vao_binder&&) = delete;
+      vao_binder& operator= (vao_binder const&) = delete;
+      vao_binder& operator= (vao_binder&&) = delete;
     private:
-      bool _was_enabled;
-    };
-
-    class matrix_pusher
-    {
-    public:
-      matrix_pusher()
-      {
-        gl.pushMatrix();
-      }
-      ~matrix_pusher()
-      {
-        gl.popMatrix();
-      }
-
-      matrix_pusher (matrix_pusher const&) = delete;
-      matrix_pusher (matrix_pusher&&) = delete;
-      matrix_pusher& operator= (matrix_pusher const&) = delete;
-      matrix_pusher& operator= (matrix_pusher&&) = delete;
-    };
-
-    template<GLint matrix_mode>
-    class matrix_mode_setter
-    {
-    public:
-      matrix_mode_setter()
-      {
-        gl.getIntegerv (GL_MATRIX_MODE, &_old_mode);
-        gl.matrixMode (matrix_mode);
-      }
-      ~matrix_mode_setter()
-      {
-        gl.matrixMode (_old_mode);
-      }
-
-      matrix_mode_setter (matrix_mode_setter const&) = delete;
-      matrix_mode_setter (matrix_mode_setter&&) = delete;
-      matrix_mode_setter& operator= (matrix_mode_setter const&) = delete;
-      matrix_mode_setter& operator= (matrix_mode_setter&&) = delete;
-
-    private:
-      GLint _old_mode;
+      GLint _old;
     };
 
     template<GLenum type>
@@ -192,6 +131,37 @@ namespace opengl
       buffer_binder& operator= (buffer_binder&&) = delete;
     };
 
+    // used to bind index buffers to vao and not unbind before the vao does
+    class index_buffer_manual_binder
+    {
+    public:
+      index_buffer_manual_binder(GLuint buffer) : _buffer(buffer) {}
+
+      void bind()
+      {
+        gl.getIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, reinterpret_cast<GLint*> (&_old));
+        gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffer);
+      }
+
+      ~index_buffer_manual_binder()
+      {
+        if (_binded) 
+        { 
+          gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _old); 
+        }
+      }
+
+      index_buffer_manual_binder(index_buffer_manual_binder const&) = delete;
+      index_buffer_manual_binder(index_buffer_manual_binder&&) = delete;
+      index_buffer_manual_binder& operator= (index_buffer_manual_binder const&) = delete;
+      index_buffer_manual_binder& operator= (index_buffer_manual_binder&&) = delete;
+
+    private:
+      GLuint _old = 0;
+      GLuint _buffer;
+      bool _binded = false;
+    };
+
     template<std::size_t count>
       struct buffers
     {
@@ -213,6 +183,72 @@ namespace opengl
 
     private:
       GLuint _buffers[count];
+    };
+
+    template<std::size_t count>
+      struct deferred_upload_buffers
+    {
+      bool buffer_generated() const { return _buffer_generated; }
+
+      void upload()
+      {
+        gl.genBuffers (count, _buffers);
+        _buffer_generated = true;
+      }
+
+      deferred_upload_buffers() { }
+
+      ~deferred_upload_buffers()
+      {
+        if (_buffer_generated)
+        {
+          gl.deleteBuffers (count, _buffers);
+        }        
+      }
+
+      deferred_upload_buffers (deferred_upload_buffers const&) = delete;
+      deferred_upload_buffers (deferred_upload_buffers&&) = delete;
+      deferred_upload_buffers& operator= (deferred_upload_buffers const&) = delete;
+      deferred_upload_buffers& operator= (deferred_upload_buffers&&) = delete;
+
+      GLuint const& operator[] (std::size_t i) const { return _buffers[i]; }
+
+    private:
+      bool _buffer_generated = false;
+      GLuint _buffers[count];
+    };
+
+    template<std::size_t count>
+      struct deferred_upload_vertex_arrays
+    {
+      bool buffer_generated() const { return _buffer_generated; }
+
+      void upload()
+      {
+        gl.genVertexArrays (count, _vertex_arrays);
+        _buffer_generated = true;
+      }
+
+      deferred_upload_vertex_arrays() { }
+
+      ~deferred_upload_vertex_arrays()
+      {
+        if (_buffer_generated)
+        {
+          gl.deleteVertexArray (count, _vertex_arrays);
+        }        
+      }
+
+      deferred_upload_vertex_arrays (deferred_upload_vertex_arrays const&) = delete;
+      deferred_upload_vertex_arrays (deferred_upload_vertex_arrays&&) = delete;
+      deferred_upload_vertex_arrays& operator= (deferred_upload_vertex_arrays const&) = delete;
+      deferred_upload_vertex_arrays& operator= (deferred_upload_vertex_arrays&&) = delete;
+
+      GLuint const& operator[] (std::size_t i) const { return _vertex_arrays[i]; }
+
+    private:
+      bool _buffer_generated = false;
+      GLuint _vertex_arrays[count];
     };
   }
 }

@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/frustum.hpp>
+#include <noggit/AsyncLoader.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/TextureManager.h> // TextureManager, Texture
@@ -8,6 +9,8 @@
 #include <noggit/World.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
+
+#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <iomanip>
@@ -17,29 +20,20 @@
 #include <string>
 #include <vector>
 
-const std::string& WMO::filename() const
-{
-  return _filename;
-}
 
 WMO::WMO(const std::string& filenameArg)
-  : _finished_upload(false)
-  , _filename(filenameArg)
+  : AsyncObject(filenameArg)
+  , _finished_upload(false)
 {
-  finished = false;
-
-  finishLoading();
 }
 
 void WMO::finishLoading ()
 {
-  MPQFile f(_filename);
+  MPQFile f(filename);
   if (f.isEof()) {
-    LogError << "Error loading WMO \"" << _filename << "\"." << std::endl;
+    LogError << "Error loading WMO \"" << filename << "\"." << std::endl;
     return;
   }
-
-  LogDebug << "Loading WMO \"" << _filename << "\"." << std::endl;
 
   uint32_t fourcc;
   uint32_t size;
@@ -66,7 +60,8 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOHD');
 
-  unsigned int col, nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+  CArgb ambient_color;
+  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
@@ -75,13 +70,20 @@ void WMO::finishLoading ()
   f.read (&nModels, 4);
   f.read (&nDoodads, 4);
   f.read (&nDoodadSets, 4);
-  f.read (&col, 4);
+  f.read (&ambient_color, 4);
   f.read (&nX, 4);
   f.read (ff, 12);
   extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
   f.read (ff, 12);
   extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
-  f.seekRelative (4);
+  f.read(&flags, 2);
+
+  f.seekRelative (2);
+
+  ambient_light_color.x = static_cast<float>(ambient_color.r) / 255.f;
+  ambient_light_color.y = static_cast<float>(ambient_color.g) / 255.f;
+  ambient_light_color.z = static_cast<float>(ambient_color.b) / 255.f;
+  ambient_light_color.w = static_cast<float>(ambient_color.a) / 255.f;
 
   // - MOTX ----------------------------------------------
 
@@ -101,14 +103,39 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOMT');
 
   std::size_t const num_materials (size / 0x40);
-  mat.resize (num_materials);
+  materials.resize (num_materials);
 
-  for (size_t i (0); i < num_materials; ++i)
+  std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
+
+  auto load_texture
+    ( [&] (std::uint32_t ofs)
+      {
+        char const* texture
+          (texbuf[ofs] ? &texbuf[ofs] : "textures/shanecube.blp");
+
+        auto const mapping
+          (texture_offset_to_inmem_index.emplace(ofs, textures.size()));
+
+        if (mapping.second)
+        {
+          textures.emplace_back(texture);
+        }
+        return mapping.first->second;
+      }
+    );
+
+  for (size_t i(0); i < num_materials; ++i)
   {
-    f.read (&mat[i], 0x40);
+    f.read(&materials[i], sizeof(WMOMaterial));
 
-    std::string const texpath (texbuf.data() + mat[i].nameStart);
-    textures.push_back (texpath);
+    uint32_t shader = materials[i].shader;
+    bool use_second_texture = (shader == 6 || shader == 5 || shader == 3);
+
+    materials[i].texture1 = load_texture(materials[i].texture_offset_1);
+    if (use_second_texture)
+    {
+      materials[i].texture2 = load_texture(materials[i].texture_offset_2);
+    }
   }
 
   // - MOGN ----------------------------------------------
@@ -142,14 +169,14 @@ void WMO::finishLoading ()
 
   if (size > 4)
   {
-    std::string path = std::string (reinterpret_cast<char const*>(f.getPointer ()));
-    if (path.length ())
-    {
-      LogDebug << "SKYBOX:" << std::endl;
+    std::string path = noggit::mpq::normalized_filename(std::string (reinterpret_cast<char const*>(f.getPointer ())));
+    boost::replace_all(path, "mdx", "m2");
 
+    if (path.length())
+    {
       if (MPQFile::exists(path))
       {
-        skybox = scoped_model_reference (path);
+        skybox = scoped_model_reference(path);
       }
     }
   }
@@ -266,7 +293,7 @@ void WMO::finishLoading ()
     size_t after_entry (f.getPos() + 0x28);
     f.read (&x, sizeof (x));
 
-    modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+    modelis.emplace_back(ddnames + x.name_offset, &f);
     model_nearest_light_vector.emplace_back();
 
     f.seek (after_entry);
@@ -292,129 +319,80 @@ void WMO::finishLoading ()
   finished = true;
 }
 
-void WMO::upload()
-{
-  for (unsigned int i = 0; i < mat.size(); ++i)
-    mat[i]._texture = textures[i];
-
-  for (auto& group : groups)
-    group.upload ();
-
-  _finished_upload = true;
-}
-
-// model.cpp
-void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth);
-
-void WMO::draw ( int doodadset
-               , const math::vector_3d &ofs
-               , math::degrees const angle
+void WMO::draw ( opengl::scoped::use_program& wmo_shader
+               , math::matrix_4x4 const& model_view
+               , math::matrix_4x4 const& projection
+               , math::matrix_4x4 const& transform_matrix
+               , math::matrix_4x4 const& transform_matrix_transposed
                , bool boundingbox
                , math::frustum const& frustum
                , const float& cull_distance
                , const math::vector_3d& camera
-               , bool draw_doodads
+               , bool // draw_doodads
                , bool draw_fog
-               , math::vector_3d water_color_light
-               , math::vector_3d water_color_dark
+               , math::vector_4d const& ocean_color_light
+               , math::vector_4d const& ocean_color_dark
+               , math::vector_4d const& river_color_light
+               , math::vector_4d const& river_color_dark
+               , liquid_render& render
                , int animtime
-               , std::function<void (bool)> setup_outdoor_lights
                , bool world_has_skies
-               , std::function<void (bool)> setup_fog
+               , display_mode display
                )
-{
-  if (!finishedLoading ())
-    return;
-
-  if (!_finished_upload) {
-    upload ();
-    return;
-  }
-
-  if (draw_fog)
-    gl.enable(GL_FOG);
-  else
-    gl.disable(GL_FOG);
+{ 
+  wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
 
   for (auto& group : groups)
   {
-    group.draw ( ofs
-               , angle
+    if (!group.is_visible(transform_matrix, frustum, cull_distance, camera, display))
+    {
+      continue;
+    }
+
+    group.draw ( wmo_shader
                , frustum
                , cull_distance
                , camera
                , draw_fog
-               , setup_outdoor_lights
                , world_has_skies
-               , setup_fog
                );
 
-    if (draw_doodads)
-    {
-      group.drawDoodads ( doodadset
-                        , ofs
-                        , angle
-                        , frustum
-                        , draw_fog
-                        , setup_outdoor_lights
-                        , setup_fog
-                        , animtime
-                        );
-    }
-
-    group.drawLiquid ( water_color_light
-                     , water_color_dark
+    group.drawLiquid ( model_view
+                     , projection
+                     , transform_matrix_transposed
+                     , ocean_color_light
+                     , ocean_color_dark
+                     , river_color_light
+                     , river_color_dark
+                     , render
                      , draw_fog
                      , animtime
-                     , setup_outdoor_lights
-                     , setup_fog
                      );
   }
 
   if (boundingbox)
   {
-    gl.disable(GL_LIGHTING);
-
-    gl.disable(GL_COLOR_MATERIAL);
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    gl.enable(GL_BLEND);
+    opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (auto& group : groups)
-      opengl::primitives::wire_box (group.BoundingBoxMin, group.BoundingBoxMax)
-        .draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
+    {
+      opengl::primitives::wire_box(group.BoundingBoxMin, group.BoundingBoxMax)
+        .draw( model_view
+             , projection
+             , transform_matrix_transposed
+             , {1.0f, 1.0f, 1.0f, 1.0f}
+             );
+    }
 
     opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
                                  , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
-                                 ).draw ({1.0f, 0.0f, 0.0f, 1.0f}, 2.0f);
+                                 ).draw ( model_view
+                                        , projection
+                                        , transform_matrix_transposed
+                                        , {1.0f, 0.0f, 0.0f, 1.0f}
+                                        );
 
-    /*gl.color4fv( math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-    gl.vertex3f( 0.0f, 0.0f, 0.0f );
-    gl.vertex3f( this->header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
-    gl.end();
-
-    gl.color4fv( math::vector_4d( 0.0f, 1.0f, 0.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-    gl.vertex3f( 0.0f, 0.0f, 0.0f );
-    gl.vertex3f( 0.0f, header.BoundingBoxMax.z + header.BoundingBoxMax.z / 5.0f, 0.0f );
-    gl.end();
-
-    gl.color4fv( math::vector_4d( 0.0f, 0.0f, 1.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-    gl.vertex3f( 0.0f, 0.0f, 0.0f );
-    gl.vertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
-    gl.end();*/
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (0);
-    opengl::texture::enable_texture();
-
-    gl.enable(GL_LIGHTING);
   }
 }
 
@@ -422,52 +400,90 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
 {
   std::vector<float> results;
 
-  if (!finishedLoading ())
+  if (!finishedLoading() || loading_failed())
+  {
     return results;
+  }
 
   for (auto& group : groups)
   {
     group.intersect (ray, &results);
   }
 
-  std::cout << _filename << " " << results.size() << "\n";
+  std::cout << filename << " " << results.size() << "\n";
 
   return results;
 }
 
-bool WMO::drawSkybox ( math::vector_3d pCamera
-                     , math::vector_3d pLower
-                     , math::vector_3d pUpper
-                     , bool draw_fog
-                     , int animtime
-                     ) const
+bool WMO::draw_skybox ( math::matrix_4x4 const& model_view
+                      , math::vector_3d const& camera_pos
+                      , opengl::scoped::use_program& m2_shader
+                      , math::frustum const& frustum
+                      , const float& cull_distance
+                      , int animtime
+                      , bool draw_particles
+                      , math::vector_3d aabb_min
+                      , math::vector_3d aabb_max
+                      , std::map<int, std::pair<math::vector_3d, math::vector_3d>> const& group_extents
+                      ) const
 {
-  if (skybox && pCamera.is_inside_of(pLower, pUpper))
+  if (!skybox || !camera_pos.is_inside_of(aabb_min, aabb_max))
   {
-    //! \todo  only draw sky if we are "inside" the WMO... ?
-
-    // We need to clear the depth buffer, because the skybox model can (will?)
-    // require it *. This is inefficient - is there a better way to do this?
-    // * planets in front of "space" in Caverns of Time
-    //gl.clear(GL_DEPTH_BUFFER_BIT);
-
-    // update: skybox models seem to have an explicit renderop ordering!
-    // that saves us the depth buffer clear and the depth testing, too
-
-    gl.disable(GL_CULL_FACE);
-    gl.disable(GL_DEPTH_TEST);
-    opengl::scoped::matrix_pusher const matrix;
-    math::vector_3d o = pCamera;
-    gl.translatef(o.x, o.y, o.z);
-    const float sc = 2.0f;
-    gl.scalef(sc, sc, sc);
-    skybox.get()->draw (draw_fog, animtime);
-    gl.enable(GL_DEPTH_TEST);
-
-    return true;
+    return false;
   }
 
+  for (int i=0; i<groups.size(); ++i)
+  {
+    auto const& g = groups[i];
+
+    if (!g.has_skybox())
+    {
+      continue;
+    }
+
+    auto& extent(group_extents.at(i));
+
+    if (camera_pos.is_inside_of(extent.first, extent.second))
+    {
+      ModelInstance sky(skybox.get()->filename);
+      sky.pos = camera_pos;
+      sky.scale = 2.f;
+      sky.recalcExtents();
+
+      skybox->get()->draw(model_view, sky, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+
+      return true;
+    }
+  }  
+
   return false;
+}
+
+std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint16_t doodadset) const
+{
+  std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads;
+
+  if (doodadset >= doodadsets.size())
+  {
+    LogError << "Invalid doodadset for instance of wmo " << filename << std::endl;
+    return doodads;
+  }
+
+  auto const& dset = doodadsets[doodadset];
+  uint32_t start = dset.start, end = start + dset.size;
+
+  for (int i = 0; i < groups.size(); ++i)
+  {
+    for (uint16_t ref : groups[i].doodad_ref())
+    {
+      if (ref >= start && ref < end)
+      {
+        doodads[i].push_back(modelis[ref]);
+      }
+    }
+  }
+
+  return doodads;
 }
 
 void WMOLight::init(MPQFile* f)
@@ -501,35 +517,21 @@ void WMOLight::init(MPQFile* f)
   */
 }
 
-void WMOLight::setup(GLint light)
+void WMOLight::setup(GLint)
 {
   // not used right now -_-
-
-  GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
-  GLfloat LightPosition[] = { pos.x, pos.y, pos.z, 0.0f };
-
-  gl.lightfv(light, GL_AMBIENT, LightAmbient);
-  gl.lightfv(light, GL_DIFFUSE, fcolor);
-  gl.lightfv(light, GL_POSITION, LightPosition);
-
-  gl.enable(light);
 }
 
-void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d lcol)
+void WMOLight::setupOnce(GLint, math::vector_3d, math::vector_3d)
 {
-  math::vector_4d position(dir, 0);
+  //math::vector_4d position(dir, 0);
   //math::vector_4d position(0,1,0,0);
 
-  math::vector_4d ambient = math::vector_4d(lcol * 0.3f, 1);
-  //math::vector_4d ambient = math::vector_4d(0.101961f, 0.062776f, 0, 1);
-  math::vector_4d diffuse = math::vector_4d(lcol, 1);
-  //math::vector_4d diffuse = math::vector_4d(0.439216f, 0.266667f, 0, 1);
+  //math::vector_4d ambient = math::vector_4d(light_color * 0.3f, 1);
+  //math::vector_4d diffuse = math::vector_4d(light_color, 1);
 
-  gl.lightfv(light, GL_AMBIENT, ambient);
-  gl.lightfv(light, GL_DIFFUSE, diffuse);
-  gl.lightfv(light, GL_POSITION, position);
 
-  gl.enable(light);
+  //gl.enable(light);
 }
 
 
@@ -539,6 +541,7 @@ WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
   , num(_num)
 {
   // extract group info from f
+  std::uint32_t flags; // not used, the flags are in the group header
   f->read(&flags, 4);
   float ff[3];
   f->read(ff, 12);
@@ -555,6 +558,34 @@ WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
   else name = "(no name)";
 }
 
+WMOGroup::WMOGroup(WMOGroup const& other)
+  : BoundingBoxMin(other.BoundingBoxMin)
+  , BoundingBoxMax(other.BoundingBoxMax)
+  , VertexBoxMin(other.VertexBoxMin)
+  , VertexBoxMax(other.VertexBoxMax)
+  , use_outdoor_lights(other.use_outdoor_lights)
+  , name(other.name)
+  , wmo(other.wmo)
+  , header(other.header)
+  , center(other.center)
+  , rad(other.rad)
+  , num(other.num)
+  , fog(other.fog)
+  , _doodad_ref(other._doodad_ref)
+  , _batches(other._batches)
+  , _vertices(other._vertices)
+  , _normals(other._normals)
+  , _texcoords(other._texcoords)
+  , _texcoords_2(other._texcoords_2)
+  , _vertex_colors(other._vertex_colors)
+  , _indices(other._indices)
+{
+  if (other.lq)
+  {
+    lq = std::make_unique<wmo_liquid>(*other.lq.get());
+  }
+}
+
 namespace
 {
   math::vector_4d colorFromInt(unsigned int col)
@@ -567,110 +598,73 @@ namespace
     return math::vector_4d(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
   }
 }
-struct WMOGroupHeader {
-  uint32_t nameStart, nameStart2, flags;
-  float box1[3], box2[3];
-  uint16_t portalStart, portalCount;
-  uint16_t batches[4];
-  uint8_t fogs[4];
-  int32_t unk1, id, unk2, unk3;
-};
-
-namespace
-{
-  struct scoped_material_setter
-  {
-    scoped_material_setter (WMOMaterial* material, bool vertex_colors)
-      : _over_bright ((material->flags & 0x10) && !vertex_colors)
-      , _specular (material->specular && !vertex_colors && !_over_bright)
-      , _alpha_test ((material->transparent) != 0)
-      , _back_face_cull (material->flags & 0x04)
-    {
-      if (_alpha_test)
-      {
-        gl.enable (GL_ALPHA_TEST);
-
-        float aval = 0;
-
-        if (material->flags & 0x80) aval = 0.3f;
-        if (material->flags & 0x01) aval = 0.0f;
-
-        gl.alphaFunc (GL_GREATER, aval);
-      }
-
-      if (_back_face_cull)
-        gl.disable (GL_CULL_FACE);
-      else
-        gl.enable (GL_CULL_FACE);
-
-      if (_specular)
-      {
-        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(material->col2));
-      }
-      else
-      {
-        ::math::vector_4d nospec(0, 0, 0, 1);
-        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
-      }
-
-      if (_over_bright)
-      {
-        //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
-        GLfloat em[4] = {1,1,1,1};
-        gl.materialfv (GL_FRONT, GL_EMISSION, em);
-      }
-    }
-
-    ~scoped_material_setter()
-    {
-      if (_over_bright)
-      {
-        GLfloat em[4] = {0,0,0,1};
-        gl.materialfv (GL_FRONT, GL_EMISSION, em);
-      }
-
-      if (_alpha_test)
-      {
-        gl.disable (GL_ALPHA_TEST);
-      }
-    }
-
-    const bool _over_bright;
-    const bool _specular;
-    const bool _alpha_test;
-    const bool _back_face_cull;
-  };
-}
 
 void WMOGroup::upload()
 {
-  gl.genBuffers (1, &_vertices_buffer);
+  _vertex_array.upload();
+  _buffers.upload();
+
   gl.bufferData<GL_ARRAY_BUFFER> ( _vertices_buffer
                                  , _vertices.size() * sizeof (*_vertices.data())
                                  , _vertices.data()
                                  , GL_STATIC_DRAW
                                  );
 
-  gl.genBuffers (1, &_normals_buffer);
   gl.bufferData<GL_ARRAY_BUFFER> ( _normals_buffer
                                  , _normals.size() * sizeof (*_normals.data())
                                  , _normals.data()
                                  , GL_STATIC_DRAW
                                  );
 
-  gl.genBuffers (1, &_texcoords_buffer);
   gl.bufferData<GL_ARRAY_BUFFER> ( _texcoords_buffer
                                  , _texcoords.size() * sizeof (*_texcoords.data())
                                  , _texcoords.data()
                                  , GL_STATIC_DRAW
                                  );
 
-  gl.genBuffers (1, &_vertex_colors_buffer);
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_buffer, _indices, GL_STATIC_DRAW);
+  
+  if (header.flags.has_two_motv)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d> ( _texcoords_buffer_2
+                                                    , _texcoords_2
+                                                    , GL_STATIC_DRAW
+                                                    );
+  }
+
   gl.bufferData<GL_ARRAY_BUFFER> ( _vertex_colors_buffer
                                  , _vertex_colors.size() * sizeof (*_vertex_colors.data())
                                  , _vertex_colors.data()
                                  , GL_STATIC_DRAW
                                  );
+
+  _uploaded = true;
+}
+
+void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
+{
+  opengl::scoped::index_buffer_manual_binder indices (_indices_buffer);
+  {
+    opengl::scoped::vao_binder const _ (_vao);
+
+    wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    if (header.flags.has_two_motv)
+    {
+      wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    if (header.flags.has_vertex_color)
+    {
+      wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    indices.bind();
+  }
+
+  _vao_is_setup = true;
 }
 
 void WMOGroup::load()
@@ -679,7 +673,7 @@ void WMOGroup::load()
   std::stringstream curNum;
   curNum << "_" << std::setw (3) << std::setfill ('0') << num;
 
-  std::string fname = wmo->filename ();
+  std::string fname = wmo->filename;
   fname.insert (fname.find (".wmo"), curNum.str ());
 
   MPQFile f(fname);
@@ -690,11 +684,6 @@ void WMOGroup::load()
 
   uint32_t fourcc;
   uint32_t size;
-
-  hascv = false;
-
-  int nLR = 0;
-  uint16_t const* useLights = nullptr;
 
   // - MVER ----------------------------------------------
 
@@ -714,9 +703,7 @@ void WMOGroup::load()
 
   assert (fourcc == 'MOGP');
 
-  WMOGroupHeader header;
-
-  f.read (&header, sizeof (WMOGroupHeader));
+  f.read (&header, sizeof (wmo_group_header));
 
   WMOFog &wf = wmo->fogs[header.fogs[0]];
   if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
@@ -789,6 +776,11 @@ void WMOGroup::load()
 
   f.read (_normals.data (), size);
 
+  for (auto& n : _normals)
+  {
+    n = {n.x, n.z, -n.y};
+  }
+
   // - MOTV ----------------------------------------------
 
   f.read (&fourcc, 4);
@@ -811,32 +803,29 @@ void WMOGroup::load()
   f.read (_batches.data (), size);
 
   // - MOLR ----------------------------------------------
-  if (header.flags & 0x200)
+  if (header.flags.has_light)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MOLR');
 
-    nLR = size / 2;
-    useLights = reinterpret_cast<uint16_t const*>(f.getPointer ());
-
     f.seekRelative (size);
   }
   // - MODR ----------------------------------------------
-  if (header.flags & 0x800)
+  if (header.flags.has_doodads)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MODR');
 
-    ddr.resize (size / sizeof (int16_t));
+    _doodad_ref.resize (size / sizeof (int16_t));
 
-    f.read (ddr.data (), size);
+    f.read (_doodad_ref.data (), size);
   }
   // - MOBN ----------------------------------------------
-  if (header.flags & 0x1)
+  if (header.flags.has_bsp_tree)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -846,7 +835,7 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
   // - MOBR ----------------------------------------------
-  if (header.flags & 0x1)
+  if (header.flags.has_bsp_tree)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -855,39 +844,34 @@ void WMOGroup::load()
 
     f.seekRelative (size);
   }
-  // - MPBV ----------------------------------------------
-  if (header.flags & 0x400)
+  
+  if (header.flags.flag_0x400)
   {
+    // - MPBV ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MPBV');
 
     f.seekRelative (size);
-  }
-  // - MPBP ----------------------------------------------
-  if (header.flags & 0x400)
-  {
+
+    // - MPBP ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MPBP');
 
     f.seekRelative (size);
-  }
-  // - MPBI ----------------------------------------------
-  if (header.flags & 0x400)
-  {
+
+    // - MPBI ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MPBI');
 
     f.seekRelative (size);
-  }
-  // - MPBG ----------------------------------------------
-  if (header.flags & 0x400)
-  {
+
+    // - MPBG ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
@@ -896,27 +880,17 @@ void WMOGroup::load()
     f.seekRelative (size);
   }
   // - MOCV ----------------------------------------------
-  if (header.flags & 0x4)
+  if (header.flags.has_vertex_color)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MOCV');
 
-    hascv = true;
-
-    uint32_t const* colors = reinterpret_cast<uint32_t const*> (f.getPointer ());
-    _vertex_colors.resize (size / sizeof (uint32_t));
-
-    for(size_t i (0); i < size / sizeof (uint32_t); ++i)
-    {
-      _vertex_colors[i] = colorFromInt (colors[i]);
-    }
-
-    f.seekRelative (size);
+    load_mocv(f, size);
   }
   // - MLIQ ----------------------------------------------
-  if (header.flags & 0x1000)
+  if (header.flags.has_water)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -926,9 +900,18 @@ void WMOGroup::load()
     WMOLiquidHeader hlq;
     f.read(&hlq, 0x1E);
 
-    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+    lq = std::make_unique<wmo_liquid> ( &f
+                                      , hlq
+                                      , wmo->materials[hlq.material_id]
+                                      , header.group_liquid
+                                      , (bool)wmo->flags.use_liquid_type_dbc_id
+                                      , (bool)header.flags.ocean
+                                      );
+
+    // creating the wmo liquid doesn't move the position
+    f.seekRelative(size - 0x1E);
   }
-  if (header.flags & 0x20000)
+  if (header.flags.has_mori_morb)
   {
     // - MORI ----------------------------------------------
     f.read (&fourcc, 4);
@@ -948,40 +931,52 @@ void WMOGroup::load()
   }
 
   // - MOTV ----------------------------------------------
-  if (header.flags & 0x2000000)
+  if (header.flags.has_two_motv)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MOTV');
 
-    f.seekRelative (size);
+    _texcoords_2.resize(size / sizeof(::math::vector_2d));
+    f.read(_texcoords_2.data(), size);
   }
   // - MOCV ----------------------------------------------
-  if (header.flags & 0x1000000)
+  if (header.flags.has_two_mocv)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MOCV');
 
-    f.seekRelative (size);
-  }
+    // there can be only the 2nd chunk
+    if (header.flags.has_vertex_color)
+    {
+      std::vector<CImVector> mocv_2(_vertex_colors.size());
+      f.read(mocv_2.data(), size);
 
-  indoor = flags & 8192;
+      for (int i = 0; i < mocv_2.size(); ++i)
+      {
+        // second mocv chunks is used to change the alpha of the color from the first chunk, don't ask why
+        _vertex_colors[i].w = static_cast<float>(mocv_2[i].a) / 255.f;
+      }
+    }
+    else
+    {
+      load_mocv(f, size);
+    }
+  }
 
   //dl_light = 0;
   // "real" lighting?
-  if ((flags & 0x2000) && hascv)
+  if (header.flags.indoor && header.flags.has_vertex_color)
   {
     ::math::vector_3d dirmin(1, 1, 1);
     float lenmin;
-    int lmin;
 
-    for (auto doodad : ddr)
+    for (auto doodad : _doodad_ref)
     {
       lenmin = 999999.0f * 999999.0f;
-      lmin = 0;
       ModelInstance& mi = wmo->modelis[doodad];
       for (unsigned int j = 0; j < wmo->lights.size(); j++)
       {
@@ -992,89 +987,212 @@ void WMOGroup::load()
         {
           lenmin = ll;
           dirmin = dir;
-          lmin = j;
         }
       }
       wmo->model_nearest_light_vector[doodad] = dirmin;
     }
 
-    outdoorLights = false;
+    use_outdoor_lights = false;
   }
   else
   {
-    outdoorLights = true;
+    use_outdoor_lights = true;
   }
 }
 
-void WMOGroup::draw( const math::vector_3d& ofs
-                   , const math::degrees angle
-                   , math::frustum const& frustum
-                   , const float& cull_distance
-                   , const math::vector_3d& camera
-                   , bool draw_fog
-                   , std::function<void (bool)> setup_outdoor_lights
-                   , bool world_has_skies
-                   , std::function<void (bool)> setup_fog
-                   )
+void WMOGroup::load_mocv(MPQFile& f, uint32_t size)
 {
-  visible = false;
-  // view frustum culling
+  uint32_t const* colors = reinterpret_cast<uint32_t const*> (f.getPointer());
+  _vertex_colors.resize(size / sizeof(uint32_t));
 
-  math::vector_3d pos = center + ofs;
-
-  math::rotate(ofs.x, ofs.z, &pos.x, &pos.z, angle);
-
-  if (!frustum.intersectsSphere(pos, rad)) return;
-
-  float dist = (pos - camera).length() - rad;
-  if (dist >= cull_distance) return;
-  visible = true;
-  setupFog (draw_fog, setup_fog);
-
-  gl.vertexPointer (_vertices_buffer, 3, GL_FLOAT, 0, nullptr);
-  gl.normalPointer (_normals_buffer, GL_FLOAT, 0, nullptr);
-  gl.texCoordPointer (_texcoords_buffer, 2, GL_FLOAT, 0, nullptr);
-
-  if (hascv)
+  for (size_t i(0); i < size / sizeof(uint32_t); ++i)
   {
-    if(indoor)
-    {
-      gl.enableClientState (GL_COLOR_ARRAY);
-      gl.colorPointer (_vertex_colors_buffer, 4, GL_FLOAT, 0, 0);
-    }
+    _vertex_colors[i] = colorFromInt(colors[i]);
+  }
 
-    gl.disable(GL_LIGHTING);
-    setup_outdoor_lights (false);
+  if (wmo->flags.do_not_fix_vertex_color_alpha)
+  {
+    for (auto& color : _vertex_colors)
+    {
+      color.w = header.flags.exterior ? 255.f : 0.f;
+    }
   }
   else
   {
-    if (world_has_skies)
-    {
-      setup_outdoor_lights (true);
-    }
-    else gl.disable(GL_LIGHTING);
+    fix_vertex_color_alpha();
   }
 
-  gl.disable(GL_BLEND);
-  gl.color4f(1,1,1,1);
+  // there's no read so this is required
+  f.seekRelative(size);
+}
+
+void WMOGroup::fix_vertex_color_alpha()
+{
+  int interior_batchs_start = 0;
+  
+  if (header.transparency_batches_count > 0)
+  {
+    interior_batchs_start = _batches[header.transparency_batches_count - 1].vertex_end + 1;
+  }
+
+  math::vector_4d wmo_ambient_color;
+
+  if (wmo->flags.use_unified_render_path)
+  {
+    wmo_ambient_color = {0.f, 0.f, 0.f, 0.f};
+  }
+  else
+  {
+    wmo_ambient_color = wmo->ambient_light_color;
+    // w is not used, set it to 0 to avoid changing the vertex color alpha
+    wmo_ambient_color.w = 0.f;
+  }
+
+  for (int i = 0; i < _vertex_colors.size(); ++i)
+  {
+    auto& color = _vertex_colors[i];
+    float r = color.x;
+    float g = color.y;
+    float b = color.z;
+    float a = color.w;
+
+    // I removed the color = color/2 because it's just multiplied by 2 in the shader afterward in blizzard's code
+    if (i >= interior_batchs_start)
+    {
+      r += ((r * a / 64.f) - wmo_ambient_color.x);
+      g += ((g * a / 64.f) - wmo_ambient_color.y);
+      r += ((b * a / 64.f) - wmo_ambient_color.z);
+    }
+    else
+    {
+      r -= wmo_ambient_color.x;
+      g -= wmo_ambient_color.y;
+      b -= wmo_ambient_color.z;
+
+      r = (r * (1.f - a));
+      g = (g * (1.f - a));
+      b = (b * (1.f - a));
+    }
+
+    color.x = std::min(255.f, std::max(0.f, r));
+    color.y = std::min(255.f, std::max(0.f, g));
+    color.z = std::min(255.f, std::max(0.f, b));
+    color.w = 1.f; // default value used in the shader so I simplified it here,
+                   // it can be overriden by the 2nd mocv chunk
+  }
+}
+
+bool WMOGroup::is_visible( math::matrix_4x4 const& transform
+                         , math::frustum const& frustum
+                         , float const& cull_distance
+                         , math::vector_3d const& camera
+                         , display_mode display
+                         ) const
+{
+  math::vector_3d pos = transform * center;
+
+  if (!frustum.intersectsSphere(pos, rad))
+  {
+    return false;
+  }
+
+  float dist = display == display_mode::in_3D
+    ? (pos - camera).length() - rad
+    : std::abs(pos.y - camera.y) - rad;
+
+  return (dist < cull_distance);
+}
+
+void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
+                   , math::frustum const& // frustum
+                   , const float& //cull_distance
+                   , const math::vector_3d& //camera
+                   , bool // draw_fog
+                   , bool // world_has_skies
+                   )
+{
+  if (!_uploaded)
+  {
+    upload();
+  }
+
+  if (!_vao_is_setup)
+  {
+    setup_vao(wmo_shader);
+  }
+
+  bool exterior_lit = header.flags.exterior_lit | header.flags.exterior;
+
+  wmo_shader.uniform("use_vertex_color", (int)header.flags.has_vertex_color);
+  wmo_shader.uniform("exterior_lit", (int)exterior_lit);
+
+  opengl::scoped::vao_binder const _ (_vao);
 
   for (wmo_batch& batch : _batches)
   {
-    WMOMaterial* mat (&wmo->mat.at (batch.texture));
-    scoped_material_setter const material_setter (mat, _vertex_colors.size ());
+    WMOMaterial const& mat (wmo->materials.at (batch.texture));
+    
+    float alpha_test = 0.003921568f; // 1/255
 
-    mat->_texture.get()->bind();
+    switch (mat.blend_mode)
+    {
+      case 1:
+        gl.disable(GL_BLEND);
+        alpha_test = 0.878431372f; // 224/255
+        break;
+      case 2:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+      case 3:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+        break;
+      case 4:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_ZERO);
+        break;
+      case 5:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+        break;
+      case 6:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_ONE);
+        break;
+      case 0:
+      default:
+        alpha_test = -1.f;
+        gl.disable(GL_BLEND);
+        break;
+    }    
 
-    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
-  }
+    wmo_shader.uniform("shader_id", (int)mat.shader);
 
-  gl.color4f(1, 1, 1, 1);
-  gl.enable(GL_CULL_FACE);
+    wmo_shader.uniform("alpha_test", alpha_test);
+    wmo_shader.uniform("unfogged", (int)mat.flags.unfogged);
+    wmo_shader.uniform("unlit", (int)mat.flags.unlit);
 
-  if (hascv)
-  {
-    gl.disableClientState (GL_COLOR_ARRAY);
-    gl.enable (GL_LIGHTING);
+    if (mat.flags.unculled)
+    {
+      gl.disable(GL_CULL_FACE);
+    }
+    else
+    {
+      gl.enable(GL_CULL_FACE);
+    }
+
+    opengl::texture::set_active_texture(0);
+    wmo->textures.at(mat.texture1)->bind();
+
+    // only shaders using 2 textures in wotlk
+    if (mat.shader == 6 || mat.shader == 5 || mat.shader == 3)
+    {
+      opengl::texture::set_active_texture(1);
+      wmo->textures.at(mat.texture2)->bind();
+    }
+
+    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(sizeof(std::uint16_t)*batch.index_start));
   }
 }
 
@@ -1103,92 +1221,41 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 }
 
-void WMOGroup::drawDoodads ( unsigned int doodadset
-                           , const math::vector_3d& ofs
-                           , math::degrees const angle
-                           , math::frustum const& frustum
-                           , bool draw_fog
-                           , std::function<void (bool)> setup_outdoor_lights
-                           , std::function<void (bool)> setup_fog
-                           , int animtime
-                           )
-{
-  if (!visible) return;
-  if (ddr.empty()) return;
-  if (doodadset >= wmo->doodadsets.size()) return;
-
-  setup_outdoor_lights (outdoorLights);
-  setupFog (draw_fog, setup_fog);
-
-  /*
-  float xr=0,xg=0,xb=0;
-  if (flags & 0x0040) xr = 1;
-  //if (flags & 0x0008) xg = 1;
-  if (flags & 0x8000) xb = 1;
-  gl.color4f(xr,xg,xb,1);
-  */
-
-  // draw doodads
-  gl.color4f(1, 1, 1, 1);
-  for (const auto& dd : ddr) {
-    if ( dd >= wmo->doodadsets[doodadset].start
-      && dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)
-      && dd < wmo->modelis.size()
-      )
-    {
-      ModelInstance& mi = wmo->modelis[dd];
-
-      if (!outdoorLights) {
-        WMOLight::setupOnce(GL_LIGHT2, wmo->model_nearest_light_vector[dd], mi.lcol);
-      }
-      setupFog (draw_fog, setup_fog);
-      wmo->modelis[dd].draw_wmo (ofs, angle, frustum, draw_fog, animtime);
-    }
-  }
-
-  gl.disable(GL_LIGHT2);
-
-  gl.color4f(1, 1, 1, 1);
-
-}
-
-void WMOGroup::drawLiquid ( math::vector_3d water_color_light
-                          , math::vector_3d water_color_dark
-                          , bool draw_fog
+void WMOGroup::drawLiquid ( math::matrix_4x4 const& model_view
+                          , math::matrix_4x4 const& projection
+                          , math::matrix_4x4 const& transform
+                          , math::vector_4d const& ocean_color_light
+                          , math::vector_4d const& ocean_color_dark
+                          , math::vector_4d const& river_color_light
+                          , math::vector_4d const& river_color_dark
+                          , liquid_render& render
+                          , bool // draw_fog
                           , int animtime
-                          , std::function<void (bool)> setup_outdoor_lights
-                          , std::function<void (bool)> setup_fog
                           )
 {
-  if (!visible) return;
-
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
-  if (lq) {
-    setupFog (draw_fog, setup_fog);
-    if (outdoorLights) {
-      setup_outdoor_lights (true);
-    }
-    else {
-      //! \todo  setup some kind of indoor lighting... ?
-      setup_outdoor_lights (false);
-      gl.enable(GL_LIGHT2);
-      gl.lightfv(GL_LIGHT2, GL_AMBIENT, math::vector_4d(0.1f, 0.1f, 0.1f, 1));
-      gl.lightfv(GL_LIGHT2, GL_DIFFUSE, math::vector_4d(0.8f, 0.8f, 0.8f, 1));
-      gl.lightfv(GL_LIGHT2, GL_POSITION, math::vector_4d(0, 1, 0, 0));
-    }
+  if (lq) 
+  { 
     gl.disable(GL_BLEND);
-    gl.disable(GL_ALPHA_TEST);
     gl.depthMask(GL_TRUE);
-    gl.color4f(1, 1, 1, 1);
-    lq->draw (water_color_light, water_color_dark, animtime);
-    gl.disable(GL_LIGHT2);
+
+    lq->draw ( model_view
+             , projection
+             , transform
+             , ocean_color_light
+             , ocean_color_dark
+             , river_color_light
+             , river_color_dark
+             , render
+             , animtime
+             );
   }
 }
 
 void WMOGroup::setupFog (bool draw_fog, std::function<void (bool)> setup_fog)
 {
-  if (outdoorLights || fog == -1) {
+  if (use_outdoor_lights || fog == -1) {
     setup_fog (draw_fog);
   }
   else {
@@ -1211,16 +1278,7 @@ void WMOFog::init(MPQFile* f)
 
 void WMOFog::setup()
 {
-  /*if (gWorld->drawfog) {
-  gl.fogfv(GL_FOG_COLOR, color);
-  gl.fogf(GL_FOG_START, fogstart);
-  gl.fogf(GL_FOG_END, fogend);
 
-  gl.enable(GL_FOG);
-  } else {
-  gl.disable(GL_FOG);
-  }*/
-  gl.disable(GL_FOG);
 }
 
 decltype (WMOManager::_) WMOManager::_;
@@ -1234,4 +1292,13 @@ void WMOManager::report()
             }
           );
   LogDebug << output;
+}
+
+void WMOManager::clear_hidden_wmos()
+{
+  _.apply ( [&] (std::string const&, WMO& wmo)
+            {
+              wmo.show();
+            }
+          );
 }

@@ -40,6 +40,23 @@ namespace math
            };
   }
 
+  inline matrix_4x4 ortho(float left, float right, float bottom, float top, float z_near, float z_far)
+  {
+    float v0 = 2.f / (right - left);
+    float v1 = 2.f / (top - bottom);
+    float v2 = -2.f / (z_far - z_near);
+
+    float tx = -(right + left) / (right - left);
+    float ty = -(top + bottom) / (top - bottom);
+    float tz = -(z_far + z_near) / (z_far - z_near);
+
+    return { v0,  0.f, 0.f, tx
+           , 0.f,  v1, 0.f, ty
+           , 0.f, 0.f,  v2, tz
+           , 0.f, 0.f, 0.f, 1.f
+           };
+  }
+
   inline matrix_4x4 look_at ( vector_3d const& eye
                             , vector_3d const& center
                             , vector_3d const& up

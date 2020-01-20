@@ -6,6 +6,7 @@
 #include <noggit/ChunkWater.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/MapHeaders.h>
+#include <noggit/tool_enums.hpp>
 
 #include <memory>
 
@@ -15,18 +16,22 @@ class sExtendableArray;
 class TileWater
 {
 public:
-  TileWater(MapTile *pTile, float pXbase, float pZbase);
+  TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_green_lava);
 
   ChunkWater* getChunk(int x, int z);
 
   void readFromFile(MPQFile &theFile, size_t basePos);
   void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 
-  void draw ( opengl::scoped::use_program& water_shader
-            , math::vector_3d water_color_light
-            , math::vector_3d water_color_dark
+  void draw ( math::frustum const& frustum
+            , const float& cull_distance
+            , const math::vector_3d& camera
+            , bool camera_moved
+            , liquid_render& render
+            , opengl::scoped::use_program& water_shader
             , int animtime
             , int layer
+            , display_mode display
             );
   bool hasData(size_t layer);
   void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);

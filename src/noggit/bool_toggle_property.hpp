@@ -29,7 +29,10 @@ namespace noggit
     {
       return _value;
     }
-
+    void toggle()
+    {
+      set(!_value);
+    }
   public:
     bool_toggle_property (bool value)
       : _value (value)

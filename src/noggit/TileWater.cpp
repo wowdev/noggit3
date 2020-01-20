@@ -6,7 +6,7 @@
 #include <noggit/Misc.h>
 #include <noggit/TileWater.hpp>
 
-TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
+TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_green_lava)
   : tile(pTile)
   , xbase(pXbase)
   , zbase(pZbase)
@@ -15,7 +15,7 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
   {
     for (int x = 0; x < 16; ++x)
     {
-      chunks[z][x] = std::make_unique<ChunkWater> (xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z);
+      chunks[z][x] = std::make_unique<ChunkWater> (xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z, use_mclq_green_lava);
     }
   }
 }
@@ -32,22 +32,30 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
   }
 }
 
-void TileWater::draw ( opengl::scoped::use_program& water_shader
-                     , math::vector_3d water_color_light
-                     , math::vector_3d water_color_dark
+void TileWater::draw ( math::frustum const& frustum
+                     , const float& cull_distance
+                     , const math::vector_3d& camera
+                     , bool camera_moved
+                     , liquid_render& render
+                     , opengl::scoped::use_program& water_shader
                      , int animtime
                      , int layer
+                     , display_mode display
                      )
 {
   for (int z = 0; z < 16; ++z)
   {
     for (int x = 0; x < 16; ++x)
     {
-      chunks[z][x]->draw ( water_shader
-                         , water_color_light
-                         , water_color_dark
+      chunks[z][x]->draw ( frustum
+                         , cull_distance
+                         , camera
+                         , camera_moved
+                         , render
+                         , water_shader                         
                          , animtime
                          , layer
+                         , display
                          );
     }
   }
@@ -97,7 +105,6 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
   }
 
   SetChunkHeader(lADTFile, ofsW - 8, 'MH2O', lCurrentPosition - ofsW);
-  lCurrentPosition += 8;
 }
 
 bool TileWater::hasData(size_t layer)

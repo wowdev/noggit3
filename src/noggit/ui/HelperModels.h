@@ -4,16 +4,16 @@
 
 #include <QtWidgets/QWidget>
 
-class MapView;
-
 namespace noggit
 {
   namespace ui
   {
+    class object_editor;
+
     class helper_models : public QWidget
     {
     public:
-      helper_models (MapView *mapview);
+      helper_models (object_editor* object_editor);
     };
   }
 }

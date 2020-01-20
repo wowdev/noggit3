@@ -16,6 +16,21 @@
 #include <sstream>
 #include <string>
 
+
+enum class uid_fix_status
+{
+  done,
+  done_with_errors,
+  failed
+};
+
+enum class model_update
+{
+  add,
+  remove,
+  none
+};
+
 /*!
 \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
 */
@@ -124,7 +139,7 @@ public:
   auto loaded_tiles()
   {
     return tiles<false>
-      ([] (tile_index const&, MapTile* tile) { return !!tile; });
+      ([] (tile_index const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
   }
 
   auto tiles_in_range (math::vector_3d const& pos, float radius)
@@ -143,6 +158,8 @@ public:
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile);
 
+  void update_model_tile(const tile_index& tile, model_update type, uint32_t uid);
+
   void setChanged(const tile_index& tile);
   void setChanged(MapTile* tile);
 
@@ -160,6 +177,7 @@ public:
 
   bool hasAGlobalWMO();
   bool hasTile(const tile_index& index) const;
+  bool tileAwaitingLoading(const tile_index& tile) const;
   bool tileLoaded(const tile_index& tile) const;
 
   bool hasAdt();
@@ -180,17 +198,19 @@ public:
 
   uint32_t newGUID();
 
-  void fixUIDs (World*);
+  uid_fix_status fixUIDs (World*, bool);
   void searchMaxUID();
   void saveMaxUID();
   void loadMaxUID();
 
+  // todo: find out how wow choose to use the green lava in outland
+  inline bool use_mclq_green_lava() const
+  {
+    return _map_id == 530;
+  }
+
 private:
 	uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
-#ifdef USE_MYSQL_UID_STORAGE
-  uint32_t getHighestGUIDFromDB() const;
-  uint32_t newGUIDDB();
-#endif
 
   const std::string basename;
 
@@ -200,7 +220,9 @@ public:
 private:
   std::string globalWMOName;
 
-  int lastUnloadTime;
+  int _last_unload_time;
+  int _unload_interval;
+  int _unload_dist;
 
   // Is the WDT telling us to use a different alphamap structure.
   bool mBigAlpha;
@@ -211,13 +233,7 @@ private:
 
   bool autoheight;
 
-  int cx;
-  int cz;
-
   uint32_t highestGUID;
-  uint32_t highestGUIDDB;
-  uint32_t highGUID;
-  uint32_t highGUIDDB;
 
   ENTRY_MODF wmoEntry;
   MPHD mphd;

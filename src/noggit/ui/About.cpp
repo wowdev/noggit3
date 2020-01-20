@@ -5,6 +5,7 @@
 
 #include "revision.h"
 
+#include <QIcon>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QVBoxLayout>
 
@@ -15,6 +16,7 @@ namespace noggit
     about::about()
       : QWidget (nullptr)
     {
+      setWindowIcon (QIcon (":/icon"));
       //! \todo make nice looking again, I don't care currently
       new QVBoxLayout (this);
 
