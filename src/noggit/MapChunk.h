@@ -52,6 +52,7 @@ private:
   math::vector_3d mccv[mapbufsize];
 
   std::vector<uint8_t> compressed_shadow_map() const;
+  bool has_shadows() const;
 
   void initStrip();
 
