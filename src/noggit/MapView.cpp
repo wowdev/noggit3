@@ -2746,10 +2746,7 @@ void MapView::mousePressEvent(QMouseEvent* event)
 
   if (leftMouse)
   {
-    if (_display_mode == display_mode::in_3D)
-    {
-      doSelection(false);
-    }
+    doSelection(false);
   }
   else if (rightMouse)
   {
