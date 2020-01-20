@@ -658,8 +658,6 @@ void World::draw ( math::matrix_4x4 const& model_view
       }
     }
 
-    skies->update_sky_colors(camera_pos, daytime);
-
     if (!hadSky)
     {
       skies->draw( model_view
@@ -987,11 +985,10 @@ void World::draw ( math::matrix_4x4 const& model_view
     water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
   }
 
-  // todo: find the correct alpha values
-  math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], 0.7f);
-  math::vector_4d ocean_color_dark (skies->color_set[OCEAN_COLOR_DARK], 0.9f);
-  math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], 0.7f);
-  math::vector_4d river_color_dark (skies->color_set[RIVER_COLOR_DARK], 0.9f);
+  math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
+  math::vector_4d ocean_color_dark (skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
+  math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha());
+  math::vector_4d river_color_dark (skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha());
 
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())

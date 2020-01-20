@@ -82,6 +82,10 @@ public:
   /// Fields
   static const size_t ID = 0;        // uint
   static const size_t skybox = 2;      // uint ref to LightSkyBox
+  static const size_t water_shallow_alpha = 5;
+  static const size_t water_deep_alpha = 6;
+  static const size_t ocean_shallow_alpha = 7;
+  static const size_t ocean_deep_alpha = 8;
 };
 
 class LightSkyboxDB : public DBCFile
