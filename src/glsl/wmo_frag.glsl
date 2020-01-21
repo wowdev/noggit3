@@ -66,8 +66,8 @@ void main()
     return;
   }
 
-  vec4 tex = texture2D(tex1, f_texcoord);
-  vec4 tex_2 = texture2D(tex2, f_texcoord_2);
+  vec4 tex = texture(tex1, f_texcoord);
+  vec4 tex_2 = texture(tex2, f_texcoord_2);
 
   if(tex.a < alpha_test)
   {
