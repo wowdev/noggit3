@@ -61,15 +61,15 @@ vec4 texture_blend()
   if(layer_count == 0)
     return vec4 (1.0, 1.0, 1.0, 1.0);
 
-  vec3 alpha = texture2D (alphamap, vary_texcoord / 8.0).rgb;
+  vec3 alpha = texture(alphamap, vary_texcoord / 8.0).rgb;
   float a0 = alpha.r;  
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  vec3 t0 = texture2D(tex0, vary_texcoord + tex_anim_0).rgb;
-  vec3 t1 = texture2D(tex1, vary_texcoord + tex_anim_1).rgb;
-  vec3 t2 = texture2D(tex2, vary_texcoord + tex_anim_2).rgb;
-  vec3 t3 = texture2D(tex3, vary_texcoord + tex_anim_3).rgb;
+  vec3 t0 = texture(tex0, vary_texcoord + tex_anim_0).rgb;
+  vec3 t1 = texture(tex1, vary_texcoord + tex_anim_1).rgb;
+  vec3 t2 = texture(tex2, vary_texcoord + tex_anim_2).rgb;
+  vec3 t3 = texture(tex3, vary_texcoord + tex_anim_3).rgb;
 
   return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
 }
@@ -120,7 +120,7 @@ void main()
     out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
-  float shadow_alpha = texture2D (shadow_map, vary_texcoord / 8.0).r;
+  float shadow_alpha = texture(shadow_map, vary_texcoord / 8.0).r;
 
   out_color = vec4 (out_color.rgb * (1.0 - shadow_alpha), 1.0);
 

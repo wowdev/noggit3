@@ -49,7 +49,7 @@ void liquid_render::prepare_draw ( opengl::scoped::use_program& water_shader
   {
     auto const& textures = _textures_by_liquid_id[liquid_id];
     water_shader.sampler
-    ("texture"
+    ("tex"
       , GL_TEXTURE0
       , textures[texture_index].get()
     );
