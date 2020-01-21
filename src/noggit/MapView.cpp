@@ -2134,7 +2134,7 @@ math::ray MapView::intersect_ray() const
   {
     math::vector_3d const pos
     ( _camera.position.x - (width() * 0.5f - mx) * _2d_zoom
-    , _camera.position.y * _2d_zoom
+    , _camera.position.y
     , _camera.position.z - (height() * 0.5f - mz) * _2d_zoom
     );
     
@@ -2226,7 +2226,6 @@ math::matrix_4x4 MapView::model_view() const
   if (_display_mode == display_mode::in_2D)
   {
     math::vector_3d eye = _camera.position;
-    eye.y *= _2d_zoom;
     math::vector_3d target = eye;
     target.y -= 1.f;
     target.z -= 0.001f;
