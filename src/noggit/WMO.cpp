@@ -954,6 +954,8 @@ void WMOGroup::load()
     else
     {
       load_mocv(f, size);
+      // update the flag to match the data
+      header.flags.has_vertex_color = 1;
     }
   }
 
