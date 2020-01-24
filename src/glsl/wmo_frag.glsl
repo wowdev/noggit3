@@ -74,7 +74,7 @@ void main()
     discard;
   }
 
-  vec4 vertex_color = vec4(0.);
+  vec4 vertex_color = vec4(0., 0., 0., 1.f);
   vec3 light_color = vec3(1.);
 
   if(use_vertex_color) 
