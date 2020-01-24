@@ -1004,7 +1004,7 @@ void WMOGroup::load_mocv(MPQFile& f, uint32_t size)
   {
     for (auto& color : _vertex_colors)
     {
-      color.w = header.flags.exterior ? 255.f : 0.f;
+      color.w = header.flags.exterior ? 1.f : 0.f;
     }
   }
   else
