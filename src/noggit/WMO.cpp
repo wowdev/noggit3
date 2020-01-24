@@ -400,8 +400,6 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
     group.intersect (ray, &results);
   }
 
-  std::cout << filename << " " << results.size() << "\n";
-
   return results;
 }
 
