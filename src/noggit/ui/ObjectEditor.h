@@ -59,6 +59,8 @@ namespace noggit
                     , QWidget* parent = nullptr
                     );
 
+      ~object_editor();
+
       void import_last_model_from_wmv(int type);
       void copy(std::string const& filename);
       void copy_current_selection(World* world);
@@ -84,6 +86,7 @@ namespace noggit
       bool _use_median_pivot_point;
 
       std::vector<selection_type> selected;
+      std::vector<selection_type> _model_instance_created;
       
       void replace_selection(std::vector<selection_type> new_selection);
 
