@@ -27,7 +27,7 @@ namespace noggit
     {
       apply ( [&] (std::string const& key, T const&)
               {
-                LogDebug << key << ": " << _counts.at (key) << "\n";
+                LogDebug << key << ": " << _counts.at (key) << std::endl;
               }
             );
     }

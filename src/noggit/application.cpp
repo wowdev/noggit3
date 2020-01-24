@@ -310,7 +310,7 @@ namespace
                             );
     }
 
-    LogError << "std::terminate: " << reason << "\n";
+    LogError << "std::terminate: " << reason << std::endl;
   }
 
   struct application_with_exception_printer_on_notify : QApplication
