@@ -314,6 +314,23 @@ namespace noggit
       modelImport->move(mv_pos.x() + (mv_size.width() / 2), mv_pos.y() + (mv_size.height() / 2));
     }
 
+    object_editor::~object_editor()
+    {
+      for (auto& instance : _model_instance_created)
+      {
+        if (instance.which() == eEntry_Model)
+        {
+          ModelInstance* mi = boost::get<selected_model_type>(instance);
+          delete mi;
+        }
+        else if (instance.which() == eEntry_WMO)
+        {
+          WMOInstance* wi = boost::get<selected_wmo_type>(instance);
+          delete wi;
+        }
+      }
+    }
+
     void object_editor::showImportModels()
     {
       modelImport->show();
@@ -460,16 +477,25 @@ namespace noggit
         return;
       }
 
-      std::vector<selection_type> selectionVector;
+      std::vector<selection_type> selected_model;
+
       if (boost::ends_with (filename, ".m2"))
       {
-        selectionVector.push_back(new ModelInstance(filename));
-        replace_selection(selectionVector);
+        ModelInstance* mi = new ModelInstance(filename);
+
+        _model_instance_created.push_back(mi);
+
+        selected_model.push_back(mi);
+        replace_selection(selected_model);
       }
       else if (boost::ends_with (filename, ".wmo"))
       {
-        selectionVector.push_back(new WMOInstance(filename));
-        replace_selection(selectionVector);
+        WMOInstance* wi = new WMOInstance(filename);
+
+        _model_instance_created.push_back(wi);
+
+        selected_model.push_back(wi);
+        replace_selection(selected_model);
       }
     }
 
@@ -483,17 +509,21 @@ namespace noggit
         return;
       }
 
-      std::vector<selection_type> selectionVector;
+      std::vector<selection_type> selected_model;
+
       for (auto& selection : current_selection)
       {
         if (selection.which() == eEntry_Model)
         {
           auto original = boost::get<selected_model_type>(selection);
           auto clone = new ModelInstance(original->model->filename);
+          
           clone->scale = original->scale;
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
-          selectionVector.push_back(clone);
+
+          selected_model.push_back(clone);
+          _model_instance_created.push_back(clone);
         }
         else if (selection.which() == eEntry_WMO)
         {
@@ -501,10 +531,12 @@ namespace noggit
           auto clone = new WMOInstance(original->wmo->filename);
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
-          selectionVector.push_back(clone);
+
+          selected_model.push_back(clone);
+          _model_instance_created.push_back(clone);
         }
       }
-      replace_selection(selectionVector);
+      replace_selection(selected_model);
     }
 
     void object_editor::SaveObjecttoTXT (World* world)

@@ -1507,6 +1507,7 @@ MapView::~MapView()
   opengl::context::scoped_setter const _ (::gl, context());
 
   delete TexturePicker; // explicitly delete this here to avoid opengl context related crash
+  delete objectEditor;
 
   if (_force_uid_check)
   {
@@ -1518,6 +1519,10 @@ MapView::~MapView()
   AsyncLoader::instance().reset_object_fail();
 
   noggit::ui::selected_texture::texture.reset();
+
+  ModelManager::report();
+  TextureManager::report();
+  WMOManager::report();
 }
 
 void MapView::tick (float dt)
