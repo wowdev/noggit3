@@ -46,12 +46,12 @@ MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
 {
   if (!SFileOpenArchive(filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE | STREAM_FLAG_READ_ONLY, &_archiveHandle))
   {
-    LogError << "Error opening archive: " << filename << "\n";
+    LogError << "Error opening archive: " << filename << std::endl;
     return;
   }
   else
   {
-    LogDebug << "Opened archive " << filename << "\n";
+    LogDebug << "Opened archive " << filename << std::endl;
   }
 
   finished = !doListfile;

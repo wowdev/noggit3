@@ -120,7 +120,7 @@ namespace opengl
         {
           errors += _extra_info();
 #ifndef NOGGIT_DO_NOT_THROW_ON_OPENGL_ERRORS
-          LogError << _function << ":" + errors << "\n";
+          LogError << _function << ":" + errors << std::endl;
 #else
           throw std::runtime_error (_function + ":" + errors);
 #endif
