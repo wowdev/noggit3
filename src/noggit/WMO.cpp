@@ -645,7 +645,7 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
     }
 
     // even if the 2 flags are set there's only one vertex color vector, the 2nd chunk is used for alpha only
-    if (header.flags.has_vertex_color || header.flags.has_two_mocv)
+    if (header.flags.has_vertex_color || header.flags.use_mocv2_for_texture_blending)
     {
       wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
     }
@@ -931,7 +931,7 @@ void WMOGroup::load()
     f.read(_texcoords_2.data(), size);
   }
   // - MOCV ----------------------------------------------
-  if (header.flags.has_two_mocv)
+  if (header.flags.use_mocv2_for_texture_blending)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
@@ -1119,7 +1119,7 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
   }
 
   bool exterior_lit = header.flags.exterior_lit | header.flags.exterior;
-  int has_mocv = header.flags.has_vertex_color | header.flags.has_two_mocv;
+  int has_mocv = header.flags.has_vertex_color | header.flags.use_mocv2_for_texture_blending;
 
   wmo_shader.uniform("use_vertex_color", has_mocv);
   wmo_shader.uniform("exterior_lit", (int)exterior_lit);

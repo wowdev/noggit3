@@ -70,7 +70,7 @@ union wmo_group_flags
     uint32_t mount_allowed : 1; // 0x200000
     uint32_t flag_0x400000 : 1;
     uint32_t flag_0x800000 : 1;
-    uint32_t has_two_mocv : 1; // 0x1000000
+    uint32_t use_mocv2_for_texture_blending : 1; // 0x1000000
     uint32_t has_two_motv : 1; // 0x2000000
     uint32_t antiportal : 1; // 0x4000000
     uint32_t unk : 1; // 0x8000000 requires intBatchCount == 0, extBatchCount == 0, UNREACHABLE. 
