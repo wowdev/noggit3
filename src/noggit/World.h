@@ -175,6 +175,7 @@ public:
     mult
   };
 
+  void snap_selected_models_to_the_ground();
   void scale_selected_models(float v, m2_scaling_type type);
   void move_selected_models(float dx, float dy, float dz);
   void move_selected_models(math::vector_3d const& delta)
