@@ -241,6 +241,65 @@ void World::reset_selection()
   _selected_model_count = 0;
 }
 
+void World::snap_selected_models_to_the_ground()
+{
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    math::vector_3d& pos = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->pos
+      : boost::get<selected_wmo_type>(entry)->pos
+      ;
+
+    selection_result hits;
+    
+
+    for_chunk_at(pos, [&] (MapChunk* chunk)
+    {
+      {
+        math::ray intersect_ray(pos, math::vector_3d(0.f, -1.f, 0.f));
+        chunk->intersect(intersect_ray, &hits);
+      }
+      // object is bellow ground
+      if (hits.empty())
+      {
+        math::ray intersect_ray(pos, math::vector_3d(0.f, 1.f, 0.f));
+        chunk->intersect(intersect_ray, &hits);
+      }
+    });
+
+    // this should never happen
+    if (hits.empty())
+    {
+      LogError << "Snap to ground ray intersection failed" << std::endl;
+      continue;
+    }
+
+    // the ground can only be intersected once
+    pos.y = boost::get<selected_chunk_type>(hits[0].second).position.y;
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+
+  update_selection_pivot();
+}
+
 void World::scale_selected_models(float v, m2_scaling_type type)
 {
   for (auto& entry : _current_selection)
