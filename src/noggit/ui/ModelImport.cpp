@@ -79,7 +79,8 @@ namespace noggit
       }
 
       _list->setMinimumWidth(_list->sizeHintForColumn(0));
-      setMinimumWidth(_list->width()+ _textBox->width());
+      // margin for the "Filter: " text
+      setMinimumWidth(_list->sizeHintForColumn(0) + 100);
     }
   }
 }
