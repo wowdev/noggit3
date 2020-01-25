@@ -644,7 +644,8 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
       wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
-    if (header.flags.has_vertex_color)
+    // even if the 2 flags are set there's only one vertex color vector, the 2nd chunk is used for alpha only
+    if (header.flags.has_vertex_color || header.flags.has_two_mocv)
     {
       wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
     }
@@ -937,23 +938,22 @@ void WMOGroup::load()
 
     assert (fourcc == 'MOCV');
 
-    // there can be only the 2nd chunk
-    if (header.flags.has_vertex_color)
-    {
-      std::vector<CImVector> mocv_2(_vertex_colors.size());
-      f.read(mocv_2.data(), size);
+    std::vector<CImVector> mocv_2(size / sizeof(CImVector));
+    f.read(mocv_2.data(), size);
 
-      for (int i = 0; i < mocv_2.size(); ++i)
-      {
-        // second mocv chunks is used to change the alpha of the color from the first chunk, don't ask why
-        _vertex_colors[i].w = static_cast<float>(mocv_2[i].a) / 255.f;
-      }
-    }
-    else
+    for (int i = 0; i < mocv_2.size(); ++i)
     {
-      load_mocv(f, size);
-      // update the flag to match the data
-      header.flags.has_vertex_color = 1;
+      float alpha = static_cast<float>(mocv_2[i].a) / 255.f;
+
+      // the second mocv is used for texture blending only
+      if (header.flags.has_vertex_color)
+      {
+        _vertex_colors[i].w = alpha;
+      }
+      else // no vertex coloring, only texture blending with the alpha
+      {
+        _vertex_colors.emplace_back(0.f, 0.f, 0.f, alpha);
+      }
     }
   }
 
@@ -1119,8 +1119,9 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
   }
 
   bool exterior_lit = header.flags.exterior_lit | header.flags.exterior;
+  int has_mocv = header.flags.has_vertex_color | header.flags.has_two_mocv;
 
-  wmo_shader.uniform("use_vertex_color", (int)header.flags.has_vertex_color);
+  wmo_shader.uniform("use_vertex_color", has_mocv);
   wmo_shader.uniform("exterior_lit", (int)exterior_lit);
 
   opengl::scoped::vao_binder const _ (_vao);
