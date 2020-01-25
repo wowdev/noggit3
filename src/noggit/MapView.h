@@ -117,7 +117,7 @@ private:
   float mTimespeed;
 
   void ResetSelectedObjectRotation();
-  void SnapSelectedObjectToGround();
+  void snap_selected_models_to_the_ground();
   void DeleteSelectedObject();
   void changeZoneIDValue (int set);
 
