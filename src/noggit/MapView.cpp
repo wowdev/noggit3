@@ -1632,14 +1632,21 @@ void MapView::tick (float dt)
         }
         else
         {
+          // only move horizontally
           if (!_move_model_to_cursor_position.get())
           {
             _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
           }
-          else
+          else // follow the ground
           {
-            // todo: add option to align with the terrain's height
             _world->set_selected_models_pos(_cursor_pos, false);
+
+            // only required when multiple models are selected since
+            // the cursor pos is already exactly where the ground is
+            if (_world->has_multiple_model_selected())
+            {
+              snap_selected_models_to_the_ground();
+            }
           }
         }
 
