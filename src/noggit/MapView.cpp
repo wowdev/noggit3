@@ -149,30 +149,9 @@ void MapView::ResetSelectedObjectRotation()
   _rotation_editor_need_update = true;
 }
 
-void MapView::SnapSelectedObjectToGround()
+void MapView::snap_selected_models_to_the_ground()
 {
-  for (auto& selection : _world->current_selection())
-  {
-    if (_world->is_selection(eEntry_WMO, selection))
-    {
-      WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
-      math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
-      _world->GetVertex(wmo->pos.x, wmo->pos.z, &t);
-      wmo->pos.y = t.y;
-      wmo->recalcExtents();
-      _world->updateTilesWMO(wmo, model_update::none);
-    }
-    else if (_world->is_selection(eEntry_Model, selection))
-    {
-      ModelInstance* m2 = boost::get<selected_model_type>(selection);
-      math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
-      _world->GetVertex(m2->pos.x, m2->pos.z, &t);
-      m2->pos.y = t.y;
-      m2->recalcExtents();
-      _world->updateTilesModel(m2, model_update::none);
-    }
-  }
-
+  _world->snap_selected_models_to_the_ground();
   _rotation_editor_need_update = true;
 }
 
@@ -526,7 +505,7 @@ void MapView::createGUI()
   edit_menu->addSeparator();
   ADD_ACTION (edit_menu, "Delete", Qt::Key_Delete, [this] { DeleteSelectedObject(); });
   ADD_ACTION (edit_menu, "Reset rotation", "Ctrl+R", [this] { ResetSelectedObjectRotation(); });
-  ADD_ACTION (edit_menu, "Set to ground", Qt::Key_PageDown, [this] { SnapSelectedObjectToGround(); });
+  ADD_ACTION (edit_menu, "Set to ground", Qt::Key_PageDown, [this] { snap_selected_models_to_the_ground(); });
 
 
   edit_menu->addSeparator();
