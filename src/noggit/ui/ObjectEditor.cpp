@@ -69,7 +69,7 @@ namespace noggit
       scale_group->setCheckable(true);
       scale_group->setChecked(_settings->value ("model/random_size", false).toBool());
 
-      QCheckBox *copyAttributesCheck = new QCheckBox("Copy rotation,\ntilt, and scale", this);
+      QCheckBox *copyAttributesCheck = new QCheckBox("Copy rotation, tilt, and scale", this);
 
       QDoubleSpinBox *rotRangeStart = new QDoubleSpinBox(this);
       QDoubleSpinBox *rotRangeEnd = new QDoubleSpinBox(this);
@@ -134,13 +134,13 @@ namespace noggit
       auto object_movement_box (new QGroupBox("Object Movement", this));
       auto object_movement_layout = new QFormLayout (object_movement_box);
 
-      auto object_movement_cb ( new checkbox ( "Follow\nground cursor"
+      auto object_movement_cb ( new checkbox ( "Mouse move snap\nmodels to the ground"
                                              , move_model_to_cursor_position
                                              , this
                                              )
                               );
 
-      auto object_median_pivot_point (new checkbox ("Median pivot point"
+      auto object_median_pivot_point (new checkbox ("Rotate around\npivot point (multi select)"
                                                    , use_median_pivot_point
                                                    , this
                                                    )
