@@ -1002,9 +1002,16 @@ void WMOGroup::load_mocv(MPQFile& f, uint32_t size)
 
   if (wmo->flags.do_not_fix_vertex_color_alpha)
   {
-    for (auto& color : _vertex_colors)
+    int interior_batchs_start = 0;
+
+    if (header.transparency_batches_count > 0)
     {
-      color.w = header.flags.exterior ? 1.f : 0.f;
+      interior_batchs_start = _batches[header.transparency_batches_count - 1].vertex_end + 1;
+    }
+
+    for (int n = interior_batchs_start; n < _vertex_colors.size(); ++n)
+    {
+      _vertex_colors[n].w = header.flags.exterior ? 1.f : 0.f;
     }
   }
   else
