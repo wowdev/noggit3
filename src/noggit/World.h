@@ -159,6 +159,7 @@ public:
   // Selection related methods.
   bool is_selection(int pSelectionType, selection_type selection) const;
   bool is_selected(selection_type selection) const;
+  bool is_selected(std::uint32_t uid) const;
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
   boost::optional<selection_type> get_last_selected_model() const;
   bool has_selection() const { return !_current_selection.empty(); }
