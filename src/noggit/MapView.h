@@ -259,6 +259,7 @@ private:
 
   noggit::bool_toggle_property _locked_cursor_mode = {false};
   noggit::bool_toggle_property _move_model_to_cursor_position = {true};
+  noggit::bool_toggle_property _snap_multi_selection_to_ground = {false};
   noggit::bool_toggle_property _use_median_pivot_point = {true};
   noggit::bool_toggle_property _display_all_water_layers = {true};
   noggit::unsigned_int_property _displayed_water_layer = {0};
