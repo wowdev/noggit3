@@ -54,6 +54,7 @@ namespace noggit
       object_editor ( MapView*
                     , World*
                     , bool_toggle_property* move_model_to_cursor_position
+                    , bool_toggle_property* snap_multi_selection_to_ground
                     , bool_toggle_property* use_median_pivot_point
                     , object_paste_params*
                     , QWidget* parent = nullptr

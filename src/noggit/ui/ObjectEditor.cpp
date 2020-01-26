@@ -37,6 +37,7 @@ namespace noggit
     object_editor::object_editor ( MapView* mapView
                                  , World* world
                                  , bool_toggle_property* move_model_to_cursor_position
+                                 , bool_toggle_property* snap_multi_selection_to_ground
                                  , bool_toggle_property* use_median_pivot_point
                                  , object_paste_params* paste_params
                                  , QWidget* parent
@@ -131,23 +132,37 @@ namespace noggit
       paste_layout->addRow(selectionButton);
       paste_layout->addRow(cameraButton);
 
-      auto object_movement_box (new QGroupBox("Object Movement", this));
+      auto object_movement_box (new QGroupBox("Single Selection Movement", this));
       auto object_movement_layout = new QFormLayout (object_movement_box);
 
-      auto object_movement_cb ( new checkbox ( "Mouse move snap\nmodels to the ground"
+      // single model selection
+      auto object_movement_cb ( new checkbox ( "Mouse move follow\ncursor on the ground"
                                              , move_model_to_cursor_position
                                              , this
                                              )
                               );
 
-      auto object_median_pivot_point (new checkbox ("Rotate around\npivot point (multi select)"
+      object_movement_layout->addRow(object_movement_cb);
+
+      // multi model selection
+      auto multi_select_movement_box(new QGroupBox("Multi Selection Movement", this));
+      auto multi_select_movement_layout = new QFormLayout(multi_select_movement_box);
+
+      auto multi_select_movement_cb ( new checkbox( "Mouse move snap\nmodels to the ground"
+                                                  , snap_multi_selection_to_ground
+                                                  , this
+                                                  )
+                                    );
+
+      auto object_median_pivot_point (new checkbox ("Rotate around pivot point"
                                                    , use_median_pivot_point
                                                    , this
                                                    )
                                      );
 
-      object_movement_layout->addRow(object_movement_cb);
-      object_movement_layout->addRow(object_median_pivot_point);
+      
+      multi_select_movement_layout->addRow(multi_select_movement_cb);
+      multi_select_movement_layout->addRow(object_median_pivot_point);
 
       QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
       QPushButton *visToggleButton = new QPushButton("Toggle Visibility", this);
@@ -171,6 +186,7 @@ namespace noggit
       layout->addRow(copyBox);
       layout->addRow(pasteBox);
       layout->addRow(object_movement_box);
+      layout->addRow(multi_select_movement_box);
       layout->addRow(rotEditorButton);
       layout->addRow(visToggleButton);
       layout->addRow(clearListButton);

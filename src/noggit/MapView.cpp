@@ -271,6 +271,7 @@ void MapView::createGUI()
   objectEditor = new noggit::ui::object_editor(this
     , _world.get()
     , &_move_model_to_cursor_position
+    , &_snap_multi_selection_to_ground
     , &_use_median_pivot_point
     , &_object_paste_params
     , _object_editor_dock
@@ -1632,20 +1633,24 @@ void MapView::tick (float dt)
         }
         else
         {
-          // only move horizontally
-          if (!_move_model_to_cursor_position.get())
-          {
-            _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
-          }
-          else // follow the ground
+          if (_world->has_multiple_model_selected())
           {
             _world->set_selected_models_pos(_cursor_pos, false);
 
-            // only required when multiple models are selected since
-            // the cursor pos is already exactly where the ground is
-            if (_world->has_multiple_model_selected())
+            if (_snap_multi_selection_to_ground.get())
             {
               snap_selected_models_to_the_ground();
+            }
+          }
+          else
+          {
+            if (!_move_model_to_cursor_position.get())
+            {
+              _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
+            }
+            else
+            {
+              _world->set_selected_models_pos(_cursor_pos, false);
             }
           }
         }
