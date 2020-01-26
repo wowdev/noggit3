@@ -47,23 +47,24 @@ namespace noggit
 
       createBookmarkList();
 
+      _settings = new settings(this);
+      _about = new about(this);
+
       auto file_menu (menuBar()->addMenu ("&Noggit"));
 
       auto settings_action (file_menu->addAction ("Settings"));
       QObject::connect ( settings_action, &QAction::triggered
-                       , []
+                       , [&]
                          {
-                           auto window (new settings());
-                           window->show();
+                           _settings->show();
                          }
                        );
 
       auto about_action (file_menu->addAction ("About"));
       QObject::connect ( about_action, &QAction::triggered
-                       , []
+                       , [&]
                          {
-                           auto window (new about());
-                           window->show();
+                           _about->show();
                          }
                        );
 

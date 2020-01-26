@@ -56,8 +56,8 @@ namespace noggit
 {
   namespace ui
   {
-    settings::settings()
-      : QDialog (nullptr)
+    settings::settings(QWidget* parent)
+      : QDialog (parent)
       , _settings (new QSettings (this))
     {
       setWindowIcon (QIcon (":/icon"));

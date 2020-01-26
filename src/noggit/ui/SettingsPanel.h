@@ -71,7 +71,7 @@ namespace noggit
 
       QSettings* _settings;
     public:
-      settings();
+      settings(QWidget* parent = nullptr);
       void discard_changes();
       void save_changes();
     };
