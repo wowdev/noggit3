@@ -15,6 +15,8 @@ namespace noggit
   namespace ui
   {
     class minimap_widget;
+    class settings;
+    class about;
 
     struct main_window : QMainWindow
     {
@@ -70,6 +72,8 @@ namespace noggit
       std::vector<BookmarkEntry> mBookmarks;
 
       minimap_widget* _minimap;
+      settings* _settings;
+      about* _about;
       QWidget* _null_widget;
 
       std::unique_ptr<World> _world;

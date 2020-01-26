@@ -11,7 +11,7 @@ namespace noggit
     class about : public QWidget
     {
     public:
-      about();
+      about(QWidget* parent = nullptr);
     };
   }
 }
