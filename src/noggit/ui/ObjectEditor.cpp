@@ -59,9 +59,9 @@ namespace noggit
       auto rotation_group (new QGroupBox ("Random rotation", copyBox));
       auto tilt_group (new QGroupBox ("Random tilt", copyBox));
       auto scale_group (new QGroupBox ("Random scale", copyBox));
-      auto rotation_layout (new QFormLayout (rotation_group));
-      auto tilt_layout (new QFormLayout (tilt_group));
-      auto scale_layout (new QFormLayout (scale_group));
+      auto rotation_layout (new QGridLayout (rotation_group));
+      auto tilt_layout (new QGridLayout(tilt_group));
+      auto scale_layout (new QGridLayout(scale_group));
 
       rotation_group->setCheckable(true);
       rotation_group->setChecked(_settings->value ("model/random_rotation", false).toBool());
@@ -103,22 +103,22 @@ namespace noggit
       scaleRangeStart->setRange (-180.f, 180.f);
       scaleRangeEnd->setRange (-180.f, 180.f);
       
-      rotation_layout->addRow("Min:", rotRangeStart);
-      rotation_layout->addRow("Max:", rotRangeEnd);
+      rotation_layout->addWidget(rotRangeStart, 0, 0);
+      rotation_layout->addWidget(rotRangeEnd, 0 ,1);
       copy_layout->addRow(rotation_group);
 
-      tilt_layout->addRow("Min:", tiltRangeStart);
-      tilt_layout->addRow("Max:", tiltRangeEnd);
+      tilt_layout->addWidget(tiltRangeStart, 0, 0);
+      tilt_layout->addWidget(tiltRangeEnd, 0, 1);
       copy_layout->addRow(tilt_group);
 
-      scale_layout->addRow("Min:", scaleRangeStart);
-      scale_layout->addRow("Max:", scaleRangeEnd);
+      scale_layout->addWidget(scaleRangeStart, 0, 0);
+      scale_layout->addWidget(scaleRangeEnd, 0, 1);
       copy_layout->addRow(scale_group);
 
       copy_layout->addRow(copyAttributesCheck);
 
       QGroupBox *pasteBox = new QGroupBox("Paste Options", this);
-      auto paste_layout = new QFormLayout (pasteBox);
+      auto paste_layout = new QGridLayout (pasteBox);
       QRadioButton *terrainButton = new QRadioButton("Terrain");
       QRadioButton *selectionButton = new QRadioButton("Selection");
       QRadioButton *cameraButton = new QRadioButton("Camera");
@@ -128,9 +128,9 @@ namespace noggit
       pasteModeGroup->addButton(selectionButton, 1);
       pasteModeGroup->addButton(cameraButton, 2);
 
-      paste_layout->addRow(terrainButton);
-      paste_layout->addRow(selectionButton);
-      paste_layout->addRow(cameraButton);
+      paste_layout->addWidget(terrainButton, 0, 0);
+      paste_layout->addWidget(selectionButton, 0, 1);
+      paste_layout->addWidget(cameraButton, 1, 0);
 
       auto object_movement_box (new QGroupBox("Single Selection Movement", this));
       auto object_movement_layout = new QFormLayout (object_movement_box);
@@ -165,8 +165,8 @@ namespace noggit
       multi_select_movement_layout->addRow(object_median_pivot_point);
 
       QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
-      QPushButton *visToggleButton = new QPushButton("Toggle Visibility", this);
-      QPushButton *clearListButton = new QPushButton("Clear List", this);
+      QPushButton *visToggleButton = new QPushButton("Toggle Hidden Models Visibility", this);
+      QPushButton *clearListButton = new QPushButton("Clear Hidden Models List", this);
 
       QGroupBox *importBox = new QGroupBox(this);
       new QGridLayout (importBox);
