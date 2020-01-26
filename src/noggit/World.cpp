@@ -183,6 +183,29 @@ bool World::is_selected(selection_type selection) const
   return false;
 }
 
+bool World::is_selected(std::uint32_t uid) const
+{
+  for (selection_type const& entry : _current_selection)
+  {
+    if (entry.which() == eEntry_WMO)
+    {
+      if (boost::get<selected_wmo_type>(entry)->mUniqueID == uid)
+      {
+        return true;
+      }
+    }
+    else if (entry.which() == eEntry_Model)
+    {
+      if (boost::get<selected_model_type>(entry)->uid == uid)
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 boost::optional<selection_type> World::get_last_selected_model() const
 {
   auto const it
@@ -1910,6 +1933,11 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 
     if (remove)
     {
+      if (is_selected(uid))
+      {
+        reset_selection();
+      }
+
       if (mModelInstances.find(uid) != mModelInstances.end())
       {
         mModelInstances.erase(uid);
@@ -1921,8 +1949,6 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
     }
   }
 
-  // todo: only reset if the selected model has been unloaded
-  reset_selection();
   update_models_by_filename();
 }
 
