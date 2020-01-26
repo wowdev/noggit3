@@ -844,7 +844,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-  if(cursor != cursor_mode::terrain)
+  if(cursor != cursor_mode::terrain && cursor != cursor_mode::none)
   {
     opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
     gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
