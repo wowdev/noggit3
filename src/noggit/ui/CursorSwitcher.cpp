@@ -24,13 +24,11 @@ namespace noggit
 
       auto butt_disk (new QRadioButton ("Disk", this));
       auto butt_sphere (new QRadioButton ("Sphere", this));
-      auto butt_triangle (new QRadioButton ("Triangle", this));
       auto butt_terrain_disk (new QRadioButton ("Terrain Disk", this));
       auto butt_none (new QRadioButton ("None", this));
 
       this->layout()->addWidget (butt_disk);
       this->layout()->addWidget (butt_sphere);
-      this->layout()->addWidget (butt_triangle);
       this->layout()->addWidget (butt_terrain_disk);
       this->layout()->addWidget (butt_none);
 
@@ -38,7 +36,6 @@ namespace noggit
 
       group->addButton (butt_disk, static_cast<int>(cursor_mode::disk));
       group->addButton (butt_sphere, static_cast<int>(cursor_mode::sphere));
-      group->addButton (butt_triangle, static_cast<int>(cursor_mode::triangle));
       group->addButton (butt_terrain_disk, static_cast<int>(cursor_mode::terrain));
       group->addButton (butt_none, static_cast<int>(cursor_mode::none));
 
@@ -60,7 +57,7 @@ namespace noggit
               , [group] (unsigned int id)
                 {
                   QSignalBlocker const blocker(group);
-                  group->button(id)->setChecked (true);                  
+                  group->button(id)->setChecked (true);
                 }
               );
 
