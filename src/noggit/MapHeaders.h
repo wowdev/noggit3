@@ -216,22 +216,26 @@ struct MH2O_Render
   std::uint64_t fatigue = 0;
 };
 
+struct water_vert
+{
+  std::uint8_t depth;
+  std::uint8_t flow_0_pct;
+  std::uint8_t flow_1_pct;
+  std::uint8_t filler;
+};
+
+struct magma_vert
+{
+  std::uint16_t x;
+  std::uint16_t y;
+};
+
 struct mclq_vertex
 {
   union
   {
-    struct water_vert
-    {
-      std::uint8_t depth;
-      std::uint8_t flow_0_pct;
-      std::uint8_t flow_1_pct;
-      std::uint8_t filler;
-    } water;
-    struct magma_vert
-    {
-      std::uint16_t x;
-      std::uint16_t y;
-    } magma;
+    water_vert water;
+    magma_vert magma;
   };
 
   float height;
