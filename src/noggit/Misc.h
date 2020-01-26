@@ -65,7 +65,10 @@ namespace misc
   }
   inline void bit_or(std::uint64_t& value, int x, int y, bool on)
   {
-    value |= (std::uint64_t(1) << (y * 8 + x));
+    if (on)
+    {
+      value |= (std::uint64_t(1) << (y * 8 + x));
+    }
   }
 
   struct random_color : math::vector_4d
