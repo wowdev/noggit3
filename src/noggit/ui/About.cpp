@@ -14,9 +14,11 @@ namespace noggit
   namespace ui
   {
     about::about(QWidget* parent)
-      : QWidget (parent)
+      : QDialog(parent)
     {
-      setWindowIcon (QIcon (":/icon"));
+      setWindowIcon(QIcon(":/icon"));
+      setWindowTitle("About");
+
       //! \todo make nice looking again, I don't care currently
       new QVBoxLayout (this);
 

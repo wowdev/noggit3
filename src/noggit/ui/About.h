@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include <QtWidgets/QWidget>
+#include <QtWidgets/QDialog>
 
 namespace noggit
 {
   namespace ui
   {
-    class about : public QWidget
+    class about : public QDialog
     {
     public:
       about(QWidget* parent = nullptr);
