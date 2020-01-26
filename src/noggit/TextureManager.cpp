@@ -296,7 +296,7 @@ out vec2 f_tex_coord;
 
 void main()
 {
-  f_tex_coord = tex_coord;
+  f_tex_coord = vec2(tex_coord.x, -tex_coord.y);
   gl_Position = position;
 }
 )code"
@@ -314,7 +314,7 @@ layout(location = 0) out vec4 out_color;
 
 void main()
 {
-  out_color = vec4(texture(tex, f_tex_coord).rgb, 1.);
+  out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
 }
 )code"
         }
