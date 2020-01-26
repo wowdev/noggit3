@@ -636,6 +636,8 @@ void World::draw ( math::matrix_4x4 const& model_view
   math::matrix_4x4 const mvp(model_view * projection);
   math::frustum const frustum (mvp);
 
+  cursor_mode cursor = static_cast<cursor_mode>(cursor_type);
+
   if (!_m2_program)
   {
     _m2_program.reset
@@ -795,7 +797,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("ambient_color", ambient_color);
 
 
-    if (cursor_type == 4)
+    if (cursor == cursor_mode::terrain)
     {
       mcnk_shader.uniform ("draw_cursor_circle", 1);
       mcnk_shader.uniform ("cursor_position", cursor_pos);
@@ -842,8 +844,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-  // 4 = terrain shader cursor
-  if(cursor_type != 4)
+  if(cursor != cursor_mode::terrain)
   {
     opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
     gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -852,11 +853,11 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
     {
-      mode = cursor_type == 2
+      mode = cursor == cursor_mode::sphere
         ? noggit::cursor_render::mode::square
         : noggit::cursor_render::mode::cube;
     }
-    else if (cursor_type == 2)
+    else if (cursor == cursor_mode::sphere)
     {
       mode = noggit::cursor_render::mode::sphere;
     }

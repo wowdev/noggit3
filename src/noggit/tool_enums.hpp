@@ -75,7 +75,6 @@ enum class cursor_mode : unsigned int
   none,
   disk,
   sphere,
-  triangle,
   terrain,
   mode_count
 };
