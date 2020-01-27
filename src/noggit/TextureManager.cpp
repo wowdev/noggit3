@@ -282,45 +282,6 @@ namespace noggit
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
 
-
-    opengl::program program
-    (
-      {
-        {
-          GL_VERTEX_SHADER, R"code(
-#version 330 core
-
-in vec4 position;
-in vec2 tex_coord;
-out vec2 f_tex_coord;
-
-void main()
-{
-  f_tex_coord = vec2(tex_coord.x, -tex_coord.y);
-  gl_Position = position;
-}
-)code"
-        },
-        {
-          GL_FRAGMENT_SHADER,
-          R"code(
-#version 330 core
-
-uniform sampler2D tex;
-
-in vec2 f_tex_coord;
-
-layout(location = 0) out vec4 out_color;
-
-void main()
-{
-  out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
-}
-)code"
-        }
-      }
-    );
-
     opengl::scoped::deferred_upload_vertex_arrays<1> vao;
     vao.upload();
     opengl::scoped::deferred_upload_buffers<3> buffers;
@@ -367,6 +328,44 @@ void main()
     gl.viewport(0, 0, w, h);
     gl.clearColor(.0f, .0f, .0f, 1.f);
     gl.clear(GL_COLOR_BUFFER_BIT);
+
+    opengl::program program
+    (
+      {
+        {
+          GL_VERTEX_SHADER, R"code(
+#version 330 core
+
+in vec4 position;
+in vec2 tex_coord;
+out vec2 f_tex_coord;
+
+void main()
+{
+f_tex_coord = vec2(tex_coord.x, -tex_coord.y);
+gl_Position = position;
+}
+)code"
+        },
+        {
+          GL_FRAGMENT_SHADER,
+          R"code(
+#version 330 core
+
+uniform sampler2D tex;
+
+in vec2 f_tex_coord;
+
+layout(location = 0) out vec4 out_color;
+
+void main()
+{
+out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
+}
+)code"
+        }
+      }
+    );
 
     opengl::scoped::use_program shader (program);
 
