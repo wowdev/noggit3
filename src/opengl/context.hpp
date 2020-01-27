@@ -127,6 +127,7 @@ namespace opengl
     void useProgram (GLuint program);
     void validate_program (GLuint program);
     GLint get_program (GLuint program, GLenum pname);
+    std::string get_program_info_log(GLuint program);
 
     GLint getAttribLocation (GLuint program, GLchar const* name);
     void vertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid const* pointer);

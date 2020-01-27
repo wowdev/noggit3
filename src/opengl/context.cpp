@@ -524,9 +524,9 @@ namespace opengl
     }
     if (get_program (program, GL_LINK_STATUS) != GL_TRUE)
     {
-      std::vector<char> log (get_program (program, GL_INFO_LOG_LENGTH));
-      _current_context->functions()->glGetProgramInfoLog (program, log.size(), nullptr, log.data());
-      throw std::runtime_error ("linking program failed: " + std::string (log.data()));
+      std::string error = get_program_info_log(program);
+      LogError << "linking program failed: " << error << std::endl;
+      throw std::runtime_error ("linking program failed: " + error);
     }
   }
   void context::useProgram (GLuint program)
@@ -542,8 +542,9 @@ namespace opengl
     }
     if (get_program (program, GL_VALIDATE_STATUS) != GL_TRUE)
     {
-      //! \todo show log
-      throw std::runtime_error ("validating program failed");
+      std::string error = get_program_info_log(program);
+      LogError << "validating program failed: " << error << std::endl;
+      throw std::runtime_error("validating program failed: " + error);
     }
   }
   GLint context::get_program (GLuint program, GLenum pname)
@@ -552,6 +553,14 @@ namespace opengl
     GLint params;
     _current_context->functions()->glGetProgramiv (program, pname, &params);
     return params;
+  }
+  std::string context::get_program_info_log(GLuint program)
+  {
+    verify_context_and_check_for_gl_errors const _(_current_context, BOOST_CURRENT_FUNCTION);
+    std::vector<char> log(get_program(program, GL_INFO_LOG_LENGTH));
+    _current_context->functions()->glGetProgramInfoLog(program, log.size(), nullptr, log.data());
+
+    return std::string(log.data());
   }
 
   GLint context::getAttribLocation (GLuint program, GLchar const* name)
