@@ -102,7 +102,9 @@ namespace opengl
     }
 
     gl.link_program (*_handle);
-    gl.validate_program (*_handle);
+#ifdef  VALIDATE_OPENGL_PROGRAMS
+    gl.validate_program(*_handle);
+#endif
   }
   program::program (program&& other)
   {
