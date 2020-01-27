@@ -77,6 +77,7 @@ void ColorListWidget::append()
     p->colors.push_back(Qt::black);
     append_widget(p->colors.size()-1);
     Q_EMIT colorsChanged(p->colors);
+    Q_EMIT color_added();
 }
 
 void ColorListWidget::emit_changed()
