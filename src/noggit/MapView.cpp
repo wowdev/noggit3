@@ -227,7 +227,7 @@ void MapView::createGUI()
   _tool_properties_docks.insert(_flatten_blur_dock);
 
   _texturing_dock = new QDockWidget("Texturing", this);
-  texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get(), _texturing_dock);
+  texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get(), &_show_texture_palette_small_window, _texturing_dock);
   _texturing_dock->setWidget(texturingTool);
   _tool_properties_docks.insert(_texturing_dock);
 

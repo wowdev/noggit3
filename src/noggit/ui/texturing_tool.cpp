@@ -20,6 +20,7 @@ namespace noggit
   {
     texturing_tool::texturing_tool ( const math::vector_3d* camera_pos
                                    , World* world
+                                   , bool_toggle_property* show_quick_palette
                                    , QWidget* parent
                                    )
       : QWidget(parent)
@@ -156,11 +157,13 @@ namespace noggit
       _spray_pressure_slider = new QSlider (Qt::Orientation::Horizontal, _spray_content);
       _spray_pressure_slider->setRange (0, 10 * 100);
       _spray_pressure_slider->setSliderPosition (std::round(_spray_pressure * 100));
-      spray_layout->addRow (_spray_pressure_slider);      
+      spray_layout->addRow (_spray_pressure_slider);
 
       _texture_switcher = new texture_swapper(tool_widget, camera_pos, world);
       _texture_switcher->hide();
 
+      auto quick_palette_btn (new QPushButton("Quick Palette", this));
+      tool_layout->addRow(quick_palette_btn);
 
       auto anim_widget (new QWidget (this));
       auto anim_layout (new QFormLayout (anim_widget));
@@ -346,6 +349,13 @@ namespace noggit
               , [&] (bool b)
                 {
                   _spray_content->setVisible(b);
+                }
+              );
+
+      connect ( quick_palette_btn, &QPushButton::pressed
+              , [=] ()
+                {
+                  show_quick_palette->set(true);
                 }
               );
 

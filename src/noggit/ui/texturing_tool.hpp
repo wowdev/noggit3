@@ -22,7 +22,7 @@ namespace noggit
   {
     class checkbox;
     class current_texture;
-    class texture_swapper;    
+    class texture_swapper;
 
     enum class texturing_mode
     {
@@ -34,7 +34,11 @@ namespace noggit
     class texturing_tool : public QWidget
     {
     public:
-      texturing_tool (const math::vector_3d* camera_pos, World*, QWidget* parent = nullptr);
+      texturing_tool ( const math::vector_3d* camera_pos
+                     , World* world
+                     , bool_toggle_property* show_quick_palette
+                     , QWidget* parent = nullptr
+                     );
 
       float brush_radius() const;
       float hardness() const;
