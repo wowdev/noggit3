@@ -307,7 +307,7 @@ void Model::initCommon(const MPQFile& f)
       pass.index_start = model_geosets[geoset].istart;
       pass.index_count = model_geosets[geoset].icount;
       pass.vertex_start = model_geosets[geoset].vstart;
-      pass.vertex_end = pass.vertex_start + model_geosets[geoset].vcount;   
+      pass.vertex_end = pass.vertex_start + model_geosets[geoset].vcount;
 
       _render_passes.push_back(pass);
     }
@@ -346,9 +346,20 @@ void Model::fix_shader_id_blend_override()
     int shader = 0;
     bool blend_mode_override = (header.Flags & 8);
 
+    // fuckporting check
+    if (pass.texture_coord_combo_index + pass.texture_count - 1 >= _texture_unit_lookup.size())
+    {
+      LogDebug << "wrong texture coord combo index on fuckported model: " << filename << std::endl;
+      // use default stuff
+      pass.shader_id = 0;
+      pass.texture_count = 1;
+
+      continue;
+    }
+
     if (!blend_mode_override)
     {
-      uint16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];     
+      uint16_t texture_unit_lookup = _texture_unit_lookup[pass.texture_coord_combo_index];
 
       if (_render_flags[pass.renderflag_index].blend)
       {
@@ -358,7 +369,7 @@ void Model::fix_shader_id_blend_override()
         {
           shader |= 0x8;
         }
-      }      
+      }
 
       shader <<= 4;
 
@@ -391,7 +402,7 @@ void Model::fix_shader_id_blend_override()
         if (texture_unit_lookup == 1 && i + 1 == pass.texture_count)
         {
           shader |= 0x4000;
-        }        
+        }
       }
 
       shader |= (runtime_shader_val[1] & 0xFFFF) | ((runtime_shader_val[0] << 4) & 0xFFFF);
