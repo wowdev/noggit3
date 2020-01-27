@@ -120,6 +120,17 @@ macro(includePlattform SUFFIX)
   endif(UNIX)
 endmacro(includePlattform)
 
+OPTION(VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" ON)
+
+
+if(VALIDATE_OPENGL_PROGRAMS)
+  add_definitions ( -DVALIDATE_OPENGL_PROGRAMS)
+  
+  if(APPLE)
+    message(WARNING "Noggit will most likely not work on a mac with this option enabled.")
+  endif()
+endif()
+
 includePlattform("prefind")
 
 FIND_PACKAGE( OpenGL REQUIRED )
