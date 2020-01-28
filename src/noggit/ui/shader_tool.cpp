@@ -12,6 +12,7 @@
 #include <qt-color-widgets/color_list_widget.hpp>
 
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QToolButton>
 
@@ -97,6 +98,11 @@ namespace noggit
       _color_palette = new color_widgets::ColorListWidget(this);
       _color_palette->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
       layout->addRow(_color_palette);
+
+      auto info_label (new QLabel("drag&drop colors to select them", this));
+      info_label->setAlignment(Qt::AlignCenter);
+
+      layout->addRow(info_label);
 
       QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
       QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
