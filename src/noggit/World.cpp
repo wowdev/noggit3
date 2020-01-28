@@ -1927,6 +1927,8 @@ std::uint32_t World::add_model_instance(ModelInstance& model_instance)
     if (check.get().which() == eEntry_WMO)
     {
       model_instance.uid = mapIndex.newGUID();
+      updateTilesModel(&model_instance, model_update::add);
+
       return add_model_instance(model_instance);
     }
     else
@@ -1953,6 +1955,8 @@ std::uint32_t World::add_model_instance(ModelInstance& model_instance)
                              );
 
         model_instance.uid = mapIndex.newGUID();
+        updateTilesModel(&model_instance, model_update::add);
+
         return add_model_instance(model_instance);
       }
     }
@@ -1975,6 +1979,8 @@ std::uint32_t World::add_wmo_instance(WMOInstance& wmo_instance)
     if (check.get().which() == eEntry_Model)
     {
       wmo_instance.mUniqueID = mapIndex.newGUID();
+      updateTilesWMO(&wmo_instance, model_update::add);
+
       return add_wmo_instance(wmo_instance);
     }
     else
@@ -2000,6 +2006,8 @@ std::uint32_t World::add_wmo_instance(WMOInstance& wmo_instance)
                              );
 
         wmo_instance.mUniqueID = mapIndex.newGUID();
+        updateTilesWMO(&wmo_instance, model_update::add);
+
         return add_wmo_instance(wmo_instance);
       }
     }
