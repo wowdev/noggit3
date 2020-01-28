@@ -272,16 +272,14 @@ void MapTile::finishLoading()
 
     for (auto const& object : lWMOInstances)
     {
-      _world->mWMOInstances.emplace(object.uniqueID, WMOInstance(mWMOFilenames[object.nameID], &object));
-      uids.push_back(object.uniqueID);
+      uids.push_back(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID], &object)));
     }
 
     // - Load M2s ------------------------------------------
 
     for (auto const& model : lModelInstances)
     {
-      _world->mModelInstances.emplace(model.uniqueID, ModelInstance(mModelFilenames[model.nameID], &model));
-      uids.push_back(model.uniqueID);
+      uids.push_back(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID], &model)));
     }
 
     _world->need_model_updates = true;
@@ -521,27 +519,26 @@ void MapTile::saveTile(bool saveAllModels, World* world)
   lTileExtents[0] = math::vector_3d(xbase, 0.0f, zbase);
   lTileExtents[1] = math::vector_3d(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
 
-
-  for (auto const& object : world->mWMOInstances)
+  // get every models on the tile
+  for (std::uint32_t uid : uids)
   {
-    // no need to check if wmos are loaded since if they aren't their extents hasn't changed and thus can be saved as is
-    if (saveAllModels || object.second.isInsideRect(lTileExtents))
-    {
-      lObjectInstances.emplace_back(object.second);
-    }
-  }
+    auto model = world->get_model(uid);
 
-  for (auto& model : world->mModelInstances)
-  {
-    // todo: move that somewhere to not check for each time ?
-    if (!model.second.model->finishedLoading())
+    if (!model)
     {
-      AsyncLoader::instance().ensure_loaded(model.second.model.get());
-      model.second.recalcExtents();
+      // todo: save elsewhere if this happens ? it shouldn't but still
+      LogError << "Could not fine model with uid=" << uid << " when saving " << filename << std::endl;
     }
-    if (saveAllModels || model.second.isInsideRect(lTileExtents))
+    else
     {
-      lModelInstances.emplace_back(model.second);
+      if (model.get().which() == eEntry_WMO)
+      {
+        lObjectInstances.emplace_back(*boost::get<selected_wmo_type>(model.get()));
+      }
+      else
+      {
+        lModelInstances.emplace_back(*boost::get<selected_model_type>(model.get()));
+      }
     }
   }
 
@@ -565,7 +562,9 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   lID = 0;
   for (auto& model : lModels)
+  {
     model.second.nameID = lID++;
+  }
 
   std::map<std::string, filenameOffsetThing> lObjects;
 
@@ -579,16 +578,26 @@ void MapTile::saveTile(bool saveAllModels, World* world)
 
   lID = 0;
   for (auto& object : lObjects)
+  {
     object.second.nameID = lID++;
+  }
 
   // Check which textures are on this ADT.
   std::map<std::string, int> lTextures;
 
   for (int i = 0; i < 16; ++i)
+  {
     for (int j = 0; j < 16; ++j)
+    {
       for (size_t tex = 0; tex < mChunks[i][j]->texture_set->num(); tex++)
+      {
         if (lTextures.find(mChunks[i][j]->texture_set->filename(tex)) == lTextures.end())
-          lTextures.emplace (mChunks[i][j]->texture_set->filename(tex), -1);
+        {
+          lTextures.emplace(mChunks[i][j]->texture_set->filename(tex), -1);
+        }
+      }
+    }
+  }
 
   lID = 0;
   for (auto& texture : lTextures)

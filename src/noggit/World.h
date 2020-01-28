@@ -51,11 +51,11 @@ class World
 private:
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
 
-public:
   //! \todo  Get these managed? ._.
   std::map<int, ModelInstance> mModelInstances;
   std::map<int, WMOInstance> mWMOInstances;
 
+public:
   MapIndex mapIndex;
   noggit::map_horizon horizon;
 
@@ -249,6 +249,12 @@ public:
               , math::vector_3d rotation
               );
 
+  // add a m2 instance to the world (needs to be positioned already), return the uid
+  std::uint32_t add_model_instance(ModelInstance& model_instance);
+  // add a wmo instance to the world (needs to be positioned already), return the uid
+  std::uint32_t add_wmo_instance(WMOInstance& wmo_instance);
+
+  boost::optional<selection_type> get_model(std::uint32_t uid);
   void remove_models_if_needed(std::vector<uint32_t> const& uids);
 
   void reload_tile(tile_index const& tile);

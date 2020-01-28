@@ -1916,6 +1916,117 @@ void World::addWMO ( std::string const& filename
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
 
+std::uint32_t World::add_model_instance(ModelInstance& model_instance)
+{
+  std::uint32_t uid = model_instance.uid;
+  auto check = get_model(uid);
+
+  if (check)
+  {
+    // a wmo has this id already, generate a new uid
+    if (check.get().which() == eEntry_WMO)
+    {
+      model_instance.uid = mapIndex.newGUID();
+      return add_model_instance(model_instance);
+    }
+    else
+    {
+      ModelInstance* possible_duplicate = boost::get<selected_model_type>(check.get());
+
+      // check if it's not a duplicate/already loaded model
+      if( model_instance.model->filename == possible_duplicate->model->filename
+       && misc::vec3d_equals(model_instance.pos, possible_duplicate->pos) 
+       && misc::vec3d_equals(model_instance.dir, possible_duplicate->dir)
+       && misc::float_equals(model_instance.scale, possible_duplicate->scale)
+        )
+      {
+        return model_instance.uid;
+      }
+      else
+      {
+        QMessageBox::critical( nullptr
+                             , "UID ALREADY IN USE"
+                             , "Save, use 'Editor > Force uid check on next opening', reload the map\n"
+                               "and use 'fix all uids' to fix any other similar issue.\n\n"
+                               "Please enable 'Always check for max UID', mysql uid store or synchronize your "
+                               "uid.ini file if you're sharing the map between several mappers.\n"
+                             );
+
+        model_instance.uid = mapIndex.newGUID();
+        return add_model_instance(model_instance);
+      }
+    }
+  }
+  else
+  {
+    mModelInstances.emplace(model_instance.uid, model_instance);
+    return model_instance.uid;
+  }
+}
+
+std::uint32_t World::add_wmo_instance(WMOInstance& wmo_instance)
+{
+  std::uint32_t uid = wmo_instance.mUniqueID;
+  auto check = get_model(uid);
+
+  if (check)
+  {
+    // a model has this id already, generate a new uid
+    if (check.get().which() == eEntry_Model)
+    {
+      wmo_instance.mUniqueID = mapIndex.newGUID();
+      return add_wmo_instance(wmo_instance);
+    }
+    else
+    {
+      WMOInstance* possible_duplicate = boost::get<selected_wmo_type>(check.get());
+
+      // check if it's not a duplicate/already loaded model
+      if( wmo_instance.wmo->filename == possible_duplicate->wmo->filename
+       && misc::vec3d_equals(wmo_instance.pos, possible_duplicate->pos) 
+       && misc::vec3d_equals(wmo_instance.dir, possible_duplicate->dir)
+        )
+      {
+        return wmo_instance.mUniqueID;
+      }
+      else
+      {
+        QMessageBox::critical( nullptr
+                             , "UID ALREADY IN USE"
+                             , "Save, use 'Editor > Force uid check on next opening', reload the map\n"
+                               "and use 'fix all uids' to fix any other similar issue.\n\n"
+                               "Please enable 'Always check for max UID', mysql uid store or synchronize your "
+                               "uid.ini file if you're sharing the map between several mappers.\n"
+                             );
+
+        wmo_instance.mUniqueID = mapIndex.newGUID();
+        return add_wmo_instance(wmo_instance);
+      }
+    }
+  }
+  else
+  {
+    mWMOInstances.emplace(wmo_instance.mUniqueID, wmo_instance);
+    return wmo_instance.mUniqueID;
+  }
+}
+
+boost::optional<selection_type> World::get_model(std::uint32_t uid)
+{
+  if (mWMOInstances.find(uid) != mWMOInstances.end())
+  {
+    return &mWMOInstances.at(uid);
+  }
+  else if (mModelInstances.find(uid) != mModelInstances.end())
+  {
+    return &mModelInstances.at(uid);
+  }
+  else
+  {
+    return boost::none;
+  }
+}
+
 void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 {
   for (uint32_t uid : uids)
