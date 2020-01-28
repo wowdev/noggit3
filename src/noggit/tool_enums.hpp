@@ -75,6 +75,7 @@ enum class cursor_mode : unsigned int
   none,
   disk,
   sphere,
+  unused, // left it there to avoid issues
   terrain,
   mode_count
 };
