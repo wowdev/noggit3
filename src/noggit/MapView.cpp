@@ -910,7 +910,10 @@ void MapView::createGUI()
             , MOD_shift
             , [this]
               {
-                cursor_type.set ((cursor_type.get() + 1) % static_cast<unsigned int>(cursor_mode::mode_count));
+                do
+                {
+                  cursor_type.set ((cursor_type.get() + 1) % static_cast<unsigned int>(cursor_mode::mode_count));
+                } while (cursor_type.get() == static_cast<unsigned int>(cursor_mode::unused)); // hack to not get the unused cursor type
               }
             , [this] { return terrainMode != editing_mode::object; }
             );
@@ -1349,17 +1352,23 @@ MapView::MapView( math::degrees camera_yaw0
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
 
   cursor_type.set (_settings->value ("cursor/default_type", static_cast<unsigned int>(cursor_mode::terrain)).toUInt());
+
   cursor_color.x = _settings->value ("cursor/color/r", 1).toFloat();
   cursor_color.y = _settings->value ("cursor/color/g", 1).toFloat();
   cursor_color.z = _settings->value ("cursor/color/b", 1).toFloat();
   cursor_color.w = _settings->value ("cursor/color/a", 1).toFloat();
 
-  _cursor_switcher.reset(new noggit::ui::cursor_switcher (this, cursor_color, cursor_type));
-
-  connect (&cursor_type, &noggit::unsigned_int_property::changed, [&] (unsigned int type)
+  connect(&cursor_type, &noggit::unsigned_int_property::changed, [&] (unsigned int type)
   {
-    _settings->setValue ("cursor/default_type", type);
+    _settings->setValue("cursor/default_type", type);
   });
+
+  if (cursor_type.get() == static_cast<unsigned int>(cursor_mode::unused))
+  {
+    cursor_type.set(static_cast<unsigned int>(cursor_mode::terrain));
+  }
+
+  _cursor_switcher.reset(new noggit::ui::cursor_switcher (this, cursor_color, cursor_type));
 
   setFocusPolicy (Qt::StrongFocus);
   setMouseTracking (true);
