@@ -197,7 +197,6 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::createGUI()
 {
-
   // create tool widgets
 
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);

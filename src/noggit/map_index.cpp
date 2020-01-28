@@ -603,6 +603,27 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 {
   // pre-cond: mTiles[z][x].flags are set
 
+  // unload any previously loaded tile, although there shouldn't be as
+  // the fix is executed before loading the map
+  for (int z = 0; z < 64; ++z)
+  {
+    for (int x = 0; x < 64; ++x)
+    {
+      if (mTiles[z][x].tile)
+      {
+        MapTile* tile = mTiles[z][x].tile.get();
+
+        // don't unload half loaded tiles
+        if (!tile->finishedLoading())
+        {
+          AsyncLoader::instance().ensure_loaded(tile);
+        }
+
+        unloadTile(tile->index);
+      }
+    }
+  }
+
   std::forward_list<ModelInstance> models;
   std::forward_list<WMOInstance> wmos;
 
@@ -783,15 +804,15 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
   // set all uids
   // for each tile save the m2/wmo present inside
-  uint32_t uid{ 0 };
-  std::map<std::size_t, std::map<std::size_t, std::forward_list<ModelInstance*>>> modelPerTile;
-  std::map<std::size_t, std::map<std::size_t, std::forward_list<WMOInstance*>>> wmoPerTile;
+  highestGUID = 0;
+
+  std::map<std::size_t, std::map<std::size_t, std::forward_list<std::uint32_t>>> uids_per_tile;
 
   bool loading_error = false;
 
   for (ModelInstance& instance : models)
   {
-    instance.uid = uid++;
+    instance.uid = highestGUID++;
 
     if (!instance.model->finishedLoading())
     {
@@ -808,19 +829,20 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(extents[1].z / TILESIZE), (std::size_t)63);
 
+    world->add_model_instance(instance);
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        modelPerTile[z][x].push_front(&instance);
+        uids_per_tile[z][x].push_front(instance.uid);
       }
     }
   }
 
   for (WMOInstance& instance : wmos)
   {
-    instance.mUniqueID = uid++;
+    instance.mUniqueID = highestGUID++;
     // no need to check if the loading is finished since the extents are stored inside the adt
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
@@ -828,11 +850,13 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
 
+    world->add_wmo_instance(instance);
+
     for (std::size_t z = sz; z <= ez; ++z)
     {
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        wmoPerTile[z][x].push_front(&instance);
+        uids_per_tile[z][x].push_front(instance.mUniqueID);
       }
     }
   }
@@ -842,11 +866,8 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     return uid_fix_status::failed;
   }
 
-  // save the current highest guid
-  highestGUID = uid ? uid - 1 : 0;
-
   // load each tile without the models and
-  // save them with the models from modelPerTile / wmoPerTile
+  // save them with the models with the new uids
   for (int z = 0; z < 64; ++z)
   {
     for (int x = 0; x < 64; ++x)
@@ -866,29 +887,14 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), world);
       tile.finishLoading();
 
-      std::map<int, ModelInstance> modelInst;
-      std::map<int, WMOInstance> wmoInst;
-
-      for (ModelInstance* instance : modelPerTile[z][x])
+      // add the uids to the tile to be able to save the models
+      // which have been loaded in world earlier
+      for (std::uint32_t uid : uids_per_tile[z][x])
       {
-        modelInst.emplace(instance->uid, *instance);
+        tile.add_model(uid);
       }
-      modelPerTile[z][x].clear();
 
-      for (WMOInstance* instance : wmoPerTile[z][x])
-      {
-        wmoInst.emplace(instance->mUniqueID, *instance);
-      }
-      wmoPerTile[z][x].clear();
-
-      // save using the models selected beforehand
-      std::swap(world->mModelInstances, modelInst);
-      std::swap(world->mWMOInstances, wmoInst);
       tile.saveTile(true, world);
-      // restore the original map in World
-      std::swap(world->mModelInstances, modelInst);
-      std::swap(world->mWMOInstances, wmoInst);
-      
     }
   }
 
