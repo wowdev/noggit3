@@ -272,14 +272,14 @@ void MapTile::finishLoading()
 
     for (auto const& object : lWMOInstances)
     {
-      uids.push_back(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID], &object)));
+      add_model(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID], &object)));
     }
 
     // - Load M2s ------------------------------------------
 
     for (auto const& model : lModelInstances)
     {
-      uids.push_back(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID], &model)));
+      add_model(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID], &model)));
     }
 
     _world->need_model_updates = true;
@@ -901,5 +901,13 @@ void MapTile::remove_model(uint32_t uid)
   if (it != uids.end())
   {
     uids.erase(it);
+  }
+}
+
+void MapTile::add_model(uint32_t uid)
+{
+  if (std::find(uids.begin(), uids.end(), uid) == uids.end())
+  {
+    uids.push_back(uid);
   }
 }

@@ -108,7 +108,7 @@ public:
   }
 
   void remove_model(uint32_t uid);
-  void add_model(uint32_t uid) { uids.push_back(uid); }
+  void add_model(uint32_t uid);
 
   TileWater Water;
 private:
