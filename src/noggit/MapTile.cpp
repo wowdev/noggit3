@@ -506,7 +506,7 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 
 /// --- Only saving related below this line. --------------------------
 
-void MapTile::saveTile(bool saveAllModels, World* world)
+void MapTile::saveTile(World* world)
 {
   Log << "Saving ADT \"" << filename << "\"." << std::endl;
 

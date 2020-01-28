@@ -144,7 +144,7 @@ void MapIndex::saveall (World* world)
 
   for (MapTile* tile : loaded_tiles())
   {
-    tile->saveTile (false, world);
+    tile->saveTile(world);
     tile->changed = 0;
   }
 }
@@ -408,7 +408,7 @@ void MapIndex::saveTile(const tile_index& tile, World* world)
 	if (tileLoaded(tile))
 	{
     saveMaxUID();
-		mTiles[tile.z][tile.x].tile->saveTile (false, world);
+		mTiles[tile.z][tile.x].tile->saveTile(world);
 	}
 }
 
@@ -423,7 +423,7 @@ void MapIndex::saveChanged (World* world)
   {
     if (tile->changed)
     {
-      tile->saveTile (false, world);
+      tile->saveTile(world);
       tile->changed = 0;
     }
   }
@@ -894,7 +894,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         tile.add_model(uid);
       }
 
-      tile.saveTile(true, world);
+      tile.saveTile(world);
     }
   }
 

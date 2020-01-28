@@ -92,7 +92,7 @@ public:
 
   bool GetVertex(float x, float z, math::vector_3d *V);
 
-  void saveTile(bool saveAllModels, World*);
+  void saveTile(World*);
 	void CropWater();
 
   bool isTile(int pX, int pZ);

@@ -1730,7 +1730,7 @@ void World::convert_alphamap(bool to_big_alpha)
         AsyncLoader::instance().ensure_loaded(mTile);
 
         mTile->convert_alphamap(to_big_alpha);
-        mTile->saveTile (false, this);
+        mTile->saveTile(this);
         mapIndex.markOnDisc (tile, true);
         mapIndex.unsetChanged(tile);
 
