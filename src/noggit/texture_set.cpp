@@ -377,7 +377,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
   if (tex_layer == -1 || nTextures == 1)
   {
-    return false;
+    return nTextures == 1;
   }
 
   radius = brush->getRadius();
