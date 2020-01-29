@@ -384,37 +384,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 {
   bool changed = false;
 
-  float zPos, xPos, dist, radius;
-
-  // hacky fix to make sure textures are blended between 2 chunks
-  float x_ofs = 0.f;
-  float z_ofs = 0.f;
-  bool hacky_blend = false;
-  if (z < zbase)
-  {
-    //zbase -= TEXDETAILSIZE;
-    z_ofs = -TEXDETAILSIZE / 2.f;
-    hacky_blend = true;
-  }
-  else if (z > zbase + CHUNKSIZE)
-  {
-    //zbase += TEXDETAILSIZE;
-    z_ofs = TEXDETAILSIZE / 2.f;
-    hacky_blend = true;
-  }
-
-  if (x < xbase)
-  {
-    //xbase -= TEXDETAILSIZE;
-    x_ofs = -TEXDETAILSIZE / 2.f;
-    hacky_blend = true;
-  }
-  else if (x > xbase + CHUNKSIZE)
-  {
-    //xbase += TEXDETAILSIZE;
-    x_ofs = TEXDETAILSIZE / 2.f;
-    hacky_blend = true;
-  }
+  float zPos, xPos, dist, radius;  
 
   int tex_layer = get_texture_index_or_add (std::move (texture), strength);
 
@@ -440,16 +410,13 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     for (int i = 0; i < 64; ++i)
     {
       dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);// -(hacky_blend ? TEXDETAILSIZE / 2.f : 0.f);
-      xPos += TEXDETAILSIZE;
-
-      if (dist>radius)
+      
+      if (dist<=radius)
       {
-        continue;
+        changed |= change_texture(tex_layer, i + 64 * j, strength, pressure*brush->getValue(dist));
       }
 
-      dist = misc::dist(x, z, xPos + x_ofs + TEXDETAILSIZE / 2.0f, zPos + z_ofs + TEXDETAILSIZE / 2.0f);// -(hacky_blend ? TEXDETAILSIZE / 2.f : 0.f);
-
-      changed |= change_texture(tex_layer, i + 64 * j, strength, pressure*brush->getValue(dist));
+      xPos += TEXDETAILSIZE;
     }
     zPos += TEXDETAILSIZE;
   }
