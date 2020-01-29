@@ -127,7 +127,7 @@ void TextureSet::swap_layers(int layer_1, int layer_2)
     return;
   }
 
-  if (lower_texture_id < upper_texture_id)
+  if (lower_texture_id > upper_texture_id)
   {
     std::swap(lower_texture_id, upper_texture_id);
   }
