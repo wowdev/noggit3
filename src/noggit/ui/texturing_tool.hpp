@@ -64,6 +64,11 @@ namespace noggit
         return _texture_brush;
       }
 
+      float alpha_target() const
+      {
+        return static_cast<float>(_brush_level) / 255.f;
+      }
+
       current_texture* _current_texture;
 
       QSize sizeHint() const override;

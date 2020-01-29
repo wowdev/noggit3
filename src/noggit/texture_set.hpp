@@ -12,6 +12,18 @@
 class Brush;
 class MapTile;
 
+struct tmp_edit_alpha_values
+{
+  using alpha_layer = std::array<float, 64 * 64>;
+  // use 4 "alphamaps" for an easier editing
+  std::array<alpha_layer, 4> map;
+
+  alpha_layer& operator[](std::size_t i)
+  {
+    return map.at(i);
+  }
+};
+
 class TextureSet
 {
 public:
@@ -29,7 +41,7 @@ public:
   bool eraseUnusedTextures();
   void swap_layers(int layer_1, int layer_2);
   void replace_texture(scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture);
-  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture);
+  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture);
   bool replace_texture( float xbase
                       , float zbase
                       , float x
@@ -65,9 +77,9 @@ public:
 
   std::vector<uint8_t> lod_texture_map();
 
+  bool apply_alpha_changes();
 private:
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
-  bool change_texture(int texture_id, size_t offset, uint strength, float pressure);
 
   uint8_t sum_alpha(size_t offset) const;
 
@@ -86,4 +98,8 @@ private:
   bool _need_lod_texture_map_update = false;
 
   ENTRY_MCLY _layers_info[4];
+
+  boost::optional<tmp_edit_alpha_values> tmp_edit_values;
+
+  void create_temporary_alphamaps();
 };
