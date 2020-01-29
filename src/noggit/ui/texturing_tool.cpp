@@ -528,16 +528,16 @@ namespace noggit
       {
         if (_spray_mode_group->isChecked())
         {
-          world->sprayTexture(pos, &_spray_brush, _brush_level, strength, _texture_brush.getRadius(), _spray_pressure, texture);
+          world->sprayTexture(pos, &_spray_brush, alpha_target(), strength, _texture_brush.getRadius(), _spray_pressure, texture);
 
           if (_inner_radius_cb->isChecked())
           {
-            world->paintTexture(pos, &_inner_brush, _brush_level, strength, texture);
+            world->paintTexture(pos, &_inner_brush, alpha_target(), strength, texture);
           }
         }
         else
         {
-          world->paintTexture(pos, &_texture_brush, _brush_level, strength, texture);
+          world->paintTexture(pos, &_texture_brush, alpha_target(), strength, texture);
         }
       }
       else if (_texturing_mode == texturing_mode::anim)

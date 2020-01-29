@@ -976,7 +976,7 @@ void MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, sco
   texture_set->replace_texture(oldTexture, std::move (newTexture));
 }
 
-bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
+bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture));
 }

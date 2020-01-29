@@ -74,6 +74,12 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
     {
       alphamaps[texLevel - 1] = boost::in_place();
     }
+
+    if (tmp_edit_values && nTextures == 1)
+    {
+      // default values for the layer 0 are 255 (uint8) or 1.f (float) !
+      tmp_edit_values.get()[0].fill(1.f);
+    }
   }
 
   _need_amap_update = true;
@@ -105,6 +111,7 @@ void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to
     // prevent texture duplication
     if (replacement_texture_level != -1 && replacement_texture_level != texture_to_replace_level)
     {
+      // temp alphamap changes are applied in here
       merge_layers(texture_to_replace_level, replacement_texture_level);
     }
   }
@@ -127,6 +134,8 @@ void TextureSet::swap_layers(int layer_1, int layer_2)
 
   if (lower_texture_id >= 0 && upper_texture_id >= 0 && lower_texture_id < nTextures && upper_texture_id < nTextures)
   {
+    apply_alpha_changes();
+
     std::swap(textures[lower_texture_id], textures[upper_texture_id]);
     std::swap(_layers_info[lower_texture_id], _layers_info[upper_texture_id]);
 
@@ -196,6 +205,11 @@ void TextureSet::eraseTexture(size_t id)
       std::swap (alphamaps[i - 1], alphamaps[i]);
     }
 
+    if (tmp_edit_values)
+    {
+      tmp_edit_values.get()[i].swap(tmp_edit_values.get()[i+1]);
+    }
+
     _layers_info[i] = _layers_info[i + 1];
   }
 
@@ -209,6 +223,12 @@ void TextureSet::eraseTexture(size_t id)
 
   // erase the old info as a precaution but it's overriden when adding a new texture
   _layers_info[nTextures] = ENTRY_MCLY();
+
+  // set the default values for the temporary alphamap too
+  if (tmp_edit_values)
+  {
+    tmp_edit_values.get()[nTextures].fill(0.f);
+  }
 
   _need_amap_update = true;
   _need_lod_texture_map_update = true;
@@ -266,30 +286,48 @@ bool TextureSet::eraseUnusedTextures()
   }
 
   std::set<int> visible_tex;
-
-  for (int i = 0; i < 4096 && visible_tex.size() < nTextures; ++i)
+  
+  if (tmp_edit_values)
   {
-    uint8_t sum = 0;
-    for (int n = 0; n < nTextures - 1; ++n)
+    auto& amaps = tmp_edit_values.get();
+
+    for (int i = 0; i < 4096 && visible_tex.size() < nTextures; ++i)
     {
-      uint8_t a = alphamaps[n]->getAlpha(i);
-      sum += a;
-      if (a > 0)
+      for (int layer = 0; layer < nTextures; ++layer)
       {
-        visible_tex.emplace(n + 1);
+        if (amaps[layer][i] > 0.f)
+        {
+          visible_tex.emplace(i);
+        }
       }
     }
-
-    // base layer visible
-    if (sum < 255)
+  }
+  else
+  {
+    for (int i = 0; i < 4096 && visible_tex.size() < nTextures; ++i)
     {
-      visible_tex.emplace(0);
+      uint8_t sum = 0;
+      for (int n = 0; n < nTextures - 1; ++n)
+      {
+        uint8_t a = alphamaps[n]->getAlpha(i);
+        sum += a;
+        if (a > 0)
+        {
+          visible_tex.emplace(n + 1);
+        }
+      }
+
+      // base layer visible
+      if (sum < 255)
+      {
+        visible_tex.emplace(0);
+      }
     }
   }
 
   if (visible_tex.size() < nTextures)
   {
-    for (int i = nTextures-1; i >= 0; --i)
+    for (int i = nTextures - 1; i >= 0; --i)
     {
       if (visible_tex.find(i) == visible_tex.end())
       {
@@ -329,62 +367,11 @@ int TextureSet::get_texture_index_or_add (scoped_blp_texture_reference texture, 
   return addTexture (std::move (texture));
 }
 
-// assume nTextures > 1
-bool TextureSet::change_texture(int texture_id, size_t offset, uint strength, float pressure)
-{
-  auto set_alpha([&](int alpha_id, size_t offset, float value)
-  {
-    alphamaps[alpha_id]->setAlpha(offset, static_cast<uint8_t>(std::min(std::max(std::round(value), 0.0f), 255.0f)));
-  });
-
-  float current_alpha = texture_id ? alphamaps[texture_id - 1]->getAlpha(offset) : 255.f - sum_alpha(offset);
-  float sum_other_alphas = 255.f - current_alpha;
-  float alpha_change = (strength - current_alpha)* pressure;
-  float alpha_after_change = current_alpha + alpha_change;
-
-  if (current_alpha == strength)
-  {
-    return false;
-  }
-
-  // just change the first alphamap
-  if (texture_id == 0 && current_alpha == 255.f)
-  {
-    set_alpha(0, offset, -alpha_change);
-    return true;
-  }
-
-  // round alpha_change to be able to get to the extremes easier
-  if (alpha_after_change < 1.f && alpha_change < 0.f)
-  {
-    alpha_change = -current_alpha;
-  }
-  else if (alpha_after_change > 254.f && alpha_change > 0.f)
-  {
-    alpha_change = (255.f - current_alpha);
-  }
-
-  for (int alpha_id = 0; alpha_id < nTextures - 1; ++alpha_id)
-  {
-    if (alpha_id + 1 == texture_id)
-    {
-      set_alpha(alpha_id, offset, current_alpha + alpha_change);
-    }
-    else
-    {
-      float a = alphamaps[alpha_id]->getAlpha(offset);
-      set_alpha(alpha_id, offset, a - (a / sum_other_alphas) * alpha_change);
-    }
-  }
-
-  return true;
-}
-
-bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, uint strength, float pressure, scoped_blp_texture_reference texture)
+bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   bool changed = false;
 
-  float zPos, xPos, dist, radius;  
+  float zPos, xPos, dist, radius;
 
   int tex_layer = get_texture_index_or_add (std::move (texture), strength);
 
@@ -400,7 +387,12 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     return changed;
   }
 
-  //First Lets find out do we have the texture already
+  if (!tmp_edit_values)
+  {
+    create_temporary_alphamaps();
+  }
+
+  auto& amaps = tmp_edit_values.get();
 
   zPos = zbase;
 
@@ -409,11 +401,32 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     xPos = xbase;
     for (int i = 0; i < 64; ++i)
     {
-      dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);// -(hacky_blend ? TEXDETAILSIZE / 2.f : 0.f);
+      dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
       
       if (dist<=radius)
       {
-        changed |= change_texture(tex_layer, i + 64 * j, strength, pressure*brush->getValue(dist));
+        std::size_t offset = i + 64 * j;
+
+        float current_alpha = amaps[tex_layer][i + 64 * j];
+        float sum_other_alphas = 1.f - current_alpha;
+        float alpha_change = (strength - current_alpha)* pressure * brush->getValue(dist);
+
+        if (!misc::float_equals(current_alpha, strength))
+        {
+          for (int i = 0; i < nTextures; ++i)
+          {
+            if (i == tex_layer)
+            {
+              amaps[i][offset] += alpha_change;
+            }
+            else
+            {
+              amaps[i][offset] -= alpha_change * (amaps[i][offset] / sum_other_alphas);
+            }
+          }
+
+          changed = true;
+        }
       }
 
       xPos += TEXDETAILSIZE;
@@ -450,6 +463,8 @@ bool TextureSet::replace_texture( float xbase
   {
     return false;
   }
+
+  apply_alpha_changes();
 
   // if the chunk is fully inside the brush, just swap the 2 textures
   if (misc::square_is_in_circle(x, z, radius, xbase, zbase, CHUNKSIZE))
@@ -603,6 +618,8 @@ std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
 {
   std::vector<std::vector<uint8_t>> amaps;
 
+  apply_alpha_changes();
+
   if (nTextures > 1)
   {
     if (big_alphamap)
@@ -686,6 +703,7 @@ void TextureSet::convertToBigAlpha()
 
   uint8_t tab[4096 * 3];
 
+  apply_alpha_changes();
   alphas_to_big_alpha(tab);
 
   for (size_t k = 0; k < nTextures - 1; k++)
@@ -744,6 +762,7 @@ void TextureSet::convertToOldAlpha()
 
   uint8_t tab[3 * 4096];
 
+  apply_alpha_changes();
   alphas_to_old_alpha(tab);
 
   for (size_t k = 0; k < nTextures - 1; k++)
@@ -765,6 +784,8 @@ void TextureSet::merge_layers(size_t id1, size_t id2)
   {
     std::swap(id2, id1);
   }
+
+  apply_alpha_changes();
 
   // base alpha = 255 - sum_alpha(0..nTextures-1)
   // works only when alphamap are in the big alpha format (always the case when editing)
@@ -790,7 +811,7 @@ void TextureSet::merge_layers(size_t id1, size_t id2)
 
 bool TextureSet::removeDuplicate()
 {
-  bool changed = false;
+  bool changed = apply_alpha_changes();
 
   for (size_t i = 0; i < nTextures; i++)
   {
@@ -815,30 +836,50 @@ void TextureSet::bind_alpha(std::size_t id)
 
   if (_need_amap_update)
   {
-    std::vector<uint8_t> amap(3 * 64 * 64);
+    
 
     if (nTextures)
     {
-      uint8_t const* alpha_ptr[3];
-
-      for (int i = 0; i < nTextures - 1; ++i)
+      if (tmp_edit_values)
       {
-        alpha_ptr[i] = alphamaps[i]->getAlpha();
-      }
+        std::vector<float> amap(3 * 64 * 64);
+        auto& tmp_amaps = tmp_edit_values.get();
 
-      for (int i = 0; i < 64 * 64; ++i)
-      {
-        for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
+        for (int i = 0; i < 64 * 64; ++i)
         {
-          amap[i * 3 + alpha_id] = (alpha_id < nTextures - 1)
-                                 ? *(alpha_ptr[alpha_id]++)
-                                 : 0
-                                 ;
+          for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
+          {
+            amap[i * 3 + alpha_id] = tmp_amaps[alpha_id+1][i];
+          }
         }
+
+        gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_FLOAT, amap.data());
+      }
+      else
+      {
+        std::vector<uint8_t> amap(3 * 64 * 64);
+        uint8_t const* alpha_ptr[3];
+
+        for (int i = 0; i < nTextures - 1; ++i)
+        {
+          alpha_ptr[i] = alphamaps[i]->getAlpha();
+        }
+
+        for (int i = 0; i < 64 * 64; ++i)
+        {
+          for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
+          {
+            amap[i * 3 + alpha_id] = (alpha_id < nTextures - 1)
+                                   ? *(alpha_ptr[alpha_id]++)
+                                   : 0
+                                   ;
+          }
+        }
+
+        gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_UNSIGNED_BYTE, amap.data());
       }
     }
 
-    gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_UNSIGNED_BYTE, amap.data());
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -865,6 +906,9 @@ namespace
 
 std::vector<uint8_t> TextureSet::lod_texture_map()
 {
+  // make sure all changes have been applied
+  apply_alpha_changes();
+
   if (_need_lod_texture_map_update)
   {
     update_lod_texture_map();
@@ -913,3 +957,67 @@ uint8_t TextureSet::sum_alpha(size_t offset) const
   return sum;
 }
 
+namespace
+{
+  inline std::uint8_t float_alpha_to_uint8(float a)
+  {
+    return static_cast<std::uint8_t>(std::max(0.f, std::min(255.f, std::round(a))));
+  }
+}
+
+bool TextureSet::apply_alpha_changes()
+{
+  if (!tmp_edit_values || nTextures < 2)
+  {
+    tmp_edit_values = boost::none;
+    return false;
+  }
+
+  auto& new_amaps = tmp_edit_values.get();
+
+  for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
+  {
+    std::array<std::uint8_t, 64 * 64> values;
+
+    for (int i = 0; i < 64 * 64; ++i)
+    {
+      values[i] = float_alpha_to_uint8(new_amaps[alpha_layer + 1][i] * 255.f);
+    }
+
+    alphamaps[alpha_layer]->setAlpha(values.data());
+  }
+
+  _need_amap_update = true;
+  _need_lod_texture_map_update = true;
+
+  tmp_edit_values = boost::none;
+
+  return true;
+}
+
+void TextureSet::create_temporary_alphamaps()
+{
+  if (tmp_edit_values || nTextures < 2)
+  {
+    return;
+  }
+
+  tmp_edit_values.emplace();
+
+  tmp_edit_alpha_values& values = tmp_edit_values.get();
+
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    float base_alpha = 1.f;
+
+    for (int alpha_layer = 0; alpha_layer < nTextures-1; ++alpha_layer)
+    {
+      float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha(i)) / 255.f;
+
+      values[alpha_layer + 1][i] = f;
+      base_alpha -= f;
+    }
+
+    values[0][i] = base_alpha;
+  }
+}
