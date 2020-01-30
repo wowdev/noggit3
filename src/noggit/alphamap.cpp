@@ -32,6 +32,22 @@ Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool use_big_alphamaps, bool 
   }
 }
 
+namespace
+{
+  struct compressed_mcal_entry
+  {
+    enum mode_t
+    {
+      copy = 0,              // append value[0..count - 1]
+      fill = 1,              // append value[0] count times
+    };
+    uint8_t count : 7;
+    uint8_t mode : 1;
+
+    uint8_t value[];
+  };
+}
+
 void Alphamap::readCompressed(MPQFile *f)
 {
   // compressed
@@ -39,22 +55,35 @@ void Alphamap::readCompressed(MPQFile *f)
 
   for (std::size_t offset_output(0); offset_output < 4096;)
   {
-    bool const fill(*input & 0x80);
-    std::size_t const n(*input & 0x7F);
+    compressed_mcal_entry const* e = reinterpret_cast<compressed_mcal_entry const*>(input);
+
+    int count = e->count;
+
+    if (offset_output + count > 4096)
+    {
+      LogError << "Invalid MCAL, uncompressed size is greater than 4096" << std::endl;
+      count = 4096 - offset_output;
+    }
+
     ++input;
 
-    if (fill)
+    if (count == 0)
     {
-      memset(&amap[offset_output], *input, n);
+      continue;
+    }
+
+    if (e->mode == compressed_mcal_entry::fill)
+    {
+      memset(&amap[offset_output], e->value[0], count);
       ++input;
     }
     else
     {
-      memcpy(&amap[offset_output], input, n);
-      input += n;
+      memcpy(&amap[offset_output], e->value, count);
+      input += count;
     }
 
-    offset_output += n;
+    offset_output += count;
   }
 }
 
@@ -117,19 +146,6 @@ const unsigned char *Alphamap::getAlpha()
 
 std::vector<uint8_t> Alphamap::compress() const
 {
-  struct entry
-  {
-    enum mode_t
-    {
-      copy = 0,              // append value[0..count - 1]
-      fill = 1,              // append value[0] count times
-    };    
-    uint8_t count : 7;
-    uint8_t mode : 1;
-
-    uint8_t value[];
-  };
-
   std::vector<uint8_t> data(amap, amap+4096);
   auto current (data.begin());
   auto const end (data.end());
@@ -138,26 +154,26 @@ std::vector<uint8_t> Alphamap::compress() const
   auto const consume_fill
   ( 
     [&]
-  {
-    int8_t count (0);
-    column_pos %= 64;
-
-    while ((current + 1 < end) && *current == *(current + 1) && column_pos < 63)
     {
-      ++current;
-      ++count;
-      ++column_pos;
-    }
+      int8_t count (0);
+      column_pos %= 64;
 
-    // include current (current is incremented in the for loop)
-    if (count)
-    {
-      ++count;
-      ++column_pos;
-    }
+      while ((current + 1 < end) && *current == *(current + 1) && column_pos < 63)
+      {
+        ++current;
+        ++count;
+        ++column_pos;
+      }
 
-    return count;
-  }
+      // include current (current is incremented in the for loop)
+      if (count)
+      {
+        ++count;
+        ++column_pos;
+      }
+
+      return count;
+    }
   );
 
   std::vector<uint8_t> result;
@@ -165,9 +181,9 @@ std::vector<uint8_t> Alphamap::compress() const
   auto const current_copy_entry
   ( 
     [&]
-  {
-    return reinterpret_cast<entry*> (&*(result.begin() + *current_copy_entry_offset));
-  }
+    {
+      return reinterpret_cast<compressed_mcal_entry*> (&*(result.begin() + *current_copy_entry_offset));
+    }
   );
 
   for (; current != end; ++current)
@@ -180,8 +196,8 @@ std::vector<uint8_t> Alphamap::compress() const
       result.emplace_back();
       result.emplace_back(*current);
 
-      entry* e (reinterpret_cast<entry*> (&*(result.rbegin() + 1)));
-      e->mode = entry::fill;
+      compressed_mcal_entry* e (reinterpret_cast<compressed_mcal_entry*> (&*(result.rbegin() + 1)));
+      e->mode = compressed_mcal_entry::fill;
       e->count = fill;
 
       column_pos %= 64;
@@ -195,7 +211,7 @@ std::vector<uint8_t> Alphamap::compress() const
         current_copy_entry_offset = result.size();
         result.emplace_back();
         result.emplace_back(*current);
-        current_copy_entry()->mode = entry::copy;
+        current_copy_entry()->mode = compressed_mcal_entry::copy;
         current_copy_entry()->count = 1;
 
         column_pos %= 64;
