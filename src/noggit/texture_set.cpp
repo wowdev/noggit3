@@ -387,11 +387,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     return changed;
   }
 
-  if (!tmp_edit_values)
-  {
-    create_temporary_alphamaps();
-  }
-
+  create_temporary_alphamaps_if_needed();
   auto& amaps = tmp_edit_values.get();
 
   zPos = zbase;
@@ -464,8 +460,6 @@ bool TextureSet::replace_texture( float xbase
     return false;
   }
 
-  apply_alpha_changes();
-
   // if the chunk is fully inside the brush, just swap the 2 textures
   if (misc::square_is_in_circle(x, z, radius, xbase, zbase, CHUNKSIZE))
   {
@@ -504,6 +498,9 @@ bool TextureSet::replace_texture( float xbase
     return false;
   }
 
+  create_temporary_alphamaps_if_needed();
+  auto& amap = tmp_edit_values.get();
+
   for (int j = 0; j < 64; j++)
   {
     x_pos = xbase;
@@ -514,28 +511,10 @@ bool TextureSet::replace_texture( float xbase
 
       if (dist <= radius)
       {
-        if(old_tex_level == 0)
-        {
-          uint8_t base_alpha = 255.0f, new_tex_alpha = alphamaps[new_tex_level - 1]->getAlpha(alpha_offset);
-          for (int n = 0; n < nTextures - 1; ++n)
-          {
-            base_alpha -= alphamaps[n]->getAlpha(alpha_offset);
-          }
+        int offset = j * 64 + i;
 
-          alphamaps[new_tex_level - 1]->setAlpha(alpha_offset, base_alpha + new_tex_alpha);
-        }
-        else
-        {
-          if (new_tex_level != 0)
-          {
-            uint8_t old_tex_alpha = alphamaps[old_tex_level - 1]->getAlpha(alpha_offset);
-            uint8_t new_tex_alpha = alphamaps[new_tex_level - 1]->getAlpha(alpha_offset);
-
-            alphamaps[new_tex_level - 1]->setAlpha(alpha_offset, old_tex_alpha + new_tex_alpha);
-          }
-
-          alphamaps[old_tex_level - 1]->setAlpha(alpha_offset, 0);
-        }
+        amap[new_tex_level][offset] += amap[old_tex_level][offset];
+        amap[old_tex_level][offset] = 0.f;
 
         changed = true;
       }
@@ -836,8 +815,6 @@ void TextureSet::bind_alpha(std::size_t id)
 
   if (_need_amap_update)
   {
-    
-
     if (nTextures)
     {
       if (tmp_edit_values)
@@ -995,7 +972,7 @@ bool TextureSet::apply_alpha_changes()
   return true;
 }
 
-void TextureSet::create_temporary_alphamaps()
+void TextureSet::create_temporary_alphamaps_if_needed()
 {
   if (tmp_edit_values || nTextures < 2)
   {
