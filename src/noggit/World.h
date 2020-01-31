@@ -269,6 +269,8 @@ public:
   void deleteWMOInstance(int pUniqueID);
 
   void delete_duplicate_model_and_wmo_instances();
+  // used after the uid fix all
+  void unload_every_model_and_wmo_instance();
 
 	static bool IsEditableWorld(int pMapId);
 

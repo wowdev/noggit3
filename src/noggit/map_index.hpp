@@ -209,8 +209,15 @@ public:
     return _map_id == 530;
   }
 
+  bool uid_fix_all_in_progress() const
+  {
+    return _uid_fix_all_in_progress;
+  }
+
 private:
 	uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
+
+  bool _uid_fix_all_in_progress = false;
 
   const std::string basename;
 
