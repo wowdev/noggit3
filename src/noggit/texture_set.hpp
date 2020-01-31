@@ -101,5 +101,5 @@ private:
 
   boost::optional<tmp_edit_alpha_values> tmp_edit_values;
 
-  void create_temporary_alphamaps();
+  void create_temporary_alphamaps_if_needed();
 };
