@@ -60,9 +60,6 @@ public:
   bool is_animated(std::size_t id) const;
   void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
-  uint8_t getAlpha(size_t id, size_t offset);
-  const uint8_t *getAlpha(size_t id);
-
   std::vector<std::vector<uint8_t>> save_alpha(bool big_alphamap);
 
   void convertToBigAlpha();
