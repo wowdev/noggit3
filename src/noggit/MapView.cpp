@@ -1496,6 +1496,7 @@ MapView::~MapView()
 
   delete TexturePicker; // explicitly delete this here to avoid opengl context related crash
   delete objectEditor;
+  delete texturingTool;
 
   if (_force_uid_check)
   {
