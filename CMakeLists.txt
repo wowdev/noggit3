@@ -483,7 +483,6 @@ add_custom_command(
     COMMAND "${CMAKE_COMMAND}"
               -Dcmake_src_dir="${CMAKE_SOURCE_DIR}"
               -Dout_dir="${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}"
-              -DCMAKE_FILES_DIRECTORY="${CMAKE_FILES_DIRECTORY}"
               -P "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake"
               
     DEPENDS "${force_update_file}"
