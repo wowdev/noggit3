@@ -842,6 +842,8 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     }
   }
 
+  models.clear();
+
   for (WMOInstance& instance : wmos)
   {
     instance.mUniqueID = highestGUID++;
@@ -862,6 +864,8 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       }
     }
   }
+
+  wmos.clear();
 
   if (cancel_on_model_loading_error && loading_error)
   {
