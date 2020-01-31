@@ -189,8 +189,6 @@ ENDIF()
 
 includePlattform("postfind")
 
-# Find revision ID and hash of the sourcetree
-include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
@@ -443,6 +441,10 @@ source_group("glsl"  FILES ${shaders})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
+# file used to force running the pre_build command by making it a "dependency" for the project
+set(force_update_file "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/force_build_update.cpp")
+set_source_files_properties(${force_update_file} PROPERTIES GENERATED TRUE)
+
 ADD_EXECUTABLE ( noggit
                   WIN32
                   MACOSX_BUNDLE
@@ -465,7 +467,37 @@ ADD_EXECUTABLE ( noggit
                   ${moced}
                   ${compiled_resource_files}
                   ${shaders}
+                  ${force_update_file}
                 )
+                
+           
+# Version ID update:
+           
+set(force_update_cmake "${CMAKE_SOURCE_DIR}/cmake/force_update.cmake")
+file(TOUCH "${force_update_file}")
+
+# update the version when it has changed
+add_custom_command(
+    PRE_BUILD
+    TARGET noggit
+    COMMAND "${CMAKE_COMMAND}"
+              -Dcmake_src_dir="${CMAKE_SOURCE_DIR}"
+              -Dout_dir="${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}"
+              -DCMAKE_FILES_DIRECTORY="${CMAKE_FILES_DIRECTORY}"
+              -P "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake"
+              
+    DEPENDS "${force_update_file}"
+  )
+  
+# execute the script that update dependency file to run the previous command again before the next build
+add_custom_command(
+    POST_BUILD
+    TARGET noggit
+    COMMAND "${CMAKE_COMMAND}" 
+              -Dforce_update_file="${force_update_file}" 
+              -P ${force_update_cmake}
+  )
+
 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}

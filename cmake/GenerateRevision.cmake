@@ -18,21 +18,21 @@ set (hg_rev_hash "0")
 set (hg_rev_id_str "0")
 set (hg_rev_id "0")
 
-if (HG_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.hg")
+if (HG_FOUND AND EXISTS "${cmake_src_dir}/.hg")
   execute_process (COMMAND "${HG_EXECUTABLE}" id -n
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${cmake_src_dir}"
     OUTPUT_VARIABLE hg_rev_id_str
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
   )
   execute_process (COMMAND "${HG_EXECUTABLE}" id -i
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${cmake_src_dir}"
     OUTPUT_VARIABLE hg_rev_hash_str
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
   )
-elseif (EXISTS "${CMAKE_SOURCE_DIR}/.hg_archival.txt")
-  file (READ "${CMAKE_SOURCE_DIR}/.hg_archival.txt" hg_rev_hash_str
+elseif (EXISTS "${cmake_src_dir}/.hg_archival.txt")
+  file (READ "${cmake_src_dir}/.hg_archival.txt" hg_rev_hash_str
     LIMIT 10
     OFFSET 7
     NEWLINE_CONSUME
@@ -41,25 +41,25 @@ elseif (EXISTS "${CMAKE_SOURCE_DIR}/.hg_archival.txt")
   set (hg_rev_id_str "Archive")
   set (hg_rev_id "0")
   set (hg_rev_hash ${hg_rev_hash_str})
-elseif (GIT_FOUND AND HG_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/hg")
-  execute_process (COMMAND "${HG_EXECUTABLE}" -R "${CMAKE_SOURCE_DIR}/.git/hg" tags
+elseif (GIT_FOUND AND HG_FOUND AND EXISTS "${cmake_src_dir}/.git/hg")
+  execute_process (COMMAND "${HG_EXECUTABLE}" -R "${cmake_src_dir}/.git/hg" tags
                    COMMAND grep ^tip
                    COMMAND sed -e s,tip[[:space:]]*,, -e s,:.*,,
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${cmake_src_dir}"
     OUTPUT_VARIABLE hg_rev_id_str
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
   )
-  execute_process (COMMAND "${HG_EXECUTABLE}" -R "${CMAKE_SOURCE_DIR}/.git/hg" tags
+  execute_process (COMMAND "${HG_EXECUTABLE}" -R "${cmake_src_dir}/.git/hg" tags
                    COMMAND grep ^tip
                    COMMAND sed -e s,tip[[:space:]]*,, -e s,.*:,,
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${cmake_src_dir}"
     OUTPUT_VARIABLE hg_rev_hash_str
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
   )
   execute_process (COMMAND "${GIT_EXECUTABLE}" diff --name-only
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY "${cmake_src_dir}"
     OUTPUT_VARIABLE git_diff_files
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
@@ -77,7 +77,17 @@ if (NOT hg_rev_id_str)
   endif()
 endif()
 
-configure_file ("${CMAKE_SOURCE_DIR}/cmake/revision.h.in.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp/revision.h"
-  @ONLY
-)
+# load the previous version str
+set(previous_rev_file "${out_dir}/tmp/previous_rev")
+file(TOUCH ${previous_rev_file})
+file(READ ${previous_rev_file} previous_hg_rev)
+
+if(NOT "${hg_rev_id_str}" STREQUAL "${previous_hg_rev}")
+  configure_file ("${cmake_src_dir}/cmake/revision.h.in.cmake"
+    "${out_dir}/tmp/revision.h"
+    @ONLY
+  )
+  
+  #update the stored version
+  file(WRITE ${previous_rev_file} "${hg_rev_id_str}")
+endif()
