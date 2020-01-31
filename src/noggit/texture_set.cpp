@@ -583,16 +583,6 @@ void TextureSet::change_texture_flag(scoped_blp_texture_reference const& tex, st
   }
 }
 
-uint8_t TextureSet::getAlpha(size_t id, size_t offset)
-{
-  return alphamaps[id]->getAlpha(offset);
-}
-
-const uint8_t *TextureSet::getAlpha(size_t id)
-{
-  return alphamaps[id]->getAlpha();
-}
-
 std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
 {
   std::vector<std::vector<uint8_t>> amaps;
