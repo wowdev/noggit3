@@ -2068,6 +2068,12 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
     }
   }
 
+  // deselect the terrain when an adt is unloaded
+  if (_current_selection.size() == 1 && _current_selection.at(0).which() == eEntry_MapChunk)
+  {
+    reset_selection();
+  }
+
   update_models_by_filename();
 }
 
