@@ -1834,6 +1834,16 @@ void World::delete_duplicate_model_and_wmo_instances()
   Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
 }
 
+void World::unload_every_model_and_wmo_instance()
+{
+  reset_selection();
+
+  mWMOInstances.clear();
+  mModelInstances.clear();
+
+  update_models_by_filename();
+}
+
 void World::warning_if_uid_in_use(uint32_t uid)
 {
   if(mModelInstances.find(uid) != mModelInstances.end() || mWMOInstances.find(uid) != mWMOInstances.end())
@@ -2037,6 +2047,14 @@ boost::optional<selection_type> World::get_model(std::uint32_t uid)
 
 void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 {
+  // todo: manage instances properly
+  // don't unload anything during the uid fix all,
+  // otherwise models spanning several adts will be unloaded too soon
+  if (mapIndex.uid_fix_all_in_progress())
+  {
+    return;
+  }
+
   for (uint32_t uid : uids)
   {
     bool remove = true;

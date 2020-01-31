@@ -624,6 +624,8 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     }
   }
 
+  _uid_fix_all_in_progress = true;
+
   std::forward_list<ModelInstance> models;
   std::forward_list<WMOInstance> wmos;
 
@@ -900,6 +902,11 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
   // override the db highest uid if used
   saveMaxUID();
+
+  _uid_fix_all_in_progress = false;
+
+  // force instances unloading
+  world->unload_every_model_and_wmo_instance();
 
   return loading_error ? uid_fix_status::done_with_errors : uid_fix_status::done;
 }
