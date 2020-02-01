@@ -1,6 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-
 #include <noggit/World.h>
 
 #include <math/frustum.hpp>
@@ -89,7 +88,8 @@ bool World::IsEditableWorld(int pMapId)
 }
 
 World::World(const std::string& name, int map_id)
-  : mapIndex (name, map_id, this)
+  : _model_instance_storage(this)
+  , mapIndex (name, map_id, this)
   , horizon(name)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
@@ -257,11 +257,37 @@ void World::remove_from_selection(selection_type entry)
   }
 }
 
+void World::remove_from_selection(std::uint32_t uid)
+{
+  for (auto& it = _current_selection.begin(); it != _current_selection.end(); ++it)
+  {
+    if (it->which() == eEntry_Model && boost::get<selected_model_type>(*it)->uid == uid)
+    {
+      _current_selection.erase(it);
+      update_selection_pivot();
+      return;
+    }
+    else if (it->which() == eEntry_WMO && boost::get<selected_wmo_type>(*it)->mUniqueID == uid)
+    {
+      _current_selection.erase(it);
+      update_selection_pivot();
+      return;
+    }
+  }
+}
+
 void World::reset_selection()
 {
   _current_selection.clear();
   _multi_select_pivot = boost::none;
   _selected_model_count = 0;
+}
+
+void World::delete_selected_models()
+{
+  _model_instance_storage.delete_instances(_current_selection);
+  need_model_updates = true;
+  reset_selection();
 }
 
 void World::snap_selected_models_to_the_ground()
@@ -597,9 +623,8 @@ void World::initDisplay()
   if (mapIndex.hasAGlobalWMO())
   {
     WMOInstance inst(mWmoFilename, &mWmoEntry);
-    //! \todo is this used? does it even make _any_ sense to set the camera position to the center of a wmo?
-    // camera = inst.pos;
-    mWMOInstances.emplace(mWmoEntry.uniqueID, std::move(inst));
+
+    _model_instance_storage.add_wmo_instance(std::move(inst));
   }
   else
   {
@@ -773,33 +798,33 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (draw_wmo || mapIndex.hasAGlobalWMO())
     {
-      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-      {
-        if (!it->second.wmo->finishedLoading() || !it->second.wmo->skybox)
+      _model_instance_storage.for_each_wmo_instance
+      (
+        [&] (WMOInstance& wmo)
         {
-          continue;
-        }
-        if (it->second.group_extents.empty())
-        {
-          it->second.recalcExtents();
-        }
+          if (wmo.wmo->finishedLoading() && wmo.wmo->skybox)
+          {
+            if (wmo.group_extents.empty())
+            {
+              wmo.recalcExtents();
+            }
 
-        hadSky = it->second.wmo->draw_skybox ( model_view
-                                             , camera_pos
-                                             , m2_shader
-                                             , frustum
-                                             , culldistance
-                                             , animtime
-                                             , draw_model_animations
-                                             , it->second.extents[0]
-                                             , it->second.extents[1]
-                                             , it->second.group_extents
-                                             );
-        if (hadSky)
-        {
-          break;
+            hadSky = wmo.wmo->draw_skybox( model_view
+                                         , camera_pos
+                                         , m2_shader
+                                         , frustum
+                                         , culldistance
+                                         , animtime
+                                         , draw_model_animations
+                                         , wmo.extents[0]
+                                         , wmo.extents[1]
+                                         , wmo.group_extents
+                                         );
+          }
+        
         }
-      }
+        , [&] () { return hadSky; }
+      );
     }
 
     if (!hadSky)
@@ -970,13 +995,13 @@ void World::draw ( math::matrix_4x4 const& model_view
   bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
   if (draw_doodads_wmo)
   {
-    for (auto& wmo : mWMOInstances)
+    _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
     {
-      for (auto& doodad : wmo.second.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models, display))
+      for (auto& doodad : wmo.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models, display))
       {
         _wmo_doodads[doodad->model->filename].push_back(doodad);
       }
-    }
+    });
   }
 
   std::unordered_map<Model*, std::size_t> model_with_particles;
@@ -1147,28 +1172,28 @@ void World::draw ( math::matrix_4x4 const& model_view
       wmo_program.uniform("exterior_diffuse_color", diffuse_color);
       wmo_program.uniform("exterior_ambient_color", ambient_color);
 
-      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+      _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
       {
-        bool is_hidden = it->second.wmo->is_hidden();
+        bool is_hidden = wmo.wmo->is_hidden();
         if (draw_hidden_models || !is_hidden)
         {
-          it->second.draw( wmo_program
-                         , model_view
-                         , projection
-                         , frustum
-                         , culldistance
-                         , camera_pos
-                         , is_hidden
-                         , draw_wmo_doodads
-                         , draw_fog
-                         , _liquid_render.get()
-                         , current_selection()
-                         , animtime
-                         , skies->hasSkies()
-                         , display
-          );
+          wmo.draw( wmo_program
+                  , model_view
+                  , projection
+                  , frustum
+                  , culldistance
+                  , camera_pos
+                  , is_hidden
+                  , draw_wmo_doodads
+                  , draw_fog
+                  , _liquid_render.get()
+                  , current_selection()
+                  , animtime
+                  , skies->hasSkies()
+                  , display
+                  );
         }
-      }
+      });
 
       gl.enable(GL_BLEND);
       gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1330,24 +1355,24 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
   {
     if (draw_models)
     {
-      for (auto&& model_instance : mModelInstances)
+      _model_instance_storage.for_each_m2_instance([&] (ModelInstance& model_instance)
       {
-        if (draw_hidden_models || ! model_instance.second.model->is_hidden())
+        if (draw_hidden_models || !model_instance.model->is_hidden())
         {
-          model_instance.second.intersect (model_view, ray, &results, animtime);
+          model_instance.intersect(model_view, ray, &results, animtime);
         }
-      }
+      });
     }
 
     if (draw_wmo)
     {
-      for (auto&& wmo_instance : mWMOInstances)
+      _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo_instance)
       {
-        if (draw_hidden_models || ! wmo_instance.second.wmo->is_hidden())
+        if (draw_hidden_models || !wmo_instance.wmo->is_hidden())
         {
-          wmo_instance.second.intersect (ray, &results);
+          wmo_instance.intersect(ray, &results);
         }
-      }
+      });
     }
   }
 
@@ -1381,33 +1406,7 @@ void World::clearHeight(math::vector_3d const& pos)
 
 void World::clearAllModelsOnADT(tile_index const& tile)
 {
-  std::vector<int> wmo_to_delete, m2_to_delete;
-
-  for (auto it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-  {
-    if (tile_index(it->second.pos) == tile)
-    {
-      wmo_to_delete.push_back(it->second.mUniqueID);
-    }
-  }
-
-  for (auto it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
-  {
-    if (tile_index(it->second.pos) == tile)
-    {
-      m2_to_delete.push_back(it->second.uid);
-    }
-  }
-
-  for (int uid : wmo_to_delete)
-  {
-    deleteWMOInstance(uid);
-  }
-  for (int uid : m2_to_delete)
-  {
-    deleteModelInstance(uid);
-  }
-
+  _model_instance_storage.delete_instances_from_tile(tile);
   update_models_by_filename();
 }
 
@@ -1747,108 +1746,39 @@ void World::saveMap (int, int)
 
 void World::deleteModelInstance(int pUniqueID)
 {
-  std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
+  auto instance = _model_instance_storage.get_model_instance(pUniqueID);
 
-  if (it == mModelInstances.end())
+  if (instance)
   {
-    return;
+    remove_from_selection(instance.get());
   }
-
-  remove_from_selection(&it->second);
-
-  updateTilesModel(&it->second, model_update::remove);
-  mModelInstances.erase(it);
 }
 
 void World::deleteWMOInstance(int pUniqueID)
 {
-  std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
+  auto instance = _model_instance_storage.get_wmo_instance(pUniqueID);
 
-  if (it == mWMOInstances.end())
+  if (instance)
   {
-    return;
+    remove_from_selection(instance.get());
   }
-
-  remove_from_selection(&it->second);
-
-  updateTilesWMO(&it->second, model_update::remove);
-  mWMOInstances.erase(it);
 }
 
 void World::delete_duplicate_model_and_wmo_instances()
 {
-  std::unordered_set<int> wmos_to_remove;
-  std::unordered_set<int> models_to_remove;
+  reset_selection();
 
-  for (auto lhs(mWMOInstances.begin()); lhs != mWMOInstances.end(); ++lhs)
-  {
-    for (auto rhs(std::next(lhs)); rhs != mWMOInstances.end(); ++rhs)
-    {
-      assert(lhs->first != rhs->first);
-
-      if ( misc::vec3d_equals(lhs->second.pos, rhs->second.pos)
-        && misc::vec3d_equals(lhs->second.dir, rhs->second.dir)
-        && lhs->second.wmo->filename == rhs->second.wmo->filename
-         )
-      {
-        wmos_to_remove.emplace(rhs->second.mUniqueID);
-      }
-    }
-  }
-
-  for (auto lhs(mModelInstances.begin()); lhs != mModelInstances.end(); ++lhs)
-  {
-    for (auto rhs(std::next(lhs)); rhs != mModelInstances.end(); ++rhs)
-    {
-      assert(lhs->first != rhs->first);
-
-      if ( misc::vec3d_equals(lhs->second.pos, rhs->second.pos)
-        && misc::vec3d_equals(lhs->second.dir, rhs->second.dir)
-        && lhs->second.scale == rhs->second.scale
-        && lhs->second.model->filename == rhs->second.model->filename
-        )
-      {
-        models_to_remove.emplace(rhs->second.uid);
-      }
-    }
-  }
-
-  for (int uid : wmos_to_remove)
-  {
-    deleteWMOInstance(uid);
-  }
-  for (int uid : models_to_remove)
-  {
-    deleteModelInstance(uid);
-  }
-
-  update_models_by_filename();
-
-  Log << "Deleted " << wmos_to_remove.size() << " duplicate WMOs" << std::endl;
-  Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
+  _model_instance_storage.clear_duplicates();
+  need_model_updates = true;
 }
 
 void World::unload_every_model_and_wmo_instance()
 {
   reset_selection();
 
-  mWMOInstances.clear();
-  mModelInstances.clear();
+  _model_instance_storage.clear();
 
-  update_models_by_filename();
-}
-
-void World::warning_if_uid_in_use(uint32_t uid)
-{
-  if(mModelInstances.find(uid) != mModelInstances.end() || mWMOInstances.find(uid) != mWMOInstances.end())
-  {
-    QMessageBox::critical( nullptr
-                         , "UID ALREADY IN USE"
-                         , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
-                           "uid.ini file if you're sharing the map between several mappers.\n"
-                           "Use 'Editor > Force uid check on next opening' to fix the issue."
-                         );
-  }
+  _models_by_filename.clear();
 }
 
 void World::addM2 ( std::string const& filename
@@ -1858,43 +1788,44 @@ void World::addM2 ( std::string const& filename
                   , noggit::object_paste_params* paste_params
                   )
 {
-  ModelInstance newModelis = ModelInstance(filename);
+  ModelInstance model_instance = ModelInstance(filename);
 
-  newModelis.uid = mapIndex.newGUID();
-  newModelis.pos = newPos;
-  newModelis.scale = scale;
-  newModelis.dir = rotation;
+  model_instance.uid = mapIndex.newGUID();
+  model_instance.pos = newPos;
+  model_instance.scale = scale;
+  model_instance.dir = rotation;
 
   if (_settings->value("model/random_rotation", false).toBool())
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
-    newModelis.dir.y += misc::randfloat(min, max);
+    model_instance.dir.y += misc::randfloat(min, max);
   }
 
   if (_settings->value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
-    newModelis.dir.x += misc::randfloat(min, max);
-    newModelis.dir.z += misc::randfloat(min, max);
+    model_instance.dir.x += misc::randfloat(min, max);
+    model_instance.dir.z += misc::randfloat(min, max);
   }
 
   if (_settings->value ("model/random_size", false).toBool ())
   {
     float min = paste_params->minScale;
     float max = paste_params->maxScale;
-    newModelis.scale = misc::randfloat(min, max);
+    model_instance.scale = misc::randfloat(min, max);
   }
 
   // to ensure the tiles are updated correctly
-  AsyncLoader::instance().ensure_loaded(newModelis.model.get());
-  newModelis.recalcExtents();
-  updateTilesModel(&newModelis, model_update::add);
+  AsyncLoader::instance().ensure_loaded(model_instance.model.get());
 
-  warning_if_uid_in_use(newModelis.uid);
+  model_instance.recalcExtents();
+  model_instance.uid = _model_instance_storage.add_model_instance(model_instance);
 
-  _models_by_filename[filename].push_back(&(mModelInstances.emplace(newModelis.uid, newModelis).first->second));
+  updateTilesModel(&model_instance, model_update::add);
+
+  _models_by_filename[filename].push_back(_model_instance_storage.get_model_instance(model_instance.uid).get());
 }
 
 void World::addWMO ( std::string const& filename
@@ -1902,135 +1833,35 @@ void World::addWMO ( std::string const& filename
                    , math::vector_3d rotation
                    )
 {
-  WMOInstance newWMOis(filename);
+  WMOInstance wmo_instance(filename);
 
-  newWMOis.mUniqueID = mapIndex.newGUID();
-  newWMOis.pos = newPos;
-  newWMOis.dir = rotation;
+  wmo_instance.mUniqueID = mapIndex.newGUID();
+  wmo_instance.pos = newPos;
+  wmo_instance.dir = rotation;
 
   // to ensure the tiles are updated correctly
-  AsyncLoader::instance().ensure_loaded(newWMOis.wmo.get());
+  AsyncLoader::instance().ensure_loaded(wmo_instance.wmo.get());
 
   // recalc the extends
-  newWMOis.recalcExtents();
-  updateTilesWMO(&newWMOis, model_update::add);
+  wmo_instance.recalcExtents();
+  wmo_instance.mUniqueID = _model_instance_storage.add_wmo_instance(wmo_instance);
 
-  warning_if_uid_in_use(newWMOis.mUniqueID);
-
-  mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
+  updateTilesWMO(&wmo_instance, model_update::add);
 }
 
 std::uint32_t World::add_model_instance(ModelInstance model_instance)
 {
-  if (auto check = get_model(model_instance.uid))
-  {
-    // a wmo has this id already, generate a new uid
-    if (check.get().which() == eEntry_WMO)
-    {
-      model_instance.uid = mapIndex.newGUID();
-      updateTilesModel(&model_instance, model_update::add);
-
-      return add_model_instance (std::move (model_instance));
-    }
-    else
-    {
-      ModelInstance* possible_duplicate = boost::get<selected_model_type>(check.get());
-
-      // check if it's not a duplicate/already loaded model
-      if( model_instance.model->filename == possible_duplicate->model->filename
-       && misc::vec3d_equals(model_instance.pos, possible_duplicate->pos)
-       && misc::vec3d_equals(model_instance.dir, possible_duplicate->dir)
-       && misc::float_equals(model_instance.scale, possible_duplicate->scale)
-        )
-      {
-        return model_instance.uid;
-      }
-      else
-      {
-        QMessageBox::critical( nullptr
-                             , "UID ALREADY IN USE"
-                             , "Save, use 'Editor > Force uid check on next opening', reload the map\n"
-                               "and use 'fix all uids' to fix any other similar issue.\n\n"
-                               "Please enable 'Always check for max UID', mysql uid store or synchronize your "
-                               "uid.ini file if you're sharing the map between several mappers.\n"
-                             );
-
-        model_instance.uid = mapIndex.newGUID();
-        updateTilesModel(&model_instance, model_update::add);
-
-        return add_model_instance (std::move (model_instance));
-      }
-    }
-  }
-  else
-  {
-    mModelInstances.emplace(model_instance.uid, model_instance);
-    return model_instance.uid;
-  }
+  return _model_instance_storage.add_model_instance(model_instance);
 }
 
 std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance)
 {
-  if (auto check = get_model(wmo_instance.mUniqueID))
-  {
-    // a model has this id already, generate a new uid
-    if (check.get().which() == eEntry_Model)
-    {
-      wmo_instance.mUniqueID = mapIndex.newGUID();
-      updateTilesWMO(&wmo_instance, model_update::add);
-
-      return add_wmo_instance (std::move (wmo_instance));
-    }
-    else
-    {
-      WMOInstance* possible_duplicate = boost::get<selected_wmo_type>(check.get());
-
-      // check if it's not a duplicate/already loaded model
-      if( wmo_instance.wmo->filename == possible_duplicate->wmo->filename
-       && misc::vec3d_equals(wmo_instance.pos, possible_duplicate->pos)
-       && misc::vec3d_equals(wmo_instance.dir, possible_duplicate->dir)
-        )
-      {
-        return wmo_instance.mUniqueID;
-      }
-      else
-      {
-        QMessageBox::critical( nullptr
-                             , "UID ALREADY IN USE"
-                             , "Save, use 'Editor > Force uid check on next opening', reload the map\n"
-                               "and use 'fix all uids' to fix any other similar issue.\n\n"
-                               "Please enable 'Always check for max UID', mysql uid store or synchronize your "
-                               "uid.ini file if you're sharing the map between several mappers.\n"
-                             );
-
-        wmo_instance.mUniqueID = mapIndex.newGUID();
-        updateTilesWMO(&wmo_instance, model_update::add);
-
-        return add_wmo_instance (std::move (wmo_instance));
-      }
-    }
-  }
-  else
-  {
-    mWMOInstances.emplace(wmo_instance.mUniqueID, wmo_instance);
-    return wmo_instance.mUniqueID;
-  }
+  return _model_instance_storage.add_wmo_instance(wmo_instance);
 }
 
 boost::optional<selection_type> World::get_model(std::uint32_t uid)
 {
-  if (mWMOInstances.find(uid) != mWMOInstances.end())
-  {
-    return selection_type {&mWMOInstances.at(uid)};
-  }
-  else if (mModelInstances.find(uid) != mModelInstances.end())
-  {
-    return selection_type {&mModelInstances.at(uid)};
-  }
-  else
-  {
-    return boost::none;
-  }
+  return _model_instance_storage.get_instance(uid);
 }
 
 void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
@@ -2045,33 +1876,8 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 
   for (uint32_t uid : uids)
   {
-    bool remove = true;
-
-    for (MapTile* tile : mapIndex.loaded_tiles())
-    {
-      if (tile->has_model(uid))
-      {
-        remove = false;
-        break;
-      }
-    }
-
-    if (remove)
-    {
-      if (is_selected(uid))
-      {
-        reset_selection();
-      }
-
-      if (mModelInstances.find(uid) != mModelInstances.end())
-      {
-        mModelInstances.erase(uid);
-      }
-      else
-      {
-        mWMOInstances.erase(uid);
-      }
-    }
+    // it handles the removal from the selection if necessary
+    _model_instance_storage.unload_instance_and_remove_from_selection_if_necessary(uid);
   }
 
   // deselect the terrain when an adt is unloaded
@@ -2103,6 +1909,7 @@ void World::updateTilesEntry(selection_type const& entry, model_update type)
 
 void World::updateTilesWMO(WMOInstance* wmo, model_update type)
 {
+  std::unique_lock<std::mutex> const lock (_mutex);
   tile_index start(wmo->extents[0]), end(wmo->extents[1]);
   for (int z = start.z; z <= end.z; ++z)
   {
@@ -2115,6 +1922,8 @@ void World::updateTilesWMO(WMOInstance* wmo, model_update type)
 
 void World::updateTilesModel(ModelInstance* m2, model_update type)
 {
+  std::unique_lock<std::mutex> const lock (_mutex);
+
   auto const& extents(m2->extents());
   tile_index start(extents[0]), end(extents[1]);
 
@@ -2459,12 +2268,12 @@ void World::update_models_by_filename()
 {
   _models_by_filename.clear();
 
-  for (auto& it : mModelInstances)
+  _model_instance_storage.for_each_m2_instance([&] (ModelInstance& model_instance)
   {
-    _models_by_filename[it.second.model->filename].push_back(&it.second);
+    _models_by_filename[model_instance.model->filename].push_back(&model_instance);
     // to make sure the transform matrix are up to date
-    it.second.recalcExtents();
-  }
+    model_instance.recalcExtents();
+  });
 
   need_model_updates = false;
 }

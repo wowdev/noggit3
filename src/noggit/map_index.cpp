@@ -588,6 +588,8 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 
 uint32_t MapIndex::newGUID()
 {
+  std::unique_lock<std::mutex> lock (_mutex);
+
 #ifdef USE_MYSQL_UID_STORAGE
   QSettings settings;
 

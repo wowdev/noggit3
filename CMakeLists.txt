@@ -228,6 +228,7 @@ set ( noggit_root_sources
       src/noggit/texture_set.cpp
       src/noggit/uid_storage.cpp
       src/noggit/wmo_liquid.cpp
+      src/noggit/world_model_instances_storage.cpp
     )
 
 set ( noggit_ui_sources
@@ -320,6 +321,7 @@ set ( noggit_root_headers
       src/noggit/tool_enums.hpp
       src/noggit/uid_storage.hpp
       src/noggit/wmo_liquid.hpp
+      src/noggit/world_model_instances_storage.hpp
     )
 
 set ( noggit_ui_headers

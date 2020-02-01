@@ -34,6 +34,14 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
   }
 }
 
+bool ModelInstance::is_a_duplicate_of(ModelInstance const& other)
+{
+  return model->filename == other.model->filename
+      && misc::vec3d_equals(pos, other.pos)
+      && misc::vec3d_equals(dir, other.dir)
+      && misc::float_equals(scale, other.scale);
+}
+
 void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
                              , math::matrix_4x4 const& projection
                              , bool is_current_selection
