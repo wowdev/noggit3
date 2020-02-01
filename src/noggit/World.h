@@ -14,6 +14,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/world_model_instances_storage.hpp>
 #include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
 
@@ -22,6 +23,7 @@
 #include <QtCore/QSettings>
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -50,11 +52,7 @@ class World
 {
 private:
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
-
-  //! \todo  Get these managed? ._.
-  std::map<int, ModelInstance> mModelInstances;
-  std::map<int, WMOInstance> mWMOInstances;
-
+  noggit::world_model_instances_storage _model_instance_storage;
 public:
   MapIndex mapIndex;
   noggit::map_horizon horizon;
@@ -167,7 +165,9 @@ public:
   void set_current_selection(selection_type entry);
   void add_to_selection(selection_type entry);
   void remove_from_selection(selection_type entry);
+  void remove_from_selection(std::uint32_t uid);
   void reset_selection();
+  void delete_selected_models();
 
   enum class m2_scaling_type
   {
@@ -321,7 +321,6 @@ public:
   bool need_model_updates = false;
 
 private:
-  void warning_if_uid_in_use(uint32_t uid);
   void update_models_by_filename();
 
   std::set<MapChunk*>& vertexBorderChunks();
@@ -356,4 +355,6 @@ private:
   opengl::primitives::square _square_render;
 
   boost::optional<liquid_render> _liquid_render = boost::none;
+
+  std::mutex _mutex;
 };

@@ -37,6 +37,13 @@ WMOInstance::WMOInstance(std::string const& filename)
   change_doodadset(_doodadset);
 }
 
+bool WMOInstance::is_a_duplicate_of(WMOInstance const& other)
+{
+  return wmo->filename == other.wmo->filename
+      && misc::vec3d_equals(pos, other.pos)
+      && misc::vec3d_equals(dir, other.dir);
+}
+
 void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                        , math::matrix_4x4 const& model_view
                        , math::matrix_4x4 const& projection

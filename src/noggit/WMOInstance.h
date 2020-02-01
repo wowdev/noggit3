@@ -91,6 +91,8 @@ public:
       return this->mUniqueID == other.mUniqueID;
   }*/
 
+  bool is_a_duplicate_of(WMOInstance const& other);
+
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection

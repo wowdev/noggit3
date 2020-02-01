@@ -161,19 +161,7 @@ void MapView::DeleteSelectedObject()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  for (auto& selection : _world->current_selection())
-  {
-    if (_world->is_selection(eEntry_WMO, selection))
-    {
-      _world->deleteWMOInstance(boost::get<selected_wmo_type>(selection)->mUniqueID);
-    }
-    else if (_world->is_selection(eEntry_Model, selection))
-    {
-      _world->deleteModelInstance(boost::get<selected_model_type>(selection)->uid);
-      _world->need_model_updates = true;
-    }
-  }
-
+  _world->delete_selected_models();
   _rotation_editor_need_update = true;
 }
 

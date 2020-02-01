@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <ctime>
 #include <fstream>
+#include <mutex>
 #include <sstream>
 #include <string>
 
@@ -250,4 +251,6 @@ private:
 
   //! \todo REMOVE!
   World* _world;
+
+  std::mutex _mutex;
 };
