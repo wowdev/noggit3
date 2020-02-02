@@ -141,6 +141,7 @@ namespace opengl
       {
         gl.getIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, reinterpret_cast<GLint*> (&_old));
         gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffer);
+        _binded = true;
       }
 
       ~index_buffer_manual_binder()
