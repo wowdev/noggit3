@@ -669,11 +669,71 @@ void World::draw ( math::matrix_4x4 const& model_view
           , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
           }
       );
-
+  }
+  if (!_m2_instanced_program)
+  {
     _m2_instanced_program.reset
       ( new opengl::program
           { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
           , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+          }
+      );
+  }
+  if (!_m2_box_program)
+  {
+    _m2_box_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
+          }
+      );
+  }
+  if (!_m2_ribbons_program)
+  {
+    _m2_ribbons_program.reset
+      ( new opengl::program
+        { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
+        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
+        }
+      );
+  }
+  if (!_m2_particles_program)
+  {
+    _m2_particles_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
+          }
+      );
+  }
+  if (!_mcnk_program)
+  {
+    _mcnk_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("terrain_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("terrain_fs") }
+          }
+      );
+  }
+  if (!_mfbo_program)
+  {
+    _mfbo_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("mfbo_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("mfbo_fs") }
+          }
+      );
+  }
+  if (!_liquid_render)
+  {
+    _liquid_render.emplace();
+  }
+  if (!_wmo_program)
+  {
+    _wmo_program.reset
+      ( new opengl::program
+          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
           }
       );
   }
@@ -773,16 +833,6 @@ void World::draw ( math::matrix_4x4 const& model_view
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
-    if (!_mcnk_program)
-    {
-      _mcnk_program.reset
-        ( new opengl::program
-            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("terrain_vs") }
-            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("terrain_fs") }
-            }
-        );
-    }
-
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
     mcnk_shader.uniform("model_view", model_view);
@@ -1012,16 +1062,6 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
-      if (!_m2_box_program)
-      {
-        _m2_box_program.reset
-          ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
-              , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
-              }
-          );
-      }
-
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
       m2_box_shader.uniform ("model_view", model_view);
@@ -1058,13 +1098,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
-
-
-
-  if (!_liquid_render)
-  {
-    _liquid_render.emplace();
-  }
   // set anim time only once per frame
   {
     opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
@@ -1093,16 +1126,6 @@ void World::draw ( math::matrix_4x4 const& model_view
   if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
     {
-      if (!_wmo_program)
-      {
-        _wmo_program.reset
-          ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
-              , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
-              }
-          );
-      }
-
       opengl::scoped::use_program wmo_program {*_wmo_program.get()};
 
       wmo_program.uniform("model_view", model_view);
@@ -1156,16 +1179,6 @@ void World::draw ( math::matrix_4x4 const& model_view
   // model particles
   if (draw_model_animations && !model_with_particles.empty())
   {
-    if (!_m2_particles_program)
-    {
-      _m2_particles_program.reset
-        ( new opengl::program
-            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
-            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
-            }
-        );
-    }
-
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
@@ -1183,16 +1196,6 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (draw_model_animations && !model_with_particles.empty())
   {
-    if (!_m2_ribbons_program)
-    {
-      _m2_ribbons_program.reset
-        ( new opengl::program
-          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
-          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
-          }
-        );
-    }
-
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
@@ -1292,15 +1295,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     // don't write on the depth buffer
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
-    if (!_mfbo_program)
-    {
-      _mfbo_program.reset
-        ( new opengl::program
-            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("mfbo_vs") }
-            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("mfbo_fs") }
-            }
-        );
-    }
     opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
 
     mfbo_shader.uniform("model_view_projection", model_view * projection);
