@@ -2027,11 +2027,11 @@ boost::optional<selection_type> World::get_model(std::uint32_t uid)
 {
   if (mWMOInstances.find(uid) != mWMOInstances.end())
   {
-    return &mWMOInstances.at(uid);
+    return selection_type {&mWMOInstances.at(uid)};
   }
   else if (mModelInstances.find(uid) != mModelInstances.end())
   {
-    return &mModelInstances.at(uid);
+    return selection_type {&mModelInstances.at(uid)};
   }
   else
   {
