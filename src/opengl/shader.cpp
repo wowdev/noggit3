@@ -14,6 +14,7 @@
 #include <QFile>
 #include <QTextStream>
 
+#include <stdexcept>
 #include <list>
 #include <regex>
 #include <sstream>
@@ -21,11 +22,17 @@
 namespace opengl
 {
   shader::shader (GLenum type, std::string const& source)
+  try
     : _handle (gl.createShader (type))
   {
     char const* source_ptr (source.data());
     gl.shaderSource (_handle, 1, &source_ptr, nullptr);
     gl.compile_shader (_handle);
+  }
+  catch (...)
+  {
+    std::throw_with_nested
+      (std::runtime_error ("error constructing shader '" + source + "'"));
   }
   shader::~shader()
   {
