@@ -56,6 +56,12 @@ namespace opengl
   std::string shader::src_from_qrc(std::string const& shader_alias, std::vector<std::string> const& defines)
   {
     std::string src(src_from_qrc(shader_alias));
+
+    if (defines.empty())
+    {
+      return src;
+    }
+
     std::stringstream ss;
 
     ss << "\n";
@@ -64,20 +70,16 @@ namespace opengl
       ss << "#define " << def << "\n";
     }
 
-    std::regex regex("([^#]*(#version)[ \t]+[0-9]+.*$)", std::regex::extended);
+    std::regex regex("#version[ \t]+[0-9]+.*");
     std::smatch match;
 
-    if (std::regex_search(src, match, regex))
-    {
-      // #version is always the first thing in the shader, insert defines after it
-      std::size_t version_length = match.length(0);
-      // insert the defines after the version directive
-      src.insert(version_length, ss.str());
-    }
-    else
+    if (!std::regex_search(src, match, regex))
     {
       throw std::logic_error("shader " + shader_alias + " has no #version directive");
     }
+
+    // #version is always the first thing in the shader, insert defines after it
+    src.insert(match.length() + match.position(), ss.str());
 
     return src;
   }
