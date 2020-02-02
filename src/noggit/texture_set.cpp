@@ -507,7 +507,6 @@ bool TextureSet::replace_texture( float xbase
     for (int i = 0; i < 64; ++i)
     {
       dist = misc::dist(x, z, x_pos + TEXDETAILSIZE / 2.0f, z_pos + TEXDETAILSIZE / 2.0f);
-      int alpha_offset = j * 64 + i;
 
       if (dist <= radius)
       {
