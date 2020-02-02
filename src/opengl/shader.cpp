@@ -57,7 +57,7 @@ namespace opengl
       ss << "#define " << def << "\n";
     }
 
-    std::regex regex("([^#]*(#version)[ \t]+[0-9]+.*$)");
+    std::regex regex("([^#]*(#version)[ \t]+[0-9]+.*$)", std::regex::extended);
     std::smatch match;
 
     if (std::regex_search(src, match, regex))
@@ -69,7 +69,7 @@ namespace opengl
     }
     else
     {
-      throw std::logic_error("shader" + shader_alias + " has no #version directive");
+      throw std::logic_error("shader " + shader_alias + " has no #version directive");
     }
 
     return src;
