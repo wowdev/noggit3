@@ -170,7 +170,7 @@ void TextureSet::eraseTextures()
   }
 
   textures.clear();
-  
+
   for (int i = 0; i < 4; ++i)
   {
     if (i > 0)
@@ -286,7 +286,7 @@ bool TextureSet::eraseUnusedTextures()
   }
 
   std::set<int> visible_tex;
-  
+
   if (tmp_edit_values)
   {
     auto& amaps = tmp_edit_values.get();
@@ -398,7 +398,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     for (int i = 0; i < 64; ++i)
     {
       dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
-      
+
       if (dist<=radius)
       {
         std::size_t offset = i + 64 * j;
