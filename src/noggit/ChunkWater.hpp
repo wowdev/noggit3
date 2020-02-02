@@ -26,7 +26,7 @@ public:
   ChunkWater& operator= (ChunkWater const&) = delete;
   ChunkWater& operator= (ChunkWater&&) = delete;
 
-  void from_mclq(mcnk_flags const& flags, std::vector<mclq>& layers);
+  void from_mclq(std::vector<mclq>& layers);
   void fromFile(MPQFile &f, size_t basePos);
   void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
