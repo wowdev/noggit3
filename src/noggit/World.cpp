@@ -282,7 +282,7 @@ void World::snap_selected_models_to_the_ground()
       ;
 
     selection_result hits;
-    
+
 
     for_chunk_at(pos, [&] (MapChunk* chunk)
     {
@@ -1059,7 +1059,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   }
 
 
-  
+
 
   if (!_liquid_render)
   {
@@ -1087,7 +1087,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       water_shader.uniform("use_transform", 1);
     }
-  }  
+  }
 
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
@@ -1944,7 +1944,7 @@ std::uint32_t World::add_model_instance(ModelInstance model_instance)
 
       // check if it's not a duplicate/already loaded model
       if( model_instance.model->filename == possible_duplicate->model->filename
-       && misc::vec3d_equals(model_instance.pos, possible_duplicate->pos) 
+       && misc::vec3d_equals(model_instance.pos, possible_duplicate->pos)
        && misc::vec3d_equals(model_instance.dir, possible_duplicate->dir)
        && misc::float_equals(model_instance.scale, possible_duplicate->scale)
         )
@@ -1993,7 +1993,7 @@ std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance)
 
       // check if it's not a duplicate/already loaded model
       if( wmo_instance.wmo->filename == possible_duplicate->wmo->filename
-       && misc::vec3d_equals(wmo_instance.pos, possible_duplicate->pos) 
+       && misc::vec3d_equals(wmo_instance.pos, possible_duplicate->pos)
        && misc::vec3d_equals(wmo_instance.dir, possible_duplicate->dir)
         )
       {
