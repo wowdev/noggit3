@@ -15,7 +15,7 @@ ChunkWater::ChunkWater(float x, float z, bool use_mclq_green_lava)
 {
 }
 
-void ChunkWater::from_mclq(mcnk_flags const& flags, std::vector<mclq>& layers)
+void ChunkWater::from_mclq(std::vector<mclq>& layers)
 {
   math::vector_3d pos(xbase, 0.0f, zbase);
 
