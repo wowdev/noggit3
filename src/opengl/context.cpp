@@ -569,6 +569,12 @@ namespace opengl
   {
     verify_context_and_check_for_gl_errors const _(_current_context, BOOST_CURRENT_FUNCTION);
     std::vector<char> log(get_program(program, GL_INFO_LOG_LENGTH));
+
+    if (log.empty())
+    {
+      return "<empty log>";
+    }
+
     _current_context->functions()->glGetProgramInfoLog(program, log.size(), nullptr, log.data());
 
     return std::string(log.data());
