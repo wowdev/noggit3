@@ -13,7 +13,6 @@ namespace opengl
 {
   namespace scoped
   {
-    //! \todo Ensure the if is done at compile time by template spezialization.
     template<GLenum cap, GLboolean value>
       class bool_setter
     {
@@ -24,9 +23,6 @@ namespace opengl
       bool_setter (bool_setter&&) = delete;
       bool_setter& operator= (bool_setter const&) = delete;
       bool_setter& operator= (bool_setter&&) = delete;
-
-    private:
-      bool _was_enabled;
     };
 
     template<GLboolean value>
