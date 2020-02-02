@@ -107,12 +107,8 @@ namespace opengl
 #endif
   }
   program::program (program&& other)
+    : _handle (boost::none)
   {
-    if (_handle)
-    {
-      gl.deleteProgram (*_handle);
-    }
-    _handle = boost::none;
     std::swap (_handle, other._handle);
   }
   program::~program()
