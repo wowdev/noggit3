@@ -1926,12 +1926,9 @@ void World::addWMO ( std::string const& filename
   mWMOInstances.emplace(newWMOis.mUniqueID, newWMOis);
 }
 
-std::uint32_t World::add_model_instance(ModelInstance& model_instance)
+std::uint32_t World::add_model_instance(ModelInstance model_instance)
 {
-  std::uint32_t uid = model_instance.uid;
-  auto check = get_model(uid);
-
-  if (check)
+  if (auto check = get_model(model_instance.uid))
   {
     // a wmo has this id already, generate a new uid
     if (check.get().which() == eEntry_WMO)
@@ -1939,7 +1936,7 @@ std::uint32_t World::add_model_instance(ModelInstance& model_instance)
       model_instance.uid = mapIndex.newGUID();
       updateTilesModel(&model_instance, model_update::add);
 
-      return add_model_instance(model_instance);
+      return add_model_instance (std::move (model_instance));
     }
     else
     {
@@ -1967,7 +1964,7 @@ std::uint32_t World::add_model_instance(ModelInstance& model_instance)
         model_instance.uid = mapIndex.newGUID();
         updateTilesModel(&model_instance, model_update::add);
 
-        return add_model_instance(model_instance);
+        return add_model_instance (std::move (model_instance));
       }
     }
   }
@@ -1978,12 +1975,9 @@ std::uint32_t World::add_model_instance(ModelInstance& model_instance)
   }
 }
 
-std::uint32_t World::add_wmo_instance(WMOInstance& wmo_instance)
+std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance)
 {
-  std::uint32_t uid = wmo_instance.mUniqueID;
-  auto check = get_model(uid);
-
-  if (check)
+  if (auto check = get_model(wmo_instance.mUniqueID))
   {
     // a model has this id already, generate a new uid
     if (check.get().which() == eEntry_Model)
@@ -1991,7 +1985,7 @@ std::uint32_t World::add_wmo_instance(WMOInstance& wmo_instance)
       wmo_instance.mUniqueID = mapIndex.newGUID();
       updateTilesWMO(&wmo_instance, model_update::add);
 
-      return add_wmo_instance(wmo_instance);
+      return add_wmo_instance (std::move (wmo_instance));
     }
     else
     {
@@ -2018,7 +2012,7 @@ std::uint32_t World::add_wmo_instance(WMOInstance& wmo_instance)
         wmo_instance.mUniqueID = mapIndex.newGUID();
         updateTilesWMO(&wmo_instance, model_update::add);
 
-        return add_wmo_instance(wmo_instance);
+        return add_wmo_instance (std::move (wmo_instance));
       }
     }
   }

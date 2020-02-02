@@ -250,9 +250,9 @@ public:
               );
 
   // add a m2 instance to the world (needs to be positioned already), return the uid
-  std::uint32_t add_model_instance(ModelInstance& model_instance);
+  std::uint32_t add_model_instance(ModelInstance model_instance);
   // add a wmo instance to the world (needs to be positioned already), return the uid
-  std::uint32_t add_wmo_instance(WMOInstance& wmo_instance);
+  std::uint32_t add_wmo_instance(WMOInstance wmo_instance);
 
   boost::optional<selection_type> get_model(std::uint32_t uid);
   void remove_models_if_needed(std::vector<uint32_t> const& uids);
