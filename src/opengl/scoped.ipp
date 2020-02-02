@@ -4,30 +4,65 @@ namespace opengl
 {
   namespace scoped
   {
-    template<GLenum cap, GLboolean value>
-      bool_setter<cap, value>::bool_setter()
+    template<GLenum cap>
+      class bool_setter<cap, GL_TRUE>
+    {
+    public:
+      bool_setter();
+      ~bool_setter();
+      bool_setter (bool_setter const&) = delete;
+      bool_setter (bool_setter&&) = delete;
+      bool_setter& operator= (bool_setter const&) = delete;
+      bool_setter& operator= (bool_setter&&) = delete;
+
+    private:
+      bool _was_enabled;
+    };
+
+    template<GLenum cap>
+      class bool_setter<cap, GL_FALSE>
+    {
+    public:
+      bool_setter();
+      ~bool_setter();
+      bool_setter (bool_setter const&) = delete;
+      bool_setter (bool_setter&&) = delete;
+      bool_setter& operator= (bool_setter const&) = delete;
+      bool_setter& operator= (bool_setter&&) = delete;
+
+    private:
+      bool _was_enabled;
+    };
+
+    template<GLenum cap>
+      bool_setter<cap, GL_TRUE>::bool_setter()
         : _was_enabled (gl.isEnabled (cap) == GL_TRUE)
     {
-      if (value == GL_TRUE)
-      {
-        gl.enable (cap);
-      }
-      else
+      gl.enable (cap);
+    }
+
+    template<GLenum cap>
+      bool_setter<cap, GL_TRUE>::~bool_setter()
+    {
+      if (_was_enabled != GL_TRUE)
       {
         gl.disable (cap);
       }
     }
 
-    template<GLenum cap, GLboolean value>
-      bool_setter<cap, value>::~bool_setter()
+    template<GLenum cap>
+      bool_setter<cap, GL_FALSE>::bool_setter()
+        : _was_enabled (gl.isEnabled (cap) == GL_TRUE)
+    {
+      gl.disable (cap);
+    }
+
+    template<GLenum cap>
+      bool_setter<cap, GL_FALSE>::~bool_setter()
     {
       if (_was_enabled == GL_TRUE)
       {
         gl.enable (cap);
-      }
-      else
-      {
-        gl.disable (cap);
       }
     }
 
