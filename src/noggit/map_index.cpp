@@ -831,13 +831,13 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(extents[1].z / TILESIZE), (std::size_t)63);
 
-    world->add_model_instance(instance);
+    auto const real_uid (world->add_model_instance (std::move (instance)));
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        uids_per_tile[z][x].push_front(instance.uid);
+        uids_per_tile[z][x].push_front (real_uid);
       }
     }
   }
@@ -854,13 +854,13 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
 
-    world->add_wmo_instance(instance);
+    auto const real_uid (world->add_wmo_instance (std::move (instance)));
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        uids_per_tile[z][x].push_front(instance.mUniqueID);
+        uids_per_tile[z][x].push_front (real_uid);
       }
     }
   }
