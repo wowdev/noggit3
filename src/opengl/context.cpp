@@ -9,6 +9,7 @@
 
 #include <boost/current_function.hpp>
 
+#include <QtCore/QSysInfo>
 #include <QtGui/QOpenGLFunctions>
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 
@@ -536,6 +537,16 @@ namespace opengl
   }
   void context::validate_program (GLuint program)
   {
+    // "The issue is that Mac does not allow validating shaders before
+    // they are bound to a VBO. So, validating needs to be done after
+    // that, not just after compiling the shader program. The doc says
+    // that this is the way to be done afaik, but Windows/Linux does
+    // not seem to care."
+    if (QSysInfo::productType() == "osx")
+    {
+      return;
+    }
+
     {
       verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
       _current_context->functions()->glValidateProgram (program);
