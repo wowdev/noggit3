@@ -155,7 +155,6 @@ public:
   boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
-  bool is_selection(int pSelectionType, selection_type selection) const;
   bool is_selected(selection_type selection) const;
   bool is_selected(std::uint32_t uid) const;
   std::vector<selection_type> const& current_selection() const { return _current_selection; }

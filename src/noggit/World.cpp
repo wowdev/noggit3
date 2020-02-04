@@ -139,11 +139,6 @@ void World::update_selection_pivot()
   }
 }
 
-bool World::is_selection(int pSelectionType, selection_type selection) const
-{
-  return has_selection() && selection.which() == pSelectionType;
-}
-
 bool World::is_selected(selection_type selection) const
 {
   if (selection.which() == eEntry_Model)
@@ -1112,7 +1107,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     for (auto& selection : current_selection())
     {
-      if (is_selection(eEntry_Model, selection))
+      if (selection.which() == eEntry_Model)
       {
         auto model = boost::get<selected_model_type>(selection);
         if (model->is_visible(frustum, culldistance, camera_pos, display))

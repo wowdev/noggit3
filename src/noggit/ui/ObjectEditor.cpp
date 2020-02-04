@@ -565,18 +565,18 @@ namespace noggit
       std::ofstream stream(_settings->value("project/import_file", "import.txt").toString().toStdString(), std::ios_base::app);
       for (auto& selection : world->current_selection())
       {
-        if (world->is_selection(eEntry_MapChunk, selection))
+        if (selection.which() == eEntry_MapChunk)
         {
           continue;
         }
 
         std::string path;
 
-        if (world->is_selection(eEntry_WMO, selection))
+        if (selection.which() == eEntry_WMO)
         {
           path = boost::get<selected_wmo_type>(selection)->wmo->filename;
         }
-        else if (world->is_selection(eEntry_Model, selection))
+        else if (selection.which() == eEntry_Model)
         {
           path = boost::get<selected_model_type>(selection)->model->filename;
         }
