@@ -1759,6 +1759,11 @@ void World::deleteWMOInstance(int pUniqueID)
   }
 }
 
+bool World::uid_duplicates_found() const
+{
+  return _model_instance_storage.uid_duplicates_found();
+}
+
 void World::delete_duplicate_model_and_wmo_instances()
 {
   reset_selection();

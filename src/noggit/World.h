@@ -267,6 +267,7 @@ public:
   void deleteModelInstance(int pUniqueID);
   void deleteWMOInstance(int pUniqueID);
 
+  bool uid_duplicates_found() const;
   void delete_duplicate_model_and_wmo_instances();
   // used after the uid fix all
   void unload_every_model_and_wmo_instance();
