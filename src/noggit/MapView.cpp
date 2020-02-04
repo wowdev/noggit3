@@ -1377,116 +1377,116 @@ MapView::MapView( math::degrees camera_yaw0
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
 }
 
-  void MapView::tabletEvent(QTabletEvent* event)
-  {
-    _tablet_pressure = event->pressure();
-    event->setAccepted(true);
+void MapView::tabletEvent(QTabletEvent* event)
+{
+  _tablet_pressure = event->pressure();
+  event->setAccepted(true);
     
-  }
+}
 
-  void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
+void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
+{
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
+  AsyncLoader::instance().ensure_loaded(_world->mapIndex.loadTile(pos));
+
+  _camera.position = pos;
+  _camera.position.y = 0.0f;
+
+  _world->GetVertex (pos.x, pos.z, &_camera.position);
+
+  // min elevation according to https://wowdev.wiki/AreaTable.dbc
+  //! \ todo use the current area's MinElevation
+  if (_camera.position.y < -5000.0f)
   {
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
-
-    AsyncLoader::instance().ensure_loaded(_world->mapIndex.loadTile(pos));
-
-    _camera.position = pos;
+    //! \todo use the height of a model/wmo of the tile (or the map) ?
     _camera.position.y = 0.0f;
-
-    _world->GetVertex (pos.x, pos.z, &_camera.position);
-
-    // min elevation according to https://wowdev.wiki/AreaTable.dbc
-    //! \ todo use the current area's MinElevation
-    if (_camera.position.y < -5000.0f)
-    {
-      //! \todo use the height of a model/wmo of the tile (or the map) ?
-      _camera.position.y = 0.0f;
-    }
-
-    _camera.position.y += 50.0f;
-
-    _minimap->update();
   }
 
-  void MapView::on_uid_fix_fail()
+  _camera.position.y += 50.0f;
+
+  _minimap->update();
+}
+
+void MapView::on_uid_fix_fail()
+{
+  emit uid_fix_failed();
+
+  _uid_fix_failed = true;
+  deleteLater();
+}
+
+void MapView::initializeGL()
+{
+  opengl::context::scoped_setter const _ (::gl, context());
+  gl.viewport(0.0f, 0.0f, width(), height());
+
+  gl.clearColor (0.0f, 0.0f, 0.0f, 1.0f);
+
+  if (_uid_fix == uid_fix_mode::max_uid)
   {
-    emit uid_fix_failed();
-
-    _uid_fix_failed = true;
-    deleteLater();
+    _world->mapIndex.searchMaxUID();
   }
-
-  void MapView::initializeGL()
+  else if (_uid_fix == uid_fix_mode::fix_all_fail_on_model_loading_error)
   {
-    opengl::context::scoped_setter const _ (::gl, context());
-    gl.viewport(0.0f, 0.0f, width(), height());
+    auto result = _world->mapIndex.fixUIDs (_world.get(), true);
 
-    gl.clearColor (0.0f, 0.0f, 0.0f, 1.0f);
-
-    if (_uid_fix == uid_fix_mode::max_uid)
+    if (result == uid_fix_status::done_with_errors)
     {
-      _world->mapIndex.searchMaxUID();
+      on_uid_fix_fail();
+      return;
     }
-    else if (_uid_fix == uid_fix_mode::fix_all_fail_on_model_loading_error)
-    {
-      auto result = _world->mapIndex.fixUIDs (_world.get(), true);
-
-      if (result == uid_fix_status::done_with_errors)
-      {
-        on_uid_fix_fail();
-        return;
-      }
-    }
-    else if (_uid_fix == uid_fix_mode::fix_all_fuckporting_edition)
-    {
-      _world->mapIndex.fixUIDs (_world.get(), false);
-    }
-
-    _uid_fix = uid_fix_mode::none;
-
-    createGUI();
-
-    set_editing_mode (editing_mode::ground);
-
-    if (!_from_bookmark)
-    {
-      move_camera_with_auto_height (_camera.position);
-    }    
   }
-
-  void MapView::paintGL()
+  else if (_uid_fix == uid_fix_mode::fix_all_fuckporting_edition)
   {
-    opengl::context::scoped_setter const _ (::gl, context());
-    const qreal now(_startup_time.elapsed() / 1000.0);
-
-    _last_frame_durations.emplace_back (now - _last_update);
-
-    tick (now - _last_update);
-    _last_update = now;
-
-    gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    draw_map();
-
-    if (_world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
-    {
-      _uid_duplicate_warning_shown = true;
-
-      QMessageBox::critical( this
-                           , "UID ALREADY IN USE"
-                           , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
-                             "uid.ini file if you're sharing the map between several mappers.\n\n"
-                             "Use 'Editor > Force uid check on next opening' to fix the issue."
-                           );
-    }
+    _world->mapIndex.fixUIDs (_world.get(), false);
   }
 
-  void MapView::resizeGL (int width, int height)
+  _uid_fix = uid_fix_mode::none;
+
+  createGUI();
+
+  set_editing_mode (editing_mode::ground);
+
+  if (!_from_bookmark)
   {
-    opengl::context::scoped_setter const _ (::gl, context());
-    gl.viewport(0.0f, 0.0f, width, height);
+    move_camera_with_auto_height (_camera.position);
+  }    
+}
+
+void MapView::paintGL()
+{
+  opengl::context::scoped_setter const _ (::gl, context());
+  const qreal now(_startup_time.elapsed() / 1000.0);
+
+  _last_frame_durations.emplace_back (now - _last_update);
+
+  tick (now - _last_update);
+  _last_update = now;
+
+  gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  draw_map();
+
+  if (_world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
+  {
+    _uid_duplicate_warning_shown = true;
+
+    QMessageBox::critical( this
+                          , "UID ALREADY IN USE"
+                          , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
+                            "uid.ini file if you're sharing the map between several mappers.\n\n"
+                            "Use 'Editor > Force uid check on next opening' to fix the issue."
+                          );
   }
+}
+
+void MapView::resizeGL (int width, int height)
+{
+  opengl::context::scoped_setter const _ (::gl, context());
+  gl.viewport(0.0f, 0.0f, width, height);
+}
 
 
 MapView::~MapView()
