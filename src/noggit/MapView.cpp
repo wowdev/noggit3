@@ -1468,6 +1468,18 @@ MapView::MapView( math::degrees camera_yaw0
     gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     draw_map();
+
+    if (_world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
+    {
+      _uid_duplicate_warning_shown = true;
+
+      QMessageBox::critical( this
+                           , "UID ALREADY IN USE"
+                           , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
+                             "uid.ini file if you're sharing the map between several mappers.\n\n"
+                             "Use 'Editor > Force uid check on next opening' to fix the issue."
+                           );
+    }
   }
 
   void MapView::resizeGL (int width, int height)
@@ -1819,7 +1831,7 @@ void MapView::tick (float dt)
           }
           break;
         }
-      }      
+      }
     }
   }
 
