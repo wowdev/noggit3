@@ -254,6 +254,7 @@ void blp_texture::finishLoading()
 
   f.close();
   finished = true;
+  _state_changed.notify_all();
 }
 
 namespace noggit

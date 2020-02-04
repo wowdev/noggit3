@@ -2,9 +2,12 @@
 
 #pragma once
 
-#include <string>
-
 #include <noggit/Log.h>
+
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <string>
 
 enum class async_priority : int
 {
@@ -19,7 +22,9 @@ class AsyncObject
 private: 
   bool _loading_failed = false;
 protected:
-  bool finished = false;
+  std::atomic<bool> finished = false;
+  std::mutex _mutex;
+  std::condition_variable _state_changed;
 
   AsyncObject(std::string filename) : filename(filename) {}
 
@@ -31,7 +36,7 @@ public:
 
   virtual bool finishedLoading() const
   {
-    return finished;
+    return finished.load();
   }
 
   bool loading_failed() const
@@ -39,11 +44,30 @@ public:
     return _loading_failed;
   }
 
+  void wait_until_loaded()
+  {
+    if (finished.load())
+    {
+      return;
+    }
+
+    std::unique_lock<std::mutex> lock (_mutex);
+
+    _state_changed.wait 
+    ( lock
+    , [&]
+      {
+        return finished.load();
+      }
+    );
+  }
+
   void error_on_loading()
   {
     LogError << filename << " could not be loaded" << std::endl;
     _loading_failed = true;
     finished = true;
+    _state_changed.notify_all();
   }
 
   virtual bool is_required_when_saving() const

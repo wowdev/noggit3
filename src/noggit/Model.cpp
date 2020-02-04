@@ -74,6 +74,7 @@ void Model::finishLoading()
   f.close();
 
   finished = true;
+  _state_changed.notify_all();
 }
 
 
