@@ -317,6 +317,7 @@ void WMO::finishLoading ()
     group.load();
 
   finished = true;
+  _state_changed.notify_all();
 }
 
 void WMO::draw ( opengl::scoped::use_program& wmo_shader

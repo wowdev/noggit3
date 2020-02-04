@@ -100,6 +100,7 @@ void MPQArchive::finishLoading()
   }
 
   finished = true;
+  _state_changed.notify_all();
 
   if (MPQArchive::allFinishedLoading())
   {

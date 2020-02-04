@@ -299,6 +299,7 @@ void MapTile::finishLoading()
 
   LogDebug << "Done loading tile " << index.x << "," << index.z << "." << std::endl;
   finished = true;
+  _state_changed.notify_all();
 }
 
 bool MapTile::isTile(int pX, int pZ)
