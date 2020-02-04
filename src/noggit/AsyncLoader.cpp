@@ -93,21 +93,6 @@ void AsyncLoader::queue_for_load (AsyncObject* object)
   _state_changed.notify_one();
 }
 
-void AsyncLoader::ensure_loaded (AsyncObject* object)
-{
-  std::unique_lock<std::mutex> lock (_guard);
-  _state_changed.wait 
-  ( lock
-  , [&]
-    {
-      auto const& to_load = _to_load[(size_t)object->loading_priority()];
-      return std::find (to_load.begin(), to_load.end(), object) == to_load.end()
-        && std::find (_currently_loading.begin(), _currently_loading.end(), object) == _currently_loading.end()
-        ;
-    }
-  );
-}
-
 void AsyncLoader::ensure_deletable (AsyncObject* object)
 {
   std::unique_lock<std::mutex> lock (_guard);

@@ -1715,7 +1715,7 @@ void World::convert_alphamap(bool to_big_alpha)
 
       if (mTile)
       {
-        AsyncLoader::instance().ensure_loaded(mTile);
+        mTile->wait_until_loaded();
 
         mTile->convert_alphamap(to_big_alpha);
         mTile->saveTile(this);
@@ -1818,8 +1818,7 @@ void World::addM2 ( std::string const& filename
   }
 
   // to ensure the tiles are updated correctly
-  AsyncLoader::instance().ensure_loaded(model_instance.model.get());
-
+  model_instance.model->wait_until_loaded();
   model_instance.recalcExtents();
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
@@ -1839,9 +1838,7 @@ void World::addWMO ( std::string const& filename
   wmo_instance.dir = rotation;
 
   // to ensure the tiles are updated correctly
-  AsyncLoader::instance().ensure_loaded(wmo_instance.wmo.get());
-
-  // recalc the extends
+  wmo_instance.wmo->wait_until_loaded();
   wmo_instance.recalcExtents();
 
   _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
