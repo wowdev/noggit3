@@ -24,7 +24,6 @@ public:
   //! that a previously enqueued object can be destroyed.
   void queue_for_load (AsyncObject*);
   
-  void ensure_loaded (AsyncObject*);
   void ensure_deletable (AsyncObject*);
 
   AsyncLoader(int numThreads);

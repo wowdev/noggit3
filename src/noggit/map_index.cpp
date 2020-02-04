@@ -480,11 +480,7 @@ MapTile* MapIndex::getTileAbove(MapTile* tile) const
   }
 
   MapTile* tile_above = mTiles[tile->index.z - 1][tile->index.x].tile.get();
-
-  if (!tile_above->finishedLoading())
-  {
-    AsyncLoader::instance().ensure_loaded(tile_above);
-  }
+  tile_above->wait_until_loaded();
 
   return tile_above;
 }
@@ -498,11 +494,7 @@ MapTile* MapIndex::getTileLeft(MapTile* tile) const
   }
 
   MapTile* tile_left = mTiles[tile->index.z][tile->index.x - 1].tile.get();
-
-  if (!tile_left->finishedLoading())
-  {
-    AsyncLoader::instance().ensure_loaded(tile_left);
-  }
+  tile_left->wait_until_loaded();
 
   return tile_left;
 }
@@ -622,10 +614,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         MapTile* tile = mTiles[z][x].tile.get();
 
         // don't unload half loaded tiles
-        if (!tile->finishedLoading())
-        {
-          AsyncLoader::instance().ensure_loaded(tile);
-        }
+        tile->wait_until_loaded();
 
         unloadTile(tile->index);
       }
@@ -823,11 +812,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
   for (ModelInstance& instance : models)
   {
     instance.uid = highestGUID++;
-
-    if (!instance.model->finishedLoading())
-    {
-      AsyncLoader::instance().ensure_loaded(instance.model.get());
-    }
+    instance.model->wait_until_loaded();
 
     loading_error |= instance.model->loading_failed();
 
