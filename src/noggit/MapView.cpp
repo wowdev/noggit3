@@ -129,14 +129,14 @@ void MapView::ResetSelectedObjectRotation()
 {
   for (auto& selection : _world->current_selection())
   {
-    if (_world->is_selection(eEntry_WMO, selection))
+    if (selection.which() == eEntry_WMO)
     {
       WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
       _world->updateTilesWMO(wmo, model_update::remove);
       wmo->resetDirection();
       _world->updateTilesWMO(wmo, model_update::add);
     }
-    else if (_world->is_selection(eEntry_Model, selection))
+    else if (selection.which() == eEntry_Model)
     {
       ModelInstance* m2 = boost::get<selected_model_type>(selection);
       _world->updateTilesModel(m2, model_update::remove);
