@@ -68,7 +68,7 @@ namespace noggit
                 }
                 else if (world()->mapIndex.tileLoaded (tile))
                 {
-                  if (world()->mapIndex.getChanged(tile))
+                  if (world()->mapIndex.has_unsaved_changes(tile))
                   {
                     changed = true;
                   }

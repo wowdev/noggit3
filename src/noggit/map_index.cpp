@@ -145,7 +145,7 @@ void MapIndex::saveall (World* world)
   for (MapTile* tile : loaded_tiles())
   {
     tile->saveTile(world);
-    tile->changed = 0;
+    tile->changed = false;
   }
 }
 
@@ -263,7 +263,7 @@ void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint
     AsyncLoader::instance().ensure_loaded(adt);
   }
 
-  adt->changed = 1;
+  adt->changed = true;
 
   if (type == model_update::add)
   {
@@ -281,7 +281,7 @@ void MapIndex::setChanged(const tile_index& tile)
 
   if (!!mTile)
   {
-    mTile->changed = 1;
+    mTile->changed = true;
   }
 }
 
@@ -295,13 +295,13 @@ void MapIndex::unsetChanged(const tile_index& tile)
   // change the changed flag of the map tile
   if (hasTile(tile))
   {
-    mTiles[tile.z][tile.x].tile->changed = 0;
+    mTiles[tile.z][tile.x].tile->changed = false;
   }
 }
 
-int MapIndex::getChanged(const tile_index& tile) const
+bool MapIndex::has_unsaved_changes(const tile_index& tile) const
 {
-  return (tileLoaded(tile) ? getTile(tile)->changed : 0);
+  return (tileLoaded(tile) ? getTile(tile)->changed.load() : false);
 }
 
 void MapIndex::setFlag(bool to, math::vector_3d const& pos, uint32_t flag)
@@ -367,7 +367,7 @@ void MapIndex::unloadTiles(const tile_index& tile)
       if (tile.dist(adt->index) > _unload_dist)
       {
         //Only unload adts not marked to save
-        if (adt->changed == 0)
+        if (!adt->changed.load())
         {
           unloadTile(adt->index);
         }
@@ -415,16 +415,18 @@ void MapIndex::saveTile(const tile_index& tile, World* world)
 void MapIndex::saveChanged (World* world)
 {
   if (changed)
+  {
     save();
+  }
 
   saveMaxUID();
 
   for (MapTile* tile : loaded_tiles())
   {
-    if (tile->changed)
+    if (tile->changed.load())
     {
       tile->saveTile(world);
-      tile->changed = 0;
+      tile->changed = false;
     }
   }
 }
