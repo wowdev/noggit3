@@ -166,7 +166,7 @@ public:
 
   void unsetChanged(const tile_index& tile);
   void setFlag(bool to, math::vector_3d const& pos, uint32_t flag);
-  int getChanged(const tile_index& tile) const;
+  bool has_unsaved_changes(const tile_index& tile) const;
 
   void saveTile(const tile_index& tile, World*);
   void saveChanged (World*);

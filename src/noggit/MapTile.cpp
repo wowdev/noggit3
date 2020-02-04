@@ -30,7 +30,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   , index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
-  , changed(0)
+  , changed(false)
   , Water (this, xbase, zbase, use_mclq_green_lava)
   , mBigAlpha(pBigAlpha)
   , _load_models(pLoadModels)

@@ -60,7 +60,7 @@ public:
   const tile_index index;
   float xbase, zbase;
 
-  int changed;
+  std::atomic<bool> changed;
 
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
