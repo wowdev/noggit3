@@ -23,7 +23,6 @@
 #include <QtCore/QSettings>
 
 #include <map>
-#include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -249,9 +248,9 @@ public:
               );
 
   // add a m2 instance to the world (needs to be positioned already), return the uid
-  std::uint32_t add_model_instance(ModelInstance model_instance);
+  std::uint32_t add_model_instance(ModelInstance model_instance, bool from_reloading);
   // add a wmo instance to the world (needs to be positioned already), return the uid
-  std::uint32_t add_wmo_instance(WMOInstance wmo_instance);
+  std::uint32_t add_wmo_instance(WMOInstance wmo_instance, bool from_reloading);
 
   boost::optional<selection_type> get_model(std::uint32_t uid);
   void remove_models_if_needed(std::vector<uint32_t> const& uids);
@@ -259,8 +258,8 @@ public:
   void reload_tile(tile_index const& tile);
 
   void updateTilesEntry(selection_type const& entry, model_update type);
-  void updateTilesWMO(WMOInstance* wmo, model_update type);
-  void updateTilesModel(ModelInstance* m2, model_update type);
+  void updateTilesWMO(WMOInstance* wmo, model_update type, bool from_reloading = false);
+  void updateTilesModel(ModelInstance* m2, model_update type, bool from_reloading = false);
 
   void saveMap (int width, int height);
 
@@ -355,6 +354,4 @@ private:
   opengl::primitives::square _square_render;
 
   boost::optional<liquid_render> _liquid_render = boost::none;
-
-  std::mutex _mutex;
 };

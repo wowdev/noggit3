@@ -249,7 +249,7 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 }
 
-void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint32_t uid)
+void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint32_t uid, bool from_reloading)
 {
   if (!hasTile(tile))
   {
@@ -258,10 +258,14 @@ void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint
 
   MapTile* adt = loadTile(tile);
 
-  if (!adt->finishedLoading())
+  // don't update models beings reloaded on the tile that's reloading
+  // otherwise it'll create a deadlock
+  if (from_reloading && adt->tile_is_being_reloaded())
   {
-    AsyncLoader::instance().ensure_loaded(adt);
+    return;
   }
+
+  adt->wait_until_loaded();
 
   adt->changed = true;
 
@@ -319,7 +323,7 @@ void MapIndex::setFlag(bool to, math::vector_3d const& pos, uint32_t flag)
   }
 }
 
-MapTile* MapIndex::loadTile(const tile_index& tile)
+MapTile* MapIndex::loadTile(const tile_index& tile, bool reloading)
 {
   if (!hasTile(tile))
   {
@@ -340,7 +344,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, use_mclq_green_lava(), _world);
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, use_mclq_green_lava(), reloading, _world);
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 
@@ -354,7 +358,7 @@ void MapIndex::reloadTile(const tile_index& tile)
   if (tileLoaded(tile))
   {
     mTiles[tile.z][tile.x].tile.reset();
-    loadTile(tile);
+    loadTile(tile, true);
   }
 }
 
@@ -835,7 +839,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(extents[1].z / TILESIZE), (std::size_t)63);
 
-    auto const real_uid (world->add_model_instance (std::move (instance)));
+    auto const real_uid (world->add_model_instance (std::move(instance), false));
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
@@ -858,7 +862,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
 
-    auto const real_uid (world->add_wmo_instance (std::move (instance)));
+    auto const real_uid (world->add_wmo_instance (std::move(instance), false));
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
@@ -894,7 +898,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
       // load the tile without the models
-      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), world);
+      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), false, world);
       tile.finishLoading();
 
       // add the uids to the tile to be able to save the models

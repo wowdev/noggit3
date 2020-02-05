@@ -619,7 +619,7 @@ void World::initDisplay()
   {
     WMOInstance inst(mWmoFilename, &mWmoEntry);
 
-    _model_instance_storage.add_wmo_instance(std::move(inst));
+    _model_instance_storage.add_wmo_instance(std::move(inst), false);
   }
   else
   {
@@ -1821,11 +1821,10 @@ void World::addM2 ( std::string const& filename
   AsyncLoader::instance().ensure_loaded(model_instance.model.get());
 
   model_instance.recalcExtents();
-  model_instance.uid = _model_instance_storage.add_model_instance(model_instance);
 
-  updateTilesModel(&model_instance, model_update::add);
+  std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
-  _models_by_filename[filename].push_back(_model_instance_storage.get_model_instance(model_instance.uid).get());
+  _models_by_filename[filename].push_back(_model_instance_storage.get_model_instance(uid).get());
 }
 
 void World::addWMO ( std::string const& filename
@@ -1844,19 +1843,18 @@ void World::addWMO ( std::string const& filename
 
   // recalc the extends
   wmo_instance.recalcExtents();
-  wmo_instance.mUniqueID = _model_instance_storage.add_wmo_instance(wmo_instance);
 
-  updateTilesWMO(&wmo_instance, model_update::add);
+  _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
 }
 
-std::uint32_t World::add_model_instance(ModelInstance model_instance)
+std::uint32_t World::add_model_instance(ModelInstance model_instance, bool from_reloading)
 {
-  return _model_instance_storage.add_model_instance(model_instance);
+  return _model_instance_storage.add_model_instance(std::move(model_instance), from_reloading);
 }
 
-std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance)
+std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance, bool from_reloading)
 {
-  return _model_instance_storage.add_wmo_instance(wmo_instance);
+  return _model_instance_storage.add_wmo_instance(std::move(wmo_instance), from_reloading);
 }
 
 boost::optional<selection_type> World::get_model(std::uint32_t uid)
@@ -1907,23 +1905,20 @@ void World::updateTilesEntry(selection_type const& entry, model_update type)
   }
 }
 
-void World::updateTilesWMO(WMOInstance* wmo, model_update type)
+void World::updateTilesWMO(WMOInstance* wmo, model_update type, bool from_reloading)
 {
-  std::unique_lock<std::mutex> const lock (_mutex);
   tile_index start(wmo->extents[0]), end(wmo->extents[1]);
   for (int z = start.z; z <= end.z; ++z)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex.update_model_tile(tile_index(x, z), type, wmo->mUniqueID);
+      mapIndex.update_model_tile(tile_index(x, z), type, wmo->mUniqueID, from_reloading);
     }
   }
 }
 
-void World::updateTilesModel(ModelInstance* m2, model_update type)
+void World::updateTilesModel(ModelInstance* m2, model_update type, bool from_reloading)
 {
-  std::unique_lock<std::mutex> const lock (_mutex);
-
   auto const& extents(m2->extents());
   tile_index start(extents[0]), end(extents[1]);
 
@@ -1931,7 +1926,7 @@ void World::updateTilesModel(ModelInstance* m2, model_update type)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex.update_model_tile(tile_index(x, z), type, m2->uid);
+      mapIndex.update_model_tile(tile_index(x, z), type, m2->uid, from_reloading);
     }
   }
 }
