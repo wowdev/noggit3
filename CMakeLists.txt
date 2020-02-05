@@ -75,6 +75,17 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
 # yes, we intend to use multi-character character constants
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
 
+if(WIN32)
+  OPTION(NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)
+  if(NAME_REUSE_AS_ERROR)
+    # declaration of 'identifier' hides previous: 
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4456) # local declaration
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4457) # function parameter
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4458) # class members
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4459) # global declaration
+  endif()
+endif()
+
 # multi core building for visual studio
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
 
