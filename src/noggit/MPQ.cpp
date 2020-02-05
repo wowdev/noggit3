@@ -137,9 +137,9 @@ void MPQArchive::unloadAllMPQs()
   _openArchives.clear();
 }
 
-bool MPQArchive::hasFile(const std::string& filename) const
+bool MPQArchive::hasFile(const std::string& file) const
 {
-  return SFileHasFile(_archiveHandle, filename.c_str());
+  return SFileHasFile(_archiveHandle, file.c_str());
 }
 
 void MPQArchive::unloadMPQ(const std::string& filename)
@@ -153,10 +153,10 @@ void MPQArchive::unloadMPQ(const std::string& filename)
   }
 }
 
-bool MPQArchive::openFile(const std::string& filename, HANDLE* fileHandle) const
+bool MPQArchive::openFile(const std::string& file, HANDLE* fileHandle) const
 {
   assert(fileHandle);
-  return SFileOpenFileEx(_archiveHandle, filename.c_str(), 0, fileHandle);
+  return SFileOpenFileEx(_archiveHandle, file.c_str(), 0, fileHandle);
 }
 /*
 * basic constructor to save the file to project path

@@ -310,7 +310,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
   std::vector<std::uint16_t> indices;
   std::vector<math::vector_3d> vertices;
   std::vector<math::vector_3d> offsets;
-  std::vector<math::vector_4d> colors;
+  std::vector<math::vector_4d> colors_data;
   std::vector<math::vector_2d> texcoords;
 
   std::uint16_t indice = 0;
@@ -362,22 +362,22 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
         texcoords.push_back(tiles[it->tile].tc[0]);
         vertices.push_back(it->pos);
         offsets.push_back(-(vRight + vUp) * size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         texcoords.push_back(tiles[it->tile].tc[1]);
         vertices.push_back(it->pos);
         offsets.push_back((vRight - vUp) * size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         texcoords.push_back(tiles[it->tile].tc[2]);
         vertices.push_back(it->pos);
         offsets.push_back((vRight + vUp) * size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         texcoords.push_back(tiles[it->tile].tc[3]);
         vertices.push_back(it->pos);
         offsets.push_back(-(vRight - vUp) * size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         add_quad_indices(indices, indice);
       }
@@ -393,19 +393,19 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
 
         texcoords.push_back(tiles[it->tile].tc[0]);
         vertices.push_back(it->pos + it->corners[0] * it->size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         texcoords.push_back(tiles[it->tile].tc[1]);
         vertices.push_back(it->pos + it->corners[1] * it->size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         texcoords.push_back(tiles[it->tile].tc[2]);
         vertices.push_back(it->pos + it->corners[2] * it->size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         texcoords.push_back(tiles[it->tile].tc[3]);
         vertices.push_back(it->pos + it->corners[3] * it->size);
-        colors.push_back(it->color);
+        colors_data.push_back(it->color);
 
         add_quad_indices(indices, indice);
       }
@@ -432,26 +432,26 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
 
       texcoords.push_back(tiles[it->tile].tc[0]);
       vertices.push_back(it->pos + bv0 * it->size);
-      colors.push_back(it->color);
+      colors_data.push_back(it->color);
 
       texcoords.push_back(tiles[it->tile].tc[1]);
       vertices.push_back(it->pos + bv1 * it->size);
-      colors.push_back(it->color);
+      colors_data.push_back(it->color);
 
       texcoords.push_back(tiles[it->tile].tc[2]);
       vertices.push_back(it->origin + bv1 * it->size);
-      colors.push_back(it->color);
+      colors_data.push_back(it->color);
 
       texcoords.push_back(tiles[it->tile].tc[3]);
       vertices.push_back(it->origin + bv0 * it->size);
-      colors.push_back(it->color);
+      colors_data.push_back(it->color);
 
       add_quad_indices(indices, indice);
     }
   }
 
   gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_4d>(_colors_vbo, colors, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, math::vector_4d>(_colors_vbo, colors_data, GL_STREAM_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
 

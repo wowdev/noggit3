@@ -409,15 +409,15 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
         if (!misc::float_equals(current_alpha, strength))
         {
-          for (int i = 0; i < nTextures; ++i)
+          for (int layer = 0; layer < nTextures; ++layer)
           {
-            if (i == tex_layer)
+            if (layer == tex_layer)
             {
-              amaps[i][offset] += alpha_change;
+              amaps[layer][offset] += alpha_change;
             }
             else
             {
-              amaps[i][offset] -= alpha_change * (amaps[i][offset] / sum_other_alphas);
+              amaps[layer][offset] -= alpha_change * (amaps[layer][offset] / sum_other_alphas);
             }
           }
 
