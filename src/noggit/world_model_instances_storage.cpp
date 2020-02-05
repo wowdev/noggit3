@@ -12,15 +12,25 @@ namespace noggit
 
   }
 
-  std::uint32_t world_model_instances_storage::add_model_instance(ModelInstance instance)
-  {
-    std::unique_lock<std::mutex> const lock (_mutex);
-    return unsafe_add_model_instance(std::move(instance));
-  }
-  std::uint32_t world_model_instances_storage::unsafe_add_model_instance(ModelInstance instance)
+  std::uint32_t world_model_instances_storage::add_model_instance(ModelInstance instance, bool from_reloading)
   {
     std::uint32_t uid = instance.uid;
-    bool uid_already_used = unsafe_uid_is_used(uid);
+
+    {
+      std::lock_guard<std::mutex> const lock (_mutex);
+      instance.uid = unsafe_add_model_instance_no_world_upd(instance);
+    }
+
+    if (from_reloading || instance.uid != uid)
+    {
+      _world->updateTilesModel(&instance, model_update::add, from_reloading);
+    }
+
+    return instance.uid;
+  }
+  std::uint32_t world_model_instances_storage::unsafe_add_model_instance_no_world_upd(ModelInstance instance)
+  {
+    std::uint32_t uid = instance.uid;
     auto existing_instance = unsafe_get_model_instance(uid);
 
     if (existing_instance)
@@ -29,38 +39,43 @@ namespace noggit
       if (existing_instance.get()->is_a_duplicate_of(instance))
       {
         _instance_count_per_uid[uid]++;
-
         return uid;
       }
     }
-    else if(!uid_already_used)
+    else if(!unsafe_uid_is_used(uid))
     {
       _m2s.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
-
       return uid;
     }
 
     // the uid is already used for another model/wmo, use a new one
     _uid_duplicates_found = true;
     instance.uid = _world->mapIndex.newGUID();
-    instance.uid = unsafe_add_model_instance(instance);
 
-    _world->updateTilesModel(&instance, model_update::add);
-
-    return instance.uid;
+    return unsafe_add_model_instance_no_world_upd(std::move(instance));
   }
 
   
-  std::uint32_t world_model_instances_storage::add_wmo_instance(WMOInstance instance)
-  {
-    std::unique_lock<std::mutex> const lock (_mutex);
-    return unsafe_add_wmo_instance(std::move(instance));
-  }
-  std::uint32_t world_model_instances_storage::unsafe_add_wmo_instance(WMOInstance instance)
+  std::uint32_t world_model_instances_storage::add_wmo_instance(WMOInstance instance, bool from_reloading)
   {
     std::uint32_t uid = instance.mUniqueID;
-    bool uid_already_used = unsafe_uid_is_used(uid);
+
+    {
+      std::lock_guard<std::mutex> const lock(_mutex);
+      instance.mUniqueID = unsafe_add_wmo_instance_no_world_upd(instance);
+    }
+
+    if (from_reloading || instance.mUniqueID != uid)
+    {
+      _world->updateTilesWMO(&instance, model_update::add, from_reloading);
+    }
+
+    return instance.mUniqueID;
+  }
+  std::uint32_t world_model_instances_storage::unsafe_add_wmo_instance_no_world_upd(WMOInstance instance)
+  {
+    std::uint32_t uid = instance.mUniqueID;
     auto existing_instance = unsafe_get_wmo_instance(uid);
 
     if (existing_instance)
@@ -73,23 +88,18 @@ namespace noggit
         return uid;
       }
     }
-    else if (!uid_already_used)
+    else if (!unsafe_uid_is_used(uid))
     {
       _wmos.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
-
       return uid;
     }
 
     // the uid is already used for another model/wmo, use a new one
     _uid_duplicates_found = true;
-    std::uint32_t new_uid = _world->mapIndex.newGUID();
-    instance.mUniqueID = new_uid;
-    instance.mUniqueID = unsafe_add_wmo_instance(instance);
-    
-    _world->updateTilesWMO(&instance, model_update::add);
+    instance.mUniqueID = _world->mapIndex.newGUID();
 
-    return new_uid;
+    return unsafe_add_wmo_instance_no_world_upd(std::move(instance));
   }
 
   void world_model_instances_storage::delete_instances_from_tile(tile_index const& tile)

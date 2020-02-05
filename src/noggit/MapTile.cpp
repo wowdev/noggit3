@@ -25,13 +25,22 @@
 #include <utility>
 #include <vector>
 
-MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, bool use_mclq_green_lava, World* world)
+MapTile::MapTile( int pX
+                , int pZ
+                , std::string const& pFilename
+                , bool pBigAlpha
+                , bool pLoadModels
+                , bool use_mclq_green_lava
+                , bool reloading_tile
+                , World* world
+                )
   : AsyncObject(pFilename)
   , index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , changed(false)
   , Water (this, xbase, zbase, use_mclq_green_lava)
+  , _tile_is_being_reloaded(reloading_tile)
   , mBigAlpha(pBigAlpha)
   , _load_models(pLoadModels)
   , _world(world)
@@ -272,14 +281,14 @@ void MapTile::finishLoading()
 
     for (auto const& object : lWMOInstances)
     {
-      add_model(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID], &object)));
+      add_model(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID], &object), _tile_is_being_reloaded));
     }
 
     // - Load M2s ------------------------------------------
 
     for (auto const& model : lModelInstances)
     {
-      add_model(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID], &model)));
+      add_model(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID], &model), _tile_is_being_reloaded));
     }
 
     _world->need_model_updates = true;
@@ -299,6 +308,7 @@ void MapTile::finishLoading()
 
   LogDebug << "Done loading tile " << index.x << "," << index.z << "." << std::endl;
   finished = true;
+  _tile_is_being_reloaded = false;
   _state_changed.notify_all();
 }
 
@@ -897,6 +907,8 @@ void MapTile::CropWater()
 
 void MapTile::remove_model(uint32_t uid)
 {
+  std::lock_guard<std::mutex> const lock (_mutex);
+
   auto it = std::find(uids.begin(), uids.end(), uid);
 
   if (it != uids.end())
@@ -907,6 +919,8 @@ void MapTile::remove_model(uint32_t uid)
 
 void MapTile::add_model(uint32_t uid)
 {
+  std::lock_guard<std::mutex> const lock(_mutex);
+
   if (std::find(uids.begin(), uids.end(), uid) == uids.end())
   {
     uids.push_back(uid);

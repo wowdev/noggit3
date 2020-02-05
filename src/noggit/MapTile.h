@@ -28,7 +28,15 @@ class MapTile : public AsyncObject
 {
 
 public:
-	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels, bool use_mclq_green_lava, World*);
+	MapTile( int x0
+         , int z0
+         , std::string const& pFilename
+         , bool pBigAlpha
+         , bool pLoadModels
+         , bool use_mclq_green_lava
+         , bool reloading_tile
+         , World*
+         );
   ~MapTile();
 
   void finishLoading();
@@ -111,7 +119,11 @@ public:
   void add_model(uint32_t uid);
 
   TileWater Water;
+
+  bool tile_is_being_reloaded() const { return _tile_is_being_reloaded; }
+
 private:
+  bool _tile_is_being_reloaded;
 
   // MFBO:
   math::vector_3d mMinimumValues[3 * 3];

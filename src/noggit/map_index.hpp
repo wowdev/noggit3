@@ -157,9 +157,9 @@ public:
   MapIndex(const std::string& pBasename, int map_id, World*);
 
   void enterTile(const tile_index& tile);
-  MapTile *loadTile(const tile_index& tile);
+  MapTile *loadTile(const tile_index& tile, bool reloading = false);
 
-  void update_model_tile(const tile_index& tile, model_update type, uint32_t uid);
+  void update_model_tile(const tile_index& tile, model_update type, uint32_t uid, bool from_reloading = false);
 
   void setChanged(const tile_index& tile);
   void setChanged(MapTile* tile);

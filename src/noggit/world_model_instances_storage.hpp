@@ -32,9 +32,9 @@ namespace noggit
     world_model_instances_storage& operator= (world_model_instances_storage&&) = delete;
 
     // perform uid duplicate check, return the uid of the stored instance
-    std::uint32_t add_model_instance(ModelInstance instance);
+    std::uint32_t add_model_instance(ModelInstance instance, bool from_reloading);
     // perform uid duplicate check, return the uid of the stored instance
-    std::uint32_t add_wmo_instance(WMOInstance instance);
+    std::uint32_t add_wmo_instance(WMOInstance instance, bool from_reloading);
 
     boost::optional<ModelInstance*> get_model_instance(std::uint32_t uid);
     boost::optional<WMOInstance*> get_wmo_instance(std::uint32_t uid);
@@ -57,8 +57,8 @@ namespace noggit
   private: // private functions aren't thread safe
     inline bool unsafe_uid_is_used(std::uint32_t uid) const;
 
-    std::uint32_t unsafe_add_model_instance(ModelInstance instance);
-    std::uint32_t unsafe_add_wmo_instance(WMOInstance instance);
+    std::uint32_t unsafe_add_model_instance_no_world_upd(ModelInstance instance);
+    std::uint32_t unsafe_add_wmo_instance_no_world_upd(WMOInstance instance);
     boost::optional<ModelInstance*> unsafe_get_model_instance(std::uint32_t uid);
     boost::optional<WMOInstance*> unsafe_get_wmo_instance(std::uint32_t uid);
 
