@@ -175,7 +175,7 @@ void TextureSet::eraseTextures()
   {
     if (i > 0)
     {
-      alphamaps[i - 1].reset();
+      alphamaps[i - 1] = boost::none;
     }
     _layers_info[i] = ENTRY_MCLY();
   }
@@ -186,7 +186,9 @@ void TextureSet::eraseTextures()
   memset(_lod_texture_map.data(), 0, 64 * sizeof(std::uint8_t));
 
   _need_amap_update = true;
-  _need_lod_texture_map_update = false;
+  _need_lod_texture_map_update = true;
+
+  tmp_edit_values = boost::none;
 }
 
 void TextureSet::eraseTexture(size_t id)
