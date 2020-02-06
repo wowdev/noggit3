@@ -755,23 +755,14 @@ void TextureSet::merge_layers(size_t id1, size_t id2)
     std::swap(id2, id1);
   }
 
-  apply_alpha_changes();
+  create_temporary_alphamaps_if_needed();
 
-  // base alpha = 255 - sum_alpha(0..nTextures-1)
-  // works only when alphamap are in the big alpha format (always the case when editing)
-  if (id1 != 0)
+  auto& amap = tmp_edit_values.get();
+
+  for (int i = 0; i < 64 * 64; ++i)
   {
-    uint8_t tab[2][64 * 64];
-
-    memcpy(tab[0], alphamaps[id1 - 1]->getAlpha(), 64 * 64);
-    memcpy(tab[1], alphamaps[id2 - 1]->getAlpha(), 64 * 64);
-
-    for (int i = 0; i < 64 * 64; ++i)
-    {
-      tab[0][i] += tab[1][i];
-    }
-
-    alphamaps[id1-1]->setAlpha(tab[0]);
+    amap[id1][i] += amap[id2][i];
+    // no need to set the id alphamap to 0, it'll be done in "eraseTexture(id2)"
   }
 
   eraseTexture(id2);
