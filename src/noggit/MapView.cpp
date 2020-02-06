@@ -321,6 +321,15 @@ void MapView::createGUI()
   TexturePicker->hide();
   connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
 
+  connect( TexturePicker
+         , &noggit::ui::texture_picker::set_texture
+         , [=] (scoped_blp_texture_reference texture)
+           {
+             makeCurrent();
+             opengl::context::scoped_setter const _(::gl, context());
+             noggit::ui::selected_texture::set(std::move(texture));
+           }
+         );
   connect(TexturePicker, &noggit::ui::texture_picker::shift_left
     , [=]
     {

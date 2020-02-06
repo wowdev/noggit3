@@ -38,6 +38,7 @@ namespace noggit
       MapChunk* _chunk;
 
     signals:
+      void set_texture(scoped_blp_texture_reference texture);
       void shift_left();
       void shift_right();
     };
