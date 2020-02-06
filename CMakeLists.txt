@@ -86,6 +86,8 @@ if(WIN32)
   endif()
 endif()
 
+# better exception handling for visual studio, particularly for the asynchronous stuff
+add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /EHa)
 # multi core building for visual studio
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
 
