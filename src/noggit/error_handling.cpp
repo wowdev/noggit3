@@ -6,9 +6,10 @@
 #include <vector>
 
 #ifndef WIN32
-#  include <execinfo.h>
+  #include <execinfo.h>
 #else
-#  include <win/StackWalker.h>
+  #include <win/StackWalker.h>
+  #include <errhandlingapi.h>
 #endif
 
 namespace
@@ -95,10 +96,58 @@ namespace
   }
 }
 
+#ifdef _WIN32
+static LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
+{
+  auto code = ExceptionInfo->ExceptionRecord->ExceptionCode;
+
+  switch (code)
+  {
+    case EXCEPTION_ACCESS_VIOLATION: LogError << "EXCEPTION_ACCESS_VIOLATION" << std::endl; break;
+    case EXCEPTION_DATATYPE_MISALIGNMENT: LogError << "EXCEPTION_DATATYPE_MISALIGNMENT" << std::endl; break;
+    case EXCEPTION_BREAKPOINT: LogError << "EXCEPTION_BREAKPOINT" << std::endl; break;
+    case EXCEPTION_SINGLE_STEP: LogError << "EXCEPTION_SINGLE_STEP" << std::endl; break;
+    case EXCEPTION_ARRAY_BOUNDS_EXCEEDED: LogError << "EXCEPTION_ARRAY_BOUNDS_EXCEEDED" << std::endl; break;
+    case EXCEPTION_FLT_DENORMAL_OPERAND: LogError << "EXCEPTION_FLT_DENORMAL_OPERAND" << std::endl; break;
+    case EXCEPTION_FLT_DIVIDE_BY_ZERO: LogError << "EXCEPTION_FLT_DIVIDE_BY_ZERO" << std::endl; break;
+    case EXCEPTION_FLT_INEXACT_RESULT: LogError << "EXCEPTION_FLT_INEXACT_RESULT" << std::endl; break;
+    case EXCEPTION_FLT_INVALID_OPERATION: LogError << "EXCEPTION_FLT_INVALID_OPERATION" << std::endl; break;
+    case EXCEPTION_FLT_OVERFLOW: LogError << "EXCEPTION_FLT_OVERFLOW" << std::endl; break;
+    case EXCEPTION_FLT_STACK_CHECK: LogError << "EXCEPTION_FLT_STACK_CHECK" << std::endl; break;
+    case EXCEPTION_FLT_UNDERFLOW: LogError << "EXCEPTION_FLT_UNDERFLOW" << std::endl; break;
+    case EXCEPTION_INT_DIVIDE_BY_ZERO: LogError << "EXCEPTION_INT_DIVIDE_BY_ZERO" << std::endl; break;
+    case EXCEPTION_INT_OVERFLOW: LogError << "EXCEPTION_INT_OVERFLOW" << std::endl; break;
+    case EXCEPTION_PRIV_INSTRUCTION: LogError << "EXCEPTION_PRIV_INSTRUCTION" << std::endl; break;
+    case EXCEPTION_IN_PAGE_ERROR: LogError << "EXCEPTION_IN_PAGE_ERROR" << std::endl; break;
+    case EXCEPTION_ILLEGAL_INSTRUCTION: LogError << "EXCEPTION_ILLEGAL_INSTRUCTION" << std::endl; break;
+    case EXCEPTION_NONCONTINUABLE_EXCEPTION: LogError << "EXCEPTION_NONCONTINUABLE_EXCEPTION" << std::endl; break;
+    case EXCEPTION_STACK_OVERFLOW: LogError << "EXCEPTION_STACK_OVERFLOW" << std::endl; break;
+    case EXCEPTION_INVALID_DISPOSITION: LogError << "EXCEPTION_INVALID_DISPOSITION" << std::endl; break;
+    case EXCEPTION_GUARD_PAGE: LogError << "EXCEPTION_GUARD_PAGE" << std::endl; break;
+    case EXCEPTION_INVALID_HANDLE: LogError << "EXCEPTION_INVALID_HANDLE" << std::endl; break;
+#ifdef STATUS_POSSIBLE_DEADLOCK
+    case EXCEPTION_POSSIBLE_DEADLOCK: LogError << "EXCEPTION_POSSIBLE_DEADLOCK" << std::endl; break;
+#endif
+    default:
+      LogError << "Exception code=" << code << std::endl;
+  }
+
+  noggit::printStacktrace();
+ 
+  return EXCEPTION_CONTINUE_SEARCH;
+}
+#endif
+
+
+
 namespace noggit
 {
   void RegisterErrorHandlers()
   {
+#ifdef _WIN32
+    SetUnhandledExceptionFilter(windows_exception_handler);
+#endif
+
     signal (SIGABRT, leave);
     signal (SIGFPE, leave);
     signal (SIGILL, leave);
