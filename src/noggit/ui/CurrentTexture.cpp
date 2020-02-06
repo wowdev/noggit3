@@ -65,7 +65,9 @@ namespace noggit
     void current_texture::mousePressEvent(QMouseEvent* event)
     {
       if (event->button() == Qt::LeftButton)
+      {
         _start_pos = event->pos();
+      }
 
       clickable_label::mousePressEvent(event);
     }
@@ -75,31 +77,36 @@ namespace noggit
       clickable_label::mouseMoveEvent(event);
 
       if (!(event->buttons() & Qt::LeftButton))
+      {
         return;
-      if ((event->pos() - _start_pos).manhattanLength()
-        < QApplication::startDragDistance())
+      }
+
+      int drag_dist = (event->pos() - _start_pos).manhattanLength();
+
+      if (drag_dist < QApplication::startDragDistance())
+      {
         return;
+      }
 
       QMimeData* mimeData = new QMimeData;
       mimeData->setText(QString(_filename.c_str()));
-
 
       QDrag* drag = new QDrag(this);
       drag->setMimeData(mimeData);
       drag->setPixmap(*pixmap());
       drag->exec();
-      
     }
 
     void current_texture::dragEnterEvent(QDragEnterEvent* event)
     {
       if (event->mimeData()->hasText())
+      {
         event->accept();
+      }
     }
 
     void current_texture::dropEvent(QDropEvent* event)
     {
-
       std::string filename = event->mimeData()->text().toStdString();
 
       switch (_drop_behavior)
@@ -119,13 +126,11 @@ namespace noggit
         case CurrentTextureDropBehavior::none:
           return;
       }
-
     }
 
     void current_texture::set_drop_behavior(int behavior)
     {
       _drop_behavior = behavior;
     }
-
   }
 }
