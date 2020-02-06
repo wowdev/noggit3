@@ -30,8 +30,7 @@ namespace noggit
 
       auto layout (new QFormLayout (this));
 
-      _texture_to_swap_display = new current_texture(this, this);
-      _texture_to_swap_display->set_drop_behavior(CurrentTextureDropBehavior::texture_swapper);
+      _texture_to_swap_display = new current_texture(true, this);
 
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
@@ -101,10 +100,9 @@ namespace noggit
       _radius_spin->setValue(_radius + change);
     }
 
-    void texture_swapper::set_texture(std::string& filename)
+    void texture_swapper::set_texture(std::string const& filename)
     {
-      _texture_to_swap = scoped_blp_texture_reference(filename);
-      _texture_to_swap_display->set_texture(filename);
+      _texture_to_swap = std::move(scoped_blp_texture_reference(filename));
     }
   }
 }

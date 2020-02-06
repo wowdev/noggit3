@@ -71,6 +71,8 @@ namespace noggit
 
       current_texture* _current_texture;
 
+      texture_swapper* const texture_swap_tool() { return _texture_switcher; }
+
       QSize sizeHint() const override;
 
     private:

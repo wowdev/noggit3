@@ -275,6 +275,27 @@ void MapView::createGUI()
 
   TexturePalette = new noggit::ui::tileset_chooser(this);
 
+  connect( texturingTool->texture_swap_tool()->texture_display()
+         , &noggit::ui::current_texture::texture_dropped
+         , [=] (std::string const& filename)
+           {
+             makeCurrent();
+             opengl::context::scoped_setter const _(::gl, context());
+
+             texturingTool->texture_swap_tool()->set_texture(filename);
+           }
+         );
+
+  connect( texturingTool->_current_texture
+         , &noggit::ui::current_texture::texture_dropped
+         , [=] (std::string const& filename)
+           {
+             makeCurrent();
+             opengl::context::scoped_setter const _(::gl, context());
+
+             noggit::ui::selected_texture::set(filename);
+           }
+         );
   connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
     , [=]
     {
