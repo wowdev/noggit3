@@ -10,7 +10,6 @@
 
 void AsyncLoader::process()
 {
-  noggit::RegisterErrorHandlers();
   AsyncObject* object = nullptr;
 
   QSettings settings;
