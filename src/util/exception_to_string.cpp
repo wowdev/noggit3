@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/errorHandling.h>
 #include <util/exception_to_string.hpp>
 
 namespace util
@@ -42,6 +43,7 @@ namespace util
 
   std::string exception_to_string (std::exception_ptr ptr)
   {
+    noggit::printStacktrace();
     return exception_to_string_impl (ptr, 0, true);
   }
 }

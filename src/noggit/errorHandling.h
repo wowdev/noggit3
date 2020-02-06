@@ -5,4 +5,5 @@
 namespace noggit
 {
   void RegisterErrorHandlers();
+  void printStacktrace();
 }
