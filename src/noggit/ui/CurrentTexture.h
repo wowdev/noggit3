@@ -23,11 +23,10 @@ namespace noggit
 
     class current_texture : public clickable_label
     {
+      Q_OBJECT
     private:
       std::string _filename;
       bool _need_update;
-      int _drop_behavior = CurrentTextureDropBehavior::current_texture;
-      texture_swapper* _texture_switcher;
 
       virtual void resizeEvent (QResizeEvent*) override
       {
@@ -41,17 +40,17 @@ namespace noggit
 
       QPoint _start_pos;
 
+      signals:
+        void texture_dropped(std::string const& filename);
     public:
-      current_texture(QWidget* parent = nullptr, texture_swapper* texture_switcher = nullptr);
+      current_texture(bool accept_drop, QWidget* parent = nullptr);
       void set_texture (std::string const& texture);
-      void set_drop_behavior(int behavior);
 
       void mouseMoveEvent(QMouseEvent* event) override;
       void mousePressEvent(QMouseEvent* event) override;
 
       void dragEnterEvent(QDragEnterEvent* event) override;
       void dropEvent(QDropEvent* event) override;
-
     };
   }
 }

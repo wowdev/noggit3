@@ -16,7 +16,7 @@ namespace noggit
 {
   namespace ui
   {
-    current_texture::current_texture(QWidget* parent, texture_swapper* texture_switcher)
+    current_texture::current_texture(bool accept_drop, QWidget* parent)
       : clickable_label (parent)
       , _filename("tileset\\generic\\black.blp")
       , _need_update(true)
@@ -24,11 +24,9 @@ namespace noggit
       QSizePolicy policy (QSizePolicy::Maximum, QSizePolicy::Maximum);
       setSizePolicy (policy);
       setMinimumSize(128, 128);
-      setAcceptDrops(true);
+      setAcceptDrops(accept_drop);
 
       update_texture_if_needed();
-
-      _texture_switcher = texture_switcher;
     }
 
     QSize current_texture::sizeHint() const
@@ -109,28 +107,8 @@ namespace noggit
     {
       std::string filename = event->mimeData()->text().toStdString();
 
-      switch (_drop_behavior)
-      {
-        case CurrentTextureDropBehavior::current_texture:
-        {
-          set_texture(filename);
-          noggit::ui::selected_texture::set(filename);
-          event->accept();
-          break;
-        }
-        case CurrentTextureDropBehavior::texture_swapper:
-        {
-          _texture_switcher->set_texture(filename);
-          break;
-        }
-        case CurrentTextureDropBehavior::none:
-          return;
-      }
-    }
-
-    void current_texture::set_drop_behavior(int behavior)
-    {
-      _drop_behavior = behavior;
+      set_texture(filename);
+      emit texture_dropped(filename);
     }
   }
 }

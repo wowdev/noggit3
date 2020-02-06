@@ -31,7 +31,7 @@ namespace noggit
 
       for (int i = 0; i < 4; i++)
       {
-        current_texture* click_label = new current_texture(this);
+        current_texture* click_label = new current_texture(false, this);
         connect ( click_label, &clickable_label::clicked
                 , [=]
                   {
@@ -39,8 +39,6 @@ namespace noggit
                   }
                 );
 
-        click_label->setAcceptDrops(false);
-        click_label->set_drop_behavior(CurrentTextureDropBehavior::none);
         layout->addWidget(click_label, 0, i);
         _labels.push_back(click_label);
       }

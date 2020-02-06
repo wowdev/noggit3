@@ -49,7 +49,9 @@ namespace noggit
         _brush_mode_group->setChecked(!_brush_mode_group->isChecked());
       }
 
-      void set_texture(std::string& filename);
+      void set_texture(std::string const& filename);
+
+      current_texture* const texture_display() { return _texture_to_swap_display; }
 
     private:
       boost::optional<scoped_blp_texture_reference> _texture_to_swap;

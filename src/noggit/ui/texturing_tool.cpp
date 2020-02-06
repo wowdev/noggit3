@@ -42,7 +42,7 @@ namespace noggit
       _inner_brush.init();
       _spray_brush.init();
 
-      _current_texture = new current_texture(this);
+      _current_texture = new current_texture(true, this);
       _current_texture->resize(QSize(225, 225));
       layout->addRow (_current_texture);
       layout->setAlignment(_current_texture, Qt::AlignHCenter);
