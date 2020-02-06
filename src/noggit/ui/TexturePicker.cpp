@@ -95,7 +95,7 @@ namespace noggit
     {
       assert(id < _textures.size());
 
-      selected_texture::set (_textures[id]);
+      emit set_texture(_textures[id]);
       current_texture_window->set_texture (_textures[id]->filename);
     }
 
