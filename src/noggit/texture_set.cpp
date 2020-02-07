@@ -616,10 +616,12 @@ std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
 
       for (size_t layer = 0; layer < nTextures - 1; ++layer)
       {
-        amaps.emplace_back();
+        amaps.emplace_back(2048);
+        auto& layer_data = amaps.back();
+
         for (int i = 0; i < 2048; ++i)
         {
-          amaps.back().push_back(combine_nibble(layer, i));
+          layer_data[i] = combine_nibble(layer, i);
         }
       }
     }
