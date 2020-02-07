@@ -6,6 +6,8 @@
 
 #include <StormLib.h>
 
+#include <boost/filesystem/path.hpp>
+
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -48,17 +50,21 @@ class MPQFile
   std::vector<char> buffer;
   size_t pointer;
 
-  // disable copying
-  MPQFile(const MPQFile& /*f*/) { }
-  void operator=(const MPQFile& /*f*/) { }
 
   bool External;
-  std::string fname;
+  boost::filesystem::path _disk_path;
+  std::string _mpq_path;
 
 public:
   explicit MPQFile(const std::string& pFilename);  // filenames are not case sensitive, the are if u dont use a filesystem which is kinda shitty...
 
+  MPQFile() = delete;
   ~MPQFile();
+  MPQFile(MPQFile const&) = delete;
+  MPQFile(MPQFile&&) = delete;
+  MPQFile& operator=(MPQFile const&) = delete;
+  MPQFile& operator=(MPQFile&&) = delete;
+
   size_t read(void* dest, size_t bytes);
   size_t getSize() const;
   size_t getPos() const;
@@ -86,15 +92,10 @@ public:
 
   void SaveFile();
 
-  static bool exists(const std::string& pFilename);
-  static bool existsOnDisk(const std::string& pFilename);
-  static bool existsInMPQ(const std::string& pFilename);
+  static bool exists (std::string const& filename);
+  static bool existsOnDisk (std::string const& filename);
 
   friend class MPQArchive;
-
-private:
-  static std::string getDiskPath(const std::string& pFilename);
-  static std::string getMPQPath(const std::string& pFilename);
 };
 
 namespace noggit
@@ -102,5 +103,6 @@ namespace noggit
   namespace mpq
   {
     std::string normalized_filename (std::string filename);
+    std::string normalized_filename_insane (std::string filename);
   }
 }
