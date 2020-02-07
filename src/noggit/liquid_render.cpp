@@ -87,6 +87,8 @@ void liquid_render::add_liquid_id(int liquid_id)
     if (lLiquidTypeRow.getInt(LiquidTypeDB::ShaderType) == 3)
     {
       filename = "XTextures\\river\\lake_a.%d.blp";
+      // default param for water
+      _float_param_by_liquid_id[liquid_id] = math::vector_2d(1.f, 0.f);
     }
     else
     {
