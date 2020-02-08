@@ -62,11 +62,7 @@ namespace noggit
 
               if (world()->mapIndex.hasTile (tile))
               {
-                if (world()->mapIndex.isTileExternal (tile))
-                {
-                  painter.setPen (QColor::fromRgbF (1.0f, 0.7f, 0.5f, 0.6f));
-                }
-                else if (world()->mapIndex.tileLoaded (tile))
+                if (world()->mapIndex.tileLoaded (tile))
                 {
                   if (world()->mapIndex.has_unsaved_changes(tile))
                   {
@@ -74,6 +70,10 @@ namespace noggit
                   }
 
                   painter.setPen(QColor::fromRgbF(0.f, 0.f, 0.f, 0.6f));
+                }
+                else if (world()->mapIndex.isTileExternal(tile))
+                {
+                  painter.setPen(QColor::fromRgbF(1.0f, 0.7f, 0.5f, 0.6f));
                 }
                 else
                 {
