@@ -7,6 +7,7 @@
 #include <limits>
 #include <ostream>
 #include <tuple>
+#include <vector>
 
 namespace math
 {
@@ -202,4 +203,16 @@ namespace math
     vector_3d (vector_3d_base<float> x) : vector_3d_base<float> (std::move (x)) {}
     vector_3d() : vector_3d_base<float>() {}
   };
+
+
+  template<typename Fun>
+    std::vector<math::vector_3d> apply
+      (Fun&& fun, std::vector<math::vector_3d> points)
+  {
+    for (auto& point : points)
+    {
+      point = fun (point);
+    }
+    return points;
+  }
 }

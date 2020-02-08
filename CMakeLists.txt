@@ -276,6 +276,7 @@ set ( noggit_ui_sources
     )
 
 set ( math_sources
+      src/math/bounding_box.cpp
       src/math/frustum.cpp
       src/math/matrix_4x4.cpp
       src/math/ray.cpp
@@ -369,6 +370,7 @@ set ( noggit_ui_headers
     )
 
 set ( math_headers
+      src/math/bounding_box.hpp
       src/math/constants.hpp
       src/math/frustum.hpp
       src/math/interpolation.hpp
