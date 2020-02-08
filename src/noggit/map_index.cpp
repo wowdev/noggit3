@@ -265,16 +265,18 @@ void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint
     return;
   }
 
-  adt->wait_until_loaded();
-
   adt->changed = true;
 
   if (type == model_update::add)
   {
+    // don't wait until the adt is loaded:
+    // avoid deadlock when fixing uid duplicates on loading
     adt->add_model(uid);
   }
   else if(type == model_update::remove)
   {
+    // only remove models from fully loaded tiles
+    adt->wait_until_loaded();
     adt->remove_model(uid);
   }
 }
