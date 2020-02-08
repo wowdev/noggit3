@@ -33,6 +33,8 @@ static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
 class MapChunk
 {
 private:
+  tile_mode _mode;
+
   bool hasMCCV;
 
   int holes;
@@ -85,7 +87,7 @@ private:
   opengl::scoped::deferred_upload_buffers<4> lod_indices;
 
 public:
-  MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha);
+  MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode);
 
   MapTile *mt;
   math::vector_3d vmin, vmax, vcenter;

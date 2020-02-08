@@ -26,7 +26,6 @@ class World;
 
 class MapTile : public AsyncObject
 {
-
 public:
 	MapTile( int x0
          , int z0
@@ -36,6 +35,7 @@ public:
          , bool use_mclq_green_lava
          , bool reloading_tile
          , World*
+         , tile_mode mode = tile_mode::edit
          );
   ~MapTile();
 
@@ -123,6 +123,7 @@ public:
   bool tile_is_being_reloaded() const { return _tile_is_being_reloaded; }
 
 private:
+  tile_mode _mode;
   bool _tile_is_being_reloaded;
 
   // MFBO:

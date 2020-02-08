@@ -278,3 +278,13 @@ struct MPHD
   uint32_t something;
   uint32_t unused[6];
 };
+
+
+enum class tile_mode
+{
+  // regular mode
+  edit,
+  // uid fix mode, ignore/change loading and saving to
+  // reduce the uid fix all time
+  uid_fix_all
+};

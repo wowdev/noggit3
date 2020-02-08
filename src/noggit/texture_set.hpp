@@ -28,7 +28,7 @@ class TextureSet
 {
 public:
   TextureSet() = delete;
-  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map);
+  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps);
 
   math::vector_2d anim_uv_offset(int id, int animtime) const;
 
@@ -99,4 +99,6 @@ private:
   boost::optional<tmp_edit_alpha_values> tmp_edit_values;
 
   void create_temporary_alphamaps_if_needed();
+
+  bool _do_not_convert_alphamaps;
 };

@@ -20,8 +20,9 @@
 #include <iostream>
 #include <map>
 
-MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
-  : mt(maintile)
+MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
+  : _mode(mode)
+  , mt(maintile)
   , use_big_alphamap(bigAlpha)
 {
   uint32_t fourcc;
@@ -60,7 +61,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
 
-  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha, !!header_flags.flags.do_not_fix_alpha_map);
+  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha, !!header_flags.flags.do_not_fix_alpha_map, mode == tile_mode::uid_fix_all);
 
   // - MCVT ----------------------------------------------
   {
@@ -210,7 +211,11 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     header_flags.value &= ~(0xF << 2);
   }
 
-  initStrip();
+  // no need to create indexes when applying the uid fix
+  if (_mode == tile_mode::edit)
+  {
+    initStrip();
+  }
 
   vcenter = (vmin + vmax) * 0.5f;
 }
@@ -237,6 +242,14 @@ void MapChunk::update_intersect_points()
 
 void MapChunk::upload()
 {
+  // uid fix adt should never/can't be rendered
+  // add the check here once to avoid checks all over the place
+  // editing requires rendering anyway
+  if (_mode == tile_mode::uid_fix_all)
+  {
+    throw std::logic_error("Trying to render an ADT/chunk that is supposed to be used for the uid fix all only");
+  }
+
   _vertex_array.upload();
   _buffers.upload();
   lod_indices.upload();

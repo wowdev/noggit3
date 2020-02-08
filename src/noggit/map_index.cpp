@@ -883,7 +883,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
       // load the tile without the models
-      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), false, world);
+      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), false, world, tile_mode::uid_fix_all);
       tile.finishLoading();
 
       // add the uids to the tile to be able to save the models

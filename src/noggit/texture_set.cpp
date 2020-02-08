@@ -13,9 +13,10 @@
 
 #include <boost/utility/in_place_factory.hpp>
 
-TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map)
+TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps)
+  : nTextures(header.nLayers)
+  , _do_not_convert_alphamaps(do_not_convert_alphamaps)
 {
-  nTextures = header.nLayers;
   for (int i = 0; i < 64; ++i)
   {
     const size_t array_index(i / 4);
@@ -49,7 +50,7 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
     }
 
     // always use big alpha for editing / rendering
-    if (!use_big_alphamaps)
+    if (!use_big_alphamaps && !_do_not_convert_alphamaps)
     {
       convertToBigAlpha();
     }
@@ -603,7 +604,19 @@ std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
     else
     {
       uint8_t tab[4096 * 3];
-      alphas_to_old_alpha(tab);
+
+      if (_do_not_convert_alphamaps)
+      {
+        for (size_t k = 0; k < nTextures - 1; k++)
+        {
+          memcpy(tab + (k*64*64), alphamaps[k]->getAlpha(), 64 * 64);
+        }
+      }
+      else
+      {
+        alphas_to_old_alpha(tab);
+      }
+      
 
       auto const combine_nibble
       (
