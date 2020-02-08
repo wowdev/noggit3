@@ -86,6 +86,7 @@ namespace math
       return quaternion {*this * static_cast<vector_4d> (q)};
     }
     matrix_4x4 operator* (matrix_4x4 const&) const;
+    std::vector<math::vector_3d> operator*(std::vector<math::vector_3d> points) const;
 
     matrix_4x4& operator* (float);
     matrix_4x4& operator/ (float);

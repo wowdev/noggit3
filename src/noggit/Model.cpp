@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/bounding_box.hpp>
 #include <noggit/AsyncLoader.h>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
@@ -47,7 +48,7 @@ void Model::finishLoading()
   }
 
 
-  _vertex_box_points = misc::box_points ( misc::transform_model_box_coords(header.bounding_box_min)
+  _vertex_box_points = math::box_points ( misc::transform_model_box_coords(header.bounding_box_min)
                                         , misc::transform_model_box_coords(header.bounding_box_max)
                                         );
 

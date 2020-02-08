@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/bounding_box.hpp>
 #include <math/frustum.hpp>
 #include <noggit/Log.h>
 #include <noggit/Misc.h> // checkinside
@@ -191,49 +192,33 @@ void ModelInstance::recalcExtents()
 
   update_transform_matrix();
 
-  math::vector_3d min (math::vector_3d::max()), vertex_box_min (min);
-  math::vector_3d max (math::vector_3d::min()), vertex_box_max (max);;
-  math::matrix_4x4 rot (_transform_mat_transposed.transposed());
+  math::aabb const relative_to_model
+    ( math::min ( model->header.collision_box_min
+                , model->header.bounding_box_min
+                )
+    , math::max ( model->header.collision_box_max
+                , model->header.bounding_box_max
+                )
+    );
 
-  math::vector_3d bounds[8 * 2];
-  math::vector_3d *ptr = bounds;
+  //! \todo If both boxes are {inf, -inf}, or well, if any min.c > max.c,
+  //! the model is bad itself. We *could* detect that case and explicitly
+  //! assume {-1, 1} then, to be nice to fuckported models.
 
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_max.y, model->header.collision_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_max.y, model->header.collision_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_min.y, model->header.collision_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_min.y, model->header.collision_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_min.y, model->header.collision_box_max.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_max.x, model->header.collision_box_max.y, model->header.collision_box_max.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_max.y, model->header.collision_box_max.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.collision_box_min.x, model->header.collision_box_min.y, model->header.collision_box_max.z));
+  auto const corners_in_world (math::apply (misc::transform_model_box_coords, relative_to_model.all_corners()));
 
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_max.y, model->header.bounding_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_max.y, model->header.bounding_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_min.y, model->header.bounding_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_min.y, model->header.bounding_box_min.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_min.y, model->header.bounding_box_max.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_max.x, model->header.bounding_box_max.y, model->header.bounding_box_max.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_max.y, model->header.bounding_box_max.z));
-  *ptr++ = rot * misc::transform_model_box_coords(math::vector_3d(model->header.bounding_box_min.x, model->header.bounding_box_min.y, model->header.bounding_box_max.z));
+  auto const rotated_corners_in_world (_transform_mat_transposed.transposed() * corners_in_world);
 
+  math::aabb const bounding_of_rotated_points (rotated_corners_in_world);
 
-  for (int i = 0; i < 8 * 2; ++i)
-  {
-    misc::extract_v3d_min_max (bounds[i], min, max);
-    // vertex box only for size_cat
-    if (i >= 8)
-    {
-      misc::extract_v3d_min_max (bounds[i], vertex_box_min, vertex_box_max);
-    }
-  }
+  _extents[0] = bounding_of_rotated_points.min;
+  _extents[1] = bounding_of_rotated_points.max;
 
-  _extents[0] = min;
-  _extents[1] = max;
-
-  size_cat = (max - min).length();
+  size_cat = (bounding_of_rotated_points.max - bounding_of_rotated_points.min).length();
 
   _need_recalc_extents = false;
 }
+
 
 std::vector<math::vector_3d> const& ModelInstance::extents()
 {

@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/bounding_box.hpp>
 #include <math/matrix_4x4.hpp>
 #include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
@@ -49,7 +50,7 @@ void main()
                    }
                  }
     {
-      std::vector<math::vector_3d> positions (misc::box_points (min_point, max_point));
+      std::vector<math::vector_3d> positions (math::box_points (min_point, max_point));
       
       static std::array<std::uint8_t, 16> const indices
         {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};

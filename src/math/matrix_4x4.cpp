@@ -124,6 +124,17 @@ namespace math
            };
   }
 
+  std::vector<math::vector_3d> matrix_4x4::operator*
+    (std::vector<math::vector_3d> points) const
+  {
+    return apply ( [&] (math::vector_3d const& point)
+                   {
+                     return *this * point;
+                   }
+                 , points
+                 );
+  }
+
   namespace
   {
     float minor_size (matrix_4x4 const& mat, std::size_t x, std::size_t y)
