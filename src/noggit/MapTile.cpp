@@ -33,6 +33,7 @@ MapTile::MapTile( int pX
                 , bool use_mclq_green_lava
                 , bool reloading_tile
                 , World* world
+                , tile_mode mode
                 )
   : AsyncObject(pFilename)
   , index(tile_index(pX, pZ))
@@ -40,6 +41,7 @@ MapTile::MapTile( int pX
   , zbase(pZ * TILESIZE)
   , changed(false)
   , Water (this, xbase, zbase, use_mclq_green_lava)
+  , _mode(mode)
   , _tile_is_being_reloaded(reloading_tile)
   , mBigAlpha(pBigAlpha)
   , _load_models(pLoadModels)
@@ -299,7 +301,7 @@ void MapTile::finishLoading()
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
   {
     theFile.seek(lMCNKOffsets[nextChunk]);
-    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha);
+    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode);
   }
 
   theFile.close();
