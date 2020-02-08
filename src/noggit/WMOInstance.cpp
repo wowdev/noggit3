@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/bounding_box.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/Misc.h> // checkinside
@@ -144,57 +145,37 @@ void WMOInstance::recalcExtents()
   update_transform_matrix();
   update_doodads();
 
-  math::vector_3d min (math::vector_3d::max());
-  math::vector_3d max (math::vector_3d::min());
+  std::vector<math::vector_3d> points;
 
-  std::vector<math::vector_3d> bounds (8 * (wmo->groups.size() + 1));
-  math::vector_3d *ptr = bounds.data();
-  math::vector_3d wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
-  math::vector_3d wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
+  math::vector_3d wmo_min(misc::transform_model_box_coords(wmo->extents[0]));
+  math::vector_3d wmo_max(misc::transform_model_box_coords(wmo->extents[1]));
 
-  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMax.y, wmoMin.z);
-  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMax.y, wmoMin.z);
-  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMin.y, wmoMin.z);
-  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMin.y, wmoMin.z);
-  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMin.y, wmoMax.z);
-  *ptr++ = _transform_mat * math::vector_3d(wmoMax.x, wmoMax.y, wmoMax.z);
-  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMax.y, wmoMax.z);
-  *ptr++ = _transform_mat * math::vector_3d(wmoMin.x, wmoMin.y, wmoMax.z);
+  auto& root_points = _transform_mat * math::aabb(wmo_min, wmo_max).all_corners();
+
+  points.insert(points.end(), root_points.begin(), root_points.end());
 
   for (int i = 0; i < (int)wmo->groups.size(); ++i)
   {
     auto const& group = wmo->groups[i];
+    auto& group_points = _transform_mat 
+      * math::aabb( group.BoundingBoxMin // no need to use misc::transform_model_box_coords
+                  , group.BoundingBoxMax // they are already in world coord (see group ctor)
+                  ).all_corners();
 
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMax.y, group.BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMax.y, group.BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMin.y, group.BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMin.y, group.BoundingBoxMin.z);
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMin.y, group.BoundingBoxMax.z);
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMax.x, group.BoundingBoxMax.y, group.BoundingBoxMax.z);
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMax.y, group.BoundingBoxMax.z);
-    *ptr++ = _transform_mat * math::vector_3d(group.BoundingBoxMin.x, group.BoundingBoxMin.y, group.BoundingBoxMax.z);
+    points.insert(points.end(), group_points.begin(), group_points.end());
 
     if (group.has_skybox())
     {
-      math::vector_3d group_min(math::vector_3d::max());
-      math::vector_3d group_max(math::vector_3d::min());
+      math::aabb const group_aabb(group_points);
 
-      for (int n = (i+1) * 8; n < (i+2)*8; ++n)
-      {
-        misc::extract_v3d_min_max(bounds[n], group_min, group_max);
-      }
-
-      group_extents[i] = {group_min, group_max};
+      group_extents[i] = {group_aabb.min, group_aabb.max};
     }
   }
 
-  for (int i = 0; i < 8 * ((int)wmo->groups.size() + 1); ++i)
-  {
-    misc::extract_v3d_min_max (bounds[i], min, max);
-  }
+  math::aabb const wmo_aabb(points);
 
-  extents[0] = min;
-  extents[1] = max;
+  extents[0] = wmo_aabb.min;
+  extents[1] = wmo_aabb.max;
 }
 
 bool WMOInstance::isInsideRect(math::vector_3d rect[2]) const
