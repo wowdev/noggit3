@@ -74,7 +74,7 @@ public:
     minimap(const map_horizon& horizon);
   };
 
-  map_horizon(const std::string& basename);
+  map_horizon(const std::string& basename, const MapIndex * const index);
 
   QImage _qt_minimap;
 
