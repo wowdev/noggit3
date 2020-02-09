@@ -14,6 +14,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/world_tile_update_queue.hpp>
 #include <noggit/world_model_instances_storage.hpp>
 #include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
@@ -47,6 +48,7 @@ class World
 private:
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   noggit::world_model_instances_storage _model_instance_storage;
+  noggit::world_tile_update_queue _tile_update_queue;
 public:
   MapIndex mapIndex;
   noggit::map_horizon horizon;
@@ -255,6 +257,7 @@ public:
   void updateTilesEntry(selection_type const& entry, model_update type);
   void updateTilesWMO(WMOInstance* wmo, model_update type, bool from_reloading = false);
   void updateTilesModel(ModelInstance* m2, model_update type, bool from_reloading = false);
+  void wait_for_all_tile_updates();
 
   void saveMap (int width, int height);
 

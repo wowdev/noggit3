@@ -89,6 +89,7 @@ bool World::IsEditableWorld(int pMapId)
 
 World::World(const std::string& name, int map_id)
   : _model_instance_storage(this)
+  , _tile_update_queue(this)
   , mapIndex (name, map_id, this)
   , horizon(name)
   , mWmoFilename("")
@@ -1904,28 +1905,17 @@ void World::updateTilesEntry(selection_type const& entry, model_update type)
 
 void World::updateTilesWMO(WMOInstance* wmo, model_update type, bool from_reloading)
 {
-  tile_index start(wmo->extents[0]), end(wmo->extents[1]);
-  for (int z = start.z; z <= end.z; ++z)
-  {
-    for (int x = start.x; x <= end.x; ++x)
-    {
-      mapIndex.update_model_tile(tile_index(x, z), type, wmo->mUniqueID, from_reloading);
-    }
-  }
+  _tile_update_queue.queue_update(wmo, type);
 }
 
 void World::updateTilesModel(ModelInstance* m2, model_update type, bool from_reloading)
 {
-  auto const& extents(m2->extents());
-  tile_index start(extents[0]), end(extents[1]);
+  _tile_update_queue.queue_update(m2, type);
+}
 
-  for (int z = start.z; z <= end.z; ++z)
-  {
-    for (int x = start.x; x <= end.x; ++x)
-    {
-      mapIndex.update_model_tile(tile_index(x, z), type, m2->uid, from_reloading);
-    }
-  }
+void World::wait_for_all_tile_updates()
+{
+  _tile_update_queue.wait_for_all_update();
 }
 
 unsigned int World::getMapID()

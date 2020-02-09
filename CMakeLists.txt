@@ -242,6 +242,7 @@ set ( noggit_root_sources
       src/noggit/uid_storage.cpp
       src/noggit/wmo_liquid.cpp
       src/noggit/world_model_instances_storage.cpp
+      src/noggit/world_tile_update_queue.cpp
     )
 
 set ( noggit_ui_sources
@@ -306,6 +307,7 @@ set ( noggit_root_headers
       src/noggit/DBCFile.h
       src/noggit/Log.h
       src/noggit/MPQ.h
+      src/noggit/map_enums.hpp
       src/noggit/MapChunk.h
       src/noggit/MapHeaders.h
       src/noggit/MapTile.h
@@ -336,6 +338,7 @@ set ( noggit_root_headers
       src/noggit/uid_storage.hpp
       src/noggit/wmo_liquid.hpp
       src/noggit/world_model_instances_storage.hpp
+      src/noggit/world_tile_update_queue.hpp
     )
 
 set ( noggit_ui_headers

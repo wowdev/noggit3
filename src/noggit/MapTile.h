@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/ray.hpp>
+#include <noggit/map_enums.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
