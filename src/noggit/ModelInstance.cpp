@@ -68,6 +68,14 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
                                         , transform_matrix_transposed()
                                         , {1.0f, 1.0f, 1.0f, 1.0f}
                                         );
+
+    opengl::primitives::wire_box ( _extents[0]
+                                 , _extents[1]
+                                 ).draw ( model_view
+                                        , projection
+                                        , math::matrix_4x4(math::matrix_4x4::unit)
+                                        , {0.0f, 1.0f, 0.0f, 1.0f}
+                                        );
   }
   else
   {
