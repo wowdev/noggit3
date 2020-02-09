@@ -95,12 +95,13 @@ map_horizon::map_horizon(const std::string& basename)
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
   _filename = filename.str();
 
-  MPQFile wdl_file (_filename);
-  if (wdl_file.isEof())
+  if (!MPQFile::exists(_filename))
   {
     LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
     return;
   }
+
+  MPQFile wdl_file (_filename);
 
   uint32_t fourcc;
   uint32_t size;
