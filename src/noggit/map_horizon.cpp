@@ -89,7 +89,7 @@ static inline uint32_t color_for_height (int16_t height)
 namespace noggit
 {
 
-map_horizon::map_horizon(const std::string& basename)
+map_horizon::map_horizon(const std::string& basename, const MapIndex * const index)
 {
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
@@ -190,7 +190,18 @@ map_horizon::map_horizon(const std::string& basename)
           for (size_t i (0); i < 16; ++i)
           {
             //! \todo R and B are inverted here
-            _qt_minimap.setPixel (x * 16 + i, y * 16 + j, color_for_height (_tiles[y][x]->height_17[j][i]));
+            _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color_for_height(_tiles[y][x]->height_17[j][i]));
+          }
+        }
+      }
+      // the adt exist but there's no data in the wdl
+      else if (index->hasTile(tile_index(x, y)))
+      {
+        for (size_t j(0); j < 16; ++j)
+        {
+          for (size_t i(0); i < 16; ++i)
+          {
+            _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color(200, 100, 25));
           }
         }
       }
