@@ -27,11 +27,6 @@
 #include <unordered_set>
 #include <vector>
 
-namespace opengl
-{
-  class call_list;
-}
-
 namespace noggit
 {
   struct object_paste_params;
