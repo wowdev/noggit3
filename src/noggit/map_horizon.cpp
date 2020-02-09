@@ -106,78 +106,70 @@ map_horizon::map_horizon(const std::string& basename)
   uint32_t fourcc;
   uint32_t size;
 
-  // - MVER ----------------------------------------------
+  bool done = false;
 
-  uint32_t version;
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-  wdl_file.read (&version, 4);
-
-  assert (fourcc == 'MVER' && size == 4 && version == 18);
-
-  // - MWMO ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MWMO');
-      // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
-
-  wdl_file.seekRelative (size);
-
-  // - MWID ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MWID');
-      // List of indexes into the MWMO tile.
-
-  wdl_file.seekRelative (size);
-
-  // - MODF ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MODF');
-      // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF tiles.
-
-  wdl_file.seekRelative (size);
-
-  // - MAOF ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MAOF' && size == 64 * 64 * sizeof (uint32_t));
-
-  uint32_t mare_offsets[64][64];
-  wdl_file.read (mare_offsets, 64 * 64 * sizeof (uint32_t));
-
-  // - MARE and MAHO by offset ---------------------------
-  for (size_t y (0); y < 64; ++y)
+  do
   {
-    for (size_t x (0); x < 64; ++x)
+    wdl_file.read(&fourcc, 4);
+    wdl_file.read(&size, 4);
+
+    switch (fourcc)
     {
-      if (!mare_offsets[y][x])
-        continue;
+      case 'MVER':
+      {
+        uint32_t version;
+        wdl_file.read(&version, 4);
+        assert(size == 4 && version == 18);
 
-      wdl_file.seek (mare_offsets[y][x]);
-      wdl_file.read (&fourcc, 4);
-      wdl_file.read (&size, 4);
+        break;
+      }
+      // todo: handle those too ?
+      case 'MWMO':
+      case 'MWID':
+      case 'MODF':
+        wdl_file.seekRelative(size);
+        break;
+      case 'MAOF':
+      {
+        assert(size == 64 * 64 * sizeof(uint32_t));
 
-      assert (fourcc == 'MARE');
-      assert (size == 0x442);
+        uint32_t mare_offsets[64][64];
+        wdl_file.read(mare_offsets, 64 * 64 * sizeof(uint32_t));
 
-      _tiles[y][x] = std::make_unique<map_horizon_tile>();
+        // - MARE and MAHO by offset ---------------------------
+        for (size_t y(0); y < 64; ++y)
+        {
+          for (size_t x(0); x < 64; ++x)
+          {
+            if (!mare_offsets[y][x])
+            {
+              continue;
+            }
 
-      //! \todo There also is MAHO giving holes into this heightmap.
-      wdl_file.read(_tiles[y][x]->height_17, 17 * 17 * sizeof(int16_t));
-      wdl_file.read(_tiles[y][x]->height_16, 16 * 16 * sizeof(int16_t));
+            wdl_file.seek(mare_offsets[y][x]);
+            wdl_file.read(&fourcc, 4);
+            wdl_file.read(&size, 4);
+
+            assert(fourcc == 'MARE');
+            assert(size == 0x442);
+
+            _tiles[y][x] = std::make_unique<map_horizon_tile>();
+
+            //! \todo There also is MAHO giving holes into this heightmap.
+            wdl_file.read(_tiles[y][x]->height_17, 17 * 17 * sizeof(int16_t));
+            wdl_file.read(_tiles[y][x]->height_16, 16 * 16 * sizeof(int16_t));
+          }
+        }
+
+        done = true;
+        break;
+      }
+      default:
+        LogError << "unknown chunk in wdl: code=" << fourcc << std::endl;
+        wdl_file.seekRelative(size);
+        break;
     }
-  }
+  } while (!done && !wdl_file.isEof());
 
   wdl_file.close();
 
