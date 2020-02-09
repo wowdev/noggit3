@@ -140,6 +140,8 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
 
 void MapIndex::saveall (World* world)
 {
+  world->wait_for_all_tile_updates();
+
   saveMaxUID();
 
   for (MapTile* tile : loaded_tiles())
@@ -249,7 +251,7 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 }
 
-void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint32_t uid, bool from_reloading)
+void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint32_t uid)
 {
   if (!hasTile(tile))
   {
@@ -257,26 +259,15 @@ void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint
   }
 
   MapTile* adt = loadTile(tile);
-
-  // don't update models beings reloaded on the tile that's reloading
-  // otherwise it'll create a deadlock
-  if (from_reloading && adt->tile_is_being_reloaded())
-  {
-    return;
-  }
-
+  adt->wait_until_loaded();
   adt->changed = true;
 
   if (type == model_update::add)
   {
-    // don't wait until the adt is loaded:
-    // avoid deadlock when fixing uid duplicates on loading
     adt->add_model(uid);
   }
   else if(type == model_update::remove)
   {
-    // only remove models from fully loaded tiles
-    adt->wait_until_loaded();
     adt->remove_model(uid);
   }
 }
@@ -410,6 +401,8 @@ bool MapIndex::isTileExternal(const tile_index& tile) const
 
 void MapIndex::saveTile(const tile_index& tile, World* world)
 {
+  world->wait_for_all_tile_updates();
+
 	// save given tile
 	if (tileLoaded(tile))
 	{
@@ -420,6 +413,8 @@ void MapIndex::saveTile(const tile_index& tile, World* world)
 
 void MapIndex::saveChanged (World* world)
 {
+  world->wait_for_all_tile_updates();
+
   if (changed)
   {
     save();

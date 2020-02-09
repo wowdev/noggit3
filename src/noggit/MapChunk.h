@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/quaternion.hpp> // math::vector_4d
+#include <noggit/map_enums.hpp>
 #include <noggit/MapTile.h> // MapTile
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>

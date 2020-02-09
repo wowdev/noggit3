@@ -15,15 +15,16 @@ namespace noggit
   std::uint32_t world_model_instances_storage::add_model_instance(ModelInstance instance, bool from_reloading)
   {
     std::uint32_t uid = instance.uid;
+    std::uint32_t uid_after;
 
     {
       std::lock_guard<std::mutex> const lock (_mutex);
-      instance.uid = unsafe_add_model_instance_no_world_upd(instance);
+      uid_after = unsafe_add_model_instance_no_world_upd(std::move(instance));
     }
 
-    if (from_reloading || instance.uid != uid)
+    if (from_reloading || uid_after != uid)
     {
-      _world->updateTilesModel(&instance, model_update::add, from_reloading);
+      _world->updateTilesModel(&_m2s.at(uid_after), model_update::add);
     }
 
     return instance.uid;
@@ -60,15 +61,16 @@ namespace noggit
   std::uint32_t world_model_instances_storage::add_wmo_instance(WMOInstance instance, bool from_reloading)
   {
     std::uint32_t uid = instance.mUniqueID;
+    std::uint32_t uid_after;
 
     {
       std::lock_guard<std::mutex> const lock(_mutex);
-      instance.mUniqueID = unsafe_add_wmo_instance_no_world_upd(instance);
+      uid_after = unsafe_add_wmo_instance_no_world_upd(std::move(instance));
     }
 
-    if (from_reloading || instance.mUniqueID != uid)
+    if (from_reloading || uid_after != uid)
     {
-      _world->updateTilesWMO(&instance, model_update::add, from_reloading);
+      _world->updateTilesWMO(&_wmos.at(uid_after), model_update::add, from_reloading);
     }
 
     return instance.mUniqueID;
