@@ -2,6 +2,9 @@
 This software is open source software licensed under GPL3, as found in
 the COPYING file.
 
+# DISCORD #
+You can follow noggit's development and get the latest build here: https://discord.gg/UbdFHyM
+
 # CONTRIBUTORS #
 A  list  of  known  contributors  can be  found  in  the  CONTRIBUTORS
 file.  New maintainers  should  list  themselves there  as  it is  not
