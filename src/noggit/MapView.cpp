@@ -1540,10 +1540,14 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
-  delete TexturePicker; // explicitly delete this here to avoid opengl context related crash
-  delete objectEditor;
-  delete texturingTool;
-
+  // when the uid fix fail the UI isn't created
+  if (!_uid_fix_failed)
+  {
+    delete TexturePicker; // explicitly delete this here to avoid opengl context related crash
+    delete objectEditor;
+    delete texturingTool;
+  }
+  
   if (_force_uid_check)
   {
     uid_storage::remove_uid_for_map(_world->getMapID());
