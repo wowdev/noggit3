@@ -51,6 +51,7 @@ namespace noggit
 
       void createBookmarkList();
       void build_menu();
+      void rebuild_menu();
 
       struct MapEntry
       {
