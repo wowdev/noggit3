@@ -82,45 +82,54 @@ namespace noggit
       connect ( _rotation_x, &QDoubleSpinBox::editingFinished
               , [&, world]
                 {
-                  // avoid rotation changes when losing focus
-                  if(_rotation_x->hasFocus())
+                  if (world->has_multiple_model_selected())
                   {
-                    change_models_rotation(world);
-                  }
-                  else // reset value
-                  {
-                    QSignalBlocker const _ (_rotation_x);
-                    _rotation_x->setValue(0.f);
+                    // avoid rotation changes when losing focus
+                    if (_rotation_x->hasFocus())
+                    {
+                      change_models_rotation(world);
+                    }
+                    else // reset value
+                    {
+                      QSignalBlocker const _(_rotation_x);
+                      _rotation_x->setValue(0.f);
+                    }
                   }
                 }
               );
       connect ( _rotation_z, &QDoubleSpinBox::editingFinished
               , [&, world]
                 {
-                  // avoid rotation changes when losing focus
-                  if(_rotation_z->hasFocus())
+                  if (world->has_multiple_model_selected())
                   {
-                    change_models_rotation(world);
-                  }
-                  else // reset value
-                  {
-                    QSignalBlocker const _ (_rotation_z);
-                    _rotation_z->setValue(0.f);
+                    // avoid rotation changes when losing focus
+                    if (_rotation_z->hasFocus())
+                    {
+                      change_models_rotation(world);
+                    }
+                    else // reset value
+                    {
+                      QSignalBlocker const _(_rotation_z);
+                      _rotation_z->setValue(0.f);
+                    }
                   }
                 }
               );
       connect ( _rotation_y, &QDoubleSpinBox::editingFinished
               , [&, world]
                 {
-                  // avoid rotation changes when losing focus
-                  if(_rotation_y->hasFocus())
+                  if (world->has_multiple_model_selected())
                   {
-                    change_models_rotation(world);
-                  }
-                  else // reset value
-                  {
-                    QSignalBlocker const _ (_rotation_y);
-                    _rotation_y->setValue(0.f);
+                    // avoid rotation changes when losing focus
+                    if (_rotation_y->hasFocus())
+                    {
+                      change_models_rotation(world);
+                    }
+                    else // reset value
+                    {
+                      QSignalBlocker const _(_rotation_y);
+                      _rotation_y->setValue(0.f);
+                    }
                   }
                 }
               );
