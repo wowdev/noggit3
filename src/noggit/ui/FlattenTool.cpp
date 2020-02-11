@@ -39,7 +39,7 @@ namespace noggit
 
       radio_linear->toggle();
 
-      QGroupBox* flatten_type_group (new QGroupBox ("Type"));
+      QGroupBox* flatten_type_group (new QGroupBox ("Type", this));
       QGridLayout* flatten_type_layout (new QGridLayout (flatten_type_group));
       flatten_type_layout->addWidget (radio_flat, 0, 0);
       flatten_type_layout->addWidget (radio_linear, 0, 1);
@@ -75,11 +75,11 @@ namespace noggit
 
       layout->addRow(_speed_slider);
 
-      layout->addRow(new QLabel("Flatten/Blur:"));
+      QGroupBox* flatten_blur_group = new QGroupBox("Flatten/Blur", this);
+      auto flatten_blur_layout = new QGridLayout(flatten_blur_group);
 
-      QGridLayout* lock_checkbox_layout(new QGridLayout());
-      lock_checkbox_layout->addWidget(_lock_up_checkbox = new QCheckBox(this), 0, 0);
-      lock_checkbox_layout->addWidget(_lock_down_checkbox = new QCheckBox(this), 0, 1);
+      flatten_blur_layout->addWidget(_lock_up_checkbox = new QCheckBox(this), 0, 0);
+      flatten_blur_layout->addWidget(_lock_down_checkbox = new QCheckBox(this), 0, 1);
 
       _lock_up_checkbox->setChecked(_flatten_mode.raise);
       _lock_up_checkbox->setText("raise");
@@ -88,11 +88,16 @@ namespace noggit
       _lock_down_checkbox->setText("lower");
       _lock_down_checkbox->setToolTip("Lower the terrain when using the tool");
 
-      layout->addRow(lock_checkbox_layout);
+      layout->addRow(flatten_blur_group);
 
-      layout->addRow(new QLabel("Flatten only:"));
+      QGroupBox* flatten_only_group = new QGroupBox("Flatten only", this);
+      auto flatten_only_layout = new QFormLayout(flatten_only_group);
 
-      QGridLayout* angle_layout(new QGridLayout());
+      _angle_group = new QGroupBox("Angled mode", this);
+      _angle_group->setCheckable(true);
+      _angle_group->setChecked(false);
+
+      QGridLayout* angle_layout(new QGridLayout(_angle_group));
 
       angle_layout->addWidget(_orientation_dial = new QDial(this), 0, 0);
       _orientation_dial->setRange(0, 360);
@@ -105,32 +110,31 @@ namespace noggit
       _angle_slider->setRange(0, 89);
       _angle_slider->setSliderPosition(_angle);
       _angle_slider->setToolTip("Angle");
+      _angle_slider->setMinimumHeight(80);
       angle_layout->addWidget(_angle_slider, 0, 1);
+      
+      flatten_only_layout->addRow(_angle_group);
 
-      _angle_group = new QGroupBox("Angled mode");
-      _angle_group->setCheckable(true);
-      _angle_group->setChecked(false);
-      _angle_group->setLayout(angle_layout);
-      layout->addRow(_angle_group);
+      _lock_group = new QGroupBox("Lock mode", this);
+      _lock_group->setCheckable(true);
+      _lock_group->setChecked(false);
 
-      QFormLayout* lock_layout(new QFormLayout());
+      QFormLayout* lock_layout(new QFormLayout(_lock_group));
+
       lock_layout->addRow("X:", _lock_x = new QDoubleSpinBox(this));
       lock_layout->addRow("Z:", _lock_z = new QDoubleSpinBox(this));
       lock_layout->addRow("H:", _lock_h = new QDoubleSpinBox(this));
-
-      _lock_group = new QGroupBox("Lock mode");
-      _lock_group->setCheckable(true);
-      _lock_group->setChecked(false);
-      _lock_group->setLayout(lock_layout);
-
-      layout->addRow(_lock_group);
 
       _lock_x->setRange(0.0, 34133.0);
       _lock_x->setDecimals(3);
       _lock_z->setRange(0.0, 34133.0);
       _lock_z->setDecimals(3);
       _lock_h->setRange (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max());
+      _lock_h->setDecimals(3);
       _lock_h->setMinimumWidth(30);
+
+      flatten_only_layout->addRow(_lock_group);
+      layout->addRow(flatten_only_group);
 
       connect ( _type_button_box, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
