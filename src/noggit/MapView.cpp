@@ -1449,6 +1449,8 @@ void MapView::on_uid_fix_fail()
 
 void MapView::initializeGL()
 {
+  bool uid_warning = false;
+
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width(), height());
 
@@ -1470,7 +1472,9 @@ void MapView::initializeGL()
   }
   else if (_uid_fix == uid_fix_mode::fix_all_fuckporting_edition)
   {
-    _world->mapIndex.fixUIDs (_world.get(), false);
+    auto result = _world->mapIndex.fixUIDs (_world.get(), false);
+
+    uid_warning = result == uid_fix_status::done_with_errors;
   }
 
   _uid_fix = uid_fix_mode::none;
@@ -1482,7 +1486,19 @@ void MapView::initializeGL()
   if (!_from_bookmark)
   {
     move_camera_with_auto_height (_camera.position);
-  }    
+  }
+
+  if (uid_warning)
+  {
+    QMessageBox::warning
+      ( nullptr
+      , "UID Warning"
+      , "Some models were missing or couldn't be loaded. "
+        "This will lead to culling (visibility) errors in game\n"
+        "It is recommanded to fix those models (listed in the log file) and run the uid fix all again."
+      , QMessageBox::Ok
+      );
+  }
 }
 
 void MapView::paintGL()
