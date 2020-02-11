@@ -141,9 +141,9 @@ namespace noggit
       auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
       connect(mapview, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
 
-      setCentralWidget (mapview);
-
       map_loaded = true;
+
+      setCentralWidget (mapview);
     }
 
     void main_window::loadMap(int mapID)
@@ -168,17 +168,17 @@ namespace noggit
 
     void main_window::build_menu()
     {
-      auto widget (new QWidget);
+      auto widget (new QWidget(this));
       auto layout (new QHBoxLayout (widget));
 
-      QListWidget* continents_table (new QListWidget (nullptr));
-      QListWidget* dungeons_table (new QListWidget (nullptr));
-      QListWidget* raids_table (new QListWidget (nullptr));
-      QListWidget* battlegrounds_table (new QListWidget (nullptr));
-      QListWidget* arenas_table (new QListWidget (nullptr));
-      QListWidget* bookmarks_table (new QListWidget (nullptr));
+      QListWidget* continents_table (new QListWidget (widget));
+      QListWidget* dungeons_table (new QListWidget (widget));
+      QListWidget* raids_table (new QListWidget (widget));
+      QListWidget* battlegrounds_table (new QListWidget (widget));
+      QListWidget* arenas_table (new QListWidget (widget));
+      QListWidget* bookmarks_table (new QListWidget (widget));
 
-      QTabWidget* entry_points_tabs (new QTabWidget (nullptr));
+      QTabWidget* entry_points_tabs (new QTabWidget (widget));
       entry_points_tabs->addTab (continents_table, "Continents");
       entry_points_tabs->addTab (dungeons_table, "Dungeons");
       entry_points_tabs->addTab (raids_table, "Raids");
@@ -263,6 +263,15 @@ namespace noggit
       setCentralWidget (widget);
     }
 
+    void main_window::rebuild_menu()
+    {
+      setCentralWidget(_null_widget = new QWidget(this));
+
+      createBookmarkList();
+      build_menu();
+      map_loaded = false;
+    }
+
     void main_window::createBookmarkList()
     {
       mBookmarks.clear();
@@ -326,43 +335,29 @@ namespace noggit
       switch (prompt.buttonRole(prompt.clickedButton()))
       {
         case QMessageBox::AcceptRole:
-        {
-          // update bookmark list
-          createBookmarkList();
-          map_loaded = false;
-
-          build_menu();
+          rebuild_menu();
           break;
-        }
-
         case QMessageBox::DestructiveRole:
-        {
-          build_menu();
+          setCentralWidget(_null_widget = new QWidget(this));
           event->accept();
           break;
-        }
-
         default:
-        {
           event->ignore();
           break;
-        }
-
       }
-
     }
 
     void main_window::prompt_uid_fix_failure()
     {
-      QMessageBox::critical
-        (nullptr
-          , "UID fix failed"
-          , "The UID fix couldn't be done because some models were missing or fucked up.\n"
-            "The models are listed in the log file."
-          , QMessageBox::Ok
-        );
+      rebuild_menu();
 
-      //!\ todo: rebuild/show the map selection menu
+      QMessageBox::critical
+        ( nullptr
+        , "UID fix failed"
+        , "The UID fix couldn't be done because some models were missing or fucked up.\n"
+          "The models are listed in the log file."
+        , QMessageBox::Ok
+        );
     }
   }
 }
