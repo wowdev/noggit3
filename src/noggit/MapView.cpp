@@ -1462,7 +1462,7 @@ void MapView::initializeGL()
   {
     auto result = _world->mapIndex.fixUIDs (_world.get(), true);
 
-    if (result == uid_fix_status::done_with_errors)
+    if (result == uid_fix_status::failed)
     {
       on_uid_fix_fail();
       return;
