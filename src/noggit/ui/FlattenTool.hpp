@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <noggit/tool_enums.hpp>
 #include <math/vector_3d.hpp>
 
 #include <QtWidgets/QButtonGroup>
@@ -60,7 +61,7 @@ namespace noggit
       math::vector_3d _lock_pos;
 
       int _flatten_type;
-      int _flatten_mode;
+      flatten_mode _flatten_mode;
 
     private:
       QButtonGroup* _type_button_box;

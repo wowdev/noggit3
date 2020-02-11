@@ -43,11 +43,20 @@ enum eFlattenType
   eFlattenType_Count,
 };
 
-enum eFlattenMode
+struct flatten_mode
 {
-  eFlattenMode_Raise = 0x1,
-  eFlattenMode_Lower = 0x2,
-  eFlattenMode_Both = eFlattenMode_Raise | eFlattenMode_Lower,
+  flatten_mode(bool a, bool b) : raise(a), lower(b) {}
+
+  bool raise : 1;
+  bool lower : 1;
+
+  flatten_mode next()
+  {
+    lower = lower == raise;
+    raise = !raise;
+
+    return *this;
+  }
 };
 
 enum class editing_mode
