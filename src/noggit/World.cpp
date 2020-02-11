@@ -1529,13 +1529,13 @@ void World::changeTerrain(math::vector_3d const& pos, float change, float radius
     );
 }
 
-void World::flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
+void World::flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
 {
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->flattenTerrain(pos, remain, radius, BrushType, flattenType, origin, angle, orientation);
+        return chunk->flattenTerrain(pos, remain, radius, BrushType, mode, origin, angle, orientation);
       }
     , [this] (MapChunk* chunk)
       {
@@ -1544,7 +1544,7 @@ void World::flattenTerrain(math::vector_3d const& pos, float remain, float radiu
     );
 }
 
-void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType)
+void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode)
 {
   for_all_chunks_in_range
     ( pos, radius
@@ -1554,6 +1554,7 @@ void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, 
                                   , remain
                                   , radius
                                   , BrushType
+                                  , mode
                                   , [this] (float x, float z) -> boost::optional<float>
                                     {
                                       math::vector_3d vec;

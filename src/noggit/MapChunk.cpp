@@ -847,7 +847,7 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
                               , float remain
                               , float radius
                               , int BrushType
-                              , int flattenType
+                              , flatten_mode const& mode
                               , math::vector_3d const& origin
                               , math::degrees angle
                               , math::degrees orientation
@@ -870,8 +870,8 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
 			  ) * math::tan(angle)
 	  );
 
-	  if ((flattenType == eFlattenMode_Raise && ah < mVertices[i].y)
-		  || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y)
+	  if ((!mode.lower && ah < mVertices[i].y)
+		  || (!mode.raise && ah > mVertices[i].y)
 		  )
 	  {
 		  continue;
@@ -908,10 +908,16 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
                            , float remain
                            , float radius
                            , int BrushType
+                           , flatten_mode const& mode
                            , std::function<boost::optional<float> (float, float)> height
                            )
 {
   bool changed (false);
+
+  if (BrushType == eFlattenType_Origin)
+  {
+    return false;
+  }
 
   for (int i (0); i < mapbufsize; ++i)
   {
@@ -943,18 +949,21 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
       }
     }
 
-	if (BrushType == eFlattenType_Origin)
-	{
-		continue;
-	}
+    float target = TotalHeight / TotalWeight;
+    float& y = mVertices[i].y;
 
-    mVertices[i].y = math::interpolation::linear
+    if ((target > y && !mode.raise) || (target < y && !mode.lower))
+    {
+      continue;
+    }
+
+    y = math::interpolation::linear
       ( BrushType == eFlattenType_Flat ? remain
       : BrushType == eFlattenType_Linear ? remain * (1.f - dist / radius)
       : BrushType == eFlattenType_Smooth ? pow (remain, 1.f + dist / radius)
       : throw std::logic_error ("bad brush type")
-      , mVertices[i].y
-      , TotalHeight / TotalWeight
+      , y
+      , target
       );
 
     changed = true;

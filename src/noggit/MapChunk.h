@@ -151,8 +151,8 @@ public:
 
   //! \todo implement Action stack for these
   bool changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
-  bool flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
-  bool blurTerrain ( math::vector_3d const& pos, float remain, float radius, int BrushType
+  bool flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
+  bool blurTerrain ( math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode
                    , std::function<boost::optional<float> (float, float)> height
                    );
 
