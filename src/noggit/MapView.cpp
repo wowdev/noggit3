@@ -885,6 +885,20 @@ void MapView::createGUI()
                                  );
                   }
                 );
+
+  ADD_ACTION_NS ( help_menu
+                , "Discord"
+                , []
+                  {
+                    ShellExecute ( nullptr
+                                 , "open"
+                                 , "https://discord.gg/UbdFHyM"
+                                 , nullptr
+                                 , nullptr
+                                 , SW_SHOWNORMAL
+                                 );
+                  }
+                );
 #endif
 
   ADD_ACTION ( file_menu
