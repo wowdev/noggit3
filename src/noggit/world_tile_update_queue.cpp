@@ -58,7 +58,9 @@ namespace noggit
     wmo_instance_update& operator= (wmo_instance_update&&) = default;
 
     wmo_instance_update(WMOInstance* wmo, model_update type)
-      : instance(wmo)
+      : start(wmo->extents[0])
+      , end(wmo->extents[1])
+      , uid(wmo->mUniqueID)
       , update_type(type)
     {
 
@@ -66,17 +68,18 @@ namespace noggit
 
     virtual void apply(World* const world) override
     {
-      tile_index start(instance->extents[0]), end(instance->extents[1]);
       for (int z = start.z; z <= end.z; ++z)
       {
         for (int x = start.x; x <= end.x; ++x)
         {
-          world->mapIndex.update_model_tile(tile_index(x, z), update_type, instance->mUniqueID);
+          world->mapIndex.update_model_tile(tile_index(x, z), update_type, uid);
         }
       }
     }
 
-    WMOInstance* instance;
+    tile_index start;
+    tile_index end;
+    std::uint32_t uid;
     model_update update_type;
   };
 
@@ -114,10 +117,19 @@ namespace noggit
 
   void world_tile_update_queue::queue_update(ModelInstance* instance, model_update type)
   {
-    std::lock_guard<std::mutex> const lock (_mutex);
+    {
+      std::lock_guard<std::mutex> const lock(_mutex);
 
-    _update_queue.emplace(new model_instance_update(instance, type));
-    _state_changed.notify_one();
+      _update_queue.emplace(new model_instance_update(instance, type));
+      _state_changed.notify_one();
+    }
+    // make sure deletion are done here
+    // otherwise the instance get deleted
+    if (type == model_update::remove)
+    {
+      // wait for all update to make sure they are done in the right order
+      wait_for_all_update();
+    }
   }
   void world_tile_update_queue::queue_update(WMOInstance* instance, model_update type)
   {
