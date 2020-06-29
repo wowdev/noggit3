@@ -107,101 +107,100 @@ tested, and nobody has built distributable packages in years.
 
 # DEVELOPMENT #
 Feel free to ask the owner of the official repository
-(https://bitbucket.org/berndloerwald/noggit3/) for write access or
+(https://github.com/wowdev/noggit3) for write access or
 fork and post a pull request.
 
-There is a bug tracker at https://bitbucket.org/berndloerwald/noggit3/issues
-which should be used.
+There is a bug tracker at https://github.com/wowdev/noggit3/issues which should be used.
 
 Discord, as linked above, may be used for communication.
 
 # CODING GUIDELINES #
-Following is an example for file src/noggit/ui/foo_ban.h. .cpp files
+Following is an example for file `src/noggit/ui/foo_ban.hpp`. `.cpp` files
 are similar.
 
 ```cpp
-    // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
  
-    //! \note Include guard shall be using #pragma once
-    #pragma once
+//! \note Include guard shall be using #pragma once
+#pragma once
  
-    //! \note Use fully qualified paths rather than "../relative". Order
-    //! includes with own first, then external dependencies, then c++ STL.
-    #include <noggit/bar.h>
+//! \note Use fully qualified paths rather than "../relative". Order
+//! includes with own first, then external dependencies, then c++ STL.
+#include <noggit/bar.hpp>
  
-    //! \note Namespaces equal directories. (java style packages.)
-    namespace noggit
+//! \note Namespaces equal directories. (java style packages.)
+namespace noggit
+{
+  namespace ui
+  {
+    //! \note Lower case, underscore separated. Classes might have
+    //! a _type suffix (even though being against the standard), but 
+    //! shouldn't.
+    class foo_ban : public QWidget
     {
-      namespace ui
+      Q_OBJECT;
+ 
+    public:
+      //! \note Long parameter list. Would be more than 80 chars.
+      //! chars. Break with comma in front. Use spaces to be
+      //! aligned below the braces.
+      foo_ban ( type const& name
+              , type_2 const& name_2
+              , type const& name3
+              )
+        : QWidget (nullptr)
+      //! \note Prefer initialization lists over assignment.
+        , _var (name)
+      {}
+
+      //! \note Use const where possible. No space between name and
+      //! braces when no arguments are given.
+      void render() const;
+ 
+      //! \note If you really need getters and setters, your design
+      //! might be broken. Please avoid them or consider just a
+      //! public data member.
+      type const& var() const
       {
-        //! \note Lower case, underscore separated. Classes might have
-        //! a _type suffix (even though being against the standard), but 
-        //! shouldn't.
-        class foo_ban : public QWidget
-        {
-        Q_OBJECT;
- 
-        public:
-          //! \note Long parameter list. Would be more than 80 chars.
-          //! chars. Break with comma in front. Use spaces to be
-          //! aligned below the braces.
-          foo_ban ( type const& name
-                  , type_2 const& name_2
-                  , type const& name3
-                  )
-            : QWidget (nullptr)
-          //! \note Prefer initialization lists over assignment.
-            , _var (name)
-          {}
- 
-          //! \note Use const where possible. No space between name and
-          //! braces when no arguments are given.
-          void render() const;
- 
-          //! \note If you really need getters and setters, your design
-          //! might be broken. Please avoid them or consider just a
-          //! public data member.
-          type const& var() const
-          {
-            return _var;
-          }
-          void var (type const& var_)
-          {
-            _var = var_;
-          }
- 
-          //! \note Prefer const where possible. If you need to copy, 
-          //! just take a `T`. Otherwise prefer taking a `T const&`.
-          //! Don't bother when it comes to tiny types, don't bother.
-          bazs_type count_some_numbers ( std::size_t begin
-                                       , std::size_t end
-                                       ) const
-          {
-            bazs_type bazs;
- 
-            //! \note Prefer construction over assignment. Prefer
-            //! preincrement.
-            for (size_t it (begin); it < end; ++it)
-            {
-              bazs.emplace_back (it);
-            }
- 
-            //! \note Prefer STL algorithms over hand written code.
-            auto const smallest
-              (std::min_element (bazs.begin(), bazs.end()));
- 
-            return *smallest;
-          }
- 
-        private:
-          //! \note Member variables are prefixed with an underscore.
-          type _var;
-          //! \note Typedef when using complex types. Fully qualify
-          //! types.
-          using baz_type = type_2;
-          using bazs_type = std::vector<baz_type>;
-          bazs_type _bazs;
-        }
+        return _var;
       }
+      void var (type const& var_)
+      {
+        _var = var_;
+      }
+ 
+      //! \note Prefer const where possible. If you need to copy, 
+      //! just take a `T`. Otherwise prefer taking a `T const&`.
+      //! Don't bother when it comes to tiny types, don't bother.
+      bazs_type count_some_numbers ( std::size_t begin
+                                   , std::size_t end
+                                   ) const
+      {
+        bazs_type bazs;
+ 
+        //! \note Prefer construction over assignment. Prefer
+        //! preincrement.
+        for (size_t it (begin); it < end; ++it)
+        {
+          bazs.emplace_back (it);
+        }
+ 
+        //! \note Prefer STL algorithms over hand written code.
+        auto const smallest
+          (std::min_element (bazs.begin(), bazs.end()));
+ 
+        return *smallest;
+      }
+
+    private:
+      //! \note Member variables are prefixed with an underscore.
+      type _var;
+      //! \note Typedef when using complex types. Fully qualify
+      //! types.
+      using baz_type = type_2;
+      using bazs_type = std::vector<baz_type>;
+      bazs_type _bazs;
     }
+  }
+}
 ```
