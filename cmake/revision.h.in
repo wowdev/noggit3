@@ -2,4 +2,4 @@
 
 #pragma once
 
-#define STRPRODUCTVER "3.@hg_rev_id_str@"
+#define STRPRODUCTVER "3.@NOGGIT_GIT_VERSION_STRING@"

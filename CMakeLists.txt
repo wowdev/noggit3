@@ -462,10 +462,6 @@ source_group("glsl"  FILES ${shaders})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
-# file used to force running the pre_build command by making it a "dependency" for the project
-set(force_update_file "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/force_build_update.cpp")
-set_source_files_properties(${force_update_file} PROPERTIES GENERATED TRUE)
-
 ADD_EXECUTABLE ( noggit
                   WIN32
                   MACOSX_BUNDLE
@@ -491,34 +487,6 @@ ADD_EXECUTABLE ( noggit
                   ${force_update_file}
                 )
                 
-           
-# Version ID update:
-           
-set(force_update_cmake "${CMAKE_SOURCE_DIR}/cmake/force_update.cmake")
-file(TOUCH "${force_update_file}")
-
-# update the version when it has changed
-add_custom_command(
-    PRE_BUILD
-    TARGET noggit
-    COMMAND "${CMAKE_COMMAND}"
-              -Dcmake_src_dir="${CMAKE_SOURCE_DIR}"
-              -Dout_dir="${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}"
-              -P "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake"
-              
-    DEPENDS "${force_update_file}"
-  )
-  
-# execute the script that update dependency file to run the previous command again before the next build
-add_custom_command(
-    POST_BUILD
-    TARGET noggit
-    COMMAND "${CMAKE_COMMAND}" 
-              -Dforce_update_file="${force_update_file}" 
-              -P ${force_update_cmake}
-  )
-
-
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   StormLib
@@ -530,6 +498,40 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::OpenGLExtensions
   ColorWidgets-qt5
 )
+
+set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")
+set (_noggit_revision_template_file "${CMAKE_SOURCE_DIR}/cmake/revision.h.in")
+set (_noggit_revision_output_file "${_noggit_revision_output_dir}/revision.h")
+set (_noggit_revision_state_file "${CMAKE_BINARY_DIR}/revision.state")
+set (_noggit_revision_script_file "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake")
+
+include_directories ("${_noggit_revision_output_dir}")
+
+find_package (Git)
+if (GIT_FOUND)
+  add_custom_target (update_git_revision
+    ALL
+    DEPENDS "${_noggit_revision_template_file}"
+            "${_noggit_revision_script_file}"
+    BYPRODUCTS "${_noggit_revision_output_file}"
+               "${_noggit_revision_state_file}"
+    COMMAND ${CMAKE_COMMAND}
+              -D_noggit_revision_template_file="${_noggit_revision_template_file}"
+              -D_noggit_revision_output_file="${_noggit_revision_output_file}"
+              -D_noggit_revision_state_file="${_noggit_revision_state_file}"
+              -DGIT_EXECUTABLE="${GIT_EXECUTABLE}"
+              -P "${_noggit_revision_script_file}"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+  add_dependencies (noggit update_git_revision)
+else()
+  message (WARNING "Failed to find a Git executable, will NOT produce a "
+    "useful version string. Crash logs will be useless. Do NOT distribute.")
+
+  set (NOGGIT_GIT_VERSION_STRING "UNKNOWN")
+  configure_file ("${_noggit_revision_template_file}"
+                  "${_noggit_revision_output_file}" @ONLY)
+endif()
 
 if(APPLE)
   TARGET_LINK_LIBRARIES (noggit
