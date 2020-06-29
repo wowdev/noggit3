@@ -215,7 +215,7 @@ boost::optional<selection_type> World::get_last_selected_model() const
     );
 
   return it == _current_selection.rend()
-    ? boost::optional<selection_type>() : *it;
+    ? boost::optional<selection_type>() : boost::optional<selection_type> (*it);
 }
 
 void World::set_current_selection(selection_type entry)
