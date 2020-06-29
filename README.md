@@ -5,17 +5,12 @@ the COPYING file.
 # DISCORD #
 You can follow Noggit's development and get the latest build here: https://discord.gg/UbdFHyM
 
-# CONTRIBUTORS #
-A list of known contributors can be found in the CONTRIBUTORS
-file. New maintainers should list themselves there as it is not
-automatically updated.
-
 # BUILDING #
 This project requires CMake to be built. It also requires the
 following libraries:
 
 * OpenGL
-* storm (stormlib by Ladislav Zezula)
+* StormLib (by Ladislav Zezula)
 * Boost
 * Qt 5
 
@@ -40,9 +35,9 @@ Any recent CMake 3.x version should work. Just take the latest.
 Install boost to `<boost-install>`. The easiest is to download a pre-built
 package from https://sourceforge.net/projects/boost/files/boost-binaries/.
 
-* Any version from the last years should work.
+* Any version from the last years should work, 1.60 at least.
 * Be sure to pick the right compiler version!
-* CMake may not support the latest version yet, if you have bad timing.
+* CMake may not support the latest version yet, if you have bad timing, try picking the second newest if configuring fails.
 
 ### Qt5 ###
 Install Qt5 to `<Qt-install>`, downloading a pre-built package from
@@ -53,7 +48,7 @@ also only **one** compiler version. If download size is noticably large
 (more than a few hundred MB), you're probably downloading way too much.
 
 ### StormLib ###
-Download stormlib from https://github.com/ladislav-zezula/StormLib (any
+Download StormLib from https://github.com/ladislav-zezula/StormLib (any
 recent version).
 
 * open CMake GUI
@@ -124,6 +119,7 @@ Discord, as linked above, may be used for communication.
 Following is an example for file src/noggit/ui/foo_ban.h. .cpp files
 are similar.
 
+```cpp
     // This file is part of Noggit3, licensed under GNU General Public License (version 3).
  
     //! \note Include guard shall be using #pragma once
@@ -208,3 +204,4 @@ are similar.
         }
       }
     }
+```
