@@ -1,5 +1,7 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+# adds target StormLib
+
 find_path (STORM_INCLUDE_DIR StormLib.h StormPort.h)
 
 find_library (_storm_debug_lib NAMES StormLibDAD StormLibDAS StormLibDUD StormLibDUS)
@@ -14,7 +16,7 @@ else()
 endif()
 
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (storm DEFAULT_MSG STORM_LIBRARIES STORM_INCLUDE_DIR)
+find_package_handle_standard_args (StormLib DEFAULT_MSG STORM_LIBRARIES STORM_INCLUDE_DIR)
 
 mark_as_advanced (STORM_INCLUDE_DIR _storm_debug_lib _storm_release_lib _storm_any_lib STORM_LIBRARIES)
 
