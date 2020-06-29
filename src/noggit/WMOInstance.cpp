@@ -150,14 +150,14 @@ void WMOInstance::recalcExtents()
   math::vector_3d wmo_min(misc::transform_model_box_coords(wmo->extents[0]));
   math::vector_3d wmo_max(misc::transform_model_box_coords(wmo->extents[1]));
 
-  auto& root_points = _transform_mat * math::aabb(wmo_min, wmo_max).all_corners();
+  auto&& root_points = _transform_mat * math::aabb(wmo_min, wmo_max).all_corners();
 
   points.insert(points.end(), root_points.begin(), root_points.end());
 
   for (int i = 0; i < (int)wmo->groups.size(); ++i)
   {
     auto const& group = wmo->groups[i];
-    auto& group_points = _transform_mat 
+    auto&& group_points = _transform_mat
       * math::aabb( group.BoundingBoxMin // no need to use misc::transform_model_box_coords
                   , group.BoundingBoxMax // they are already in world coord (see group ctor)
                   ).all_corners();

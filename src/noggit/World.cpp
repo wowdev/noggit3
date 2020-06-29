@@ -255,7 +255,7 @@ void World::remove_from_selection(selection_type entry)
 
 void World::remove_from_selection(std::uint32_t uid)
 {
-  for (auto& it = _current_selection.begin(); it != _current_selection.end(); ++it)
+  for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
   {
     if (it->which() == eEntry_Model && boost::get<selected_model_type>(*it)->uid == uid)
     {
