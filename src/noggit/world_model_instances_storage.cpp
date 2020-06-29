@@ -70,7 +70,7 @@ namespace noggit
 
     if (from_reloading || uid_after != uid)
     {
-      _world->updateTilesWMO(&_wmos.at(uid_after), model_update::add, from_reloading);
+      _world->updateTilesWMO(&_wmos.at(uid_after), model_update::add);
     }
 
     return instance.mUniqueID;

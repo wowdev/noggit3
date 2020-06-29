@@ -1904,12 +1904,12 @@ void World::updateTilesEntry(selection_type const& entry, model_update type)
   }
 }
 
-void World::updateTilesWMO(WMOInstance* wmo, model_update type, bool from_reloading)
+void World::updateTilesWMO(WMOInstance* wmo, model_update type)
 {
   _tile_update_queue.queue_update(wmo, type);
 }
 
-void World::updateTilesModel(ModelInstance* m2, model_update type, bool from_reloading)
+void World::updateTilesModel(ModelInstance* m2, model_update type)
 {
   _tile_update_queue.queue_update(m2, type);
 }

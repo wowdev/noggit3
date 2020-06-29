@@ -255,8 +255,8 @@ public:
   void reload_tile(tile_index const& tile);
 
   void updateTilesEntry(selection_type const& entry, model_update type);
-  void updateTilesWMO(WMOInstance* wmo, model_update type, bool from_reloading = false);
-  void updateTilesModel(ModelInstance* m2, model_update type, bool from_reloading = false);
+  void updateTilesWMO(WMOInstance* wmo, model_update type);
+  void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
   void saveMap (int width, int height);
