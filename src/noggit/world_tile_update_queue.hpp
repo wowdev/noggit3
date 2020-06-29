@@ -41,7 +41,7 @@ namespace noggit
   private:
     World* _world;
 
-    std::atomic<bool> _stop = false;
+    std::atomic<bool> _stop = {false};
     std::mutex _mutex;
     std::condition_variable _state_changed;
 

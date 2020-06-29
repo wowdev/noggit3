@@ -104,7 +104,7 @@ namespace noggit
   private:
     World* _world;
     std::mutex _mutex;
-    std::atomic<bool> _uid_duplicates_found = false;
+    std::atomic<bool> _uid_duplicates_found = {false};
 
     m2_instance_umap _m2s;
     wmo_instance_umap _wmos;

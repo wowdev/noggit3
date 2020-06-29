@@ -22,7 +22,7 @@ class AsyncObject
 private: 
   bool _loading_failed = false;
 protected:
-  std::atomic<bool> finished = false;
+  std::atomic<bool> finished = {false};
   std::mutex _mutex;
   std::condition_variable _state_changed;
 
