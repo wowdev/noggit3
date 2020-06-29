@@ -133,9 +133,7 @@ namespace noggit
 {
   namespace ui
   {
-    //! \note Lower case, underscore separated. Classes might have
-    //! a _type suffix (even though being against the standard), but 
-    //! shouldn't.
+    //! \note Lower case, underscore separated.
     class foo_ban : public QWidget
     {
       Q_OBJECT;
@@ -144,13 +142,13 @@ namespace noggit
       //! \note Long parameter list. Would be more than 80 chars.
       //! chars. Break with comma in front. Use spaces to be
       //! aligned below the braces.
-      foo_ban ( type const& name
+      foo_ban ( type name
               , type_2 const& name_2
               , type const& name3
               )
         : QWidget (nullptr)
       //! \note Prefer initialization lists over assignment.
-        , _var (name)
+        , _var (std::move (name))
       {}
 
       //! \note Use const where possible. No space between name and
@@ -159,20 +157,20 @@ namespace noggit
  
       //! \note If you really need getters and setters, your design
       //! might be broken. Please avoid them or consider just a
-      //! public data member.
+      //! public data member, or use proper methods with semantics.
       type const& var() const
       {
         return _var;
       }
-      void var (type const& var_)
+      void var (type var_)
       {
-        _var = var_;
+        _var = std::move (var_);
       }
  
       //! \note Prefer const where possible. If you need to copy, 
       //! just take a `T`. Otherwise prefer taking a `T const&`.
-      //! Don't bother when it comes to tiny types, don't bother.
-      bazs_type count_some_numbers ( std::size_t begin
+      //! Don't bother when it comes to tiny types.
+      baz_type count_some_numbers ( std::size_t begin
                                    , std::size_t end
                                    ) const
       {
@@ -180,12 +178,13 @@ namespace noggit
  
         //! \note Prefer construction over assignment. Prefer
         //! preincrement.
-        for (size_t it (begin); it < end; ++it)
+        for (size_t it (begin); it != end; ++it)
         {
           bazs.emplace_back (it);
         }
  
         //! \note Prefer STL algorithms over hand written code.
+        assert (!bazs.empty());
         auto const smallest
           (std::min_element (bazs.begin(), bazs.end()));
  
