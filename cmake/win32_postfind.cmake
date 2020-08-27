@@ -6,12 +6,14 @@ LINK_DIRECTORIES(${Boost_STRIPPED_LIB_DIR} ${STORMLIB_LIBRARY_DIR})
 #maybe in wrong order now
 SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/")
 SET(SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/win/StackWalker.cpp")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /vmg /D NOMINMAX")
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /vmg)
+add_compile_definitions (NOMINMAX)
 
 # warnings?
 if( NOGGIT_ALL_WARNINGS )
     MESSAGE( STATUS "Spilling out mass warnings." )
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /Wall /Wp64")
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /W4)
+    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Wall)
 endif( NOGGIT_ALL_WARNINGS )
 
 # mark 32 bit executables large address aware so they can use > 2GB address space
