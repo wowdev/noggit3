@@ -568,6 +568,23 @@ add_library (noggit::math ALIAS noggit-math)
 include (CTest)
 enable_testing()
 
+# boost::unit_test_framework, when linked using a shared library,
+# needs to be explicitly told to generate `main()` as well. CMake's
+# FindBoost does not do that, so detect what type of library it gave
+# us and fix up that flag if needed.
+# todo: what is the state of this on windows?
+if ( TARGET Boost::unit_test_framework
+    AND Boost_UNIT_TEST_FRAMEWORK_LIBRARY MATCHES ".*\.so[0-9\.]*$")
+  get_property (_current_options
+    TARGET Boost::unit_test_framework
+    PROPERTY INTERFACE_COMPILE_DEFINITIONS)
+  set (_boost_test_shared_link_option BOOST_TEST_DYN_LINK)
+  if (NOT _boost_test_shared_link_option IN_LIST _current_options)
+    set_property (TARGET Boost::unit_test_framework APPEND
+      PROPERTY INTERFACE_COMPILE_DEFINITIONS ${_boost_test_shared_link_option})
+  endif()
+endif()
+
 add_executable (math-vector_2d.test test/math/vector_2d.cpp)
 target_compile_definitions (math-vector_2d.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
 target_link_libraries (math-vector_2d.test Boost::unit_test_framework noggit::math)
