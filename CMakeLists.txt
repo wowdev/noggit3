@@ -93,6 +93,20 @@ if(WIN32)
   endif()
 endif()
 
+if( NOGGIT_ALL_WARNINGS )
+  MESSAGE( STATUS "Spilling out mass warnings." )
+  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -W)
+  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wall)
+  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wextra)
+  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wshadow)
+  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Weverything)
+
+  MESSAGE( STATUS "Spilling out mass warnings." )
+  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /W4)
+  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Wall)
+endif( NOGGIT_ALL_WARNINGS )
+
+
 # better exception handling for visual studio, particularly for the asynchronous stuff
 add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /EHa)
 # multi core building for visual studio
