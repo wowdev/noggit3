@@ -8,6 +8,13 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 # Project name
 project(Noggit)
 
+option (ADDITIONAL_OPTIMIZATION_FLAGS "Enable OpenGL error check ?" OFF)
+option (NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)
+option (NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
+option (NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF)
+option (NOGGIT_OPENGL_ERROR_CHECK "Enable OpenGL error check ?" ON)
+option (USE_SQL "Enable sql uid save ? (require mysql installed)" OFF)
+option (VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" ON)
 
 include (CheckCXXCompilerFlag)
 macro (add_compiler_flag_if_supported _VAR _FLAG)
@@ -77,7 +84,6 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
 
 if(WIN32)
-  OPTION(NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)
   if(NAME_REUSE_AS_ERROR)
     # declaration of 'identifier' hides previous: 
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4456) # local declaration
@@ -95,7 +101,6 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
 
 if(WIN32)
   # Disable opengl error log
-  OPTION(ADDITIONAL_OPTIMIZATION_FLAGS "Enable OpenGL error check ?" OFF)
   IF(ADDITIONAL_OPTIMIZATION_FLAGS)
     MESSAGE( STATUS "Enabled additional optimization flags for msvc.")
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ob2) # inline any suitable functions
@@ -110,7 +115,6 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
 
-OPTION(USE_SQL "Enable sql uid save ? (require mysql installed)" OFF)
 
 macro(includePlattform SUFFIX)
   if(UNIX)
@@ -134,7 +138,6 @@ macro(includePlattform SUFFIX)
   endif(UNIX)
 endmacro(includePlattform)
 
-OPTION(VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" ON)
 
 
 if(VALIDATE_OPENGL_PROGRAMS)
@@ -185,17 +188,13 @@ add_subdirectory (src/external/qt-color-widgets)
 # Add the found include directories to our include list.
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
 
-OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
-
 # Log to console for easier debugging.
-OPTION( NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF )
 IF( NOGGIT_LOGTOCONSOLE )
   MESSAGE( STATUS "And writing log to console instead of log.txt" )
   ADD_DEFINITIONS( -DDEBUG__LOGGINGTOCONSOLE )
 ENDIF( NOGGIT_LOGTOCONSOLE )
 
 # Disable opengl error log
-OPTION(NOGGIT_OPENGL_ERROR_CHECK "Enable OpenGL error check ?" ON)
 IF(NOT NOGGIT_OPENGL_ERROR_CHECK )
   MESSAGE( STATUS "OpenGL error check disabled." )
   ADD_DEFINITIONS( -DNOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS )
