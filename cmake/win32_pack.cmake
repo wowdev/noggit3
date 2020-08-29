@@ -3,7 +3,7 @@
 install(TARGETS noggit DESTINATION .)
 install(DIRECTORY bin/shaders DESTINATION .)
 install(DIRECTORY bin/fonts DESTINATION .)
-install(FILES bin/noggit_template.conf bin/freetype6.dll bin/StormLib.dll bin/glew32.dll bin/zlib1.dll DESTINATION .)
+install(FILES bin/freetype6.dll bin/StormLib.dll bin/glew32.dll bin/zlib1.dll DESTINATION .)
 
 set(CPACK_GENERATOR "ZIP;NSIS")
 # \todo Re-add proper version, if we ever use cpack again.
