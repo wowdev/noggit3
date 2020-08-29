@@ -166,7 +166,7 @@ includePlattform("prefind")
 
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
-FIND_PACKAGE( StormLib REQUIRED )
+FIND_PACKAGE( stormlib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
 
@@ -508,7 +508,7 @@ ADD_EXECUTABLE ( noggit
                 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
-  StormLib
+  stormlib::stormlib
   Boost::thread
   Boost::filesystem
   Boost::system
