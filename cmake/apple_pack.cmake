@@ -1,7 +1,6 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 # Also link against libz for static's sake.
-SET(FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES} z)
 set_target_properties ( noggit
                         PROPERTIES
                         MACOSX_BUNDLE_ICON_FILE
@@ -34,7 +33,7 @@ INCLUDE(InstallRequiredSystemLibraries)
 
 SET(APPS "${CMAKE_CURRENT_BINARY_DIR}/noggit.app")
 
-SET(DIRS ${OPENGL_LIBRARY_DIR} ${FREETYPE_LIBRARY_DIR} ${STORMLIB_LIBRARY_DIR} ${Boost_LIBRARY_DIR})
+SET(DIRS ${OPENGL_LIBRARY_DIR} ${STORMLIB_LIBRARY_DIR} ${Boost_LIBRARY_DIR})
 INSTALL(CODE " include(BundleUtilities) fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\" " COMPONENT Runtime)
 
 SET(CPACK_BUNDLE_NAME "Noggit 3")

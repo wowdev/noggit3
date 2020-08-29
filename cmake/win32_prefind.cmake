@@ -6,12 +6,11 @@ SET(CMAKE_INCLUDE_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/i
 SET(CMAKE_LIBRARY_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/" "C:/Program Files (x86)/StormLib/bin/" )
 
 if(LIB_ROOT)
-  set(FREETYPE_DIR "${LIB_ROOT}/freetype")
   set(STORMLIB_DIR "${LIB_ROOT}/stormlib")
   set(BOOST_ROOT "${LIB_ROOT}/boost")
 endif(LIB_ROOT)
 
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${FREETYPE_DIR} ${STORMLIB_DIR})
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${STORMLIB_DIR})
 SET(Boost_USE_STATIC_LIBS ON)
 
 if ("cxx_variable_templates" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
