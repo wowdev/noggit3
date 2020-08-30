@@ -72,14 +72,12 @@ add_compiler_flag_if_supported (-Werror=mismatched-tags)
 # yes, we intend to use multi-character character constants
 add_compiler_flag_if_supported (-Wno-multichar)
 
-if(WIN32)
-  if(NAME_REUSE_AS_ERROR)
-    # declaration of 'identifier' hides previous:
-    add_compiler_flag_if_supported (/we4456) # local declaration
-    add_compiler_flag_if_supported (/we4457) # function parameter
-    add_compiler_flag_if_supported (/we4458) # class members
-    add_compiler_flag_if_supported (/we4459) # global declaration
-  endif()
+if (NAME_REUSE_AS_ERROR)
+  # declaration of 'identifier' hides previous:
+  add_compiler_flag_if_supported (/we4456) # local declaration
+  add_compiler_flag_if_supported (/we4457) # function parameter
+  add_compiler_flag_if_supported (/we4458) # class members
+  add_compiler_flag_if_supported (/we4459) # global declaration
 endif()
 
 if( NOGGIT_ALL_WARNINGS )
@@ -101,17 +99,14 @@ add_compiler_flag_if_supported (/EHa)
 # multi core building for visual studio
 add_compiler_flag_if_supported (/MP)
 
+if (ADDITIONAL_OPTIMIZATION_FLAGS)
+  message ( STATUS "Enabled additional optimization flags for msvc.")
+  add_compiler_flag_if_supported (/Ob2) # inline any suitable functions
+  add_compiler_flag_if_supported (/Oi)  # enable intrasic functions
+  add_compiler_flag_if_supported (/Ot)  # favor fast code
+  add_compiler_flag_if_supported (/GL)  # whole program optimization
+endif()
 
-if(WIN32)
-  # Disable opengl error log
-  IF(ADDITIONAL_OPTIMIZATION_FLAGS)
-    MESSAGE( STATUS "Enabled additional optimization flags for msvc.")
-    add_compiler_flag_if_supported (/Ob2) # inline any suitable functions
-    add_compiler_flag_if_supported (/Oi)  # enable intrasic functions
-    add_compiler_flag_if_supported (/Ot)  # favor fast code
-    add_compiler_flag_if_supported (/GL)  # whole program optimization
-  ENDIF()
-endif(WIN32)
 
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
