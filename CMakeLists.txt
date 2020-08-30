@@ -140,14 +140,6 @@ macro(includePlattform SUFFIX)
   else(UNIX)
     if(WIN32)
       include("${CMAKE_SOURCE_DIR}/cmake/win32_${SUFFIX}.cmake")
-      # adds for library repo
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")
-      #storm lib
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
-      #boost
-      include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
 	  endif(WIN32)
   endif(UNIX)
 endmacro(includePlattform)
