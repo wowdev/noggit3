@@ -181,15 +181,6 @@ if (APPLE)
   # todo: sounds bogus
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_INCLUDE_DIR)
 elseif (WIN32)
-  # todo: sounds bogus [[
-  STRING(REGEX REPLACE "/[^/]*$" "" Boost_STRIPPED_LIB_DIR "${Boost_THREAD_LIBRARY_DEBUG}")
-  LINK_DIRECTORIES(${Boost_STRIPPED_LIB_DIR} ${STORMLIB_LIBRARY_DIR})
-  # ]]
-
-  #maybe in wrong order now
-  SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/")
-  SET(SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/win/StackWalker.cpp")
-
   add_compiler_flag_if_supported (/vmg)
   add_compile_definitions (NOMINMAX)
 
@@ -201,8 +192,6 @@ elseif (WIN32)
 
   set(ResFiles media/res.rc)
 endif()
-
-include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
@@ -488,7 +477,6 @@ ADD_EXECUTABLE ( noggit
                   ${moced}
                   ${compiled_resource_files}
                   ${shaders}
-                  ${force_update_file}
                 )
                 
 TARGET_LINK_LIBRARIES (noggit
