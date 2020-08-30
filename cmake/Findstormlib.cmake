@@ -26,7 +26,13 @@ target_link_libraries (StormLib INTERFACE ${STORM_LIBRARIES})
 set_property  (TARGET StormLib APPEND PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${STORM_INCLUDE_DIR})
 set_property  (TARGET StormLib APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${STORM_INCLUDE_DIR})
 
-#! \note on Windows, storm tries to auto-link. There is no proper flag to disable that, so abuse this one.
-target_compile_definitions (StormLib INTERFACE -D__STORMLIB_SELF__)
+
+if (NOT WIN32)
+  find_package (ZLIB REQUIRED)
+  find_package (BZip2 REQUIRED)
+  target_link_libraries (StormLib INTERFACE ZLIB::ZLIB BZip2::BZip2)
+endif()
+
+target_compile_definitions (StormLib INTERFACE STORMLIB_NO_AUTO_LINK)
 
 add_library (stormlib::stormlib ALIAS StormLib)
