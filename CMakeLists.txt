@@ -18,98 +18,98 @@ option (VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" ON)
 
 include ("cmake/add_compiler_flag_if_supported.cmake")
 
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
+add_compiler_flag_if_supported (-fcolor-diagnostics)
 
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=reorder)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=conditional-uninitialized)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused-parameter)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused-private-field)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-variable-declarations)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-prototypes)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=deprecated)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-braces)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=inconsistent-missing-override)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=parentheses)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=shift-sign-overflow)
+add_compiler_flag_if_supported (-Werror=reorder)
+add_compiler_flag_if_supported (-Werror=conditional-uninitialized)
+add_compiler_flag_if_supported (-Werror=unused)
+add_compiler_flag_if_supported (-Werror=unused-parameter)
+add_compiler_flag_if_supported (-Werror=unused-private-field)
+add_compiler_flag_if_supported (-Werror=missing-variable-declarations)
+add_compiler_flag_if_supported (-Werror=missing-prototypes)
+add_compiler_flag_if_supported (-Werror=deprecated)
+add_compiler_flag_if_supported (-Werror=missing-braces)
+add_compiler_flag_if_supported (-Werror=inconsistent-missing-override)
+add_compiler_flag_if_supported (-Werror=parentheses)
+add_compiler_flag_if_supported (-Werror=shift-sign-overflow)
 
 # covered by CMAKE_CXX_STANDARD
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat-pedantic)
+add_compiler_flag_if_supported (-Wno-c++98-compat)
+add_compiler_flag_if_supported (-Wno-c++98-compat-pedantic)
 
 # covered by compilers used
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-gnu-anonymous-struct)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-variadic-macros)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-vla)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-vla-extension)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-zero-length-array)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-gnu-zero-variadic-macro-arguments)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-nested-anon-types)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-four-char-constants)
+add_compiler_flag_if_supported (-Wno-gnu-anonymous-struct)
+add_compiler_flag_if_supported (-Wno-variadic-macros)
+add_compiler_flag_if_supported (-Wno-vla)
+add_compiler_flag_if_supported (-Wno-vla-extension)
+add_compiler_flag_if_supported (-Wno-zero-length-array)
+add_compiler_flag_if_supported (-Wno-gnu-zero-variadic-macro-arguments)
+add_compiler_flag_if_supported (-Wno-nested-anon-types)
+add_compiler_flag_if_supported (-Wno-four-char-constants)
 
 # we assume that our constructors and destructors do not access other global state
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-exit-time-destructors)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-global-constructors)
+add_compiler_flag_if_supported (-Wno-exit-time-destructors)
+add_compiler_flag_if_supported (-Wno-global-constructors)
 
 # is fine with GNU, required due to our libstdc
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-disabled-macro-expansion)
+add_compiler_flag_if_supported (-Wno-disabled-macro-expansion)
 
 # we can live with the compilation unit containing the vtable not being fixed
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-weak-vtables)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-weak-template-vtables)
+add_compiler_flag_if_supported (-Wno-weak-vtables)
+add_compiler_flag_if_supported (-Wno-weak-template-vtables)
 
 # __DATE__ and __TIME__ not being reproducible is exactly why they exist.
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-date-time)
+add_compiler_flag_if_supported (-Wno-date-time)
 
 # we don't care for a few bytes
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-padded)
+add_compiler_flag_if_supported (-Wno-padded)
 
 # msvc++ mangles struct/class into name, thus symbols may be called differently
 # with a bad forward-decl. we want compilation to fail, not linking.
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4099)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
+add_compiler_flag_if_supported (/we4099)
+add_compiler_flag_if_supported (-Werror=mismatched-tags)
 
 # yes, we intend to use multi-character character constants
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
+add_compiler_flag_if_supported (-Wno-multichar)
 
 if(WIN32)
   if(NAME_REUSE_AS_ERROR)
-    # declaration of 'identifier' hides previous: 
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4456) # local declaration
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4457) # function parameter
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4458) # class members
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4459) # global declaration
+    # declaration of 'identifier' hides previous:
+    add_compiler_flag_if_supported (/we4456) # local declaration
+    add_compiler_flag_if_supported (/we4457) # function parameter
+    add_compiler_flag_if_supported (/we4458) # class members
+    add_compiler_flag_if_supported (/we4459) # global declaration
   endif()
 endif()
 
 if( NOGGIT_ALL_WARNINGS )
   MESSAGE( STATUS "Spilling out mass warnings." )
-  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -W)
-  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wall)
-  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wextra)
-  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wshadow)
-  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Weverything)
+  add_compiler_flag_if_supported (-W)
+  add_compiler_flag_if_supported (-Wall)
+  add_compiler_flag_if_supported (-Wextra)
+  add_compiler_flag_if_supported (-Wshadow)
+  add_compiler_flag_if_supported (-Weverything)
 
   MESSAGE( STATUS "Spilling out mass warnings." )
-  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /W4)
-  add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Wall)
+  add_compiler_flag_if_supported (/W4)
+  add_compiler_flag_if_supported (/Wall)
 endif( NOGGIT_ALL_WARNINGS )
 
 
 # better exception handling for visual studio, particularly for the asynchronous stuff
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /EHa)
+add_compiler_flag_if_supported (/EHa)
 # multi core building for visual studio
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
+add_compiler_flag_if_supported (/MP)
 
 
 if(WIN32)
   # Disable opengl error log
   IF(ADDITIONAL_OPTIMIZATION_FLAGS)
     MESSAGE( STATUS "Enabled additional optimization flags for msvc.")
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ob2) # inline any suitable functions
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Oi)  # enable intrasic functions
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ot)  # favor fast code
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /GL)  # whole program optimization
+    add_compiler_flag_if_supported (/Ob2) # inline any suitable functions
+    add_compiler_flag_if_supported (/Oi)  # enable intrasic functions
+    add_compiler_flag_if_supported (/Ot)  # favor fast code
+    add_compiler_flag_if_supported (/GL)  # whole program optimization
   ENDIF()
 endif(WIN32)
 

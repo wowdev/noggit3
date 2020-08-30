@@ -6,7 +6,7 @@ LINK_DIRECTORIES(${Boost_STRIPPED_LIB_DIR} ${STORMLIB_LIBRARY_DIR})
 #maybe in wrong order now
 SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/")
 SET(SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/win/StackWalker.cpp")
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /vmg)
+add_compiler_flag_if_supported (/vmg)
 add_compile_definitions (NOMINMAX)
 
 # mark 32 bit executables large address aware so they can use > 2GB address space
