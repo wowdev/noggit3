@@ -118,23 +118,6 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
 
-
-macro(includePlattform SUFFIX)
-  if(UNIX)
-    if(APPLE)
-      include("${CMAKE_SOURCE_DIR}/cmake/apple_${SUFFIX}.cmake")
-    else(APPLE)
-      include("${CMAKE_SOURCE_DIR}/cmake/linux_${SUFFIX}.cmake")
-    endif(APPLE)
-  else(UNIX)
-    if(WIN32)
-      include("${CMAKE_SOURCE_DIR}/cmake/win32_${SUFFIX}.cmake")
-	  endif(WIN32)
-  endif(UNIX)
-endmacro(includePlattform)
-
-
-
 if(VALIDATE_OPENGL_PROGRAMS)
   add_definitions ( -DVALIDATE_OPENGL_PROGRAMS)
   
@@ -143,7 +126,42 @@ if(VALIDATE_OPENGL_PROGRAMS)
   endif()
 endif()
 
-includePlattform("prefind")
+# todo: we should probably always require that to avoid an incomplete
+# installation with shared libs. it is static on windows luckily.
+if (APPLE OR WIN32)
+  set (Boost_USE_STATIC_LIBS ON)
+endif()
+
+if (WIN32)
+  # todo: this appears to be bogus [[
+  # Set this to more paths you windows guys need.
+  # this shouldnt be here....steff pls try to use the vars *_DIR or LIB_ROOT
+  SET(CMAKE_INCLUDE_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/" "C:/Program Files (x86)/StormLib/src/")
+  SET(CMAKE_LIBRARY_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/" "C:/Program Files (x86)/StormLib/bin/" )
+
+  # adds for library repo
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")
+  #storm lib
+  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
+  #boost
+  include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
+  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
+
+  if(LIB_ROOT)
+    set(STORMLIB_DIR "${LIB_ROOT}/stormlib")
+    set(BOOST_ROOT "${LIB_ROOT}/boost")
+  endif(LIB_ROOT)
+
+  set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${STORMLIB_DIR})
+  ## ]]]
+
+  if ("cxx_variable_templates" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+    # todo: msvc++ does not like this in new versions. just drop
+    # support for old msvc and omit this line?
+    add_definitions (-D__cpp_variable_templates=201304)
+  endif()
+endif()
 
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
@@ -195,7 +213,30 @@ IF(NOT NOGGIT_OPENGL_ERROR_CHECK )
   ADD_DEFINITIONS( -DNOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS )
 ENDIF()
 
-includePlattform("postfind")
+if (APPLE)
+  # todo: sounds bogus
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_INCLUDE_DIR)
+elseif (WIN32)
+  # todo: sounds bogus [[
+  STRING(REGEX REPLACE "/[^/]*$" "" Boost_STRIPPED_LIB_DIR "${Boost_THREAD_LIBRARY_DEBUG}")
+  LINK_DIRECTORIES(${Boost_STRIPPED_LIB_DIR} ${STORMLIB_LIBRARY_DIR})
+  # ]]
+
+  #maybe in wrong order now
+  SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/")
+  SET(SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/win/StackWalker.cpp")
+
+  add_compiler_flag_if_supported (/vmg)
+  add_compile_definitions (NOMINMAX)
+
+  # mark 32 bit executables large address aware so they can use > 2GB address space
+  if(CMAKE_SIZEOF_VOID_P MATCHES 4)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
+    message(STATUS "- MSVC: Enabled large address awareness!")
+  endif()
+
+  set(ResFiles media/res.rc)
+endif()
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
@@ -551,8 +592,6 @@ if (NOGGIT_LOGTOCONSOLE AND WIN32)
   set_property (TARGET noggit APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:"_CONSOLE">)
 endif()
 
-includePlattform("pack")
-
 if (NOT APPLE)
   install (TARGETS noggit DESTINATION .)
   # todo: pdb
@@ -566,6 +605,51 @@ if (NOT APPLE)
   #SET(CPACK_PACKAGE_FILE_NAME "Noggit")
   #SET(CPACK_PACKAGE_VERSION "3")
   #include(CPack)
+else()
+  # Also link against libz for static's sake.
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_ICON_FILE
+                          "noggit"
+                        )
+  set_source_files_properties (media/noggit.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_BUNDLE_NAME
+                          "Noggit 3"
+                        )
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_BUNDLE_VERSION
+                          "3"
+                        )
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_GUI_IDENTIFIER
+                          "com.noggit.noggit"
+                        )
+
+  # Copy the binary to bin/.
+  INSTALL(TARGETS noggit
+    BUNDLE DESTINATION ${CMAKE_CURRENT_BINARY_DIR} COMPONENT Runtime
+    RUNTIME DESTINATION bin COMPONENT Runtime
+  )
+
+  INCLUDE(InstallRequiredSystemLibraries)
+
+  SET(APPS "${CMAKE_CURRENT_BINARY_DIR}/noggit.app")
+
+  SET(DIRS ${OPENGL_LIBRARY_DIR} ${STORMLIB_LIBRARY_DIR} ${Boost_LIBRARY_DIR})
+  INSTALL(CODE " include(BundleUtilities) fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\" " COMPONENT Runtime)
+
+  SET(CPACK_BUNDLE_NAME "Noggit 3")
+  SET(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/media/Info.plist")
+  SET(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/media/noggit.icns")
+  SET(CPACK_DMG_VOLUME_NAME "Noggit 3")
+  SET(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/media/noggit.png")
+  SET(CPACK_GENERATOR "DragNDrop")
+  SET(CPACK_PACKAGE_FILE_NAME "Noggit 3")
+  INCLUDE(CPack)
 endif()
 
 add_library (noggit-math STATIC
