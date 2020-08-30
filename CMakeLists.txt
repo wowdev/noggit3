@@ -564,6 +564,21 @@ endif()
 
 includePlattform("pack")
 
+if (NOT APPLE)
+  install (TARGETS noggit DESTINATION .)
+  # todo: pdb
+  # todo: Qt5{Core,Gui,OpenGL,Widgets}.dll
+  # todo: platforms/q{windows,direct2d}.dll
+  # todo: if shared: dependencies!
+
+  #set(CPACK_GENERATOR "ZIP;NSIS")
+  ## \todo Re-add proper version, if we ever use cpack again.
+  #SET(CPACK_BUNDLE_NAME "Noggit_3")
+  #SET(CPACK_PACKAGE_FILE_NAME "Noggit")
+  #SET(CPACK_PACKAGE_VERSION "3")
+  #include(CPack)
+endif()
+
 add_library (noggit-math STATIC
   "src/math/matrix_4x4.cpp"
   "src/math/vector_2d.cpp"
