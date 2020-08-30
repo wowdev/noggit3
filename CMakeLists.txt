@@ -78,6 +78,7 @@ if (NAME_REUSE_AS_ERROR)
   add_compiler_flag_if_supported (/we4457) # function parameter
   add_compiler_flag_if_supported (/we4458) # class members
   add_compiler_flag_if_supported (/we4459) # global declaration
+  add_compiler_flag_if_supported (-Werror=shadow)
 endif()
 
 if( NOGGIT_ALL_WARNINGS )
@@ -102,6 +103,8 @@ if (ADDITIONAL_OPTIMIZATION_FLAGS)
   add_compiler_flag_if_supported (/Oi)  # enable intrasic functions
   add_compiler_flag_if_supported (/Ot)  # favor fast code
   add_compiler_flag_if_supported (/GL)  # whole program optimization
+  add_compiler_flag_if_supported (-flto)
+  add_compiler_flag_if_supported (-O3)
 endif()
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
