@@ -87,12 +87,9 @@ if( NOGGIT_ALL_WARNINGS )
   add_compiler_flag_if_supported (-Wextra)
   add_compiler_flag_if_supported (-Wshadow)
   add_compiler_flag_if_supported (-Weverything)
-
-  MESSAGE( STATUS "Spilling out mass warnings." )
   add_compiler_flag_if_supported (/W4)
   add_compiler_flag_if_supported (/Wall)
 endif( NOGGIT_ALL_WARNINGS )
-
 
 # better exception handling for visual studio, particularly for the asynchronous stuff
 add_compiler_flag_if_supported (/EHa)
@@ -107,17 +104,16 @@ if (ADDITIONAL_OPTIMIZATION_FLAGS)
   add_compiler_flag_if_supported (/GL)  # whole program optimization
 endif()
 
-
-
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+# todo: why?
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
 
 if(VALIDATE_OPENGL_PROGRAMS)
   add_definitions ( -DVALIDATE_OPENGL_PROGRAMS)
-  
+
   if(APPLE)
-    message(WARNING "Noggit will most likely not work on a mac with this option enabled.")
+    message(WARNING "Noggit will most likely not work on a mac with option VALIDATE_OPENGL_PROGRAMS enabled.")
   endif()
 endif()
 
@@ -465,7 +461,6 @@ IF(WIN32)
         include/win/StackWalker.h
       )
 ENDIF(WIN32)
-
 
 list (APPEND headers_to_moc
   src/noggit/MapView.h
