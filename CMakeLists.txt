@@ -124,29 +124,6 @@ if (APPLE OR WIN32)
 endif()
 
 if (WIN32)
-  # todo: this appears to be bogus [[
-  # Set this to more paths you windows guys need.
-  # this shouldnt be here....steff pls try to use the vars *_DIR or LIB_ROOT
-  SET(CMAKE_INCLUDE_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/" "C:/Program Files (x86)/StormLib/src/")
-  SET(CMAKE_LIBRARY_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/" "C:/Program Files (x86)/StormLib/bin/" )
-
-  # adds for library repo
-  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")
-  #storm lib
-  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
-  #boost
-  include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
-  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
-  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
-
-  if(LIB_ROOT)
-    set(STORMLIB_DIR "${LIB_ROOT}/stormlib")
-    set(BOOST_ROOT "${LIB_ROOT}/boost")
-  endif(LIB_ROOT)
-
-  set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${STORMLIB_DIR})
-  ## ]]]
-
   if ("cxx_variable_templates" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
     # todo: msvc++ does not like this in new versions. just drop
     # support for old msvc and omit this line?
@@ -159,17 +136,13 @@ FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework
 FIND_PACKAGE( stormlib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
-
 if (USE_SQL)
   find_library(MYSQL_LIBRARY
-    NAMES libmysql
-    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql")
+    NAMES libmysql)
   find_library(MYSQLCPPCONN_LIBRARY
-    NAMES mysqlcppconn
-    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
+    NAMES mysqlcppconn)
   find_path (MYSQLCPPCONN_INCLUDE
-    NAMES cppconn/driver.h
-    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
+    NAMES cppconn/driver.h)
 
   if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
     add_definitions ( -DUSE_MYSQL_UID_STORAGE )
