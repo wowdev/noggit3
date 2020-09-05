@@ -548,7 +548,10 @@ endif()
 
 if (NOT APPLE)
   install (TARGETS noggit DESTINATION .)
-  # todo: pdb
+  if (WIN32)
+    install (FILES $<TARGET_PDB_FILE:noggit> DESTINATION . OPTIONAL)
+  endif()
+
   # todo: Qt5{Core,Gui,OpenGL,Widgets}.dll
   # todo: platforms/q{windows,direct2d}.dll
   # todo: if shared: dependencies!
