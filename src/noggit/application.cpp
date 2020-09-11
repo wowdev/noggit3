@@ -295,23 +295,22 @@ Noggit::Noggit(int argc, char *argv[])
 
 namespace
 {
-  std::string current_exception_string()
+  void noggit_terminate_handler()
   {
-    return util::exception_to_string (std::current_exception());
-  }
+    std::string const reason
+      {util::exception_to_string (std::current_exception())};
 
-  void current_exception_messagebox (QString title)
-  {
-    QMessageBox::critical ( nullptr
-                          , title
-                          , QString::fromStdString (current_exception_string())
-                          , QMessageBox::Close
-                          , QMessageBox::Close
-                          );
-  }
-  void current_exception_log (std::string title)
-  {
-    LogError << title << ": " << current_exception_string() << std::endl;
+    if (qApp)
+    {
+      QMessageBox::critical ( nullptr
+                            , "std::terminate"
+                            , QString::fromStdString (reason)
+                            , QMessageBox::Close
+                            , QMessageBox::Close
+                            );
+    }
+
+    LogError << "std::terminate: " << reason << std::endl;
   }
 
   struct application_with_exception_printer_on_notify : QApplication
@@ -326,55 +325,22 @@ namespace
       }
       catch (...)
       {
-        current_exception_messagebox ("event loop exception");
-        current_exception_log ("event loop exception");
-
-        exit (1);
-
-        return false;
+        std::terminate();
       }
     }
   };
 }
 
 int main(int argc, char *argv[])
-try
 {
   noggit::RegisterErrorHandlers();
-  std::set_terminate
-    ( []
-      {
-        if (qApp)
-        {
-          current_exception_messagebox ("std::terminate");
-        }
+  std::set_terminate (noggit_terminate_handler);
 
-        current_exception_log ("std::terminate");
-      }
-    );
-
-  application_with_exception_printer_on_notify qapp (argc, argv);
+  QApplication qapp (argc, argv);
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
-  //! \note Extra level here because we won't have a qapp below,
-  //! but we still want to not std::terminate if throwing above either.
-  try
-  {
-    Noggit app (argc, argv);
+  Noggit app (argc, argv);
 
-    return qapp.exec();
-  }
-  catch (...)
-  {
-    current_exception_messagebox ("top level exception");
-
-    throw;
-  }
-}
-catch (...)
-{
-  current_exception_log ("top level exception");
-
-  return 1;
+  return qapp.exec();
 }
