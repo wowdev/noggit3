@@ -205,7 +205,7 @@ namespace noggit
       paint_label->setStyleSheet(header_style);
       texture_layout->addRow(paint_label);
 
-      generate_hotkey_row({ font_noggit::ctrl, font_noggit::shift, font_noggit::alt, font_noggit::lmb }, "\a+\a+\a+\a - Open texture picker for the chunk", texture_layout);
+      generate_hotkey_row({ font_noggit::ctrl, font_noggit::shift, font_noggit::alt, font_noggit::lmb }, "\a+\a+\a+\a - Deletes all textures for the chunk", texture_layout);
       generate_hotkey_row({ font_noggit::shift, font_noggit::lmb },                                      "\a+\a - Draw texture or fills if chunk is empty", texture_layout);
       generate_hotkey_row({ font_noggit::alt, font_noggit::lmb_drag },                                   "\a+\a - Change radius", texture_layout);
       generate_hotkey_row({ font_noggit::alt, font_noggit::rmb_drag },                                   "\a+\a - Change hardness", texture_layout);
