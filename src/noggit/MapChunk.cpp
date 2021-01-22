@@ -632,7 +632,7 @@ void MapChunk::intersect (math::ray const& ray, selection_result* results)
        )
     {
       results->emplace_back
-        (*distance, selected_chunk_type (this, i, ray.position (*distance)));
+        (*distance, selected_chunk_type (this, strip_without_holes[i + 0], ray.position (*distance)));
     }
   }
 }

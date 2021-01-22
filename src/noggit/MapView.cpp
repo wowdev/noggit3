@@ -1709,7 +1709,7 @@ void MapView::tick (float dt)
           if (_world->has_multiple_model_selected())
           {
             _world->set_selected_models_pos(_cursor_pos, false);
-
+            
             if (_snap_multi_selection_to_ground.get())
             {
               snap_selected_models_to_the_ground();
@@ -1717,13 +1717,18 @@ void MapView::tick (float dt)
           }
           else
           {
+            
             if (!_move_model_to_cursor_position.get())
             {
               _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
             }
             else
             {
+
               _world->set_selected_models_pos(_cursor_pos, false);
+
+              _world->rotate_selected_models_to_ground_normal();
+
             }
           }
         }
@@ -2275,7 +2280,10 @@ void MapView::update_cursor_pos()
   {
     auto const& hit(results.front().second);
     // hit cannot be something else than a chunk
-    _cursor_pos = boost::get<selected_chunk_type>(hit).position;
+    auto const& chunkHit = boost::get<selected_chunk_type>(hit);
+    _cursor_pos = chunkHit.position;
+    _cursor_tri = chunkHit.triangle;
+    _cursor_chunk = chunkHit.chunk;
   }
 }
 

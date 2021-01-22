@@ -73,6 +73,9 @@ private:
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
+  int _cursor_tri;
+  MapChunk* _cursor_chunk;
+
   bool look, freelook;
   bool ui_hidden = false;
 

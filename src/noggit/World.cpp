@@ -563,6 +563,50 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
     updateTilesEntry(entry, model_update::add);
   }
 }
+void World::rotate_selected_models_to_ground_normal()
+{
+
+    math::vector_3d finRot;
+
+    math::quaternion q;
+    math::vector_3d varnormal = _cursor_chunk->mNormals[_cursor_tri];
+    math::vector_3d worldUp = math::vector_3d(0, 1, 0);
+    math::vector_3d a = worldUp % (varnormal);
+
+    q.x = a.x;
+    q.y = a.y;
+    q.z = a.z;
+
+    q.w = std::sqrt((worldUp.length_squared() * (_cursor_chunk->mNormals[_cursor_tri].length_squared()))
+        + (worldUp * varnormal));
+
+
+    q.normalize();
+
+    // TOEULER
+    {
+        // roll (x-axis rotation)
+        double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
+        double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
+        finRot.x = std::atan2(sinr_cosp, cosr_cosp);
+
+        // pitch (y-axis rotation)
+        double sinp = 2 * (q.w * q.y - q.z * q.x);
+        if (std::abs(sinp) >= 1)
+            finRot.y = std::copysign(math::constants::pi / 2, sinp); // use 90 degrees if out of range
+        else
+            finRot.y = std::asin(sinp);
+
+        // yaw (z-axis rotation)
+        double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+        double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+        finRot.z = std::atan2(siny_cosp, cosy_cosp);
+    }
+    set_selected_models_rotation(
+        math::degrees(math::radians(finRot.z)),
+        math::degrees(math::radians(finRot.y)),
+        math::degrees(math::radians(finRot.x)));
+}
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 {
