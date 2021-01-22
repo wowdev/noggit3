@@ -312,7 +312,7 @@ void World::snap_selected_models_to_the_ground()
         math::ray intersect_ray(pos, math::vector_3d(0.f, -1.f, 0.f));
         chunk->intersect(intersect_ray, &hits);
       }
-      // object is bellow ground
+      // object is below ground
       if (hits.empty())
       {
         math::ray intersect_ray(pos, math::vector_3d(0.f, 1.f, 0.f));
@@ -563,49 +563,174 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
     updateTilesEntry(entry, model_update::add);
   }
 }
-void World::rotate_selected_models_to_ground_normal()
+
+math::vector_3d getBarycentricCoordinatesAt(
+    const math::vector_3d& a, 
+    const math::vector_3d& b, 
+    const math::vector_3d& c, 
+    const math::vector_3d& point, 
+    const math::vector_3d& normal)
 {
+    math::vector_3d bary;
 
-    math::vector_3d finRot;
+    // The area of a triangle is 
+    
+    double areaABC = normal * ((b - a) % (c - a));
+    double areaPBC = normal * ((b - point) % (c - point));
+    double areaPCA = normal * ((c - point) % (a - point));
 
-    math::quaternion q;
-    math::vector_3d varnormal = _cursor_chunk->mNormals[_cursor_tri];
-    math::vector_3d worldUp = math::vector_3d(0, 1, 0);
-    math::vector_3d a = worldUp % (varnormal);
+    bary.x = areaPBC / areaABC; // alpha
+    bary.y = areaPCA / areaABC; // beta
+    bary.z = 1.0f - bary.x - bary.y; // gamma
 
-    q.x = a.x;
-    q.y = a.y;
-    q.z = a.z;
+    return bary;
+}
 
-    q.w = std::sqrt((worldUp.length_squared() * (_cursor_chunk->mNormals[_cursor_tri].length_squared()))
-        + (worldUp * varnormal));
-
-
-    q.normalize();
-
-    // TOEULER
+void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
+{
+    for (auto& entry : _current_selection)
     {
-        // roll (x-axis rotation)
-        double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
-        double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
-        finRot.x = std::atan2(sinr_cosp, cosr_cosp);
+        auto type = entry.which();
+        if (type == eEntry_MapChunk)
+        {
+            continue;
+        }
 
-        // pitch (y-axis rotation)
-        double sinp = 2 * (q.w * q.y - q.z * q.x);
-        if (std::abs(sinp) >= 1)
-            finRot.y = std::copysign(math::constants::pi / 2, sinp); // use 90 degrees if out of range
+        bool entry_is_m2 = type == eEntry_Model;
+
+        updateTilesEntry(entry, model_update::remove);
+
+        math::vector_3d rayPos = entry_is_m2
+            ? boost::get<selected_model_type>(entry)->pos
+            : boost::get<selected_wmo_type>(entry)->pos
+            ;
+
+        math::vector_3d& dir = entry_is_m2
+            ? boost::get<selected_model_type>(entry)->dir
+            : boost::get<selected_wmo_type>(entry)->dir
+            ;
+
+        selection_result results;
+        for_chunk_at(rayPos, [&](MapChunk* chunk)
+        {
+            {
+                math::ray intersect_ray(rayPos, math::vector_3d(0.f, -1.f, 0.f));
+                chunk->intersect(intersect_ray, &results);
+            }
+            // object is below ground
+            if (results.empty())
+            {
+                math::ray intersect_ray(rayPos, math::vector_3d(0.f, 1.f, 0.f));
+                chunk->intersect(intersect_ray, &results);
+            }
+        });
+
+        // We shouldn't end up with empty ever. 
+        if (results.empty())
+        {
+            LogError << "rotate_selected_models_to_ground_normal ray intersection failed" << std::endl;
+            continue;
+        }
+
+        // We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
+        auto const& hitChunkInfo = boost::get<selected_chunk_type>(results.front().second);
+            
+        math::quaternion q;
+        math::vector_3d varnormal;
+        
+        
+
+        
+        
+        // Surface Normal
+        auto &p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
+        auto &p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
+        auto &p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
+
+        math::vector_3d v1 = p1 - p0;
+        math::vector_3d v2 = p2 - p0;
+
+        const auto tmpVec = v2 % v1;
+        varnormal.x = tmpVec.z;
+        varnormal.y = tmpVec.y;
+        varnormal.z = tmpVec.x;
+
+        // Smooth option, gradient the normal towards closest vertex
+        if (smoothNormals) // Vertex Normal
+        {
+            auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
+            
+            const auto& vNormal0 = hitChunkInfo.chunk->mNormals[std::get<0>(hitChunkInfo.triangle)];
+            const auto& vNormal1 = hitChunkInfo.chunk->mNormals[std::get<1>(hitChunkInfo.triangle)];
+            const auto& vNormal2 = hitChunkInfo.chunk->mNormals[std::get<2>(hitChunkInfo.triangle)];
+
+            varnormal.x = 
+                vNormal0.x * normalWeights.x +
+                vNormal1.x * normalWeights.y +
+                vNormal2.x * normalWeights.z;
+
+            varnormal.y = 
+                vNormal0.y * normalWeights.x +
+                vNormal1.y * normalWeights.y +
+                vNormal2.y * normalWeights.z;
+
+            varnormal.z = 
+                vNormal0.z * normalWeights.x +
+                vNormal1.z * normalWeights.y +
+                vNormal2.z * normalWeights.z;
+        }
+        
+
+        math::vector_3d worldUp = math::vector_3d(0, 1, 0);
+        math::vector_3d a = worldUp % (varnormal);
+
+        q.x = a.x;
+        q.y = a.y;
+        q.z = a.z;
+
+        q.w = std::sqrt((worldUp.length_squared() * (varnormal.length_squared()))
+            + (worldUp * varnormal));
+
+
+        q.normalize();
+
+        math::vector_3d new_dir;
+        // To euler, because wow
+        {
+            // roll (x-axis rotation)
+            double sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z);
+            double cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
+            new_dir.z = std::atan2(sinr_cosp, cosr_cosp) * 180.0f / math::constants::pi;
+
+            // pitch (y-axis rotation)
+            double sinp = 2.0 * (q.w * q.y - q.z * q.x);
+            if (std::abs(sinp) >= 1)
+                new_dir.y = std::copysign(math::constants::pi / 2, sinp) * 180.0f / math::constants::pi; // use 90 degrees if out of range
+            else
+                new_dir.y = std::asin(sinp) * 180.0f / math::constants::pi;
+
+            // yaw (z-axis rotation)
+            double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
+            double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
+            new_dir.x = std::atan2(siny_cosp, cosy_cosp) * 180.0f / math::constants::pi;
+        }
+        
+        dir = new_dir;
+
+        if (entry_is_m2)
+        {
+            boost::get<selected_model_type>(entry)->recalcExtents();
+        }
         else
-            finRot.y = std::asin(sinp);
+        {
+            boost::get<selected_wmo_type>(entry)->recalcExtents();
+        }
 
-        // yaw (z-axis rotation)
-        double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
-        double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-        finRot.z = std::atan2(siny_cosp, cosy_cosp);
+        updateTilesEntry(entry, model_update::add);
     }
-    set_selected_models_rotation(
-        math::degrees(math::radians(finRot.z)),
-        math::degrees(math::radians(finRot.y)),
-        math::degrees(math::radians(finRot.x)));
+    
+
+    
 }
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)

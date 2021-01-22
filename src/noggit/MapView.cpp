@@ -261,6 +261,8 @@ void MapView::createGUI()
     , &_snap_multi_selection_to_ground
     , &_use_median_pivot_point
     , &_object_paste_params
+    , &_rotate_along_ground
+    , &_rotate_along_ground_smooth
     , _object_editor_dock
   );
   _object_editor_dock->setWidget(objectEditor);
@@ -1713,6 +1715,8 @@ void MapView::tick (float dt)
             if (_snap_multi_selection_to_ground.get())
             {
               snap_selected_models_to_the_ground();
+              if(_rotate_along_ground.get())
+                _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
             }
           }
           else
@@ -1724,10 +1728,10 @@ void MapView::tick (float dt)
             }
             else
             {
-
               _world->set_selected_models_pos(_cursor_pos, false);
 
-              _world->rotate_selected_models_to_ground_normal();
+              if (_rotate_along_ground.get())
+                _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
 
             }
           }
@@ -2282,8 +2286,6 @@ void MapView::update_cursor_pos()
     // hit cannot be something else than a chunk
     auto const& chunkHit = boost::get<selected_chunk_type>(hit);
     _cursor_pos = chunkHit.position;
-    _cursor_tri = chunkHit.triangle;
-    _cursor_chunk = chunkHit.chunk;
   }
 }
 

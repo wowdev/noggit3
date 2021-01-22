@@ -73,8 +73,6 @@ private:
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
-  int _cursor_tri;
-  MapChunk* _cursor_chunk;
 
   bool look, freelook;
   bool ui_hidden = false;
@@ -264,6 +262,9 @@ private:
   noggit::bool_toggle_property _locked_cursor_mode = {false};
   noggit::bool_toggle_property _move_model_to_cursor_position = {true};
   noggit::bool_toggle_property _snap_multi_selection_to_ground = {false};
+  noggit::bool_toggle_property _rotate_along_ground = { true };
+  noggit::bool_toggle_property _rotate_along_ground_smooth = { true };
+
   noggit::bool_toggle_property _use_median_pivot_point = {true};
   noggit::bool_toggle_property _display_all_water_layers = {true};
   noggit::unsigned_int_property _displayed_water_layer = {0};

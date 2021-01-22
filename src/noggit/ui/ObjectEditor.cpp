@@ -40,6 +40,8 @@ namespace noggit
                                  , bool_toggle_property* snap_multi_selection_to_ground
                                  , bool_toggle_property* use_median_pivot_point
                                  , object_paste_params* paste_params
+                                 , bool_toggle_property* rotate_along_ground
+                                 , bool_toggle_property* rotate_along_ground_smooth
                                  , QWidget* parent
                                  )
             : QWidget(parent)
@@ -141,8 +143,21 @@ namespace noggit
                                              , this
                                              )
                               );
+      auto object_rotateground_cb(new checkbox("Rotate when following cursor"
+          , rotate_along_ground
+          , this
+      )
+      );
+
+      auto object_rotategroundsmooth_cb(new checkbox("Smooth follow rotation"
+          , rotate_along_ground_smooth
+          , this
+      )
+      );
 
       object_movement_layout->addRow(object_movement_cb);
+      object_movement_layout->addRow(object_rotateground_cb);
+      object_movement_layout->addRow(object_rotategroundsmooth_cb);
 
       // multi model selection
       auto multi_select_movement_box(new QGroupBox("Multi Selection Movement", this));

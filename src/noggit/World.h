@@ -186,7 +186,7 @@ public:
   void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
   void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
   // Checks the normal of the terrain on model origin and rotates to that spot.
-  void rotate_selected_models_to_ground_normal();
+  void rotate_selected_models_to_ground_normal(bool smoothNormals);
   
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
