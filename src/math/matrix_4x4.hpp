@@ -67,8 +67,12 @@ namespace math
 
     static struct rotation_xyz_t {} rotation_xyz;
     matrix_4x4 (rotation_xyz_t, degrees::vec3 const&);
+
     static struct rotation_yzx_t {} rotation_yzx;
     matrix_4x4 (rotation_yzx_t, degrees::vec3 const&);
+
+    static struct rotation_yxz_t {} rotation_yxz;
+    matrix_4x4(rotation_yxz_t, degrees::vec3 const&);
 
     float operator() (std::size_t const& j, std::size_t const& i) const
     {

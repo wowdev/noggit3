@@ -494,26 +494,20 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
         : boost::get<selected_wmo_type>(entry)->pos
         ;
 
-      math::vector_3d& dir = entry_is_m2
-        ? boost::get<selected_model_type>(entry)->dir
-        : boost::get<selected_wmo_type>(entry)->dir
-        ;
-
       math::vector_3d diff_pos = pos - _multi_select_pivot.get();
       math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
 
       pos += rot_result - diff_pos;
-      dir += dir_change;
     }
-    else
-    {
-      math::vector_3d& dir = entry_is_m2
+    
+
+    math::vector_3d& dir = entry_is_m2
         ? boost::get<selected_model_type>(entry)->dir
         : boost::get<selected_wmo_type>(entry)->dir
         ;
 
-      dir += dir_change;
-    }
+    dir += dir_change;
+    
 
     if (entry_is_m2)
     {
@@ -526,6 +520,52 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
     updateTilesEntry(entry, model_update::add);
   }
+}
+
+void World::rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+{
+    bool has_multi_select = has_multiple_model_selected();
+
+    for (auto& entry : _current_selection)
+    {
+        auto type = entry.which();
+        if (type == eEntry_MapChunk)
+        {
+            continue;
+        }
+
+        bool entry_is_m2 = type == eEntry_Model;
+
+        updateTilesEntry(entry, model_update::remove);
+
+        math::vector_3d& dir = entry_is_m2
+            ? boost::get<selected_model_type>(entry)->dir
+            : boost::get<selected_wmo_type>(entry)->dir
+            ;
+        float rx = misc::randfloat(minX, maxX);
+        float ry = misc::randfloat(minY, maxY);
+        float rz = misc::randfloat(minZ, maxZ);
+
+        math::quaternion baseRotation = math::quaternion(math::radians(math::degrees(dir.z)), math::radians(math::degrees(-dir.y)), math::radians(math::degrees(dir.x)));
+        math::quaternion newRotation = math::quaternion(math::radians(math::degrees(rx)), math::radians(math::degrees(ry)), math::radians(math::degrees(rz)));
+
+        math::quaternion finalRotation = baseRotation % newRotation;
+        finalRotation.normalize();
+
+        dir = finalRotation.ToEulerAngles();
+
+
+        if (entry_is_m2)
+        {
+            boost::get<selected_model_type>(entry)->recalcExtents();
+        }
+        else
+        {
+            boost::get<selected_wmo_type>(entry)->recalcExtents();
+        }
+
+        updateTilesEntry(entry, model_update::add);
+    }
 }
 
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
@@ -696,7 +736,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
         math::vector_3d new_dir;
         // To euler, because wow
-        {
+        /*{
             // roll (x-axis rotation)
             double sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z);
             double cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
@@ -713,9 +753,8 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
             double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
             double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
             new_dir.x = std::atan2(siny_cosp, cosy_cosp) * 180.0f / math::constants::pi;
-        }
-        
-        dir = new_dir;
+        }*/
+        dir = q.ToEulerAngles();
 
         if (entry_is_m2)
         {

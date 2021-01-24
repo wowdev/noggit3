@@ -59,6 +59,7 @@ namespace noggit
                     , object_paste_params*
                     , bool_toggle_property* rotate_along_ground
                     , bool_toggle_property* rotate_along_ground_smooth
+                    , bool_toggle_property* rotate_along_ground_random
                     , QWidget* parent = nullptr
                     );
 
