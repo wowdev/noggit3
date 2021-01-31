@@ -15,24 +15,25 @@ namespace math
   {
   public:
     quaternion()
-      : quaternion(0.f, 0.f, 0.f, 1.0f)
+      : quaternion (0.f, 0.f, 0.f, 1.0f)
     {}
 
-    quaternion(const float& x
-      , const float& y
-      , const float& z
-      , const float& w
-    )
+    quaternion ( const float& x
+               , const float& y
+               , const float& z
+               , const float& w
+               )
       : vector_4d(x, y, z, w)
     { }
 
-    explicit quaternion(const vector_4d& v)
+    explicit quaternion (const vector_4d& v)
       : vector_4d(v)
     { }
 
-    quaternion(const vector_3d& v, const float w)
+    quaternion (const vector_3d& v, const float w)
       : vector_4d(v, w)
     { }
+
     // heading = rotation around y
     // attitude = rotation around z
     // bank = rotation around x
@@ -95,19 +96,18 @@ namespace math
 
       return retVal;
     }
-
   };
 
   //! \note "linear" interpolation for quaternions should be slerp by default.
   namespace interpolation
   {
     template<>
-    inline quaternion linear(const float& percentage
-      , const quaternion& start
-      , const quaternion& end
-    )
+    inline quaternion linear ( const float& percentage
+                             , const quaternion& start
+                             , const quaternion& end
+                             )
     {
-      return slerp(percentage, start, end);
+      return slerp (percentage, start, end);
     }
   }
 

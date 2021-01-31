@@ -992,7 +992,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                                          , wmo.group_extents
                                          );
           }
-
         }
         , [&] () { return hadSky; }
       );

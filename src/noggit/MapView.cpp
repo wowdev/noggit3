@@ -1735,8 +1735,8 @@ void MapView::tick (float dt)
 
           if (snapped && _rotate_along_ground.get())
           {
-	    _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
-	    if (_rotate_along_ground_random.get())
+            _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
+            if (_rotate_along_ground_random.get())
             {
 	      float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
 

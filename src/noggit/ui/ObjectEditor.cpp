@@ -144,7 +144,7 @@ namespace noggit
                                              , this
                                              )
                               );
-     
+
       object_movement_layout->addRow(object_movement_cb);
 
       // multi model selection
