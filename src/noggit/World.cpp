@@ -602,13 +602,15 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
   }
 }
 
-math::vector_3d getBarycentricCoordinatesAt(
+namespace
+{
+  math::vector_3d getBarycentricCoordinatesAt(
     const math::vector_3d& a, 
     const math::vector_3d& b, 
     const math::vector_3d& c, 
     const math::vector_3d& point, 
     const math::vector_3d& normal)
-{
+  {
     math::vector_3d bary;
 
     // The area of a triangle is 
@@ -622,6 +624,7 @@ math::vector_3d getBarycentricCoordinatesAt(
     bary.z = 1.0f - bary.x - bary.y; // gamma
 
     return bary;
+  }
 }
 
 void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
