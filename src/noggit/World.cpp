@@ -524,8 +524,6 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
 void World::rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
 {
-    bool has_multi_select = has_multiple_model_selected();
-
     for (auto& entry : _current_selection)
     {
         auto type = entry.which();
