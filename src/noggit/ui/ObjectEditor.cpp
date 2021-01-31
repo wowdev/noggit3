@@ -170,24 +170,22 @@ namespace noggit
       auto object_rot_box(new QGroupBox("Follow Ground Rotation", this));
       auto object_rot_layout = new QFormLayout(object_rot_box);
 
-      auto object_rotateground_cb(new checkbox("Rotate following cursor"
-          , rotate_along_ground
-          , this
-      )
-      );
+      auto object_rotateground_cb ( new checkbox ( "Rotate following cursor"
+                                                 , rotate_along_ground
+                                                 , this
+                                                 )
+                                  );
+      auto object_rotategroundsmooth_cb ( new checkbox ( "Smooth follow rotation"
+                                                       , rotate_along_ground_smooth
+                                                       , this
+                                                       )
+                                        );
 
-      auto object_rotategroundsmooth_cb(new checkbox("Smooth follow rotation"
-          , rotate_along_ground_smooth
-          , this
-      )
-      );
-
-      auto object_rotategroundrandom_cb(new checkbox("Random rot/tilt/scale\n on rotate"
-          , rotate_along_ground_random
-          , this
-      )
-      );
-
+      auto object_rotategroundrandom_cb ( new checkbox ( "Random rot/tilt/scale\n on rotate"
+                                                       , rotate_along_ground_random
+                                                       , this
+                                                       )
+                                        );
       object_rot_layout->addRow(object_rotateground_cb);
       object_rot_layout->addRow(object_rotategroundsmooth_cb);
       object_rot_layout->addRow(object_rotategroundrandom_cb);

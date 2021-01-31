@@ -1713,17 +1713,15 @@ void MapView::tick (float dt)
           if (_world->has_multiple_model_selected())
           {
             _world->set_selected_models_pos(_cursor_pos, false);
-            
+
             if (_snap_multi_selection_to_ground.get())
             {
-              
               snap_selected_models_to_the_ground();
               snapped = true;
             }
           }
           else
           {
-            
             if (!_move_model_to_cursor_position.get())
             {
               _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
@@ -1731,51 +1729,42 @@ void MapView::tick (float dt)
             else
             {
               _world->set_selected_models_pos(_cursor_pos, false);
-
               snapped = true;
-
             }
           }
 
           if (snapped && _rotate_along_ground.get())
           {
-              _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
-              if (_rotate_along_ground_random.get())
-              {
-                  float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
+	    _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
+	    if (_rotate_along_ground_random.get())
+            {
+	      float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
 
-                  if (_settings->value("model/random_rotation", false).toBool())
-                  {
-                      minY = _object_paste_params.minRotation;
-                      maxY = _object_paste_params.maxRotation;
-                  }
+	      if (_settings->value("model/random_rotation", false).toBool())
+	      {
+		minY = _object_paste_params.minRotation;
+		maxY = _object_paste_params.maxRotation;
+	      }
 
-                  if (_settings->value("model/random_tilt", false).toBool())
-                  {
-                      minX = _object_paste_params.minTilt;
-                      maxX = _object_paste_params.maxTilt;
-                      minZ = minX;
-                      maxZ = maxX;
-                  }
+	      if (_settings->value("model/random_tilt", false).toBool())
+	      {
+		minX = _object_paste_params.minTilt;
+		maxX = _object_paste_params.maxTilt;
+		minZ = minX;
+		maxZ = maxX;
+	      }
 
-                _world->rotate_selected_models_randomly(
-                    minX,
-                    maxX,
-                    minY,
-                    maxY,
-                    minZ,
-                    maxZ);
+	      _world->rotate_selected_models_randomly (minX, maxX, minY, maxY, minZ, maxZ);
 
-                  if (_settings->value("model/random_size", false).toBool())
-                  {
-                      float min = _object_paste_params.minScale;
-                      float max = _object_paste_params.maxScale;
+	      if (_settings->value("model/random_size", false).toBool())
+	      {
+		float min = _object_paste_params.minScale;
+		float max = _object_paste_params.maxScale;
 
-                      _world->scale_selected_models(misc::randfloat(min, max), World::m2_scaling_type::set);
-                  }
-              }
+		_world->scale_selected_models(misc::randfloat(min, max), World::m2_scaling_type::set);
+	      }
+	    }
           }
-          
         }
 
         _rotation_editor_need_update = true;

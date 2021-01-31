@@ -89,11 +89,11 @@ namespace math
   }
 
   matrix_4x4::matrix_4x4(rotation_yxz_t, degrees::vec3 const& angle)
-      : matrix_4x4(unit)
+    : matrix_4x4(unit)
   {
-      *this *= rotate_axis<y>(angle.y);
-      *this *= rotate_axis<x>(angle.x);
-      *this *= rotate_axis<z>(angle.z);
+    *this *= rotate_axis<y>(angle.y);
+    *this *= rotate_axis<x>(angle.x);
+    *this *= rotate_axis<z>(angle.z);
   }
 
   vector_3d matrix_4x4::operator* (vector_3d const& v) const
