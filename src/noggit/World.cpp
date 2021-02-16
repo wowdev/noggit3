@@ -384,6 +384,7 @@ void World::scale_selected_models(float v, m2_scaling_type type)
 
 void World::move_selected_models(float dx, float dy, float dz)
 {
+
   for (auto& entry : _current_selection)
   {
     auto type = entry.which();
@@ -2123,6 +2124,64 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
     return true;
   });
 }
+
+// @tswow-begin
+void World::selectVertices(math::vector_3d const& pos1, math::vector_3d const& pos2)
+{
+  math::vector_3d pos_min = math::vector_3d(std::min(pos1.x,pos2.x),std::min(pos1.y,pos2.y),std::min(pos1.z,pos2.z));
+  math::vector_3d pos_max = math::vector_3d(std::max(pos1.x,pos2.x),std::max(pos1.y,pos2.y),std::max(pos1.z,pos2.z));
+  LogDebug << "Function is being called\n";
+  _vertex_center_updated = false;
+  _vertex_border_updated = false;
+
+  for_all_chunks_between(pos_min, pos_max, [&](MapChunk* chunk){
+    _vertex_chunks.emplace(chunk);
+    _vertex_tiles.emplace(chunk->mt);
+    chunk->selectVertex(pos_min, pos_max, _vertices_selected);
+    return true;
+  });
+}
+
+void World::select_all_chunks_between(math::vector_3d const& pos1, math::vector_3d const& pos2, std::vector<MapChunk*>& chunks_in)
+{
+    math::vector_3d pos_min = math::vector_3d(std::min(pos1.x,pos2.x),std::min(pos1.y,pos2.y),std::min(pos1.z,pos2.z));
+    math::vector_3d pos_max = math::vector_3d(std::max(pos1.x,pos2.x),std::max(pos1.y,pos2.y),std::max(pos1.z,pos2.z));
+
+    for_all_chunks_between(pos_min, pos_max, [&](MapChunk* chunk){
+      chunks_in.push_back(chunk);
+      return true;
+    });
+}
+
+std::set<math::vector_3d*>* World::getSelectedVertices()
+{
+  return &_vertices_selected;
+}
+
+template<typename Fun>
+bool World::for_all_chunks_between (math::vector_3d const& pos1, math::vector_3d const& pos2,Fun&& fun)
+{
+  bool changed (false);
+
+  for (MapTile* tile : mapIndex.tiles_between (pos1, pos2))
+  {
+    if (!tile->finishedLoading())
+    {
+      continue;
+    }
+
+    for (MapChunk* chunk : tile->chunks_between(pos1, pos2))
+    {
+      if (fun (chunk))
+      {
+        changed = true;
+        mapIndex.setChanged (tile);
+      }
+    }
+  }
+  return changed;
+}
+// @tswow-end
 
 bool World::deselectVertices(math::vector_3d const& pos, float radius)
 {

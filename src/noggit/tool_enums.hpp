@@ -70,6 +70,9 @@ enum class editing_mode
   water,
   mccv,
   object,
+  // @tswow-begin
+  scripting
+  // @tswow-end
 };
 
 enum water_opacity

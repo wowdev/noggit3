@@ -764,6 +764,22 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
+// @tswow-begin
+void MapChunk::CreateMCCV()
+{
+  if(!hasMCCV)
+  {
+    for(int i=0;i<mapbufsize; ++i)
+    {
+      mccv[i].x = 1.0f;
+      mccv[i].y = 1.0f;
+      mccv[i].z = 1.0f;
+    }
+    hasMCCV = true;
+  }
+}
+// @tswow-end
+
 bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
   float dist;
@@ -817,6 +833,17 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
 
   return changed;
 }
+
+// @tswow-begin
+void MapChunk::UpdateMCCV()
+{
+  if(_uploaded)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    _need_vao_update = true;
+  }
+}
+// @tswow-end
 
 math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
 {
@@ -1437,6 +1464,23 @@ void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<m
     }
   }
 }
+
+// @tswow-begin
+void MapChunk::selectVertex(math::vector_3d const& pos1, math::vector_3d const& pos2, std::set<math::vector_3d*>& vertices)
+{
+  LogDebug << "In a chunk right now\n";
+  for(int i = 0; i< mapbufsize; ++i)
+  {
+    if(
+      pos1.x<=mVertices[i].x && pos2.x>=mVertices[i].x &&
+      pos1.z<=mVertices[i].z && pos2.z>=mVertices[i].z
+    )
+    {
+      vertices.emplace(&mVertices[i]);
+    }
+  }
+}
+// @tswow-end
 
 void MapChunk::fixVertices(std::set<math::vector_3d*>& selected)
 {

@@ -148,6 +148,25 @@ public:
       );
   }
 
+  // @tswow-begin
+  auto tiles_between (math::vector_3d const& pos1, math::vector_3d const& pos2)
+  {
+    return tiles<true>
+      ( [this, pos1, pos2] (tile_index const& index, MapTile*)
+        {
+          auto minX = index.x*TILESIZE;
+          auto maxX = index.x*TILESIZE+TILESIZE;
+          auto minZ = index.z*TILESIZE;
+          auto maxZ = index.z*TILESIZE+TILESIZE;
+
+          return hasTile(index) && 
+            minX <= pos2.x && maxX >= pos1.x &&
+            minZ <= pos2.z && maxZ >= pos1.z;
+          }
+      );
+    }
+  // @tswow-end
+
   MapIndex(const std::string& pBasename, int map_id, World*);
 
   void enterTile(const tile_index& tile);

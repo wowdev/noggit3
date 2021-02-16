@@ -12,6 +12,7 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/unsigned_int_property.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
 
 #include <boost/optional.hpp>
 
@@ -48,6 +49,9 @@ namespace noggit
     class water;
     class zone_id_browser;
     class texture_palette_small;
+    // @tswow-begin
+    class scripting_tool;
+    // @tswow-end
     struct main_window;
     struct tileset_chooser;
   }
@@ -306,4 +310,8 @@ private:
   QDockWidget* _vertex_shading_dock;
   noggit::ui::texturing_tool* texturingTool;
   QDockWidget* _texturing_dock;
+  // @tswow-begin
+  noggit::scripting::scripting_tool* scriptingTool;
+  QDockWidget* _script_tool_dock;
+  // @tswow-end
 };

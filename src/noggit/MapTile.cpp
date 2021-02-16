@@ -508,6 +508,30 @@ std::vector<MapChunk*> MapTile::chunks_in_range (math::vector_3d const& pos, flo
   return chunks;
 }
 
+// @tswow-begin
+std::vector<MapChunk*> MapTile::chunks_between (math::vector_3d const& pos1, math::vector_3d const& pos2) const
+{
+  std::vector<MapChunk*> chunks;
+
+  for (size_t ty (0); ty < 16; ++ty)
+  {
+    for (size_t tx (0); tx < 16; ++tx)
+    {
+      auto minX = mChunks[ty][tx]->xbase;
+      auto minZ = mChunks[ty][tx]->zbase;
+      auto maxX = minX+CHUNKSIZE;
+      auto maxZ = minZ+CHUNKSIZE;
+      if(minX <= pos2.x && maxX >= pos1.x &&
+        minZ <= pos2.z && maxZ >= pos1.z)
+        {
+          chunks.emplace_back(mChunks[ty][tx].get());
+        }
+    }
+  }
+
+  return chunks;
+}
+// @tswow-end
 
 bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 {

@@ -244,6 +244,20 @@ set ( noggit_root_sources
       src/noggit/wmo_liquid.cpp
       src/noggit/world_model_instances_storage.cpp
       src/noggit/world_tile_update_queue.cpp
+      src/noggit/scripting/script_printf.cpp
+      src/noggit/scripting/script_random.cpp
+      src/noggit/scripting/script_selection.cpp
+      src/noggit/scripting/script_setup.cpp
+      src/noggit/scripting/script_vec.cpp
+      src/noggit/scripting/scripting_tool.cpp
+      src/noggit/scripting/script_context.cpp
+      src/noggit/scripting/script_image.cpp
+      src/noggit/scripting/script_loader.cpp
+      src/noggit/scripting/script_math.cpp
+      src/noggit/scripting/script_noise.cpp
+      src/noggit/scripting/script_filesystem.cpp
+      ${DUKTAPE_PATH}/duktape.c
+      ${LODEPNG_PATH}/lodepng.cpp
     )
 
 set ( noggit_ui_sources
@@ -340,6 +354,19 @@ set ( noggit_root_headers
       src/noggit/wmo_liquid.hpp
       src/noggit/world_model_instances_storage.hpp
       src/noggit/world_tile_update_queue.hpp
+      src/noggit/scripting/script_filesystem.hpp
+      src/noggit/scripting/script_noise.hpp
+      src/noggit/scripting/script_printf.hpp
+      src/noggit/scripting/script_random.hpp
+      src/noggit/scripting/script_selection.hpp
+      src/noggit/scripting/script_setup.hpp
+      src/noggit/scripting/script_texture_index.hpp
+      src/noggit/scripting/script_vec.hpp
+      src/noggit/scripting/scripting_tool.hpp
+      src/noggit/scripting/script_context.hpp
+      src/noggit/scripting/script_image.hpp
+      src/noggit/scripting/script_loader.hpp
+      src/noggit/scripting/script_math.hpp
     )
 
 set ( noggit_ui_headers
@@ -577,3 +604,7 @@ add_executable (math-matrix_4x4.test test/math/matrix_4x4.cpp)
 target_compile_definitions (math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
 target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
+
+
+target_include_directories (noggit SYSTEM PUBLIC ${FASTNOISE_INCLUDE} ${LODEPNG_PATH} ${DUKTAPE_PATH})
+target_link_libraries (noggit ${FASTNOISE_LIB})

@@ -299,6 +299,19 @@ public:
 
   bool deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);
+  // @tswow-begin
+  void selectVertices(math::vector_3d const& pos1, math::vector_3d const& pos2);
+  std::set<math::vector_3d*>* getSelectedVertices();
+
+  template<typename Fun>
+  bool for_all_chunks_between ( math::vector_3d const& pos1,
+                                math::vector_3d const& pos2,
+                                Fun&& /* MapChunk* -> bool changed */
+                                );
+
+  void select_all_chunks_between(math::vector_3d const& pos1, math::vector_3d const& pos2, std::vector<MapChunk*>& chunks_in);
+
+  // @tswow-end
 
   void moveVertices(float h);
   void orientVertices ( math::vector_3d const& ref_pos

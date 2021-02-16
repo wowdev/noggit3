@@ -34,6 +34,9 @@
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
+// @tswow-begin
+#include <noggit/scripting/scripting_tool.hpp>
+// @tswow-end
 #include <opengl/scoped.hpp>
 
 #include "revision.h"
@@ -49,6 +52,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QComboBox>
 #include <QWidgetAction>
 
 #include <algorithm>
@@ -120,6 +124,8 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
   case editing_mode::object:
     _object_editor_dock->setVisible(!ui_hidden);
     break;
+  case editing_mode::scripting:
+    _script_tool_dock->setVisible(!ui_hidden);
   }
 
   
@@ -185,7 +191,12 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::createGUI()
 {
-  // create tool widgets
+  // @tswow-begin
+  _script_tool_dock = new QDockWidget("Scripting", this);
+  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock);
+  _script_tool_dock->setWidget(scriptingTool);
+  _tool_properties_docks.insert(_script_tool_dock);
+  // @tswow-end
 
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
   terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
@@ -494,8 +505,6 @@ void MapView::createGUI()
             );                                                    \
   }                                                               \
   while (false)
-
-
 
   ADD_ACTION (file_menu, "Save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); });
   ADD_ACTION (file_menu, "Save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); });
@@ -1770,6 +1779,22 @@ void MapView::tick (float dt)
 
     for (auto& selection : currentSelection)
     {
+      if(selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
+      {
+        scriptingTool->sendUpdate(
+          _world.get(), 
+          _cursor_pos, 
+          &_camera,
+          7.5f*dt,
+          leftMouse,
+          rightMouse,
+          _mod_shift_down,
+          _mod_ctrl_down,
+          _mod_alt_down,
+          _mod_space_down
+        );
+      }
+
       if (leftMouse && selection.which() == eEntry_MapChunk)
       {
         bool underMap = _world->isUnderMap(_cursor_pos);
@@ -2348,6 +2373,12 @@ void MapView::draw_map()
   case editing_mode::mccv:
     radius = shaderTool->brushRadius();
     break;
+  // @tswow-begin
+  case editing_mode::scripting:
+    radius = scriptingTool->brushRadius();
+    inner_radius = scriptingTool->innerRadius();
+    break;
+  // @tswow-end
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
