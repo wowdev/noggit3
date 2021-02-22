@@ -1,84 +1,73 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
-#include <noggit/scripting/script_loader.hpp>
 #include <lodepng.h>
-#include <dukglue.h>
+#include <noggit/scripting/script_exception.hpp>
 
 using namespace noggit::scripting;
 
-noggit::scripting::script_image::script_image(std::string path)
+void noggit::scripting::img_load_png(script_image &img, const char *path)
 {
-    unsigned error = lodepng::decode(image,width,height,path);
-    if(error)
+    unsigned error = lodepng::decode(img._image, img._width, img._height, path);
+    if (error)
     {
-        get_cur_tool()->addLog("[error]: failed to load image with error "+error);
+        throw script_exception("Failed to load png image with error code:" + error);
     }
 }
 
-noggit::scripting::script_image::script_image(unsigned width, unsigned height)
+void noggit::scripting::img_resize(script_image &img, int width, int height)
 {
-    image.resize(width*height*4);
-    std::fill(image.begin(),image.end(),0);
+    img._image.resize(width * height * 4);
 }
 
-unsigned noggit::scripting::script_image::get_width()
+int noggit::scripting::img_width(script_image &img)
 {
-    return width;
+    return img._width;
 }
 
-unsigned noggit::scripting::script_image::get_height()
+int noggit::scripting::img_height(script_image &img)
 {
-    return height;
+    return img._height;
 }
 
-unsigned noggit::scripting::script_image::get_index(unsigned x, unsigned y)
+int noggit::scripting::img_get_index(script_image &img, int x, int y)
 {
-    return ((x+y*width)*4);
+    return ((x + y * img._width) * 4);
 }
 
-unsigned int noggit::scripting::script_image::get_pixel(unsigned x, unsigned y)
+unsigned noggit::scripting::img_get_pixel(script_image &img, int x, int y)
 {
-    unsigned index = get_index(x,y);
-    return image[index] << 24 | image[index+1] << 16 | image[index+2] << 8 | image[index+3];
+    unsigned index = img_get_index(img, x, y);
+    return img._image[index] << 24 | img._image[index + 1] << 16 | img._image[index + 2] << 8 | img._image[index + 3];
 }
 
-void noggit::scripting::script_image::set_pixel(unsigned x, unsigned y, unsigned int value)
+script_image noggit::scripting::create_image()
 {
-    unsigned index = get_index(x,y);
-    image[index] = (value << 24);
-    image[index+1] = (value << 16)&0xff;
-    image[index+2] = (value << 8)&0xff;
-    image[index+3] = (value)&0xff;
+    return script_image();
 }
 
-void noggit::scripting::script_image::save(std::string filename)
+void noggit::scripting::img_set_pixel(script_image &img, int x, int y, unsigned value)
 {
-    unsigned error = lodepng::encode(filename.c_str(), image, width, height); 
-    if(error)
+    unsigned index = img_get_index(img, x, y);
+    img._image[index] = (value << 24);
+    img._image[index + 1] = (value << 16) & 0xff;
+    img._image[index + 2] = (value << 8) & 0xff;
+    img._image[index + 3] = (value)&0xff;
+}
+
+void noggit::scripting::img_save(script_image &img, const char *filename)
+{
+    unsigned error = lodepng::encode(filename, img._image, img._width, img._height);
+    if (error)
     {
-        get_cur_tool()->addLog("[error]: failed to save image with error "+error);
+        get_cur_tool()->addLog("[error]: failed to save image with error " + error);
     }
 }
 
-std::shared_ptr<script_image> noggit::scripting::load_image(std::string path)
+float noggit::scripting::img_gradient_scale(script_image &img, float rel)
 {
-    return std::make_shared<script_image>(path);
-}
-
-std::shared_ptr<script_image> noggit::scripting::create_image(unsigned width, unsigned height)
-{
-    return std::make_shared<script_image>(width,height);
-}
-
-void noggit::scripting::register_image_functions(duk_context* ctx)
-{
-    GLUE_METHOD(ctx,script_image,get_index);
-    GLUE_METHOD(ctx,script_image,get_pixel);
-    GLUE_METHOD(ctx,script_image,set_pixel);
-    GLUE_METHOD(ctx,script_image,save);
-    GLUE_METHOD(ctx,script_image,get_width);
-    GLUE_METHOD(ctx,script_image,get_height);
-
-    GLUE_FUNCTION(ctx,load_image);
-    GLUE_FUNCTION(ctx,create_image);
+    int x = std::floor(rel * float(img._width));
+    // read red channel, but it shouldn't matter.
+    return float(img._image[x * 4]) / 255.0;
 }

@@ -144,6 +144,7 @@ namespace noggit
     {
       if (it.which() == eEntry_Model)
       {
+        LogDebug << "Removing removing!!!!!!!!!!!!!\n";
         auto& instance = boost::get<selected_model_type>(it);
         
         _world->updateTilesModel(instance, model_update::remove);

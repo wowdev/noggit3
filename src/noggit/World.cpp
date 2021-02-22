@@ -1784,7 +1784,9 @@ void World::unload_every_model_and_wmo_instance()
   _models_by_filename.clear();
 }
 
-void World::addM2 ( std::string const& filename
+// @tswow-begin
+ModelInstance* World::addM2 ( std::string const& filename
+// @tswow-end
                   , math::vector_3d newPos
                   , float scale
                   , math::vector_3d rotation
@@ -1825,11 +1827,14 @@ void World::addM2 ( std::string const& filename
   model_instance.recalcExtents();
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
-
-  _models_by_filename[filename].push_back(_model_instance_storage.get_model_instance(uid).get());
+  auto model = _model_instance_storage.get_model_instance(uid).get();
+  _models_by_filename[filename].push_back(model);
+  return model;
 }
 
-void World::addWMO ( std::string const& filename
+// @tswow-begin
+WMOInstance* World::addWMO ( std::string const& filename
+// @tswow-end
                    , math::vector_3d newPos
                    , math::vector_3d rotation
                    )
@@ -1844,7 +1849,8 @@ void World::addWMO ( std::string const& filename
   wmo_instance.wmo->wait_until_loaded();
   wmo_instance.recalcExtents();
 
-  _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
+  auto uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
+  return _model_instance_storage.get_wmo_instance(uid).get();
 }
 
 std::uint32_t World::add_model_instance(ModelInstance model_instance, bool from_reloading)
@@ -2126,6 +2132,13 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
 }
 
 // @tswow-begin
+
+void World::delete_models(std::vector<selection_type>& const types)
+{
+   _model_instance_storage.delete_instances(types);
+  need_model_updates = true;
+}
+
 void World::selectVertices(math::vector_3d const& pos1, math::vector_3d const& pos2)
 {
   math::vector_3d pos_min = math::vector_3d(std::min(pos1.x,pos2.x),std::min(pos1.y,pos2.y),std::min(pos1.z,pos2.z));

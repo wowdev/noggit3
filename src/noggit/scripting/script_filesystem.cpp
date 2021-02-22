@@ -1,100 +1,89 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/script_exception.hpp>
-#include <noggit/scripting/script_loader.hpp>
-#include <dukglue.h>
 
 using namespace noggit::scripting;
 namespace fs = boost::filesystem;
 
-std::string noggit::scripting::read_file(std::string path)
+static void skip_dirs(script_file_iterator &itr)
 {
-    if(!fs::exists(path))
+    while (itr._dir != itr._end && boost::filesystem::is_directory(itr._dir->path()))
     {
-        throw script_exception("No such file:"+path);
+        ++itr._dir;
+    }
+}
+
+const char *noggit::scripting::read_file(const char *path)
+{
+    if (!fs::exists(path))
+    {
+        throw script_exception("No such file:" + *path);
     }
     std::ifstream t(path);
     std::string str((std::istreambuf_iterator<char>(t)),
-        std::istreambuf_iterator<char>());
-    return str;
+                    std::istreambuf_iterator<char>());
+    return str.c_str();
 }
 
-static void mkdirs(std::string pathstr)
+static void mkdirs(const char *pathstr)
 {
     auto path = fs::path(pathstr);
     auto parent_path = path.parent_path();
-    if(parent_path.string().size()>0)
+    if (parent_path.string().size() > 0)
     {
         fs::create_directories(path.parent_path());
     }
 }
 
-void noggit::scripting::write_file(std::string path, std::string input)
+void noggit::scripting::write_file(const char *path, const char *input)
 {
     mkdirs(path);
     std::ofstream(path) << input;
 }
 
-void noggit::scripting::append_file(std::string path, std::string input)
+void noggit::scripting::append_file(const char *path, const char *input)
 {
     mkdirs(path);
     std::ofstream outfile;
     outfile.open(path, std::ios_base::app); // append instead of overwrite
-    outfile << input; 
+    outfile << input;
 }
 
-bool noggit::scripting::path_exists(std::string path)
+bool noggit::scripting::path_exists(const char *path)
 {
     return fs::exists(path);
 }
 
-std::shared_ptr<script_file_iterator> noggit::scripting::read_directory(std::string path)
+script_file_iterator noggit::scripting::read_directory(const char *path)
 {
     fs::recursive_directory_iterator dir(path), end;
-    return std::make_shared<script_file_iterator>(dir,end);
+    return script_file_iterator(dir, end);
 }
 
-
-void noggit::scripting::script_file_iterator::skip_dirs()
+noggit::scripting::script_file_iterator::script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end) : _dir(dir), _end(end)
 {
-    while(_dir != _end && boost::filesystem::is_directory(_dir->path()))
+    skip_dirs(*this);
+}
+
+const char *noggit::scripting::file_itr_get(script_file_iterator &itr)
+{
+    return itr._dir->path().string().c_str();
+}
+
+bool noggit::scripting::file_itr_next(script_file_iterator &itr)
+{
+    if (!itr._started)
     {
-        ++_dir;
+        itr._started = true;
+        return itr._dir != itr._end;
     }
-}
 
-noggit::scripting::script_file_iterator::script_file_iterator
-(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end): _dir(dir), _end(end)
-{
-    skip_dirs();
-}
-
-bool noggit::scripting::script_file_iterator::is_on_file()
-{
-    return _dir != _end;
-}
-
-std::string noggit::scripting::script_file_iterator::get_file()
-{
-    return _dir->path().string();
-}
-
-void noggit::scripting::script_file_iterator::next_file()
-{
-    if(_dir != _end)
+    if (itr._dir != itr._end)
     {
-        ++_dir;
-        skip_dirs();
+        ++itr._dir;
+        skip_dirs(itr);
     }
-}
 
-void noggit::scripting::register_filesystem_functions(duk_context* ctx)
-{
-    GLUE_FUNCTION(ctx,read_file);
-    GLUE_FUNCTION(ctx,write_file);
-    GLUE_FUNCTION(ctx,read_directory);
-    GLUE_FUNCTION(ctx,append_file);
-
-    GLUE_METHOD(ctx,script_file_iterator,is_on_file);
-    GLUE_METHOD(ctx,script_file_iterator,get_file);
-    GLUE_METHOD(ctx,script_file_iterator,next_file);
+    return itr._dir != itr._end;
 }

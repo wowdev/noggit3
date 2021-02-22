@@ -1,3 +1,5 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #pragma once
 
 #include <string>
@@ -7,11 +9,8 @@
 #include <limits>
 #include <random>
 #include <chrono>
-#include <noggit/scripting/script_selection.hpp>
 
-#include <lodepng.h>
-#include <noggit/scripting/script_setup.hpp>
-#include <noggit/camera.hpp>
+#include <math/vector_3d.hpp>
 
 /**
  * script_context.hpp
@@ -19,11 +18,6 @@
  * Contains library functions that scripts can call.
  */
 class World;
-namespace math {
-    struct vector_3d;
-}
-
-struct duk_hthread;
 
 namespace noggit
 {
@@ -32,48 +26,10 @@ namespace noggit
     namespace scripting
     {
         struct script_vec;
-        typedef std::shared_ptr<script_vec> vecptr;
 
-        class script_context {
-        public:
+        struct script_context
+        {
             script_context(World *world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera *camera, bool alt, bool shift, bool ctrl, bool space);
-            std::shared_ptr<script_vec> pos();
-            std::shared_ptr<script_selection> select(float origin_x, float origin_z, float inner_radius, float outer_radius);
-            void change_terrain(vecptr, float change, float radius, float inner_radius, int brush_type);
-            void add_m2(std::string filename, vecptr pos, float scale, vecptr rotation);
-            void add_wmo(std::string filename, vecptr pos, vecptr rotation);
-            unsigned int get_map_id();
-            unsigned int get_area_id(vecptr);
-            void set_area_id(vecptr, int id, bool adt = false);
-            void change_vertex_color(vecptr pos, vecptr color, float alpha, float change, float radius, bool editMode);
-            vecptr get_vertex_color(vecptr pos);
-            void flatten_terrain(vecptr pos, float remain, float radius, int brush_type, bool lower, bool raise, vecptr origin, double angle, double orientation);
-            void blur_terrain(vecptr pos, float remain, float radius, int brush_type, bool lower, bool raise);
-            void erase_textures(vecptr pos);
-            void clear_shadows(vecptr pos);
-            void clear_textures(vecptr pos);
-            void clear_height(vecptr pos);
-            void set_hole(vecptr pos, bool big, bool hole);
-            void set_hole_adt(vecptr pos, bool hole);
-            void deselect_vertices_radius(vecptr pos, float radius);
-            void clear_vertex_selection();
-            void move_vertices(float h);
-            void flatten_vertices(float h);
-            void update_vertices();
-
-            void paint_texture(vecptr pos, float strength, float pressure, float hardness, float radius, std::string texture);
-            
-            float cam_pitch();
-            float cam_yaw();
-
-            float outer_radius();
-            float inner_radius();
-
-            bool holding_alt();
-            bool holding_shift();
-            bool holding_ctrl();
-            bool holding_space();
-        private:
             World *_world;
             bool _holding_alt;
             bool _holding_shift;
@@ -85,6 +41,39 @@ namespace noggit
             float _inner_radius;
         };
 
-        void register_context_functions(duk_hthread* ctx);
-    }
-}
+        script_context* get_ctx();
+        void set_ctx(script_context *ctx);
+        math::vector_3d pos();
+        math::vector_3d vec(float x, float y, float c);
+        void brush_change_terrain(math::vector_3d &, float change, float radius, float inner_radius, int brush_type);
+        void add_m2(const char *filename, math::vector_3d &pos, float scale, math::vector_3d &rotation);
+        void add_wmo(const char *filename, math::vector_3d &pos, math::vector_3d &rotation);
+        unsigned int get_map_id();
+        unsigned int get_area_id(math::vector_3d &);
+        void brush_set_area_id(math::vector_3d &, int id, bool adt = false);
+        void brush_change_vertex_color(math::vector_3d &pos, math::vector_3d &color, float alpha, float change, float radius, bool editMode);
+        math::vector_3d brush_get_vertex_color(math::vector_3d &pos);
+        void brush_flatten_terrain(math::vector_3d &pos, float remain, float radius, int brush_type, bool lower, bool raise, math::vector_3d &origin, double angle, double orientation);
+        void brush_blur_terrain(math::vector_3d &pos, float remain, float radius, int brush_type, bool lower, bool raise);
+        void brush_erase_textures(math::vector_3d &pos);
+        void brush_clear_shadows(math::vector_3d &pos);
+        void brush_clear_textures(math::vector_3d &pos);
+        void brush_clear_height(math::vector_3d &pos);
+        void brush_set_hole(math::vector_3d &pos, bool big, bool hole);
+        void brush_set_hole_adt(math::vector_3d &pos, bool hole);
+        void brush_deselect_vertices(math::vector_3d &pos, float radius);
+        void brush_clear_vertex_selection();
+        void brush_move_vertices(float h);
+        void brush_flatten_vertices(float h);
+        void brush_update_vertices();
+        void brush_paint_texture(math::vector_3d &pos, float strength, float pressure, float hardness, float radius, const char *texture);
+        float cam_pitch();
+        float cam_yaw();
+        float outer_radius();
+        float inner_radius();
+        bool holding_alt();
+        bool holding_shift();
+        bool holding_ctrl();
+        bool holding_space();
+    } // namespace scripting
+} // namespace noggit

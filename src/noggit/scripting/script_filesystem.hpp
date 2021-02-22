@@ -1,33 +1,32 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #pragma once
 
 #include <boost/filesystem.hpp>
 #include <string>
 
-struct duk_hthread;
-
-namespace noggit {
-    namespace scripting {
+namespace noggit
+{
+    namespace scripting
+    {
         namespace fs = boost::filesystem;
 
-        class script_file_iterator {
-        public:
+        struct script_file_iterator
+        {
             script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end);
-            bool is_on_file();
-            std::string get_file();
-            void next_file();
-        private:
+            script_file_iterator() {}
             fs::recursive_directory_iterator _dir;
             fs::recursive_directory_iterator _end;
-            void skip_dirs();
+            bool _started = false;
         };
 
-        void write_file(std::string path, std::string content);
-        void append_file(std::string path, std::string content);
-        std::shared_ptr<script_file_iterator> read_directory(std::string path);
-        std::string read_file(std::string path);
-        bool path_exists(std::string path);
+        bool file_itr_next(script_file_iterator &thiz);
+        const char *file_itr_get(script_file_iterator &thiz);
 
-        void register_filesystem_functions(duk_hthread *ctx);
-
-    }
-}
+        void write_file(const char *path, const char *content);
+        void append_file(const char *, const char *content);
+        script_file_iterator read_directory(const char *directory);
+        const char *read_file(const char *path);
+        bool path_exists(const char *path);
+    } // namespace scripting
+} // namespace noggit

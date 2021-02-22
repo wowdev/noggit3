@@ -1,35 +1,35 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #pragma once
 
 #include <vector>
 #include <string>
-
 #include <memory>
 
-struct duk_hthread;
-
-namespace noggit {
-    namespace scripting {
-        class script_image
+namespace noggit
+{
+    namespace scripting
+    {
+        struct script_image
         {
-        public:
-            script_image(std::string path);
-            script_image(unsigned width, unsigned height);
-            unsigned get_index(unsigned x, unsigned y);
-            unsigned get_pixel(unsigned x, unsigned y);
-            void set_pixel(unsigned x, unsigned y, unsigned value);
-            void save(std::string filename);
-
-            unsigned get_width();
-            unsigned get_height();
-        private:
-            std::vector<unsigned char> image;
-            unsigned width;
-            unsigned height;
+            script_image() {}
+            std::vector<unsigned char> _image;
+            unsigned _width = 0;
+            unsigned _height = 0;
         };
 
-        std::shared_ptr<script_image> load_image(std::string path);
-        std::shared_ptr<script_image> create_image(unsigned width, unsigned height);
+        int img_get_index(script_image &img, int x, int y);
+        unsigned img_get_pixel(script_image &img, int x, int y);
 
-        void register_image_functions(duk_hthread* ctx);
-    }
-}
+        float img_gradient_scale(script_image &img, float rel);
+
+        void img_set_pixel(script_image &img, int x, int y, unsigned value);
+        void img_save(script_image &img, const char *filename);
+        int img_width(script_image &img);
+        int img_height(script_image &img);
+        void img_resize(script_image &img, int width, int height);
+        void img_load_png(script_image &img, const char *path);
+
+        script_image create_image();
+    } // namespace scripting
+} // namespace noggit

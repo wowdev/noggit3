@@ -1,266 +1,306 @@
-#include <iostream>
-#include <fstream>
-#include <stack>
-
-#include <dukglue.h>
-#include <boost/filesystem.hpp>
-
-#include <noggit/Log.h>
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_loader.hpp>
-#include <noggit/scripting/scripting_tool.hpp>
-
-#include <noggit/scripting/script_context.hpp>
-#include <noggit/scripting/script_setup.hpp>
-#include <noggit/scripting/script_image.hpp>
-#include <noggit/scripting/script_math.hpp>
-#include <noggit/scripting/script_noise.hpp>
-#include <noggit/scripting/script_printf.hpp>
-#include <noggit/scripting/script_random.hpp>
-#include <noggit/scripting/script_selection.hpp>
-#include <noggit/scripting/script_vec.hpp>
-#include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_noggit_module.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
+#include <daScript/daScript.h>
+#include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/Log.h>
 
+using namespace das;
 using namespace noggit::scripting;
 
-static duk_context *ctx = nullptr;
-static std::vector<std::string> scripts;
-static int selected_script = -1;
+static bool initialized = false;
+static int cur_script = -1;
 
-static void handle_error(int value)
-{
-    if (value)
-    {
-        throw script_exception((std::string(duk_safe_to_string(ctx,-1))).c_str());
-    }
-}
-
-std::string filename(std::string filename)
-{
-    return boost::filesystem::path(filename).filename().string();
-}
-
-std::string dirname(std::string filename)
-{
-    return boost::filesystem::path(filename).parent_path().string();
-}
-
-std::string resolve(std::string path)
-{
-    return boost::filesystem::relative(
-        boost::filesystem::absolute(
-            boost::filesystem::path(path)), 
-            boost::filesystem::path("./"))
-            .string();
-}
-
-void register_script_functions(duk_context* ctx)
-{
-    register_setup_functions(ctx);
-    register_vec_functions(ctx);
-    register_misc_functions(ctx);
-    register_image_functions(ctx);
-    register_noise_functions(ctx);
-    register_random_functions(ctx);
-    register_print_functions(ctx);
-    register_context_functions(ctx);
-    register_selection_functions(ctx);
-    register_filesystem_functions(ctx);
-}
-
-#define CLICK_EVENT(type)                      \
-    static bool has_##type##_handler = false;  \
-    duk_ret_t on_##type(duk_context *ctx)      \
-    {                                          \
-        has_##type##_handler = true;           \
-        duk_dup(ctx, 0);                       \
-        duk_put_global_string(ctx, #type);     \
-        return 0;                              \
-    }                                          \
-    void send_##type(script_context *script)   \
-    {                                          \
-        if (has_##type##_handler)              \
-        {                                      \
-            duk_get_global_string(ctx, #type); \
-            dukglue_push(ctx, script);         \
-            duk_int_t rc = duk_pcall(ctx, 1);  \
-            handle_error(rc);                  \
-            duk_pop(ctx);                      \
-        }                                      \
+#define CALL_FUNC(ctr, type)                                 \
+    if (ctr)                                                 \
+    {                                                        \
+        if (ctr->_on_##type)                                 \
+        {                                                    \
+            auto fun = ctr->_ctx->findFunction(#type);       \
+            ctr->_ctx->eval(fun, nullptr);                   \
+            if (auto ex = ctr->_ctx->getException())         \
+            {                                                \
+                get_cur_tool()->addLog("exception: " + *ex); \
+            }                                                \
+        }                                                    \
     }
 
-CLICK_EVENT(left_click)
-CLICK_EVENT(left_hold)
-CLICK_EVENT(left_release)
-
-CLICK_EVENT(right_click)
-CLICK_EVENT(right_hold)
-CLICK_EVENT(right_release)
-
-/** 
- * Require Stuff 
- * 
- * This segment can be useful for anyone trying to use duktape with CommonJS  
- */
-
-struct ExportsObject {};
-
-std::map<std::string, ExportsObject> exports;
-std::vector<std::string> module_stack;
-
-ExportsObject* __get_exports(std::string key)
+struct script_container
 {
-    return &exports[key];
-}
-
-inline bool ends_with(std::string const& value, std::string const& ending)
-{
-    if (ending.size() > value.size()) return false;
-    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-}
-
-ExportsObject* require(std::string path)
-{
-    auto parent = module_stack.back();
-    auto out = resolve((boost::filesystem::path(dirname(parent)) / boost::filesystem::path(path)).string());
-    std::replace(out.begin(), out.end(), '\\', '/');
-
-    // the first element is just the root and will be duplicate, so ignore it.
-    if (module_stack.size() > 1)
+    script_container(
+        std::string name,
+        std::string display_name,
+        Context *ctx,
+        bool select,
+        bool left_click,
+        bool left_hold,
+        bool left_release,
+        bool right_click,
+        bool right_hold,
+        bool right_release) : _name(name),
+                              _display_name(display_name),
+                              _ctx(ctx),
+                              _on_select(select),
+                              _on_left_click(left_click),
+                              _on_left_hold(left_hold),
+                              _on_left_release(left_release),
+                              _on_right_click(right_click),
+                              _on_right_hold(right_hold),
+                              _on_right_release(right_release)
     {
-        auto index = std::find(module_stack.begin()+1, module_stack.end(), out);
-        if (index != module_stack.end())
+    }
+    script_container() {}
+
+    Context *_ctx = nullptr;
+
+    std::string _name;
+    std::string _display_name;
+
+    bool _on_select = false;
+
+    bool _on_left_click = false;
+    bool _on_left_hold = false;
+    bool _on_left_release = false;
+
+    bool _on_right_click = false;
+    bool _on_right_hold = false;
+    bool _on_right_release = false;
+
+    // TODO: Allowing memory leak atm because this just crashes
+    ~script_container()
+    { /*delete _ctx;*/
+    }
+};
+
+static std::vector<script_container> containers;
+
+int noggit::scripting::get_selected_script()
+{
+    return cur_script;
+}
+
+std::string noggit::scripting::selected_script_name()
+{
+    return cur_script >= 0 && cur_script < containers.size()
+               ? containers[cur_script]._name
+               : "";
+}
+
+const std::string &noggit::scripting::get_script_name(int id)
+{
+    return containers[id]._name;
+}
+
+const std::string &noggit::scripting::get_script_display_name(int id)
+{
+    return containers[id]._display_name;
+}
+
+int noggit::scripting::script_count()
+{
+    return containers.size();
+}
+
+// is not allowed to happen in a namespace
+void install_modules()
+{
+    NEED_MODULE(Module_BuiltIn);
+    NEED_MODULE(Module_Math);
+    NEED_MODULE(Module_Strings);
+    NEED_MODULE(Module_Rtti);
+    NEED_MODULE(Module_Ast);
+    NEED_MODULE(Module_Debugger);
+    NEED_MODULE(Module_FIO);
+    NEED_MODULE(Module_Random);
+
+    // prolly not a good idea
+    //NEED_MODULE(Module_Network);
+
+    NEED_MODULE(NoggitModule);
+}
+
+static script_container *get_container()
+{
+    if (cur_script < 0)
+    {
+        return nullptr;
+    }
+    return &containers[cur_script];
+}
+
+void noggit::scripting::send_left_click(){CALL_FUNC(get_container(), left_click)};
+void noggit::scripting::send_left_hold(){CALL_FUNC(get_container(), left_hold)};
+void noggit::scripting::send_left_release(){CALL_FUNC(get_container(), left_release)};
+
+void noggit::scripting::send_right_click(){CALL_FUNC(get_container(), right_click)};
+void noggit::scripting::send_right_hold(){CALL_FUNC(get_container(), right_hold)};
+void noggit::scripting::send_right_release(){CALL_FUNC(get_container(), right_release)};
+
+static bool ends_with(const std::string &str, const std::string &suffix)
+{
+    return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
+}
+
+class : public TextWriter
+{
+public:
+    virtual void output() override
+    {
+        int newPos = tellp();
+        if (newPos != pos)
         {
-            std::string error_msg = "Circular dependency in module: " + out+"\nRequire stack (grows down): \n      ";
-            index = module_stack.begin()+1;
-            while (index != module_stack.end())
-            {
-                error_msg += (*index);
-                if (*index == out) error_msg += " << seen here";
-                error_msg += "\n    ->";
-                index++;
-            }
-            error_msg += out + " << and again here (error)\n";
-            throw script_exception(error_msg.c_str());
+            string st(data.data() + pos, newPos - pos);
+            get_cur_tool()->addLog(st);
+            pos = newPos;
         }
     }
-    
-    auto exports_object = &(exports[out] = ExportsObject());
-    module_stack.push_back(out);
-    // isolate the script context
-    auto fullstr = "(function(){var exports = __get_exports('" + out + "'); " + read_file(out + ".js") + ";}());";
-    int res = duk_peval_string(ctx,fullstr.c_str());
-    handle_error(res);
-    module_stack.pop_back();
-    return exports_object;
-}
+
+protected:
+    int pos = 0;
+} _noggit_printer;
+
+// used to reroute 'print' to
+class NoggitContext : public das::Context
+{
+public:
+    NoggitContext(int stackSize) : das::Context(stackSize) {}
+    virtual void to_out(const char *msg) override
+    {
+        get_cur_tool()->addLog(msg);
+    }
+
+    virtual void to_err(const char *msg) override
+    {
+        get_cur_tool()->addLog(msg);
+    }
+};
 
 int noggit::scripting::load_scripts()
 {
-    exports.clear();
-    module_stack.clear();
-
-    auto tool = get_cur_tool();
-    // TODO: error
-    if (tool == nullptr)
+    if (!initialized)
     {
-        return -1;
+        install_modules();
+        initialized = true;
+        Module::Initialize();
     }
-    std::string lastName = "";
-    if (selected_script != -1)
-        lastName = scripts[selected_script];
 
-    LogDebug << "Loading scripts" << std::endl;
-    if (ctx != nullptr)
+    std::string old_module = cur_script > 0 ? get_script_name(cur_script) : "";
+    cur_script = -1;
+    int new_index = -1;
+    containers.clear();
+
+    ModuleGroup dummyLibGroup;
+
+    auto itr = read_directory("scripts");
+    while (file_itr_next(itr))
     {
-        duk_destroy_heap(ctx);
-    }
-    scripts.clear();
+        std::string file = file_itr_get(itr);
+        if (!ends_with(file, ".das") || ends_with(file, ".spec.das"))
+            continue;
 
-    ctx = duk_create_heap_default();
-    duk_push_global_object(ctx);
-
-    // Events
-    TAPE_FUNCTION(ctx, on_left_click, 1);
-    TAPE_FUNCTION(ctx, on_left_hold, 1);
-    TAPE_FUNCTION(ctx, on_left_release, 1);
-    TAPE_FUNCTION(ctx, on_right_click, 1);
-    TAPE_FUNCTION(ctx, on_right_hold, 1);
-    TAPE_FUNCTION(ctx, on_right_release, 1);
-
-    GLUE_FUNCTION(ctx,require);
-    GLUE_FUNCTION(ctx,__get_exports);
-
-    register_script_functions(ctx);
-    tool->clearLog();
-
-    using namespace boost::filesystem;
-    if(boost::filesystem::exists("scripts") && boost::filesystem::is_directory("scripts"))
-    {
-        boost::filesystem::recursive_directory_iterator dir("scripts"), end;
-        while(dir != end)
+        auto fAccess = make_smart<FsFileAccess>();
+        auto program = compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup);
+        auto ctx = new NoggitContext(program->getContextStackSize());
+        if (!program->simulate(*ctx, _noggit_printer))
         {
-            if(!boost::filesystem::is_directory(dir->path()) && ends_with(dir->path().string(),".js"))
+            get_cur_tool()->setStyleSheet("background-color: #f0a5a5;");
+            get_cur_tool()->addLog("Script error:");
+            for (auto &err : program->errors)
             {
-                auto path = dir->path().string();
-                path = path.substr(0,path.size()-3);
-                module_stack.push_back(path);
-                require("./"+filename(path));
-                module_stack.pop_back();
+                get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
             }
-            boost::system::error_code ec;
-            dir.increment(ec);
-            if(ec)
+            containers.clear();
+            // TODO: free ctx here.
+            return -1;
+        }
+
+        bool is_any = false;
+
+#define CHECK_FUNC(ctx, type)                                      \
+    auto on_##type = ctx->findFunction(#type);                     \
+    auto is_##type = false;                                        \
+    if (on_##type)                                                 \
+    {                                                              \
+        if (verifyCall<void>(on_##type->debugInfo, dummyLibGroup)) \
+        {                                                          \
+            is_##type = true;                                      \
+            is_any = true;                                         \
+        }                                                          \
+    }
+
+        CHECK_FUNC(ctx, select);
+        CHECK_FUNC(ctx, left_click);
+        CHECK_FUNC(ctx, left_hold);
+        CHECK_FUNC(ctx, left_release);
+
+        CHECK_FUNC(ctx, right_click);
+        CHECK_FUNC(ctx, right_hold);
+        CHECK_FUNC(ctx, right_release);
+
+        if (is_any)
+        {
+            auto module_name = file.substr(8, file.size() - 12);
+            if (module_name == old_module)
             {
-                throw script_exception(("Error accessing " + dir->path().string() + "::" + ec.message() + "\n").c_str());
+                new_index = containers.size();
             }
+
+            auto display_name = module_name;
+            auto title_fun = ctx->findFunction("title");
+            if (title_fun)
+            {
+                if (!verifyCall<const char *>(title_fun->debugInfo, dummyLibGroup))
+                {
+                    get_cur_tool()->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
+                }
+                else
+                {
+                    auto result = cast<const char *>::to(ctx->eval(title_fun));
+                    if (result)
+                    {
+                        display_name = result;
+                    }
+                }
+            }
+
+            containers.push_back(script_container(
+                module_name,
+                display_name,
+                ctx,
+                is_select,
+                is_left_click,
+                is_left_hold,
+                is_left_release,
+                is_right_click,
+                is_right_hold,
+                is_right_release));
         }
     }
 
-    tool->clearDescription();
-    if (selected_script != -1)
+    if (new_index == -1 && containers.size() > 0)
     {
-        auto it = std::find(scripts.begin(), scripts.end(), lastName);
-        if (it != scripts.end())
-        {
-            selected_script = -1;
-            select_script(it - scripts.begin());
-            return selected_script;
-        }
+        new_index = 0;
     }
-    selected_script = -1;
-    select_script(0);
-    return selected_script;
+
+    // remove error color on successful compile
+    get_cur_tool()->setStyleSheet("");
+
+    return new_index;
 }
 
 void noggit::scripting::select_script(int index)
 {
-    auto tool = get_cur_tool();
-    if (tool == nullptr || index == selected_script || index >= scripts.size())
+    // just for safety
+    save_json();
+
+    if (index < 0 || index >= containers.size())
     {
         return;
     }
 
-    tool->removeScriptWidgets();
-
-    selected_script = index;
-    tool->clearDescription();
-    tool->clearLog();
-
-    has_left_click_handler = false;
-    has_left_hold_handler = false;
-    has_left_release_handler = false;
-    has_right_click_handler = false;
-    has_right_hold_handler = false;
-    has_right_release_handler = false;
-
-    auto name = scripts[index];
-    duk_get_global_string(ctx, name.c_str());
-    duk_int_t rc = duk_pcall(ctx, 0);
-    handle_error(rc);
-}
-
-std::vector<std::string> *noggit::scripting::get_scripts()
-{
-    return &scripts;
+    cur_script = index;
+    auto ref = &containers[index];
+    CALL_FUNC(ref, select);
 }

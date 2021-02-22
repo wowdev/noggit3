@@ -1,3 +1,5 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #include <boost/algorithm/string/predicate.hpp>
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/World.h>

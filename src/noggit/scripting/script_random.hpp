@@ -1,34 +1,31 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #pragma once
 
 #include <random>
 #include <chrono>
 #include <memory>
 
-struct duk_hthread;
-
-namespace noggit {
-    namespace scripting {
-        // TODO: are you supposed to re-create the distributions each time you need them?
-        class script_random {
-            public:
+namespace noggit
+{
+    namespace scripting
+    {
+        struct script_random
+        {
+            unsigned long _state;
             script_random(unsigned seed);
             script_random(std::string seed);
             script_random();
-
-            int get_int32(int low, int high);
-            unsigned get_uint32(unsigned low, unsigned high);
-            unsigned long get_uint64(unsigned long low, unsigned long high);
-            long get_int64(long low, long high);
-            double get_double(double low, double high);
-            double get_float(float low, float high);
-
-            private:
-            std::mt19937 _engine;
         };
 
-        std::shared_ptr<script_random> random_from_seed(std::string seed);
-        std::shared_ptr<script_random> random_from_time();
+        int rand_int32(script_random &rand, int low, int high);
+        unsigned rand_uint32(script_random &rand, unsigned low, unsigned high);
+        unsigned long rand_uint64(script_random &rand, unsigned long low, unsigned long high);
+        long rand_int64(script_random &rand, long low, long high);
+        double rand_double(script_random &rand, double low, double high);
+        float rand_float(script_random &rand, float low, float high);
 
-        void register_random_functions(duk_hthread* ctx);
-    }
-}
+        script_random random_from_seed(const char *seed);
+        script_random random_from_time();
+    } // namespace scripting
+} // namespace noggit

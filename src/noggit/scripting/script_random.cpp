@@ -1,75 +1,69 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_random.hpp>
-#include <noggit/scripting/script_loader.hpp>
-#include <dukglue.h>
 
 using namespace noggit::scripting;
 
 noggit::scripting::script_random::script_random(unsigned seed)
+    : _state(seed)
 {
-    _engine = std::mt19937(seed);
 }
 
 noggit::scripting::script_random::script_random(std::string seed)
+    : _state(std::hash<std::string>()(seed))
 {
-    _engine = std::mt19937(std::hash<std::string>()(seed));
 }
 
 noggit::scripting::script_random::script_random()
+    : _state(std::chrono::high_resolution_clock::now().time_since_epoch().count())
 {
-    _engine = std::mt19937(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 }
 
-int noggit::scripting::script_random::get_int32(int low, int high)
+int noggit::scripting::rand_int32(script_random &rand, int low, int high)
 {
-    return std::uniform_int_distribution<int>(low, high)(_engine); 
+    return low + int(rand_uint64(rand, 0, std::abs(high - low)));
 }
 
-
-unsigned noggit::scripting::script_random::get_uint32(unsigned low, unsigned high)
+unsigned noggit::scripting::rand_uint32(script_random &rand, unsigned low, unsigned high)
 {
-    return std::uniform_int_distribution<unsigned>(low, high)(_engine);
+    return rand_uint64(rand, low, high);
 }
 
-
-unsigned long noggit::scripting::script_random::get_uint64(unsigned long low, unsigned long high)
+unsigned long noggit::scripting::rand_uint64(script_random &rand, unsigned long low, unsigned long high)
 {
-    return std::uniform_int_distribution<unsigned long>(low, high)(_engine);
+    auto x = rand._state;
+    x ^= x >> 12; // a
+    x ^= x << 25; // b
+    x ^= x >> 27; // c
+    rand._state = x;
+    // does the modulo bias cancel out the use of 64 bits here?
+    return low + ((x * 0x2545F4914F6CDD1DULL) % (high - low));
 }
 
-long noggit::scripting::script_random::get_int64(long low, long high)
+long noggit::scripting::rand_int64(script_random &rand, long low, long high)
 {
-    return std::uniform_int_distribution<long>(low, high)(_engine);
+    return low + rand_uint64(rand, 0, std::abs(high - low));
 }
 
-double noggit::scripting::script_random::get_double(double low, double high)
+double noggit::scripting::rand_double(script_random &rand, double low, double high)
 {
-    return std::uniform_real_distribution<double>(low, high)(_engine);
+#define RAND_MAX_DOUBLE 18446744073709551615ull
+    return low + rand_uint64(rand, 0, RAND_MAX_DOUBLE) / (RAND_MAX_DOUBLE / (high - low));
 }
 
-double noggit::scripting::script_random::get_float(float low, float high)
+float noggit::scripting::rand_float(script_random &rand, float low, float high)
 {
-    return std::uniform_real_distribution<float>(low, high)(_engine);
+// TODO: prolly not a good idea
+#define RAND_MAX_FLOAT 4294967295
+    return low + rand_uint32(rand, 0, RAND_MAX_FLOAT) / (RAND_MAX_FLOAT / (high - low));
 }
 
-std::shared_ptr<script_random> noggit::scripting::random_from_seed(std::string seed)
+script_random noggit::scripting::random_from_seed(const char *seed)
 {
-    return std::make_shared<script_random>(seed);
+    return script_random(std::string(seed));
 }
 
-std::shared_ptr<script_random> noggit::scripting::random_from_time()
+script_random noggit::scripting::random_from_time()
 {
-    return std::make_shared<script_random>();
-}
-
-void noggit::scripting::register_random_functions(duk_context* ctx)
-{
-    GLUE_METHOD(ctx, script_random,get_int32);
-    GLUE_METHOD(ctx, script_random,get_uint32);
-    //GLUE_METHOD(ctx, script_random,get_uint64);
-    //GLUE_METHOD(ctx, script_random,get_int64);
-    GLUE_METHOD(ctx, script_random,get_double);
-    GLUE_METHOD(ctx, script_random,get_float);
-
-    GLUE_FUNCTION(ctx,random_from_seed);
-    GLUE_FUNCTION(ctx,random_from_time);
+    return script_random();
 }

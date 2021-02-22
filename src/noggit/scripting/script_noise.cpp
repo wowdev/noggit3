@@ -1,94 +1,120 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_noise.hpp>
-#include <noggit/scripting/script_loader.hpp>
-#include <dukglue.h>
+#include <noggit/scripting/scripting_tool.hpp>
 
 using namespace noggit::scripting;
 
-float noggit::scripting::script_noise_2d::get(int x, int y)
+script_noise_map noggit::scripting::make_noisemap()
 {
-    unsigned index = x + y * _width;
-    return _noise[index]; 
+    return script_noise_map();
 }
 
-float noggit::scripting::script_noise_2d::get_f(float x, float y)
+float noggit::scripting::noise_get_index(script_noise_map &noise, int x, int y)
 {
-    return get(std::floor(x),std::floor(y));
+    unsigned index = x + y * noise._width;
+    return noise._noise[index];
 }
 
-void noggit::scripting::script_noise_2d::set(int x, int y, float value)
+float noggit::scripting::noise_get_global(script_noise_map &noise, math::vector_3d &pos)
 {
-    unsigned index = x + y * _width;
-    _noise[index] = value;
+    return noise_get_index(noise, std::round(pos.x) - noise._start_x, std::round(pos.z) - noise._start_y);
 }
 
-noggit::scripting::script_noise_2d::script_noise_2d(unsigned start_x, unsigned start_y, unsigned width, unsigned height) 
-    : _width(width), _height(height), _start_x(start_x), _start_y(start_y)
+bool noggit::scripting::noise_is_highest_global(script_noise_map &noise, math::vector_3d &pos, int check_radius)
 {
+    int x = std::round(pos.x) - noise._start_x;
+    int z = std::round(pos.z) - noise._start_y;
 
+    float own = noise_get_index(noise, x, z);
+
+    for (int xc = x - check_radius; xc < x + check_radius; ++xc)
+    {
+        for (int zc = z - check_radius; zc < z + check_radius; ++zc)
+        {
+            if (xc == x && zc == z)
+            {
+                continue;
+            }
+
+            if (noise_get_index(noise, xc, zc) > own)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void noggit::scripting::noise_set(script_noise_map &noise, int x, int y, float value)
+{
+    unsigned index = x + y * noise._width;
+    noise._noise[index] = value;
+}
+
+void noggit::scripting::script_noise_map::resize(unsigned width, unsigned height, unsigned start_x, unsigned start_y)
+{
+    _width = width;
+    _height = height;
+    _start_x = _start_x;
+    _start_y = _start_y;
     _noise.resize(width * height);
 }
 
-unsigned noggit::scripting::script_noise_2d::get_start_x() { return _start_x; }
-unsigned noggit::scripting::script_noise_2d::get_start_y() { return _start_y; }
-unsigned noggit::scripting::script_noise_2d::get_width() { return _width;  }
-unsigned noggit::scripting::script_noise_2d::get_height() { return _height;  }
+unsigned noggit::scripting::noise_start_x(script_noise_map &noise) { return noise._start_x; }
+unsigned noggit::scripting::noise_start_y(script_noise_map &noise) { return noise._start_y; }
+unsigned noggit::scripting::noise_width(script_noise_map &noise) { return noise._width; }
+unsigned noggit::scripting::noise_height(script_noise_map &noise) { return noise._height; }
 
 noggit::scripting::script_noise_generator::script_noise_generator(FastNoise::SmartNode<> generator)
-    : _generator(generator){}
+    : _generator(generator) {}
 
-
-std::shared_ptr<script_noise_2d> noggit::scripting::script_noise_generator::uniform_2d(std::string seed, int xStart, int yStart, unsigned xSize, unsigned ySize, float frequency)
+void noggit::scripting::noise_fill(script_noise_generator &thiz, script_noise_map &map, const char *seed, int x_start, int y_start, unsigned x_size, unsigned y_size, float frequency)
 {
-    auto map = std::make_shared<script_noise_2d>(xStart,yStart,xSize,ySize);
-    _generator->GenUniformGrid2D(map->_noise.data(), xStart, yStart, xSize, ySize, frequency, std::hash<std::string>()(seed));
-    return map;
-}
-
-std::shared_ptr<script_noise_generator> noggit::scripting::noise_simplex()
-{
-    return std::make_shared<script_noise_generator>(FastNoise::New<FastNoise::Simplex>());
-}
-std::shared_ptr<script_noise_generator> noggit::scripting::noise_perlin()
-{
-    return std::make_shared<script_noise_generator>(FastNoise::New<FastNoise::Perlin>());
-}
-std::shared_ptr<script_noise_generator> noggit::scripting::noise_value()
-{
-    return std::make_shared<script_noise_generator>(FastNoise::New<FastNoise::Value>());
-}
-std::shared_ptr<script_noise_generator> noggit::scripting::noise_fractal()
-{
-    return std::make_shared<script_noise_generator>(FastNoise::New<FastNoise::FractalFBm>());
-}
-std::shared_ptr<script_noise_generator> noggit::scripting::noise_cellular()
-{
-    return std::make_shared<script_noise_generator>(FastNoise::New<FastNoise::CellularValue>());
-}
-std::shared_ptr<script_noise_generator> noggit::scripting::noise_white()
-{
-    return std::make_shared<script_noise_generator>(FastNoise::New<FastNoise::White>());
-}
-std::shared_ptr<script_noise_generator> noggit::scripting::noise_custom(std::string encodedNodeTree)
-{
-    return std::make_shared<script_noise_generator>(FastNoise::NewFromEncodedNodeTree(encodedNodeTree.c_str()));
+    map._noise.resize(x_size * y_size);
+    map._start_x = x_start;
+    map._start_y = y_start;
+    map._width = x_size;
+    map._height = y_size;
+    thiz._generator->GenUniformGrid2D(map._noise.data(), x_start, y_start, x_size, y_size, frequency, std::hash<std::string>()(std::string(seed)));
 }
 
-void noggit::scripting::register_noise_functions(duk_context* ctx)
+void noggit::scripting::noise_fill_selection(script_noise_generator &thiz, script_noise_map &map, script_selection &selection, const char *seed, float frequency, int padding)
 {
-    GLUE_METHOD(ctx,script_noise_2d,get);
-    GLUE_METHOD(ctx,script_noise_2d,get_f);
-    GLUE_METHOD(ctx,script_noise_2d,set);
-    GLUE_METHOD(ctx,script_noise_2d,get_start_x);
-    GLUE_METHOD(ctx,script_noise_2d,get_start_y);
-    GLUE_METHOD(ctx,script_noise_2d,get_width);
-    GLUE_METHOD(ctx,script_noise_2d,get_height);
-    GLUE_METHOD(ctx,script_noise_generator,uniform_2d);
+    auto x_start = std::floor(selection._min.x) - (padding + 1);
+    auto z_start = std::floor(selection._min.z) - (padding + 1);
 
-    GLUE_FUNCTION(ctx,noise_simplex);
-    GLUE_FUNCTION(ctx,noise_perlin);
-    GLUE_FUNCTION(ctx,noise_value);
-    GLUE_FUNCTION(ctx,noise_fractal);
-    GLUE_FUNCTION(ctx,noise_cellular);
-    GLUE_FUNCTION(ctx,noise_white);
-    GLUE_FUNCTION(ctx,noise_custom);
+    auto x_size = std::ceil(selection._max.x - selection._min.x) + (padding + 1) * 2;
+    auto z_size = std::ceil(selection._max.z - selection._min.z) + (padding + 1) * 2;
+
+    noise_fill(thiz, map, seed, x_start, z_start, x_size, z_size, frequency);
+}
+
+script_noise_generator noggit::scripting::make_noisegen_simplex()
+{
+    return script_noise_generator(FastNoise::New<FastNoise::Simplex>());
+}
+script_noise_generator noggit::scripting::make_noisegen_perlin()
+{
+    return script_noise_generator(FastNoise::New<FastNoise::Perlin>());
+}
+script_noise_generator noggit::scripting::make_noisegen_value()
+{
+    return script_noise_generator(FastNoise::New<FastNoise::Value>());
+}
+script_noise_generator noggit::scripting::make_noisegen_fractal()
+{
+    return script_noise_generator(FastNoise::New<FastNoise::FractalFBm>());
+}
+script_noise_generator noggit::scripting::make_noisegen_cellular()
+{
+    return script_noise_generator(FastNoise::New<FastNoise::CellularValue>());
+}
+script_noise_generator noggit::scripting::make_noisegen_white()
+{
+    return script_noise_generator(FastNoise::New<FastNoise::White>());
+}
+script_noise_generator noggit::scripting::make_noisegen_custom(const char *encodedNodeTree)
+{
+    return script_noise_generator(FastNoise::NewFromEncodedNodeTree(encodedNodeTree));
 }

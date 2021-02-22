@@ -234,12 +234,16 @@ public:
   void setHole(math::vector_3d const& pos, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);
 
-  void addM2 ( std::string const& filename
+  // @tswow-begin
+  ModelInstance* addM2 ( std::string const& filename
+  // @tswow-end
              , math::vector_3d newPos
              , float scale, math::vector_3d rotation
              , noggit::object_paste_params*
              );
-  void addWMO ( std::string const& filename
+  // @tswow-begin
+  WMOInstance* addWMO ( std::string const& filename
+  // @tswow-end
               , math::vector_3d newPos
               , math::vector_3d rotation
               );
@@ -300,6 +304,7 @@ public:
   bool deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);
   // @tswow-begin
+  void delete_models(std::vector<selection_type>& const types);
   void selectVertices(math::vector_3d const& pos1, math::vector_3d const& pos2);
   std::set<math::vector_3d*>* getSelectedVertices();
 
@@ -310,6 +315,18 @@ public:
                                 );
 
   void select_all_chunks_between(math::vector_3d const& pos1, math::vector_3d const& pos2, std::vector<MapChunk*>& chunks_in);
+
+  template<typename Fun>
+  void for_each_wmo_instance(Fun&& function)
+  {
+    _model_instance_storage.for_each_wmo_instance(function);
+  }
+
+  template<typename Fun>
+  void for_each_m2_instance(Fun&& function)
+  {
+    _model_instance_storage.for_each_m2_instance(function);
+  }
 
   // @tswow-end
 

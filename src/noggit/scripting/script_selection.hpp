@@ -1,88 +1,60 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #pragma once
 
 #include <vector>
 #include <string>
+#include <math/vector_3d.hpp>
+#include <noggit/scripting/script_model.hpp>
+#include <noggit/scripting/script_chunk.hpp>
 
-namespace math {
-    struct vector_3d;
-}
 class MapChunk;
 class World;
-struct duk_hthread;
 
-struct TextureIndex {
+struct TextureIndex
+{
     short indices[36];
 };
 
-namespace noggit {
-    namespace scripting {
-        class script_selection {
-        public:
-            script_selection(World* world, float origin_x, float origin_z, float inner_radius, float outer_radius);
+namespace noggit
+{
+    namespace scripting
+    {
+        struct script_selection
+        {
+            script_selection(World *world, math::vector_3d &origin, float radius_x, float radius_y);
+            script_selection(World *world, math::vector_3d &point1, math::vector_3d &point2);
+            script_selection();
 
-            bool is_on_chunk();
-            bool is_on_vertex();
-            bool is_on_tex();
+            World *_world;
+            math::vector_3d _center;
+            math::vector_3d _min;
+            math::vector_3d _max;
+            math::vector_3d _size;
 
-            void next_chunk();
-            void next_vertex();
-            void next_tex();
+            std::vector<MapChunk *> _chunks;
+            int _cur_chunk = -1;
+            bool _initialized_chunks = false;
 
-            void reset_cur_chunk();
-            void reset_cur_vertex();
-            void reset_cur_tex();
-
-            int chunk_add_texture(std::string texture);
-            void chunk_clear_textures();
-            void chunk_remove_texture(size_t index);
-            std::string chunk_get_texture(size_t index);
-            void chunk_apply_textures();
-            void chunk_apply_heightmap();
-            void chunk_apply_vertex_color();
-            void chunk_apply_all();
-            void chunk_set_impassable(bool add);
-            int chunk_get_area_id();
-            void chunk_set_area_id(int value);
-
-            float vert_get_x();
-            float vert_get_y();
-            float vert_get_z();
-            void vert_set_y(float value);
-            void vert_set_color(float r, float g, float b);
-            void vert_set_water(int type, float height);
-            bool vert_is_water_aligned();
-            void vert_set_hole(bool add);
-            void vert_fill_tex_alpha(size_t index, float alpha);
-            float tex_get_alpha(size_t index);
-            void tex_set_alpha(size_t index, float alpha);
-        private:
-            std::vector<MapChunk*> _chunks;
-            World* _world;
-            float _inner_radius;
-            float _outer_radius;
-            float _origin_z;
-            float _origin_x;
-
-            float _low_x_inner;
-            float _low_z_inner;
-            float _high_x_inner;
-            float _high_z_inner;
-
-            float _low_x_outer;
-            float _low_z_outer;
-            float _high_x_outer;
-            float _high_z_outer;
-        
-            std::vector<MapChunk*>::iterator _cur_chunk;
-            math::vector_3d* _cur_vertex;
-            unsigned _vertex_index = 0;
-            math::vector_3d* _cur_mccv;
-            TextureIndex* _cur_texture_set;
-            short *_cur_texture;
-
-            void skip_vertices();
+            script_model_iterator _models;
         };
 
-        void register_selection_functions(duk_hthread* ctx);
-    }
-}
+        script_selection make_selector();
+        void select_origin(script_selection &sel, math::vector_3d &origin, float xRadius, float zRadius);
+        void select_between(script_selection &sel, math::vector_3d &point1, math::vector_3d &point2);
+
+        bool sel_next_chunk(script_selection &sel);
+        script_chunk sel_get_chunk(script_selection &sel);
+        void sel_reset_chunk_itr(script_selection &sel);
+
+        bool sel_next_model(script_selection &sel);
+        script_model sel_get_model(script_selection &sel);
+        void sel_reset_model_itr(script_selection &sel);
+        void sel_requery_models(script_selection &sel);
+
+        math::vector_3d sel_center(script_selection &sel);
+        math::vector_3d sel_min(script_selection &sel);
+        math::vector_3d sel_max(script_selection &sel);
+        math::vector_3d sel_size(script_selection &sel);
+    } // namespace scripting
+} // namespace noggit

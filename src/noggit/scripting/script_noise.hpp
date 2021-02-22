@@ -1,45 +1,57 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #pragma once
 
 #include <vector>
 #include <string>
 #include <memory>
 #include <FastNoise/FastNoise.h>
+#include <noggit/scripting/script_selection.hpp>
+#include <math/vector_3d.hpp>
 
-struct duk_hthread;
-
-namespace noggit {
-    namespace scripting {
-        class script_noise_2d {
-        public:
-            script_noise_2d(unsigned start_x, unsigned start_y, unsigned width, unsigned height);
-            float get(int x, int y);
-            float get_f(float x, float y);
-            void set(int x, int y, float value);
-            unsigned get_start_x();
-            unsigned get_start_y();
-            unsigned get_width();
-            unsigned get_height();
+namespace noggit
+{
+    namespace scripting
+    {
+        struct script_noise_map
+        {
+            script_noise_map() {}
             std::vector<float> _noise;
-        private:
-            unsigned _width, _height, _start_x, _start_y;
+            unsigned _width = 0;
+            unsigned _height = 0;
+            unsigned _start_x = 0;
+            unsigned _start_y = 0;
+            void resize(unsigned width, unsigned height, unsigned start_x, unsigned start_y);
         };
 
-        class script_noise_generator {
-        public:
+        float noise_get_index(script_noise_map &noise, int x, int y);
+        float noise_get_global(script_noise_map &noise, math::vector_3d &pos);
+        bool noise_is_highest_global(script_noise_map &noise, math::vector_3d &pos, int check_radius);
+        void noise_set(script_noise_map &noise, int x, int y, float value);
+        unsigned noise_start_x(script_noise_map &noise);
+        unsigned noise_start_y(script_noise_map &noise);
+        unsigned noise_width(script_noise_map &noise);
+        unsigned noise_height(script_noise_map &noise);
+
+        struct script_noise_generator
+        {
             script_noise_generator(FastNoise::SmartNode<> generator);
-            std::shared_ptr<script_noise_2d> uniform_2d(std::string seed, int xStart, int yStart, unsigned xSize, unsigned ySize, float frequency);
-        private:
+            script_noise_generator() {}
+            std::shared_ptr<script_noise_map> uniform_2d(std::string seed, int xStart, int yStart, unsigned xSize, unsigned ySize, float frequency);
             FastNoise::SmartNode<> _generator;
         };
 
-        std::shared_ptr<script_noise_generator> noise_simplex();
-        std::shared_ptr<script_noise_generator> noise_perlin();
-        std::shared_ptr<script_noise_generator> noise_value();
-        std::shared_ptr<script_noise_generator> noise_fractal();
-        std::shared_ptr<script_noise_generator> noise_cellular();
-        std::shared_ptr<script_noise_generator> noise_white();
-        std::shared_ptr<script_noise_generator> noise_custom(std::string encodedNodeTree);
+        script_noise_map make_noisemap();
 
-        void register_noise_functions(duk_hthread* ctx);
-    }
-}
+        void noise_fill(script_noise_generator &thiz, script_noise_map &noisemap, const char *seed, int xStart, int yStart, unsigned xSize, unsigned ySize, float frequency);
+        void noise_fill_selection(script_noise_generator &thiz, script_noise_map &noisemap, script_selection &selection, const char *seed, float frequency, int padding);
+
+        script_noise_generator make_noisegen_simplex();
+        script_noise_generator make_noisegen_perlin();
+        script_noise_generator make_noisegen_value();
+        script_noise_generator make_noisegen_fractal();
+        script_noise_generator make_noisegen_cellular();
+        script_noise_generator make_noisegen_white();
+        script_noise_generator make_noisegen_custom(const char *encodedNodeTree);
+    } // namespace scripting
+} // namespace noggit

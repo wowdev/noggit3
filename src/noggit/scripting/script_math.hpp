@@ -1,17 +1,15 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #pragma once
 
 #include <memory>
 #include <string>
-#include <boost/filesystem.hpp>
+#include <math/vector_3d.hpp>
 
-struct script_vec;
-class script_random;
-class script_image;
-class script_noise_generator;
-struct duk_hthread;
-
-namespace noggit {
-    namespace scripting {
+namespace noggit
+{
+    namespace scripting
+    {
 
         // math stuff
         float round(float a1);
@@ -36,8 +34,9 @@ namespace noggit {
         float tan(float arg);
         float sqrt(float arg);
         float abs(float arg);
-        
-        // Registry function (not available from script)
-        void register_misc_functions(duk_hthread *ctx);
-    }
-}
+        float lerp(float from, float to, float amount);
+        float dist_2d(math::vector_3d &from, math::vector_3d &to);
+        int dist_2d_compare(math::vector_3d &from, math::vector_3d &to, float dist);
+        math::vector_3d rotate_2d(math::vector_3d &point, math::vector_3d &origin, float angleDeg);
+    } // namespace scripting
+} // namespace noggit

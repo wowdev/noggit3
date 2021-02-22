@@ -1,9 +1,12 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
+
 // Note: This file should only be included by script_loader.cpp
 #pragma once
 
 #include <string>
 
-#include "daScript/daScript.h"
+#include <daScript/daScript.h>
 #include <noggit/scripting/scripting_tool.hpp>
 
 #include <noggit/scripting/script_image.hpp>

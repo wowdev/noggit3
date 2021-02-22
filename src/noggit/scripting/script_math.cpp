@@ -1,8 +1,7 @@
+// This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
+// licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_math.hpp>
-#include <noggit/scripting/script_loader.hpp>
-#include <boost/filesystem.hpp>
-#include <noggit/scripting/script_exception.hpp>
-#include <dukglue.h>
+#include <cmath>
 
 using namespace noggit::scripting;
 
@@ -10,8 +9,8 @@ float noggit::scripting::round(float a1) { return ::round(a1); }
 float noggit::scripting::pow(float a1, float a2) { return ::pow(a1, a2); }
 float noggit::scripting::log10(float arg) { return ::log10(arg); }
 float noggit::scripting::log(float arg) { return ::log(arg); }
-float noggit::scripting::ceil(float arg) { return (int) ::ceil(arg); }
-float noggit::scripting::floor(float arg) { return (int) ::floor(arg); }
+float noggit::scripting::ceil(float arg) { return (int)::ceil(arg); }
+float noggit::scripting::floor(float arg) { return (int)::floor(arg); }
 float noggit::scripting::exp(float arg) { return ::exp(arg); }
 float noggit::scripting::cbrt(float arg) { return ::cbrt(arg); }
 float noggit::scripting::acosh(float arg) { return ::acosh(arg); }
@@ -28,30 +27,29 @@ float noggit::scripting::sin(float arg) { return ::sin(arg); }
 float noggit::scripting::tan(float arg) { return ::tan(arg); }
 float noggit::scripting::sqrt(float arg) { return ::sqrt(arg); }
 float noggit::scripting::abs(float arg) { return ::abs(arg); }
-
-void noggit::scripting::register_misc_functions(duk_context *ctx)
+float noggit::scripting::lerp(float from, float to, float ratio) { return from + ratio * (to - from); }
+float noggit::scripting::dist_2d(math::vector_3d &from, math::vector_3d &to)
 {
+    return std::sqrt(std::pow(from.x - to.x, 2) + std::pow(from.z - to.z, 2));
+}
 
-    GLUE_FUNCTION(ctx,round);
-    GLUE_FUNCTION(ctx,pow);
-    GLUE_FUNCTION(ctx,log10);
-    GLUE_FUNCTION(ctx,log);
-    GLUE_FUNCTION(ctx,ceil);
-    GLUE_FUNCTION(ctx,floor);
-    GLUE_FUNCTION(ctx,exp);
-    GLUE_FUNCTION(ctx,cbrt);
-    GLUE_FUNCTION(ctx,acosh);
-    GLUE_FUNCTION(ctx,asinh);
-    GLUE_FUNCTION(ctx,atanh);
-    GLUE_FUNCTION(ctx,cosh);
-    GLUE_FUNCTION(ctx,sinh);
-    GLUE_FUNCTION(ctx,tanh);
-    GLUE_FUNCTION(ctx,acos);
-    GLUE_FUNCTION(ctx,asin);
-    GLUE_FUNCTION(ctx,atan);
-    GLUE_FUNCTION(ctx,cos);
-    GLUE_FUNCTION(ctx,sin);
-    GLUE_FUNCTION(ctx,tan);
-    GLUE_FUNCTION(ctx,sqrt);
-    GLUE_FUNCTION(ctx,abs);
+int noggit::scripting::dist_2d_compare(math::vector_3d &from, math::vector_3d &to, float compare)
+{
+    float dist = std::pow(from.x - to.x, 2) + std::pow(from.z - to.z, 2);
+    compare = std::pow(compare, 2);
+    return dist > compare ? 1 : dist == compare ? 0 : -1;
+}
+
+math::vector_3d noggit::scripting::rotate_2d(math::vector_3d &point, math::vector_3d &origin, float angle)
+{
+    float s = std::sin(angle * 0.0174532925);
+    float c = std::cos(angle * 0.0174532925);
+
+    float lx = point.x - origin.x;
+    float lz = point.z - origin.z;
+
+    float nx = lx * c - lz * s + origin.x;
+    float nz = lx * s + lz * c + origin.z;
+
+    return math::vector_3d(nx, point.y, nz);
 }

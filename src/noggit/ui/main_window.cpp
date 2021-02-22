@@ -20,6 +20,9 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+// @tswow-begin
+#include <noggit/scripting/scripting_tool.hpp>
+// @tswow-end
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
@@ -329,6 +332,10 @@ namespace noggit
       prompt.addButton ("Return to menu", QMessageBox::AcceptRole);
       prompt.setDefaultButton (prompt.addButton ("Cancel", QMessageBox::RejectRole));
       prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    
+      // @tswow-begin
+      noggit::scripting::save_json();
+      // @tswow-end
 
       prompt.exec();
 
