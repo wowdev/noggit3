@@ -4,7 +4,7 @@ This version of noggit has support for "Script Brushes", a special type of brush
 Script brushes allow us to manipulate heightmaps, textures, vertex colors, water and m2/wmo objects in a customized manner.
 Script brushes is an experimental feature, so please be careful and keep regular backups of your work when working with them.
 
-See [this video](insert-link) for an introduction to the UI.
+See [this video](https://youtu.be/J5-8zQ5U8gY) for an introduction to the UI.
 
 
 ## Introduction to Da Scripting
