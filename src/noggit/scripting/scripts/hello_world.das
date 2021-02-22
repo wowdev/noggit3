@@ -1,3 +1,5 @@
+// Made by TSWoW (https://github.com/tswow), licensed under GNU General Public License (version 3).
+
 // We must import noggit to use any of the API functions
 require noggit
 

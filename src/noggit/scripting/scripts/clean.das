@@ -1,3 +1,4 @@
+// Made by TSWoW (https://github.com/tswow), licensed under GNU General Public License (version 3).
 require noggit
 require strings
 
