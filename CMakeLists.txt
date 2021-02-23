@@ -248,6 +248,7 @@ set ( noggit_root_sources
       src/noggit/scripting/script_selection.cpp
       src/noggit/scripting/scripting_tool.cpp
       src/noggit/scripting/script_context.cpp
+      src/noggit/scripting/script_brush.cpp
       src/noggit/scripting/script_image.cpp
       src/noggit/scripting/script_loader.cpp
       src/noggit/scripting/script_math.cpp
@@ -364,6 +365,7 @@ set ( noggit_root_headers
       src/noggit/scripting/script_texture_index.hpp
       src/noggit/scripting/scripting_tool.hpp
       src/noggit/scripting/script_context.hpp
+      src/noggit/scripting/script_brush.hpp
       src/noggit/scripting/script_image.hpp
       src/noggit/scripting/script_loader.hpp
       src/noggit/scripting/script_math.hpp
