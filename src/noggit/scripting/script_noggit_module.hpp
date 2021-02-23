@@ -18,6 +18,7 @@
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_brush.hpp>
+#include <noggit/scripting/script_misc.hpp>
 
 #include <noggit/scripting/script_chunk.hpp>
 #include <noggit/scripting/script_model.hpp>
