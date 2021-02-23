@@ -8,10 +8,25 @@
 #include <noggit/Log.h>
 
 using namespace das;
-using namespace noggit::scripting;
 
 static bool initialized = false;
 static int cur_script = -1;
+
+// is not allowed to happen in a namespace
+void install_modules()
+{
+    NEED_MODULE(Module_BuiltIn);
+    NEED_MODULE(Module_Math);
+    NEED_MODULE(Module_Strings);
+    NEED_MODULE(Module_Rtti);
+    NEED_MODULE(Module_Ast);
+    NEED_MODULE(Module_Debugger);
+    NEED_MODULE(Module_FIO);
+    NEED_MODULE(Module_Random);
+    // prolly not a good idea
+    //NEED_MODULE(Module_Network);
+    NEED_MODULE(NoggitModule);
+}
 
 #define CALL_FUNC(ctr, type)                                 \
     if (ctr)                                                 \
@@ -76,51 +91,6 @@ struct script_container
 
 static std::vector<script_container> containers;
 
-int noggit::scripting::get_selected_script()
-{
-    return cur_script;
-}
-
-std::string noggit::scripting::selected_script_name()
-{
-    return cur_script >= 0 && cur_script < containers.size()
-               ? containers[cur_script]._name
-               : "";
-}
-
-const std::string &noggit::scripting::get_script_name(int id)
-{
-    return containers[id]._name;
-}
-
-const std::string &noggit::scripting::get_script_display_name(int id)
-{
-    return containers[id]._display_name;
-}
-
-int noggit::scripting::script_count()
-{
-    return containers.size();
-}
-
-// is not allowed to happen in a namespace
-void install_modules()
-{
-    NEED_MODULE(Module_BuiltIn);
-    NEED_MODULE(Module_Math);
-    NEED_MODULE(Module_Strings);
-    NEED_MODULE(Module_Rtti);
-    NEED_MODULE(Module_Ast);
-    NEED_MODULE(Module_Debugger);
-    NEED_MODULE(Module_FIO);
-    NEED_MODULE(Module_Random);
-
-    // prolly not a good idea
-    //NEED_MODULE(Module_Network);
-
-    NEED_MODULE(NoggitModule);
-}
-
 static script_container *get_container()
 {
     if (cur_script < 0)
@@ -130,18 +100,26 @@ static script_container *get_container()
     return &containers[cur_script];
 }
 
-void noggit::scripting::send_left_click(){CALL_FUNC(get_container(), left_click)};
-void noggit::scripting::send_left_hold(){CALL_FUNC(get_container(), left_hold)};
-void noggit::scripting::send_left_release(){CALL_FUNC(get_container(), left_release)};
-
-void noggit::scripting::send_right_click(){CALL_FUNC(get_container(), right_click)};
-void noggit::scripting::send_right_hold(){CALL_FUNC(get_container(), right_hold)};
-void noggit::scripting::send_right_release(){CALL_FUNC(get_container(), right_release)};
-
 static bool ends_with(const std::string &str, const std::string &suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
 }
+
+// used to reroute 'print' to
+class NoggitContext : public das::Context
+{
+public:
+    NoggitContext(int stackSize) : das::Context(stackSize) {}
+    virtual void to_out(const char *msg) override
+    {
+        get_cur_tool()->addLog(msg);
+    }
+
+    virtual void to_err(const char *msg) override
+    {
+        get_cur_tool()->addLog(msg);
+    }
+};
 
 class : public TextWriter
 {
@@ -161,146 +139,169 @@ protected:
     int pos = 0;
 } _noggit_printer;
 
-// used to reroute 'print' to
-class NoggitContext : public das::Context
-{
-public:
-    NoggitContext(int stackSize) : das::Context(stackSize) {}
-    virtual void to_out(const char *msg) override
-    {
-        get_cur_tool()->addLog(msg);
-    }
-
-    virtual void to_err(const char *msg) override
-    {
-        get_cur_tool()->addLog(msg);
-    }
-};
-
-int noggit::scripting::load_scripts()
-{
-    if (!initialized)
-    {
-        install_modules();
-        initialized = true;
-        Module::Initialize();
-    }
-
-    std::string old_module = cur_script > 0 ? get_script_name(cur_script) : "";
-    cur_script = -1;
-    int new_index = -1;
-    containers.clear();
-
-    ModuleGroup dummyLibGroup;
-
-    auto itr = read_directory("scripts");
-    while (file_itr_next(itr))
-    {
-        std::string file = file_itr_get(itr);
-        if (!ends_with(file, ".das") || ends_with(file, ".spec.das"))
-            continue;
-
-        auto fAccess = make_smart<FsFileAccess>();
-        auto program = compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup);
-        auto ctx = new NoggitContext(program->getContextStackSize());
-        if (!program->simulate(*ctx, _noggit_printer))
+namespace noggit {
+    namespace scripting {
+        int get_selected_script()
         {
-            get_cur_tool()->setStyleSheet("background-color: #f0a5a5;");
-            get_cur_tool()->addLog("Script error:");
-            for (auto &err : program->errors)
+            return cur_script;
+        }
+
+        std::string selected_script_name()
+        {
+            return cur_script >= 0 && cur_script < containers.size()
+                    ? containers[cur_script]._name
+                    : "";
+        }
+
+        const std::string &get_script_name(int id)
+        {
+            return containers[id]._name;
+        }
+
+        const std::string &get_script_display_name(int id)
+        {
+            return containers[id]._display_name;
+        }
+
+        int script_count()
+        {
+            return containers.size();
+        }
+
+        void send_left_click(){CALL_FUNC(get_container(), left_click)};
+        void send_left_hold(){CALL_FUNC(get_container(), left_hold)};
+        void send_left_release(){CALL_FUNC(get_container(), left_release)};
+
+        void send_right_click(){CALL_FUNC(get_container(), right_click)};
+        void send_right_hold(){CALL_FUNC(get_container(), right_hold)};
+        void send_right_release(){CALL_FUNC(get_container(), right_release)};
+
+        int load_scripts()
+        {
+            if (!initialized)
             {
-                get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
+                install_modules();
+                initialized = true;
+                Module::Initialize();
             }
+
+            std::string old_module = cur_script > 0 ? get_script_name(cur_script) : "";
+            cur_script = -1;
+            int new_index = -1;
             containers.clear();
-            // TODO: free ctx here.
-            return -1;
-        }
 
-        bool is_any = false;
+            ModuleGroup dummyLibGroup;
 
-#define CHECK_FUNC(ctx, type)                                      \
-    auto on_##type = ctx->findFunction(#type);                     \
-    auto is_##type = false;                                        \
-    if (on_##type)                                                 \
-    {                                                              \
-        if (verifyCall<void>(on_##type->debugInfo, dummyLibGroup)) \
-        {                                                          \
-            is_##type = true;                                      \
-            is_any = true;                                         \
-        }                                                          \
-    }
-
-        CHECK_FUNC(ctx, select);
-        CHECK_FUNC(ctx, left_click);
-        CHECK_FUNC(ctx, left_hold);
-        CHECK_FUNC(ctx, left_release);
-
-        CHECK_FUNC(ctx, right_click);
-        CHECK_FUNC(ctx, right_hold);
-        CHECK_FUNC(ctx, right_release);
-
-        if (is_any)
-        {
-            auto module_name = file.substr(8, file.size() - 12);
-            if (module_name == old_module)
+            auto itr = read_directory("scripts");
+            while (file_itr_next(itr))
             {
-                new_index = containers.size();
-            }
+                std::string file = file_itr_get(itr);
+                if (!ends_with(file, ".das") || ends_with(file, ".spec.das"))
+                    continue;
 
-            auto display_name = module_name;
-            auto title_fun = ctx->findFunction("title");
-            if (title_fun)
-            {
-                if (!verifyCall<const char *>(title_fun->debugInfo, dummyLibGroup))
+                auto fAccess = make_smart<FsFileAccess>();
+                auto program = compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup);
+                auto ctx = new NoggitContext(program->getContextStackSize());
+                if (!program->simulate(*ctx, _noggit_printer))
                 {
-                    get_cur_tool()->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
-                }
-                else
-                {
-                    auto result = cast<const char *>::to(ctx->eval(title_fun));
-                    if (result)
+                    get_cur_tool()->setStyleSheet("background-color: #f0a5a5;");
+                    get_cur_tool()->addLog("Script error:");
+                    for (auto &err : program->errors)
                     {
-                        display_name = result;
+                        get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
                     }
+                    containers.clear();
+                    // TODO: free ctx here.
+                    return -1;
+                }
+
+                bool is_any = false;
+
+        #define CHECK_FUNC(ctx, type)                                      \
+            auto on_##type = ctx->findFunction(#type);                     \
+            auto is_##type = false;                                        \
+            if (on_##type)                                                 \
+            {                                                              \
+                if (verifyCall<void>(on_##type->debugInfo, dummyLibGroup)) \
+                {                                                          \
+                    is_##type = true;                                      \
+                    is_any = true;                                         \
+                }                                                          \
+            }
+
+                CHECK_FUNC(ctx, select);
+                CHECK_FUNC(ctx, left_click);
+                CHECK_FUNC(ctx, left_hold);
+                CHECK_FUNC(ctx, left_release);
+
+                CHECK_FUNC(ctx, right_click);
+                CHECK_FUNC(ctx, right_hold);
+                CHECK_FUNC(ctx, right_release);
+
+                if (is_any)
+                {
+                    auto module_name = file.substr(8, file.size() - 12);
+                    if (module_name == old_module)
+                    {
+                        new_index = containers.size();
+                    }
+
+                    auto display_name = module_name;
+                    auto title_fun = ctx->findFunction("title");
+                    if (title_fun)
+                    {
+                        if (!verifyCall<const char *>(title_fun->debugInfo, dummyLibGroup))
+                        {
+                            get_cur_tool()->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
+                        }
+                        else
+                        {
+                            auto result = cast<const char *>::to(ctx->eval(title_fun));
+                            if (result)
+                            {
+                                display_name = result;
+                            }
+                        }
+                    }
+
+                    containers.push_back(script_container(
+                        module_name,
+                        display_name,
+                        ctx,
+                        is_select,
+                        is_left_click,
+                        is_left_hold,
+                        is_left_release,
+                        is_right_click,
+                        is_right_hold,
+                        is_right_release));
                 }
             }
 
-            containers.push_back(script_container(
-                module_name,
-                display_name,
-                ctx,
-                is_select,
-                is_left_click,
-                is_left_hold,
-                is_left_release,
-                is_right_click,
-                is_right_hold,
-                is_right_release));
+            if (new_index == -1 && containers.size() > 0)
+            {
+                new_index = 0;
+            }
+
+            // remove error color on successful compile
+            get_cur_tool()->setStyleSheet("");
+
+            return new_index;
+        }
+
+        void select_script(int index)
+        {
+            // just for safety
+            save_json();
+
+            if (index < 0 || index >= containers.size())
+            {
+                return;
+            }
+
+            cur_script = index;
+            auto ref = &containers[index];
+            CALL_FUNC(ref, select);
         }
     }
-
-    if (new_index == -1 && containers.size() > 0)
-    {
-        new_index = 0;
-    }
-
-    // remove error color on successful compile
-    get_cur_tool()->setStyleSheet("");
-
-    return new_index;
-}
-
-void noggit::scripting::select_script(int index)
-{
-    // just for safety
-    save_json();
-
-    if (index < 0 || index >= containers.size())
-    {
-        return;
-    }
-
-    cur_script = index;
-    auto ref = &containers[index];
-    CALL_FUNC(ref, select);
 }
