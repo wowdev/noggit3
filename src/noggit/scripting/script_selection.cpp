@@ -3,6 +3,7 @@
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/World.h>
+#include <noggit/scripting/script_heap.hpp>
 
 // see script_selection_xxx.cpp for all implementations
 
@@ -47,15 +48,23 @@ namespace noggit {
 
         static bool is_on_chunk(script_selection &sel)
         {
-            return sel._cur_chunk < sel._chunks.size();
+            return sel._cur_chunk < sel._chunks_size;
         }
 
         bool sel_next_chunk(script_selection &sel)
         {
             if (!sel._initialized_chunks)
             {
-                sel._chunks.clear();
-                sel._world->select_all_chunks_between(sel._min, sel._max, sel._chunks);
+                if(sel._chunks != nullptr) 
+                {
+                    script_free(sel._chunks);
+                }
+                std::vector<MapChunk*> chunks;
+                sel._world->select_all_chunks_between(sel._min, sel._max, chunks);
+
+                sel._chunks = (MapChunk**) script_calloc(sizeof(MapChunk*)*chunks.size());
+                sel._chunks_size = chunks.size();
+                memcpy(sel._chunks,chunks.data(),chunks.size()*sizeof(MapChunk*));
                 sel._initialized_chunks = true;
             }
 

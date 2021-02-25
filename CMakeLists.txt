@@ -258,6 +258,7 @@ set ( noggit_root_sources
       src/noggit/scripting/script_chunk.cpp
       src/noggit/scripting/script_vert.cpp
       src/noggit/scripting/script_filesystem.cpp
+      src/noggit/scripting/script_heap.cpp
       ${LODEPNG_PATH}/lodepng.cpp
     )
 
@@ -371,6 +372,7 @@ set ( noggit_root_headers
       src/noggit/scripting/script_image.hpp
       src/noggit/scripting/script_loader.hpp
       src/noggit/scripting/script_math.hpp
+      src/noggit/scripting/script_heap.hpp
     )
 
 set ( noggit_ui_headers

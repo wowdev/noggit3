@@ -11,12 +11,17 @@ namespace noggit
     {
         namespace fs = boost::filesystem;
 
+        struct script_file_wrapper
+        {
+            fs::recursive_directory_iterator _dir;
+            fs::recursive_directory_iterator _end;
+        };
+
         struct script_file_iterator
         {
             script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end);
             script_file_iterator() {}
-            fs::recursive_directory_iterator _dir;
-            fs::recursive_directory_iterator _end;
+            script_file_wrapper* _wrapper;
             bool _started = false;
         };
 

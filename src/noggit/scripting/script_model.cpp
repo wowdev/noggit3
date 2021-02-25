@@ -8,7 +8,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/ui/ObjectEditor.h>
-
+#include <noggit/scripting/script_heap.hpp>
 
 namespace noggit {
     namespace scripting {
@@ -167,19 +167,31 @@ namespace noggit {
 
         void script_model_iterator::query()
         {
-            _models.clear();
+            if(_models!=nullptr)
+            {
+                script_free(_models);
+            }
+            
+            std::vector<script_model> models;
+
             _world->for_each_m2_instance([&](ModelInstance &model) {
                 if (model.pos.x >= _min.x && model.pos.x <= _max.x && model.pos.z >= _min.z && model.pos.z <= _max.z)
                 {
-                    _models.push_back(script_model(&model));
+                    models.push_back(script_model(&model));
                 }
             });
             _world->for_each_wmo_instance([&](WMOInstance &model) {
                 if (model.pos.x >= _min.x && model.pos.x <= _max.x && model.pos.z >= _min.z && model.pos.z <= _max.z)
                 {
-                    _models.push_back(script_model(&model));
+                    models.push_back(script_model(&model));
                 }
             });
+            
+            _models_size = models.size();
+            size_t size = models.size()*sizeof(script_model);
+            _models = (script_model*) script_calloc(size);
+            memcpy(_models,models.data(),size);
+
             _initialized = true;
             reset_itr();
         }
@@ -196,13 +208,13 @@ namespace noggit {
                 query();
             }
 
-            if (_model_index >= int(_models.size()))
+            if (_model_index >= int(_models_size))
             {
                 return false;
             }
 
             ++_model_index;
-            return _model_index < _models.size();
+            return _model_index < _models_size;
         }
 
         script_model script_model_iterator::get()

@@ -1,24 +1,36 @@
 // This file is part of the Script Brushes extension of Noggit3 by TSWoW (https://github.com/tswow/)
 // licensed under GNU General Public License (version 3).
+#include <lodepng.h>
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
-#include <lodepng.h>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_heap.hpp>
 
 namespace noggit {
     namespace scripting {
         void img_load_png(script_image &img, const char *path)
         {
-            unsigned error = lodepng::decode(img._image, img._width, img._height, path);
+            // zzzzzzzzzzz but they only take a vector
+            std::vector<unsigned char> vec;
+            unsigned error = lodepng::decode(vec, img._width, img._height, path);
             if (error)
             {
                 throw script_exception("Failed to load png image with error code:" + error);
             }
+            img_resize(img,img._width,img._height);
+            memcpy(img._image,vec.data(),vec.size());
         }
 
         void img_resize(script_image &img, int width, int height)
         {
-            img._image.resize(width * height * 4);
+            if(img._image != nullptr)
+            {
+                script_free(img._image);
+            }
+            // m is for more fun
+            img._image = (unsigned char*) script_malloc(width*height*4);
+            img._width = width;
+            img._height = height;
         }
 
         int img_width(script_image &img)

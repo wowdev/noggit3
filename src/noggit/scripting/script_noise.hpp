@@ -16,7 +16,7 @@ namespace noggit
         struct script_noise_map
         {
             script_noise_map() {}
-            std::vector<float> _noise;
+            float* _noise = nullptr;
             unsigned _width = 0;
             unsigned _height = 0;
             unsigned _start_x = 0;
@@ -33,12 +33,18 @@ namespace noggit
         unsigned noise_width(script_noise_map &noise);
         unsigned noise_height(script_noise_map &noise);
 
+        // we can't store smart pointers on the stack
+        struct script_noise_wrapper
+        {
+            FastNoise::SmartNode<> _generator;
+        };
+
         struct script_noise_generator
         {
-            script_noise_generator(FastNoise::SmartNode<> generator);
+            script_noise_generator(script_noise_wrapper* generator);
             script_noise_generator() {}
             std::shared_ptr<script_noise_map> uniform_2d(std::string seed, int xStart, int yStart, unsigned xSize, unsigned ySize, float frequency);
-            FastNoise::SmartNode<> _generator;
+            script_noise_wrapper* _wrapper;
         };
 
         script_noise_map make_noisemap();

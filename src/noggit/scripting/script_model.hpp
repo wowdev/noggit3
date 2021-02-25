@@ -32,10 +32,11 @@ namespace noggit
             math::vector_3d _min;
             math::vector_3d _max;
 
-            std::vector<script_model> _models;
+            script_model* _models = nullptr;
 
             bool _initialized = false;
             int _model_index = -1;
+            int _models_size = 0;
 
             bool next();
             void reset_itr();

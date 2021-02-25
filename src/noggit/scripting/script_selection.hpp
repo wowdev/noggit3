@@ -32,7 +32,8 @@ namespace noggit
             math::vector_3d _max;
             math::vector_3d _size;
 
-            std::vector<MapChunk *> _chunks;
+            int _chunks_size = 0;
+            MapChunk** _chunks = nullptr;
             int _cur_chunk = -1;
             bool _initialized_chunks = false;
 

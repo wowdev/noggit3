@@ -9,6 +9,7 @@
 #include <noggit/World.h>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_loader.hpp>
+#include <noggit/scripting/script_heap.hpp>
 #include <json.hpp>
 
 #include <QtWidgets/QFormLayout>
@@ -526,14 +527,8 @@ namespace noggit {
                 delete widget;
             }
 
-            for (auto &str : _strings)
-            {
-                free(str);
-            }
-
             _script_widgets.clear();
             _string_arrays.clear();
-            _strings.clear();
         }
 
         void scripting_tool::select_profile(int profile)
@@ -611,6 +606,7 @@ namespace noggit {
                 addLog(("[error]: " + std::string(e.what())));
             }
 
+            script_free_all();
             set_ctx(nullptr);
             _last_left = left_mouse;
             _last_right = right_mouse;
@@ -655,13 +651,13 @@ namespace noggit {
         const char *get_string_param(const char *path)
         {
             auto str = get_json_unsafe<std::string>(path);
+
             // HACK: daScript somehow doesn't like receiving qt or json strings
             // idk if it's because they're on the stack or whatever
             // even copying it to another std::string doesn't work, but this does.
-            char *chr = (char *)malloc(sizeof(char)*(str.size()+1) * str.size());
-            chr[str.size()] = 0;
+            char *chr = (char*) script_malloc(sizeof(char)*(str.size()+1));
             str.copy(chr, str.size());
-            _strings.push_back(chr);
+            chr[str.size()] = 0;
             return chr;
         }
 

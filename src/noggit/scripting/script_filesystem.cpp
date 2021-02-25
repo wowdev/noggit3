@@ -2,16 +2,20 @@
 // licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_heap.hpp>
 
 namespace fs = boost::filesystem;
 
-namespace noggit {
-    namespace scripting {
+namespace noggit
+{
+    namespace scripting
+    {
         static void skip_dirs(script_file_iterator &itr)
         {
-            while (itr._dir != itr._end && boost::filesystem::is_directory(itr._dir->path()))
+            while (itr._wrapper->_dir != itr._wrapper->_end && 
+                boost::filesystem::is_directory(itr._wrapper->_dir->path()))
             {
-                ++itr._dir;
+                ++itr._wrapper->_dir;
             }
         }
 
@@ -58,18 +62,22 @@ namespace noggit {
 
         script_file_iterator read_directory(const char *path)
         {
-            fs::recursive_directory_iterator dir(path), end;
+            fs::recursive_directory_iterator 
+                dir(path==nullptr ? "" : path), end;
             return script_file_iterator(dir, end);
         }
 
-        script_file_iterator::script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end) : _dir(dir), _end(end)
+        script_file_iterator::script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end)
         {
+            _wrapper = (script_file_wrapper *)script_calloc(sizeof(script_file_wrapper));
+            _wrapper->_dir = dir;
+            _wrapper->_end = end;
             skip_dirs(*this);
         }
 
         const char *file_itr_get(script_file_iterator &itr)
         {
-            return itr._dir->path().string().c_str();
+            return itr._wrapper->_dir->path().string().c_str();
         }
 
         bool file_itr_next(script_file_iterator &itr)
@@ -77,16 +85,16 @@ namespace noggit {
             if (!itr._started)
             {
                 itr._started = true;
-                return itr._dir != itr._end;
+                return itr._wrapper->_dir != itr._wrapper->_end;
             }
 
-            if (itr._dir != itr._end)
+            if (itr._wrapper->_dir != itr._wrapper->_end)
             {
-                ++itr._dir;
+                ++itr._wrapper->_dir;
                 skip_dirs(itr);
             }
 
-            return itr._dir != itr._end;
+            return itr._wrapper->_dir != itr._wrapper->_end;
         }
-    }
-}
+    } // namespace scripting
+} // namespace noggit

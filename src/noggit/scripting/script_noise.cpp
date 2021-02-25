@@ -2,6 +2,7 @@
 // licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_heap.hpp>
 
 namespace noggit {
     namespace scripting {
@@ -58,7 +59,10 @@ namespace noggit {
             _height = height;
             _start_x = _start_x;
             _start_y = _start_y;
-            _noise.resize(width * height);
+            if (_noise != nullptr) {
+                script_free(_noise);
+            }
+            _noise = (float*) script_malloc(width*height*sizeof(float));
         }
 
         unsigned noise_start_x(script_noise_map &noise) { return noise._start_x; }
@@ -66,17 +70,17 @@ namespace noggit {
         unsigned noise_width(script_noise_map &noise) { return noise._width; }
         unsigned noise_height(script_noise_map &noise) { return noise._height; }
 
-        script_noise_generator::script_noise_generator(FastNoise::SmartNode<> generator)
-            : _generator(generator) {}
+        script_noise_generator::script_noise_generator(script_noise_wrapper * wrapper)
+            : _wrapper(wrapper) {}
 
         void noise_fill(script_noise_generator &thiz, script_noise_map &map, const char *seed, int x_start, int y_start, unsigned x_size, unsigned y_size, float frequency)
         {
-            map._noise.resize(x_size * y_size);
+            map.resize(x_size, y_size, x_start, y_start);
             map._start_x = x_start;
             map._start_y = y_start;
             map._width = x_size;
             map._height = y_size;
-            thiz._generator->GenUniformGrid2D(map._noise.data(), x_start, y_start, x_size, y_size, frequency, std::hash<std::string>()(std::string(seed)));
+            thiz._wrapper->_generator->GenUniformGrid2D(map._noise, x_start, y_start, x_size, y_size, frequency, std::hash<std::string>()(std::string(seed)));
         }
 
         void noise_fill_selection(script_noise_generator &thiz, script_noise_map &map, script_selection &selection, const char *seed, float frequency, int padding)
@@ -90,33 +94,41 @@ namespace noggit {
             noise_fill(thiz, map, seed, x_start, z_start, x_size, z_size, frequency);
         }
 
+        static script_noise_wrapper* wrap(FastNoise::SmartNode<> generator)
+        {
+            script_noise_wrapper* wrap = 
+                (script_noise_wrapper*) script_calloc(sizeof(script_noise_wrapper));
+            wrap->_generator = generator;
+            return wrap;
+        }
+
         script_noise_generator make_noisegen_simplex()
         {
-            return script_noise_generator(FastNoise::New<FastNoise::Simplex>());
+            return script_noise_generator(wrap(FastNoise::New<FastNoise::Simplex>()));
         }
         script_noise_generator make_noisegen_perlin()
         {
-            return script_noise_generator(FastNoise::New<FastNoise::Perlin>());
+            return script_noise_generator(wrap(FastNoise::New<FastNoise::Perlin>()));
         }
         script_noise_generator make_noisegen_value()
         {
-            return script_noise_generator(FastNoise::New<FastNoise::Value>());
+            return script_noise_generator(wrap(FastNoise::New<FastNoise::Value>()));
         }
         script_noise_generator make_noisegen_fractal()
         {
-            return script_noise_generator(FastNoise::New<FastNoise::FractalFBm>());
+            return script_noise_generator(wrap(FastNoise::New<FastNoise::FractalFBm>()));
         }
         script_noise_generator make_noisegen_cellular()
         {
-            return script_noise_generator(FastNoise::New<FastNoise::CellularValue>());
+            return script_noise_generator(wrap(FastNoise::New<FastNoise::CellularValue>()));
         }
         script_noise_generator make_noisegen_white()
         {
-            return script_noise_generator(FastNoise::New<FastNoise::White>());
+            return script_noise_generator(wrap(FastNoise::New<FastNoise::White>()));
         }
         script_noise_generator make_noisegen_custom(const char *encodedNodeTree)
         {
-            return script_noise_generator(FastNoise::NewFromEncodedNodeTree(encodedNodeTree));
+            return script_noise_generator(wrap(FastNoise::NewFromEncodedNodeTree(encodedNodeTree)));
         }
     }
 }

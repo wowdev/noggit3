@@ -82,11 +82,6 @@ struct script_container
     bool _on_right_click = false;
     bool _on_right_hold = false;
     bool _on_right_release = false;
-
-    // TODO: Allowing memory leak atm because this just crashes
-    ~script_container()
-    { /*delete _ctx;*/
-    }
 };
 
 static std::vector<script_container> containers;
@@ -105,7 +100,7 @@ static bool ends_with(const std::string &str, const std::string &suffix)
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
 }
 
-// used to reroute 'print' to
+// used to reroute 'print' to noggit
 class NoggitContext : public das::Context
 {
 public:
@@ -180,14 +175,25 @@ namespace noggit {
         {
             if (!initialized)
             {
-                install_modules();
                 initialized = true;
-                Module::Initialize();
+                install_modules();
+            } 
+            else
+            {
             }
+
+            Module::Initialize();
 
             std::string old_module = cur_script > 0 ? get_script_name(cur_script) : "";
             cur_script = -1;
             int new_index = -1;
+
+            for(auto& ctr : containers)
+            {
+                // There may be a better way to do this
+                // with the reset/resetHeap calls.
+                delete ctr._ctx;
+            }
             containers.clear();
 
             ModuleGroup dummyLibGroup;

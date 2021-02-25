@@ -13,7 +13,7 @@ namespace noggit
         struct script_image
         {
             script_image() {}
-            std::vector<unsigned char> _image;
+            unsigned char* _image = nullptr;
             unsigned _width = 0;
             unsigned _height = 0;
         };
