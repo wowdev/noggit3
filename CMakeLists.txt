@@ -1,6 +1,6 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.11)
 cmake_policy (SET CMP0057 NEW) # "Support new IN_LIST if() operator."
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -149,9 +149,7 @@ includePlattform("prefind")
 
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
-FIND_PACKAGE( StormLib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
-
 
 if (USE_SQL)
   find_library(MYSQL_LIBRARY
@@ -259,7 +257,6 @@ set ( noggit_root_sources
       src/noggit/scripting/script_vert.cpp
       src/noggit/scripting/script_filesystem.cpp
       src/noggit/scripting/script_heap.cpp
-      ${LODEPNG_PATH}/lodepng.cpp
     )
 
 set ( noggit_ui_sources
@@ -523,7 +520,6 @@ ADD_EXECUTABLE ( noggit
                 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
-  StormLib
   Boost::thread
   Boost::filesystem
   Boost::system
@@ -611,6 +607,96 @@ target_compile_definitions (math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"
 target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
 
+include(FetchContent)
+message("Installing dependencies")
 
-target_include_directories (noggit SYSTEM PUBLIC ${FASTNOISE_INCLUDE} ${LODEPNG_PATH} ${DASCRIPT_INCLUDE} ${JSON_INCLUDE})
-target_link_libraries (noggit ${FASTNOISE_LIB} ${DASCRIPT_LIB})
+# json.hpp
+FetchContent_Declare(json
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+  GIT_TAG v3.9.1)
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+  message("Installing json.hpp...")
+  FetchContent_Populate(json)
+  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# lodepng
+FetchContent_Declare(lodepng
+  GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
+  )
+FetchContent_GetProperties(lodepng)
+if(NOT lodepng_POPULATED)
+  message("Installing lodepng...")
+  FetchContent_Populate(lodepng)
+  add_library(lodepng ${lodepng_SOURCE_DIR}/lodepng.cpp)
+endif()
+
+# FastNoise2
+FetchContent_Declare(fastnoise2
+  GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+  )
+FetchContent_GetProperties(fastnoise2)
+
+message(${CMAKE_CURRENT_SOURCE_DIR})
+
+if(NOT fastnoise2_POPULATED)
+  message("Installing FastNoise2... (big repo, large download)")
+  FetchContent_Populate(fastnoise2)
+  add_subdirectory(${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
+  # hack, but something's wrong in FastNoise2s CMakeLists
+  target_include_directories (FastNoise PRIVATE ${fastnoise2_SOURCE_DIR}/include)
+
+  target_include_directories (NoiseTool PRIVATE ${fastnoise2_SOURCE_DIR}/include)
+endif()
+
+# daScript
+FetchContent_Declare(dascript
+  GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
+  # hack that ignores daScript submodules (empty string is bugged)
+  GIT_SUBMODULES "src"
+  )
+FetchContent_GetProperties(dascript)
+if(NOT gitdascript_POPULATED)
+  message("Installing daScript...")
+  FetchContent_Populate(dascript)
+  add_subdirectory(${dascript_SOURCE_DIR} ${dascript_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# StormLib
+FetchContent_Declare(storm
+  GIT_REPOSITORY https://github.com/ladislav-zezula/StormLib.git
+  )
+FetchContent_GetProperties(storm)
+if(NOT storm_POPULATED)
+  message("Installing StormLib...")
+  FetchContent_Populate(storm)
+  add_subdirectory(${storm_SOURCE_DIR} ${storm_BINARY_DIR})
+endif()
+
+target_include_directories (
+  noggit SYSTEM PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/external/daScript/include
+  ${json_SOURCE_DIR}/include/nlohmann
+  ${lodepng_SOURCE_DIR}
+  ${fastnoise2_SOURCE_DIR}/include
+  ${dascript_SOURCE_DIR}/include
+  ${storm_SOURCE_DIR}/src
+)
+
+add_dependencies(
+  noggit 
+  FastNoise 
+  libDaScript 
+  storm 
+  NoiseTool
+)
+
+target_link_libraries (
+  noggit 
+  libDaScript
+  lodepng
+  FastNoise
+  storm
+  nlohmann_json::nlohmann_json
+)
