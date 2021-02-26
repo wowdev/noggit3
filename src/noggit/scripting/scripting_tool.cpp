@@ -122,9 +122,8 @@ namespace noggit {
             if(selection != -1)
             {
                 script_selection->setCurrentIndex(selection);
+                on_change_script(selection);
             }
-
-            on_change_script(selection);
         }
 
         void scripting_tool::on_change_script(int selection)
@@ -640,12 +639,12 @@ namespace noggit {
 
         void scripting_tool::clearLog()
         {
-            _log->setPlainText("");
+            _log->clear();
         }
 
         void scripting_tool::clearDescription()
         {
-            _description->setText("");
+            _description->clear();
         }
 
         const char *get_string_param(const char *path)

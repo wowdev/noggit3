@@ -1785,8 +1785,8 @@ void MapView::tick (float dt)
       if(selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
       {
         scriptingTool->sendUpdate(
-          _world.get(), 
-          _cursor_pos, 
+          _world.get(),
+          _cursor_pos,
           &_camera,
           7.5f*dt,
           leftMouse,

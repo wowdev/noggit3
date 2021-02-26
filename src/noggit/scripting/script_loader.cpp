@@ -178,9 +178,6 @@ namespace noggit {
                 initialized = true;
                 install_modules();
             } 
-            else
-            {
-            }
 
             Module::Initialize();
 
@@ -216,8 +213,13 @@ namespace noggit {
                     {
                         get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
                     }
+
+                    delete ctx;
+                    for(auto& ctr : containers)
+                    {
+                        delete ctr._ctx;
+                    }
                     containers.clear();
-                    // TODO: free ctx here.
                     return -1;
                 }
 
