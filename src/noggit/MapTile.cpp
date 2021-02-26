@@ -508,7 +508,6 @@ std::vector<MapChunk*> MapTile::chunks_in_range (math::vector_3d const& pos, flo
   return chunks;
 }
 
-// @tswow-begin
 std::vector<MapChunk*> MapTile::chunks_between (math::vector_3d const& pos1, math::vector_3d const& pos2) const
 {
   std::vector<MapChunk*> chunks;
@@ -531,7 +530,6 @@ std::vector<MapChunk*> MapTile::chunks_between (math::vector_3d const& pos1, mat
 
   return chunks;
 }
-// @tswow-end
 
 bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 {

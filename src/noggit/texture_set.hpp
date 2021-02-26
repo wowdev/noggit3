@@ -76,11 +76,9 @@ public:
 
   bool apply_alpha_changes();
   
-  // @tswow-begin
   void create_temporary_alphamaps_if_needed();
   size_t nTextures;
   boost::optional<tmp_edit_alpha_values> tmp_edit_values;
-  // @tswow-end
 private:
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
 
@@ -95,22 +93,11 @@ private:
   std::array<boost::optional<Alphamap>, 3> alphamaps;
   opengl::texture amap_gl_tex;
   bool _need_amap_update = true;
-  // @tswow-begin
-  // (moved nTextures to public)
-  // @tswow-end
 
   std::vector<uint8_t> _lod_texture_map;
   bool _need_lod_texture_map_update = false;
 
   ENTRY_MCLY _layers_info[4];
-
-  // @tswow-begin
-  // (moved tmp_edit_values to public)
-  // @tswow-end
-  
-  // @tswow-begin
-  // (moved create_temporary_alphamaps_if_needed to public)
-  // @tswow-end
 
   bool _do_not_convert_alphamaps;
 };

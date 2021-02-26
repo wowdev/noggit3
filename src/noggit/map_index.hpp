@@ -148,7 +148,6 @@ public:
       );
   }
 
-  // @tswow-begin
   auto tiles_between (math::vector_3d const& pos1, math::vector_3d const& pos2)
   {
     return tiles<true>
@@ -165,7 +164,6 @@ public:
           }
       );
     }
-  // @tswow-end
 
   MapIndex(const std::string& pBasename, int map_id, World*);
 

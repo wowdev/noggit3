@@ -764,7 +764,6 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
-// @tswow-begin
 void MapChunk::CreateMCCV()
 {
   if(!hasMCCV)
@@ -778,7 +777,6 @@ void MapChunk::CreateMCCV()
     hasMCCV = true;
   }
 }
-// @tswow-end
 
 bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
@@ -834,7 +832,6 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   return changed;
 }
 
-// @tswow-begin
 void MapChunk::UpdateMCCV()
 {
   if(_uploaded)
@@ -843,7 +840,6 @@ void MapChunk::UpdateMCCV()
     _need_vao_update = true;
   }
 }
-// @tswow-end
 
 math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
 {
@@ -1465,7 +1461,6 @@ void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<m
   }
 }
 
-// @tswow-begin
 void MapChunk::selectVertex(math::vector_3d const& pos1, math::vector_3d const& pos2, std::set<math::vector_3d*>& vertices)
 {
   for(int i = 0; i< mapbufsize; ++i)
@@ -1479,7 +1474,6 @@ void MapChunk::selectVertex(math::vector_3d const& pos1, math::vector_3d const& 
     }
   }
 }
-// @tswow-end
 
 void MapChunk::fixVertices(std::set<math::vector_3d*>& selected)
 {

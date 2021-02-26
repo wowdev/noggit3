@@ -65,9 +65,7 @@ public:
   MapChunk* getChunk(unsigned int x, unsigned int z);
   //! \todo map_index style iterators
   std::vector<MapChunk*> chunks_in_range (math::vector_3d const& pos, float radius) const;
-  // @tswow-begin
   std::vector<MapChunk*> chunks_between (math::vector_3d const& pos1, math::vector_3d const& pos2) const;
-  // @tswow-end
 
   const tile_index index;
   float xbase, zbase;

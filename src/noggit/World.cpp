@@ -1784,9 +1784,7 @@ void World::unload_every_model_and_wmo_instance()
   _models_by_filename.clear();
 }
 
-// @tswow-begin
 ModelInstance* World::addM2 ( std::string const& filename
-// @tswow-end
                   , math::vector_3d newPos
                   , float scale
                   , math::vector_3d rotation
@@ -1832,9 +1830,7 @@ ModelInstance* World::addM2 ( std::string const& filename
   return model;
 }
 
-// @tswow-begin
 WMOInstance* World::addWMO ( std::string const& filename
-// @tswow-end
                    , math::vector_3d newPos
                    , math::vector_3d rotation
                    )
@@ -2131,8 +2127,6 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
   });
 }
 
-// @tswow-begin
-
 void World::delete_models(std::vector<selection_type>& const types)
 {
    _model_instance_storage.delete_instances(types);
@@ -2143,7 +2137,6 @@ void World::selectVertices(math::vector_3d const& pos1, math::vector_3d const& p
 {
   math::vector_3d pos_min = math::vector_3d(std::min(pos1.x,pos2.x),std::min(pos1.y,pos2.y),std::min(pos1.z,pos2.z));
   math::vector_3d pos_max = math::vector_3d(std::max(pos1.x,pos2.x),std::max(pos1.y,pos2.y),std::max(pos1.z,pos2.z));
-  LogDebug << "Function is being called\n";
   _vertex_center_updated = false;
   _vertex_border_updated = false;
 
@@ -2194,7 +2187,6 @@ bool World::for_all_chunks_between (math::vector_3d const& pos1, math::vector_3d
   }
   return changed;
 }
-// @tswow-end
 
 bool World::deselectVertices(math::vector_3d const& pos, float radius)
 {

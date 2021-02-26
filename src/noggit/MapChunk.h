@@ -52,9 +52,6 @@ private:
   std::map<int, std::vector<StripType>> strip_lods;
 
   math::vector_3d mNormals[mapbufsize];
-  // @tswow-begin
-  // (moved mccv to public)
-  // @tswow-end
 
   std::vector<uint8_t> compressed_shadow_map() const;
   bool has_shadows() const;
@@ -106,9 +103,7 @@ public:
   std::unique_ptr<TextureSet> texture_set;
 
   math::vector_3d mVertices[mapbufsize];
-  // @tswow-begin
   math::vector_3d mccv[mapbufsize];
-  // @tswow-end
 
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
@@ -147,10 +142,8 @@ public:
 
   void intersect (math::ray const&, selection_result*);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
-  // @tswow-begin
   void CreateMCCV();
   void UpdateMCCV();
-  // @tswow-end
   math::vector_3d pickMCCV(math::vector_3d const& pos);
 
   ChunkWater* liquid_chunk() const;
@@ -204,7 +197,5 @@ public:
   // fix the gaps with the chunk above
   bool fixGapAbove(const MapChunk* chunk);
 
-  // @tswow-begin
   void selectVertex(math::vector_3d const& minPos, math::vector_3d const& maxPos, std::set<math::vector_3d*>& vertices);
-  // @tswow-end
 };
