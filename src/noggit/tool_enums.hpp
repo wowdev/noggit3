@@ -70,9 +70,9 @@ enum class editing_mode
   water,
   mccv,
   object,
-  // @tswow-begin
+  #ifdef NOGGIT_SCRIPTING
   scripting
-  // @tswow-end
+  #endif
 };
 
 enum water_opacity

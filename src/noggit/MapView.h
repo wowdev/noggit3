@@ -49,9 +49,9 @@ namespace noggit
     class water;
     class zone_id_browser;
     class texture_palette_small;
-    // @tswow-begin
+    #ifdef NOGGIT_SCRIPTING
     class scripting_tool;
-    // @tswow-end
+    #endif
     struct main_window;
     struct tileset_chooser;
   }
@@ -310,8 +310,8 @@ private:
   QDockWidget* _vertex_shading_dock;
   noggit::ui::texturing_tool* texturingTool;
   QDockWidget* _texturing_dock;
-  // @tswow-begin
+  #ifdef NOGGIT_SCRIPTING
   noggit::scripting::scripting_tool* scriptingTool;
   QDockWidget* _script_tool_dock;
-  // @tswow-end
+  #endif
 };

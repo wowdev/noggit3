@@ -1468,7 +1468,6 @@ void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<m
 // @tswow-begin
 void MapChunk::selectVertex(math::vector_3d const& pos1, math::vector_3d const& pos2, std::set<math::vector_3d*>& vertices)
 {
-  LogDebug << "In a chunk right now\n";
   for(int i = 0; i< mapbufsize; ++i)
   {
     if(

@@ -201,6 +201,8 @@ ENDIF()
 
 includePlattform("postfind")
 
+OPTION(SCRIPTING "Enable scripting support?" ON)
+
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
@@ -242,21 +244,6 @@ set ( noggit_root_sources
       src/noggit/wmo_liquid.cpp
       src/noggit/world_model_instances_storage.cpp
       src/noggit/world_tile_update_queue.cpp
-      src/noggit/scripting/script_random.cpp
-      src/noggit/scripting/script_selection.cpp
-      src/noggit/scripting/scripting_tool.cpp
-      src/noggit/scripting/script_context.cpp
-      src/noggit/scripting/script_brush.cpp
-      src/noggit/scripting/script_misc.cpp
-      src/noggit/scripting/script_image.cpp
-      src/noggit/scripting/script_loader.cpp
-      src/noggit/scripting/script_math.cpp
-      src/noggit/scripting/script_noise.cpp
-      src/noggit/scripting/script_model.cpp
-      src/noggit/scripting/script_chunk.cpp
-      src/noggit/scripting/script_vert.cpp
-      src/noggit/scripting/script_filesystem.cpp
-      src/noggit/scripting/script_heap.cpp
     )
 
 set ( noggit_ui_sources
@@ -353,23 +340,6 @@ set ( noggit_root_headers
       src/noggit/wmo_liquid.hpp
       src/noggit/world_model_instances_storage.hpp
       src/noggit/world_tile_update_queue.hpp
-      src/noggit/scripting/script_filesystem.hpp
-      src/noggit/scripting/script_noise.hpp
-      src/noggit/scripting/script_chunk.hpp
-      src/noggit/scripting/script_model.hpp
-      src/noggit/scripting/script_vert.hpp
-      src/noggit/scripting/script_noggit_module.hpp
-      src/noggit/scripting/script_random.hpp
-      src/noggit/scripting/script_selection.hpp
-      src/noggit/scripting/script_texture_index.hpp
-      src/noggit/scripting/scripting_tool.hpp
-      src/noggit/scripting/script_context.hpp
-      src/noggit/scripting/script_misc.hpp
-      src/noggit/scripting/script_brush.hpp
-      src/noggit/scripting/script_image.hpp
-      src/noggit/scripting/script_loader.hpp
-      src/noggit/scripting/script_math.hpp
-      src/noggit/scripting/script_heap.hpp
     )
 
 set ( noggit_ui_headers
@@ -417,6 +387,45 @@ set ( math_headers
       src/math/vector_3d.hpp
       src/math/vector_4d.hpp
     )
+
+
+set ( scripting_sources
+    src/noggit/scripting/script_random.cpp
+    src/noggit/scripting/script_selection.cpp
+    src/noggit/scripting/scripting_tool.cpp
+    src/noggit/scripting/script_context.cpp
+    src/noggit/scripting/script_brush.cpp
+    src/noggit/scripting/script_misc.cpp
+    src/noggit/scripting/script_image.cpp
+    src/noggit/scripting/script_loader.cpp
+    src/noggit/scripting/script_math.cpp
+    src/noggit/scripting/script_noise.cpp
+    src/noggit/scripting/script_model.cpp
+    src/noggit/scripting/script_chunk.cpp
+    src/noggit/scripting/script_vert.cpp
+    src/noggit/scripting/script_filesystem.cpp
+    src/noggit/scripting/script_heap.cpp
+  )
+  
+set ( scripting_headers
+    src/noggit/scripting/script_filesystem.hpp
+    src/noggit/scripting/script_noise.hpp
+    src/noggit/scripting/script_chunk.hpp
+    src/noggit/scripting/script_model.hpp
+    src/noggit/scripting/script_vert.hpp
+    src/noggit/scripting/script_noggit_module.hpp
+    src/noggit/scripting/script_random.hpp
+    src/noggit/scripting/script_selection.hpp
+    src/noggit/scripting/script_texture_index.hpp
+    src/noggit/scripting/scripting_tool.hpp
+    src/noggit/scripting/script_context.hpp
+    src/noggit/scripting/script_misc.hpp
+    src/noggit/scripting/script_brush.hpp
+    src/noggit/scripting/script_image.hpp
+    src/noggit/scripting/script_loader.hpp
+    src/noggit/scripting/script_math.hpp
+    src/noggit/scripting/script_heap.hpp
+  )
 
 set ( opengl_headers
       src/opengl/context.hpp
@@ -490,6 +499,7 @@ source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
+source_group("scripting", FILES ${scripting_sources} ${scripting_headers})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
@@ -517,6 +527,11 @@ ADD_EXECUTABLE ( noggit
                   ${shaders}
                   ${force_update_file}
                 )
+
+IF(SCRIPTING)
+  TARGET_SOURCES(noggit PRIVATE ${scripting_sources} ${scripting_headers})
+  ADD_COMPILE_DEFINITIONS(NOGGIT_SCRIPTING)
+ENDIF(SCRIPTING)
                 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
@@ -610,58 +625,83 @@ add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
 include(FetchContent)
 message("Installing dependencies")
 
-# json.hpp
-FetchContent_Declare(json
-  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-  GIT_TAG v3.9.1)
-FetchContent_GetProperties(json)
-if(NOT json_POPULATED)
-  message("Installing json.hpp...")
-  FetchContent_Populate(json)
-  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+if(SCRIPTING)
+  # json.hpp
+  FetchContent_Declare(json
+    GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+    GIT_TAG v3.9.1)
+  FetchContent_GetProperties(json)
+  if(NOT json_POPULATED)
+    message("Installing json.hpp...")
+    FetchContent_Populate(json)
+    add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
 
-# lodepng
-FetchContent_Declare(lodepng
-  GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
+  # lodepng
+  FetchContent_Declare(lodepng
+    GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
+    )
+  FetchContent_GetProperties(lodepng)
+  if(NOT lodepng_POPULATED)
+    message("Installing lodepng...")
+    FetchContent_Populate(lodepng)
+    add_library(lodepng ${lodepng_SOURCE_DIR}/lodepng.cpp)
+  endif()
+
+  # FastNoise2
+  FetchContent_Declare(fastnoise2
+    GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+    )
+  FetchContent_GetProperties(fastnoise2)
+
+  if(NOT fastnoise2_POPULATED)
+    message("Installing FastNoise2... (big repo, large download)")
+    FetchContent_Populate(fastnoise2)
+    add_subdirectory(${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
+    # hack, but something's wrong in FastNoise2s CMakeLists
+    target_include_directories (FastNoise PRIVATE ${fastnoise2_SOURCE_DIR}/include)
+
+    target_include_directories (NoiseTool PRIVATE ${fastnoise2_SOURCE_DIR}/include)
+  endif()
+
+  # daScript
+  FetchContent_Declare(dascript
+    GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
+    # hack that ignores daScript submodules (empty string is bugged)
+    GIT_SUBMODULES "src"
+    )
+  FetchContent_GetProperties(dascript)
+  if(NOT gitdascript_POPULATED)
+    message("Installing daScript...")
+    FetchContent_Populate(dascript)
+    add_subdirectory(${dascript_SOURCE_DIR} ${dascript_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
+
+  target_include_directories (
+    noggit SYSTEM PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/external/daScript/include
+    ${json_SOURCE_DIR}/include/nlohmann
+    ${lodepng_SOURCE_DIR}
+    ${fastnoise2_SOURCE_DIR}/include
+    ${dascript_SOURCE_DIR}/include
+    ${storm_SOURCE_DIR}/src
   )
-FetchContent_GetProperties(lodepng)
-if(NOT lodepng_POPULATED)
-  message("Installing lodepng...")
-  FetchContent_Populate(lodepng)
-  add_library(lodepng ${lodepng_SOURCE_DIR}/lodepng.cpp)
-endif()
 
-# FastNoise2
-FetchContent_Declare(fastnoise2
-  GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+  add_dependencies(
+    noggit 
+    FastNoise 
+    libDaScript 
+    NoiseTool
   )
-FetchContent_GetProperties(fastnoise2)
 
-message(${CMAKE_CURRENT_SOURCE_DIR})
-
-if(NOT fastnoise2_POPULATED)
-  message("Installing FastNoise2... (big repo, large download)")
-  FetchContent_Populate(fastnoise2)
-  add_subdirectory(${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
-  # hack, but something's wrong in FastNoise2s CMakeLists
-  target_include_directories (FastNoise PRIVATE ${fastnoise2_SOURCE_DIR}/include)
-
-  target_include_directories (NoiseTool PRIVATE ${fastnoise2_SOURCE_DIR}/include)
-endif()
-
-# daScript
-FetchContent_Declare(dascript
-  GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
-  # hack that ignores daScript submodules (empty string is bugged)
-  GIT_SUBMODULES "src"
+  target_link_libraries (
+    noggit 
+    libDaScript
+    lodepng
+    FastNoise
+    nlohmann_json::nlohmann_json
   )
-FetchContent_GetProperties(dascript)
-if(NOT gitdascript_POPULATED)
-  message("Installing daScript...")
-  FetchContent_Populate(dascript)
-  add_subdirectory(${dascript_SOURCE_DIR} ${dascript_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+endif(SCRIPTING)
 
 # StormLib
 FetchContent_Declare(storm
@@ -674,29 +714,12 @@ if(NOT storm_POPULATED)
   add_subdirectory(${storm_SOURCE_DIR} ${storm_BINARY_DIR})
 endif()
 
-target_include_directories (
-  noggit SYSTEM PUBLIC 
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/external/daScript/include
-  ${json_SOURCE_DIR}/include/nlohmann
-  ${lodepng_SOURCE_DIR}
-  ${fastnoise2_SOURCE_DIR}/include
-  ${dascript_SOURCE_DIR}/include
-  ${storm_SOURCE_DIR}/src
-)
-
 add_dependencies(
-  noggit 
-  FastNoise 
-  libDaScript 
-  storm 
-  NoiseTool
+  noggit
+  storm
 )
 
-target_link_libraries (
-  noggit 
-  libDaScript
-  lodepng
-  FastNoise
+target_link_libraries(
+  noggit
   storm
-  nlohmann_json::nlohmann_json
 )
