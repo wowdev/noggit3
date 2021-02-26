@@ -4,8 +4,6 @@
 #include <noggit/scripting/script_heap.hpp>
 #include <noggit/World.h>
 
-// see script_selection_xxx.cpp for all implementations
-
 namespace noggit
 {
   namespace scripting
