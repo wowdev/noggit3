@@ -8,6 +8,7 @@ namespace noggit
 {
   namespace scripting
   {
+    // makes it easier for scripters to not pass this around
     static script_context *ctx;
 
     void set_ctx(script_context *nctx)

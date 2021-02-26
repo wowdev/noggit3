@@ -33,9 +33,9 @@ namespace noggit
   {
 
     static json _json;
-    static std::vector<char *> _strings;
-    static std::string _cur_profile = "Default";
-    static boost::mutex mutex;
+    static std::vector<char *> strings;
+    static std::string cur_profile = "Default";
+    static boost::mutex script_change_mutex;
 
     template <typename T>
     static T get_json_safe(std::string key, T def)
@@ -47,17 +47,17 @@ namespace noggit
         _json[ssn] = json();
       }
 
-      if (!_json[ssn].contains(_cur_profile))
+      if (!_json[ssn].contains(cur_profile))
       {
-        _json[ssn][_cur_profile] = json();
+        _json[ssn][cur_profile] = json();
       }
 
-      if (!_json[ssn][_cur_profile].contains(key))
+      if (!_json[ssn][cur_profile].contains(key))
       {
-        _json[ssn][_cur_profile][key] = def;
+        _json[ssn][cur_profile][key] = def;
       }
 
-      return _json[ssn][_cur_profile][key];
+      return _json[ssn][cur_profile][key];
     }
 
     template <typename T>
@@ -69,24 +69,24 @@ namespace noggit
         _json[ssn] = json();
       }
 
-      if (!_json[ssn].contains(_cur_profile))
+      if (!_json[ssn].contains(cur_profile))
       {
-        _json[ssn][_cur_profile] = json();
+        _json[ssn][cur_profile] = json();
       }
 
-      _json[ssn][_cur_profile][key] = def;
+      _json[ssn][cur_profile][key] = def;
     }
 
     template <typename T>
     static void set_json_unsafe(std::string key, T value)
     {
-      _json[selected_script_name()][_cur_profile][key] = value;
+      _json[selected_script_name()][cur_profile][key] = value;
     }
 
     template <typename T>
     static T get_json_unsafe(std::string key)
     {
-      return _json[selected_script_name()][_cur_profile][key].get<T>();
+      return _json[selected_script_name()][cur_profile][key].get<T>();
     }
 
     static scripting_tool *cur_tool = nullptr;
@@ -98,7 +98,6 @@ namespace noggit
 
     void scripting_tool::doReload()
     {
-      auto old_tool = cur_tool;
       cur_tool = this;
       int selection = -1;
       removeScriptWidgets();
@@ -112,27 +111,26 @@ namespace noggit
         addLog("[error]: " + std::string(e.what()));
         return;
       }
-      this->script_selection->clear();
+      _script_selection->clear();
 
       for (int i = 0; i < script_count(); ++i)
       {
-        this->script_selection->addItem(get_script_display_name(i).c_str());
+        _script_selection->addItem(get_script_display_name(i).c_str());
       }
 
       if (selection != -1)
       {
-        script_selection->setCurrentIndex(selection);
+        _script_selection->setCurrentIndex(selection);
         on_change_script(selection);
       }
     }
 
     void scripting_tool::on_change_script(int selection)
     {
-      mutex.lock();
+      script_change_mutex.lock();
       removeScriptWidgets();
       clearDescription();
 
-      auto old_tool = cur_tool;
       cur_tool = this;
 
       auto sn = get_script_name(selection);
@@ -185,13 +183,13 @@ namespace noggit
         }
       }
 
-      _cur_profile = _profile_selection->itemText(next_profile).toUtf8().constData();
+      cur_profile = _profile_selection->itemText(next_profile).toUtf8().constData();
       _profile_selection->setCurrentIndex(next_profile);
       if (!_json.contains(cur_script))
       {
         _json[cur_script] = json();
       }
-      _json[cur_script][CUR_PROFILE_PATH] = _cur_profile;
+      _json[cur_script][CUR_PROFILE_PATH] = cur_profile;
       select_script(selection);
 
       initialize_radius();
@@ -205,28 +203,22 @@ namespace noggit
         }
       }
 
-      cur_tool = old_tool;
-      mutex.unlock();
+      cur_tool = nullptr;
+      script_change_mutex.unlock();
     }
 
     scripting_tool::scripting_tool(QWidget *parent) : QWidget(parent)
     {
       auto layout(new QFormLayout(this));
-      script_selection = new QComboBox();
-      layout->addRow(script_selection);
+      _script_selection = new QComboBox();
+      layout->addRow(_script_selection);
 
-      if (boost::filesystem::exists(SCRIPT_FILE))
-      {
-        std::ifstream(SCRIPT_FILE) >> _json;
-      }
-
-      QPushButton *btn = new QPushButton("Reload Scripts", this);
-      layout->addRow(btn);
-      connect(btn, &QPushButton::released, this, [this]() {
-        auto old_tool = cur_tool;
+      _reload_button = new QPushButton("Reload Scripts", this);
+      layout->addRow(_reload_button);
+      connect(_reload_button, &QPushButton::released, this, [this]() {
         cur_tool = this;
         doReload();
-        cur_tool = old_tool;
+        cur_tool = nullptr;
       });
 
       // Profiles
@@ -247,95 +239,6 @@ namespace noggit
 
       layout->addRow(_profile_group);
 
-      connect(_profile_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
-        select_profile(index);
-      });
-
-      connect(_profile_remove_button, &QPushButton::released, this, [this]() {
-        auto script_name = selected_script_name();
-        if (script_name.size() == 0)
-        {
-          // error?
-          return;
-        }
-
-        auto index = _profile_selection->currentIndex();
-
-        // no deleting default settings
-        if (index == 0)
-        {
-          return;
-        }
-
-        auto text = _profile_selection->itemText(index).toUtf8().constData();
-        _profile_selection->removeItem(index);
-
-        if (_json.contains(script_name))
-        {
-          if (_json[script_name].contains(text))
-          {
-            _json[script_name].erase(text);
-          }
-        }
-
-        // go back to default, so we don't accidentally delete another profile
-        select_profile(0);
-      });
-
-      connect(_profile_create_button, &QPushButton::released, this, [this]() {
-        auto script_name = selected_script_name();
-
-        // no invalid script
-        if (script_name.size() == 0)
-          return;
-
-        std::string newText = _profile_name_entry->text().toUtf8().constData();
-
-        // no empty profiles
-        if (newText.size() == 0)
-          return;
-
-        auto count = _profile_selection->count();
-        for (int i = 0; i < count; ++i)
-        {
-          // no duplicate profiles
-          if (_profile_selection->itemText(i).toUtf8().constData() == newText)
-          {
-            return;
-          }
-        }
-
-        _profile_name_entry->clear();
-
-        _profile_selection->addItem(newText.c_str());
-
-        if (!_json.contains(script_name))
-        {
-          _json[script_name] = json();
-        }
-
-        if (!_json[script_name].contains(newText))
-        {
-          if (_json[script_name].contains(_cur_profile))
-          {
-            _json[script_name][newText] = _json[script_name][_cur_profile];
-          }
-          else
-          {
-            _json[script_name][newText] = json();
-          }
-        }
-
-        _profile_selection->setCurrentIndex(count);
-
-        select_profile(count);
-      });
-
-      connect(script_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
-        clearLog();
-        on_change_script(index);
-      });
-
       _radius_spin = new QDoubleSpinBox(this);
       _radius_spin->setRange(0.0f, 1000.0f);
       _radius_spin->setDecimals(2);
@@ -355,14 +258,14 @@ namespace noggit
       _inner_radius_slider->setRange(0, 100);
       _inner_radius_slider->setSliderPosition((int)std::round(_inner_radius * 100));
 
-      QGroupBox *radius_group(new QGroupBox("Radius"));
-      QFormLayout *radius_layout(new QFormLayout(radius_group));
-      radius_layout->addRow("Outer:", _radius_spin);
-      radius_layout->addRow(_radius_slider);
-      radius_layout->addRow("Inner:", _inner_radius_spin);
-      radius_layout->addRow(_inner_radius_slider);
+      _radius_group = new QGroupBox("Radius");
+      _radius_layout = new QFormLayout(_radius_group);
+      _radius_layout->addRow("Outer:", _radius_spin);
+      _radius_layout->addRow(_radius_slider);
+      _radius_layout->addRow("Inner:", _inner_radius_spin);
+      _radius_layout->addRow(_inner_radius_slider);
 
-      layout->addWidget(radius_group);
+      layout->addWidget(_radius_group);
 
       _script_settings_group = new QGroupBox("Script Settings");
       _script_settings_layout = new QFormLayout(_script_settings_group);
@@ -403,40 +306,132 @@ namespace noggit
         set_json_unsafe(INNER_RADIUS_PATH, v);
       });
 
+      connect(_profile_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
+        select_profile(index);
+      });
+
+      connect(_profile_remove_button, &QPushButton::released, this, [this]() {
+        auto script_name = selected_script_name();
+        if (script_name.size() == 0)
+        {
+          // TODO: error?
+          return;
+        }
+
+        auto index = _profile_selection->currentIndex();
+
+        // do not allow deleting default settings
+        if (index == 0)
+        {
+          return;
+        }
+
+        auto text = _profile_selection->itemText(index).toUtf8().constData();
+        _profile_selection->removeItem(index);
+
+        if (_json.contains(script_name))
+        {
+          if (_json[script_name].contains(text))
+          {
+            _json[script_name].erase(text);
+          }
+        }
+
+        // go back to default, so we don't accidentally delete another profile
+        select_profile(0);
+      });
+
+      connect(_profile_create_button, &QPushButton::released, this, [this]() {
+        auto script_name = selected_script_name();
+
+        // do not allow invalid script
+        if (script_name.size() == 0)
+          return;
+
+        std::string newText = _profile_name_entry->text().toUtf8().constData();
+
+        // do not allow empty profiles
+        if (newText.size() == 0)
+          return;
+
+        auto count = _profile_selection->count();
+        for (int i = 0; i < count; ++i)
+        {
+          // do not allow duplicate profiles
+          if (_profile_selection->itemText(i).toUtf8().constData() == newText)
+          {
+            return;
+          }
+        }
+
+        _profile_name_entry->clear();
+        _profile_selection->addItem(newText.c_str());
+        if (!_json.contains(script_name))
+        {
+          _json[script_name] = json();
+        }
+
+        if (!_json[script_name].contains(newText))
+        {
+          if (_json[script_name].contains(cur_profile))
+          {
+            _json[script_name][newText] = _json[script_name][cur_profile];
+          }
+          else
+          {
+            _json[script_name][newText] = json();
+          }
+        }
+
+        _profile_selection->setCurrentIndex(count);
+
+        select_profile(count);
+      });
+
+      connect(_script_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
+        clearLog();
+        on_change_script(index);
+      });
+
+      if (boost::filesystem::exists(SCRIPT_FILE))
+      {
+        std::ifstream(SCRIPT_FILE) >> _json;
+      }
       doReload();
     }
 
-#define ADD_SLIDER(path, T, min, max, def, decimals)                   \
-  double dp1 = decimals > 0 ? decimals + 5 : decimals + 1;               \
-  auto spinner = new QDoubleSpinBox(this);                       \
-  spinner->setRange(min, max);                             \
-  spinner->setDecimals(decimals);                          \
-  spinner->setValue(def);                              \
-  auto slider = new QSlider(Qt::Orientation::Horizontal, this);            \
-  slider->setRange(min *dp1, max *dp1);                        \
-  slider->setSliderPosition((int)std::round(def *dp1));                \
-  auto label = new QLabel(this);                           \
-  label->setText(name);                                \
+// i don't remember why this was a macro
+#define ADD_SLIDER(path, T, min, max, def, decimals)                                 \
+  double dp1 = decimals > 0 ? decimals + 5 : decimals + 1;                           \
+  auto spinner = new QDoubleSpinBox(this);                                           \
+  spinner->setRange(min, max);                                                       \
+  spinner->setDecimals(decimals);                                                    \
+  spinner->setValue(def);                                                            \
+  auto slider = new QSlider(Qt::Orientation::Horizontal, this);                      \
+  slider->setRange(min *dp1, max *dp1);                                              \
+  slider->setSliderPosition((int)std::round(def *dp1));                              \
+  auto label = new QLabel(this);                                                     \
+  label->setText(name);                                                              \
   connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=](double v) { \
-    set_json_unsafe<T>(path, (T)v);                        \
-    QSignalBlocker const blocker(slider);                      \
-    slider->setSliderPosition((int)std::round(v *dp1));              \
-  });                                        \
-  connect(slider, &QSlider::valueChanged, [=](int v) {                 \
-    double t = double(v) / dp1;                          \
-    set_json_unsafe<T>(path, t);                           \
-    QSignalBlocker const blocker(spinner);                     \
-    spinner->setValue(t);                              \
-  });                                        \
-                                             \
-  _script_settings_layout->addRow(label, spinner);                   \
-  _script_settings_layout->addRow("", slider);                     \
-  _script_widgets.push_back(label);                          \
-  _script_widgets.push_back(spinner);                        \
-  _script_widgets.push_back(slider);                         \
+    set_json_unsafe<T>(path, (T)v);                                                  \
+    QSignalBlocker const blocker(slider);                                            \
+    slider->setSliderPosition((int)std::round(v *dp1));                              \
+  });                                                                                \
+  connect(slider, &QSlider::valueChanged, [=](int v) {                               \
+    double t = double(v) / dp1;                                                      \
+    set_json_unsafe<T>(path, t);                                                     \
+    QSignalBlocker const blocker(spinner);                                           \
+    spinner->setValue(t);                                                            \
+  });                                                                                \
+                                                                                     \
+  _script_settings_layout->addRow(label, spinner);                                   \
+  _script_settings_layout->addRow("", slider);                                       \
+  _script_widgets.push_back(label);                                                  \
+  _script_widgets.push_back(spinner);                                                \
+  _script_widgets.push_back(slider);                                                 \
   set_json_safe<T>(path, std::min(max, std::max(min, get_json_safe<T>(path, def)))); \
-  auto v = get_json_safe<T>(path, def);                        \
-  slider->setSliderPosition((int)std::round(v *dp1));                \
+  auto v = get_json_safe<T>(path, def);                                              \
+  slider->setSliderPosition((int)std::round(v *dp1));                                \
   spinner->setValue(v);
 
     void scripting_tool::addDouble(const char *name, double min, double max, double def, int zeros)
@@ -533,9 +528,8 @@ namespace noggit
     {
       removeScriptWidgets();
       clearDescription();
-      auto old_tool = cur_tool;
       cur_tool = this;
-      _cur_profile = _profile_selection->itemText(profile).toUtf8().constData();
+      cur_profile = _profile_selection->itemText(profile).toUtf8().constData();
 
       auto n = selected_script_name();
       if (!_json.contains(n))
@@ -543,27 +537,26 @@ namespace noggit
         _json[n] = json();
       }
 
-      _json[n][CUR_PROFILE_PATH] = _cur_profile;
+      _json[n][CUR_PROFILE_PATH] = cur_profile;
 
       initialize_radius();
 
       select_script(get_selected_script());
-      cur_tool = old_tool;
+      cur_tool = nullptr;
     }
 
     void scripting_tool::sendUpdate(
-      World *world,
-      math::vector_3d pos_in,
-      noggit::camera *cam,
-      float dt,
-      bool left_mouse,
-      bool right_mouse,
-      bool holding_shift,
-      bool holding_ctrl,
-      bool holding_alt,
-      bool holding_space)
+        World *world,
+        math::vector_3d pos_in,
+        noggit::camera *cam,
+        float dt,
+        bool left_mouse,
+        bool right_mouse,
+        bool holding_shift,
+        bool holding_ctrl,
+        bool holding_alt,
+        bool holding_space)
     {
-      auto old_tool = cur_tool;
       cur_tool = this;
       script_context ctx(world, pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space);
       set_ctx(&ctx);
@@ -606,9 +599,9 @@ namespace noggit
 
       script_free_all();
       set_ctx(nullptr);
+      cur_tool = nullptr;
       _last_left = left_mouse;
       _last_right = right_mouse;
-      cur_tool = old_tool;
     }
 
     void scripting_tool::initialize_radius()

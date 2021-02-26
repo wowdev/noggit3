@@ -20,7 +20,6 @@
 
 class World;
 
-
 namespace noggit
 {
   class camera;
@@ -66,9 +65,13 @@ namespace noggit
       float _radius = 0;
       float _speed = 0;
       float _inner_radius = 0;
+    
+    private:
+      QComboBox *_script_selection;
+      QPushButton *_reload_button;
 
-      QComboBox *script_selection;
-
+      QGroupBox *_radius_group;
+      QFormLayout *_radius_layout;
       QDoubleSpinBox *_radius_spin;
       QSlider *_radius_slider;
 
@@ -117,6 +120,8 @@ namespace noggit
     void add_description(const char *desc);
 
     void save_json();
+
+    // same as script_context, but must also be accessable during "select"
     scripting_tool *get_cur_tool();
   } // namespace scripting
 } // namespace noggit
