@@ -623,7 +623,25 @@ target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework noggit::m
 add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
 
 include(FetchContent)
-message("Installing dependencies")
+
+# StormLib
+FetchContent_Declare(storm
+  GIT_REPOSITORY https://github.com/ladislav-zezula/StormLib.git
+  )
+FetchContent_GetProperties(storm)
+if(NOT DEFINED STORM_SOURCE)
+  message("Installing StormLib...")
+  FetchContent_Populate(storm)
+  set( STORM_SOURCE ${storm_SOURCE_DIR} CACHE PATH "StormLib sources")
+  set( STORM_BIN ${storm_BINARY_DIR} CACHE PATH "StormLib binaries")
+endif()
+
+add_subdirectory(${STORM_SOURCE} ${STORM_BIN} EXCLUDE_FROM_ALL)
+
+add_dependencies(
+  noggit
+  storm
+)
 
 if(SCRIPTING)
   # json.hpp
@@ -631,38 +649,41 @@ if(SCRIPTING)
     GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
     GIT_TAG v3.9.1)
   FetchContent_GetProperties(json)
-  if(NOT json_POPULATED)
+  if(NOT DEFINED JSON_SOURCE)
     message("Installing json.hpp...")
     FetchContent_Populate(json)
-    add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+    set(JSON_SOURCE ${json_SOURCE_DIR} CACHE PATH "json.hpp source files")
+    set(JSON_BIN ${json_BINARY_DIR} CACHE PATH "json.hpp bin files")
   endif()
+  add_subdirectory(${JSON_SOURCE} ${JSON_BIN} EXCLUDE_FROM_ALL)
 
   # lodepng
   FetchContent_Declare(lodepng
     GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
     )
   FetchContent_GetProperties(lodepng)
-  if(NOT lodepng_POPULATED)
+  if(NOT DEFINED LODEPNG_SOURCE)
     message("Installing lodepng...")
     FetchContent_Populate(lodepng)
-    add_library(lodepng ${lodepng_SOURCE_DIR}/lodepng.cpp)
+    set(LODEPNG_SOURCE ${lodepng_SOURCE_DIR} CACHE PATH "lodepng source files")
   endif()
+  add_library(lodepng ${LODEPNG_SOURCE}/lodepng.cpp)
 
   # FastNoise2
   FetchContent_Declare(fastnoise2
     GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
     )
   FetchContent_GetProperties(fastnoise2)
-
-  if(NOT fastnoise2_POPULATED)
+  if(NOT DEFINED FASTNOISE_SOURCE)
     message("Installing FastNoise2... (big repo, large download)")
     FetchContent_Populate(fastnoise2)
-    add_subdirectory(${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
-    # hack, but something's wrong in FastNoise2s CMakeLists
-    target_include_directories (FastNoise PRIVATE ${fastnoise2_SOURCE_DIR}/include)
-
-    target_include_directories (NoiseTool PRIVATE ${fastnoise2_SOURCE_DIR}/include)
+    set(FASTNOISE_SOURCE ${fastnoise2_SOURCE_DIR} CACHE PATH "FastNoise 2 source files")
+    set(FASTNOISE_BIN ${fastnoise2_BINARY_DIR} CACHE PATH "FastNoise 2 bin files")
   endif()
+  add_subdirectory(${FASTNOISE_SOURCE} ${FASTNOISE_BIN} EXCLUDE_FROM_ALL)
+  # hack, but something's wrong in FastNoise2s CMakeLists
+  target_include_directories (FastNoise PRIVATE ${FASTNOISE_SOURCE}/include)
+  target_include_directories (NoiseTool PRIVATE ${FASTNOISE_SOURCE}/include)
 
   # daScript
   FetchContent_Declare(dascript
@@ -671,20 +692,23 @@ if(SCRIPTING)
     GIT_SUBMODULES "src"
     )
   FetchContent_GetProperties(dascript)
-  if(NOT gitdascript_POPULATED)
+  if(NOT DEFINED DASCRIPT_SOURCE)
     message("Installing daScript...")
     FetchContent_Populate(dascript)
-    add_subdirectory(${dascript_SOURCE_DIR} ${dascript_BINARY_DIR} EXCLUDE_FROM_ALL)
+    set(DASCRIPT_SOURCE ${dascript_SOURCE_DIR} CACHE PATH "daScript source files")
+    set(DASCRIPT_BIN ${dascript_BINARY_DIR} CACHE PATH "daScript bin files")
   endif()
+
+  add_subdirectory(${DASCRIPT_SOURCE} ${DASCRIPT_BIN} EXCLUDE_FROM_ALL)
 
   target_include_directories (
     noggit SYSTEM PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/external/daScript/include
-    ${json_SOURCE_DIR}/include/nlohmann
-    ${lodepng_SOURCE_DIR}
-    ${fastnoise2_SOURCE_DIR}/include
-    ${dascript_SOURCE_DIR}/include
-    ${storm_SOURCE_DIR}/src
+    ${JSON_SOURCE}/include/nlohmann
+    ${LODEPNG_SOURCE}
+    ${FASTNOISE_SOURCE}/include
+    ${DASCRIPT_SOURCE}/include
+    ${STORM_SOURCE}/src
   )
 
   add_dependencies(
@@ -702,22 +726,6 @@ if(SCRIPTING)
     nlohmann_json::nlohmann_json
   )
 endif(SCRIPTING)
-
-# StormLib
-FetchContent_Declare(storm
-  GIT_REPOSITORY https://github.com/ladislav-zezula/StormLib.git
-  )
-FetchContent_GetProperties(storm)
-if(NOT storm_POPULATED)
-  message("Installing StormLib...")
-  FetchContent_Populate(storm)
-  add_subdirectory(${storm_SOURCE_DIR} ${storm_BINARY_DIR})
-endif()
-
-add_dependencies(
-  noggit
-  storm
-)
 
 target_link_libraries(
   noggit
