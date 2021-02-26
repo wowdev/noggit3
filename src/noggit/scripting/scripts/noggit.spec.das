@@ -1,6 +1,3 @@
-
-// scripting_tool.hpp
-
 /**
  * Adds a "string list" (dropdown menu) parameter
  * 

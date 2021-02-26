@@ -1,4 +1,4 @@
-// Made by TSWoW (https://github.com/tswow), licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 require noggit
 require strings
 
