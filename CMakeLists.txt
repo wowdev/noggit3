@@ -624,112 +624,90 @@ target_compile_definitions (math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"
 target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
 
-include(FetchContent)
+include (FetchContent)
 
-# StormLib
-FetchContent_Declare(storm
+# Dependency: StormLib
+
+FetchContent_Declare (storm
   GIT_REPOSITORY https://github.com/ladislav-zezula/StormLib.git
-  )
-FetchContent_GetProperties(storm)
-if(NOT DEFINED STORM_SOURCE)
-  message("Installing StormLib...")
-  FetchContent_Populate(storm)
-  set( STORM_SOURCE ${storm_SOURCE_DIR} CACHE PATH "StormLib sources")
-  set( STORM_BIN ${storm_BINARY_DIR} CACHE PATH "StormLib binaries")
+)
+FetchContent_GetProperties (storm)
+if (NOT storm_POPULATED)
+  message (STATUS "Installing StormLib...")
+  FetchContent_Populate (storm)
 endif()
+add_subdirectory (${storm_SOURCE_DIR} ${storm_BINARY_DIR} EXCLUDE_FROM_ALL)
 
-add_subdirectory(${STORM_SOURCE} ${STORM_BIN} EXCLUDE_FROM_ALL)
-
-add_dependencies(
-  noggit
+target_link_libraries (noggit
   storm
 )
 
 if (NOGGIT_WITH_SCRIPTING)
-  # json.hpp
-  FetchContent_Declare(json
+  # Dependency: json.hpp
+  FetchContent_Declare (json
     GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-    GIT_TAG v3.9.1)
-  FetchContent_GetProperties(json)
-  if(NOT DEFINED JSON_SOURCE)
-    message("Installing json.hpp...")
-    FetchContent_Populate(json)
-    set(JSON_SOURCE ${json_SOURCE_DIR} CACHE PATH "json.hpp source files")
-    set(JSON_BIN ${json_BINARY_DIR} CACHE PATH "json.hpp bin files")
+    GIT_TAG v3.9.1
+  )
+  FetchContent_GetProperties (json)
+  if (NOT json_POPULATED)
+    message (STATUS "Installing json.hpp...")
+    FetchContent_Populate (json)
   endif()
-  add_subdirectory(${JSON_SOURCE} ${JSON_BIN} EXCLUDE_FROM_ALL)
+  add_subdirectory (${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 
-  # lodepng
-  FetchContent_Declare(lodepng
+  # Dependency: lodepng
+  FetchContent_Declare (lodepng
     GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
-    )
-  FetchContent_GetProperties(lodepng)
-  if(NOT DEFINED LODEPNG_SOURCE)
-    message("Installing lodepng...")
-    FetchContent_Populate(lodepng)
-    set(LODEPNG_SOURCE ${lodepng_SOURCE_DIR} CACHE PATH "lodepng source files")
+  )
+  FetchContent_GetProperties (lodepng)
+  if (NOT lodepng_POPULATED)
+    message (STATUS "Installing lodepng...")
+    FetchContent_Populate (lodepng)
   endif()
-  add_library(lodepng ${LODEPNG_SOURCE}/lodepng.cpp)
+  add_library (lodepng "${lodepng_SOURCE_DIR}/lodepng.cpp")
 
-  # FastNoise2
-  FetchContent_Declare(fastnoise2
+  # Dependency: FastNoise2
+  FetchContent_Declare (fastnoise2
     GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
-    )
-  FetchContent_GetProperties(fastnoise2)
-  if(NOT DEFINED FASTNOISE_SOURCE)
-    message("Installing FastNoise2... (big repo, large download)")
-    FetchContent_Populate(fastnoise2)
-    set(FASTNOISE_SOURCE ${fastnoise2_SOURCE_DIR} CACHE PATH "FastNoise 2 source files")
-    set(FASTNOISE_BIN ${fastnoise2_BINARY_DIR} CACHE PATH "FastNoise 2 bin files")
+  )
+  FetchContent_GetProperties (fastnoise2)
+  if (NOT fastnoise2_POPULATED)
+    message (STATUS "Installing FastNoise2... (big repo, large download)")
+    FetchContent_Populate (fastnoise2)
   endif()
-  add_subdirectory(${FASTNOISE_SOURCE} ${FASTNOISE_BIN} EXCLUDE_FROM_ALL)
+  add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
   # hack, but something's wrong in FastNoise2s CMakeLists
-  target_include_directories (FastNoise PRIVATE ${FASTNOISE_SOURCE}/include)
-  target_include_directories (NoiseTool PRIVATE ${FASTNOISE_SOURCE}/include)
+  target_include_directories (FastNoise PRIVATE ${fastnoise2_SOURCE_DIR}/include)
+  target_include_directories (NoiseTool PRIVATE ${fastnoise2_SOURCE_DIR}/include)
 
-  # daScript
-  FetchContent_Declare(dascript
+  # Dependency: daScript
+  FetchContent_Declare (dascript
     GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
     # hack that ignores daScript submodules (empty string is bugged)
     GIT_SUBMODULES "src"
-    )
-  FetchContent_GetProperties(dascript)
-  if(NOT DEFINED DASCRIPT_SOURCE)
-    message("Installing daScript...")
-    FetchContent_Populate(dascript)
-    set(DASCRIPT_SOURCE ${dascript_SOURCE_DIR} CACHE PATH "daScript source files")
-    set(DASCRIPT_BIN ${dascript_BINARY_DIR} CACHE PATH "daScript bin files")
+  )
+  FetchContent_GetProperties (dascript)
+  if (NOT dascript_POPULATED)
+    message (STATUS "Installing daScript...")
+    FetchContent_Populate (dascript)
   endif()
 
-  add_subdirectory(${DASCRIPT_SOURCE} ${DASCRIPT_BIN} EXCLUDE_FROM_ALL)
+  add_subdirectory (${dascript_SOURCE_DIR} ${dascript_BINARY_DIR} EXCLUDE_FROM_ALL)
 
-  target_include_directories (
-    noggit SYSTEM PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/external/daScript/include
-    ${JSON_SOURCE}/include/nlohmann
-    ${LODEPNG_SOURCE}
-    ${FASTNOISE_SOURCE}/include
-    ${DASCRIPT_SOURCE}/include
-    ${STORM_SOURCE}/src
+  # \todo add to library targets, if they don't do already
+  target_include_directories (noggit SYSTEM
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/external/daScript/include
+    PRIVATE ${json_SOURCE_DIR}/include/nlohmann
+    PRIVATE ${lodepng_SOURCE_DIR}
+    PRIVATE ${fastnoise2_SOURCE_DIR}/include
+    PRIVATE ${dascript_SOURCE_DIR}/include
+    PRIVATE ${storm_SOURCE_DIR}/src
   )
 
-  add_dependencies(
-    noggit 
-    FastNoise 
-    libDaScript 
-    NoiseTool
-  )
-
-  target_link_libraries (
-    noggit 
+  target_link_libraries (noggit
     libDaScript
     lodepng
     FastNoise
     nlohmann_json::nlohmann_json
   )
 endif()
-
-target_link_libraries(
-  noggit
-  storm
-)
