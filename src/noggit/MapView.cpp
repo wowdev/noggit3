@@ -129,8 +129,6 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
     _script_tool_dock->setVisible(!ui_hidden);
 #endif
   }
-
-  
 }
 
 void MapView::ResetSelectedObjectRotation()
@@ -1782,20 +1780,20 @@ void MapView::tick (float dt)
     for (auto& selection : currentSelection)
     {
 #ifdef NOGGIT_HAS_SCRIPTING
-      if(selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
+      if (selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
       {
-        scriptingTool->sendUpdate(
-          _world.get(),
-          _cursor_pos,
-          &_camera,
-          7.5f*dt,
-          leftMouse,
-          rightMouse,
-          _mod_shift_down,
-          _mod_ctrl_down,
-          _mod_alt_down,
-          _mod_space_down
-        );
+        scriptingTool->sendUpdate
+          ( _world.get()
+          , _cursor_pos
+          , &_camera
+          , 7.5f * dt
+          , leftMouse
+          , rightMouse
+          , _mod_shift_down
+          , _mod_ctrl_down
+          , _mod_alt_down
+          , _mod_space_down
+          );
       }
 #endif
 

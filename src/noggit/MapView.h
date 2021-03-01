@@ -12,7 +12,6 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/unsigned_int_property.hpp>
-#include <noggit/scripting/scripting_tool.hpp>
 
 #include <boost/optional.hpp>
 
