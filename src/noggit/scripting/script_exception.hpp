@@ -8,13 +8,11 @@ namespace noggit
 {
   namespace scripting
   {
-    class script_exception : public std::exception
+    class script_exception : public std::runtime_error
     {
     public:
-      script_exception(char const* msg) :
-        std::exception(msg) {}
       script_exception(std::string msg) :
-        std::exception(msg.c_str()) {}
+        std::runtime_error(msg) {}
     };
   } // namespace scripting
 } // namespace noggit
