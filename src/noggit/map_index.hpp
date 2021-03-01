@@ -123,6 +123,9 @@ public:
   };
 
   template<bool Load>
+    using tile_range = boost::iterator_range<tile_iterator<Load>>;
+
+  template<bool Load>
     auto tiles ( std::function<bool (tile_index const&, MapTile*)> pred
                = [] (tile_index const&, MapTile*) { return true; }
                )
@@ -131,39 +134,10 @@ public:
       (tile_iterator<Load> {this, {0, 0}, pred}, tile_iterator<Load>{});
   }
 
-  auto loaded_tiles()
-  {
-    return tiles<false>
-      ([] (tile_index const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
-  }
-
-  auto tiles_in_range (math::vector_3d const& pos, float radius)
-  {
-    return tiles<true>
-      ( [this, pos, radius] (tile_index const& index, MapTile*)
-        {
-          return hasTile(index) && misc::getShortestDist
-            (pos.x, pos.z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
-        }
-      );
-  }
-
-  auto tiles_between (math::vector_3d const& pos1, math::vector_3d const& pos2)
-  {
-    return tiles<true>
-      ( [this, pos1, pos2] (tile_index const& index, MapTile*)
-        {
-          auto minX = index.x*TILESIZE;
-          auto maxX = index.x*TILESIZE+TILESIZE;
-          auto minZ = index.z*TILESIZE;
-          auto maxZ = index.z*TILESIZE+TILESIZE;
-
-          return hasTile(index) && 
-            minX <= pos2.x && maxX >= pos1.x &&
-            minZ <= pos2.z && maxZ >= pos1.z;
-          }
-      );
-  }
+  tile_range<false> loaded_tiles();
+  tile_range<true> tiles_in_range (math::vector_3d const& pos, float radius);
+  //! inclusive
+  tile_range<true> tiles_between (math::vector_3d const& pos1, math::vector_3d const& pos2);
 
   MapIndex(const std::string& pBasename, int map_id, World*);
 
