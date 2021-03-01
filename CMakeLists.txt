@@ -499,7 +499,9 @@ source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
-source_group("scripting", FILES ${scripting_sources} ${scripting_headers})
+if (NOGGIT_WITH_SCRIPTING)
+  source_group("scripting", FILES ${scripting_sources} ${scripting_headers})
+endif()
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
