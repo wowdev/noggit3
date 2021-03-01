@@ -58,8 +58,8 @@ namespace noggit
     {
       _width = width;
       _height = height;
-      _start_x = _start_x;
-      _start_y = _start_y;
+      _start_x = start_x;
+      _start_y = start_y;
       if (_noise != nullptr)
       {
         script_free(_noise);
