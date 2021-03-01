@@ -32,7 +32,7 @@ namespace noggit
     {
       if (!fs::exists(path))
       {
-        throw script_exception("No such file:" + *path);
+        throw script_exception("No such file:" + std::string (path));
       }
       std::ifstream t(path);
       std::string str((std::istreambuf_iterator<char>(t)),

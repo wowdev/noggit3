@@ -17,7 +17,7 @@ namespace noggit
       unsigned error = lodepng::decode(vec, img._width, img._height, path);
       if (error)
       {
-        throw script_exception("Failed to load png image with error code:" + error);
+        throw script_exception("Failed to load png image with error code:" + std::to_string (error));
       }
       img_resize(img, img._width, img._height);
       memcpy(img._image, vec.data(), vec.size());
@@ -75,7 +75,7 @@ namespace noggit
       unsigned error = lodepng::encode(filename, img._image, img._width, img._height);
       if (error)
       {
-        get_cur_tool()->addLog("[error]: failed to save image with error " + error);
+        get_cur_tool()->addLog("[error]: failed to save image with error " + std::to_string (error));
       }
     }
 

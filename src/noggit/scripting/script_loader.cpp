@@ -38,7 +38,7 @@ void install_modules()
       ctr->_ctx->eval(fun, nullptr);           \
       if (auto ex = ctr->_ctx->getException())     \
       {                        \
-        get_cur_tool()->addLog("exception: " + *ex); \
+        get_cur_tool()->addLog("exception: " + std::to_string (*ex)); \
       }                        \
     }                          \
   }
