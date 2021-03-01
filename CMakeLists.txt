@@ -201,7 +201,7 @@ ENDIF()
 
 includePlattform("postfind")
 
-OPTION(SCRIPTING "Enable scripting support?" ON)
+OPTION (NOGGIT_WITH_SCRIPTING "Enable scripting support?" ON)
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
@@ -528,11 +528,11 @@ ADD_EXECUTABLE ( noggit
                   ${force_update_file}
                 )
 
-IF(SCRIPTING)
+IF (NOGGIT_WITH_SCRIPTING)
   TARGET_SOURCES(noggit PRIVATE ${scripting_sources} ${scripting_headers})
   ADD_COMPILE_DEFINITIONS(NOGGIT_HAS_SCRIPTING)
-ENDIF(SCRIPTING)
-                
+ENDIF()
+
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   Boost::thread
@@ -643,7 +643,7 @@ add_dependencies(
   storm
 )
 
-if(SCRIPTING)
+if (NOGGIT_WITH_SCRIPTING)
   # json.hpp
   FetchContent_Declare(json
     GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
@@ -725,7 +725,7 @@ if(SCRIPTING)
     FastNoise
     nlohmann_json::nlohmann_json
   )
-endif(SCRIPTING)
+endif()
 
 target_link_libraries(
   noggit
