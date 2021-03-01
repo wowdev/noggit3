@@ -764,16 +764,11 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
-void MapChunk::CreateMCCV()
+void MapChunk::maybe_create_mccv()
 {
-  if(!hasMCCV)
+  if (!hasMCCV)
   {
-    for(int i=0;i<mapbufsize; ++i)
-    {
-      mccv[i].x = 1.0f;
-      mccv[i].y = 1.0f;
-      mccv[i].z = 1.0f;
-    }
+    std::fill (mccv, mccv + mapbufsize, math::vector_3d (1.f, 1.f, 1.f));
     hasMCCV = true;
   }
 }

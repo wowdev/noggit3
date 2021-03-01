@@ -35,7 +35,7 @@ namespace noggit
 
     void vert_set_color(script_vert &vert, float r, float g, float b)
     {
-      vert._chunk->CreateMCCV();
+      vert._chunk->maybe_create_mccv();
       vert._chunk->mccv[vert._index] = math::vector_3d(r, g, b);
     }
 

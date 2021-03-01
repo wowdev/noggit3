@@ -142,7 +142,8 @@ public:
 
   void intersect (math::ray const&, selection_result*);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
-  void CreateMCCV();
+  //! Initialize MCCV to 1,1,1, do nothing if already exists.
+  void maybe_create_mccv();
   void UpdateMCCV();
   math::vector_3d pickMCCV(math::vector_3d const& pos);
 
