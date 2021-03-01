@@ -20,7 +20,7 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#ifdef NOGGIT_SCRIPTING
+#ifdef NOGGIT_HAS_SCRIPTING
 #include <noggit/scripting/scripting_tool.hpp>
 #endif
 
@@ -332,10 +332,10 @@ namespace noggit
       prompt.addButton ("Return to menu", QMessageBox::AcceptRole);
       prompt.setDefaultButton (prompt.addButton ("Cancel", QMessageBox::RejectRole));
       prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-    
-      #ifdef NOGGIT_SCRIPTING
+
+#ifdef NOGGIT_HAS_SCRIPTING
       noggit::scripting::save_json();
-      #endif
+#endif
 
       prompt.exec();
 

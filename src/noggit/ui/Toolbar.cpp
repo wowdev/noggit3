@@ -19,9 +19,9 @@ namespace noggit
       add_tool_icon (editing_mode::water,        tr("Water edit"),      font_awesome::water);
       add_tool_icon (editing_mode::mccv,         tr("Shader editor"),   font_awesome::eyedropper);
       add_tool_icon (editing_mode::object,       tr("Object editor"),   font_awesome::cube);
-      #ifdef NOGGIT_SCRIPTING
+#ifdef NOGGIT_HAS_SCRIPTING
       add_tool_icon (editing_mode::scripting,       tr("Script Editor"),   font_awesome::book);
-      #endif
+#endif
     }
 
     void toolbar::add_tool_icon(editing_mode mode, const QString& name, const font_awesome::icons& icon)

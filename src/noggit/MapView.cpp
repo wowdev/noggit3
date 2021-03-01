@@ -34,7 +34,7 @@
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
-#ifdef NOGGIT_SCRIPTING
+#ifdef NOGGIT_HAS_SCRIPTING
 #include <noggit/scripting/scripting_tool.hpp>
 #endif
 #include <opengl/scoped.hpp>
@@ -124,7 +124,7 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
   case editing_mode::object:
     _object_editor_dock->setVisible(!ui_hidden);
     break;
-#ifdef NOGGIT_SCRIPTING
+#ifdef NOGGIT_HAS_SCRIPTING
   case editing_mode::scripting:
     _script_tool_dock->setVisible(!ui_hidden);
 #endif
@@ -193,12 +193,12 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::createGUI()
 {
-  #ifdef NOGGIT_SCRIPTING
+#ifdef NOGGIT_HAS_SCRIPTING
   _script_tool_dock = new QDockWidget("Scripting", this);
   scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock);
   _script_tool_dock->setWidget(scriptingTool);
   _tool_properties_docks.insert(_script_tool_dock);
-  #endif
+#endif
 
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
   terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
@@ -1781,7 +1781,7 @@ void MapView::tick (float dt)
 
     for (auto& selection : currentSelection)
     {
-#ifdef NOGGIT_SCRIPTING
+#ifdef NOGGIT_HAS_SCRIPTING
       if(selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
       {
         scriptingTool->sendUpdate(
@@ -2377,12 +2377,12 @@ void MapView::draw_map()
   case editing_mode::mccv:
     radius = shaderTool->brushRadius();
     break;
-  #ifdef NOGGIT_SCRIPTING
+#ifdef NOGGIT_HAS_SCRIPTING
   case editing_mode::scripting:
     radius = scriptingTool->brushRadius();
     inner_radius = scriptingTool->innerRadius();
     break;
-  #endif
+#endif
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
