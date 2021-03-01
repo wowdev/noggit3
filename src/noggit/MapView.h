@@ -48,12 +48,15 @@ namespace noggit
     class water;
     class zone_id_browser;
     class texture_palette_small;
-#ifdef NOGGIT_HAS_SCRIPTING
-    class scripting_tool;
-#endif
     struct main_window;
     struct tileset_chooser;
   }
+#ifdef NOGGIT_HAS_SCRIPTING
+  namespace scripting
+  {
+    class scripting_tool;
+  }
+#endif
 }
 
 enum class save_mode
