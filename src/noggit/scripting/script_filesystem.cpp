@@ -9,7 +9,7 @@ namespace noggit
 {
   namespace scripting
   {
-    static void skip_dirs(script_file_iterator &itr)
+    static void skip_dirs(script_file_iterator& itr)
     {
       while (itr._wrapper->_dir != itr._wrapper->_end &&
            boost::filesystem::is_directory(itr._wrapper->_dir->path()))
@@ -18,7 +18,7 @@ namespace noggit
       }
     }
 
-    static void mkdirs(const char *pathstr)
+    static void mkdirs(char const* pathstr)
     {
       auto path = fs::path(pathstr);
       auto parent_path = path.parent_path();
@@ -28,7 +28,7 @@ namespace noggit
       }
     }
 
-    const char *read_file(const char *path)
+    char const* read_file(char const* path)
     {
       if (!fs::exists(path))
       {
@@ -40,13 +40,13 @@ namespace noggit
       return str.c_str();
     }
 
-    void write_file(const char *path, const char *input)
+    void write_file(char const* path, char const* input)
     {
       mkdirs(path);
       std::ofstream(path) << input;
     }
 
-    void append_file(const char *path, const char *input)
+    void append_file(char const* path, char const* input)
     {
       mkdirs(path);
       std::ofstream outfile;
@@ -54,12 +54,12 @@ namespace noggit
       outfile << input;
     }
 
-    bool path_exists(const char *path)
+    bool path_exists(char const* path)
     {
       return fs::exists(path);
     }
 
-    script_file_iterator read_directory(const char *path)
+    script_file_iterator read_directory(char const* path)
     {
       fs::recursive_directory_iterator
         dir(path == nullptr ? "" : path),
@@ -69,18 +69,18 @@ namespace noggit
 
     script_file_iterator::script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end)
     {
-      _wrapper = (script_file_wrapper *)script_calloc(sizeof(script_file_wrapper));
+      _wrapper = (script_file_wrapper*)script_calloc(sizeof(script_file_wrapper));
       _wrapper->_dir = dir;
       _wrapper->_end = end;
       skip_dirs(*this);
     }
 
-    const char *file_itr_get(script_file_iterator &itr)
+    char const* file_itr_get(script_file_iterator& itr)
     {
       return itr._wrapper->_dir->path().string().c_str();
     }
 
-    bool file_itr_next(script_file_iterator &itr)
+    bool file_itr_next(script_file_iterator& itr)
     {
       if (!itr._started)
       {

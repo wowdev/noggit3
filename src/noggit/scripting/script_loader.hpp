@@ -19,8 +19,8 @@ namespace noggit
 
     int script_count();
     std::string selected_script_name();
-    const std::string &get_script_name(int id);
-    const std::string &get_script_display_name(int id);
+    std::string const& get_script_name(int id);
+    std::string const& get_script_display_name(int id);
     void select_script(int index);
     int get_selected_script();
   } // namespace scripting

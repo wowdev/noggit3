@@ -9,19 +9,19 @@ namespace noggit
   namespace scripting
   {
     // makes it easier for scripters to not pass this around
-    static script_context *ctx;
+    static script_context* ctx;
 
-    void set_ctx(script_context *nctx)
+    void set_ctx(script_context* nctx)
     {
       ctx = nctx;
     }
 
-    script_context *get_ctx()
+    script_context* get_ctx()
     {
       return ctx;
     }
 
-    script_context::script_context(World *world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera *camera, bool alt, bool shift, bool ctrl, bool space)
+    script_context::script_context(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space)
       : _world(world), _pos(pos), _camera(camera),
         _holding_alt(alt), _holding_shift(shift),
         _holding_ctrl(ctrl), _holding_space(space),

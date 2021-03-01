@@ -44,7 +44,7 @@ using namespace math;
   MAKE_TYPE_FACTORY(name, name);                           \
   struct name##_annotation : public ManagedStructureAnnotation<name, true, true>   \
   {                                        \
-    name##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(#name, ml) \
+    name##_annotation(ModuleLibrary& ml) : ManagedStructureAnnotation(#name, ml) \
     {                                      \
       __VA_ARGS__                                \
     }                                      \
@@ -56,7 +56,7 @@ using namespace math;
 #define CLASS_TEMPLATE(name, template, regname, ...)                             \
   MAKE_TYPE_FACTORY(name<template>, name<template>);                           \
   struct name##_##template##_annotation : public ManagedStructureAnnotation<name<template>, true, true>{ \
-    name##_##template##_annotation(ModuleLibrary & ml) : ManagedStructureAnnotation(#regname, ml){   \
+    name##_##template##_annotation(ModuleLibrary& ml) : ManagedStructureAnnotation(#regname, ml){   \
       __VA_ARGS__} virtual bool isLocal() const override{return true;                \
   }                                                    \
   virtual bool canCopy() const override { return true; }                         \
@@ -89,7 +89,7 @@ CLASS(script_selection)
 
 CLASS_TEMPLATE(test_class, int, "test_class_int")
 
-int *test_func()
+int* test_func()
 {
   get_cur_tool()->addLog("Test function message!");
   return nullptr;

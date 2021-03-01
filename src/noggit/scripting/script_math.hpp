@@ -33,8 +33,8 @@ namespace noggit
     float sqrt(float arg);
     float abs(float arg);
     float lerp(float from, float to, float amount);
-    float dist_2d(math::vector_3d &from, math::vector_3d &to);
-    int dist_2d_compare(math::vector_3d &from, math::vector_3d &to, float dist);
-    math::vector_3d rotate_2d(math::vector_3d &point, math::vector_3d &origin, float angleDeg);
+    float dist_2d(math::vector_3d& from, math::vector_3d& to);
+    int dist_2d_compare(math::vector_3d& from, math::vector_3d& to, float dist);
+    math::vector_3d rotate_2d(math::vector_3d& point, math::vector_3d& origin, float angleDeg);
   } // namespace scripting
 } // namespace noggit

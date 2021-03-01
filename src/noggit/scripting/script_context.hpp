@@ -23,19 +23,19 @@ namespace noggit
 
     struct script_context
     {
-      script_context(World *world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera *camera, bool alt, bool shift, bool ctrl, bool space);
-      World *_world;
+      script_context(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space);
+      World* _world;
       bool _holding_alt;
       bool _holding_shift;
       bool _holding_ctrl;
       bool _holding_space;
-      noggit::camera *_camera;
+      noggit::camera* _camera;
       math::vector_3d _pos;
       float _outer_radius;
       float _inner_radius;
     };
 
-    script_context *get_ctx();
-    void set_ctx(script_context *ctx);
+    script_context* get_ctx();
+    void set_ctx(script_context* ctx);
   } // namespace scripting
 } // namespace noggit

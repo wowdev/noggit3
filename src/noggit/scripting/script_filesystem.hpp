@@ -21,17 +21,17 @@ namespace noggit
     {
       script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end);
       script_file_iterator() {}
-      script_file_wrapper *_wrapper;
+      script_file_wrapper* _wrapper;
       bool _started = false;
     };
 
-    bool file_itr_next(script_file_iterator &thiz);
-    const char *file_itr_get(script_file_iterator &thiz);
+    bool file_itr_next(script_file_iterator& thiz);
+    char const* file_itr_get(script_file_iterator& thiz);
 
-    void write_file(const char *path, const char *content);
-    void append_file(const char *, const char *content);
-    script_file_iterator read_directory(const char *directory);
-    const char *read_file(const char *path);
-    bool path_exists(const char *path);
+    void write_file(char const* path, char const* content);
+    void append_file(char const* , char const* content);
+    script_file_iterator read_directory(char const* directory);
+    char const* read_file(char const* path);
+    bool path_exists(char const* path);
   } // namespace scripting
 } // namespace noggit

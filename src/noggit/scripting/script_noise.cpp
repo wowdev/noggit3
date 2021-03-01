@@ -12,18 +12,18 @@ namespace noggit
       return script_noise_map();
     }
 
-    float noise_get_index(script_noise_map &noise, int x, int y)
+    float noise_get_index(script_noise_map& noise, int x, int y)
     {
       unsigned index = x + y * noise._width;
       return noise._noise[index];
     }
 
-    float noise_get_global(script_noise_map &noise, math::vector_3d &pos)
+    float noise_get_global(script_noise_map& noise, math::vector_3d& pos)
     {
       return noise_get_index(noise, std::round(pos.x) - noise._start_x, std::round(pos.z) - noise._start_y);
     }
 
-    bool noise_is_highest_global(script_noise_map &noise, math::vector_3d &pos, int check_radius)
+    bool noise_is_highest_global(script_noise_map& noise, math::vector_3d& pos, int check_radius)
     {
       int x = std::round(pos.x) - noise._start_x;
       int z = std::round(pos.z) - noise._start_y;
@@ -48,7 +48,7 @@ namespace noggit
       return true;
     }
 
-    void noise_set(script_noise_map &noise, int x, int y, float value)
+    void noise_set(script_noise_map& noise, int x, int y, float value)
     {
       unsigned index = x + y * noise._width;
       noise._noise[index] = value;
@@ -64,18 +64,18 @@ namespace noggit
       {
         script_free(_noise);
       }
-      _noise = (float *)script_malloc(width * height * sizeof(float));
+      _noise = (float*)script_malloc(width * height * sizeof(float));
     }
 
-    unsigned noise_start_x(script_noise_map &noise) { return noise._start_x; }
-    unsigned noise_start_y(script_noise_map &noise) { return noise._start_y; }
-    unsigned noise_width(script_noise_map &noise) { return noise._width; }
-    unsigned noise_height(script_noise_map &noise) { return noise._height; }
+    unsigned noise_start_x(script_noise_map& noise) { return noise._start_x; }
+    unsigned noise_start_y(script_noise_map& noise) { return noise._start_y; }
+    unsigned noise_width(script_noise_map& noise) { return noise._width; }
+    unsigned noise_height(script_noise_map& noise) { return noise._height; }
 
-    script_noise_generator::script_noise_generator(script_noise_wrapper *wrapper)
+    script_noise_generator::script_noise_generator(script_noise_wrapper* wrapper)
       : _wrapper(wrapper) {}
 
-    void noise_fill(script_noise_generator &thiz, script_noise_map &map, const char *seed, int x_start, int y_start, unsigned x_size, unsigned y_size, float frequency)
+    void noise_fill(script_noise_generator& thiz, script_noise_map& map, char const* seed, int x_start, int y_start, unsigned x_size, unsigned y_size, float frequency)
     {
       map.resize(x_size, y_size, x_start, y_start);
       map._start_x = x_start;
@@ -85,7 +85,7 @@ namespace noggit
       thiz._wrapper->_generator->GenUniformGrid2D(map._noise, x_start, y_start, x_size, y_size, frequency, std::hash<std::string>()(std::string(seed)));
     }
 
-    void noise_fill_selection(script_noise_generator &thiz, script_noise_map &map, script_selection &selection, const char *seed, float frequency, int padding)
+    void noise_fill_selection(script_noise_generator& thiz, script_noise_map& map, script_selection& selection, char const* seed, float frequency, int padding)
     {
       auto x_start = std::floor(selection._min.x) - (padding + 1);
       auto z_start = std::floor(selection._min.z) - (padding + 1);
@@ -96,10 +96,10 @@ namespace noggit
       noise_fill(thiz, map, seed, x_start, z_start, x_size, z_size, frequency);
     }
 
-    static script_noise_wrapper *wrap(FastNoise::SmartNode<> generator)
+    static script_noise_wrapper* wrap(FastNoise::SmartNode<> generator)
     {
-      script_noise_wrapper *wrap =
-        (script_noise_wrapper *)script_calloc(sizeof(script_noise_wrapper));
+      script_noise_wrapper* wrap =
+        (script_noise_wrapper*)script_calloc(sizeof(script_noise_wrapper));
       wrap->_generator = generator;
       return wrap;
     }
@@ -128,7 +128,7 @@ namespace noggit
     {
       return script_noise_generator(wrap(FastNoise::New<FastNoise::White>()));
     }
-    script_noise_generator make_noisegen_custom(const char *encodedNodeTree)
+    script_noise_generator make_noisegen_custom(char const* encodedNodeTree)
     {
       return script_noise_generator(wrap(FastNoise::NewFromEncodedNodeTree(encodedNodeTree)));
     }

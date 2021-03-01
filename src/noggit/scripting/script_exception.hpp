@@ -11,9 +11,9 @@ namespace noggit
     class script_exception : public std::exception
     {
     public:
-      script_exception(const char *msg) : 
+      script_exception(char const* msg) :
         std::exception(msg) {}
-      script_exception(std::string msg) : 
+      script_exception(std::string msg) :
         std::exception(msg.c_str()) {}
     };
   } // namespace scripting

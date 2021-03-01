@@ -28,19 +28,19 @@ namespace noggit
     class scripting_tool : public QWidget
     {
     public:
-      scripting_tool(QWidget *parent = nullptr);
+      scripting_tool(QWidget* parent = nullptr);
       float brushRadius() const { return _radius; }
       float innerRadius() const { return _inner_radius; }
 
-      void addDescription(const char *text);
+      void addDescription(char const* text);
       void clearDescription();
-      void addLog(const std::string &text);
+      void addLog(std::string const& text);
       void clearLog();
       void doReload();
       void sendUpdate(
-        World *world,
+        World* world,
         math::vector_3d pos,
-        noggit::camera *cam,
+        noggit::camera* cam,
         float dt,
         bool leftButton,
         bool rightButton,
@@ -49,12 +49,12 @@ namespace noggit
         bool holding_alt,
         bool holding_space);
 
-      void addDouble(const char *name, double min, double max, double def = 0, int zeros = 2);
-      void addInt(const char *name, int min, int max, int def = 0);
-      void addBool(const char *name, bool def = false);
-      void addString(const char *name, const char *def = "");
+      void addDouble(char const* name, double min, double max, double def = 0, int zeros = 2);
+      void addInt(char const* name, int min, int max, int def = 0);
+      void addBool(char const* name, bool def = false);
+      void addString(char const* name, char const* def = "");
 
-      void addStringList(const char *name, const char *value);
+      void addStringList(char const* name, char const* value);
 
       void removeScriptWidgets();
 
@@ -65,63 +65,63 @@ namespace noggit
       float _radius = 0;
       float _speed = 0;
       float _inner_radius = 0;
-    
+
     private:
-      QComboBox *_script_selection;
-      QPushButton *_reload_button;
+      QComboBox* _script_selection;
+      QPushButton* _reload_button;
 
-      QGroupBox *_radius_group;
-      QFormLayout *_radius_layout;
-      QDoubleSpinBox *_radius_spin;
-      QSlider *_radius_slider;
+      QGroupBox* _radius_group;
+      QFormLayout* _radius_layout;
+      QDoubleSpinBox* _radius_spin;
+      QSlider* _radius_slider;
 
-      QDoubleSpinBox *_inner_radius_spin;
-      QSlider *_inner_radius_slider;
+      QDoubleSpinBox* _inner_radius_spin;
+      QSlider* _inner_radius_slider;
 
-      QLabel *_description;
-      QPlainTextEdit *_log;
+      QLabel* _description;
+      QPlainTextEdit* _log;
 
-      QGroupBox *_script_settings_group;
-      QFormLayout *_script_settings_layout;
+      QGroupBox* _script_settings_group;
+      QFormLayout* _script_settings_layout;
 
-      QGroupBox *_profile_group;
-      QFormLayout *_profile_layout;
-      QComboBox *_profile_selection;
-      QLineEdit *_profile_name_entry;
-      QLabel *_profile_remove_label;
-      QPushButton *_profile_remove_button;
-      QPushButton *_profile_create_button;
+      QGroupBox* _profile_group;
+      QFormLayout* _profile_layout;
+      QComboBox* _profile_selection;
+      QLineEdit* _profile_name_entry;
+      QLabel* _profile_remove_label;
+      QPushButton* _profile_remove_button;
+      QPushButton* _profile_create_button;
 
-      QGridLayout *_profile_select_column;
+      QGridLayout* _profile_select_column;
 
-      std::vector<QWidget *> _script_widgets;
-      std::vector<void *> _holders;
+      std::vector<QWidget*> _script_widgets;
+      std::vector<void*> _holders;
 
-      std::map<std::string, QComboBox *> _string_arrays;
+      std::map<std::string, QComboBox*> _string_arrays;
 
       void select_profile(int profile);
       void on_change_script(int script_index);
       void initialize_radius();
     };
 
-    const char *get_string_param(const char *path);
-    int get_int_param(const char *path);
-    double get_double_param(const char *path);
-    float get_float_param(const char *path);
-    bool get_bool_param(const char *path);
-    const char *get_string_list_param(const char *path);
+    char const* get_string_param(char const* path);
+    int get_int_param(char const* path);
+    double get_double_param(char const* path);
+    float get_float_param(char const* path);
+    bool get_bool_param(char const* path);
+    char const* get_string_list_param(char const* path);
 
-    void add_string_list_param(const char *path, const char *value);
-    void add_string_param(const char *path, const char *def);
-    void add_int_param(const char *path, int min, int max, int def);
-    void add_double_param(const char *path, double min, double max, double def, int zeros);
-    void add_float_param(const char *path, float min, float max, float def, int zeros);
-    void add_bool_param(const char *path, bool def);
-    void add_description(const char *desc);
+    void add_string_list_param(char const* path, char const* value);
+    void add_string_param(char const* path, char const* def);
+    void add_int_param(char const* path, int min, int max, int def);
+    void add_double_param(char const* path, double min, double max, double def, int zeros);
+    void add_float_param(char const* path, float min, float max, float def, int zeros);
+    void add_bool_param(char const* path, bool def);
+    void add_description(char const* desc);
 
     void save_json();
 
     // same as script_context, but must also be accessable during "select"
-    scripting_tool *get_cur_tool();
+    scripting_tool* get_cur_tool();
   } // namespace scripting
 } // namespace noggit

@@ -8,34 +8,34 @@ namespace noggit
 {
   namespace scripting
   {
-    std::vector<void *> ptrs;
+    std::vector<void*> ptrs;
 
-    void *script_malloc(size_t size)
+    void* script_malloc (std::size_t size)
     {
-      void *ptr = malloc(size);
+      void* ptr = malloc(size);
       ptrs.push_back(ptr);
       return ptr;
     }
 
-    void *script_calloc(size_t size)
+    void* script_calloc (std::size_t size)
     {
-      void *ptr = calloc(1, size);
+      void* ptr = calloc(1, size);
       ptrs.push_back(ptr);
       return ptr;
     }
 
     void script_free_all()
     {
-      for (auto &ptr : ptrs)
+      for (auto& ptr : ptrs)
       {
         free(ptr);
       }
       ptrs.clear();
     }
 
-    void script_free(void *ptr)
+    void script_free(void* ptr)
     {
-      std::vector<void *>::iterator pos = std::find(ptrs.begin(), ptrs.end(), ptr);
+      std::vector<void*>::iterator pos = std::find(ptrs.begin(), ptrs.end(), ptr);
       if (pos == ptrs.end())
       {
         throw script_exception("Attempted to free invalid memory, this might cause a memory leak.");

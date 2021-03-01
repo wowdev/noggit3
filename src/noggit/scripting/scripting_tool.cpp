@@ -33,7 +33,7 @@ namespace noggit
   {
 
     static json _json;
-    static std::vector<char *> strings;
+    static std::vector<char*> strings;
     static std::string cur_profile = "Default";
     static boost::mutex script_change_mutex;
 
@@ -89,9 +89,9 @@ namespace noggit
       return _json[selected_script_name()][cur_profile][key].get<T>();
     }
 
-    static scripting_tool *cur_tool = nullptr;
+    static scripting_tool* cur_tool = nullptr;
 
-    scripting_tool *get_cur_tool()
+    scripting_tool* get_cur_tool()
     {
       return cur_tool;
     }
@@ -138,7 +138,7 @@ namespace noggit
       if (_json.contains(sn))
       {
         std::vector<std::string> items;
-        for (auto &v : _json[sn].items())
+        for (auto& v : _json[sn].items())
         {
           if (v.key() != CUR_PROFILE_PATH)
           {
@@ -154,7 +154,7 @@ namespace noggit
           return a < b;
         });
 
-        for (auto &item : items)
+        for (auto& item : items)
         {
           _profile_selection->addItem(item.c_str());
         }
@@ -193,7 +193,7 @@ namespace noggit
       select_script(selection);
 
       initialize_radius();
-      for (auto &item : _string_arrays)
+      for (auto& item : _string_arrays)
       {
         // if the index is 0, that MIGHT mean the value we have
         // is invalid (old script), so we just write it again to be safe.
@@ -207,7 +207,7 @@ namespace noggit
       script_change_mutex.unlock();
     }
 
-    scripting_tool::scripting_tool(QWidget *parent) : QWidget(parent)
+    scripting_tool::scripting_tool(QWidget* parent) : QWidget(parent)
     {
       auto layout(new QFormLayout(this));
       _script_selection = new QComboBox();
@@ -408,14 +408,14 @@ namespace noggit
   spinner->setDecimals(decimals);                                                    \
   spinner->setValue(def);                                                            \
   auto slider = new QSlider(Qt::Orientation::Horizontal, this);                      \
-  slider->setRange(min *dp1, max *dp1);                                              \
-  slider->setSliderPosition((int)std::round(def *dp1));                              \
+  slider->setRange(min * dp1, max * dp1);                                            \
+  slider->setSliderPosition((int)std::round(def * dp1));                             \
   auto label = new QLabel(this);                                                     \
   label->setText(name);                                                              \
   connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=](double v) { \
     set_json_unsafe<T>(path, (T)v);                                                  \
     QSignalBlocker const blocker(slider);                                            \
-    slider->setSliderPosition((int)std::round(v *dp1));                              \
+    slider->setSliderPosition((int)std::round(v * dp1));                             \
   });                                                                                \
   connect(slider, &QSlider::valueChanged, [=](int v) {                               \
     double t = double(v) / dp1;                                                      \
@@ -431,20 +431,20 @@ namespace noggit
   _script_widgets.push_back(slider);                                                 \
   set_json_safe<T>(path, std::min(max, std::max(min, get_json_safe<T>(path, def)))); \
   auto v = get_json_safe<T>(path, def);                                              \
-  slider->setSliderPosition((int)std::round(v *dp1));                                \
+  slider->setSliderPosition((int)std::round(v * dp1));                               \
   spinner->setValue(v);
 
-    void scripting_tool::addDouble(const char *name, double min, double max, double def, int zeros)
+    void scripting_tool::addDouble(char const* name, double min, double max, double def, int zeros)
     {
       ADD_SLIDER(name, double, min, max, def, zeros);
     }
 
-    void scripting_tool::addInt(const char *name, int min, int max, int def)
+    void scripting_tool::addInt(char const* name, int min, int max, int def)
     {
       ADD_SLIDER(name, int, min, max, def, 0);
     }
 
-    void scripting_tool::addBool(const char *name, bool def)
+    void scripting_tool::addBool(char const* name, bool def)
     {
       auto checkbox = new QCheckBox(this);
       auto label = new QLabel(this);
@@ -460,7 +460,7 @@ namespace noggit
       checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
 
-    void scripting_tool::addStringList(const char *name, const char *value)
+    void scripting_tool::addStringList(char const* name, char const* value)
     {
 
       if (_string_arrays.find(name) == _string_arrays.end())
@@ -497,7 +497,7 @@ namespace noggit
       }
     }
 
-    void scripting_tool::addString(const char *name, const char *def)
+    void scripting_tool::addString(char const* name, char const* def)
     {
       auto defstr = def == nullptr ? "" : def;
       auto tline = new QLineEdit(this);
@@ -514,7 +514,7 @@ namespace noggit
 
     void scripting_tool::removeScriptWidgets()
     {
-      for (auto &widget : _script_widgets)
+      for (auto& widget : _script_widgets)
       {
         _script_settings_layout->removeWidget(widget);
         delete widget;
@@ -546,9 +546,9 @@ namespace noggit
     }
 
     void scripting_tool::sendUpdate(
-        World *world,
+        World* world,
         math::vector_3d pos_in,
-        noggit::camera *cam,
+        noggit::camera* cam,
         float dt,
         bool left_mouse,
         bool right_mouse,
@@ -592,7 +592,7 @@ namespace noggit
           send_right_release();
         }
       }
-      catch (const std::exception &e)
+      catch (std::exception const& e)
       {
         addLog(("[error]: " + std::string(e.what())));
       }
@@ -616,13 +616,13 @@ namespace noggit
       _inner_radius_slider->setValue(std::round(inner_radius));
     }
 
-    void scripting_tool::addDescription(const char *text)
+    void scripting_tool::addDescription(char const* text)
     {
       std::string stext = text == nullptr ? "" : text;
       _description->setText(_description->text() + "\n" + stext.c_str());
     }
 
-    void scripting_tool::addLog(const std::string &text)
+    void scripting_tool::addLog(std::string const& text)
     {
       LogDebug << "[script window]: " << text << "\n";
       _log->appendPlainText(text.c_str());
@@ -639,75 +639,75 @@ namespace noggit
       _description->clear();
     }
 
-    const char *get_string_param(const char *path)
+    char const* get_string_param(char const* path)
     {
       auto str = get_json_unsafe<std::string>(path);
 
       // HACK: daScript somehow doesn't like receiving qt or json strings
       // idk if it's because they're on the stack or whatever
       // even copying it to another std::string doesn't work, but this does.
-      char *chr = (char *)script_malloc(sizeof(char) * (str.size() + 1));
+      char* chr = (char*)script_malloc(sizeof(char) * (str.size() + 1));
       str.copy(chr, str.size());
       chr[str.size()] = 0;
       return chr;
     }
 
-    const char *get_string_list_param(const char *path)
+    char const* get_string_list_param(char const* path)
     {
       return get_string_param(path);
     }
 
-    int get_int_param(const char *path)
+    int get_int_param(char const* path)
     {
       return get_json_unsafe<int>(path);
     }
 
-    double get_double_param(const char *path)
+    double get_double_param(char const* path)
     {
       return get_json_unsafe<double>(path);
     }
 
-    float get_float_param(const char *path)
+    float get_float_param(char const* path)
     {
       return get_json_unsafe<double>(path);
     }
 
-    bool get_bool_param(const char *path)
+    bool get_bool_param(char const* path)
     {
       return get_json_unsafe<bool>(path);
     }
 
-    void add_string_param(const char *path, const char *def)
+    void add_string_param(char const* path, char const* def)
     {
       get_cur_tool()->addString(path, def);
     }
 
-    void add_int_param(const char *path, int min, int max, int def)
+    void add_int_param(char const* path, int min, int max, int def)
     {
       get_cur_tool()->addInt(path, min, max, def);
     }
 
-    void add_double_param(const char *path, double min, double max, double def, int zeros = 2)
+    void add_double_param(char const* path, double min, double max, double def, int zeros = 2)
     {
       get_cur_tool()->addDouble(path, min, max, def, zeros);
     }
 
-    void add_float_param(const char *path, float min, float max, float def, int zeros)
+    void add_float_param(char const* path, float min, float max, float def, int zeros)
     {
       get_cur_tool()->addDouble(path, min, max, def, zeros);
     }
 
-    void add_bool_param(const char *path, bool def)
+    void add_bool_param(char const* path, bool def)
     {
       get_cur_tool()->addBool(path, def);
     }
 
-    void add_description(const char *path)
+    void add_description(char const* path)
     {
       get_cur_tool()->addDescription(path);
     }
 
-    void add_string_list_param(const char *path, const char *value)
+    void add_string_list_param(char const* path, char const* value)
     {
       get_cur_tool()->addStringList(path, value);
     }

@@ -48,7 +48,7 @@ struct script_container
   script_container(
     std::string name,
     std::string display_name,
-    Context *ctx,
+    Context* ctx,
     bool select,
     bool left_click,
     bool left_hold,
@@ -69,7 +69,7 @@ struct script_container
   }
   script_container() {}
 
-  Context *_ctx = nullptr;
+  Context* _ctx = nullptr;
 
   std::string _name;
   std::string _display_name;
@@ -87,7 +87,7 @@ struct script_container
 
 static std::vector<script_container> containers;
 
-static script_container *get_container()
+static script_container* get_container()
 {
   if (cur_script < 0)
   {
@@ -96,7 +96,7 @@ static script_container *get_container()
   return &containers[cur_script];
 }
 
-static bool ends_with(const std::string &str, const std::string &suffix)
+static bool ends_with(std::string const& str, std::string const& suffix)
 {
   return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
 }
@@ -106,12 +106,12 @@ class NoggitContext : public das::Context
 {
 public:
   NoggitContext(int stackSize) : das::Context(stackSize) {}
-  virtual void to_out(const char *msg) override
+  virtual void to_out(char const*msg) override
   {
     get_cur_tool()->addLog(msg);
   }
 
-  virtual void to_err(const char *msg) override
+  virtual void to_err(char const*msg) override
   {
     get_cur_tool()->addLog(msg);
   }
@@ -151,12 +151,12 @@ namespace noggit
              : "";
     }
 
-    const std::string &get_script_name(int id)
+    std::string const& get_script_name(int id)
     {
       return containers[id]._name;
     }
 
-    const std::string &get_script_display_name(int id)
+    std::string const& get_script_display_name(int id)
     {
       return containers[id]._display_name;
     }
@@ -188,7 +188,7 @@ namespace noggit
       cur_script = -1;
       int new_index = -1;
 
-      for (auto &ctr : containers)
+      for (auto& ctr : containers)
       {
         // There may be a better way to do this
         // with the reset/resetHeap calls.
@@ -212,13 +212,13 @@ namespace noggit
         {
           get_cur_tool()->setStyleSheet("background-color: #f0a5a5;");
           get_cur_tool()->addLog("Script error:");
-          for (auto &err : program->errors)
+          for (auto& err : program->errors)
           {
             get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
           }
 
           delete ctx;
-          for (auto &ctr : containers)
+          for (auto& ctr : containers)
           {
             delete ctr._ctx;
           }
@@ -261,13 +261,13 @@ namespace noggit
           auto title_fun = ctx->findFunction("title");
           if (title_fun)
           {
-            if (!verifyCall<const char *>(title_fun->debugInfo, dummyLibGroup))
+            if (!verifyCall<char const*>(title_fun->debugInfo, dummyLibGroup))
             {
               get_cur_tool()->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
             }
             else
             {
-              auto result = cast<const char *>::to(ctx->eval(title_fun));
+              auto result = cast<char const*>::to(ctx->eval(title_fun));
               if (result)
               {
                 display_name = result;
