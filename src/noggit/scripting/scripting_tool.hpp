@@ -85,14 +85,13 @@ namespace noggit
       QFormLayout* _script_settings_layout;
 
       QGroupBox* _profile_group;
-      QFormLayout* _profile_layout;
+      QGridLayout* _profile_select_column;
       QComboBox* _profile_selection;
       QLineEdit* _profile_name_entry;
       QLabel* _profile_remove_label;
       QPushButton* _profile_remove_button;
       QPushButton* _profile_create_button;
 
-      QGridLayout* _profile_select_column;
 
       std::vector<QWidget*> _script_widgets;
       std::vector<void*> _holders;
