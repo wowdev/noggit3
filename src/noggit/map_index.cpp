@@ -960,3 +960,20 @@ void MapIndex::loadMaxUID()
   }
 #endif
 }
+
+MapIndex::tile_range<false> MapIndex::loaded_tiles()
+{
+  return tiles<false>
+    ([] (tile_index const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
+}
+
+MapIndex::tile_range<true> MapIndex::tiles_in_range (math::vector_3d const& pos, float radius)
+{
+  return tiles<true>
+    ( [this, pos, radius] (tile_index const& index, MapTile*)
+      {
+        return hasTile(index) && misc::getShortestDist
+          (pos.x, pos.z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
+      }
+    );
+}
