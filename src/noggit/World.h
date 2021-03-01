@@ -299,7 +299,7 @@ public:
 
   bool deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);
-  void delete_models(std::vector<selection_type>& const types);
+  void delete_models(std::vector<selection_type> const& types);
   void selectVertices(math::vector_3d const& pos1, math::vector_3d const& pos2);
   std::set<math::vector_3d*>* getSelectedVertices();
 
