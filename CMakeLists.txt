@@ -201,7 +201,7 @@ ENDIF()
 
 includePlattform("postfind")
 
-OPTION (NOGGIT_WITH_SCRIPTING "Enable scripting support?" ON)
+option (NOGGIT_WITH_SCRIPTING "Enable scripting support?" ON)
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
@@ -500,7 +500,7 @@ source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
 if (NOGGIT_WITH_SCRIPTING)
-  source_group("scripting", FILES ${scripting_sources} ${scripting_headers})
+  source_group ("scripting", FILES ${scripting_sources} ${scripting_headers})
 endif()
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
@@ -530,10 +530,10 @@ ADD_EXECUTABLE ( noggit
                   ${force_update_file}
                 )
 
-IF (NOGGIT_WITH_SCRIPTING)
-  TARGET_SOURCES(noggit PRIVATE ${scripting_sources} ${scripting_headers})
-  ADD_COMPILE_DEFINITIONS(NOGGIT_HAS_SCRIPTING)
-ENDIF()
+if (NOGGIT_WITH_SCRIPTING)
+  target_sources (noggit PRIVATE ${scripting_sources} ${scripting_headers})
+  add_compile_definitions (NOGGIT_HAS_SCRIPTING)
+endif()
 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
