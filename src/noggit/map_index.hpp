@@ -163,7 +163,7 @@ public:
             minZ <= pos2.z && maxZ >= pos1.z;
           }
       );
-    }
+  }
 
   MapIndex(const std::string& pBasename, int map_id, World*);
 

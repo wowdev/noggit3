@@ -384,7 +384,6 @@ void World::scale_selected_models(float v, m2_scaling_type type)
 
 void World::move_selected_models(float dx, float dy, float dz)
 {
-
   for (auto& entry : _current_selection)
   {
     auto type = entry.which();
@@ -2129,7 +2128,7 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
 
 void World::delete_models(std::vector<selection_type>& const types)
 {
-   _model_instance_storage.delete_instances(types);
+  _model_instance_storage.delete_instances(types);
   need_model_updates = true;
 }
 
@@ -2150,13 +2149,13 @@ void World::selectVertices(math::vector_3d const& pos1, math::vector_3d const& p
 
 void World::select_all_chunks_between(math::vector_3d const& pos1, math::vector_3d const& pos2, std::vector<MapChunk*>& chunks_in)
 {
-    math::vector_3d pos_min = math::vector_3d(std::min(pos1.x,pos2.x),std::min(pos1.y,pos2.y),std::min(pos1.z,pos2.z));
-    math::vector_3d pos_max = math::vector_3d(std::max(pos1.x,pos2.x),std::max(pos1.y,pos2.y),std::max(pos1.z,pos2.z));
+  math::vector_3d pos_min = math::vector_3d(std::min(pos1.x,pos2.x),std::min(pos1.y,pos2.y),std::min(pos1.z,pos2.z));
+  math::vector_3d pos_max = math::vector_3d(std::max(pos1.x,pos2.x),std::max(pos1.y,pos2.y),std::max(pos1.z,pos2.z));
 
-    for_all_chunks_between(pos_min, pos_max, [&](MapChunk* chunk){
-      chunks_in.push_back(chunk);
-      return true;
-    });
+  for_all_chunks_between(pos_min, pos_max, [&](MapChunk* chunk){
+    chunks_in.push_back(chunk);
+    return true;
+  });
 }
 
 std::set<math::vector_3d*>* World::getSelectedVertices()
