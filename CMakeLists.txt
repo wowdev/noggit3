@@ -14,84 +14,81 @@ macro (add_compiler_flag_if_supported _VAR _FLAG)
   string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_FLAG}" _test_variable)
   check_cxx_compiler_flag ("${_FLAG}" ${_test_variable})
   if (${_test_variable})
-    if ("${${_VAR}}" STREQUAL "")
-      set (${_VAR} "${_FLAG}")
-    else()
-      set (${_VAR} "${${_VAR}} ${_FLAG}")
-    endif()
+    list (APPEND ${_VAR} "${_FLAG}")
   endif()
 endmacro()
 
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
+set (noggit_warning_flags "")
 
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=reorder)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=conditional-uninitialized)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused-parameter)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=unused-private-field)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-variable-declarations)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-prototypes)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=deprecated)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=missing-braces)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=inconsistent-missing-override)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=parentheses)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=shift-sign-overflow)
+add_compiler_flag_if_supported (noggit_warning_flags -fcolor-diagnostics)
+
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=reorder)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=conditional-uninitialized)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=unused)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=unused-parameter)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=unused-private-field)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=missing-variable-declarations)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=missing-prototypes)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=deprecated)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=missing-braces)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=inconsistent-missing-override)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=parentheses)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=shift-sign-overflow)
 
 # covered by CMAKE_CXX_STANDARD
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat-pedantic)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-c++98-compat)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-c++98-compat-pedantic)
 
 # covered by compilers used
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-gnu-anonymous-struct)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-variadic-macros)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-vla)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-vla-extension)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-zero-length-array)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-gnu-zero-variadic-macro-arguments)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-nested-anon-types)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-four-char-constants)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-gnu-anonymous-struct)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-variadic-macros)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-vla)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-vla-extension)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-zero-length-array)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-gnu-zero-variadic-macro-arguments)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-nested-anon-types)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-four-char-constants)
 
 # we assume that our constructors and destructors do not access other global state
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-exit-time-destructors)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-global-constructors)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-exit-time-destructors)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-global-constructors)
 
 # is fine with GNU, required due to our libstdc
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-disabled-macro-expansion)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-disabled-macro-expansion)
 
 # we can live with the compilation unit containing the vtable not being fixed
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-weak-vtables)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-weak-template-vtables)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-weak-vtables)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-weak-template-vtables)
 
 # __DATE__ and __TIME__ not being reproducible is exactly why they exist.
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-date-time)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-date-time)
 
 # we don't care for a few bytes
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-padded)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-padded)
 
 # msvc++ mangles struct/class into name, thus symbols may be called differently
 # with a bad forward-decl. we want compilation to fail, not linking.
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4099)
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
+add_compiler_flag_if_supported (noggit_warning_flags /we4099)
+add_compiler_flag_if_supported (noggit_warning_flags -Werror=mismatched-tags)
 
 # yes, we intend to use multi-character character constants
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
+add_compiler_flag_if_supported (noggit_warning_flags -Wno-multichar)
 
 if(WIN32)
   OPTION(NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)
   if(NAME_REUSE_AS_ERROR)
-    # declaration of 'identifier' hides previous: 
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4456) # local declaration
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4457) # function parameter
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4458) # class members
-    add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4459) # global declaration
+    # declaration of 'identifier' hides previous:
+    add_compiler_flag_if_supported (noggit_warning_flags /we4456) # local declaration
+    add_compiler_flag_if_supported (noggit_warning_flags /we4457) # function parameter
+    add_compiler_flag_if_supported (noggit_warning_flags /we4458) # class members
+    add_compiler_flag_if_supported (noggit_warning_flags /we4459) # global declaration
   endif()
 endif()
 
 # better exception handling for visual studio, particularly for the asynchronous stuff
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /EHa)
+add_compiler_flag_if_supported (noggit_warning_flags /EHa)
 # multi core building for visual studio
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
-
+add_compiler_flag_if_supported (noggit_warning_flags /MP)
 
 if(WIN32)
   # Disable opengl error log
@@ -530,6 +527,8 @@ ADD_EXECUTABLE ( noggit
                   ${force_update_file}
                 )
 
+target_compile_options (noggit PRIVATE ${noggit_warning_flags})
+
 if (NOGGIT_WITH_SCRIPTING)
   target_sources (noggit PRIVATE ${scripting_sources} ${scripting_headers})
   add_compile_definitions (NOGGIT_HAS_SCRIPTING)
@@ -605,6 +604,7 @@ add_library (noggit-math STATIC
   "src/math/vector_2d.cpp"
 )
 add_library (noggit::math ALIAS noggit-math)
+target_compile_options (noggit-math PRIVATE ${noggit_warning_flags})
 
 include (CTest)
 enable_testing()

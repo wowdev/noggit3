@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /vmg /D NOMINMAX")
 # warnings?
 if( NOGGIT_ALL_WARNINGS )
     MESSAGE( STATUS "Spilling out mass warnings." )
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /Wall /Wp64")
+    set(noggit_warning_flags "${noggit_warning_flags} /W4 /Wall /Wp64")
 endif( NOGGIT_ALL_WARNINGS )
 
 # mark 32 bit executables large address aware so they can use > 2GB address space
