@@ -88,7 +88,6 @@ namespace noggit
       QGridLayout* _profile_select_column;
       QComboBox* _profile_selection;
       QLineEdit* _profile_name_entry;
-      QLabel* _profile_remove_label;
       QPushButton* _profile_remove_button;
       QPushButton* _profile_create_button;
 
