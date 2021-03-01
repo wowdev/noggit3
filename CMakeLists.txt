@@ -637,6 +637,9 @@ if (NOT storm_POPULATED)
   FetchContent_Populate (storm)
 endif()
 add_subdirectory (${storm_SOURCE_DIR} ${storm_BINARY_DIR} EXCLUDE_FROM_ALL)
+set (storm_warning_disable_flags "")
+add_compiler_flag_if_supported (storm_warning_disable_flags -Wno-implicit-function-declaration)
+target_compile_options (storm PRIVATE ${storm_warning_disable_flags})
 
 target_link_libraries (noggit
   storm
