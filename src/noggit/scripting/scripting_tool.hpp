@@ -63,7 +63,6 @@ namespace noggit
       bool _last_right = false;
 
       float _radius = 0;
-      float _speed = 0;
       float _inner_radius = 0;
 
     private:
