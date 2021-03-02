@@ -8,7 +8,10 @@ namespace noggit
 {
   namespace scripting
   {
-    std::vector<void*> ptrs;
+    namespace
+    {
+      std::vector<void*> ptrs;
+    }
 
     void* script_malloc (std::size_t size)
     {
