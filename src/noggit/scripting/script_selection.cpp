@@ -22,7 +22,7 @@ namespace noggit
                math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
     }
 
-    void select_between(script_selection& sel, math::vector_3d& point1, math::vector_3d& point2)
+    void select_between(script_selection& sel, math::vector_3d const& point1, math::vector_3d const& point2)
     {
       sel._world = get_ctx()->_world;
       sel._min = math::vector_3d(

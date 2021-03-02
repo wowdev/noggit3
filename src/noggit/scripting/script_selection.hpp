@@ -42,7 +42,7 @@ namespace noggit
 
     script_selection make_selector();
     void select_origin(script_selection& sel, math::vector_3d& origin, float xRadius, float zRadius);
-    void select_between(script_selection& sel, math::vector_3d& point1, math::vector_3d& point2);
+    void select_between(script_selection& sel, math::vector_3d const& point1, math::vector_3d const& point2);
 
     bool sel_next_chunk(script_selection& sel);
     script_chunk sel_get_chunk(script_selection& sel);
