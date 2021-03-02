@@ -7,12 +7,12 @@
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 
-using namespace das;
-
 static bool initialized = false;
 static int cur_script = -1;
 
 using noggit::scripting::get_cur_tool;
+
+class NoggitModule;
 
 // is not allowed to happen in a namespace
 static void install_modules()
@@ -49,7 +49,7 @@ struct script_container
   script_container(
     std::string name,
     std::string display_name,
-    Context* ctx,
+    das::Context* ctx,
     bool select,
     bool left_click,
     bool left_hold,
@@ -70,7 +70,7 @@ struct script_container
   }
   script_container() {}
 
-  Context* _ctx = nullptr;
+  das::Context* _ctx = nullptr;
 
   std::string _name;
   std::string _display_name;
@@ -118,7 +118,7 @@ public:
   }
 };
 
-class : public TextWriter
+class : public das::TextWriter
 {
 public:
   virtual void output() override
@@ -126,7 +126,7 @@ public:
     int newPos = tellp();
     if (newPos != pos)
     {
-      string st(data.data() + pos, newPos - pos);
+      das::string st(data.data() + pos, newPos - pos);
       get_cur_tool()->addLog(st);
       pos = newPos;
     }
@@ -183,7 +183,7 @@ namespace noggit
         install_modules();
       }
 
-      Module::Initialize();
+      das::Module::Initialize();
 
       std::string old_module = cur_script > 0 ? get_script_name(cur_script) : "";
       cur_script = -1;
@@ -197,7 +197,7 @@ namespace noggit
       }
       containers.clear();
 
-      ModuleGroup dummyLibGroup;
+      das::ModuleGroup dummyLibGroup;
 
       auto itr = read_directory("scripts");
       while (file_itr_next(itr))
@@ -206,8 +206,8 @@ namespace noggit
         if (!ends_with(file, ".das") || ends_with(file, ".spec.das"))
           continue;
 
-        auto fAccess = make_smart<FsFileAccess>();
-        auto program = compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup);
+        auto fAccess = das::make_smart<das::FsFileAccess>();
+        auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup);
         auto ctx = new NoggitContext(program->getContextStackSize());
         if (!program->simulate(*ctx, _noggit_printer))
         {
@@ -234,7 +234,7 @@ namespace noggit
   auto is_##type = false;                    \
   if (on_##type)                         \
   {                                \
-    if (verifyCall<void>(on_##type->debugInfo, dummyLibGroup)) \
+    if (das::verifyCall<void>(on_##type->debugInfo, dummyLibGroup)) \
     {                              \
       is_##type = true;                    \
       is_any = true;                     \
@@ -262,13 +262,13 @@ namespace noggit
           auto title_fun = ctx->findFunction("title");
           if (title_fun)
           {
-            if (!verifyCall<char const*>(title_fun->debugInfo, dummyLibGroup))
+            if (!das::verifyCall<char const*>(title_fun->debugInfo, dummyLibGroup))
             {
               get_cur_tool()->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
             }
             else
             {
-              auto result = cast<char const*>::to(ctx->eval(title_fun));
+              auto result = das::cast<char const*>::to(ctx->eval(title_fun));
               if (result)
               {
                 display_name = result;
@@ -319,3 +319,4 @@ namespace noggit
 } // namespace noggit
 
 #include <noggit/scripting/script_loader-noggit_module.ipp>
+
