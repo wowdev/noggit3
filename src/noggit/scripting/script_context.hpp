@@ -23,7 +23,7 @@ namespace noggit
 
     struct script_context
     {
-      script_context(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space);
+      script_context(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space, float dt);
       World* _world;
       math::vector_3d _pos;
       float _outer_radius;
@@ -33,6 +33,7 @@ namespace noggit
       bool _holding_shift;
       bool _holding_ctrl;
       bool _holding_space;
+      float _dt;
     };
 
     script_context* get_ctx();

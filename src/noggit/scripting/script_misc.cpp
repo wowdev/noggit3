@@ -51,6 +51,11 @@ namespace noggit
       get_ctx()->_world->addWMO(filename, pos, rotation);
     }
 
+    float dt()
+    {
+      return get_ctx()->_dt;
+    }
+
     unsigned int get_map_id()
     {
       return get_ctx()->_world->getMapID();

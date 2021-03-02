@@ -19,5 +19,6 @@ namespace noggit
     bool holding_shift();
     bool holding_ctrl();
     bool holding_space();
+    float dt();
   } // namespace scripting
 } // namespace noggit

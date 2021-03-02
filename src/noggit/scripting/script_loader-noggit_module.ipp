@@ -279,6 +279,7 @@ public:
     FUNC_SCOPED(holding_shift, worstDefault);
     FUNC_SCOPED(holding_ctrl, worstDefault);
     FUNC_SCOPED(holding_space, worstDefault);
+    FUNC_SCOPED(dt, worstDefault);
 
     // scripting_tool.hpp
     FUNC_SCOPED(get_string_param, worstDefault);

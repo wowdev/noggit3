@@ -558,7 +558,7 @@ namespace noggit
         bool holding_space)
     {
       cur_tool = this;
-      script_context ctx(world, pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space);
+      script_context ctx(world, pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space, dt);
       set_ctx(&ctx);
 
       try
