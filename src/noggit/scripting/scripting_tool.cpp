@@ -465,7 +465,6 @@ namespace noggit
 
       if (_string_arrays.find(name) == _string_arrays.end())
       {
-        auto layout = new QFormLayout(this);
         auto box = new QComboBox(this);
         auto label = new QLabel(this);
 
