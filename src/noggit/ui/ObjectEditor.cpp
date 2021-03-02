@@ -40,6 +40,9 @@ namespace noggit
                                  , bool_toggle_property* snap_multi_selection_to_ground
                                  , bool_toggle_property* use_median_pivot_point
                                  , object_paste_params* paste_params
+                                 , bool_toggle_property* rotate_along_ground
+                                 , bool_toggle_property* rotate_along_ground_smooth
+                                 , bool_toggle_property* rotate_along_ground_random
                                  , QWidget* parent
                                  )
             : QWidget(parent)
@@ -164,6 +167,29 @@ namespace noggit
       multi_select_movement_layout->addRow(multi_select_movement_cb);
       multi_select_movement_layout->addRow(object_median_pivot_point);
 
+      auto object_rot_box(new QGroupBox("Follow Ground Rotation", this));
+      auto object_rot_layout = new QFormLayout(object_rot_box);
+
+      auto object_rotateground_cb ( new checkbox ( "Rotate following cursor"
+                                                 , rotate_along_ground
+                                                 , this
+                                                 )
+                                  );
+      auto object_rotategroundsmooth_cb ( new checkbox ( "Smooth follow rotation"
+                                                       , rotate_along_ground_smooth
+                                                       , this
+                                                       )
+                                        );
+
+      auto object_rotategroundrandom_cb ( new checkbox ( "Random rot/tilt/scale\n on rotate"
+                                                       , rotate_along_ground_random
+                                                       , this
+                                                       )
+                                        );
+      object_rot_layout->addRow(object_rotateground_cb);
+      object_rot_layout->addRow(object_rotategroundsmooth_cb);
+      object_rot_layout->addRow(object_rotategroundrandom_cb);
+
       QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
       QPushButton *visToggleButton = new QPushButton("Toggle Hidden Models Visibility", this);
       QPushButton *clearListButton = new QPushButton("Clear Hidden Models List", this);
@@ -187,6 +213,7 @@ namespace noggit
       layout->addRow(pasteBox);
       layout->addRow(object_movement_box);
       layout->addRow(multi_select_movement_box);
+      layout->addRow(object_rot_box);
       layout->addRow(rotEditorButton);
       layout->addRow(visToggleButton);
       layout->addRow(clearListButton);
