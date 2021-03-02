@@ -129,11 +129,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        return script_malloc_string(wmo_const(model)->wmo->filename.c_str());
+        return script_malloc_string(wmo_const(model)->wmo->filename);
       }
       else
       {
-        return script_malloc_string(m2_const(model)->model->filename.c_str());
+        return script_malloc_string(m2_const(model)->model->filename);
       }
     }
 

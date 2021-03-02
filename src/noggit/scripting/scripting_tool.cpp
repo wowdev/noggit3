@@ -640,8 +640,7 @@ namespace noggit
 
     char const* get_string_param(char const* path)
     {
-      auto str = get_json_unsafe<std::string>(path);
-      return script_malloc_string(str);
+      return script_malloc_string(get_json_unsafe<std::string>(path));
     }
 
     char const* get_string_list_param(char const* path)
