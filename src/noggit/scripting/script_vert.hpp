@@ -15,7 +15,7 @@ namespace noggit
     struct script_vert
     {
       script_vert(MapChunk* chunk, int index);
-      script_vert() {}
+      script_vert() = default;
       MapChunk* _chunk;
       int _index;
       int _tex_index = -1;
@@ -23,7 +23,7 @@ namespace noggit
 
     struct script_tex
     {
-      script_tex() {}
+      script_tex() = default;
       script_tex(MapChunk* chunk, int index);
       MapChunk* _chunk;
       int _index;

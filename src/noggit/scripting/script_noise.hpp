@@ -15,7 +15,7 @@ namespace noggit
   {
     struct script_noise_map
     {
-      script_noise_map() {}
+      script_noise_map() = default;
       float* _noise = nullptr;
       unsigned _width = 0;
       unsigned _height = 0;
@@ -42,7 +42,7 @@ namespace noggit
     struct script_noise_generator
     {
       script_noise_generator(script_noise_wrapper* generator);
-      script_noise_generator() {}
+      script_noise_generator() = default;
       std::shared_ptr<script_noise_map> uniform_2d(std::string seed, int xStart, int yStart, unsigned xSize, unsigned ySize, float frequency);
       script_noise_wrapper* _wrapper;
     };

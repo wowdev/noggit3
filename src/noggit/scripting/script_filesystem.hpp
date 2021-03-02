@@ -20,7 +20,7 @@ namespace noggit
     struct script_file_iterator
     {
       script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end);
-      script_file_iterator() {}
+      script_file_iterator() = default;
       script_file_wrapper* _wrapper;
       bool _started = false;
     };

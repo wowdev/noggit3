@@ -13,7 +13,7 @@ namespace noggit
     struct script_chunk
     {
       script_chunk(script_selection* sel, MapChunk* chunk);
-      script_chunk() {}
+      script_chunk() = default;
       MapChunk* _chunk;
       script_selection* _sel;
       int _vert_index = -1;

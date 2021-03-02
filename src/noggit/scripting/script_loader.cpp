@@ -68,7 +68,7 @@ struct script_container
                 _on_right_release(right_release)
   {
   }
-  script_container() {}
+  script_container() = default;
 
   das::Context* _ctx = nullptr;
 
