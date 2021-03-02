@@ -14,7 +14,7 @@ using noggit::scripting::get_cur_tool;
 
 class NoggitModule;
 
-// is not allowed to happen in a namespace
+// NEED_MODULE macros don't seem to work in a namespace
 static void install_modules()
 {
   NEED_MODULE(Module_BuiltIn);
@@ -25,7 +25,7 @@ static void install_modules()
   NEED_MODULE(Module_Debugger);
   NEED_MODULE(Module_FIO);
   NEED_MODULE(Module_Random);
-  // prolly not a good idea
+  // probably not a good idea to enable networking
   //NEED_MODULE(Module_Network);
   NEED_MODULE(NoggitModule);
 }
@@ -102,7 +102,7 @@ static bool ends_with(std::string const& str, std::string const& suffix)
   return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
 }
 
-// used to reroute 'print' to noggit
+// used to reroute 'print' to the script window log
 class NoggitContext : public das::Context
 {
 public:
