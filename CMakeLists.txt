@@ -645,6 +645,10 @@ target_link_libraries (noggit
 )
 
 if (NOGGIT_WITH_SCRIPTING)
+  # The macros to define and use modules are missing prototypes but also don't work well with anon namespaces/static.
+  add_compiler_flag_if_supported (dascript_loader_warning_flags -Wno-missing-prototypes)
+  set_source_files_properties ("src/noggit/scripting/script_loader.cpp" PROPERTIES COMPILE_FLAGS ${dascript_loader_warning_flags})
+
   # Dependency: json.hpp
   FetchContent_Declare (json
     GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent

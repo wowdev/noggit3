@@ -15,7 +15,7 @@ static int cur_script = -1;
 using noggit::scripting::get_cur_tool;
 
 // is not allowed to happen in a namespace
-void install_modules()
+static void install_modules()
 {
   NEED_MODULE(Module_BuiltIn);
   NEED_MODULE(Module_Math);
