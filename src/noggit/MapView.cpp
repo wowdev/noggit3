@@ -2314,8 +2314,7 @@ void MapView::update_cursor_pos()
   {
     auto const& hit(results.front().second);
     // hit cannot be something else than a chunk
-    auto const& chunkHit = boost::get<selected_chunk_type>(hit);
-    _cursor_pos = chunkHit.position;
+    _cursor_pos = boost::get<selected_chunk_type>(hit).position;
   }
 }
 
