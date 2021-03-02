@@ -75,7 +75,7 @@ namespace noggit
       skip_dirs(*this);
     }
 
-    char const* file_itr_get(script_file_iterator& itr)
+    char const* file_itr_get(script_file_iterator const& itr)
     {
       return itr._wrapper->_dir->path().string().c_str();
     }

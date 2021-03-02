@@ -29,7 +29,7 @@ namespace noggit
       int _index;
     };
 
-    math::vector_3d vert_get_pos(script_vert& vert);
+    math::vector_3d vert_get_pos(script_vert const& vert);
     void vert_set_height(script_vert& vert, float y);
     void vert_add_height(script_vert& vert, float y);
     void vert_sub_height(script_vert& vert, float y);
@@ -38,15 +38,15 @@ namespace noggit
     void vert_set_water(script_vert& vert, int type, float height);
     void vert_set_hole(script_vert& vert, bool add);
     void vert_set_alpha(script_vert& vert, int index, float alpha);
-    float vert_get_alpha(script_vert& vert, int index);
+    float vert_get_alpha(script_vert const& vert, int index);
     bool vert_next_tex(script_vert& vert);
     void vert_reset_tex(script_vert& vert);
 
     script_tex vert_get_tex(script_vert& vert);
-    bool vert_is_water_aligned(script_vert& chunk);
+    bool vert_is_water_aligned(script_vert const& chunk);
 
     void tex_set_alpha(script_tex& tex, int index, float alpha);
-    float tex_get_alpha(script_tex& tex, int index);
-    math::vector_3d tex_get_pos_2d(script_tex& tex);
+    float tex_get_alpha(script_tex const& tex, int index);
+    math::vector_3d tex_get_pos_2d(script_tex const& tex);
   } // namespace scripting
 } // namespace noggit

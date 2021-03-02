@@ -14,6 +14,16 @@ namespace noggit
 {
   namespace scripting
   {
+    static const WMOInstance* wmo_const(script_model const& model)
+    {
+      return (const WMOInstance*)model._model;
+    }
+
+    static const ModelInstance* m2_const(script_model const& model)
+    {
+      return (const ModelInstance*)model._model;
+    }
+
     static WMOInstance* wmo(script_model& model)
     {
       return (WMOInstance*)model._model;
@@ -30,15 +40,15 @@ namespace noggit
     script_model::script_model(WMOInstance*model)
       : _model((void*)model), _is_wmo(true) {}
 
-    math::vector_3d model_get_pos(script_model& model)
+    math::vector_3d model_get_pos(script_model const& model)
     {
       if (model._is_wmo)
       {
-        return wmo(model)->pos;
+        return wmo_const(model)->pos;
       }
       else
       {
-        return m2(model)->pos;
+        return m2_const(model)->pos;
       }
     }
 
@@ -54,15 +64,15 @@ namespace noggit
       }
     }
 
-    math::vector_3d model_get_rot(script_model& model)
+    math::vector_3d model_get_rot(script_model const& model)
     {
       if (model._is_wmo)
       {
-        return wmo(model)->dir;
+        return wmo_const(model)->dir;
       }
       else
       {
-        return m2(model)->dir;
+        return m2_const(model)->dir;
       }
     }
 
@@ -78,7 +88,7 @@ namespace noggit
       }
     }
 
-    float model_get_scale(script_model& model)
+    float model_get_scale(script_model const& model)
     {
       if (model._is_wmo)
       {
@@ -86,7 +96,7 @@ namespace noggit
       }
       else
       {
-        return m2(model)->scale;
+        return m2_const(model)->scale;
       }
     }
 
@@ -102,27 +112,27 @@ namespace noggit
       }
     }
 
-    unsigned model_get_uid(script_model& model)
+    unsigned model_get_uid(script_model const& model)
     {
       if (model._is_wmo)
       {
-        return wmo(model)->mUniqueID;
+        return wmo_const(model)->mUniqueID;
       }
       else
       {
-        return m2(model)->uid;
+        return m2_const(model)->uid;
       }
     }
 
-    char const* model_get_filename(script_model& model)
+    char const* model_get_filename(script_model const& model)
     {
       if (model._is_wmo)
       {
-        return wmo(model)->wmo->filename.c_str();
+        return wmo_const(model)->wmo->filename.c_str();
       }
       else
       {
-        return m2(model)->model->filename.c_str();
+        return m2_const(model)->model->filename.c_str();
       }
     }
 

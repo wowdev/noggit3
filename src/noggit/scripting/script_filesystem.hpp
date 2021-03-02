@@ -26,7 +26,7 @@ namespace noggit
     };
 
     bool file_itr_next(script_file_iterator& thiz);
-    char const* file_itr_get(script_file_iterator& thiz);
+    char const* file_itr_get(script_file_iterator const& thiz);
 
     void write_file(char const* path, char const* content);
     void append_file(char const* , char const* content);

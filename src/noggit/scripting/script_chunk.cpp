@@ -43,7 +43,7 @@ namespace noggit
       chunk._chunk->texture_set->eraseTexture(index);
     }
 
-    char const* chunk_get_texture(script_chunk& chunk, int index)
+    char const* chunk_get_texture(script_chunk const& chunk, int index)
     {
       return (chunk._chunk->texture_set->texture(index)->filename).c_str();
     }
@@ -71,7 +71,7 @@ namespace noggit
       chunk_apply_vertex_color(chunk);
     }
 
-    int chunk_get_area_id(script_chunk& chunk)
+    int chunk_get_area_id(script_chunk const& chunk)
     {
       return chunk._chunk->getAreaID();
     }
@@ -146,22 +146,23 @@ namespace noggit
       chunk._tex_index = -1;
     }
 
-    script_vert chunk_get_vert(script_chunk& chunk)
+    script_vert chunk_get_vert(script_chunk const& chunk)
     {
       return script_vert(chunk._chunk, chunk._vert_index);
     }
 
-    script_tex chunk_get_tex(script_chunk& chunk)
+    script_tex chunk_get_tex(script_chunk const& chunk)
     {
       return script_tex(chunk._chunk, chunk._tex_index);
     }
 
     void chunk_clear_colors(script_chunk& chunk)
     {
-      for (int i = 0; i < mapbufsize; ++i)
-      {
-        chunk._chunk->mccv[i] = math::vector_3d(1.0, 1.0, 1.0);
-      }
+      std::fill (
+        chunk._chunk->mccv, 
+        chunk._chunk->mccv + mapbufsize, 
+        math::vector_3d (1.f, 1.f, 1.f)
+      );
     }
   } // namespace scripting
 } // namespace noggit

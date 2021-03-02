@@ -55,7 +55,7 @@ namespace noggit
       vert._chunk->setHole(vert_get_pos(vert), false, add);
     }
 
-    math::vector_3d vert_get_pos(script_vert& vert)
+    math::vector_3d vert_get_pos(script_vert const& vert)
     {
       return vert._chunk->mVertices[vert._index];
     }
@@ -79,7 +79,7 @@ namespace noggit
       }
     }
 
-    float vert_get_alpha(script_vert& vert, int index)
+    float vert_get_alpha(script_vert const& vert, int index)
     {
       if (index == 0)
       {
@@ -101,7 +101,7 @@ namespace noggit
       return sum / float(ctr);
     }
 
-    bool vert_is_water_aligned(script_vert& vert)
+    bool vert_is_water_aligned(script_vert const& vert)
     {
       return (vert._index % 17) > 8;
     }
@@ -127,7 +127,7 @@ namespace noggit
       return script_tex(vert._chunk, texture_index[vert._index].indices[vert._tex_index]);
     }
 
-    float tex_get_alpha(script_tex& tex, int index)
+    float tex_get_alpha(script_tex const& tex, int index)
     {
       auto& ts = tex._chunk->texture_set;
       ts->create_temporary_alphamaps_if_needed();
@@ -141,7 +141,7 @@ namespace noggit
       ts->tmp_edit_values.get()[index][tex._index] = value;
     }
 
-    math::vector_3d tex_get_pos_2d(script_tex& tex)
+    math::vector_3d tex_get_pos_2d(script_tex const& tex)
     {
       float cx = tex._chunk->xbase;
       float cz = tex._chunk->zbase;

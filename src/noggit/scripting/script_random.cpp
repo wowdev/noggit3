@@ -10,7 +10,7 @@ namespace noggit
     {
     }
 
-    script_random::script_random(std::string seed)
+    script_random::script_random(std::string const& seed)
       : _state(std::hash<std::string>()(seed))
     {
     }

@@ -35,22 +35,22 @@ namespace noggit
       img._height = height;
     }
 
-    int img_width(script_image& img)
+    int img_width(script_image const& img)
     {
       return img._width;
     }
 
-    int img_height(script_image& img)
+    int img_height(script_image const& img)
     {
       return img._height;
     }
 
-    int img_get_index(script_image& img, int x, int y)
+    int img_get_index(script_image const& img, int x, int y)
     {
       return ((x + y * img._width) * 4);
     }
 
-    unsigned img_get_pixel(script_image& img, int x, int y)
+    unsigned img_get_pixel(script_image const& img, int x, int y)
     {
       unsigned index = img_get_index(img, x, y);
       return img._image[index] << 24 | img._image[index + 1] << 16 | img._image[index + 2] << 8 | img._image[index + 3];
@@ -79,7 +79,7 @@ namespace noggit
       }
     }
 
-    float img_gradient_scale(script_image& img, float rel)
+    float img_gradient_scale(script_image const& img, float rel)
     {
       int x = std::floor(rel * float(img._width));
       // read red channel, but it shouldn't matter.

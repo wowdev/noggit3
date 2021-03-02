@@ -24,7 +24,7 @@ namespace noggit
       void resize(unsigned width, unsigned height, unsigned start_x, unsigned start_y);
     };
 
-    float noise_get_index(script_noise_map& noise, int x, int y);
+    float noise_get_index(script_noise_map const& noise, int x, int y);
     float noise_get_global(script_noise_map& noise, math::vector_3d& pos);
     bool noise_is_highest_global(script_noise_map& noise, math::vector_3d& pos, int check_radius);
     void noise_set(script_noise_map& noise, int x, int y, float value);

@@ -21,7 +21,7 @@ namespace noggit
     };
 
     void chunk_remove_texture(script_chunk& chunk, int index);
-    char const* chunk_get_texture(script_chunk& chunk, int index);
+    char const* chunk_get_texture(script_chunk const& chunk, int index);
     int chunk_add_texture(script_chunk& chunk, char const* texture);
     void chunk_clear_textures(script_chunk& chunk);
     void chunk_set_hole(script_chunk& chunk, bool hole);
@@ -31,13 +31,13 @@ namespace noggit
     void chunk_apply_vertex_color(script_chunk& chunk);
     void chunk_apply_all(script_chunk& chunk);
     void chunk_set_impassable(script_chunk& chunk, bool add);
-    int chunk_get_area_id(script_chunk& chunk);
+    int chunk_get_area_id(script_chunk const& chunk);
     void chunk_set_area_id(script_chunk& chunk, int value);
     bool chunk_next_vert(script_chunk& chunk);
     bool chunk_next_tex(script_chunk& chunk);
     void chunk_reset_vert_itr(script_chunk& chunk);
     void chunk_reset_tex_itr(script_chunk& chunk);
-    script_vert chunk_get_vert(script_chunk& chunk);
-    script_tex chunk_get_tex(script_chunk& chunk);
+    script_vert chunk_get_vert(script_chunk const& chunk);
+    script_tex chunk_get_tex(script_chunk const& chunk);
   } // namespace scripting
 } // namespace noggit

@@ -40,13 +40,13 @@ namespace noggit
       return math::vector_3d(x, y, z);
     }
 
-    void add_m2(char const* filename, math::vector_3d& pos, float scale, math::vector_3d& rotation)
+    void add_m2(char const* filename, math::vector_3d const& pos, float scale, math::vector_3d const& rotation)
     {
       auto p = object_paste_params();
       get_ctx()->_world->addM2(filename, pos, scale, rotation,& p);
     }
 
-    void add_wmo(char const* filename, math::vector_3d& pos, math::vector_3d& rotation)
+    void add_wmo(char const* filename, math::vector_3d const& pos, math::vector_3d const& rotation)
     {
       get_ctx()->_world->addWMO(filename, pos, rotation);
     }
@@ -56,7 +56,7 @@ namespace noggit
       return get_ctx()->_world->getMapID();
     }
 
-    unsigned int get_area_id(math::vector_3d& pos)
+    unsigned int get_area_id(math::vector_3d const& pos)
     {
       return get_ctx()->_world->getAreaID(pos);
     }

@@ -94,7 +94,6 @@ namespace noggit
 
       std::vector<QWidget*> _script_widgets;
       std::vector<void*> _holders;
-
       std::map<std::string, QComboBox*> _string_arrays;
 
       void select_profile(int profile);

@@ -12,7 +12,7 @@ namespace noggit
       return script_noise_map();
     }
 
-    float noise_get_index(script_noise_map& noise, int x, int y)
+    float noise_get_index(script_noise_map const& noise, int x, int y)
     {
       unsigned index = x + y * noise._width;
       return noise._noise[index];

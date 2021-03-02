@@ -22,9 +22,7 @@ namespace noggit
   {
     struct script_selection
     {
-      script_selection(World* world, math::vector_3d& origin, float radius_x, float radius_y);
-      script_selection(World* world, math::vector_3d& point1, math::vector_3d& point2);
-      script_selection();
+      script_selection() = default;
 
       World* _world;
       math::vector_3d _center;
@@ -41,7 +39,7 @@ namespace noggit
     };
 
     script_selection make_selector();
-    void select_origin(script_selection& sel, math::vector_3d& origin, float xRadius, float zRadius);
+    void select_origin(script_selection& sel, math::vector_3d const& origin, float xRadius, float zRadius);
     void select_between(script_selection& sel, math::vector_3d const& point1, math::vector_3d const& point2);
 
     bool sel_next_chunk(script_selection& sel);
@@ -53,9 +51,9 @@ namespace noggit
     void sel_reset_model_itr(script_selection& sel);
     void sel_requery_models(script_selection& sel);
 
-    math::vector_3d sel_center(script_selection& sel);
-    math::vector_3d sel_min(script_selection& sel);
-    math::vector_3d sel_max(script_selection& sel);
-    math::vector_3d sel_size(script_selection& sel);
+    math::vector_3d sel_center(script_selection const& sel);
+    math::vector_3d sel_min(script_selection const& sel);
+    math::vector_3d sel_max(script_selection const& sel);
+    math::vector_3d sel_size(script_selection const& sel);
   } // namespace scripting
 } // namespace noggit

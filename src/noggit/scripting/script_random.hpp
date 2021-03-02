@@ -13,7 +13,7 @@ namespace noggit
     {
       unsigned long _state;
       script_random(unsigned seed);
-      script_random(std::string seed);
+      script_random(std::string const& seed);
       script_random();
     };
 

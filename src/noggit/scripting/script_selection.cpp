@@ -8,14 +8,12 @@ namespace noggit
 {
   namespace scripting
   {
-    script_selection::script_selection() {}
-
     script_selection make_selector()
     {
       return script_selection();
     }
 
-    void select_origin(script_selection& sel, math::vector_3d& origin, float xRadius, float zRadius)
+    void select_origin(script_selection& sel, math::vector_3d const& origin, float xRadius, float zRadius)
     {
       select_between(sel,
                math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
@@ -40,10 +38,10 @@ namespace noggit
       sel._models = script_model_iterator(sel._world, sel._min, sel._max);
     }
 
-    math::vector_3d sel_center(script_selection& sel) { return sel._center; }
-    math::vector_3d sel_min(script_selection& sel) { return sel._min; }
-    math::vector_3d sel_max(script_selection& sel) { return sel._max; }
-    math::vector_3d sel_size(script_selection& sel) { return sel._size; }
+    math::vector_3d sel_center(script_selection const& sel) { return sel._center; }
+    math::vector_3d sel_min(script_selection const& sel) { return sel._min; }
+    math::vector_3d sel_max(script_selection const& sel) { return sel._max; }
+    math::vector_3d sel_size(script_selection const& sel) { return sel._size; }
 
     static bool is_on_chunk(script_selection& sel)
     {

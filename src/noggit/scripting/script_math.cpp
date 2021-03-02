@@ -30,19 +30,19 @@ namespace noggit
     float sqrt(float arg) { return ::sqrt(arg); }
     float abs(float arg) { return ::abs(arg); }
     float lerp(float from, float to, float ratio) { return from + ratio * (to - from); }
-    float dist_2d(math::vector_3d& from, math::vector_3d& to)
+    float dist_2d(math::vector_3d const& from, math::vector_3d const& to)
     {
       return std::sqrt(std::pow(from.x - to.x, 2) + std::pow(from.z - to.z, 2));
     }
 
-    int dist_2d_compare(math::vector_3d& from, math::vector_3d& to, float compare)
+    int dist_2d_compare(math::vector_3d const& from, math::vector_3d const& to, float compare)
     {
       float dist = std::pow(from.x - to.x, 2) + std::pow(from.z - to.z, 2);
       compare = std::pow(compare, 2);
       return dist > compare ? 1 : dist == compare ? 0 : -1;
     }
 
-    math::vector_3d rotate_2d(math::vector_3d& point, math::vector_3d& origin, float angle)
+    math::vector_3d rotate_2d(math::vector_3d const& point, math::vector_3d const& origin, float angle)
     {
       float s = std::sin(angle * 0.0174532925);
       float c = std::cos(angle * 0.0174532925);
