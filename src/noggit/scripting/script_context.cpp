@@ -22,9 +22,10 @@ namespace noggit
     }
 
     script_context::script_context(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space)
-      : _world(world), _pos(pos), _camera(camera),
+      : _world(world),
         _holding_alt(alt), _holding_shift(shift),
         _holding_ctrl(ctrl), _holding_space(space),
+        _camera(camera), _pos(pos),
         _outer_radius(outer_radius), _inner_radius(inner_radius)
     {
     }
