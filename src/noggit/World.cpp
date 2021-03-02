@@ -312,7 +312,7 @@ void World::snap_selected_models_to_the_ground()
         math::ray intersect_ray(pos, math::vector_3d(0.f, -1.f, 0.f));
         chunk->intersect(intersect_ray, &hits);
       }
-      // object is bellow ground
+      // object is below ground
       if (hits.empty())
       {
         math::ray intersect_ray(pos, math::vector_3d(0.f, 1.f, 0.f));
@@ -494,26 +494,61 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
         : boost::get<selected_wmo_type>(entry)->pos
         ;
 
-      math::vector_3d& dir = entry_is_m2
-        ? boost::get<selected_model_type>(entry)->dir
-        : boost::get<selected_wmo_type>(entry)->dir
-        ;
-
       math::vector_3d diff_pos = pos - _multi_select_pivot.get();
       math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
 
       pos += rot_result - diff_pos;
-      dir += dir_change;
     }
-    else
-    {
-      math::vector_3d& dir = entry_is_m2
+
+    math::vector_3d& dir = entry_is_m2
         ? boost::get<selected_model_type>(entry)->dir
         : boost::get<selected_wmo_type>(entry)->dir
         ;
 
-      dir += dir_change;
+    dir += dir_change;
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
     }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+}
+
+void World::rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+{
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    math::vector_3d& dir = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->dir
+      : boost::get<selected_wmo_type>(entry)->dir
+      ;
+    float rx = misc::randfloat(minX, maxX);
+    float ry = misc::randfloat(minY, maxY);
+    float rz = misc::randfloat(minZ, maxZ);
+
+    math::quaternion baseRotation = math::quaternion(math::radians(math::degrees(dir.z)), math::radians(math::degrees(-dir.y)), math::radians(math::degrees(dir.x)));
+    math::quaternion newRotation = math::quaternion(math::radians(math::degrees(rx)), math::radians(math::degrees(ry)), math::radians(math::degrees(rz)));
+
+    math::quaternion finalRotation = baseRotation % newRotation;
+    finalRotation.normalize();
+
+    dir = finalRotation.ToEulerAngles();
 
     if (entry_is_m2)
     {
@@ -550,6 +585,146 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
       ;
 
     dir = new_dir;
+
+    if (entry_is_m2)
+    {
+      boost::get<selected_model_type>(entry)->recalcExtents();
+    }
+    else
+    {
+      boost::get<selected_wmo_type>(entry)->recalcExtents();
+    }
+
+    updateTilesEntry(entry, model_update::add);
+  }
+}
+
+namespace
+{
+  math::vector_3d getBarycentricCoordinatesAt
+    ( const math::vector_3d& a
+    , const math::vector_3d& b
+    , const math::vector_3d& c
+    , const math::vector_3d& point
+    , const math::vector_3d& normal
+    )
+  {
+    // The area of a triangle is
+    double areaABC = normal * ((b - a) % (c - a));
+    double areaPBC = normal * ((b - point) % (c - point));
+    double areaPCA = normal * ((c - point) % (a - point));
+
+    math::vector_3d bary;
+    bary.x = areaPBC / areaABC; // alpha
+    bary.y = areaPCA / areaABC; // beta
+    bary.z = 1.0f - bary.x - bary.y; // gamma
+    return bary;
+  }
+}
+
+void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
+{
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    bool entry_is_m2 = type == eEntry_Model;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    math::vector_3d rayPos = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->pos
+      : boost::get<selected_wmo_type>(entry)->pos
+      ;
+
+    math::vector_3d& dir = entry_is_m2
+      ? boost::get<selected_model_type>(entry)->dir
+      : boost::get<selected_wmo_type>(entry)->dir
+      ;
+
+    selection_result results;
+    for_chunk_at(rayPos, [&](MapChunk* chunk)
+    {
+      {
+        math::ray intersect_ray(rayPos, math::vector_3d(0.f, -1.f, 0.f));
+        chunk->intersect(intersect_ray, &results);
+      }
+      // object is below ground
+      if (results.empty())
+      {
+        math::ray intersect_ray(rayPos, math::vector_3d(0.f, 1.f, 0.f));
+        chunk->intersect(intersect_ray, &results);
+      }
+    });
+
+    // We shouldn't end up with empty ever.
+    if (results.empty())
+    {
+      LogError << "rotate_selected_models_to_ground_normal ray intersection failed" << std::endl;
+      continue;
+    }
+
+    // We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
+    auto const& hitChunkInfo = boost::get<selected_chunk_type>(results.front().second);
+
+    math::quaternion q;
+    math::vector_3d varnormal;
+
+    // Surface Normal
+    auto &p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
+    auto &p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
+    auto &p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
+
+    math::vector_3d v1 = p1 - p0;
+    math::vector_3d v2 = p2 - p0;
+
+    const auto tmpVec = v2 % v1;
+    varnormal.x = tmpVec.z;
+    varnormal.y = tmpVec.y;
+    varnormal.z = tmpVec.x;
+
+    // Smooth option, gradient the normal towards closest vertex
+    if (smoothNormals) // Vertex Normal
+    {
+      auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
+
+      const auto& vNormal0 = hitChunkInfo.chunk->mNormals[std::get<0>(hitChunkInfo.triangle)];
+      const auto& vNormal1 = hitChunkInfo.chunk->mNormals[std::get<1>(hitChunkInfo.triangle)];
+      const auto& vNormal2 = hitChunkInfo.chunk->mNormals[std::get<2>(hitChunkInfo.triangle)];
+
+      varnormal.x =
+        vNormal0.x * normalWeights.x +
+        vNormal1.x * normalWeights.y +
+        vNormal2.x * normalWeights.z;
+
+      varnormal.y =
+        vNormal0.y * normalWeights.x +
+        vNormal1.y * normalWeights.y +
+        vNormal2.y * normalWeights.z;
+
+      varnormal.z =
+        vNormal0.z * normalWeights.x +
+        vNormal1.z * normalWeights.y +
+        vNormal2.z * normalWeights.z;
+    }
+
+    math::vector_3d worldUp = math::vector_3d(0, 1, 0);
+    math::vector_3d a = worldUp % (varnormal);
+
+    q.x = a.x;
+    q.y = a.y;
+    q.z = a.z;
+    q.w = std::sqrt((worldUp.length_squared() * (varnormal.length_squared()))
+                    + (worldUp * varnormal));
+    q.normalize();
+
+    math::vector_3d new_dir;
+    // To euler, because wow
+    dir = q.ToEulerAngles();
 
     if (entry_is_m2)
     {
@@ -817,7 +992,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                                          , wmo.group_extents
                                          );
           }
-        
         }
         , [&] () { return hadSky; }
       );

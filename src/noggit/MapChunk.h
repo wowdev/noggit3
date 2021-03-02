@@ -51,8 +51,6 @@ private:
   std::vector<StripType> strip_without_holes;
   std::map<int, std::vector<StripType>> strip_lods;
 
-  math::vector_3d mNormals[mapbufsize];
-
   std::vector<uint8_t> compressed_shadow_map() const;
   bool has_shadows() const;
 
@@ -102,6 +100,7 @@ public:
 
   std::unique_ptr<TextureSet> texture_set;
 
+  math::vector_3d mNormals[mapbufsize];
   math::vector_3d mVertices[mapbufsize];
   math::vector_3d mccv[mapbufsize];
 
