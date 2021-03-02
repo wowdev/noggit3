@@ -67,11 +67,6 @@ using namespace math;
 #define CLASS_ANNOTATION(name) \
   addAnnotation(make_smart<name##_annotation>(lib));
 
-template <typename T>
-struct test_class
-{
-};
-
 // Classes
 CLASS(vector_3d, FIELD(x) FIELD(y) FIELD(z))
 CLASS(script_image)
@@ -86,14 +81,6 @@ CLASS(script_model_iterator)
 
 CLASS(script_random)
 CLASS(script_selection)
-
-CLASS_TEMPLATE(test_class, int, "test_class_int")
-
-int* test_func()
-{
-  get_cur_tool()->addLog("Test function message!");
-  return nullptr;
-}
 
 class NoggitModule : public Module
 {
