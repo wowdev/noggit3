@@ -722,7 +722,6 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
                     + (worldUp * varnormal));
     q.normalize();
 
-    math::vector_3d new_dir;
     // To euler, because wow
     dir = q.ToEulerAngles();
 
