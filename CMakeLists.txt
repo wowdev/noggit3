@@ -402,7 +402,7 @@ set ( scripting_sources
     src/noggit/scripting/script_noise.cpp
     src/noggit/scripting/script_random.cpp
     src/noggit/scripting/script_selection.cpp
-    src/noggit/scripting/script_texture_index.ipp
+    src/noggit/scripting/script_vert-script_texture_index.ipp
     src/noggit/scripting/script_vert.cpp
     src/noggit/scripting/scripting_tool.cpp
   )
@@ -694,7 +694,7 @@ if (NOGGIT_WITH_SCRIPTING)
   # Dependency: daScript
   FetchContent_Declare (dascript
     GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
-    # hack that ignores daScript submodules (empty string is bugged)
+    # don't fetch submodules, see https://gitlab.kitware.com/cmake/cmake/-/issues/20579
     GIT_SUBMODULES "src"
   )
   FetchContent_GetProperties (dascript)
