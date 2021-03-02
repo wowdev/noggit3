@@ -385,32 +385,31 @@ set ( math_headers
       src/math/vector_4d.hpp
     )
 
-
 set ( scripting_sources
-    src/noggit/scripting/script_random.cpp
-    src/noggit/scripting/script_selection.cpp
-    src/noggit/scripting/scripting_tool.cpp
-    src/noggit/scripting/script_context.cpp
     src/noggit/scripting/script_brush.cpp
-    src/noggit/scripting/script_misc.cpp
-    src/noggit/scripting/script_image.cpp
-    src/noggit/scripting/script_loader.cpp
-    src/noggit/scripting/script_math.cpp
-    src/noggit/scripting/script_noise.cpp
-    src/noggit/scripting/script_model.cpp
     src/noggit/scripting/script_chunk.cpp
-    src/noggit/scripting/script_vert.cpp
+    src/noggit/scripting/script_context.cpp
     src/noggit/scripting/script_filesystem.cpp
     src/noggit/scripting/script_heap.cpp
+    src/noggit/scripting/script_image.cpp
+    src/noggit/scripting/script_loader-noggit_module.ipp
+    src/noggit/scripting/script_loader.cpp
+    src/noggit/scripting/script_math.cpp
+    src/noggit/scripting/script_misc.cpp
+    src/noggit/scripting/script_model.cpp
+    src/noggit/scripting/script_noise.cpp
+    src/noggit/scripting/script_random.cpp
+    src/noggit/scripting/script_selection.cpp
+    src/noggit/scripting/script_vert.cpp
+    src/noggit/scripting/scripting_tool.cpp
   )
-  
+
 set ( scripting_headers
     src/noggit/scripting/script_filesystem.hpp
     src/noggit/scripting/script_noise.hpp
     src/noggit/scripting/script_chunk.hpp
     src/noggit/scripting/script_model.hpp
     src/noggit/scripting/script_vert.hpp
-    src/noggit/scripting/script_noggit_module.hpp
     src/noggit/scripting/script_random.hpp
     src/noggit/scripting/script_selection.hpp
     src/noggit/scripting/script_texture_index.hpp

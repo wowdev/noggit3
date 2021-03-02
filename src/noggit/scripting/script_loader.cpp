@@ -4,7 +4,6 @@
 
 #include <noggit/Log.h>
 #include <noggit/scripting/script_loader.hpp>
-#include <noggit/scripting/script_noggit_module.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 
@@ -12,6 +11,8 @@ using namespace das;
 
 static bool initialized = false;
 static int cur_script = -1;
+
+using noggit::scripting::get_cur_tool;
 
 // is not allowed to happen in a namespace
 void install_modules()
@@ -55,9 +56,9 @@ struct script_container
     bool left_release,
     bool right_click,
     bool right_hold,
-    bool right_release) : _name(name),
+    bool right_release) : _ctx(ctx),
+                _name(name),
                 _display_name(display_name),
-                _ctx(ctx),
                 _on_select(select),
                 _on_left_click(left_click),
                 _on_left_hold(left_hold),
@@ -316,3 +317,5 @@ namespace noggit
     }
   } // namespace scripting
 } // namespace noggit
+
+#include <noggit/scripting/script_loader-noggit_module.ipp>
