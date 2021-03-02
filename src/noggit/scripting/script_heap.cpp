@@ -27,6 +27,14 @@ namespace noggit
       return ptr;
     }
 
+    const char* script_malloc_string(std::string const& str)
+    {
+      char* ptr = (char*) script_malloc(str.size()+1);
+      str.copy(ptr,str.size());
+      ptr[str.size()] = 0;
+      return ptr;
+    }
+
     void script_free_all()
     {
       for (auto& ptr : ptrs)

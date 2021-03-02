@@ -642,14 +642,7 @@ namespace noggit
     char const* get_string_param(char const* path)
     {
       auto str = get_json_unsafe<std::string>(path);
-
-      // HACK: daScript somehow doesn't like receiving qt or json strings
-      // idk if it's because they're on the stack or whatever
-      // even copying it to another std::string doesn't work, but this does.
-      char* chr = (char*)script_malloc(sizeof(char) * (str.size() + 1));
-      str.copy(chr, str.size());
-      chr[str.size()] = 0;
-      return chr;
+      return script_malloc_string(str);
     }
 
     char const* get_string_list_param(char const* path)

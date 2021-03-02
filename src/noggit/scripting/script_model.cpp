@@ -1,10 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_model.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_heap.hpp>
 #include <noggit/World.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
-#include <noggit/scripting/scripting_tool.hpp>
-#include <noggit/scripting/script_context.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/scripting/script_heap.hpp>
 
@@ -128,11 +129,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        return wmo_const(model)->wmo->filename.c_str();
+        return script_malloc_string(wmo_const(model)->wmo->filename.c_str());
       }
       else
       {
-        return m2_const(model)->model->filename.c_str();
+        return script_malloc_string(m2_const(model)->model->filename.c_str());
       }
     }
 

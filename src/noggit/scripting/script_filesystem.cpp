@@ -37,7 +37,7 @@ namespace noggit
       std::ifstream t(path);
       std::string str((std::istreambuf_iterator<char>(t)),
               std::istreambuf_iterator<char>());
-      return str.c_str();
+      return script_malloc_string(str);
     }
 
     void write_file(char const* path, char const* input)

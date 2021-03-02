@@ -2,6 +2,7 @@
 #include <noggit/scripting/script_chunk.hpp>
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_heap.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/World.h>
@@ -45,7 +46,7 @@ namespace noggit
 
     char const* chunk_get_texture(script_chunk const& chunk, int index)
     {
-      return (chunk._chunk->texture_set->texture(index)->filename).c_str();
+      return script_malloc_string(chunk._chunk->texture_set->texture(index)->filename);
     }
 
     void chunk_apply_heightmap(script_chunk& chunk)
