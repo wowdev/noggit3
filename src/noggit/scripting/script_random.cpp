@@ -22,41 +22,32 @@ namespace noggit
 
     int rand_int32(script_random& rand, int low, int high)
     {
-      return low + int(rand_uint64(rand, 0, std::abs(high - low)));
+      return std::uniform_int_distribution<int>(low,high-1)(rand._state);
     }
 
     unsigned rand_uint32(script_random& rand, unsigned low, unsigned high)
     {
-      return rand_uint64(rand, low, high);
+      return std::uniform_int_distribution<unsigned>(low,high-1)(rand._state);
     }
 
     unsigned long rand_uint64(script_random& rand, unsigned long low, unsigned long high)
     {
-      auto x = rand._state;
-      x ^= x >> 12; // a
-      x ^= x << 25; // b
-      x ^= x >> 27; // c
-      rand._state = x;
-      // does the modulo bias cancel out the use of 64 bits here?
-      return low + ((x * 0x2545F4914F6CDD1DULL) % (high - low));
+      return std::uniform_int_distribution<unsigned long>(low,high-1)(rand._state);
     }
 
     long rand_int64(script_random& rand, long low, long high)
     {
-      return low + rand_uint64(rand, 0, std::abs(high - low));
+      return std::uniform_int_distribution<long>(low,high-1)(rand._state);
     }
 
     double rand_double(script_random& rand, double low, double high)
     {
-#define RAND_MAX_DOUBLE 18446744073709551615ull
-      return low + rand_uint64(rand, 0, RAND_MAX_DOUBLE) / (RAND_MAX_DOUBLE / (high - low));
+      return std::uniform_real_distribution<double>(low,high-1)(rand._state);
     }
 
     float rand_float(script_random& rand, float low, float high)
     {
-// TODO: prolly not a good idea
-#define RAND_MAX_FLOAT 4294967295
-      return low + rand_uint32(rand, 0, RAND_MAX_FLOAT) / (RAND_MAX_FLOAT / (high - low));
+      return std::uniform_real_distribution<float>(low,high)(rand._state);
     }
 
     script_random random_from_seed(char const* seed)

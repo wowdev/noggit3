@@ -11,7 +11,7 @@ namespace noggit
   {
     struct script_random
     {
-      unsigned long _state;
+      std::minstd_rand _state;
       script_random(unsigned seed);
       script_random(std::string const& seed);
       script_random();
