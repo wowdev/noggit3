@@ -402,6 +402,7 @@ set ( scripting_sources
     src/noggit/scripting/script_noise.cpp
     src/noggit/scripting/script_random.cpp
     src/noggit/scripting/script_selection.cpp
+    src/noggit/scripting/script_texture_index.ipp
     src/noggit/scripting/script_vert.cpp
     src/noggit/scripting/scripting_tool.cpp
   )
@@ -414,7 +415,6 @@ set ( scripting_headers
     src/noggit/scripting/script_vert.hpp
     src/noggit/scripting/script_random.hpp
     src/noggit/scripting/script_selection.hpp
-    src/noggit/scripting/script_texture_index.hpp
     src/noggit/scripting/scripting_tool.hpp
     src/noggit/scripting/script_context.hpp
     src/noggit/scripting/script_misc.hpp
