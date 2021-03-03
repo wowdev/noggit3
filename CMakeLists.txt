@@ -680,6 +680,7 @@ if (NOGGIT_WITH_SCRIPTING)
   # Dependency: FastNoise2
   FetchContent_Declare (fastnoise2
     GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+    UPDATE_DISCONNECTED true
   )
   FetchContent_GetProperties (fastnoise2)
   if (NOT fastnoise2_POPULATED)
@@ -696,6 +697,7 @@ if (NOGGIT_WITH_SCRIPTING)
     GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
     # don't fetch submodules
     GIT_SUBMODULES ""
+    UPDATE_DISCONNECTED true
   )
   FetchContent_GetProperties (dascript)
   if (NOT dascript_POPULATED)
