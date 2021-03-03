@@ -2,6 +2,7 @@
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/script_exception.hpp>
 
 namespace noggit
 {
@@ -15,6 +16,18 @@ namespace noggit
     float noise_get_index(script_noise_map const& noise, int x, int y)
     {
       unsigned index = x + y * noise._width;
+      if(index<0||index>=noise._size)
+      {
+        throw script_exception(
+          std::string("noise coordinates out of bounds: x=")
+            + std::to_string(x)
+            + std::string(" y=")
+            + std::to_string(y)
+            + std::string(" width=")
+            + std::to_string(noise._width)
+            + std::string(" height=")
+            + std::to_string(noise._height));
+      }
       return noise._noise[index];
     }
 
@@ -51,15 +64,38 @@ namespace noggit
     void noise_set(script_noise_map& noise, int x, int y, float value)
     {
       unsigned index = x + y * noise._width;
+      if(index<0||index>=noise._size)
+      {
+        throw script_exception(
+          std::string("noisemap coordinates out of bounds: x=")
+            + std::to_string(x)
+            + std::string(" y=")
+            + std::to_string(y)
+            + std::string(" width=")
+            + std::to_string(noise._width)
+            + std::string(" height=")
+            + std::to_string(noise._height));
+      }
       noise._noise[index] = value;
     }
 
     void script_noise_map::resize(unsigned width, unsigned height, unsigned start_x, unsigned start_y)
     {
+      if(width<=0||height<=0)
+      {
+        throw script_exception(
+          std::string("invalid noise map size:")
+          + " width="
+          + std::to_string(width)
+          + " height="
+          + std::to_string(height)
+        );
+      }
       _width = width;
       _height = height;
       _start_x = start_x;
       _start_y = start_y;
+      _size = width*height;
       if (_noise != nullptr)
       {
         script_free(_noise);
@@ -78,11 +114,15 @@ namespace noggit
     void noise_fill(script_noise_generator& thiz, script_noise_map& map, char const* seed, int x_start, int y_start, unsigned x_size, unsigned y_size, float frequency)
     {
       map.resize(x_size, y_size, x_start, y_start);
-      map._start_x = x_start;
-      map._start_y = y_start;
-      map._width = x_size;
-      map._height = y_size;
-      thiz._wrapper->_generator->GenUniformGrid2D(map._noise, x_start, y_start, x_size, y_size, frequency, std::hash<std::string>()(std::string(seed)));
+      thiz._wrapper->_generator->GenUniformGrid2D(
+        map._noise, 
+        x_start, 
+        y_start, 
+        x_size, 
+        y_size, 
+        frequency, 
+        std::hash<std::string>()(std::string(seed))
+      );
     }
 
     void noise_fill_selection(script_noise_generator& thiz, script_noise_map& map, script_selection& selection, char const* seed, float frequency, int padding)

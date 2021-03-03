@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_exception.hpp>
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
 
@@ -9,7 +10,7 @@ namespace noggit
   namespace scripting
   {
     // makes it easier for scripters to not pass this around
-    static script_context* ctx;
+    static script_context* ctx = nullptr;
 
     void set_ctx(script_context* nctx)
     {
@@ -18,6 +19,10 @@ namespace noggit
 
     script_context* get_ctx()
     {
+      if(ctx==nullptr) 
+      {
+        throw script_exception("Accessing script context outside of interact event (likely using a forbidden function in 'select()')");
+      }
       return ctx;
     }
 

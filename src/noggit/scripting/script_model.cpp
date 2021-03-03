@@ -3,12 +3,13 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/script_exception.hpp>
+
 #include <noggit/World.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ui/ObjectEditor.h>
-#include <noggit/scripting/script_heap.hpp>
-
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
@@ -153,6 +154,11 @@ namespace noggit
 
     void model_set_filename(script_model& model, char const* filename)
     {
+      if(filename==nullptr)
+      {
+        throw script_exception("empty filename (in call to model_set_filename)");
+      }
+
       if (model_get_filename(model) == filename)
       {
         return;
@@ -232,6 +238,10 @@ namespace noggit
 
     script_model script_model_iterator::get()
     {
+      if(_model_index >= int(_models_size))
+      {
+        throw script_exception("accessing invalid model: iterator is done");
+      }
       return _models[_model_index];
     }
   } // namespace scripting

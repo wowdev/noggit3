@@ -313,7 +313,12 @@ namespace noggit
 
       cur_script = index;
       auto ref = &containers[index];
-      CALL_FUNC(ref, select);
+      try {
+        CALL_FUNC(ref, select);
+      } catch(std::exception const& e)
+      {
+        get_cur_tool()->addLog(("[error]: " + std::string(e.what())));
+      }
     }
   } // namespace scripting
 } // namespace noggit

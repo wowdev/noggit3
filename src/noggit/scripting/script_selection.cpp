@@ -2,6 +2,7 @@
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/script_exception.hpp>
 #include <noggit/World.h>
 
 namespace noggit
@@ -76,6 +77,10 @@ namespace noggit
 
     script_chunk sel_get_chunk(script_selection& sel)
     {
+      if(!is_on_chunk(sel))
+      {
+        throw script_exception("accessing invalid chunk: iterator is done");
+      }
       return script_chunk(&sel, sel._chunks[sel._cur_chunk]);
     }
 

@@ -21,6 +21,7 @@ namespace noggit
       unsigned _height = 0;
       unsigned _start_x = 0;
       unsigned _start_y = 0;
+      unsigned _size = 0;
       void resize(unsigned width, unsigned height, unsigned start_x, unsigned start_y);
     };
 

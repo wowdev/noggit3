@@ -9,6 +9,7 @@
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_loader.hpp>
 #include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/script_exception.hpp>
 
 #include <json.hpp>
 #include <QtWidgets/QFormLayout>
@@ -670,36 +671,78 @@ namespace noggit
 
     void add_string_param(char const* path, char const* def)
     {
-      get_cur_tool()->addString(path, def);
+      if(path==nullptr) 
+      {
+        throw script_exception(
+          std::string("empty name to string list parameter, default value =")
+          + std::string(def==nullptr ? "null" : def)
+        );
+      }
+      get_cur_tool()->addString(path, def != nullptr ? def : "");
     }
 
     void add_int_param(char const* path, int min, int max, int def)
     {
+      if(path==nullptr)
+      {
+        throw script_exception(
+          std::string("empty path to int parameter")
+        );
+      }
       get_cur_tool()->addInt(path, min, max, def);
     }
 
     void add_double_param(char const* path, double min, double max, double def, int zeros = 2)
     {
+      if(path==nullptr)
+      {
+        throw script_exception(
+          std::string("empty path to double parameter")
+        );
+      }
       get_cur_tool()->addDouble(path, min, max, def, zeros);
     }
 
     void add_float_param(char const* path, float min, float max, float def, int zeros)
     {
+      if(path==nullptr)
+      {
+        throw script_exception(
+          std::string("empty path to float parameter")
+        );
+      }
       get_cur_tool()->addDouble(path, min, max, def, zeros);
     }
 
     void add_bool_param(char const* path, bool def)
     {
+      if(path==nullptr)
+      {
+        throw script_exception(
+          std::string("empty path to bool parameter")
+        );
+      }
       get_cur_tool()->addBool(path, def);
     }
 
     void add_description(char const* path)
     {
-      get_cur_tool()->addDescription(path);
+      get_cur_tool()->addDescription(path != nullptr ? path : "");
     }
 
     void add_string_list_param(char const* path, char const* value)
     {
+      if (path == nullptr)
+      {
+          throw script_exception(
+              std::string("empty name to string list parameter, default value =")
+              + std::string(value == nullptr ? "" : value)
+          );
+      }
+      if (value == nullptr) throw script_exception(
+          std::string("empty value to string list parameter ")
+          + path
+      );
       get_cur_tool()->addStringList(path, value);
     }
 

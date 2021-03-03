@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_vert-script_texture_index.ipp>
+#include <noggit/scripting/script_exception.hpp>
 
 #include <vector>
 
@@ -62,6 +63,14 @@ namespace noggit
 
     void vert_set_alpha(script_vert& vert, int index, float alpha)
     {
+      if(index<0||index>3)
+      {
+        throw script_exception(
+            std::string("invalid texture layer: ")
+          + std::to_string(index)
+          + std::string(" (in call to vert_set_alpha)")
+          );
+      }
       if (index == 0)
       {
         return;
@@ -81,6 +90,14 @@ namespace noggit
 
     float vert_get_alpha(script_vert const& vert, int index)
     {
+      if(index<0||index>3)
+      {
+        throw script_exception(
+            std::string("invalid texture layer: ")
+          + std::to_string(index)
+          + std::string(" (in call to vert_get_alpha)")
+          );
+      }
       if (index == 0)
       {
         return 1;
@@ -124,6 +141,10 @@ namespace noggit
 
     script_tex vert_get_tex(script_vert& vert)
     {
+      if(is_tex_done(vert))
+      {
+        throw script_exception("accessing invalid texture unit: iterator is done");
+      }
       return script_tex(vert._chunk, texture_index[vert._index].indices[vert._tex_index]);
     }
 
@@ -136,6 +157,14 @@ namespace noggit
 
     void tex_set_alpha(script_tex& tex, int index, float value)
     {
+      if(index<0||index>3)
+      {
+        throw script_exception(
+            std::string("invalid texture layer: ")
+          + std::to_string(index)
+          + std::string(" (in call to tex_set_alpha)")
+          );
+      }
       auto& ts = tex._chunk->texture_set;
       ts->create_temporary_alphamaps_if_needed();
       ts->tmp_edit_values.get()[index][tex._index] = value;

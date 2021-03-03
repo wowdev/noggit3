@@ -8,6 +8,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/scripting/script_misc.hpp>
+#include <noggit/scripting/script_exception.hpp>
 
 #include <lodepng.h>
 
@@ -42,12 +43,20 @@ namespace noggit
 
     void add_m2(char const* filename, math::vector_3d const& pos, float scale, math::vector_3d const& rotation)
     {
+      if(filename==nullptr)
+      {
+        throw script_exception("empty string parameter (in call to add_m2)");
+      }
       auto p = object_paste_params();
       get_ctx()->_world->addM2(filename, pos, scale, rotation,& p);
     }
 
     void add_wmo(char const* filename, math::vector_3d const& pos, math::vector_3d const& rotation)
     {
+      if(filename==nullptr)
+      {
+        throw script_exception("empty string parameter (in call to add_wmo)");
+      }
       get_ctx()->_world->addWMO(filename, pos, rotation);
     }
 

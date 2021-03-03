@@ -20,6 +20,10 @@ namespace noggit
 
     static void mkdirs(char const* pathstr)
     {
+      if(pathstr == nullptr)
+      {
+        throw script_exception("empty path (in call to mkdirs)");
+      }
       auto path = fs::path(pathstr);
       auto parent_path = path.parent_path();
       if (parent_path.string().size() > 0)
@@ -30,6 +34,10 @@ namespace noggit
 
     char const* read_file(char const* path)
     {
+      if(path==nullptr)
+      {
+        throw script_exception("empty path (in call to read_file)");
+      }
       if (!fs::exists(path))
       {
         throw script_exception("No such file:" + std::string (path));
@@ -42,20 +50,48 @@ namespace noggit
 
     void write_file(char const* path, char const* input)
     {
+      if(path==nullptr)
+      {
+        throw script_exception("empty path (in call to write_file)");
+      }
       mkdirs(path);
-      std::ofstream(path) << input;
+      if(input==nullptr)
+      {
+        // this shouldn't be an invalid operation.
+        std::ofstream(path) << "";
+        return;
+      }
+      else
+      {
+        std::ofstream(path) << input;
+      }
     }
 
     void append_file(char const* path, char const* input)
     {
+      if(path==nullptr)
+      {
+        throw script_exception("empty path (in call to append_file)");
+      }
       mkdirs(path);
       std::ofstream outfile;
       outfile.open(path, std::ios_base::app); // append instead of overwrite
-      outfile << input;
+      if(input==nullptr)
+      {
+        outfile << "";
+      }
+      else
+      {
+        outfile << input;
+      }
     }
 
     bool path_exists(char const* path)
     {
+      if(path==nullptr)
+      {
+        throw script_exception("empty path (in call to path_exists)");
+      }
       return fs::exists(path);
     }
 
@@ -77,6 +113,10 @@ namespace noggit
 
     char const* file_itr_get(script_file_iterator const& itr)
     {
+      if(itr._wrapper->_dir == itr._wrapper->_end)
+      {
+        throw script_exception("accessing invalid filepath: iterator is done");
+      }
       return itr._wrapper->_dir->path().string().c_str();
     }
 

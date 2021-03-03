@@ -3,6 +3,7 @@
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/script_exception.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/World.h>
@@ -26,6 +27,10 @@ namespace noggit
 
     int chunk_add_texture(script_chunk& chunk, char const* texture)
     {
+      if(texture==nullptr)
+      {
+        throw script_exception("empty texture (in call to chunk_add_texture)");
+      }
       std::string tex = std::string(texture);
       if (!boost::starts_with(tex, "tileset/"))
       {
@@ -41,11 +46,19 @@ namespace noggit
 
     void chunk_remove_texture(script_chunk& chunk, int index)
     {
+      if(index<0||index>3) 
+      {
+        throw script_exception("invalid texture index, must be between 0-3 (in call to chunk_remove_texture)");
+      }
       chunk._chunk->texture_set->eraseTexture(index);
     }
 
     char const* chunk_get_texture(script_chunk const& chunk, int index)
     {
+      if(index<0||index>3)
+      {
+        throw script_exception("invalid texture index, must be between 0-3 (in call to chunk_get_texture)");
+      }
       return script_malloc_string(chunk._chunk->texture_set->texture(index)->filename);
     }
 

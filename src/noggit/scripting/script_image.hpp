@@ -15,6 +15,7 @@ namespace noggit
       unsigned char* _image = nullptr;
       unsigned _width = 0;
       unsigned _height = 0;
+      unsigned _size = 0;
     };
 
     int img_get_index(script_image const& img, int x, int y);
