@@ -680,6 +680,7 @@ if (NOGGIT_WITH_SCRIPTING)
   # Dependency: FastNoise2
   FetchContent_Declare (fastnoise2
     GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+    PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_fastnoise2.cmake"
     UPDATE_DISCONNECTED true
   )
   FetchContent_GetProperties (fastnoise2)
@@ -688,9 +689,6 @@ if (NOGGIT_WITH_SCRIPTING)
     FetchContent_Populate (fastnoise2)
   endif()
   add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
-  # hack, but something's wrong in FastNoise2s CMakeLists
-  target_include_directories (FastNoise PRIVATE ${fastnoise2_SOURCE_DIR}/include)
-  target_include_directories (NoiseTool PRIVATE ${fastnoise2_SOURCE_DIR}/include)
 
   # Dependency: daScript
   FetchContent_Declare (dascript
