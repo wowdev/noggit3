@@ -676,6 +676,7 @@ if (NOGGIT_WITH_SCRIPTING)
     FetchContent_Populate (lodepng)
   endif()
   add_library (lodepng "${lodepng_SOURCE_DIR}/lodepng.cpp")
+  target_include_directories (lodepng SYSTEM PUBLIC ${lodepng_SOURCE_DIR})
 
   # Dependency: FastNoise2
   FetchContent_Declare (fastnoise2
@@ -703,18 +704,8 @@ if (NOGGIT_WITH_SCRIPTING)
     message (STATUS "Installing daScript...")
     FetchContent_Populate (dascript)
   endif()
-
   add_subdirectory (${dascript_SOURCE_DIR} ${dascript_BINARY_DIR} EXCLUDE_FROM_ALL)
-
-  # \todo add to library targets, if they don't do already
-  target_include_directories (noggit SYSTEM
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/external/daScript/include
-    PRIVATE ${json_SOURCE_DIR}/include/nlohmann
-    PRIVATE ${lodepng_SOURCE_DIR}
-    PRIVATE ${fastnoise2_SOURCE_DIR}/include
-    PRIVATE ${dascript_SOURCE_DIR}/include
-    PRIVATE ${storm_SOURCE_DIR}/src
-  )
+  target_include_directories (libDaScript SYSTEM PUBLIC "${dascript_SOURCE_DIR}/include")
 
   target_link_libraries (noggit
     libDaScript
