@@ -22,6 +22,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
+#include <mutex>
+
 #define SCRIPT_FILE "script_settings.json"
 #define INNER_RADIUS_PATH "__inner_radius"
 #define OUTER_RADIUS_PATH "__outer_radius"
@@ -36,7 +38,7 @@ namespace noggit
     static json _json;
     static std::vector<char*> strings;
     static std::string cur_profile = "Default";
-    static boost::mutex script_change_mutex;
+    static std::mutex script_change_mutex;
 
     template <typename T>
     static T get_json_safe(std::string key, T def)
@@ -128,7 +130,7 @@ namespace noggit
 
     void scripting_tool::on_change_script(int selection)
     {
-      script_change_mutex.lock();
+      std::lock_guard<std::mutex> const lock (script_change_mutex);
       removeScriptWidgets();
       clearDescription();
 
@@ -205,7 +207,6 @@ namespace noggit
       }
 
       cur_tool = nullptr;
-      script_change_mutex.unlock();
     }
 
     scripting_tool::scripting_tool(QWidget* parent) : QWidget(parent)
