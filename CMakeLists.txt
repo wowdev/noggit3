@@ -1,6 +1,6 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.18)
 cmake_policy (SET CMP0057 NEW) # "Support new IN_LIST if() operator."
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -694,8 +694,8 @@ if (NOGGIT_WITH_SCRIPTING)
   # Dependency: daScript
   FetchContent_Declare (dascript
     GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
-    # don't fetch submodules, see https://gitlab.kitware.com/cmake/cmake/-/issues/20579
-    GIT_SUBMODULES "src"
+    # don't fetch submodules
+    GIT_SUBMODULES ""
   )
   FetchContent_GetProperties (dascript)
   if (NOT dascript_POPULATED)
