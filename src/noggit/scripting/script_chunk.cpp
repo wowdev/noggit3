@@ -32,10 +32,6 @@ namespace noggit
         throw script_exception("empty texture (in call to chunk_add_texture)");
       }
       std::string tex = std::string(texture);
-      if (!boost::starts_with(tex, "tileset/"))
-      {
-        tex = "tileset/" + tex;
-      }
       return chunk._chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
     }
 
