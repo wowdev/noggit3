@@ -11,7 +11,7 @@
 #include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
