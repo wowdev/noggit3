@@ -1,5 +1,5 @@
 /**
- * Adds a "string list" (dropdown menu) parameter
+ * Adds a "string list" (dropdown menu) parameter to the script window
  * 
  * As opposed to other parameter types, you can call this
  * function multiple times with the same name and different values
@@ -16,22 +16,37 @@ def add_string_list_param(name: string, value: string)
 def add_description(name: string, value: string)
     pass
 
+/**
+ * Adds a string parameter to the script window
+ */
 [export]
 def add_string_param(name: string, value: string)
     pass
     
+/**
+ * Adds an integer parameter to the script window
+ */
 [export]
 def add_int_param(name: string, min: int, max: int, default: int)
     pass
 
+/**
+ * Adds a double parameter to the script window
+ */
 [export]
 def add_double_param(name: string, min: double, max: double, default: double, zeros: int)
     pass
 
+/**
+ * Adds a float parameter to the script window
+ */
 [export]
 def add_float_param(name: string, min: double, max: double, default: double, zeros: int)
     pass
 
+/**
+ * Adds a boolean parameter to the script window
+ */
 [export]
 def add_bool_param(name: string, default: bool)
     pass
@@ -43,22 +58,47 @@ def add_bool_param(name: string, default: bool)
 def get_string_list_param(name: string): string
     pass
 
+/**
+ * Reads a string parameter from the script window
+ * 
+ * @throws if name is not a valid parameter
+ */
 [export]
 def get_string_param(name: string): string
     pass
 
+/**
+ * Reads an integer parameter from the script window
+ *
+ * @throws if name is not a valid parameter
+ */
 [export]
 def get_int_param(name: string): int
     pass
 
+/**
+ * Reads a double parameter from the script window
+ *
+ * @throws if name is not a valid parameter
+ */
 [export]
 def get_double_param(name: string): float
     pass
 
+/**
+ * Reads a float parameter from the script window
+ *
+ * @throws if name is not a valid parameter
+ */
 [export]
 def get_float_param(name: string): float
     pass
 
+/**
+ * Reads a boolean parameter from the script window
+ *
+ * @throws if name is not a valid parameter
+ */
 [export]
 def get_bool_param(name: string): float
     pass
@@ -223,26 +263,64 @@ def brush_set_hole(pos: vector_3d, big: bool, hole: bool);
 def brush_set_hole_adt(pos: vector_3d, bool hole);
     pass
 
+/**
+ * Uses the standard Noggit brush functions to deselect vertices
+ *
+ * Brush functions are very inefficient if called more than once per frame,
+ * for that, consider using a script_selector instead.
+ */
 [export]
 def brush_deselect_vertices(pos: vector_3d, float radius);
     pass
 
+/**
+ * Uses the standard Noggit brush functions to deselect all vertices
+ *
+ * Brush functions are very inefficient if called more than once per frame,
+ * for that, consider using a script_selector instead.
+ */
 [export]
 def brush_clear_vertex_selection();
     pass
 
+/**
+ * Uses the standard Noggit brush functions to move move selected vertices vertically.
+ *
+ * @see brush_select_vertices
+ *
+ * Brush functions are very inefficient if called more than once per frame,
+ * for that, consider using a script_selector instead.
+ */
 [export]
 def brush_move_vertices(h: float);
     pass
 
+/**
+ * Uses the standard Noggit brush functions to deselect all vertices
+ *
+ * Brush functions are very inefficient if called more than once per frame,
+ * for that, consider using a script_selector instead.
+ */
 [export]
 def brush_flatten_vertices(h: float);
     pass
 
+/**
+ * Uses the standard Noggit brush functions to update changes to selected vertices.
+ *
+ * Brush functions are very inefficient if called more than once per frame,
+ * for that, consider using a script_selector instead.
+ */
 [export]
 def brush_update_vertices();
     pass
 
+/**
+ * Uses the standard Noggit brush functions to paint texture alphamaps.
+ *
+ * Brush functions are very inefficient if called more than once per frame,
+ * for that, consider using a script_selector instead.
+ */
 [export]
 def brush_paint_texture(pos: vector_3d, strength: float, pressure: float, hardness: float, radius: float, texture: string)
     pass
@@ -305,44 +383,75 @@ def holding_space(): bool
 
 // script_filesystem.hpp
 
-
+/**
+ * Attempts to select the next valid file 
+ */
 [export]
 def file_itr_next(thiz: script_file_iterator): bool
     pass
 
+/**
+ * Returns the currently selected file
+ */
 [export]
-def file_itr_get(thiz: script_file_iterator): bool
+def file_itr_get(thiz: script_file_iterator): string
     pass
 
+/**
+ * Writes a string to a file
+ */
 [export]
 def write_file(path: string, content: string)
     pass
 
+/**
+ * Appends a string to a file
+ */
 [export]
 def append_file(path: string, content: string)
     pass
 
+/**
+ * Recursively reads files in a directory
+ */
 [export]
 def read_directory(directory: string): script_file_iterator
     pass
 
+/**
+ * Reads a file into a string
+ */
 [export]
 def read_file(path: string): string
     pass
 
+/**
+ * Returns true if a filepath exists
+ */
 [export]
 def path_exists(path: string): bool
     pass
 
 // script_image.hpp
-[export]
-def img_get_index(img: script_image,x: int, y: int): int
-    pass
 
+/**
+ * Returns the flat index of an image coordinate.
+ * (There is no sense in users using this)
+ */
+//[export]
+//def img_get_index(img: script_image,x: int, y: int): int
+//    pass
+
+/**
+ * Returns the pixel value (RGBA) at a specified location in an image
+ */
 [export]
 def img_get_pixel(img: script_image,x: script_image, y: script_image): uint
     pass
 
+/**
+ * Sets the pixel value (RGBA) at a specified location in an image.
+ */
 [export]
 def img_set_pixel(img: script_image,x: int, y: int, value: uint)
     pass
@@ -359,26 +468,44 @@ def img_set_pixel(img: script_image,x: int, y: int, value: uint)
 [export]
 def img_gradient_scale(img: script_image,scale: float)
 
+/**
+ * Writes an image to the file system
+ */
 [export]
 def img_save(img: script_image,filename: string): int
     pass
 
+/**
+ * Returns the width of an image
+ */
 [export]
 def img_width(img: script_image): int
     pass
 
+/**
+ * Returns the height of an image
+ */
 [export]
 def img_height(img: script_image): int
     pass
 
+/**
+ * Resizes an image, completely removing all previous pixel data.
+ */
 [export]
 def img_resize(img: script_image, width: uint, height: uint): script_image
     pass
 
+/**
+ * Loads an image from the file system
+ */
 [export]
 def img_load_png(img: script_image, path: string)
     pass
 
+/**
+ * Creates a new empty image object
+ */
 [export]
 def create_image(): script_image
     pass
@@ -487,55 +614,91 @@ def lerp(from: float, to: float, ratio: float): float
 def dist_2d(from: vector_3d, to: vector_3d, ratio: float): float
     pass
 
+/**
+ * Compares the distance between two vectors. 
+ * Ignores the 'y' axis.
+ * 
+ * @returns
+ * - 1 = vector distance is larger
+ * - 0 = vector distance is equal
+ * - -1 = vector distance is smaller
+ */
 [export]
-def dist_2d_compare(from: vector_3d, to: vector_3d, ratio: float): int
+def dist_2d_compare(from: vector_3d, to: vector_3d, distance: float): int
     pass
 
+/**
+ * Rotates a point around an origin point. Uses degrees, as most Noggit functions do.
+ */
 [export]
-def rotate_2d(point: vector_3d, origin: vector_3d, angle: float): vector_3d
+def rotate_2d(point: vector_3d, origin: vector_3d, degrees: float): vector_3d
     pass
 
 // script_noise.hpp
 
+/**
+ * Returns the noise value at an exact coordinate
+ */
 [export]
 def noise_get_index(noise: script_noise_map, x: int, y: int): float
     pass
 
 /**
- * Gets the value of this noise in global space ()
+ * Gets the value of this noise in global space
  */
 [export]
 def noise_get_global(noise: script_noise_map, pos: vector_3d): float
     pass
 
-[export]
-def noise_set(noise: script_noise_map, x: int, y: int, value: float)
-    pass
+//[export]
+//def noise_set(noise: script_noise_map, x: int, y: int, value: float)
+//    pass
 
+/**
+ * Checks if the noise point is the highest within a given radius. Uses global coordinates
+ */
 [export]
 def noise_is_highest_global(noise: script_noise_map, pos: vector_3d, check_radius: int)
     pass
 
+/**
+ * Returns the starting x-coordinate of a noise map
+ */
 [export]
 def noise_start_x(noise: script_noise_map): int
     pass
 
+/**
+ * Returns the starting y-coordinate of a noise map
+ */
 [export]
 def noise_start_y(noise: script_noise_map): int
     pass
 
+/**
+ * Returns the width of a noise map
+ */
 [export]
 def noise_width(noise: script_noise_map): int
     pass
 
+/**
+ * Returns the height of a noise map
+ */
 [export]
 def noise_height(noise: script_noise_map): int
     pass
 
+/**
+ * Creates a new noisemap
+ */
 [export]
 def make_noisemap(): script_noise_map
     pass
 
+/**
+ * Fills a noisemapj
+ */
 [export]
 def noise_fill(thiz: script_noise_generator, map: script_map,seed: string, x: int, y: int, xSize: int, ySize: int, frequency: float): script_noise_map
     pass
@@ -547,6 +710,7 @@ def noise_fill(thiz: script_noise_generator, map: script_map,seed: string, x: in
 [export]
 def noise_fill_selection(generator: script_noise_generator, map: script_map, sel: script_selection,seed: string, frequency: float, padding: int): script_noise_map
     pass
+
 
 [export]
 def make_noisegen_simplex(): script_noise_generator
