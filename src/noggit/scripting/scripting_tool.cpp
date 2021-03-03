@@ -36,7 +36,6 @@ namespace noggit
   {
 
     static json _json;
-    static std::vector<char*> strings;
     static std::string cur_profile = "Default";
     static std::mutex script_change_mutex;
 
