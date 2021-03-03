@@ -44,15 +44,15 @@ namespace noggit
       layout->addRow(new QLabel("- rotation and scale only\n  change when pressing enter", this));
       layout->addRow(new QLabel("- scaling is multiplicative", this));
 
-      _rotation_x->setRange (-1800.f, 1800.f);
+      _rotation_x->setRange (-180.f, 180.f);
       _rotation_x->setDecimals (3);
       _rotation_x->setWrapping(true);
       _rotation_x->setSingleStep(5.0f);
-      _rotation_z->setRange (-1800.f, 1800.f);
+      _rotation_z->setRange (-180.f, 180.f);
       _rotation_z->setDecimals (3);
       _rotation_z->setWrapping(true);
       _rotation_z->setSingleStep(5.0f);
-      _rotation_y->setRange (-1800.f, 3600.f);
+      _rotation_y->setRange (-180.f, 180.f);
       _rotation_y->setDecimals (3);
       _rotation_y->setWrapping(true);
       _rotation_y->setSingleStep(5.0f);
