@@ -25,7 +25,7 @@ public:
   scoped_model_reference model;
 
   math::vector_3d pos;
-  math::vector_3d dir;
+  math::degrees::vec3 dir;
   math::vector_3d light_color = { 1.f, 1.f, 1.f };
 
   //! \todo  Get this out and do somehow else.

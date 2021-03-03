@@ -65,9 +65,9 @@ namespace math
       return quaternion(newx, newy, newz, neww);
     }
 
-    vector_3d ToEulerAngles() const
+    degrees::vec3 ToEulerAngles() const
     {
-      math::vector_3d retVal;
+      math::degrees::vec3 retVal;
 
       double sqw = w * w;
       double sqx = x * x;
@@ -77,21 +77,21 @@ namespace math
       double test = x * y + z * w;
       if (test > 0.499 * unit) // singularity at north pole
       {
-        retVal.y = -static_cast<float>(2.0f * std::atan2(x, w) * 180.0f / math::constants::pi);
-        retVal.x = (math::constants::pi / 2) * 180.0f / math::constants::pi;
-        retVal.z = 0;
+        retVal.y = math::degrees(-static_cast<float>(2.0f * std::atan2(x, w) * 180.0f / math::constants::pi));
+        retVal.x = math::degrees((math::constants::pi / 2) * 180.0f / math::constants::pi);
+        retVal.z = 0_deg;
       }
       else if (test < -0.499 * unit) // singularity at south pole
       {
-        retVal.y = -static_cast<float>(-2.0f * std::atan2(x, w) * 180.0f / math::constants::pi);
-        retVal.x = (-math::constants::pi / 2) * 180.0f / math::constants::pi;
-        retVal.z = 0;
+        retVal.y = math::degrees(-static_cast<float>(-2.0f * std::atan2(x, w) * 180.0f / math::constants::pi));
+        retVal.x = math::degrees((-math::constants::pi / 2) * 180.0f / math::constants::pi);
+        retVal.z = 0_deg;
       }
       else
       {
-	retVal.y = -static_cast<float>(std::atan2(2 * y * w - 2 * x * z, sqx - sqy - sqz + sqw) * 180.0f / math::constants::pi);
-	retVal.x = static_cast<float>(std::asin(2 * test / unit) * 180.0f / math::constants::pi);
-	retVal.z = static_cast<float>(std::atan2(2 * x * w - 2 * y * z, -sqx + sqy - sqz + sqw) * 180.0f / math::constants::pi);
+        retVal.y = math::degrees(-static_cast<float>(std::atan2(2 * y * w - 2 * x * z, sqx - sqy - sqz + sqw) * 180.0f / math::constants::pi));
+        retVal.x = math::degrees(static_cast<float>(std::asin(2 * test / unit) * 180.0f / math::constants::pi));
+        retVal.z = math::degrees(static_cast<float>(std::atan2(2 * x * w - 2 * y * z, -sqx + sqy - sqz + sqw) * 180.0f / math::constants::pi));
       }
 
       return retVal;

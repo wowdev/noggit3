@@ -472,7 +472,7 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
 
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
 {
-  math::vector_3d dir_change(rx._, ry._, rz._);
+  math::degrees::vec3 dir_change(rx, ry, rz);
   bool has_multi_select = has_multiple_model_selected();
 
   for (auto& entry : _current_selection)
@@ -500,7 +500,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
       pos += rot_result - diff_pos;
     }
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
         ? boost::get<selected_model_type>(entry)->dir
         : boost::get<selected_wmo_type>(entry)->dir
         ;
@@ -534,7 +534,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 
     updateTilesEntry(entry, model_update::remove);
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
       ? boost::get<selected_model_type>(entry)->dir
       : boost::get<selected_wmo_type>(entry)->dir
       ;
@@ -565,7 +565,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
-  math::vector_3d new_dir(rx._, ry._, rz._);
+  math::degrees::vec3 new_dir(rx, ry, rz);
 
   for (auto& entry : _current_selection)
   {
@@ -579,7 +579,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
 
     updateTilesEntry(entry, model_update::remove);
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
       ? boost::get<selected_model_type>(entry)->dir
       : boost::get<selected_wmo_type>(entry)->dir
       ;
@@ -641,7 +641,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
       : boost::get<selected_wmo_type>(entry)->pos
       ;
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
       ? boost::get<selected_model_type>(entry)->dir
       : boost::get<selected_wmo_type>(entry)->dir
       ;
@@ -1959,7 +1959,7 @@ void World::unload_every_model_and_wmo_instance()
 void World::addM2 ( std::string const& filename
                   , math::vector_3d newPos
                   , float scale
-                  , math::vector_3d rotation
+                  , math::degrees::vec3 rotation
                   , noggit::object_paste_params* paste_params
                   )
 {
@@ -1974,15 +1974,15 @@ void World::addM2 ( std::string const& filename
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
-    model_instance.dir.y += misc::randfloat(min, max);
+    model_instance.dir.y += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
-    model_instance.dir.x += misc::randfloat(min, max);
-    model_instance.dir.z += misc::randfloat(min, max);
+    model_instance.dir.x += math::degrees(misc::randfloat(min, max));
+    model_instance.dir.z += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_size", false).toBool ())
@@ -2003,7 +2003,7 @@ void World::addM2 ( std::string const& filename
 
 void World::addWMO ( std::string const& filename
                    , math::vector_3d newPos
-                   , math::vector_3d rotation
+                   , math::degrees::vec3 rotation
                    )
 {
   WMOInstance wmo_instance(filename);
