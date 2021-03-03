@@ -13,8 +13,8 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QFormLayout>
-#include <QtWidgets/QPushButton.h>
-#include <QtWidgets/QGridLayout.h>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QGridLayout>
 
 #include <map>
 
