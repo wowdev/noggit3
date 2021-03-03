@@ -5,6 +5,15 @@
 
 #include <vector>
 
+// amount of texunits per chunk length
+#define TEXTURE_UNITS_WIDTH 64
+// maximum amount of texunits that can be closest to a vertex
+#define MAX_TEXUNITS_PER_VERT 36
+// total amount of vertices in each pair of two rows
+#define VERTS_PER_TWO_ROWS 17
+// maximum vertex index on odd rows
+#define VERTS_ON_ODD_ROWS 8
+
 namespace noggit
 {
   namespace scripting
@@ -120,12 +129,12 @@ namespace noggit
 
     bool vert_is_water_aligned(script_vert const& vert)
     {
-      return (vert._index % 17) > 8;
+      return (vert._index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
     }
 
     static bool is_tex_done(script_vert& vert)
     {
-      return vert._tex_index >= 36 || texture_index[vert._index].indices[vert._tex_index] == -1;
+      return vert._tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[vert._index].indices[vert._tex_index] == -1;
     }
 
     void vert_reset_tex(script_vert& vert)
@@ -174,8 +183,8 @@ namespace noggit
     {
       float cx = tex._chunk->xbase;
       float cz = tex._chunk->zbase;
-      float x = tex._index % 64;
-      float z = (float(tex._index) / 64.0);
+      float x = tex._index % TEXTURE_UNITS_WIDTH;
+      float z = (float(tex._index) / float(TEXTURE_UNITS_WIDTH));
       return math::vector_3d(cx + x * TEXDETAILSIZE, 0, cz + z * TEXDETAILSIZE);
     }
   } // namespace scripting
