@@ -394,11 +394,37 @@ namespace noggit
         on_change_script(index);
       });
 
-      if (boost::filesystem::exists(SCRIPT_FILE))
+      doReload();
+    }
+
+    void scripting_tool::readScriptSettings()
+    {
+      if (!boost::filesystem::exists(SCRIPT_FILE))
+      {
+        return;
+      }
+
+      try 
       {
         std::ifstream(SCRIPT_FILE) >> _json;
       }
-      doReload();
+      catch (std::exception err)
+      {
+        if(!boost::filesystem::exists(SCRIPT_FILE))
+        {
+          return;
+        }
+        // back up broken script settings, since they won't be read and will be overwritten.
+        std::string backup_file = std::string(SCRIPT_FILE) + ".backup";
+        int i = 0;
+        while (boost::filesystem::exists(backup_file+std::to_string(i)))
+        {
+            ++i;
+        }
+        boost::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
+
+        // Add a message box here
+      }
     }
 
 // i don't remember why this was a macro

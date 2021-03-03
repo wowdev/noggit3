@@ -32,6 +32,7 @@ namespace noggit
       float brushRadius() const { return _radius; }
       float innerRadius() const { return _inner_radius; }
 
+      void readScriptSettings();
       void addDescription(char const* text);
       void clearDescription();
       void addLog(std::string const& text);

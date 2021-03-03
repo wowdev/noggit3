@@ -1514,6 +1514,10 @@ void MapView::initializeGL()
     move_camera_with_auto_height (_camera.position);
   }
 
+#ifdef NOGGIT_HAS_SCRIPTING
+  scriptingTool->readScriptSettings();
+#endif
+
   if (uid_warning)
   {
     QMessageBox::warning
