@@ -697,6 +697,7 @@ if (NOGGIT_WITH_SCRIPTING)
     GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
     # don't fetch submodules
     GIT_SUBMODULES ""
+    PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_dascript.cmake"
     UPDATE_DISCONNECTED true
   )
   FetchContent_GetProperties (dascript)
