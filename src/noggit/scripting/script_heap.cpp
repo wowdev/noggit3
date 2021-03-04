@@ -49,7 +49,7 @@ namespace noggit
       std::vector<void*>::iterator pos = std::find(ptrs.begin(), ptrs.end(), ptr);
       if (pos == ptrs.end())
       {
-        throw script_exception("Attempted to free invalid memory, this might cause a memory leak.");
+        throw script_exception("script_free","attempted to free invalid memory, this might cause a memory leak.");
       }
       ptrs.erase(pos);
       free(ptr);

@@ -75,10 +75,10 @@ namespace noggit
       if(index<0||index>3)
       {
         throw script_exception(
+            "vert_set_alpha",
             std::string("invalid texture layer: ")
           + std::to_string(index)
-          + std::string(" (in call to vert_set_alpha)")
-          );
+          + std::string(" (in call to vert_set_alpha)"));
       }
       if (index == 0)
       {
@@ -102,6 +102,7 @@ namespace noggit
       if(index<0||index>3)
       {
         throw script_exception(
+            "vert_get_alpha",
             std::string("invalid texture layer: ")
           + std::to_string(index)
           + std::string(" (in call to vert_get_alpha)")
@@ -152,7 +153,9 @@ namespace noggit
     {
       if(is_tex_done(vert))
       {
-        throw script_exception("accessing invalid texture unit: iterator is done");
+        throw script_exception(
+          "vert_get_tex",
+          "accessing invalid texture unit: iterator is done");
       }
       return script_tex(vert._chunk, texture_index[vert._index].indices[vert._tex_index]);
     }
@@ -169,6 +172,7 @@ namespace noggit
       if(index<0||index>3)
       {
         throw script_exception(
+            "tex_set_alpha",
             std::string("invalid texture layer: ")
           + std::to_string(index)
           + std::string(" (in call to tex_set_alpha)")

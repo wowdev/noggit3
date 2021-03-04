@@ -14,16 +14,9 @@ namespace noggit
       return script_selection();
     }
 
-    void select_origin(script_selection& sel, math::vector_3d const& origin, float xRadius, float zRadius)
+    void select_between_int(const char* caller,script_selection& sel, math::vector_3d const& point1, math::vector_3d const& point2)
     {
-      select_between(sel,
-               math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
-               math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
-    }
-
-    void select_between(script_selection& sel, math::vector_3d const& point1, math::vector_3d const& point2)
-    {
-      sel._world = get_ctx()->_world;
+      sel._world = get_ctx(caller)->_world;
       sel._min = math::vector_3d(
         std::min(point1.x, point2.x),
         std::min(point1.y, point2.y),
@@ -37,6 +30,18 @@ namespace noggit
       sel._size = sel._max - sel._min;
       sel._center = sel._min + (sel._size / 2);
       sel._models = script_model_iterator(sel._world, sel._min, sel._max);
+    }
+
+    void select_origin(script_selection& sel, math::vector_3d const& origin, float xRadius, float zRadius)
+    {
+      select_between_int("select_origin",sel,
+               math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
+               math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
+    }
+
+    void select_between(script_selection& sel, math::vector_3d const& point1, math::vector_3d const& point2)
+    {
+      select_between_int("select_between",sel,point1,point2);
     }
 
     math::vector_3d sel_center(script_selection const& sel) { return sel._center; }
@@ -79,7 +84,9 @@ namespace noggit
     {
       if(!is_on_chunk(sel))
       {
-        throw script_exception("accessing invalid chunk: iterator is done");
+        throw script_exception(
+          "sel_get_chunk",
+          "accessing invalid chunk: iterator is done");
       }
       return script_chunk(&sel, sel._chunks[sel._cur_chunk]);
     }

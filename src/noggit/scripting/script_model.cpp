@@ -149,14 +149,16 @@ namespace noggit
       {
         type.push_back((ModelInstance*)model._model);
       }
-      get_ctx()->_world->delete_models(type);
+      get_ctx("model_remove")->_world->delete_models(type);
     }
 
     void model_set_filename(script_model& model, char const* filename)
     {
       if(filename==nullptr)
       {
-        throw script_exception("empty filename (in call to model_set_filename)");
+        throw script_exception(
+          "model_set_filename",
+          "empty filename (in call to model_set_filename)");
       }
 
       if (model_get_filename(model) == filename)
@@ -168,14 +170,16 @@ namespace noggit
 
       if (boost::ends_with(filename, ".wmo"))
       {
-        auto wmo = get_ctx()->_world->addWMO(filename, model_get_pos(model), model_get_rot(model));
+        auto wmo = get_ctx("model_set_filename")
+          ->_world->addWMO(filename, model_get_pos(model), model_get_rot(model));
         model._model = wmo;
         model._is_wmo = true;
       }
       else
       {
         auto params = object_paste_params();
-        auto m2 = get_ctx()->_world->addM2(filename, model_get_pos(model), model_get_scale(model), model_get_rot(model),& params);
+        auto m2 = get_ctx("model_set_filename")
+          ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), model_get_rot(model),& params);
         model._model = m2;
         model._is_wmo = false;
       }
@@ -240,7 +244,9 @@ namespace noggit
     {
       if(_model_index >= int(_models_size))
       {
-        throw script_exception("accessing invalid model: iterator is done");
+        throw script_exception(
+          "script_model_iterator#get",
+          "accessing invalid model: iterator is done");
       }
       return _models[_model_index];
     }

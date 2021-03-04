@@ -36,7 +36,7 @@ namespace noggit
       float _dt;
     };
 
-    script_context* get_ctx();
+    script_context* get_ctx(const char* caller);
     void set_ctx(script_context* ctx);
   } // namespace scripting
 } // namespace noggit

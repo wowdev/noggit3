@@ -700,6 +700,7 @@ namespace noggit
       if(path==nullptr) 
       {
         throw script_exception(
+          "add_string_param",
           std::string("empty name to string list parameter, default value =")
           + std::string(def==nullptr ? "null" : def)
         );
@@ -712,6 +713,7 @@ namespace noggit
       if(path==nullptr)
       {
         throw script_exception(
+          "add_int_param",
           std::string("empty path to int parameter")
         );
       }
@@ -723,6 +725,7 @@ namespace noggit
       if(path==nullptr)
       {
         throw script_exception(
+          "add_double_param",
           std::string("empty path to double parameter")
         );
       }
@@ -734,6 +737,7 @@ namespace noggit
       if(path==nullptr)
       {
         throw script_exception(
+          "add_float_param",
           std::string("empty path to float parameter")
         );
       }
@@ -745,6 +749,7 @@ namespace noggit
       if(path==nullptr)
       {
         throw script_exception(
+          "add_bool_param",
           std::string("empty path to bool parameter")
         );
       }
@@ -761,11 +766,13 @@ namespace noggit
       if (path == nullptr)
       {
           throw script_exception(
+              "add_string_list_param",
               std::string("empty name to string list parameter, default value =")
               + std::string(value == nullptr ? "" : value)
           );
       }
       if (value == nullptr) throw script_exception(
+          "add_string_list_param",
           std::string("empty value to string list parameter ")
           + path
       );

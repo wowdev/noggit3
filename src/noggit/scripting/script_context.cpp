@@ -17,11 +17,13 @@ namespace noggit
       ctx = nctx;
     }
 
-    script_context* get_ctx()
+    script_context* get_ctx(const char* caller)
     {
       if(ctx==nullptr) 
       {
-        throw script_exception("Accessing script context outside of interact event (likely using a forbidden function in 'select()')");
+        throw script_exception(
+          caller,
+          "accessing script context outside of interact (click/hold/release) event");
       }
       return ctx;
     }

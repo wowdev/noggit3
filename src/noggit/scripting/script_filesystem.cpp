@@ -22,7 +22,7 @@ namespace noggit
     {
       if(pathstr == nullptr)
       {
-        throw script_exception("empty path (in call to mkdirs)");
+        throw script_exception("mkdirs","empty path");
       }
       auto path = fs::path(pathstr);
       auto parent_path = path.parent_path();
@@ -36,11 +36,11 @@ namespace noggit
     {
       if(path==nullptr)
       {
-        throw script_exception("empty path (in call to read_file)");
+        throw script_exception("read_file","empty path");
       }
       if (!fs::exists(path))
       {
-        throw script_exception("No such file:" + std::string (path));
+        throw script_exception("read_file","no such file:" + std::string (path));
       }
       std::ifstream t(path);
       std::string str((std::istreambuf_iterator<char>(t)),
@@ -52,7 +52,7 @@ namespace noggit
     {
       if(path==nullptr)
       {
-        throw script_exception("empty path (in call to write_file)");
+        throw script_exception("write_file","empty path");
       }
       mkdirs(path);
       if(input==nullptr)
@@ -71,7 +71,7 @@ namespace noggit
     {
       if(path==nullptr)
       {
-        throw script_exception("empty path (in call to append_file)");
+        throw script_exception("append_file","empty path");
       }
       mkdirs(path);
       std::ofstream outfile;
@@ -90,7 +90,7 @@ namespace noggit
     {
       if(path==nullptr)
       {
-        throw script_exception("empty path (in call to path_exists)");
+        throw script_exception("path_exists","empty path");
       }
       return fs::exists(path);
     }
@@ -115,7 +115,7 @@ namespace noggit
     {
       if(itr._wrapper->_dir == itr._wrapper->_end)
       {
-        throw script_exception("accessing invalid filepath: iterator is done");
+        throw script_exception("file_itr_get","accessing invalid filepath: iterator is done");
       }
       return itr._wrapper->_dir->path().string().c_str();
     }

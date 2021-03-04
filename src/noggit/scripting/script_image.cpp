@@ -14,7 +14,7 @@ namespace noggit
     {
       if(path==nullptr)
       {
-          throw script_exception("empty png path");
+          throw script_exception("img_load_png","empty png path");
       }
       // annoying, but lodepng only takes a vector
       std::vector<unsigned char> vec;
@@ -22,6 +22,7 @@ namespace noggit
       if (error)
       {
         throw script_exception(
+          "img_load_png",
           "failed to load png image with error code:" 
           + std::to_string (error));
       }
@@ -34,6 +35,7 @@ namespace noggit
       if(width<=0||height<=0)
       {
         throw script_exception(
+          "img_resize",
           std::string("tried to resize to invalid image size: x=")
           + std::to_string(width)
           + std::string(" y=")
@@ -67,6 +69,7 @@ namespace noggit
       if(index<0||index>=img._size)
       {
         throw script_exception(
+          "img_get_index",
           "image coordinates out of bounds: x="
             + std::to_string(x)
             + " y="
@@ -105,7 +108,8 @@ namespace noggit
       if (error)
       {
         throw script_exception(
-          "Failed to save image with error " 
+          "img_save",
+          "failed to save image with error "
           + std::to_string (error));
       }
     }
@@ -115,6 +119,7 @@ namespace noggit
       if(rel<0||rel>=1)
       {
         throw script_exception(
+          "img_gradient_scale",
           "relative image coordinate out of bounds: "
             + std::to_string(rel)
             + " (should be >= 0 and < 1)");

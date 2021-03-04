@@ -29,7 +29,9 @@ namespace noggit
     {
       if(texture==nullptr)
       {
-        throw script_exception("empty texture (in call to chunk_add_texture)");
+        throw script_exception(
+          "chunk_add_texture",
+          "empty texture");
       }
       std::string tex = std::string(texture);
       return chunk._chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
@@ -44,7 +46,9 @@ namespace noggit
     {
       if(index<0||index>3) 
       {
-        throw script_exception("invalid texture index, must be between 0-3 (in call to chunk_remove_texture)");
+        throw script_exception(
+          "chunk_remove_texture",
+          "invalid texture index, must be between 0-3");
       }
       chunk._chunk->texture_set->eraseTexture(index);
     }
@@ -53,7 +57,9 @@ namespace noggit
     {
       if(index<0||index>3)
       {
-        throw script_exception("invalid texture index, must be between 0-3 (in call to chunk_get_texture)");
+        throw script_exception(
+          "chunk_get_texture",
+          "invalid texture index, must be between 0-3");
       }
       return script_malloc_string(chunk._chunk->texture_set->texture(index)->filename);
     }
@@ -61,7 +67,7 @@ namespace noggit
     void chunk_apply_heightmap(script_chunk& chunk)
     {
       chunk._chunk->updateVerticesData();
-      get_ctx()->_world->recalc_norms(chunk._chunk);
+      get_ctx("chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
     }
 
     void chunk_apply_textures(script_chunk& chunk)

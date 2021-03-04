@@ -19,6 +19,7 @@ namespace noggit
       if(index<0||index>=noise._size)
       {
         throw script_exception(
+          "noise_get_index",
           std::string("noise coordinates out of bounds: x=")
             + std::to_string(x)
             + std::string(" y=")
@@ -67,6 +68,7 @@ namespace noggit
       if(index<0||index>=noise._size)
       {
         throw script_exception(
+          "noise_set",
           std::string("noisemap coordinates out of bounds: x=")
             + std::to_string(x)
             + std::string(" y=")
@@ -84,6 +86,7 @@ namespace noggit
       if(width<=0||height<=0)
       {
         throw script_exception(
+          "resize",
           std::string("invalid noise map size:")
           + " width="
           + std::to_string(width)
