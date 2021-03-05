@@ -208,21 +208,21 @@ namespace noggit
           continue;
 
         auto fAccess = das::make_smart<das::FsFileAccess>();
-        auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup);
+        auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup, true);
 
         if (!program->options.find("persistent_heap",das::Type::tBool))
         {
-          program->options.push_back(AnnotationArgument("persistent_heap",true));
+          program->options.push_back(das::AnnotationArgument("persistent_heap",true));
         }
 
         if (!program->options.find("persistent_string_heap",das::Type::tBool))
         {
-          program->options.push_back(AnnotationArgument("persistent_string_heap",true));
+          program->options.push_back(das::AnnotationArgument("persistent_string_heap",true));
         }
 
         if (!program->options.find("intern_strings",das::Type::tBool))
         {
-          program->options.push_back(AnnotationArgument("intern_strings",false));
+          program->options.push_back(das::AnnotationArgument("intern_strings",false));
         }
 
         auto ctx = new NoggitContext(program->getContextStackSize());
