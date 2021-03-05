@@ -37,6 +37,7 @@ static void install_modules()
     {                          \
       auto fun = ctr->_ctx->findFunction(#type);     \
       ctr->_ctx->eval(fun, nullptr);           \
+      ctr->_ctx->collectStringHeap(nullptr); \
       if (auto ex = ctr->_ctx->getException())     \
       {                        \
         get_cur_tool()->addLog("exception: " + std::to_string (*ex)); \
@@ -208,6 +209,22 @@ namespace noggit
 
         auto fAccess = das::make_smart<das::FsFileAccess>();
         auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup);
+
+        if (!program->options.find("persistent_heap",das::Type::tBool))
+        {
+          program->options.push_back(AnnotationArgument("persistent_heap",true));
+        }
+
+        if (!program->options.find("persistent_string_heap",das::Type::tBool))
+        {
+          program->options.push_back(AnnotationArgument("persistent_string_heap",true));
+        }
+
+        if (!program->options.find("intern_strings",das::Type::tBool))
+        {
+          program->options.push_back(AnnotationArgument("intern_strings",false));
+        }
+
         auto ctx = new NoggitContext(program->getContextStackSize());
         if (!program->simulate(*ctx, _noggit_printer))
         {
