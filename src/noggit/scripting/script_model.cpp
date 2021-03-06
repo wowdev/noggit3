@@ -152,13 +152,13 @@ namespace noggit
       get_ctx("model_remove")->_world->delete_models(type);
     }
 
-    void model_set_filename(script_model& model, char const* filename, das::Context* ctx)
+    void model_replace(script_model& model, char const* filename, das::Context* ctx)
     {
       if(filename==nullptr)
       {
         throw script_exception(
-          "model_set_filename",
-          "empty filename (in call to model_set_filename)");
+          "model_replace",
+          "empty filename (in call to model_replace)");
       }
 
       if (model_get_filename(model, ctx) == filename)
@@ -170,7 +170,7 @@ namespace noggit
 
       if (boost::ends_with(filename, ".wmo"))
       {
-        auto wmo = get_ctx("model_set_filename")
+        auto wmo = get_ctx("model_replace")
           ->_world->addWMO(filename, model_get_pos(model), model_get_rot(model));
         model._model = wmo;
         model._is_wmo = true;
@@ -178,7 +178,7 @@ namespace noggit
       else
       {
         auto params = object_paste_params();
-        auto m2 = get_ctx("model_set_filename")
+        auto m2 = get_ctx("model_replace")
           ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), model_get_rot(model),& params);
         model._model = m2;
         model._is_wmo = false;

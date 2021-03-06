@@ -41,12 +41,10 @@ namespace noggit
       unsigned _size = 0;
     };
 
-    float noise_get_index(script_noise_map const &noise, int x, int y);
-    float noise_get_global(script_noise_map &noise, math::vector_3d &pos);
-    bool noise_is_highest_global(script_noise_map &noise, math::vector_3d &pos, int check_radius);
+    float noise_get(script_noise_map &noise, math::vector_3d &pos);
+    bool noise_is_highest(script_noise_map &noise, math::vector_3d &pos, int check_radius);
     void noise_set(script_noise_map &noise, int x, int y, float value);
-    unsigned noise_start_x(script_noise_map &noise);
-    unsigned noise_start_y(script_noise_map &noise);
+    math::vector_3d noise_start(script_noise_map const& noise);
     unsigned noise_width(script_noise_map &noise);
     unsigned noise_height(script_noise_map &noise);
     script_noise_map make_noise_size(

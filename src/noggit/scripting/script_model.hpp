@@ -62,6 +62,6 @@ namespace noggit
     void model_remove(script_model& model);
 
     const char* model_get_filename(script_model const& model, das::Context* ctx);
-    void model_set_filename(script_model& model, const char* filename, das::Context* ctx);
+    void model_replace(script_model& model, const char* filename, das::Context* ctx);
   } // namespace scripting
 } // namespace noggit

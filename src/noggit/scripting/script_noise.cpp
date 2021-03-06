@@ -12,13 +12,13 @@ namespace noggit
 {
   namespace scripting
   {
-    float noise_get_index(script_noise_map const& noise, int x, int y)
+    static float noise_get_index(std::string const& caller, script_noise_map const& noise, int x, int y)
     {
       unsigned index = x + y * noise._width;
       if(index<0||index>=noise._size)
       {
         throw script_exception(
-          "noise_get_index",
+          caller,
           std::string("noise coordinates out of bounds: x=")
             + std::to_string(x)
             + std::string(" y=")
@@ -31,17 +31,17 @@ namespace noggit
       return noise.get_map()[index];
     }
 
-    float noise_get_global(script_noise_map& noise, math::vector_3d& pos)
+    float noise_get(script_noise_map& noise, math::vector_3d& pos)
     {
-      return noise_get_index(noise, std::round(pos.x) - noise._start_x, std::round(pos.z) - noise._start_y);
+      return noise_get_index("noise_get",noise, std::round(pos.x) - noise._start_x, std::round(pos.z) - noise._start_y);
     }
 
-    bool noise_is_highest_global(script_noise_map& noise, math::vector_3d& pos, int check_radius)
+    bool noise_is_highest(script_noise_map& noise, math::vector_3d& pos, int check_radius)
     {
       int x = std::round(pos.x) - noise._start_x;
       int z = std::round(pos.z) - noise._start_y;
 
-      float own = noise_get_index(noise, x, z);
+      float own = noise_get_index("noise_is_highest",noise, x, z);
 
       for (int xc = x - check_radius; xc < x + check_radius; ++xc)
       {
@@ -52,7 +52,7 @@ namespace noggit
             continue;
           }
 
-          if (noise_get_index(noise, xc, zc) > own)
+          if (noise_get_index("noise_is_highest",noise, xc, zc) > own)
           {
             return false;
           }
@@ -163,14 +163,11 @@ namespace noggit
       );
     }
 
-    unsigned noise_start_x(script_noise_map& noise) 
+    math::vector_3d noise_start(script_noise_map const& noise)
     {
-      return noise._start_x; 
+      return math::vector_3d(noise._start_x,0,noise._start_y);
     }
-    unsigned noise_start_y(script_noise_map& noise) 
-    { 
-      return noise._start_y; 
-    }
+
     unsigned noise_width(script_noise_map& noise) 
     { 
       return noise._width; 

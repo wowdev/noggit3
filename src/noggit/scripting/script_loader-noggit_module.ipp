@@ -38,6 +38,9 @@ using namespace math;
 #define FUNC_SCOPED(name, side_effect) \
   addExtern<DAS_BIND_FUN(noggit::scripting::name)>(*this, lib, #name, SideEffects::side_effect, #name)
 
+#define FUNC_RENAME(name_in, name_out, side_effect) \
+  addExtern<DAS_BIND_FUN(name_in)>(*this, lib, name_out, SideEffects::side_effect, name_out)
+
 #define FIELD(name) \
   addField<DAS_BIND_MANAGED_FIELD(name)>(#name);
 
@@ -113,14 +116,12 @@ public:
     FUNC_SCOPED(rand_float, worstDefault);
 
     // script_noise.hpp
-    FUNC_SCOPED(noise_get_index, worstDefault);
-    FUNC_SCOPED(noise_get_global, worstDefault);
+    FUNC_SCOPED(noise_get, worstDefault);
     FUNC_SCOPED(noise_set, worstDefault);
-    FUNC_SCOPED(noise_start_x, worstDefault);
-    FUNC_SCOPED(noise_start_y, worstDefault);
-    FUNC_SCOPED(noise_width, worstDefault);
-    FUNC_SCOPED(noise_height, worstDefault);
-    FUNC_SCOPED(noise_is_highest_global, worstDefault);
+    FUNC_RETVALUE(noise_start, worstDefault);
+    FUNC_RENAME(noggit::scripting::noise_width, "width", worstDefault);
+    FUNC_RENAME(noggit::scripting::noise_height, "height", worstDefault);
+    FUNC_SCOPED(noise_is_highest, worstDefault);
     FUNC_RETVALUE(make_noise_size, worstDefault);
     FUNC_RETVALUE(make_noise_selection, worstDefault);
 
@@ -130,8 +131,8 @@ public:
     FUNC_SCOPED(img_set_pixel, worstDefault);
     FUNC_SCOPED(img_gradient_scale, worstDefault);
     FUNC_SCOPED(img_save, worstDefault);
-    FUNC_SCOPED(img_width, worstDefault);
-    FUNC_SCOPED(img_height, worstDefault);
+    FUNC_RENAME(noggit::scripting::img_width, "width", worstDefault);
+    FUNC_RENAME(noggit::scripting::img_height, "height", worstDefault);
     FUNC_RETVALUE(create_image, worstDefault);
     FUNC_RETVALUE(load_png, worstDefault);
 
@@ -201,7 +202,7 @@ public:
     FUNC_SCOPED(model_get_uid, worstDefault);
     FUNC_SCOPED(model_remove, worstDefault);
     FUNC_SCOPED(model_get_filename, worstDefault);
-    FUNC_SCOPED(model_set_filename, worstDefault);
+    FUNC_SCOPED(model_replace, worstDefault);
 
     // script_math.hpp
     FUNC_SCOPED(round, worstDefault);

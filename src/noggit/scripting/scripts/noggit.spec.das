@@ -384,20 +384,6 @@ def holding_space(): bool
 // script_filesystem.hpp
 
 /**
- * Attempts to select the next valid file 
- */
-[export]
-def file_itr_next(thiz: script_file_iterator): bool
-    pass
-
-/**
- * Returns the currently selected file
- */
-[export]
-def file_itr_get(thiz: script_file_iterator): string
-    pass
-
-/**
  * Writes a string to a file
  */
 [export]
@@ -409,13 +395,6 @@ def write_file(path: string, content: string)
  */
 [export]
 def append_file(path: string, content: string)
-    pass
-
-/**
- * Recursively reads files in a directory
- */
-[export]
-def read_directory(directory: string): script_file_iterator
     pass
 
 /**
@@ -433,14 +412,6 @@ def path_exists(path: string): bool
     pass
 
 // script_image.hpp
-
-/**
- * Returns the flat index of an image coordinate.
- * (There is no sense in users using this)
- */
-//[export]
-//def img_get_index(img: script_image,x: int, y: int): int
-//    pass
 
 /**
  * Returns the pixel value (RGBA) at a specified location in an image
@@ -479,35 +450,28 @@ def img_save(img: script_image,filename: string): int
  * Returns the width of an image
  */
 [export]
-def img_width(img: script_image): int
+def width(img: script_image): int
     pass
 
 /**
  * Returns the height of an image
  */
 [export]
-def img_height(img: script_image): int
-    pass
-
-/**
- * Resizes an image, completely removing all previous pixel data.
- */
-[export]
-def img_resize(img: script_image, width: uint, height: uint): script_image
+def height(img: script_image): int
     pass
 
 /**
  * Loads an image from the file system
  */
 [export]
-def img_load_png(img: script_image, path: string)
+def load_png(path: string): script_image
     pass
 
 /**
  * Creates a new empty image object
  */
 [export]
-def create_image(): script_image
+def create_image(width: int, height: int): script_image
     pass
 
 [export]
@@ -637,67 +601,50 @@ def rotate_2d(point: vector_3d, origin: vector_3d, degrees: float): vector_3d
 // script_noise.hpp
 
 /**
- * Returns the noise value at an exact coordinate
- */
-[export]
-def noise_get_index(noise: script_noise_map, x: int, y: int): float
-    pass
-
-/**
  * Gets the value of this noise in global space
  */
 [export]
-def noise_get_global(noise: script_noise_map, pos: vector_3d): float
+def noise_get(noise: script_noise_map, pos: vector_3d): float
     pass
-
-//[export]
-//def noise_set(noise: script_noise_map, x: int, y: int, value: float)
-//    pass
 
 /**
  * Checks if the noise point is the highest within a given radius. Uses global coordinates
  */
 [export]
-def noise_is_highest_global(noise: script_noise_map, pos: vector_3d, check_radius: int)
+def noise_is_highest(noise: script_noise_map, pos: vector_3d, check_radius: int)
     pass
 
 /**
- * Returns the starting x-coordinate of a noise map
+ * Returns the starting coordinates of a noise map. Uses x/z, y is always 0.
  */
 [export]
-def noise_start_x(noise: script_noise_map): int
-    pass
-
-/**
- * Returns the starting y-coordinate of a noise map
- */
-[export]
-def noise_start_y(noise: script_noise_map): int
+def noise_start(noise: script_noise_map): vector_3d
     pass
 
 /**
  * Returns the width of a noise map
  */
 [export]
-def noise_width(noise: script_noise_map): int
+def width(noise: script_noise_map): int
     pass
 
 /**
  * Returns the height of a noise map
  */
 [export]
-def noise_height(noise: script_noise_map): int
+def height(noise: script_noise_map): int
     pass
 
-/**
- * Creates a new noisemap
- */
 [export]
-def make_noisemap(): script_noise_map
+def make_noise_size(start_x: int, start_y: int, width: int, height: int, frequency: float, algorithm: string, seed: string): script_noise_map
+    pass
+
+[export]
+def make_noise_selection(sel: script_selection, frequency: float, algorithm: string, seed: string): script_noise_map
     pass
 
 /**
- * Fills a noisemapj
+ * Fills a noisemap
  */
 [export]
 def noise_fill(thiz: script_noise_generator, map: script_map,seed: string, x: int, y: int, xSize: int, ySize: int, frequency: float): script_noise_map
@@ -709,35 +656,6 @@ def noise_fill(thiz: script_noise_generator, map: script_map,seed: string, x: in
  */
 [export]
 def noise_fill_selection(generator: script_noise_generator, map: script_map, sel: script_selection,seed: string, frequency: float, padding: int): script_noise_map
-    pass
-
-
-[export]
-def make_noisegen_simplex(): script_noise_generator
-    pass
-
-[export]
-def make_noisegen_perlin(): script_noise_generator
-    pass
-
-[export]
-def make_noisegen_value(): script_noise_generator
-    pass
-
-[export]
-def make_noisegen_fractal(): script_noise_generator
-    pass
-
-[export]
-def make_noisegen_cellular(): script_noise_generator
-    pass
-
-[export]
-def make_noisegen_white(): script_noise_generator
-    pass
-
-[export]
-def make_noisegen_custom(encodedNodeTree: string): script_noise_generator
     pass
 
 [export]
@@ -757,15 +675,11 @@ def random_from_time(): script_random
     pass
 
 [export]
-def make_selector(): script_selection
+def select_origin(origin: vector_3d, x_radius: float, z_radius: float): script_selection
     pass
 
 [export]
-def select_origin(sel: script_selection, origin: vector_3d, x_radius: float, z_radius: float)
-    pass
-
-[export]
-def select_between(sel: script_selection, pos1: vector_3d, pos2: vector_3d)
+def select_between(pos1: vector_3d, pos2: vector_3d): script_selection
     pass
 
 [export]
@@ -986,7 +900,7 @@ def model_get_filename(model: script_model): string
     pass
 
 [export]
-def model_set_filename(model: script_model,filename: string)
+def model_replace(model: script_model,filename: string)
     pass
 
 [export]
