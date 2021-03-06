@@ -29,8 +29,7 @@ def left_hold()
     var h = get_float_param("Default Height")
 
     // Makes a selection around the cursor
-    var sel = make_selector()
-    select_origin(sel,pos(),outer_radius(),outer_radius())
+    var sel = select_origin(pos(),outer_radius(),outer_radius())
 
     if(holding_shift())
         while sel_next_chunk(sel)

@@ -33,13 +33,10 @@ def left_hold()
 	var hilltex = get_int_param("Hill Texture Index")
 
 	// Select the origin 
-	var sel = make_selector()
-	select_origin(sel,pos(),outer_radius(),outer_radius())
+	var sel = select_origin(pos(),outer_radius(),outer_radius())
 
 	// Generate a noisemap matching the selection we just made
-	var gen = make_noisegen_custom(algo);
-    var map = make_noisemap()
-	noise_fill_selection(gen,map,sel,seed,freq,10)
+    var map = make_noise_selection(sel,freq,10,algo,seed)
 
 	while sel_next_chunk(sel)
 		var chunk = sel_get_chunk(sel)
@@ -47,7 +44,7 @@ def left_hold()
 		while chunk_next_vert(chunk)
 			var vert = chunk_get_vert(chunk)
 			var loc = vert_get_pos(vert);
-			var height = noise_get_global(map,loc)*amp;
+			var height = noise_get(map,loc)*amp;
 			vert_set_height(vert,height);
 			if hilltex > 0 && height > 20.0
 				vert_set_alpha(vert, hilltex,0.5)

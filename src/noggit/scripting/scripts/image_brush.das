@@ -11,19 +11,17 @@ def select()
 
 [export]
 def left_click()
-    var img = create_image()
-    img_load_png(img,get_string_param("Filename"))
+    var img = load_png(get_string_param("Filename"));
 
     var origin = pos()
 
-    var width = img_width(img);
-    var height = img_height(img);
+    var width = width(img);
+    var height = height(img);
 
     var half_width = float(width)/2.0
     var half_height = float(height)/2.0
 
-    var sel = make_selector()
-    select_origin(sel,pos(),float(width),float(height))
+    var sel = select_origin(pos(),float(width),float(height))
 
     while sel_next_chunk(sel)
         var chunk = sel_get_chunk(sel)

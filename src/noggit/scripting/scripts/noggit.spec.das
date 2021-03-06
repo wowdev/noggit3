@@ -640,7 +640,7 @@ def make_noise_size(start_x: int, start_y: int, width: int, height: int, frequen
     pass
 
 [export]
-def make_noise_selection(sel: selection, frequency: float, algorithm: string, seed: string): noisemap
+def make_noise_selection(sel: selection, frequency: float, padding: int, algorithm: string, seed: string): noisemap
     pass
 
 /**

@@ -45,13 +45,10 @@ def left_hold()
         return
     
 	// Select the origin 
-	var sel = make_selector()
-	select_origin(sel,pos(),outer_radius(),outer_radius())
+	var sel = select_origin(pos(),outer_radius(),outer_radius())
 
     // Generate a noisemap matching the selection we just made
-	var gen = make_noisegen_simplex()
-    var map = make_noisemap()
-	noise_fill_selection(gen,map,sel,seed,10.0,10)
+	var map = make_noise_selection(sel,10.0,10,"SIMPLEX",seed)
 
     while sel_next_model(sel)
         var model = sel_get_model(sel)
@@ -62,7 +59,7 @@ def left_hold()
         while chunk_next_vert(chunk)
             var vert = chunk_get_vert(chunk)
             var loc = vert_get_pos(vert)
-            if(noise_is_highest_global(map,loc,distance) && loc.y < max_height)
+            if(noise_is_highest(map,loc,distance) && loc.y < max_height)
                 // This way, we always get the same random for the same location
                 var rnd = random_from_seed("{seed} {loc.x} {loc.z}")
                 var model = valid[rand_int32(rnd,0,length(valid))];
