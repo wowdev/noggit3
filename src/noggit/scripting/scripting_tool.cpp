@@ -623,6 +623,7 @@ namespace noggit
       }
       catch (std::exception const& e)
       {
+        doReload();
         addLog(("[error]: " + std::string(e.what())));
         resetLogScroll();
       }
