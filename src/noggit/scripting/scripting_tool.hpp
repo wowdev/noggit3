@@ -41,6 +41,7 @@ namespace noggit
       void addDescription(char const* text);
       void clearDescription();
       void addLog(std::string const& text);
+      void resetLogScroll();
       void clearLog();
       void doReload();
       void sendUpdate(

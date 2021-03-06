@@ -113,6 +113,7 @@ namespace noggit
       catch (std::exception e)
       {
         addLog("[error]: " + std::string(e.what()));
+        resetLogScroll();
         return;
       }
       _script_selection->clear();
@@ -623,6 +624,7 @@ namespace noggit
       catch (std::exception const& e)
       {
         addLog(("[error]: " + std::string(e.what())));
+        resetLogScroll();
       }
 
       script_free_all();
@@ -655,6 +657,11 @@ namespace noggit
       LogDebug << "[script window]: " << text << "\n";
       _log->appendPlainText(text.c_str());
       _log->verticalScrollBar()->setValue(_log->verticalScrollBar()->maximum());
+    }
+
+    void scripting_tool::resetLogScroll()
+    {
+      _log->verticalScrollBar()->setValue(0);
     }
 
     void scripting_tool::clearLog()

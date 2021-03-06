@@ -40,7 +40,8 @@ static void install_modules()
       ctr->_ctx->collectStringHeap(nullptr);                         \
       if (auto ex = ctr->_ctx->getException())                       \
       {                                                              \
-        get_cur_tool()->addLog("exception: " + std::to_string(*ex)); \
+        get_cur_tool()->addLog("[error]: " + std::to_string(*ex));   \
+        get_cur_tool()->resetLogScroll();                            \
       }                                                              \
     }                                                                \
   }
@@ -239,6 +240,7 @@ namespace noggit
           {
             get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
           }
+          get_cur_tool()->resetLogScroll();
 
           delete ctx;
           for (auto &ctr : containers)
@@ -342,6 +344,7 @@ namespace noggit
       catch (std::exception const &e)
       {
         get_cur_tool()->addLog(("[error]: " + std::string(e.what())));
+        get_cur_tool()->resetLogScroll();
       }
     }
   } // namespace scripting
