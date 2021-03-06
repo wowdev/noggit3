@@ -133,8 +133,7 @@ public:
     FUNC_SCOPED(img_width, worstDefault);
     FUNC_SCOPED(img_height, worstDefault);
     FUNC_RETVALUE(create_image, worstDefault);
-    FUNC_SCOPED(img_resize, worstDefault);
-    FUNC_SCOPED(img_load_png, worstDefault);
+    FUNC_RETVALUE(load_png, worstDefault);
 
     FUNC_SCOPED(write_file, worstDefault);
     FUNC_SCOPED(append_file, worstDefault);
@@ -142,9 +141,8 @@ public:
     FUNC_SCOPED(path_exists, worstDefault);
 
     // selections.hpp
-    FUNC_RETVALUE(make_selector, worstDefault);
-    FUNC_SCOPED(select_origin, worstDefault);
-    FUNC_SCOPED(select_between, worstDefault);
+    FUNC_RETVALUE(select_origin, worstDefault);
+    FUNC_RETVALUE(select_between, worstDefault);
     FUNC_SCOPED(sel_next_chunk, worstDefault);
     FUNC_RETVALUE(sel_get_chunk, worstDefault);
     FUNC_SCOPED(sel_reset_chunk_itr, worstDefault);

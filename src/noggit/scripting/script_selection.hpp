@@ -45,9 +45,8 @@ namespace noggit
       script_model_iterator _models;
     };
 
-    script_selection make_selector();
-    void select_origin(script_selection& sel, math::vector_3d const& origin, float xRadius, float zRadius);
-    void select_between(script_selection& sel, math::vector_3d const& point1, math::vector_3d const& point2);
+    script_selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius);
+    script_selection select_between(math::vector_3d const& point1, math::vector_3d const& point2);
 
     bool sel_next_chunk(script_selection& sel, das::Context* ctx);
     script_chunk sel_get_chunk(script_selection& sel);

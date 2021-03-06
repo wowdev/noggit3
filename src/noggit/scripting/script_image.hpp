@@ -32,9 +32,7 @@ namespace noggit
     void img_save(script_image& img, char const* filename);
     int img_width(script_image const& img);
     int img_height(script_image const& img);
-    void img_resize(script_image& img, int width, int height, das::Context* ctx);
-    void img_load_png(script_image& img, char const* path, das::Context* ctx);
-
-    script_image create_image();
+    script_image create_image(int width, int height, das::Context * ctx);
+    script_image load_png(const char* path, das::Context * ctx);
   } // namespace scripting
 } // namespace noggit

@@ -12,27 +12,7 @@ namespace noggit
 {
   namespace scripting
   {
-    void img_load_png(script_image& img, char const* path, das::Context* ctx)
-    {
-      if(path==nullptr)
-      {
-          throw script_exception("img_load_png","empty png path");
-      }
-      // annoying, but lodepng only takes a vector
-      std::vector<unsigned char> vec;
-      unsigned error = lodepng::decode(vec, img._width, img._height, path);
-      if (error)
-      {
-        throw script_exception(
-          "img_load_png",
-          "failed to load png image with error code:" 
-          + std::to_string (error));
-      }
-      img_resize(img, img._width, img._height, ctx);
-      memcpy(img.get_image(), vec.data(), vec.size());
-    }
-
-    void img_resize(script_image& img, int width, int height, das::Context* ctx)
+    static void img_resize(script_image& img, int width, int height, das::Context* ctx)
     {
       if(width<=0||height<=0)
       {
@@ -49,6 +29,35 @@ namespace noggit
       img._width = width;
       img._height = height;
       img._image = script_calloc(img._size, ctx);
+    }
+
+    script_image load_png(char const* path, das::Context* ctx)
+    {
+      script_image img;
+      if(path==nullptr)
+      {
+          throw script_exception("load_png","empty png path");
+      }
+      // annoying, but lodepng only takes a vector
+      std::vector<unsigned char> vec;
+      unsigned error = lodepng::decode(vec, img._width, img._height, path);
+      if (error)
+      {
+        throw script_exception(
+          "img_load_png",
+          "failed to load png image with error code:" 
+          + std::to_string (error));
+      }
+      img_resize(img, img._width, img._height, ctx);
+      memcpy(img.get_image(), vec.data(), vec.size());
+      return img;
+    }
+
+    script_image create_image(int width, int height, das::Context * ctx)
+    {
+      script_image img;
+      img_resize(img,width,height, ctx);
+      return img;
     }
 
     int img_width(script_image const& img)
@@ -87,11 +96,6 @@ namespace noggit
         | img.get_image()[index + 1] << 16 
         | img.get_image()[index + 2] << 8 
         | img.get_image()[index + 3];
-    }
-
-    script_image create_image()
-    {
-      return script_image();
     }
 
     void img_set_pixel(script_image& img, int x, int y, unsigned value)
