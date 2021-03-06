@@ -126,15 +126,15 @@ namespace noggit
       }
     }
 
-    char const* model_get_filename(script_model const& model)
+    char const* model_get_filename(script_model const& model, das::Context * ctx)
     {
       if (model._is_wmo)
       {
-        return script_malloc_string(wmo_const(model)->wmo->filename);
+        return script_calloc_string(wmo_const(model)->wmo->filename, ctx);
       }
       else
       {
-        return script_malloc_string(m2_const(model)->model->filename);
+        return script_calloc_string(m2_const(model)->model->filename, ctx);
       }
     }
 
@@ -152,7 +152,7 @@ namespace noggit
       get_ctx("model_remove")->_world->delete_models(type);
     }
 
-    void model_set_filename(script_model& model, char const* filename)
+    void model_set_filename(script_model& model, char const* filename, das::Context* ctx)
     {
       if(filename==nullptr)
       {
@@ -161,7 +161,7 @@ namespace noggit
           "empty filename (in call to model_set_filename)");
       }
 
-      if (model_get_filename(model) == filename)
+      if (model_get_filename(model, ctx) == filename)
       {
         return;
       }
@@ -188,13 +188,8 @@ namespace noggit
     script_model_iterator::script_model_iterator(World* world, math::vector_3d min, math::vector_3d max)
       : _world(world), _min(min), _max(max) {}
 
-    void script_model_iterator::query()
+    void script_model_iterator::query(das::Context* ctx)
     {
-      if (_models != nullptr)
-      {
-        script_free(_models);
-      }
-
       std::vector<script_model> models;
 
       _world->for_each_m2_instance([&](ModelInstance& model) {
@@ -212,9 +207,8 @@ namespace noggit
 
       _models_size = models.size();
       size_t size = models.size() * sizeof(script_model);
-      _models = (script_model*)script_calloc(size);
-      memcpy(_models, models.data(), size);
-
+      _models = script_calloc(size,ctx);
+      memcpy(get_models(), models.data(), size);
       _initialized = true;
       reset_itr();
     }
@@ -224,11 +218,11 @@ namespace noggit
       _model_index = -1;
     }
 
-    bool script_model_iterator::next()
+    bool script_model_iterator::next(das::Context* ctx)
     {
       if (!_initialized)
       {
-        query();
+        query(ctx);
       }
 
       if (_model_index >= int(_models_size))
@@ -248,7 +242,8 @@ namespace noggit
           "script_model_iterator#get",
           "accessing invalid model: iterator is done");
       }
-      return _models[_model_index];
+
+      return get_models()[_model_index];
     }
   } // namespace scripting
 } // namespace noggit

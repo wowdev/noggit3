@@ -8,6 +8,10 @@ class World;
 class ModelInstance;
 class WMOInstance;
 
+namespace das {
+  class Context;
+}
+
 namespace noggit
 {
   namespace scripting
@@ -31,15 +35,16 @@ namespace noggit
       math::vector_3d _min;
       math::vector_3d _max;
 
-      script_model* _models = nullptr;
+      char* _models = nullptr;
+      script_model* get_models() { return (script_model*)_models;}
 
       bool _initialized = false;
       int _model_index = -1;
       int _models_size = 0;
 
-      bool next();
+      bool next(das::Context * ctx);
       void reset_itr();
-      void query();
+      void query(das::Context* ctx);
       script_model get();
     };
 
@@ -56,7 +61,7 @@ namespace noggit
 
     void model_remove(script_model& model);
 
-    const char* model_get_filename(script_model const& model);
-    void model_set_filename(script_model& model, const char* filename);
+    const char* model_get_filename(script_model const& model, das::Context* ctx);
+    void model_set_filename(script_model& model, const char* filename, das::Context* ctx);
   } // namespace scripting
 } // namespace noggit

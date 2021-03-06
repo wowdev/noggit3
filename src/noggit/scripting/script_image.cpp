@@ -1,4 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+#include <daScript/daScript.h>
+
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
@@ -10,7 +12,7 @@ namespace noggit
 {
   namespace scripting
   {
-    void img_load_png(script_image& img, char const* path)
+    void img_load_png(script_image& img, char const* path, das::Context* ctx)
     {
       if(path==nullptr)
       {
@@ -26,11 +28,11 @@ namespace noggit
           "failed to load png image with error code:" 
           + std::to_string (error));
       }
-      img_resize(img, img._width, img._height);
-      memcpy(img._image, vec.data(), vec.size());
+      img_resize(img, img._width, img._height, ctx);
+      memcpy(img.get_image(), vec.data(), vec.size());
     }
 
-    void img_resize(script_image& img, int width, int height)
+    void img_resize(script_image& img, int width, int height, das::Context* ctx)
     {
       if(width<=0||height<=0)
       {
@@ -42,15 +44,11 @@ namespace noggit
           + std::to_string(height)
         );
       }
-      if (img._image != nullptr)
-      {
-        script_free(img._image);
-      }
       // m is for more fun
       img._size = width*height*4;
       img._width = width;
       img._height = height;
-      img._image = (unsigned char*)script_malloc(img._size);
+      img._image = script_calloc(img._size, ctx);
     }
 
     int img_width(script_image const& img)
@@ -85,7 +83,10 @@ namespace noggit
     unsigned img_get_pixel(script_image const& img, int x, int y)
     {
       unsigned index = img_get_index(img, x, y);
-      return img._image[index] << 24 | img._image[index + 1] << 16 | img._image[index + 2] << 8 | img._image[index + 3];
+      return img.get_image()[index] << 24 
+        | img.get_image()[index + 1] << 16 
+        | img.get_image()[index + 2] << 8 
+        | img.get_image()[index + 3];
     }
 
     script_image create_image()
@@ -96,15 +97,15 @@ namespace noggit
     void img_set_pixel(script_image& img, int x, int y, unsigned value)
     {
       unsigned index = img_get_index(img, x, y);
-      img._image[index] = (value << 24);
-      img._image[index + 1] = (value << 16) & 0xff;
-      img._image[index + 2] = (value << 8) & 0xff;
-      img._image[index + 3] = (value) & 0xff;
+      img.get_image()[index] = (value << 24);
+      img.get_image()[index + 1] = (value << 16) & 0xff;
+      img.get_image()[index + 2] = (value << 8) & 0xff;
+      img.get_image()[index + 3] = (value) & 0xff;
     }
 
     void img_save(script_image& img, char const* filename)
     {
-      unsigned error = lodepng::encode(filename, img._image, img._width, img._height);
+      unsigned error = lodepng::encode(filename, img.get_image(), img._width, img._height);
       if (error)
       {
         throw script_exception(
@@ -126,7 +127,7 @@ namespace noggit
       }
       int x = std::floor(rel * float(img._width));
       // read red channel, but it shouldn't matter.
-      return float(img._image[x * 4]) / 255.0;
+      return float(img.get_image()[x * 4]) / 255.0;
     }
   } // namespace scripting
 } // namespace noggit

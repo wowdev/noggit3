@@ -30,48 +30,48 @@ static void install_modules()
   NEED_MODULE(NoggitModule);
 }
 
-#define CALL_FUNC(ctr, type)                 \
-  if (ctr)                         \
-  {                            \
-    if (ctr->_on_##type)                 \
-    {                          \
-      auto fun = ctr->_ctx->findFunction(#type);     \
-      ctr->_ctx->eval(fun, nullptr);           \
-      ctr->_ctx->collectStringHeap(nullptr); \
-      if (auto ex = ctr->_ctx->getException())     \
-      {                        \
-        get_cur_tool()->addLog("exception: " + std::to_string (*ex)); \
-      }                        \
-    }                          \
+#define CALL_FUNC(ctr, type)                                         \
+  if (ctr)                                                           \
+  {                                                                  \
+    if (ctr->_on_##type)                                             \
+    {                                                                \
+      auto fun = ctr->_ctx->findFunction(#type);                     \
+      ctr->_ctx->eval(fun, nullptr);                                 \
+      ctr->_ctx->collectStringHeap(nullptr);                         \
+      if (auto ex = ctr->_ctx->getException())                       \
+      {                                                              \
+        get_cur_tool()->addLog("exception: " + std::to_string(*ex)); \
+      }                                                              \
+    }                                                                \
   }
 
 struct script_container
 {
   script_container(
-    std::string name,
-    std::string display_name,
-    das::Context* ctx,
-    bool select,
-    bool left_click,
-    bool left_hold,
-    bool left_release,
-    bool right_click,
-    bool right_hold,
-    bool right_release) : _ctx(ctx),
-                _name(name),
-                _display_name(display_name),
-                _on_select(select),
-                _on_left_click(left_click),
-                _on_left_hold(left_hold),
-                _on_left_release(left_release),
-                _on_right_click(right_click),
-                _on_right_hold(right_hold),
-                _on_right_release(right_release)
+      std::string name,
+      std::string display_name,
+      das::Context *ctx,
+      bool select,
+      bool left_click,
+      bool left_hold,
+      bool left_release,
+      bool right_click,
+      bool right_hold,
+      bool right_release) : _ctx(ctx),
+                            _name(name),
+                            _display_name(display_name),
+                            _on_select(select),
+                            _on_left_click(left_click),
+                            _on_left_hold(left_hold),
+                            _on_left_release(left_release),
+                            _on_right_click(right_click),
+                            _on_right_hold(right_hold),
+                            _on_right_release(right_release)
   {
   }
   script_container() = default;
 
-  das::Context* _ctx = nullptr;
+  das::Context *_ctx = nullptr;
 
   std::string _name;
   std::string _display_name;
@@ -89,7 +89,7 @@ struct script_container
 
 static std::vector<script_container> containers;
 
-static script_container* get_container()
+static script_container *get_container()
 {
   if (cur_script < 0)
   {
@@ -98,7 +98,7 @@ static script_container* get_container()
   return &containers[cur_script];
 }
 
-static bool ends_with(std::string const& str, std::string const& suffix)
+static bool ends_with(std::string const &str, std::string const &suffix)
 {
   return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
 }
@@ -108,14 +108,15 @@ class NoggitContext : public das::Context
 {
 public:
   NoggitContext(int stackSize) : das::Context(stackSize) {}
-  virtual void to_out(char const*msg) override
+  virtual void to_out(char const *msg) override
   {
-    get_cur_tool()->addLog(msg);
+    // if string is empty, make an empty line
+    get_cur_tool()->addLog(msg != nullptr ? msg : "");
   }
 
-  virtual void to_err(char const*msg) override
+  virtual void to_err(char const *msg) override
   {
-    get_cur_tool()->addLog(msg);
+    get_cur_tool()->addLog(msg != nullptr ? msg : "");
   }
 };
 
@@ -149,16 +150,16 @@ namespace noggit
     std::string selected_script_name()
     {
       return cur_script >= 0 && cur_script < containers.size()
-             ? containers[cur_script]._name
-             : "";
+                 ? containers[cur_script]._name
+                 : "";
     }
 
-    std::string const& get_script_name(int id)
+    std::string const &get_script_name(int id)
     {
       return containers[id]._name;
     }
 
-    std::string const& get_script_display_name(int id)
+    std::string const &get_script_display_name(int id)
     {
       return containers[id]._display_name;
     }
@@ -190,7 +191,7 @@ namespace noggit
       cur_script = -1;
       int new_index = -1;
 
-      for (auto& ctr : containers)
+      for (auto &ctr : containers)
       {
         // There may be a better way to do this
         // with the reset/resetHeap calls.
@@ -200,29 +201,33 @@ namespace noggit
 
       das::ModuleGroup dummyLibGroup;
 
-      auto itr = read_directory("scripts");
-      while (file_itr_next(itr))
+      boost::filesystem::recursive_directory_iterator dir("scripts"), end;
+
+      while (dir != end)
       {
-        std::string file = file_itr_get(itr);
+        if (boost::filesystem::is_directory(dir->path()))
+          continue;
+        std::string file = dir->path().string();
+        ++dir;
         if (!ends_with(file, ".das") || ends_with(file, ".spec.das"))
           continue;
 
         auto fAccess = das::make_smart<das::FsFileAccess>();
         auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup, true);
 
-        if (!program->options.find("persistent_heap",das::Type::tBool))
+        if (!program->options.find("persistent_heap", das::Type::tBool))
         {
-          program->options.push_back(das::AnnotationArgument("persistent_heap",true));
+          program->options.push_back(das::AnnotationArgument("persistent_heap", true));
         }
 
-        if (!program->options.find("persistent_string_heap",das::Type::tBool))
+        if (!program->options.find("persistent_string_heap", das::Type::tBool))
         {
-          program->options.push_back(das::AnnotationArgument("persistent_string_heap",true));
+          program->options.push_back(das::AnnotationArgument("persistent_string_heap", true));
         }
 
-        if (!program->options.find("intern_strings",das::Type::tBool))
+        if (!program->options.find("intern_strings", das::Type::tBool))
         {
-          program->options.push_back(das::AnnotationArgument("intern_strings",false));
+          program->options.push_back(das::AnnotationArgument("intern_strings", false));
         }
 
         auto ctx = new NoggitContext(program->getContextStackSize());
@@ -230,13 +235,13 @@ namespace noggit
         {
           get_cur_tool()->setStyleSheet("background-color: #f0a5a5;");
           get_cur_tool()->addLog("Script error:");
-          for (auto& err : program->errors)
+          for (auto &err : program->errors)
           {
             get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
           }
 
           delete ctx;
-          for (auto& ctr : containers)
+          for (auto &ctr : containers)
           {
             delete ctr._ctx;
           }
@@ -246,16 +251,16 @@ namespace noggit
 
         bool is_any = false;
 
-#define CHECK_FUNC(ctx, type)                    \
-  auto on_##type = ctx->findFunction(#type);           \
-  auto is_##type = false;                    \
-  if (on_##type)                         \
-  {                                \
+#define CHECK_FUNC(ctx, type)                                       \
+  auto on_##type = ctx->findFunction(#type);                        \
+  auto is_##type = false;                                           \
+  if (on_##type)                                                    \
+  {                                                                 \
     if (das::verifyCall<void>(on_##type->debugInfo, dummyLibGroup)) \
-    {                              \
-      is_##type = true;                    \
-      is_any = true;                     \
-    }                              \
+    {                                                               \
+      is_##type = true;                                             \
+      is_any = true;                                                \
+    }                                                               \
   }
 
         CHECK_FUNC(ctx, select);
@@ -279,31 +284,31 @@ namespace noggit
           auto title_fun = ctx->findFunction("title");
           if (title_fun)
           {
-            if (!das::verifyCall<char const*>(title_fun->debugInfo, dummyLibGroup))
+            if (!das::verifyCall<char const *>(title_fun->debugInfo, dummyLibGroup))
             {
               get_cur_tool()->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
             }
             else
             {
-              auto result = das::cast<char const*>::to(ctx->eval(title_fun));
+              auto result = das::cast<char const *>::to(ctx->eval(title_fun));
               if (result)
               {
-                display_name = result;
+                display_name = std::string(result);
               }
             }
           }
 
           containers.push_back(script_container(
-            module_name,
-            display_name,
-            ctx,
-            is_select,
-            is_left_click,
-            is_left_hold,
-            is_left_release,
-            is_right_click,
-            is_right_hold,
-            is_right_release));
+              module_name,
+              display_name,
+              ctx,
+              is_select,
+              is_left_click,
+              is_left_hold,
+              is_left_release,
+              is_right_click,
+              is_right_hold,
+              is_right_release));
         }
       }
 
@@ -330,9 +335,11 @@ namespace noggit
 
       cur_script = index;
       auto ref = &containers[index];
-      try {
+      try
+      {
         CALL_FUNC(ref, select);
-      } catch(std::exception const& e)
+      }
+      catch (std::exception const &e)
       {
         get_cur_tool()->addLog(("[error]: " + std::string(e.what())));
       }
@@ -341,4 +348,3 @@ namespace noggit
 } // namespace noggit
 
 #include <noggit/scripting/script_loader-noggit_module.ipp>
-

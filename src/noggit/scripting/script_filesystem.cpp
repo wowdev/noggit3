@@ -1,7 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <noggit/scripting/script_filesystem.hpp>
-#include <noggit/scripting/script_exception.hpp>
+#include <daScript/daScript.h> // must be on top
+
 #include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_filesystem.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -9,15 +11,6 @@ namespace noggit
 {
   namespace scripting
   {
-    static void skip_dirs(script_file_iterator& itr)
-    {
-      while (itr._wrapper->_dir != itr._wrapper->_end &&
-           boost::filesystem::is_directory(itr._wrapper->_dir->path()))
-      {
-        ++itr._wrapper->_dir;
-      }
-    }
-
     static void mkdirs(char const* pathstr)
     {
       if(pathstr == nullptr)
@@ -32,7 +25,7 @@ namespace noggit
       }
     }
 
-    char const* read_file(char const* path)
+    char const* read_file(char const* path, das::Context * ctx)
     {
       if(path==nullptr)
       {
@@ -45,7 +38,7 @@ namespace noggit
       std::ifstream t(path);
       std::string str((std::istreambuf_iterator<char>(t)),
               std::istreambuf_iterator<char>());
-      return script_malloc_string(str);
+      return script_calloc_string(str, ctx);
     }
 
     void write_file(char const* path, char const* input)
@@ -59,7 +52,6 @@ namespace noggit
       {
         // this shouldn't be an invalid operation.
         std::ofstream(path) << "";
-        return;
       }
       else
       {
@@ -93,48 +85,6 @@ namespace noggit
         throw script_exception("path_exists","empty path");
       }
       return fs::exists(path);
-    }
-
-    script_file_iterator read_directory(char const* path)
-    {
-      fs::recursive_directory_iterator
-        dir(path == nullptr ? "" : path),
-        end;
-      return script_file_iterator(dir, end);
-    }
-
-    script_file_iterator::script_file_iterator(fs::recursive_directory_iterator dir, fs::recursive_directory_iterator end)
-    {
-      _wrapper = (script_file_wrapper*)script_calloc(sizeof(script_file_wrapper));
-      _wrapper->_dir = dir;
-      _wrapper->_end = end;
-      skip_dirs(*this);
-    }
-
-    char const* file_itr_get(script_file_iterator const& itr)
-    {
-      if(itr._wrapper->_dir == itr._wrapper->_end)
-      {
-        throw script_exception("file_itr_get","accessing invalid filepath: iterator is done");
-      }
-      return itr._wrapper->_dir->path().string().c_str();
-    }
-
-    bool file_itr_next(script_file_iterator& itr)
-    {
-      if (!itr._started)
-      {
-        itr._started = true;
-        return itr._wrapper->_dir != itr._wrapper->_end;
-      }
-
-      if (itr._wrapper->_dir != itr._wrapper->_end)
-      {
-        ++itr._wrapper->_dir;
-        skip_dirs(itr);
-      }
-
-      return itr._wrapper->_dir != itr._wrapper->_end;
     }
   } // namespace scripting
 } // namespace noggit

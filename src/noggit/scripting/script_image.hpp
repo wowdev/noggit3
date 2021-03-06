@@ -5,6 +5,10 @@
 #include <string>
 #include <memory>
 
+namespace das {
+  class Context;
+}
+
 namespace noggit
 {
   namespace scripting
@@ -12,7 +16,8 @@ namespace noggit
     struct script_image
     {
       script_image() = default;
-      unsigned char* _image = nullptr;
+      char* _image;
+      unsigned char* get_image() const {return (unsigned char*)_image;}
       unsigned _width = 0;
       unsigned _height = 0;
       unsigned _size = 0;
@@ -27,8 +32,8 @@ namespace noggit
     void img_save(script_image& img, char const* filename);
     int img_width(script_image const& img);
     int img_height(script_image const& img);
-    void img_resize(script_image& img, int width, int height);
-    void img_load_png(script_image& img, char const* path);
+    void img_resize(script_image& img, int width, int height, das::Context* ctx);
+    void img_load_png(script_image& img, char const* path, das::Context* ctx);
 
     script_image create_image();
   } // namespace scripting

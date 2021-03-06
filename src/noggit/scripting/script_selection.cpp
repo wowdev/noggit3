@@ -1,4 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+#include <daScript/daScript.h>
+
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_heap.hpp>
@@ -54,20 +56,15 @@ namespace noggit
       return sel._cur_chunk < sel._chunks_size;
     }
 
-    bool sel_next_chunk(script_selection& sel)
+    bool sel_next_chunk(script_selection& sel, das::Context* ctx)
     {
       if (!sel._initialized_chunks)
       {
-        if (sel._chunks != nullptr)
-        {
-          script_free(sel._chunks);
-        }
         std::vector<MapChunk*> chunks;
         sel._world->select_all_chunks_between(sel._min, sel._max, chunks);
-
-        sel._chunks = (MapChunk**)script_calloc(sizeof(MapChunk*) * chunks.size());
+        sel._chunks = script_calloc(sizeof(MapChunk*) * chunks.size(), ctx);
         sel._chunks_size = chunks.size();
-        memcpy(sel._chunks, chunks.data(), chunks.size() * sizeof(MapChunk*));
+        memcpy(sel.get_chunks(), chunks.data(), chunks.size() * sizeof(MapChunk*));
         sel._initialized_chunks = true;
       }
 
@@ -88,12 +85,12 @@ namespace noggit
           "sel_get_chunk",
           "accessing invalid chunk: iterator is done");
       }
-      return script_chunk(&sel, sel._chunks[sel._cur_chunk]);
+      return script_chunk(&sel, sel.get_chunks()[sel._cur_chunk]);
     }
 
-    bool sel_next_model(script_selection& sel)
+    bool sel_next_model(script_selection& sel, das::Context * ctx)
     {
-      return sel._models.next();
+      return sel._models.next(ctx);
     }
 
     script_model sel_get_model(script_selection& sel)
@@ -106,9 +103,9 @@ namespace noggit
       sel._models.reset_itr();
     }
 
-    void sel_requery_models(script_selection& sel)
+    void sel_requery_models(script_selection& sel, das::Context* ctx)
     {
-      sel._models.query();
+      sel._models.query(ctx);
     }
   } // namespace scripting
 } // namespace noggit

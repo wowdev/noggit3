@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <cmath>
 
+#include <daScript/daScript.h>
+
 #include <noggit/camera.hpp>
 #include <noggit/Log.h>
 #include <noggit/scripting/scripting_tool.hpp>
@@ -665,14 +667,14 @@ namespace noggit
       _description->clear();
     }
 
-    char const* get_string_param(char const* path)
+    char const* get_string_param(char const* path, das::Context * ctx)
     {
-      return script_malloc_string(get_json_unsafe<std::string>(path));
+      return script_calloc_string(get_json_unsafe<std::string>(path), ctx);
     }
 
-    char const* get_string_list_param(char const* path)
+    char const* get_string_list_param(char const* path, das::Context * ctx)
     {
-      return get_string_param(path);
+      return get_string_param(path, ctx);
     }
 
     int get_int_param(char const* path)

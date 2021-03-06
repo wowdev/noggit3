@@ -4,6 +4,10 @@
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/MapChunk.h>
 
+namespace das {
+  class Context;
+}
+
 namespace noggit
 {
   namespace scripting
@@ -21,7 +25,7 @@ namespace noggit
     };
 
     void chunk_remove_texture(script_chunk& chunk, int index);
-    char const* chunk_get_texture(script_chunk const& chunk, int index);
+    char const* chunk_get_texture(script_chunk const& chunk, int index, das::Context* ctx);
     int chunk_add_texture(script_chunk& chunk, char const* texture);
     void chunk_clear_textures(script_chunk& chunk);
     void chunk_set_hole(script_chunk& chunk, bool hole);

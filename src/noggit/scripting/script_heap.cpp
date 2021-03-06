@@ -1,6 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+#include <daScript/daScript.h>
+
 #include <noggit/scripting/script_heap.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
+
 #include <vector>
 #include <algorithm>
 
@@ -8,51 +12,40 @@ namespace noggit
 {
   namespace scripting
   {
-    namespace
+    char* script_calloc (unsigned size, das::Context* ctx)
     {
-      std::vector<void*> ptrs;
+      // Force das to store these in the "big things" part of the string heap
+      // (256 should suffice, but not taking any risks)
+      size = std::max(unsigned(257),size);
+      auto g = ctx->stringHeap->allocate(size);
+      return g;
     }
 
-    void* script_malloc (std::size_t size)
+    const char* script_calloc_string(std::string const& str, das::Context* ctx)
     {
-      void* ptr = malloc(size);
-      ptrs.push_back(ptr);
-      return ptr;
+      return ctx->stringHeap->allocateString(str);
     }
 
-    void* script_calloc (std::size_t size)
+    bool overlaps(const char* str1, int length1, const char* str2, int length2)
     {
-      void* ptr = calloc(1, size);
-      ptrs.push_back(ptr);
-      return ptr;
+      unsigned long p1 = (unsigned long)str1;
+      unsigned long p2 = (unsigned long)str2;
+      return p1 <= p2+length2 && p2 <= p1+length1;
     }
 
-    const char* script_malloc_string(std::string const& str)
+    int script_heap_read_byte(const char* str, int offset)
     {
-      char* ptr = (char*) script_malloc(str.size()+1);
-      str.copy(ptr,str.size());
-      ptr[str.size()] = 0;
-      return ptr;
+      return int((unsigned char)str[offset]);
+    }
+
+    void script_heap_write_byte(const char* str, int offset, int byte)
+    {
+      ((unsigned char*)str)[offset] = unsigned char(unsigned(byte));
     }
 
     void script_free_all()
     {
-      for (auto& ptr : ptrs)
-      {
-        free(ptr);
-      }
-      ptrs.clear();
-    }
-
-    void script_free(void* ptr)
-    {
-      std::vector<void*>::iterator pos = std::find(ptrs.begin(), ptrs.end(), ptr);
-      if (pos == ptrs.end())
-      {
-        throw script_exception("script_free","attempted to free invalid memory, this might cause a memory leak.");
-      }
-      ptrs.erase(pos);
-      free(ptr);
+      // TODO: Disable
     }
   } // namespace scripting
 } // namespace noggit

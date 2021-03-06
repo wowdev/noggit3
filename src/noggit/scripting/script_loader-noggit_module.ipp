@@ -17,6 +17,7 @@
 #include <noggit/scripting/script_chunk.hpp>
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_vert.hpp>
+#include <noggit/scripting/script_heap.hpp>
 #include <math/vector_3d.hpp>
 
 #include <daScript/daScript.h>
@@ -40,28 +41,31 @@ using namespace math;
 #define FIELD(name) \
   addField<DAS_BIND_MANAGED_FIELD(name)>(#name);
 
-#define CLASS(name, ...)                               \
-  MAKE_TYPE_FACTORY(name, name);                           \
-  struct name##_annotation : public ManagedStructureAnnotation<name, true, true>   \
-  {                                        \
-    name##_annotation(ModuleLibrary& ml) : ManagedStructureAnnotation(#name, ml) \
-    {                                      \
-      __VA_ARGS__                                \
-    }                                      \
-    virtual bool isLocal() const override { return true; }             \
-    virtual bool canCopy() const override { return true; }             \
-    virtual bool canMove() const override { return true; }             \
+#define CLASS(name, ...)                                                         \
+  MAKE_TYPE_FACTORY(name, name);                                                 \
+  struct name##_annotation : public ManagedStructureAnnotation<name, true, true> \
+  {                                                                              \
+    name##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(#name, ml) \
+    {                                                                            \
+      __VA_ARGS__                                                                \
+    }                                                                            \
+    virtual bool isLocal() const override { return true; }                       \
+    virtual bool canCopy() const override { return true; }                       \
+    /* These three enable use in arrays and maps */                              \
+    virtual bool hasNonTrivialCtor() const override { return false; }            \
+    virtual bool hasNonTrivialDtor() const override { return false; }            \
+    virtual bool hasNonTrivialCopy() const override { return false; }            \
   };
 
-#define CLASS_TEMPLATE(name, template, regname, ...)                             \
-  MAKE_TYPE_FACTORY(name<template>, name<template>);                           \
+#define CLASS_TEMPLATE(name, template, regname, ...)                                                     \
+  MAKE_TYPE_FACTORY(name<template>, name<template>);                                                     \
   struct name##_##template##_annotation : public ManagedStructureAnnotation<name<template>, true, true>{ \
-    name##_##template##_annotation(ModuleLibrary& ml) : ManagedStructureAnnotation(#regname, ml){   \
-      __VA_ARGS__} virtual bool isLocal() const override{return true;                \
-  }                                                    \
-  virtual bool canCopy() const override { return true; }                         \
-  virtual bool canMove() const override { return true; }                         \
-  }                                                    \
+    name##_##template##_annotation(ModuleLibrary & ml) : ManagedStructureAnnotation(#regname, ml){       \
+        __VA_ARGS__} virtual bool isLocal() const override{return true;                                  \
+  }                                                                                                      \
+  virtual bool canCopy() const override { return true; }                                                 \
+  virtual bool canMove() const override { return true; }                                                 \
+  }                                                                                                      \
   ;
 
 #define CLASS_ANNOTATION(name) \
@@ -69,16 +73,13 @@ using namespace math;
 
 // Classes
 CLASS(vector_3d, FIELD(x) FIELD(y) FIELD(z))
-CLASS(script_image)
-CLASS(script_file_iterator)
+CLASS(script_image, FIELD(_image))
 CLASS(script_noise_map)
-CLASS(script_noise_generator)
 CLASS(script_chunk)
 CLASS(script_vert)
 CLASS(script_tex)
 CLASS(script_model)
 CLASS(script_model_iterator)
-
 CLASS(script_random)
 CLASS(script_selection)
 
@@ -94,11 +95,9 @@ public:
     // class annotations
     CLASS_ANNOTATION(vector_3d);
     CLASS_ANNOTATION(script_image);
-    CLASS_ANNOTATION(script_file_iterator);
-    CLASS_ANNOTATION(script_noise_map);
-    CLASS_ANNOTATION(script_noise_generator);
     CLASS_ANNOTATION(script_random);
     CLASS_ANNOTATION(script_selection);
+    CLASS_ANNOTATION(script_noise_map);
     CLASS_ANNOTATION(script_chunk);
     CLASS_ANNOTATION(script_vert);
     CLASS_ANNOTATION(script_tex);
@@ -121,20 +120,11 @@ public:
     FUNC_SCOPED(noise_start_y, worstDefault);
     FUNC_SCOPED(noise_width, worstDefault);
     FUNC_SCOPED(noise_height, worstDefault);
-    FUNC_SCOPED(noise_fill, worstDefault);
-    FUNC_SCOPED(noise_fill_selection, worstDefault);
     FUNC_SCOPED(noise_is_highest_global, worstDefault);
+    FUNC_RETVALUE(make_noise_size, worstDefault);
+    FUNC_RETVALUE(make_noise_selection, worstDefault);
 
-    FUNC_RETVALUE(make_noisemap, worstDefault);
-    FUNC_RETVALUE(make_noisegen_simplex, worstDefault);
-    FUNC_RETVALUE(make_noisegen_perlin, worstDefault);
-    FUNC_RETVALUE(make_noisegen_value, worstDefault);
-    FUNC_RETVALUE(make_noisegen_fractal, worstDefault);
-    FUNC_RETVALUE(make_noisegen_cellular, worstDefault);
-    FUNC_RETVALUE(make_noisegen_white, worstDefault);
-    FUNC_RETVALUE(make_noisegen_custom, worstDefault);
-
-    // script_string.hpp
+    // script_image.hpp
     FUNC_SCOPED(img_get_index, worstDefault);
     FUNC_SCOPED(img_get_pixel, worstDefault);
     FUNC_SCOPED(img_set_pixel, worstDefault);
@@ -146,11 +136,8 @@ public:
     FUNC_SCOPED(img_resize, worstDefault);
     FUNC_SCOPED(img_load_png, worstDefault);
 
-    FUNC_SCOPED(file_itr_next, worstDefault);
-    FUNC_SCOPED(file_itr_get, worstDefault);
     FUNC_SCOPED(write_file, worstDefault);
     FUNC_SCOPED(append_file, worstDefault);
-    FUNC_RETVALUE(read_directory, worstDefault);
     FUNC_SCOPED(read_file, worstDefault);
     FUNC_SCOPED(path_exists, worstDefault);
 
@@ -295,6 +282,12 @@ public:
     FUNC_SCOPED(add_bool_param, worstDefault);
     FUNC_SCOPED(add_string_list_param, worstDefault);
     FUNC_SCOPED(add_description, worstDefault);
+
+    // script_heap (for debugging, remove this later)
+    FUNC_SCOPED(script_heap_read_byte, worstDefault);
+    FUNC_SCOPED(script_heap_write_byte, worstDefault);
+    FUNC_SCOPED(script_calloc, worstDefault);
+    FUNC_SCOPED(overlaps, worstDefault);
   }
 };
 

@@ -1,18 +1,17 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+#include <daScript/daScript.h>
+
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 namespace noggit
 {
   namespace scripting
   {
-    script_noise_map make_noisemap()
-    {
-      return script_noise_map();
-    }
-
     float noise_get_index(script_noise_map const& noise, int x, int y)
     {
       unsigned index = x + y * noise._width;
@@ -29,7 +28,7 @@ namespace noggit
             + std::string(" height=")
             + std::to_string(noise._height));
       }
-      return noise._noise[index];
+      return noise.get_map()[index];
     }
 
     float noise_get_global(script_noise_map& noise, math::vector_3d& pos)
@@ -78,15 +77,35 @@ namespace noggit
             + std::string(" height=")
             + std::to_string(noise._height));
       }
-      noise._noise[index] = value;
+      noise.get_map()[index] = value;
     }
 
-    void script_noise_map::resize(unsigned width, unsigned height, unsigned start_x, unsigned start_y)
+    script_noise_map::script_noise_map(
+        unsigned start_x
+      , unsigned start_y
+      , unsigned width
+      , unsigned height
+      , float frequency
+      , const char* algorithm
+      , const char* seed
+      , das::Context * ctx)
     {
+      if(algorithm==nullptr)
+      {
+          throw script_exception(
+              "make_script_noise"
+              , std::string("invalid noise algorithm (empty string)")
+          );
+      }
+      if (seed == nullptr)
+      {
+          seed = "";
+      }
+
       if(width<=0||height<=0)
       {
         throw script_exception(
-          "resize",
+          "make_script_noise",
           std::string("invalid noise map size:")
           + " width="
           + std::to_string(width)
@@ -99,81 +118,102 @@ namespace noggit
       _start_x = start_x;
       _start_y = start_y;
       _size = width*height;
-      if (_noise != nullptr)
+      _noise = script_calloc(width * height * sizeof(float), ctx);
+
+      auto upper = boost::algorithm::to_upper_copy<std::string>(algorithm);
+    
+      FastNoise::SmartNode<> generator = nullptr;
+      if(upper=="SIMPLEX")
       {
-        script_free(_noise);
+        generator = FastNoise::New<FastNoise::Simplex>();
       }
-      _noise = (float*)script_malloc(width * height * sizeof(float));
-    }
+      else if(upper=="PERLIN")
+      {
+        generator = FastNoise::New<FastNoise::Perlin>();
+      }
+      else if(upper=="VALUE")
+      {
+        generator = FastNoise::New<FastNoise::Value>();
+      }
+      else if(upper=="FRACTAL")
+      {
+        generator = FastNoise::New<FastNoise::FractalFBm>();
+      }
+      else if(upper=="CELLULAR")
+      {
+        generator = FastNoise::New<FastNoise::CellularValue>();
+      }
+      else if(upper=="WHITE")
+      {
+        generator = FastNoise::New<FastNoise::White>();
+      }
+      else
+      {
+        generator = FastNoise::NewFromEncodedNodeTree(algorithm);
+      }
 
-    unsigned noise_start_x(script_noise_map& noise) { return noise._start_x; }
-    unsigned noise_start_y(script_noise_map& noise) { return noise._start_y; }
-    unsigned noise_width(script_noise_map& noise) { return noise._width; }
-    unsigned noise_height(script_noise_map& noise) { return noise._height; }
-
-    script_noise_generator::script_noise_generator(script_noise_wrapper* wrapper)
-      : _wrapper(wrapper) {}
-
-    void noise_fill(script_noise_generator& thiz, script_noise_map& map, char const* seed, int x_start, int y_start, unsigned x_size, unsigned y_size, float frequency)
-    {
-      map.resize(x_size, y_size, x_start, y_start);
-      thiz._wrapper->_generator->GenUniformGrid2D(
-        map._noise, 
-        x_start, 
-        y_start, 
-        x_size, 
-        y_size, 
+      generator->GenUniformGrid2D(
+        get_map(), 
+        start_x, 
+        start_y, 
+        width, 
+        height, 
         frequency, 
         std::hash<std::string>()(std::string(seed))
       );
     }
 
-    void noise_fill_selection(script_noise_generator& thiz, script_noise_map& map, script_selection& selection, char const* seed, float frequency, int padding)
+    unsigned noise_start_x(script_noise_map& noise) 
+    {
+      return noise._start_x; 
+    }
+    unsigned noise_start_y(script_noise_map& noise) 
+    { 
+      return noise._start_y; 
+    }
+    unsigned noise_width(script_noise_map& noise) 
+    { 
+      return noise._width; 
+    }
+    unsigned noise_height(script_noise_map& noise) 
+    { 
+      return noise._height; 
+    }
+
+    script_noise_map make_noise_size(
+        int x_start
+      , int y_start 
+      , int x_size
+      , int y_size 
+      , float frequency 
+      , const char* algorithm 
+      , const char* seed
+      , das::Context* ctx)
+    {
+      return script_noise_map(
+        x_start
+        , y_start
+        , x_size
+        , y_size
+        , frequency
+        , algorithm
+        , seed
+        , ctx);
+    }
+
+    script_noise_map make_noise_selection(
+      script_selection const& selection
+      , float frequency
+      , int padding
+      , const char* algorithm
+      , const char* seed
+      , das::Context* ctx)
     {
       auto x_start = std::floor(selection._min.x) - (padding + 1);
       auto z_start = std::floor(selection._min.z) - (padding + 1);
-
       auto x_size = std::ceil(selection._max.x - selection._min.x) + (padding + 1) * 2;
       auto z_size = std::ceil(selection._max.z - selection._min.z) + (padding + 1) * 2;
-
-      noise_fill(thiz, map, seed, x_start, z_start, x_size, z_size, frequency);
-    }
-
-    static script_noise_wrapper* wrap(FastNoise::SmartNode<> generator)
-    {
-      script_noise_wrapper* wrap =
-        (script_noise_wrapper*)script_calloc(sizeof(script_noise_wrapper));
-      wrap->_generator = generator;
-      return wrap;
-    }
-
-    script_noise_generator make_noisegen_simplex()
-    {
-      return script_noise_generator(wrap(FastNoise::New<FastNoise::Simplex>()));
-    }
-    script_noise_generator make_noisegen_perlin()
-    {
-      return script_noise_generator(wrap(FastNoise::New<FastNoise::Perlin>()));
-    }
-    script_noise_generator make_noisegen_value()
-    {
-      return script_noise_generator(wrap(FastNoise::New<FastNoise::Value>()));
-    }
-    script_noise_generator make_noisegen_fractal()
-    {
-      return script_noise_generator(wrap(FastNoise::New<FastNoise::FractalFBm>()));
-    }
-    script_noise_generator make_noisegen_cellular()
-    {
-      return script_noise_generator(wrap(FastNoise::New<FastNoise::CellularValue>()));
-    }
-    script_noise_generator make_noisegen_white()
-    {
-      return script_noise_generator(wrap(FastNoise::New<FastNoise::White>()));
-    }
-    script_noise_generator make_noisegen_custom(char const* encodedNodeTree)
-    {
-      return script_noise_generator(wrap(FastNoise::NewFromEncodedNodeTree(encodedNodeTree)));
+      return script_noise_map(x_start,z_start,x_size,z_size,frequency,algorithm,seed, ctx);
     }
   } // namespace scripting
 } // namespace noggit

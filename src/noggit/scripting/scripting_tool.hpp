@@ -20,6 +20,10 @@
 
 class World;
 
+namespace das {
+  class Context;
+}
+
 namespace noggit
 {
   class camera;
@@ -54,9 +58,7 @@ namespace noggit
       void addInt(char const* name, int min, int max, int def = 0);
       void addBool(char const* name, bool def = false);
       void addString(char const* name, char const* def = "");
-
       void addStringList(char const* name, char const* value);
-
       void removeScriptWidgets();
 
     private:
@@ -101,12 +103,12 @@ namespace noggit
       void initialize_radius();
     };
 
-    char const* get_string_param(char const* path);
     int get_int_param(char const* path);
     double get_double_param(char const* path);
     float get_float_param(char const* path);
     bool get_bool_param(char const* path);
-    char const* get_string_list_param(char const* path);
+    char const* get_string_param(char const* path, das::Context* ctx);
+    char const* get_string_list_param(char const* path, das::Context* ctx);
 
     void add_string_list_param(char const* path, char const* value);
     void add_string_param(char const* path, char const* def);
