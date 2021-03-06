@@ -411,20 +411,20 @@ def read_file(path: string): string
 def path_exists(path: string): bool
     pass
 
-// script_image.hpp
+// image.hpp
 
 /**
  * Returns the pixel value (RGBA) at a specified location in an image
  */
 [export]
-def img_get_pixel(img: script_image,x: script_image, y: script_image): uint
+def img_get_pixel(img: image,x: image, y: image): uint
     pass
 
 /**
  * Sets the pixel value (RGBA) at a specified location in an image.
  */
 [export]
-def img_set_pixel(img: script_image,x: int, y: int, value: uint)
+def img_set_pixel(img: image,x: int, y: int, value: uint)
     pass
 
 /**
@@ -437,41 +437,41 @@ def img_set_pixel(img: script_image,x: int, y: int, value: uint)
  * Larger images yield better results, but height is irrelevant.
  */
 [export]
-def img_gradient_scale(img: script_image,scale: float)
+def img_gradient_scale(img: image,scale: float)
 
 /**
  * Writes an image to the file system
  */
 [export]
-def img_save(img: script_image,filename: string): int
+def img_save(img: image,filename: string): int
     pass
 
 /**
  * Returns the width of an image
  */
 [export]
-def width(img: script_image): int
+def width(img: image): int
     pass
 
 /**
  * Returns the height of an image
  */
 [export]
-def height(img: script_image): int
+def height(img: image): int
     pass
 
 /**
  * Loads an image from the file system
  */
 [export]
-def load_png(path: string): script_image
+def load_png(path: string): image
     pass
 
 /**
  * Creates a new empty image object
  */
 [export]
-def create_image(width: int, height: int): script_image
+def create_image(width: int, height: int): image
     pass
 
 [export]
@@ -604,50 +604,50 @@ def rotate_2d(point: vector_3d, origin: vector_3d, degrees: float): vector_3d
  * Gets the value of this noise in global space
  */
 [export]
-def noise_get(noise: script_noise_map, pos: vector_3d): float
+def noise_get(noise: noisemap, pos: vector_3d): float
     pass
 
 /**
  * Checks if the noise point is the highest within a given radius. Uses global coordinates
  */
 [export]
-def noise_is_highest(noise: script_noise_map, pos: vector_3d, check_radius: int)
+def noise_is_highest(noise: noisemap, pos: vector_3d, check_radius: int)
     pass
 
 /**
  * Returns the starting coordinates of a noise map. Uses x/z, y is always 0.
  */
 [export]
-def noise_start(noise: script_noise_map): vector_3d
+def noise_start(noise: noisemap): vector_3d
     pass
 
 /**
  * Returns the width of a noise map
  */
 [export]
-def width(noise: script_noise_map): int
+def width(noise: noisemap): int
     pass
 
 /**
  * Returns the height of a noise map
  */
 [export]
-def height(noise: script_noise_map): int
+def height(noise: noisemap): int
     pass
 
 [export]
-def make_noise_size(start_x: int, start_y: int, width: int, height: int, frequency: float, algorithm: string, seed: string): script_noise_map
+def make_noise_size(start_x: int, start_y: int, width: int, height: int, frequency: float, algorithm: string, seed: string): noisemap
     pass
 
 [export]
-def make_noise_selection(sel: script_selection, frequency: float, algorithm: string, seed: string): script_noise_map
+def make_noise_selection(sel: selection, frequency: float, algorithm: string, seed: string): noisemap
     pass
 
 /**
  * Fills a noisemap
  */
 [export]
-def noise_fill(thiz: script_noise_generator, map: script_map,seed: string, x: int, y: int, xSize: int, ySize: int, frequency: float): script_noise_map
+def noise_fill(thiz: script_noise_generator, map: script_map,seed: string, x: int, y: int, xSize: int, ySize: int, frequency: float): noisemap
     pass
 
 /**
@@ -655,211 +655,211 @@ def noise_fill(thiz: script_noise_generator, map: script_map,seed: string, x: in
  * @param padding: How many extra cells should be added around the entire selection
  */
 [export]
-def noise_fill_selection(generator: script_noise_generator, map: script_map, sel: script_selection,seed: string, frequency: float, padding: int): script_noise_map
+def noise_fill_selection(generator: script_noise_generator, map: script_map, sel: selection,seed: string, frequency: float, padding: int): noisemap
     pass
 
 [export]
-def rand_int32(rand: script_random, low: int, high: int): int
+def rand_int32(rand: random, low: int, high: int): int
     pass
 
 [export]
-def rand_float(rand: script_random, low: float, high: float): float
+def rand_float(rand: random, low: float, high: float): float
     pass
 
 [export]
-def random_from_seed(seed: string): script_random
+def random_from_seed(seed: string): random
     pass
 
 [export]
-def random_from_time(): script_random
+def random_from_time(): random
     pass
 
 [export]
-def select_origin(origin: vector_3d, x_radius: float, z_radius: float): script_selection
+def select_origin(origin: vector_3d, x_radius: float, z_radius: float): selection
     pass
 
 [export]
-def select_between(pos1: vector_3d, pos2: vector_3d): script_selection
+def select_between(pos1: vector_3d, pos2: vector_3d): selection
     pass
 
 [export]
-def sel_next_chunk(script_selection &sel): bool
+def sel_next_chunk(selection &sel): bool
     pass
 
 [export]
-def sel_get_chunk(script_selection &sel): script_chunk
+def sel_get_chunk(selection &sel): chunk
     pass
 
 [export]
-def sel_reset_chunk_itr(script_selection &sel)
+def sel_reset_chunk_itr(selection &sel)
     pass
 
 [export]
-def sel_next_model(script_selection &sel): bool
+def sel_next_model(selection &sel): bool
     pass
 
 [export]
-def sel_get_model(script_selection &sel): script_model
+def sel_get_model(selection &sel): model
     pass
 
 [export]
-def sel_reset_model_itr(script_selection &sel)
+def sel_reset_model_itr(selection &sel)
     pass
 
 [export]
-def sel_requery_models(script_selection &sel)
+def sel_requery_models(selection &sel)
     pass
 
 [export]
-def sel_center(script_selection &sel): vector_3d
+def sel_center(selection &sel): vector_3d
     pass
 
 [export]
-def sel_min(script_selection &sel): vector_3d
+def sel_min(selection &sel): vector_3d
     pass
 
 [export]
-def sel_max(script_selection &sel): vector_3d
+def sel_max(selection &sel): vector_3d
     pass
 
 [export]
-def sel_size(script_selection &sel): vector_3d
+def sel_size(selection &sel): vector_3d
     pass
 
 [export]
-def chunk_set_hole(script_chunk &chunk, hole: bool)
+def chunk_set_hole(chunk &chunk, hole: bool)
     pass
 
 [export]
-def chunk_remove_texture(chunk: script_chunk, index: int)
+def chunk_remove_texture(chunk: chunk, index: int)
     pass
 
 [export]
-def chunk_get_texture(chunk: script_chunk, int index): string
+def chunk_get_texture(chunk: chunk, int index): string
     pass
 
 [export]
-def chunk_add_texture(chunk: script_chunk, texture: string): int
+def chunk_add_texture(chunk: chunk, texture: string): int
     pass
 
 [export]
-def chunk_clear_textures(script_chunk &chunk)
+def chunk_clear_textures(chunk &chunk)
     pass
 
 [export]
-def chunk_apply_textures(script_chunk &chunk)
+def chunk_apply_textures(chunk &chunk)
     pass
 
 [export]
-def chunk_apply_heightmap(script_chunk &chunk)
+def chunk_apply_heightmap(chunk &chunk)
     pass
 
 [export]
-def chunk_apply_vertex_color(script_chunk &chunk)
+def chunk_apply_vertex_color(chunk &chunk)
     pass
 
 [export]
-def chunk_apply_all(script_chunk &chunk)
+def chunk_apply_all(chunk &chunk)
     pass
 
 [export]
-def chunk_set_impassable(script_chunk &chunk, bool add)
+def chunk_set_impassable(chunk &chunk, bool add)
     pass
 
 [export]
-def chunk_get_area_id(script_chunk &chunk): int
+def chunk_get_area_id(chunk &chunk): int
     pass
 
 [export]
-def chunk_set_area_id(script_chunk &chunk, int value)
+def chunk_set_area_id(chunk &chunk, int value)
     pass
 
 [export]
-def chunk_next_vert(script_chunk &chunk): bool
+def chunk_next_vert(chunk &chunk): bool
     pass
 
 [export]
-def chunk_next_tex(script_chunk &chunk): bool
+def chunk_next_tex(chunk &chunk): bool
     pass
 
 [export]
-def chunk_reset_vert_itr(script_chunk &chunk)
+def chunk_reset_vert_itr(chunk &chunk)
     pass
 
 [export]
-def chunk_reset_tex_itr(script_chunk &chunk)
+def chunk_reset_tex_itr(chunk &chunk)
     pass
 
 [export]
-def chunk_get_vert(script_chunk &chunk): script_vert
+def chunk_get_vert(chunk &chunk): vert
     pass
 
 [export]
-def chunk_get_tex(script_chunk &chunk): script_vert
+def chunk_get_tex(chunk &chunk): vert
     pass
 
 [export]
-def chunk_clear_colors(script_chunk &chunk)
+def chunk_clear_colors(chunk &chunk)
     pass
 
 [export]
-def vert_get_pos(script_vert& vert): vector_3d
+def vert_get_pos(vert& vert): vector_3d
     pass
 
 [export]
-def vert_set_height(script_vert& vert,float y)
+def vert_set_height(vert& vert,float y)
     pass
 
 [export]
-def vert_add_height(script_vert& vert,float y)
+def vert_add_height(vert& vert,float y)
     pass
 
 [export]
-def vert_sub_height(script_vert& vert,float y)
+def vert_sub_height(vert& vert,float y)
     pass
 
 [export]
-def vert_set_color(script_vert& vert, float r, float g, float b)
+def vert_set_color(vert& vert, float r, float g, float b)
     pass
 
 [export]
-def vert_set_water(script_vert& vert, int type, float height)
+def vert_set_water(vert& vert, int type, float height)
     pass
 
 [export]
-def vert_set_hole(script_vert& vert, bool add)
+def vert_set_hole(vert& vert, bool add)
     pass
 
 [export]
-def vert_set_alpha(script_vert& vert, int index, float alpha)
+def vert_set_alpha(vert& vert, int index, float alpha)
     pass
 
 [export]
-def vert_get_alpha(script_vert& vert, int index): float
+def vert_get_alpha(vert& vert, int index): float
     pass
 
 [export]
-def vert_next_tex(script_vert& vert): bool
+def vert_next_tex(vert& vert): bool
     pass
 
 [export]
-def vert_reset_tex(script_vert& vert)
+def vert_reset_tex(vert& vert)
     pass
 
 [export]
-def vert_get_tex(script_vert& vert): script_tex
+def vert_get_tex(vert& vert): tex
     pass
 
 [export]
-def vert_is_water_aligned(script_vert &chunk): bool
+def vert_is_water_aligned(vert &chunk): bool
     pass
 
 [export]
-def tex_set_alpha(script_tex& tex, int index, float alpha)
+def tex_set_alpha(tex& tex, int index, float alpha)
     pass
 
 [export]
-def tex_get_alpha(script_tex& tex, int index): float
+def tex_get_alpha(tex& tex, int index): float
     pass
 
 /**
@@ -868,43 +868,43 @@ def tex_get_alpha(script_tex& tex, int index): float
  * The returned y value is always 0.
  */
 [export]
-def tex_get_pos_2d(script_tex& tex): float
+def tex_get_pos_2d(tex& tex): float
     pass
 
 [export]
-def model_get_pos(model: script_model): vector_3d
+def model_get_pos(model: model): vector_3d
     pass
 
 [export]
-def model_set_pos(model: script_model,pos: vector_3d)
+def model_set_pos(model: model,pos: vector_3d)
     pass
 
 [export]
-def model_get_rot(model: script_model): vector_3d
+def model_get_rot(model: model): vector_3d
     pass
 
 [export]
-def model_set_rot(model: script_model,rot: vector_3d)
+def model_set_rot(model: model,rot: vector_3d)
     pass
 
 [export]
-def model_get_scale(model: script_model): float
+def model_get_scale(model: model): float
     pass
 
 [export]
-def model_set_scale(model: script_model,scale: float)
+def model_set_scale(model: model,scale: float)
     pass
 
 [export]
-def model_get_filename(model: script_model): string
+def model_get_filename(model: model): string
     pass
 
 [export]
-def model_replace(model: script_model,filename: string)
+def model_replace(model: model,filename: string)
     pass
 
 [export]
-def model_remove(model: script_model)
+def model_remove(model: model)
     pass
 
 [export]

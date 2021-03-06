@@ -44,20 +44,20 @@ using namespace math;
 #define FIELD(name) \
   addField<DAS_BIND_MANAGED_FIELD(name)>(#name);
 
-#define CLASS(name, ...)                                                         \
-  MAKE_TYPE_FACTORY(name, name);                                                 \
-  struct name##_annotation : public ManagedStructureAnnotation<name, true, true> \
-  {                                                                              \
-    name##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(#name, ml) \
-    {                                                                            \
-      __VA_ARGS__                                                                \
-    }                                                                            \
-    virtual bool isLocal() const override { return true; }                       \
-    virtual bool canCopy() const override { return true; }                       \
-    /* These three enable use in arrays and maps */                              \
-    virtual bool hasNonTrivialCtor() const override { return false; }            \
-    virtual bool hasNonTrivialDtor() const override { return false; }            \
-    virtual bool hasNonTrivialCopy() const override { return false; }            \
+#define CLASS(name_in, name_out, ...)                                                  \
+  MAKE_TYPE_FACTORY(name_in, name_in);                                                 \
+  struct name_in##_annotation : public ManagedStructureAnnotation<name_in, true, true> \
+  {                                                                                    \
+    name_in##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(name_out, ml) \
+    {                                                                                  \
+      __VA_ARGS__                                                                      \
+    }                                                                                  \
+    virtual bool isLocal() const override { return true; }                             \
+    virtual bool canCopy() const override { return true; }                             \
+    /* These three enable use in arrays and maps */                                    \
+    virtual bool hasNonTrivialCtor() const override { return false; }                  \
+    virtual bool hasNonTrivialDtor() const override { return false; }                  \
+    virtual bool hasNonTrivialCopy() const override { return false; }                  \
   };
 
 #define CLASS_TEMPLATE(name, template, regname, ...)                                                     \
@@ -75,16 +75,16 @@ using namespace math;
   addAnnotation(make_smart<name##_annotation>(lib));
 
 // Classes
-CLASS(vector_3d, FIELD(x) FIELD(y) FIELD(z))
-CLASS(script_image, FIELD(_image))
-CLASS(script_noise_map)
-CLASS(script_chunk)
-CLASS(script_vert)
-CLASS(script_tex)
-CLASS(script_model)
-CLASS(script_model_iterator)
-CLASS(script_random)
-CLASS(script_selection)
+CLASS(vector_3d, "vector_3d", FIELD(x) FIELD(y) FIELD(z))
+CLASS(script_image, "image", FIELD(_image))
+CLASS(script_noise_map, "noisemap")
+CLASS(script_chunk, "chunk")
+CLASS(script_vert, "vert")
+CLASS(script_tex, "tex")
+CLASS(script_model, "model")
+CLASS(script_model_iterator, "model_iterator")
+CLASS(script_random, "random")
+CLASS(script_selection, "selection")
 
 class NoggitModule : public Module
 {
