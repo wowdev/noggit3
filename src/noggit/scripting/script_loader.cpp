@@ -214,7 +214,7 @@ namespace noggit
           continue;
 
         auto fAccess = das::make_smart<das::FsFileAccess>();
-        auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup, true);
+        auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup, false);
 
         if (!program->options.find("persistent_heap", das::Type::tBool))
         {
