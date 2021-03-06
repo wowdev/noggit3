@@ -12,7 +12,7 @@ namespace noggit
 {
   namespace scripting
   {
-    static float noise_get_index(std::string const& caller, script_noise_map const& noise, int x, int y)
+    static float noise_get_index(std::string const& caller, noisemap const& noise, int x, int y)
     {
       unsigned index = x + y * noise._width;
       if(index<0||index>=noise._size)
@@ -31,12 +31,12 @@ namespace noggit
       return noise.get_map()[index];
     }
 
-    float noise_get(script_noise_map& noise, math::vector_3d& pos)
+    float noise_get(noisemap& noise, math::vector_3d& pos)
     {
       return noise_get_index("noise_get",noise, std::round(pos.x) - noise._start_x, std::round(pos.z) - noise._start_y);
     }
 
-    bool noise_is_highest(script_noise_map& noise, math::vector_3d& pos, int check_radius)
+    bool noise_is_highest(noisemap& noise, math::vector_3d& pos, int check_radius)
     {
       int x = std::round(pos.x) - noise._start_x;
       int z = std::round(pos.z) - noise._start_y;
@@ -61,7 +61,7 @@ namespace noggit
       return true;
     }
 
-    void noise_set(script_noise_map& noise, int x, int y, float value)
+    void noise_set(noisemap& noise, int x, int y, float value)
     {
       unsigned index = x + y * noise._width;
       if(index<0||index>=noise._size)
@@ -80,7 +80,7 @@ namespace noggit
       noise.get_map()[index] = value;
     }
 
-    script_noise_map::script_noise_map(
+    noisemap::noisemap(
         unsigned start_x
       , unsigned start_y
       , unsigned width
@@ -163,21 +163,21 @@ namespace noggit
       );
     }
 
-    math::vector_3d noise_start(script_noise_map const& noise)
+    math::vector_3d noise_start(noisemap const& noise)
     {
       return math::vector_3d(noise._start_x,0,noise._start_y);
     }
 
-    unsigned noise_width(script_noise_map& noise) 
+    unsigned noise_width(noisemap& noise) 
     { 
       return noise._width; 
     }
-    unsigned noise_height(script_noise_map& noise) 
+    unsigned noise_height(noisemap& noise) 
     { 
       return noise._height; 
     }
 
-    script_noise_map make_noise_size(
+    noisemap make_noise_size(
         int x_start
       , int y_start 
       , int x_size
@@ -187,7 +187,7 @@ namespace noggit
       , const char* seed
       , das::Context* ctx)
     {
-      return script_noise_map(
+      return noisemap(
         x_start
         , y_start
         , x_size
@@ -198,8 +198,8 @@ namespace noggit
         , ctx);
     }
 
-    script_noise_map make_noise_selection(
-      script_selection const& selection
+    noisemap make_noise_selection(
+      selection const& selection
       , float frequency
       , int padding
       , const char* algorithm
@@ -210,7 +210,7 @@ namespace noggit
       auto z_start = std::floor(selection._min.z) - (padding + 1);
       auto x_size = std::ceil(selection._max.x - selection._min.x) + (padding + 1) * 2;
       auto z_size = std::ceil(selection._max.z - selection._min.z) + (padding + 1) * 2;
-      return script_noise_map(x_start,z_start,x_size,z_size,frequency,algorithm,seed, ctx);
+      return noisemap(x_start,z_start,x_size,z_size,frequency,algorithm,seed, ctx);
     }
   } // namespace scripting
 } // namespace noggit

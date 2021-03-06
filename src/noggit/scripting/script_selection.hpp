@@ -25,9 +25,9 @@ namespace noggit
 {
   namespace scripting
   {
-    struct script_selection
+    struct selection
     {
-      script_selection() = default;
+      selection() = default;
 
       World* _world;
       math::vector_3d _center;
@@ -42,24 +42,24 @@ namespace noggit
       int _cur_chunk = -1;
       bool _initialized_chunks = false;
 
-      script_model_iterator _models;
+      model_iterator _models;
     };
 
-    script_selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius);
-    script_selection select_between(math::vector_3d const& point1, math::vector_3d const& point2);
+    selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius);
+    selection select_between(math::vector_3d const& point1, math::vector_3d const& point2);
 
-    bool sel_next_chunk(script_selection& sel, das::Context* ctx);
-    script_chunk sel_get_chunk(script_selection& sel);
-    void sel_reset_chunk_itr(script_selection& sel);
+    bool sel_next_chunk(selection& sel, das::Context* ctx);
+    chunk sel_get_chunk(selection& sel);
+    void sel_reset_chunk_itr(selection& sel);
 
-    bool sel_next_model(script_selection& sel, das::Context * ctx);
-    script_model sel_get_model(script_selection& sel);
-    void sel_reset_model_itr(script_selection& sel);
-    void sel_requery_models(script_selection& sel, das::Context* ctx);
+    bool sel_next_model(selection& sel, das::Context * ctx);
+    model sel_get_model(selection& sel);
+    void sel_reset_model_itr(selection& sel);
+    void sel_requery_models(selection& sel, das::Context* ctx);
 
-    math::vector_3d sel_center(script_selection const& sel);
-    math::vector_3d sel_min(script_selection const& sel);
-    math::vector_3d sel_max(script_selection const& sel);
-    math::vector_3d sel_size(script_selection const& sel);
+    math::vector_3d sel_center(selection const& sel);
+    math::vector_3d sel_min(selection const& sel);
+    math::vector_3d sel_max(selection const& sel);
+    math::vector_3d sel_size(selection const& sel);
   } // namespace scripting
 } // namespace noggit

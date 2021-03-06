@@ -18,38 +18,38 @@ namespace noggit
 {
   namespace scripting
   {
-    script_vert::script_vert(MapChunk* chunk, int index)
+    vert::vert(MapChunk* chunk, int index)
       : _chunk(chunk), _index(index)
     {
     }
 
-    script_tex::script_tex(MapChunk* chunk, int index)
+    tex::tex(MapChunk* chunk, int index)
       : _chunk(chunk), _index(index)
     {
     }
 
-    void vert_set_height(script_vert& vert, float value)
+    void vert_set_height(vert& vert, float value)
     {
       vert._chunk->mVertices[vert._index].y = value;
     }
 
-    void vert_add_height(script_vert& vert, float value)
+    void vert_add_height(vert& vert, float value)
     {
       vert._chunk->mVertices[vert._index].y += value;
     }
 
-    void vert_sub_height(script_vert& vert, float value)
+    void vert_sub_height(vert& vert, float value)
     {
       vert._chunk->mVertices[vert._index].y -= value;
     }
 
-    void vert_set_color(script_vert& vert, float r, float g, float b)
+    void vert_set_color(vert& vert, float r, float g, float b)
     {
       vert._chunk->maybe_create_mccv();
       vert._chunk->mccv[vert._index] = math::vector_3d(r, g, b);
     }
 
-    void vert_set_water(script_vert& vert, int type, float height)
+    void vert_set_water(vert& vert, int type, float height)
     {
       if (!vert_is_water_aligned(vert))
       {
@@ -60,17 +60,17 @@ namespace noggit
       vert._chunk->liquid_chunk()->paintLiquid(vert_get_pos(vert), 1, type, true, math::radians(0), math::radians(0), true, math::vector_3d(0, height, 0), true, true, vert._chunk, 1);
     }
 
-    void vert_set_hole(script_vert& vert, bool add)
+    void vert_set_hole(vert& vert, bool add)
     {
       vert._chunk->setHole(vert_get_pos(vert), false, add);
     }
 
-    math::vector_3d vert_get_pos(script_vert const& vert)
+    math::vector_3d vert_get_pos(vert const& vert)
     {
       return vert._chunk->mVertices[vert._index];
     }
 
-    void vert_set_alpha(script_vert& vert, int index, float alpha)
+    void vert_set_alpha(vert& vert, int index, float alpha)
     {
       if(index<0||index>3)
       {
@@ -97,7 +97,7 @@ namespace noggit
       }
     }
 
-    float vert_get_alpha(script_vert const& vert, int index)
+    float vert_get_alpha(vert const& vert, int index)
     {
       if(index<0||index>3)
       {
@@ -128,28 +128,28 @@ namespace noggit
       return sum / float(ctr);
     }
 
-    bool vert_is_water_aligned(script_vert const& vert)
+    bool vert_is_water_aligned(vert const& vert)
     {
       return (vert._index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
     }
 
-    static bool is_tex_done(script_vert& vert)
+    static bool is_tex_done(vert& vert)
     {
       return vert._tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[vert._index].indices[vert._tex_index] == -1;
     }
 
-    void vert_reset_tex(script_vert& vert)
+    void vert_reset_tex(vert& vert)
     {
       vert._tex_index = -1;
     }
 
-    bool vert_next_tex(script_vert& vert)
+    bool vert_next_tex(vert& vert)
     {
       ++vert._tex_index;
       return !is_tex_done(vert);
     }
 
-    script_tex vert_get_tex(script_vert& vert)
+    tex vert_get_tex(vert& vert)
     {
       if(is_tex_done(vert))
       {
@@ -157,17 +157,17 @@ namespace noggit
           "vert_get_tex",
           "accessing invalid texture unit: iterator is done");
       }
-      return script_tex(vert._chunk, texture_index[vert._index].indices[vert._tex_index]);
+      return tex(vert._chunk, texture_index[vert._index].indices[vert._tex_index]);
     }
 
-    float tex_get_alpha(script_tex const& tex, int index)
+    float tex_get_alpha(tex const& tex, int index)
     {
       auto& ts = tex._chunk->texture_set;
       ts->create_temporary_alphamaps_if_needed();
       return ts->tmp_edit_values.get()[index][tex._index];
     }
 
-    void tex_set_alpha(script_tex& tex, int index, float value)
+    void tex_set_alpha(tex& tex, int index, float value)
     {
       if(index<0||index>3)
       {
@@ -183,7 +183,7 @@ namespace noggit
       ts->tmp_edit_values.get()[index][tex._index] = value;
     }
 
-    math::vector_3d tex_get_pos_2d(script_tex const& tex)
+    math::vector_3d tex_get_pos_2d(tex const& tex)
     {
       float cx = tex._chunk->xbase;
       float cz = tex._chunk->zbase;

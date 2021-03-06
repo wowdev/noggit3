@@ -71,7 +71,7 @@ namespace noggit
       float _inner_radius = 0;
 
     private:
-      QComboBox* _script_selection;
+      QComboBox* _selection;
       QPushButton* _reload_button;
 
       QGroupBox* _radius_group;

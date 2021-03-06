@@ -13,9 +13,9 @@ namespace noggit
 {
   namespace scripting
   {
-    struct script_image
+    struct image
     {
-      script_image() = default;
+      image() = default;
       char* _image;
       unsigned char* get_image() const {return (unsigned char*)_image;}
       unsigned _width = 0;
@@ -23,16 +23,16 @@ namespace noggit
       unsigned _size = 0;
     };
 
-    int img_get_index(script_image const& img, int x, int y);
-    unsigned img_get_pixel(script_image const& img, int x, int y);
+    int img_get_index(image const& img, int x, int y);
+    unsigned img_get_pixel(image const& img, int x, int y);
 
-    float img_gradient_scale(script_image const& img, float rel);
+    float img_gradient_scale(image const& img, float rel);
 
-    void img_set_pixel(script_image& img, int x, int y, unsigned value);
-    void img_save(script_image& img, char const* filename);
-    int img_width(script_image const& img);
-    int img_height(script_image const& img);
-    script_image create_image(int width, int height, das::Context * ctx);
-    script_image load_png(const char* path, das::Context * ctx);
+    void img_set_pixel(image& img, int x, int y, unsigned value);
+    void img_save(image& img, char const* filename);
+    int img_width(image const& img);
+    int img_height(image const& img);
+    image create_image(int width, int height, das::Context * ctx);
+    image load_png(const char* path, das::Context * ctx);
   } // namespace scripting
 } // namespace noggit

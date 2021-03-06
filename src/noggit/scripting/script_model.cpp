@@ -16,33 +16,33 @@ namespace noggit
 {
   namespace scripting
   {
-    static const WMOInstance* wmo_const(script_model const& model)
+    static const WMOInstance* wmo_const(model const& model)
     {
       return (const WMOInstance*)model._model;
     }
 
-    static const ModelInstance* m2_const(script_model const& model)
+    static const ModelInstance* m2_const(model const& model)
     {
       return (const ModelInstance*)model._model;
     }
 
-    static WMOInstance* wmo(script_model& model)
+    static WMOInstance* wmo(model& model)
     {
       return (WMOInstance*)model._model;
     }
 
-    static ModelInstance* m2(script_model& model)
+    static ModelInstance* m2(model& model)
     {
       return (ModelInstance*)model._model;
     }
 
-    script_model::script_model(ModelInstance*model)
+    model::model(ModelInstance*model)
       : _model((void*)model), _is_wmo(false) {}
 
-    script_model::script_model(WMOInstance*model)
+    model::model(WMOInstance*model)
       : _model((void*)model), _is_wmo(true) {}
 
-    math::vector_3d model_get_pos(script_model const& model)
+    math::vector_3d model_get_pos(model const& model)
     {
       if (model._is_wmo)
       {
@@ -54,7 +54,7 @@ namespace noggit
       }
     }
 
-    void model_set_pos(script_model& model, math::vector_3d& pos)
+    void model_set_pos(model& model, math::vector_3d& pos)
     {
       if (model._is_wmo)
       {
@@ -66,7 +66,7 @@ namespace noggit
       }
     }
 
-    math::vector_3d model_get_rot(script_model const& model)
+    math::vector_3d model_get_rot(model const& model)
     {
       if (model._is_wmo)
       {
@@ -78,7 +78,7 @@ namespace noggit
       }
     }
 
-    void model_set_rot(script_model& model, math::vector_3d& rot)
+    void model_set_rot(model& model, math::vector_3d& rot)
     {
       if (model._is_wmo)
       {
@@ -90,7 +90,7 @@ namespace noggit
       }
     }
 
-    float model_get_scale(script_model const& model)
+    float model_get_scale(model const& model)
     {
       if (model._is_wmo)
       {
@@ -102,7 +102,7 @@ namespace noggit
       }
     }
 
-    void model_set_scale(script_model& model, float scale)
+    void model_set_scale(model& model, float scale)
     {
       if (model._is_wmo)
       {
@@ -114,7 +114,7 @@ namespace noggit
       }
     }
 
-    unsigned model_get_uid(script_model const& model)
+    unsigned model_get_uid(model const& model)
     {
       if (model._is_wmo)
       {
@@ -126,7 +126,7 @@ namespace noggit
       }
     }
 
-    char const* model_get_filename(script_model const& model, das::Context * ctx)
+    char const* model_get_filename(model const& model, das::Context * ctx)
     {
       if (model._is_wmo)
       {
@@ -138,7 +138,7 @@ namespace noggit
       }
     }
 
-    void model_remove(script_model& model)
+    void model_remove(model& model)
     {
       std::vector<selection_type> type;
       if (model._is_wmo)
@@ -152,7 +152,7 @@ namespace noggit
       get_ctx("model_remove")->_world->delete_models(type);
     }
 
-    void model_replace(script_model& model, char const* filename, das::Context* ctx)
+    void model_replace(model& model, char const* filename, das::Context* ctx)
     {
       if(filename==nullptr)
       {
@@ -185,40 +185,40 @@ namespace noggit
       }
     }
 
-    script_model_iterator::script_model_iterator(World* world, math::vector_3d min, math::vector_3d max)
+    model_iterator::model_iterator(World* world, math::vector_3d min, math::vector_3d max)
       : _world(world), _min(min), _max(max) {}
 
-    void script_model_iterator::query(das::Context* ctx)
+    void model_iterator::query(das::Context* ctx)
     {
-      std::vector<script_model> models;
+      std::vector<model> models;
 
-      _world->for_each_m2_instance([&](ModelInstance& model) {
-        if (model.pos.x >= _min.x && model.pos.x <= _max.x && model.pos.z >= _min.z && model.pos.z <= _max.z)
+      _world->for_each_m2_instance([&](ModelInstance& mod) {
+        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
-          models.push_back(script_model(&model));
+          models.push_back(model(&mod));
         }
       });
-      _world->for_each_wmo_instance([&](WMOInstance& model) {
-        if (model.pos.x >= _min.x && model.pos.x <= _max.x && model.pos.z >= _min.z && model.pos.z <= _max.z)
+      _world->for_each_wmo_instance([&](WMOInstance& mod) {
+        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
-          models.push_back(script_model(&model));
+          models.push_back(model(&mod));
         }
       });
 
       _models_size = models.size();
-      size_t size = models.size() * sizeof(script_model);
+      size_t size = models.size() * sizeof(model);
       _models = script_calloc(size,ctx);
       memcpy(get_models(), models.data(), size);
       _initialized = true;
       reset_itr();
     }
 
-    void script_model_iterator::reset_itr()
+    void model_iterator::reset_itr()
     {
       _model_index = -1;
     }
 
-    bool script_model_iterator::next(das::Context* ctx)
+    bool model_iterator::next(das::Context* ctx)
     {
       if (!_initialized)
       {
@@ -234,12 +234,12 @@ namespace noggit
       return _model_index < _models_size;
     }
 
-    script_model script_model_iterator::get()
+    model model_iterator::get()
     {
       if(_model_index >= int(_models_size))
       {
         throw script_exception(
-          "script_model_iterator#get",
+          "model_iterator#get",
           "accessing invalid model: iterator is done");
       }
 

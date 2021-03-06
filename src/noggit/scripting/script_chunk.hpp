@@ -12,36 +12,36 @@ namespace noggit
 {
   namespace scripting
   {
-    struct script_selection;
+    struct selection;
 
-    struct script_chunk
+    struct chunk
     {
-      script_chunk(script_selection* sel, MapChunk* chunk);
-      script_chunk() = default;
+      chunk(selection* sel, MapChunk* chunk);
+      chunk() = default;
       MapChunk* _chunk;
-      script_selection* _sel;
+      selection* _sel;
       int _vert_index = -1;
       int _tex_index = -1;
     };
 
-    void chunk_remove_texture(script_chunk& chunk, int index);
-    char const* chunk_get_texture(script_chunk const& chunk, int index, das::Context* ctx);
-    int chunk_add_texture(script_chunk& chunk, char const* texture);
-    void chunk_clear_textures(script_chunk& chunk);
-    void chunk_set_hole(script_chunk& chunk, bool hole);
-    void chunk_clear_colors(script_chunk& chunk);
-    void chunk_apply_textures(script_chunk& chunk);
-    void chunk_apply_heightmap(script_chunk& chunk);
-    void chunk_apply_vertex_color(script_chunk& chunk);
-    void chunk_apply_all(script_chunk& chunk);
-    void chunk_set_impassable(script_chunk& chunk, bool add);
-    int chunk_get_area_id(script_chunk const& chunk);
-    void chunk_set_area_id(script_chunk& chunk, int value);
-    bool chunk_next_vert(script_chunk& chunk);
-    bool chunk_next_tex(script_chunk& chunk);
-    void chunk_reset_vert_itr(script_chunk& chunk);
-    void chunk_reset_tex_itr(script_chunk& chunk);
-    script_vert chunk_get_vert(script_chunk const& chunk);
-    script_tex chunk_get_tex(script_chunk const& chunk);
+    void chunk_remove_texture(chunk& chunk, int index);
+    char const* chunk_get_texture(chunk const& chunk, int index, das::Context* ctx);
+    int chunk_add_texture(chunk& chunk, char const* texture);
+    void chunk_clear_textures(chunk& chunk);
+    void chunk_set_hole(chunk& chunk, bool hole);
+    void chunk_clear_colors(chunk& chunk);
+    void chunk_apply_textures(chunk& chunk);
+    void chunk_apply_heightmap(chunk& chunk);
+    void chunk_apply_vertex_color(chunk& chunk);
+    void chunk_apply_all(chunk& chunk);
+    void chunk_set_impassable(chunk& chunk, bool add);
+    int chunk_get_area_id(chunk const& chunk);
+    void chunk_set_area_id(chunk& chunk, int value);
+    bool chunk_next_vert(chunk& chunk);
+    bool chunk_next_tex(chunk& chunk);
+    void chunk_reset_vert_itr(chunk& chunk);
+    void chunk_reset_tex_itr(chunk& chunk);
+    vert chunk_get_vert(chunk const& chunk);
+    tex chunk_get_tex(chunk const& chunk);
   } // namespace scripting
 } // namespace noggit

@@ -60,7 +60,7 @@ meaning you have to explicitly cast between `ints` and `floats`, and even betwee
   - Float literals are defined by appending a fractional part to a number: `10.0`
     - If a function takes a float parameter, you **must** specify the fractional part: `my_func(10.0)`
   - Unsigned int literals are defined by appending "u" to an int literal: `10u` or by writing it in hexadecimal: `0xA`
-    - Currently, unsigned ints are only used for defining pixel values in `script_images`
+    - Currently, unsigned ints are only used for defining pixel values in `images`
   
   - Explicit casting between types is necessary: 
   ```py

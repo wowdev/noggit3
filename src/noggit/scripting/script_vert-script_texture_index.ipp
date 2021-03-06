@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-// Note: This file is only a header to clean up script_selection.cpp,
+// Note: This file is only a header to clean up selection.cpp,
 // don't import it anywhere else!
 #pragma once
 

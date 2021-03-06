@@ -6,22 +6,22 @@ namespace noggit
 {
   namespace scripting
   {
-    script_random::script_random(unsigned seed)
+    random::random(unsigned seed)
       : _state(seed)
     {
     }
 
-    script_random::script_random(std::string const& seed)
+    random::random(std::string const& seed)
       : _state(std::hash<std::string>()(seed))
     {
     }
 
-    script_random::script_random()
+    random::random()
       : _state(std::chrono::high_resolution_clock::now().time_since_epoch().count())
     {
     }
 
-    int rand_int32(script_random& rand, int low, int high)
+    int rand_int32(random& rand, int low, int high)
     {
       if(low>=high) throw script_exception(
         "rand_int32",
@@ -29,7 +29,7 @@ namespace noggit
       return std::uniform_int_distribution<int>(low,high-1)(rand._state);
     }
 
-    unsigned rand_uint32(script_random& rand, unsigned low, unsigned high)
+    unsigned rand_uint32(random& rand, unsigned low, unsigned high)
     {
       if(low>=high) throw script_exception(
         "rand_uint32",
@@ -37,7 +37,7 @@ namespace noggit
       return std::uniform_int_distribution<unsigned>(low,high-1)(rand._state);
     }
 
-    unsigned long rand_uint64(script_random& rand, unsigned long low, unsigned long high)
+    unsigned long rand_uint64(random& rand, unsigned long low, unsigned long high)
     {
       if(low>=high)
       {
@@ -48,7 +48,7 @@ namespace noggit
       return std::uniform_int_distribution<unsigned long>(low,high-1)(rand._state);
     }
 
-    long rand_int64(script_random& rand, long low, long high)
+    long rand_int64(random& rand, long low, long high)
     {
       if(low>=high) 
       {
@@ -59,7 +59,7 @@ namespace noggit
       return std::uniform_int_distribution<long>(low,high-1)(rand._state);
     }
 
-    double rand_double(script_random& rand, double low, double high)
+    double rand_double(random& rand, double low, double high)
     {
       if(low>=high) 
       {
@@ -74,7 +74,7 @@ namespace noggit
       return val;
     }
 
-    float rand_float(script_random& rand, float low, float high)
+    float rand_float(random& rand, float low, float high)
     {
       if(low>=high) 
       {
@@ -89,14 +89,14 @@ namespace noggit
       return val;
     }
 
-    script_random random_from_seed(char const* seed)
+    random random_from_seed(char const* seed)
     {
-      return script_random(std::string(seed));
+      return random(std::string(seed));
     }
 
-    script_random random_from_time()
+    random random_from_time()
     {
-      return script_random();
+      return random();
     }
   } // namespace scripting
 } // namespace noggit

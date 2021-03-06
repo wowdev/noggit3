@@ -116,16 +116,16 @@ namespace noggit
         resetLogScroll();
         return;
       }
-      _script_selection->clear();
+      _selection->clear();
 
       for (int i = 0; i < script_count(); ++i)
       {
-        _script_selection->addItem(get_script_display_name(i).c_str());
+        _selection->addItem(get_script_display_name(i).c_str());
       }
 
       if (selection != -1)
       {
-        _script_selection->setCurrentIndex(selection);
+        _selection->setCurrentIndex(selection);
         on_change_script(selection);
       }
     }
@@ -214,8 +214,8 @@ namespace noggit
     scripting_tool::scripting_tool(QWidget* parent) : QWidget(parent)
     {
       auto layout(new QFormLayout(this));
-      _script_selection = new QComboBox();
-      layout->addRow(_script_selection);
+      _selection = new QComboBox();
+      layout->addRow(_selection);
 
       _reload_button = new QPushButton("Reload Scripts", this);
       layout->addRow(_reload_button);
@@ -392,7 +392,7 @@ namespace noggit
         select_profile(count);
       });
 
-      connect(_script_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
+      connect(_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
         clearLog();
         on_change_script(index);
       });

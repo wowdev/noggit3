@@ -44,20 +44,20 @@ using namespace math;
 #define FIELD(name) \
   addField<DAS_BIND_MANAGED_FIELD(name)>(#name);
 
-#define CLASS(name_in, name_out, ...)                                                  \
-  MAKE_TYPE_FACTORY(name_in, name_in);                                                 \
-  struct name_in##_annotation : public ManagedStructureAnnotation<name_in, true, true> \
-  {                                                                                    \
-    name_in##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(name_out, ml) \
-    {                                                                                  \
-      __VA_ARGS__                                                                      \
-    }                                                                                  \
-    virtual bool isLocal() const override { return true; }                             \
-    virtual bool canCopy() const override { return true; }                             \
-    /* These three enable use in arrays and maps */                                    \
-    virtual bool hasNonTrivialCtor() const override { return false; }                  \
-    virtual bool hasNonTrivialDtor() const override { return false; }                  \
-    virtual bool hasNonTrivialCopy() const override { return false; }                  \
+#define CLASS(name, ...)                                                         \
+  MAKE_TYPE_FACTORY(name, name);                                                 \
+  struct name##_annotation : public ManagedStructureAnnotation<name, true, true> \
+  {                                                                              \
+    name##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(#name, ml)  \
+    {                                                                            \
+      __VA_ARGS__                                                                \
+    }                                                                            \
+    virtual bool isLocal() const override { return true; }                       \
+    virtual bool canCopy() const override { return true; }                       \
+    /* These three enable use in arrays and maps */                              \
+    virtual bool hasNonTrivialCtor() const override { return false; }            \
+    virtual bool hasNonTrivialDtor() const override { return false; }            \
+    virtual bool hasNonTrivialCopy() const override { return false; }            \
   };
 
 #define CLASS_TEMPLATE(name, template, regname, ...)                                                     \
@@ -75,16 +75,16 @@ using namespace math;
   addAnnotation(make_smart<name##_annotation>(lib));
 
 // Classes
-CLASS(vector_3d, "vector_3d", FIELD(x) FIELD(y) FIELD(z))
-CLASS(script_image, "image", FIELD(_image))
-CLASS(script_noise_map, "noisemap")
-CLASS(script_chunk, "chunk")
-CLASS(script_vert, "vert")
-CLASS(script_tex, "tex")
-CLASS(script_model, "model")
-CLASS(script_model_iterator, "model_iterator")
-CLASS(script_random, "random")
-CLASS(script_selection, "selection")
+CLASS(vector_3d, FIELD(x) FIELD(y) FIELD(z))
+CLASS(image, FIELD(_image))
+CLASS(noisemap)
+CLASS(chunk)
+CLASS(vert)
+CLASS(tex)
+CLASS(model)
+CLASS(model_iterator)
+CLASS(random)
+CLASS(selection)
 
 class NoggitModule : public Module
 {
@@ -97,15 +97,15 @@ public:
 
     // class annotations
     CLASS_ANNOTATION(vector_3d);
-    CLASS_ANNOTATION(script_image);
-    CLASS_ANNOTATION(script_random);
-    CLASS_ANNOTATION(script_selection);
-    CLASS_ANNOTATION(script_noise_map);
-    CLASS_ANNOTATION(script_chunk);
-    CLASS_ANNOTATION(script_vert);
-    CLASS_ANNOTATION(script_tex);
-    CLASS_ANNOTATION(script_model);
-    CLASS_ANNOTATION(script_model_iterator);
+    CLASS_ANNOTATION(image);
+    CLASS_ANNOTATION(random);
+    CLASS_ANNOTATION(selection);
+    CLASS_ANNOTATION(noisemap);
+    CLASS_ANNOTATION(chunk);
+    CLASS_ANNOTATION(vert);
+    CLASS_ANNOTATION(tex);
+    CLASS_ANNOTATION(model);
+    CLASS_ANNOTATION(model_iterator);
 
     // script_random.hpp
     FUNC_RETVALUE(random_from_seed, worstDefault);
@@ -141,7 +141,7 @@ public:
     FUNC_SCOPED(read_file, worstDefault);
     FUNC_SCOPED(path_exists, worstDefault);
 
-    // selections.hpp
+    // script_selections.hpp
     FUNC_RETVALUE(select_origin, worstDefault);
     FUNC_RETVALUE(select_between, worstDefault);
     FUNC_SCOPED(sel_next_chunk, worstDefault);

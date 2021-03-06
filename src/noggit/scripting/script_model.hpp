@@ -16,27 +16,27 @@ namespace noggit
 {
   namespace scripting
   {
-    struct script_model
+    struct model
     {
-      script_model(ModelInstance* model);
-      script_model(WMOInstance* model);
-      script_model() = default;
+      model(ModelInstance* model);
+      model(WMOInstance* model);
+      model() = default;
 
       void* _model = nullptr;
       bool _is_wmo = false;
     };
 
-    struct script_model_iterator
+    struct model_iterator
     {
-      script_model_iterator(World* world, math::vector_3d min, math::vector_3d max);
-      script_model_iterator() = default;
+      model_iterator(World* world, math::vector_3d min, math::vector_3d max);
+      model_iterator() = default;
 
       World* _world;
       math::vector_3d _min;
       math::vector_3d _max;
 
       char* _models = nullptr;
-      script_model* get_models() { return (script_model*)_models;}
+      model* get_models() { return (model*)_models;}
 
       bool _initialized = false;
       int _model_index = -1;
@@ -45,23 +45,23 @@ namespace noggit
       bool next(das::Context * ctx);
       void reset_itr();
       void query(das::Context* ctx);
-      script_model get();
+      model get();
     };
 
-    math::vector_3d model_get_pos(script_model const& model);
-    void model_set_pos(script_model& model, math::vector_3d& pos);
+    math::vector_3d model_get_pos(model const& model);
+    void model_set_pos(model& model, math::vector_3d& pos);
 
-    math::vector_3d model_get_rot(script_model const& model);
-    void model_set_rot(script_model& model, math::vector_3d& rot);
+    math::vector_3d model_get_rot(model const& model);
+    void model_set_rot(model& model, math::vector_3d& rot);
 
-    float model_get_scale(script_model const& model);
-    void model_set_scale(script_model& model, float scale);
+    float model_get_scale(model const& model);
+    void model_set_scale(model& model, float scale);
 
-    unsigned model_get_uid(script_model const& model);
+    unsigned model_get_uid(model const& model);
 
-    void model_remove(script_model& model);
+    void model_remove(model& model);
 
-    const char* model_get_filename(script_model const& model, das::Context* ctx);
-    void model_replace(script_model& model, const char* filename, das::Context* ctx);
+    const char* model_get_filename(model const& model, das::Context* ctx);
+    void model_replace(model& model, const char* filename, das::Context* ctx);
   } // namespace scripting
 } // namespace noggit

@@ -16,18 +16,18 @@ namespace noggit
 {
   namespace scripting
   {
-    script_chunk::script_chunk(script_selection* sel, MapChunk* chunk)
+    chunk::chunk(selection* sel, MapChunk* chunk)
     {
       _sel = sel;
       _chunk = chunk;
     }
 
-    void chunk_set_hole(script_chunk& chunk, bool hole)
+    void chunk_set_hole(chunk& chunk, bool hole)
     {
       chunk._chunk->setHole(math::vector_3d(0, 0, 0), true, hole);
     }
 
-    int chunk_add_texture(script_chunk& chunk, char const* texture)
+    int chunk_add_texture(chunk& chunk, char const* texture)
     {
       if(texture==nullptr)
       {
@@ -39,12 +39,12 @@ namespace noggit
       return chunk._chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
     }
 
-    void chunk_clear_textures(script_chunk& chunk)
+    void chunk_clear_textures(chunk& chunk)
     {
       chunk._chunk->texture_set->eraseTextures();
     }
 
-    void chunk_remove_texture(script_chunk& chunk, int index)
+    void chunk_remove_texture(chunk& chunk, int index)
     {
       if(index<0||index>3) 
       {
@@ -55,7 +55,7 @@ namespace noggit
       chunk._chunk->texture_set->eraseTexture(index);
     }
 
-    char const* chunk_get_texture(script_chunk const& chunk, int index, das::Context * ctx)
+    char const* chunk_get_texture(chunk const& chunk, int index, das::Context * ctx)
     {
       if(index<0||index>3)
       {
@@ -66,55 +66,55 @@ namespace noggit
       return script_calloc_string(chunk._chunk->texture_set->texture(index)->filename,ctx);
     }
 
-    void chunk_apply_heightmap(script_chunk& chunk)
+    void chunk_apply_heightmap(chunk& chunk)
     {
       chunk._chunk->updateVerticesData();
       get_ctx("chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
     }
 
-    void chunk_apply_textures(script_chunk& chunk)
+    void chunk_apply_textures(chunk& chunk)
     {
       chunk._chunk->texture_set->apply_alpha_changes();
     }
 
-    void chunk_apply_vertex_color(script_chunk& chunk)
+    void chunk_apply_vertex_color(chunk& chunk)
     {
       chunk._chunk->UpdateMCCV();
     }
 
-    void chunk_apply_all(script_chunk& chunk)
+    void chunk_apply_all(chunk& chunk)
     {
       chunk_apply_heightmap(chunk);
       chunk_apply_textures(chunk);
       chunk_apply_vertex_color(chunk);
     }
 
-    int chunk_get_area_id(script_chunk const& chunk)
+    int chunk_get_area_id(chunk const& chunk)
     {
       return chunk._chunk->getAreaID();
     }
 
-    void chunk_set_area_id(script_chunk& chunk, int value)
+    void chunk_set_area_id(chunk& chunk, int value)
     {
       return chunk._chunk->setAreaID(value);
     }
 
-    void chunk_set_impassable(script_chunk& chunk, bool add)
+    void chunk_set_impassable(chunk& chunk, bool add)
     {
       chunk._chunk->setFlag(add, 0x2);
     }
 
-    static bool is_on_vert(script_chunk& chunk)
+    static bool is_on_vert(chunk& chunk)
     {
       return chunk._vert_index < 145;
     }
 
-    static bool is_on_tex(script_chunk& chunk)
+    static bool is_on_tex(chunk& chunk)
     {
       return chunk._tex_index < 4096;
     }
 
-    static void skip_vertices(script_chunk& chunk)
+    static void skip_vertices(chunk& chunk)
     {
       auto sel = chunk._sel;
       if (sel == nullptr)
@@ -134,7 +134,7 @@ namespace noggit
       }
     }
 
-    bool chunk_next_vert(script_chunk& chunk)
+    bool chunk_next_vert(chunk& chunk)
     {
       ++chunk._vert_index;
       if (is_on_vert(chunk))
@@ -148,33 +148,33 @@ namespace noggit
       }
     }
 
-    bool chunk_next_tex(script_chunk& chunk)
+    bool chunk_next_tex(chunk& chunk)
     {
       ++chunk._tex_index;
       return is_on_tex(chunk);
     }
 
-    void chunk_reset_vert_itr(script_chunk& chunk)
+    void chunk_reset_vert_itr(chunk& chunk)
     {
       chunk._vert_index = -1;
     }
 
-    void chunk_reset_tex_itr(script_chunk& chunk)
+    void chunk_reset_tex_itr(chunk& chunk)
     {
       chunk._tex_index = -1;
     }
 
-    script_vert chunk_get_vert(script_chunk const& chunk)
+    vert chunk_get_vert(chunk const& chunk)
     {
-      return script_vert(chunk._chunk, chunk._vert_index);
+      return vert(chunk._chunk, chunk._vert_index);
     }
 
-    script_tex chunk_get_tex(script_chunk const& chunk)
+    tex chunk_get_tex(chunk const& chunk)
     {
-      return script_tex(chunk._chunk, chunk._tex_index);
+      return tex(chunk._chunk, chunk._tex_index);
     }
 
-    void chunk_clear_colors(script_chunk& chunk)
+    void chunk_clear_colors(chunk& chunk)
     {
       std::fill (
         chunk._chunk->mccv, 

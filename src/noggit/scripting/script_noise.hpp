@@ -20,9 +20,9 @@ namespace noggit
 {
   namespace scripting
   {
-    struct script_noise_map
+    struct noisemap
     {
-      script_noise_map(
+      noisemap(
           unsigned start_x
           , unsigned start_y
           , unsigned width
@@ -31,7 +31,7 @@ namespace noggit
           , const char *algorithm 
           , const char *seed
           , das::Context* ctx);
-      script_noise_map() = default;
+      noisemap() = default;
       char *_noise;
       float *get_map() const { return (float *)_noise; };
       unsigned _width = 0;
@@ -41,13 +41,13 @@ namespace noggit
       unsigned _size = 0;
     };
 
-    float noise_get(script_noise_map &noise, math::vector_3d &pos);
-    bool noise_is_highest(script_noise_map &noise, math::vector_3d &pos, int check_radius);
-    void noise_set(script_noise_map &noise, int x, int y, float value);
-    math::vector_3d noise_start(script_noise_map const& noise);
-    unsigned noise_width(script_noise_map &noise);
-    unsigned noise_height(script_noise_map &noise);
-    script_noise_map make_noise_size(
+    float noise_get(noisemap &noise, math::vector_3d &pos);
+    bool noise_is_highest(noisemap &noise, math::vector_3d &pos, int check_radius);
+    void noise_set(noisemap &noise, int x, int y, float value);
+    math::vector_3d noise_start(noisemap const& noise);
+    unsigned noise_width(noisemap &noise);
+    unsigned noise_height(noisemap &noise);
+    noisemap make_noise_size(
         int start_x
       , int start_y
       , int width
@@ -57,8 +57,8 @@ namespace noggit
       , char const *seed
       , das::Context* ctx);
 
-    script_noise_map make_noise_selection(
-      script_selection const& sel
+    noisemap make_noise_selection(
+      selection const& sel
       , float frequency
       , int padding
       , char const *algorithm

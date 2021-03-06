@@ -12,7 +12,7 @@ namespace noggit
 {
   namespace scripting
   {
-    static void img_resize(script_image& img, int width, int height, das::Context* ctx)
+    static void img_resize(image& img, int width, int height, das::Context* ctx)
     {
       if(width<=0||height<=0)
       {
@@ -31,9 +31,9 @@ namespace noggit
       img._image = script_calloc(img._size, ctx);
     }
 
-    script_image load_png(char const* path, das::Context* ctx)
+    image load_png(char const* path, das::Context* ctx)
     {
-      script_image img;
+      image img;
       if(path==nullptr)
       {
           throw script_exception("load_png","empty png path");
@@ -53,24 +53,24 @@ namespace noggit
       return img;
     }
 
-    script_image create_image(int width, int height, das::Context * ctx)
+    image create_image(int width, int height, das::Context * ctx)
     {
-      script_image img;
+      image img;
       img_resize(img,width,height, ctx);
       return img;
     }
 
-    int img_width(script_image const& img)
+    int img_width(image const& img)
     {
       return img._width;
     }
 
-    int img_height(script_image const& img)
+    int img_height(image const& img)
     {
       return img._height;
     }
 
-    int img_get_index(script_image const& img, int x, int y)
+    int img_get_index(image const& img, int x, int y)
     {
       int index = ((x + y * img._width) * 4);
       if(index<0||index>=img._size)
@@ -89,7 +89,7 @@ namespace noggit
       return index;
     }
 
-    unsigned img_get_pixel(script_image const& img, int x, int y)
+    unsigned img_get_pixel(image const& img, int x, int y)
     {
       unsigned index = img_get_index(img, x, y);
       return img.get_image()[index] << 24 
@@ -98,7 +98,7 @@ namespace noggit
         | img.get_image()[index + 3];
     }
 
-    void img_set_pixel(script_image& img, int x, int y, unsigned value)
+    void img_set_pixel(image& img, int x, int y, unsigned value)
     {
       unsigned index = img_get_index(img, x, y);
       img.get_image()[index] = (value << 24);
@@ -107,7 +107,7 @@ namespace noggit
       img.get_image()[index + 3] = (value) & 0xff;
     }
 
-    void img_save(script_image& img, char const* filename)
+    void img_save(image& img, char const* filename)
     {
       unsigned error = lodepng::encode(filename, img.get_image(), img._width, img._height);
       if (error)
@@ -119,7 +119,7 @@ namespace noggit
       }
     }
 
-    float img_gradient_scale(script_image const& img, float rel)
+    float img_gradient_scale(image const& img, float rel)
     {
       if(rel<0||rel>=1)
       {
