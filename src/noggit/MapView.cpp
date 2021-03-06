@@ -192,6 +192,7 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 void MapView::createGUI()
 {
 #ifdef NOGGIT_HAS_SCRIPTING
+  noggit::scripting::readScriptSettings();
   _script_tool_dock = new QDockWidget("Scripting", this);
   scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock);
   _script_tool_dock->setWidget(scriptingTool);
@@ -1513,10 +1514,6 @@ void MapView::initializeGL()
   {
     move_camera_with_auto_height (_camera.position);
   }
-
-#ifdef NOGGIT_HAS_SCRIPTING
-  scriptingTool->readScriptSettings();
-#endif
 
   if (uid_warning)
   {

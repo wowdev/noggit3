@@ -306,7 +306,7 @@ namespace noggit
         _inner_radius = v / 100.0f;
         QSignalBlocker const blocker(_inner_radius_spin);
         _inner_radius_spin->setValue(_inner_radius);
-        set_json_unsafe(INNER_RADIUS_PATH, v);
+        set_json_unsafe(INNER_RADIUS_PATH, _inner_radius);
       });
 
       connect(_profile_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
@@ -399,7 +399,7 @@ namespace noggit
       doReload();
     }
 
-    void scripting_tool::readScriptSettings()
+    void readScriptSettings()
     {
       if (!boost::filesystem::exists(SCRIPT_FILE))
       {
@@ -634,14 +634,14 @@ namespace noggit
 
     void scripting_tool::initialize_radius()
     {
-      double inner_radius = get_json_safe<double>(INNER_RADIUS_PATH, 0);
-      double outer_radius = get_json_safe<double>(OUTER_RADIUS_PATH, 0);
+      double inner_radius = get_json_safe<double>(INNER_RADIUS_PATH, 0.5);
+      double outer_radius = get_json_safe<double>(OUTER_RADIUS_PATH, 40);
 
       _radius_spin->setValue(outer_radius);
       _inner_radius_spin->setValue(inner_radius);
 
       _radius_slider->setValue(std::round(outer_radius));
-      _inner_radius_slider->setValue(std::round(inner_radius));
+      _inner_radius_slider->setSliderPosition((int)std::round(inner_radius*100));
     }
 
     void scripting_tool::addDescription(char const* text)

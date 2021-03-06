@@ -321,6 +321,10 @@ namespace noggit
 
     void main_window::prompt_exit(QCloseEvent* event)
     {
+      #ifdef NOGGIT_HAS_SCRIPTING
+        noggit::scripting::save_json();
+      #endif
+
       emit exit_prompt_opened();
 
       QMessageBox prompt;
@@ -333,9 +337,6 @@ namespace noggit
       prompt.setDefaultButton (prompt.addButton ("Cancel", QMessageBox::RejectRole));
       prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
-#ifdef NOGGIT_HAS_SCRIPTING
-      noggit::scripting::save_json();
-#endif
 
       prompt.exec();
 
