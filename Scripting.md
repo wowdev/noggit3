@@ -80,7 +80,7 @@ meaning you have to explicitly cast between `ints` and `floats`, and even betwee
   - Clear array: `clear(arr)`
 
 #### Tables
-  - Created table: `var tab: table<string,int>`
+  - Created table: `var tab: table<string;int>`
   - Write a value: `tab["key"] = 10`.
   - Read a value: `var value = find(tab,"key")`
   - Check if a value exists: `var exists = key_exists(tab,"key")`
