@@ -41,7 +41,7 @@ def add_double_param(name: string, min: double, max: double, default: double, ze
  * Adds a float parameter to the script window
  */
 [export]
-def add_float_param(name: string, min: double, max: double, default: double, zeros: int)
+def add_float_param(name: string, min: int|float, max: int|float, default: int|float, zeros: int)
     pass
 
 /**
@@ -110,6 +110,14 @@ def get_bool_param(name: string): float
  */
 [export]
 def pos(): vector_3d
+    pass
+
+/**
+ * Constructs a new vector
+ */
+[export]
+def vec(x: int|float, y: int|float, z: int|float): vector_3d
+    pass
 
 /**
  * Selects a part of the world to modify individual chunks, vertices and texture points.
@@ -133,7 +141,7 @@ def brush_change_terrain(pos: vector_3d, change: float, radius: float, inner_rad
  * models name ends with .m2
  */
 [export]
-def add_m2(filename: string, pos: vector_3d, scale: float, rotation: vector_3d);
+def add_m2(filename: string, pos: vector_3d, scale: int|float, rotation: vector_3d);
     pass
 
 /**
@@ -195,7 +203,7 @@ def brush_get_vertex_color(pos: vector_3d) : vector_3d
  * for that, consider using a script_selector instead.
  */
 [export]
-def brush_flatten_terrain(pos: vector_3d, remain: float, radius: float, brush_type: int, lower: bool, raise: bool, origin: vector_3d, angle: double, orientation: double);
+def brush_flatten_terrain(pos: vector_3d, remain: float, radius: float, brush_type: int, lower: bool, raise: bool, origin: vector_3d, angle: float, orientation: float);
     pass
 
 /**
@@ -438,6 +446,7 @@ def img_set_pixel(img: image,x: int, y: int, value: uint)
  */
 [export]
 def img_gradient_scale(img: image,scale: float)
+    pass
 
 /**
  * Writes an image to the file system
@@ -559,14 +568,14 @@ def sqrt(arg: float): float
     pass
 
 [export]
-def abs(arg: float): float
+def abs(arg: int|float): float
     pass
 
 /**
  * Linear interpolation/fade between two numbers.
  */
 [export]
-def lerp(from: float, to: float, ratio: float): float
+def lerp(from: int|float, to: int|float, ratio: int|float): float
     pass
 
 /**
@@ -595,7 +604,7 @@ def dist_2d_compare(from: vector_3d, to: vector_3d, distance: float): int
  * Rotates a point around an origin point. Uses degrees, as most Noggit functions do.
  */
 [export]
-def rotate_2d(point: vector_3d, origin: vector_3d, degrees: float): vector_3d
+def rotate_2d(point: vector_3d, origin: vector_3d, degrees: int|float): vector_3d
     pass
 
 // script_noise.hpp
@@ -636,11 +645,11 @@ def height(noise: noisemap): int
     pass
 
 [export]
-def make_noise_size(start_x: int, start_y: int, width: int, height: int, frequency: float, algorithm: string, seed: string): noisemap
+def make_noise_size(start_x: int, start_y: int, width: int, height: int, frequency: int|float, algorithm: string, seed: string): noisemap
     pass
 
 [export]
-def make_noise_selection(sel: selection, frequency: float, padding: int, algorithm: string, seed: string): noisemap
+def make_noise_selection(sel: selection, frequency: int|float, padding: int, algorithm: string, seed: string): noisemap
     pass
 
 /**
@@ -663,7 +672,7 @@ def rand_int32(rand: random, low: int, high: int): int
     pass
 
 [export]
-def rand_float(rand: random, low: float, high: float): float
+def rand_float(rand: random, low: int|float, high: int|float): float
     pass
 
 [export]
@@ -675,7 +684,7 @@ def random_from_time(): random
     pass
 
 [export]
-def select_origin(origin: vector_3d, x_radius: float, z_radius: float): selection
+def select_origin(origin: vector_3d, x_radius: int|float, z_radius: int|float): selection
     pass
 
 [export]
@@ -807,23 +816,23 @@ def vert_get_pos(vert& vert): vector_3d
     pass
 
 [export]
-def vert_set_height(vert& vert,float y)
+def vert_set_height(v: vert,y: int|float)
     pass
 
 [export]
-def vert_add_height(vert& vert,float y)
+def vert_add_height(v: vert,y: int|float)
     pass
 
 [export]
-def vert_sub_height(vert& vert,float y)
+def vert_sub_height(v: vert,y: int|float)
     pass
 
 [export]
-def vert_set_color(vert& vert, float r, float g, float b)
+def vert_set_color(v: vert, r: int|float, g: int|float, b: int|float)
     pass
 
 [export]
-def vert_set_water(vert& vert, int type, float height)
+def vert_set_water(v: vert, type: int, height: int|float)
     pass
 
 [export]
@@ -831,7 +840,7 @@ def vert_set_hole(vert& vert, bool add)
     pass
 
 [export]
-def vert_set_alpha(vert& vert, int index, float alpha)
+def vert_set_alpha(vert& vert, int index, alpha: int|float)
     pass
 
 [export]
@@ -855,11 +864,11 @@ def vert_is_water_aligned(vert &chunk): bool
     pass
 
 [export]
-def tex_set_alpha(tex& tex, int index, float alpha)
+def tex_set_alpha(t: tex, index: int, alpha: float|int)
     pass
 
 [export]
-def tex_get_alpha(tex& tex, int index): float
+def tex_get_alpha(t: tex, index: int): float
     pass
 
 /**
@@ -892,7 +901,7 @@ def model_get_scale(model: model): float
     pass
 
 [export]
-def model_set_scale(model: model,scale: float)
+def model_set_scale(model: model,scale: int|float)
     pass
 
 [export]

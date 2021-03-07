@@ -18,11 +18,15 @@
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_heap.hpp>
+
 #include <math/vector_3d.hpp>
+
+#include <noggit/scripting/script_loader-number_hack.ipp>
 
 #include <daScript/daScript.h>
 
 #include <string>
+#include <vector>
 
 using namespace das;
 using namespace noggit::scripting;
@@ -48,7 +52,7 @@ using namespace math;
   MAKE_TYPE_FACTORY(name, name);                                                 \
   struct name##_annotation : public ManagedStructureAnnotation<name, true, true> \
   {                                                                              \
-    name##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(#name, ml)  \
+    name##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(#name, ml) \
     {                                                                            \
       __VA_ARGS__                                                                \
     }                                                                            \
@@ -113,7 +117,6 @@ public:
     FUNC_SCOPED(rand_int32, worstDefault);
     FUNC_SCOPED(rand_uint32, worstDefault);
     FUNC_SCOPED(rand_double, worstDefault);
-    FUNC_SCOPED(rand_float, worstDefault);
 
     // script_noise.hpp
     FUNC_SCOPED(noise_get, worstDefault);
@@ -122,8 +125,6 @@ public:
     FUNC_RENAME(noggit::scripting::noise_width, "width", worstDefault);
     FUNC_RENAME(noggit::scripting::noise_height, "height", worstDefault);
     FUNC_SCOPED(noise_is_highest, worstDefault);
-    FUNC_RETVALUE(make_noise_size, worstDefault);
-    FUNC_RETVALUE(make_noise_selection, worstDefault);
 
     // script_image.hpp
     FUNC_SCOPED(img_get_index, worstDefault);
@@ -142,7 +143,6 @@ public:
     FUNC_SCOPED(path_exists, worstDefault);
 
     // script_selections.hpp
-    FUNC_RETVALUE(select_origin, worstDefault);
     FUNC_RETVALUE(select_between, worstDefault);
     FUNC_SCOPED(sel_next_chunk, worstDefault);
     FUNC_RETVALUE(sel_get_chunk, worstDefault);
@@ -177,19 +177,12 @@ public:
     FUNC_RETVALUE(chunk_get_tex, worstDefault);
 
     FUNC_RETVALUE(vert_get_pos, worstDefault);
-    FUNC_SCOPED(vert_set_height, worstDefault);
-    FUNC_SCOPED(vert_add_height, worstDefault);
-    FUNC_SCOPED(vert_sub_height, worstDefault);
-    FUNC_SCOPED(vert_set_color, worstDefault);
-    FUNC_SCOPED(vert_set_water, worstDefault);
     FUNC_SCOPED(vert_set_hole, worstDefault);
-    FUNC_SCOPED(vert_set_alpha, worstDefault);
     FUNC_SCOPED(vert_get_alpha, worstDefault);
     FUNC_SCOPED(vert_next_tex, worstDefault);
     FUNC_SCOPED(vert_reset_tex, worstDefault);
     FUNC_RETVALUE(vert_get_tex, worstDefault);
     FUNC_SCOPED(vert_is_water_aligned, worstDefault);
-    FUNC_SCOPED(tex_set_alpha, worstDefault);
     FUNC_SCOPED(tex_get_alpha, worstDefault);
     FUNC_RETVALUE(tex_get_pos_2d, worstDefault);
 
@@ -198,7 +191,6 @@ public:
     FUNC_RETVALUE(model_get_rot, worstDefault);
     FUNC_SCOPED(model_set_rot, worstDefault);
     FUNC_SCOPED(model_get_scale, worstDefault);
-    FUNC_SCOPED(model_set_scale, worstDefault);
     FUNC_SCOPED(model_get_uid, worstDefault);
     FUNC_SCOPED(model_remove, worstDefault);
     FUNC_SCOPED(model_get_filename, worstDefault);
@@ -226,17 +218,12 @@ public:
     FUNC_SCOPED(sin, worstDefault);
     FUNC_SCOPED(tan, worstDefault);
     FUNC_SCOPED(sqrt, worstDefault);
-    FUNC_SCOPED(abs, worstDefault);
-    FUNC_SCOPED(lerp, worstDefault);
     FUNC_SCOPED(dist_2d, worstDefault);
     FUNC_SCOPED(dist_2d_compare, worstDefault);
-    FUNC_RETVALUE(rotate_2d, worstDefault);
 
     // script_context.hpp
     FUNC_RETVALUE(pos, worstDefault);
-    FUNC_RETVALUE(vec, worstDefault);
     FUNC_SCOPED(brush_change_terrain, worstDefault);
-    FUNC_SCOPED(add_m2, worstDefault);
     FUNC_SCOPED(add_wmo, worstDefault);
     FUNC_SCOPED(get_map_id, worstDefault);
     FUNC_SCOPED(get_area_id, worstDefault);
@@ -271,12 +258,9 @@ public:
     FUNC_SCOPED(get_string_param, worstDefault);
     FUNC_SCOPED(get_string_list_param, worstDefault);
     FUNC_SCOPED(get_int_param, worstDefault);
-    FUNC_SCOPED(get_double_param, worstDefault);
     FUNC_SCOPED(get_bool_param, worstDefault);
     FUNC_SCOPED(add_string_param, worstDefault);
     FUNC_SCOPED(add_int_param, worstDefault);
-    FUNC_SCOPED(add_double_param, worstDefault);
-    FUNC_SCOPED(add_float_param, worstDefault);
     FUNC_SCOPED(get_float_param, worstDefault);
     FUNC_SCOPED(add_bool_param, worstDefault);
     FUNC_SCOPED(add_string_list_param, worstDefault);
@@ -287,6 +271,8 @@ public:
     FUNC_SCOPED(script_heap_write_byte, worstDefault);
     FUNC_SCOPED(script_calloc, worstDefault);
     FUNC_SCOPED(overlaps, worstDefault);
+
+    register_hack_functions(this, lib);
   }
 };
 
