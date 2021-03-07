@@ -896,10 +896,20 @@ def model_get_rot(model: model): vector_3d
 def model_set_rot(model: model,rot: vector_3d)
     pass
 
+/**
+ * Returns the scale of a model
+ * 
+ * @note: If the selected model is a WMO, this function always returns 1.
+ */
 [export]
 def model_get_scale(model: model): float
     pass
 
+/**
+ * Sets the scale of a model. 
+ *
+ * @note: If the selected model is a WMO, this function does nothing.
+ */
 [export]
 def model_set_scale(model: model,scale: int|float)
     pass
