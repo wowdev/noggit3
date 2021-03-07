@@ -631,6 +631,7 @@ include (FetchContent)
 
 FetchContent_Declare (storm
   GIT_REPOSITORY https://github.com/ladislav-zezula/StormLib.git
+  GIT_TAG 60c2dd0fa16d3506722e25fee9b6fa4082b0c1e5
 )
 FetchContent_GetProperties (storm)
 if (NOT storm_POPULATED)
@@ -669,6 +670,7 @@ if (NOGGIT_WITH_SCRIPTING)
   # Dependency: lodepng
   FetchContent_Declare (lodepng
     GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
+    GIT_TAG 7fdcc96a5e5864eee72911c3ca79b1d9f0d12292
   )
   FetchContent_GetProperties (lodepng)
   if (NOT lodepng_POPULATED)
@@ -681,6 +683,7 @@ if (NOGGIT_WITH_SCRIPTING)
   # Dependency: FastNoise2
   FetchContent_Declare (fastnoise2
     GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+    GIT_TAG v0.0.1-heightmap
     PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_fastnoise2.cmake"
     UPDATE_DISCONNECTED true
   )
@@ -693,7 +696,8 @@ if (NOGGIT_WITH_SCRIPTING)
 
   # Dependency: daScript
   FetchContent_Declare (dascript
-    GIT_REPOSITORY https://github.com/ihm-ts/daScript.git
+    GIT_REPOSITORY https://github.com/GaijinEntertainment/daScript.git
+    GIT_TAG 7b93bd95db57009856473216048c2612fbb6ca84
     # don't fetch submodules
     GIT_SUBMODULES ""
     PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_dascript.cmake"
