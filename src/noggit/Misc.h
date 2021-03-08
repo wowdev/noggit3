@@ -46,6 +46,7 @@ namespace misc
   }
 
   bool vec3d_equals(math::vector_3d const& v1, math::vector_3d const& v2);
+  bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2);
 
   inline int rounded_int_div(int value, int div)
   {

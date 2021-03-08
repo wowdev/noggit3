@@ -239,12 +239,12 @@ public:
 
   void addM2 ( std::string const& filename
              , math::vector_3d newPos
-             , float scale, math::vector_3d rotation
+             , float scale, math::degrees::vec3 rotation
              , noggit::object_paste_params*
              );
   void addWMO ( std::string const& filename
               , math::vector_3d newPos
-              , math::vector_3d rotation
+              , math::degrees::vec3 rotation
               );
 
   // add a m2 instance to the world (needs to be positioned already), return the uid

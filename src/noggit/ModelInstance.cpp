@@ -21,7 +21,10 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
 {
 	uid = d->uniqueID;
 	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
-	dir = math::vector_3d(d->rot[0], d->rot[1], d->rot[2]);
+	dir = math::degrees::vec3( math::degrees(d->rot[0])
+                           , math::degrees(d->rot[1])
+                           , math::degrees(d->rot[2])
+                           );
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
 
@@ -39,7 +42,7 @@ bool ModelInstance::is_a_duplicate_of(ModelInstance const& other)
 {
   return model->filename == other.model->filename
       && misc::vec3d_equals(pos, other.pos)
-      && misc::vec3d_equals(dir, other.dir)
+      && misc::deg_vec3d_equals(dir, other.dir)
       && misc::float_equals(scale, other.scale);
 }
 
@@ -93,9 +96,9 @@ void ModelInstance::update_transform_matrix()
 {
   math::matrix_4x4 mat (math::matrix_4x4 (math::matrix_4x4::translation, pos)
           * math::matrix_4x4 (math::matrix_4x4::rotation_yzx
-                              , { math::degrees (-dir.z)
-                              , math::degrees (dir.y - 90.0f)
-                              , math::degrees (dir.x)
+                              , { -dir.z
+                              , dir.y - 90.0_deg
+                              , dir.x
                               }
           )
           * math::matrix_4x4 (math::matrix_4x4::scale, scale)
@@ -130,9 +133,9 @@ void ModelInstance::intersect ( math::matrix_4x4 const& model_view
 }
 
 void ModelInstance::resetDirection(){
-  dir.x = 0;
+  dir.x = 0_deg;
   //dir.y=0; only reset incline
-  dir.z = 0;
+  dir.z = 0_deg;
 }
 
 bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const

@@ -172,6 +172,11 @@ namespace misc
   {
     return float_equals(v1.x, v2.x) && float_equals(v1.y, v2.y) && float_equals(v1.z, v2.z);
   }
+
+  bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2)
+  {
+    return float_equals(v1.x._, v2.x._) && float_equals(v1.y._, v2.y._) && float_equals(v1.z._, v2.z._);
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)

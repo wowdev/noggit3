@@ -19,7 +19,7 @@ public:
   math::vector_3d pos;
   math::vector_3d  extents[2];
   std::map<int, std::pair<math::vector_3d, math::vector_3d>> group_extents;
-  math::vector_3d  dir;
+  math::degrees::vec3  dir;
   unsigned int mUniqueID;
   uint16_t mFlags;
   uint16_t mUnknown;

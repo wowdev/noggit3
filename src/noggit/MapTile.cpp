@@ -768,9 +768,9 @@ void MapTile::saveTile(World* world)
     lMDDF_Data[lID].pos[0] = model.pos.x;
     lMDDF_Data[lID].pos[1] = model.pos.y;
     lMDDF_Data[lID].pos[2] = model.pos.z;
-    lMDDF_Data[lID].rot[0] = model.dir.x;
-    lMDDF_Data[lID].rot[1] = model.dir.y;
-    lMDDF_Data[lID].rot[2] = model.dir.z;
+    lMDDF_Data[lID].rot[0] = model.dir.x._;
+    lMDDF_Data[lID].rot[1] = model.dir.y._;
+    lMDDF_Data[lID].rot[2] = model.dir.z._;
     lMDDF_Data[lID].scale = (uint16_t)(model.scale * 1024);
     lMDDF_Data[lID].flags = 0;
     lID++;
@@ -804,9 +804,9 @@ void MapTile::saveTile(World* world)
     lMODF_Data[lID].pos[0] = object.pos.x;
     lMODF_Data[lID].pos[1] = object.pos.y;
     lMODF_Data[lID].pos[2] = object.pos.z;
-    lMODF_Data[lID].rot[0] = object.dir.x;
-    lMODF_Data[lID].rot[1] = object.dir.y;
-    lMODF_Data[lID].rot[2] = object.dir.z;
+    lMODF_Data[lID].rot[0] = object.dir.x._;
+    lMODF_Data[lID].rot[1] = object.dir.y._;
+    lMODF_Data[lID].rot[2] = object.dir.z._;
 
     lMODF_Data[lID].extents[0][0] = object.extents[0].x;
     lMODF_Data[lID].extents[0][1] = object.extents[0].y;
