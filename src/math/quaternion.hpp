@@ -77,21 +77,21 @@ namespace math
       double test = x * y + z * w;
       if (test > 0.499 * unit) // singularity at north pole
       {
-        retVal.y = math::degrees(-static_cast<float>(2.0f * std::atan2(x, w) * 180.0f / math::constants::pi));
-        retVal.x = math::degrees((math::constants::pi / 2) * 180.0f / math::constants::pi);
+        retVal.y = -math::degrees(math::radians(2.0f * std::atan2(x, w)));
+        retVal.x = math::degrees(math::radians(math::constants::pi / 2));
         retVal.z = 0_deg;
       }
       else if (test < -0.499 * unit) // singularity at south pole
       {
-        retVal.y = math::degrees(-static_cast<float>(-2.0f * std::atan2(x, w) * 180.0f / math::constants::pi));
-        retVal.x = math::degrees((-math::constants::pi / 2) * 180.0f / math::constants::pi);
+        retVal.y = -math::degrees(math::radians(-2.0f * std::atan2(x, w)));
+        retVal.x = -math::degrees(math::radians(math::constants::pi / 2));
         retVal.z = 0_deg;
       }
       else
       {
-        retVal.y = math::degrees(-static_cast<float>(std::atan2(2 * y * w - 2 * x * z, sqx - sqy - sqz + sqw) * 180.0f / math::constants::pi));
-        retVal.x = math::degrees(static_cast<float>(std::asin(2 * test / unit) * 180.0f / math::constants::pi));
-        retVal.z = math::degrees(static_cast<float>(std::atan2(2 * x * w - 2 * y * z, -sqx + sqy - sqz + sqw) * 180.0f / math::constants::pi));
+        retVal.y = -math::degrees(math::radians(std::atan2(2 * y * w - 2 * x * z, sqx - sqy - sqz + sqw)));
+        retVal.x = math::degrees(math::radians(std::asin(2 * test / unit)));
+        retVal.z = math::degrees(math::radians(std::atan2(2 * x * w - 2 * y * z, -sqx + sqy - sqz + sqw)));
       }
 
       return retVal;
