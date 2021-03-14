@@ -303,32 +303,17 @@ void World::snap_selected_models_to_the_ground()
       : boost::get<selected_wmo_type>(entry)->pos
       ;
 
-    selection_result hits;
-
-
-    for_chunk_at(pos, [&] (MapChunk* chunk)
-    {
-      {
-        math::ray intersect_ray(pos, math::vector_3d(0.f, -1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-      // object is below ground
-      if (hits.empty())
-      {
-        math::ray intersect_ray(pos, math::vector_3d(0.f, 1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-    });
+    boost::optional<float> height = get_exact_height_at(pos);
 
     // this should never happen
-    if (hits.empty())
+    if (!height)
     {
       LogError << "Snap to ground ray intersection failed" << std::endl;
       continue;
     }
 
     // the ground can only be intersected once
-    pos.y = boost::get<selected_chunk_type>(hits[0].second).position.y;
+    pos.y = height.get();
 
     if (entry_is_m2)
     {
@@ -1611,6 +1596,18 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
   MapTile* adt = mapIndex.getTile(tile);
 
   return adt->finishedLoading() && adt->GetVertex(x, z, V);
+}
+
+boost::optional<float> World::get_exact_height_at(math::vector_3d const& pos)
+{
+  boost::optional<float> height;
+
+  for_chunk_at(pos, [&] (MapChunk* chunk)
+  {
+    height = chunk->get_exact_height_at(pos);
+  });
+
+  return height;
 }
 
 template<typename Fun>

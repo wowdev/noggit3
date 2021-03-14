@@ -190,6 +190,7 @@ public:
   void rotate_selected_models_to_ground_normal(bool smoothNormals);
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
+  boost::optional<float> get_exact_height_at(math::vector_3d const& pos);
 
   // check if the cursor is under map or in an unloaded tile
   bool isUnderMap(math::vector_3d const& pos);
