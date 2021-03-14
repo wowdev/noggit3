@@ -292,6 +292,11 @@ set ( opengl_sources
       src/opengl/texture.cpp
     )
 
+if (NOT APPLE)
+  set_property (SOURCE "src/opengl/context.cpp" PROPERTY
+    COMPILE_DEFINITIONS NOGGIT_OPENGL_SUPPORTS_CPU_INDICES_IN_DRAW_ELEMENTS)
+endif()
+
 set ( util_sources
       src/util/exception_to_string.cpp
     )
