@@ -416,7 +416,7 @@ namespace opengl
     void context::drawElements (GLenum mode, GLsizei count, std::vector<T> const& indices, std::intptr_t indices_offset)
   {
 #ifdef NOGGIT_OPENGL_SUPPORTS_CPU_INDICES_IN_DRAW_ELEMENTS
-    return _current_context->functions()->glDrawElements (mode, count, type_enum_for_type<T>{}, static_cast<char*> (indices.data()) + indices_offset);
+    return _current_context->functions()->glDrawElements (mode, count, type_enum_for_type<T>{}, reinterpret_cast<char const*> (indices.data()) + indices_offset);
 #else
     scoped::buffers<1> index_buffer;
     scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer[0]);
@@ -432,7 +432,7 @@ namespace opengl
     void context::drawElementsInstanced (GLenum mode, GLsizei count, GLsizei instancecount, std::vector<T> const& indices, std::intptr_t indices_offset)
   {
 #ifdef NOGGIT_OPENGL_SUPPORTS_CPU_INDICES_IN_DRAW_ELEMENTS
-    return _3_3_core_func->glDrawElementsInstanced (mode, count, type_enum_for_type<T>{}, static_cast<char*> (indices.data()) + indices_offset, instancecount);
+    return _3_3_core_func->glDrawElementsInstanced (mode, count, type_enum_for_type<T>{}, reinterpret_cast<char const*> (indices.data()) + indices_offset, instancecount);
 #else
     scoped::buffers<1> index_buffer;
     scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer[0]);
