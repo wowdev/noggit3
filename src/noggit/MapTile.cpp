@@ -354,6 +354,8 @@ void MapTile::draw ( math::frustum const& frustum
                    , std::map<int, misc::random_color>& area_id_colors
                    , int animtime
                    , display_mode display
+                   , bool& previous_chunk_had_shadows
+                   , bool& previous_chunk_was_textured
                    )
 {
   if (!finished)
@@ -378,6 +380,7 @@ void MapTile::draw ( math::frustum const& frustum
                           , area_id_colors
                           , animtime
                           , display
+                          , previous_chunk_had_shadows
                           );
     }
   }

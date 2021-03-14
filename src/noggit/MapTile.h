@@ -84,6 +84,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , int animtime
             , display_mode display
+            , bool& previous_chunk_had_shadows
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum

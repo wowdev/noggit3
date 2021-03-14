@@ -44,6 +44,7 @@ private:
 
   void update_shadows();
 
+  bool _has_shadow;
   uint8_t _shadow_map[64 * 64];
   opengl::texture shadow;
 
@@ -54,7 +55,7 @@ private:
   math::vector_3d mccv[mapbufsize];
 
   std::vector<uint8_t> compressed_shadow_map() const;
-  bool has_shadows() const;
+  bool shadow_map_is_empty() const;
 
   void initStrip();
 
@@ -137,6 +138,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , int animtime
             , display_mode display
+            , bool& previous_chunk_had_shadows
             );
   //! \todo only this function should be public, all others should be called from it
 

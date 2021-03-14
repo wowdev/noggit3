@@ -126,7 +126,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
 
     assert(fourcc == 'MCSH');
 
-
     uint8_t compressed_shadow_map[64 * 64 / 8];
 
     // shadow map 64 x 64
@@ -154,12 +153,15 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
       }
       _shadow_map[63 * 64 + 63] = _shadow_map[62 * 64 + 62];
     }
+
+    _has_shadow = true;
   }
   else
   {
     /** We have no shadow map (MCSH), so we got no shadows at all!  **
     ** This results in everything being black.. Yay. Lets fake it! **/
     memset(_shadow_map, 0, 64 * 64);
+    _has_shadow = false;
   }
   // - MCCV ----------------------------------------------
   if(header.ofsMCCV)
@@ -324,7 +326,7 @@ std::vector<uint8_t> MapChunk::compressed_shadow_map() const
   return shadow_map;
 }
 
-bool MapChunk::has_shadows() const
+bool MapChunk::shadow_map_is_empty() const
 {
   for (int i = 0; i < 64 * 64; ++i)
   {
@@ -564,6 +566,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , std::map<int, misc::random_color>& area_id_colors
                     , int animtime
                     , display_mode display
+                    , bool& previous_chunk_had_shadows
                     )
 {
   if (need_visibility_update || _need_visibility_update)
@@ -610,8 +613,14 @@ void MapChunk::draw ( math::frustum const& frustum
     }
   }
 
-  opengl::texture::set_active_texture(5);
-  shadow.bind();
+  // only update the shadow texture if there's a shadow map used
+  // OR if the last chunk had a shadow and this one doesn't (bind the default all 0 texture)
+  if (_has_shadow || previous_chunk_had_shadows)
+  {
+    opengl::texture::set_active_texture(5);
+    shadow.bind();
+  }
+  previous_chunk_had_shadows = _has_shadow;
 
   mcnk_shader.uniform("layer_count", (int)texture_set->num());
   mcnk_shader.uniform("cant_paint", (int)cantPaint);
@@ -1071,6 +1080,7 @@ void MapChunk::update_shadows()
 
 void MapChunk::clear_shadows()
 {
+  _has_shadow = false;
   memset(_shadow_map, 0, 64 * 64);
 
   if (_uploaded)
@@ -1353,7 +1363,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //        }
 
   // MCSH
-  if (has_shadows())
+  if (shadow_map_is_empty())
   {
     header_flags.flags.has_mcsh = 1;
 

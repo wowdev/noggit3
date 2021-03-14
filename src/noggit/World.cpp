@@ -1074,6 +1074,9 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("tex_anim_2", math::vector_2d());
     mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
+    // start true so the first chunk update the shadow texture regardless of whether it has shadows or not
+    bool previous_chunk_had_shadows = true;    
+
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->draw ( frustum
@@ -1089,6 +1092,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , area_id_colors
                  , animtime
                  , display
+                 , previous_chunk_had_shadows
                  );
     }
 
