@@ -27,6 +27,9 @@ namespace noggit
       QString get_script_display_name(int id);
       void select_script(int index);
       int get_selected_script();
+
+    private:
+      int cur_script = -1;
     };
   } // namespace scripting
 } // namespace noggit

@@ -9,8 +9,6 @@
 
 #include <mutex>
 
-static int cur_script = -1;
-
 using noggit::scripting::get_cur_tool;
 
 class NoggitModule;
@@ -89,15 +87,6 @@ struct script_container
 
 static std::vector<script_container> containers;
 
-static script_container *get_container()
-{
-  if (cur_script < 0)
-  {
-    return nullptr;
-  }
-  return &containers[cur_script];
-}
-
 static bool ends_with(std::string const &str, std::string const &suffix)
 {
   return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
@@ -169,13 +158,20 @@ namespace noggit
       return containers.size();
     }
 
-    void Loader::send_left_click(){CALL_FUNC(get_container(), left_click)};
-    void Loader::send_left_hold(){CALL_FUNC(get_container(), left_hold)};
-    void Loader::send_left_release(){CALL_FUNC(get_container(), left_release)};
+#define CURRENT_CONTEXT_CALL_FUNC(type)                                   \
+  do                                                                      \
+  {                                                                       \
+    auto container (cur_script < 0 ? nullptr : &containers[cur_script]);  \
+    CALL_FUNC (container, type);                                          \
+  } while (false)
 
-    void Loader::send_right_click(){CALL_FUNC(get_container(), right_click)};
-    void Loader::send_right_hold(){CALL_FUNC(get_container(), right_hold)};
-    void Loader::send_right_release(){CALL_FUNC(get_container(), right_release)};
+    void Loader::send_left_click(){ CURRENT_CONTEXT_CALL_FUNC (left_click); };
+    void Loader::send_left_hold(){ CURRENT_CONTEXT_CALL_FUNC (left_hold); };
+    void Loader::send_left_release(){ CURRENT_CONTEXT_CALL_FUNC (left_release); };
+
+    void Loader::send_right_click(){ CURRENT_CONTEXT_CALL_FUNC (right_click); };
+    void Loader::send_right_hold(){ CURRENT_CONTEXT_CALL_FUNC (right_hold); };
+    void Loader::send_right_release(){ CURRENT_CONTEXT_CALL_FUNC (right_release); };
 
     int Loader::load_scripts()
     {
