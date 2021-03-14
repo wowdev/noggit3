@@ -7,7 +7,8 @@
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 
-static bool initialized = false;
+#include <mutex>
+
 static int cur_script = -1;
 
 using noggit::scripting::get_cur_tool;
@@ -180,11 +181,8 @@ namespace noggit
 
     int load_scripts()
     {
-      if (!initialized)
-      {
-        initialized = true;
-        install_modules();
-      }
+      static std::once_flag modules_installed;
+      std::call_once (modules_installed, install_modules);
 
       das::Module::Initialize();
 
