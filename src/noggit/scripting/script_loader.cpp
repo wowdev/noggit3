@@ -51,14 +51,14 @@ struct script_container
   script_container(
       std::string name,
       QString display_name,
-      das::Context *ctx,
+      std::unique_ptr<das::Context> ctx,
       bool select,
       bool left_click,
       bool left_hold,
       bool left_release,
       bool right_click,
       bool right_hold,
-      bool right_release) : _ctx(ctx),
+      bool right_release) : _ctx(std::move (ctx)),
                             _name(name),
                             _display_name(display_name),
                             _on_select(select),
@@ -72,7 +72,7 @@ struct script_container
   }
   script_container() = default;
 
-  das::Context *_ctx = nullptr;
+  std::unique_ptr<das::Context> _ctx;
 
   std::string _name;
   QString _display_name;
@@ -192,12 +192,6 @@ namespace noggit
       cur_script = -1;
       int new_index = -1;
 
-      for (auto &ctr : containers)
-      {
-        // There may be a better way to do this
-        // with the reset/resetHeap calls.
-        delete ctr._ctx;
-      }
       containers.clear();
 
       das::ModuleGroup dummyLibGroup;
@@ -231,7 +225,7 @@ namespace noggit
           program->options.push_back(das::AnnotationArgument("intern_strings", false));
         }
 
-        auto ctx = new NoggitContext(program->getContextStackSize());
+        auto ctx = std::make_unique<NoggitContext> (program->getContextStackSize());
         if (!program->simulate(*ctx, _noggit_printer))
         {
           get_cur_tool()->setStyleSheet("background-color: #f0a5a5;");
@@ -242,11 +236,6 @@ namespace noggit
           }
           get_cur_tool()->resetLogScroll();
 
-          delete ctx;
-          for (auto &ctr : containers)
-          {
-            delete ctr._ctx;
-          }
           containers.clear();
           return -1;
         }
@@ -300,17 +289,17 @@ namespace noggit
             }
           }
 
-          containers.push_back(script_container(
+          containers.emplace_back(
               module_name,
               display_name,
-              ctx,
+              std::move (ctx),
               is_select,
               is_left_click,
               is_left_hold,
               is_left_release,
               is_right_click,
               is_right_hold,
-              is_right_release));
+              is_right_release);
         }
       }
 
