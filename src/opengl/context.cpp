@@ -121,9 +121,8 @@ namespace opengl
         if (!errors.empty())
         {
           errors += _extra_info();
-#ifndef NOGGIT_THROW_ON_OPENGL_ERRORS
           LogError << _function << ":" + errors << std::endl;
-#else
+#ifdef NOGGIT_THROW_ON_OPENGL_ERRORS
           throw std::runtime_error (std::string (_function) + ":" + errors);
 #endif
         }
