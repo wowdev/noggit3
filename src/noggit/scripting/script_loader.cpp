@@ -15,20 +15,18 @@ using noggit::scripting::get_cur_tool;
 
 class NoggitModule;
 
-// NEED_MODULE macros don't seem to work in a namespace
+// NEED_MODULE macros require to be called in the global namespace (they forward-declare a register function).
 static void install_modules()
 {
-  NEED_MODULE(Module_BuiltIn);
-  NEED_MODULE(Module_Math);
-  NEED_MODULE(Module_Strings);
-  NEED_MODULE(Module_Rtti);
-  NEED_MODULE(Module_Ast);
-  NEED_MODULE(Module_Debugger);
-  NEED_MODULE(Module_FIO);
-  NEED_MODULE(Module_Random);
-  // probably not a good idea to enable networking
-  //NEED_MODULE(Module_Network);
-  NEED_MODULE(NoggitModule);
+  NEED_MODULE (Module_BuiltIn);
+  NEED_MODULE (Module_Math);
+  NEED_MODULE (Module_Strings);
+  NEED_MODULE (Module_Rtti);
+  NEED_MODULE (Module_Ast);
+  NEED_MODULE (Module_Debugger);
+  NEED_MODULE (Module_FIO);
+  NEED_MODULE (Module_Random);
+  NEED_MODULE (NoggitModule);
 }
 
 #define CALL_FUNC(ctr, type)                                         \
