@@ -1388,12 +1388,12 @@ void Model::draw( math::matrix_4x4 const& model_view
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
-    m2_shader.attrib(_, "pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
-    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
-    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
-    m2_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
-    m2_shader.attrib(_, "texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
-    m2_shader.attrib(_, "texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
+    m2_shader.attrib(_, "pos", opengl::array_buffer_is_already_bound{}, 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
+    //m2_shader.attrib(_, "bones_weight", opengl::array_buffer_is_already_bound{},  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
+    //m2_shader.attrib(_, "bones_indices", opengl::array_buffer_is_already_bound{}, 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
+    m2_shader.attrib(_, "normal", opengl::array_buffer_is_already_bound{}, 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
+    m2_shader.attrib(_, "texcoord1", opengl::array_buffer_is_already_bound{}, 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
+    m2_shader.attrib(_, "texcoord2", opengl::array_buffer_is_already_bound{}, 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
   }
 
   for (ModelRenderPass& p : _render_passes)
@@ -1471,17 +1471,17 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     gl.bufferData(GL_ARRAY_BUFFER, transform_matrix.size() * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
-    m2_shader.attrib(_, "transform", 0, 1);
+    m2_shader.attrib(_, "transform", opengl::array_buffer_is_already_bound{}, static_cast<math::matrix_4x4*> (nullptr), 1);
   }
   
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    m2_shader.attrib(_, "pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
-    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
-    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
-    m2_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
-    m2_shader.attrib(_, "texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
-    m2_shader.attrib(_, "texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
+    m2_shader.attrib(_, "pos", opengl::array_buffer_is_already_bound{}, 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
+    //m2_shader.attrib(_, "bones_weight", opengl::array_buffer_is_already_bound{},  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
+    //m2_shader.attrib(_, "bones_indices", opengl::array_buffer_is_already_bound{}, 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
+    m2_shader.attrib(_, "normal", opengl::array_buffer_is_already_bound{}, 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
+    m2_shader.attrib(_, "texcoord1", opengl::array_buffer_is_already_bound{}, 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
+    m2_shader.attrib(_, "texcoord2", opengl::array_buffer_is_already_bound{}, 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
   }
 
   for (ModelRenderPass& p : _render_passes)
@@ -1527,7 +1527,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-    m2_box_shader.attrib(_, "transform", 0, 1);
+    m2_box_shader.attrib(_, "transform", opengl::array_buffer_is_already_bound{}, static_cast<math::matrix_4x4*> (nullptr), 1);
   }
   m2_box_shader.attrib(_, "position", _box_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
 

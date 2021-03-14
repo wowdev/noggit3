@@ -473,7 +473,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
   shader.attrib(_, "color", _colors_vbo, 4, GL_FLOAT, GL_FALSE, 0, 0);
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (transform_vbo);
-    shader.attrib(_, "transform", 0, 1);
+    shader.attrib(_, "transform", opengl::array_buffer_is_already_bound{}, static_cast<math::matrix_4x4*> (nullptr), 1);
   }
 
   gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), instances_count, GL_UNSIGNED_SHORT, _indices_vbo);
@@ -941,7 +941,7 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
   shader.attrib(_, "uv", _texcoord_vbo, 2, GL_FLOAT, GL_FALSE, 0, 0);
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder(transform_vbo);
-    shader.attrib(_, "transform", 0, 1);
+    shader.attrib(_, "transform", opengl::array_buffer_is_already_bound{}, static_cast<math::matrix_4x4*> (nullptr), 1);
   }
 
   gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), instances_count, GL_UNSIGNED_SHORT, _indices_vbo);
