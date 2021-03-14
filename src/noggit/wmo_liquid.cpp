@@ -264,5 +264,5 @@ void wmo_liquid::draw ( math::matrix_4x4 const& transform
   render.force_texture_update();
   render.prepare_draw (water_shader, _liquid_id, animtime);
 
-  gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
 }

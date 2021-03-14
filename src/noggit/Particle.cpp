@@ -484,9 +484,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
     shader.attrib(_, "transform", 0, 1);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder (_indices_vbo);
-  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
-
+  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), instances_count, GL_UNSIGNED_SHORT, _indices_vbo);
 }
 
 void ParticleSystem::upload()
@@ -960,8 +958,7 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
     shader.attrib(_, "transform", 0, 1);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder(_indices_vbo);
-  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
+  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), instances_count, GL_UNSIGNED_SHORT, _indices_vbo);
 }
 
 void RibbonEmitter::upload()

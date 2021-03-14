@@ -666,7 +666,7 @@ void MapChunk::draw ( math::frustum const& frustum
     _need_lod_update = false;
   }
 
-  gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
 
 
   for (int i = 0; i < texture_count; ++i)

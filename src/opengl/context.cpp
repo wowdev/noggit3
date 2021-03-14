@@ -378,21 +378,57 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _3_3_core_func->glUnmapBuffer (target);
   }
-  void context::drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices)
+
+  void context::drawElements (GLenum mode, GLsizei count, GLenum type, index_buffer_is_already_bound, std::intptr_t indices_offset)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _current_context->functions()->glDrawElements (mode, count, type, indices);
+    return _current_context->functions()->glDrawElements (mode, count, type, reinterpret_cast<void*> (indices_offset));
   }
-  void context::drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount)
+  void context::drawElementsInstanced (GLenum mode, GLsizei count, GLsizei instancecount, GLenum type, index_buffer_is_already_bound, std::intptr_t indices_offset)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _3_3_core_func->glDrawElementsInstanced (mode, count, type, indices, instancecount);
+    return _3_3_core_func->glDrawElementsInstanced (mode, count, type, reinterpret_cast<void*> (indices_offset), instancecount);
   }
-  void context::drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices)
+  void context::drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, index_buffer_is_already_bound, std::intptr_t indices_offset)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _3_3_core_func->glDrawRangeElements (mode, start, end, count, type, indices);
+    return _3_3_core_func->glDrawRangeElements (mode, start, end, count, type, reinterpret_cast<void*> (indices_offset));
   }
+
+  void context::drawElements (GLenum mode, GLsizei count, GLenum type, GLuint index_buffer, std::intptr_t indices_offset)
+  {
+    scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer);
+    return drawElements (mode, count, type, index_buffer_is_already_bound{}, indices_offset);
+  }
+  void context::drawElementsInstanced (GLenum mode, GLsizei count, GLsizei instancecount, GLenum type, GLuint index_buffer, std::intptr_t indices_offset)
+  {
+    scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer);
+    return drawElementsInstanced (mode, count, instancecount, type, index_buffer_is_already_bound{}, indices_offset);
+  }
+
+  namespace
+  {
+    template<typename> struct type_enum_for_type;
+    template<> struct type_enum_for_type<unsigned char> : std::integral_constant<GLenum, GL_UNSIGNED_BYTE> {};
+    template<> struct type_enum_for_type<unsigned short> : std::integral_constant<GLenum, GL_UNSIGNED_SHORT> {};
+  }
+
+  template<typename T>
+    void context::drawElements (GLenum mode, GLsizei count, std::vector<T> const& indices, std::intptr_t indices_offset)
+  {
+    return _current_context->functions()->glDrawElements (mode, count, type_enum_for_type<T>{}, static_cast<char*> (indices.data()) + indices_offset);
+  }
+
+  template void context::drawElements<unsigned char> (GLenum mode, GLsizei count, std::vector<unsigned char> const& indices, std::intptr_t indices_offset);
+  template void context::drawElements<unsigned short> (GLenum mode, GLsizei count, std::vector<unsigned short> const& indices, std::intptr_t indices_offset);
+
+  template<typename T>
+    void context::drawElementsInstanced (GLenum mode, GLsizei count, GLsizei instancecount, std::vector<T> const& indices, std::intptr_t indices_offset)
+  {
+    return _3_3_core_func->glDrawElementsInstanced (mode, count, type_enum_for_type<T>{}, static_cast<char*> (indices.data()) + indices_offset, instancecount);
+  }
+
+  template void context::drawElementsInstanced<unsigned short> (GLenum mode, GLsizei count, GLsizei instancecount, std::vector<unsigned short> const& indices, std::intptr_t indices_offset);
 
   void context::genPrograms (GLsizei count, GLuint* programs)
   {
@@ -743,10 +779,4 @@ namespace opengl
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint8_t>(GLuint buffer, std::vector<std::uint8_t> const& data, GLenum usage);
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(GLuint buffer, std::vector<std::uint16_t> const& data, GLenum usage);
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(GLuint buffer, std::vector<std::uint32_t> const& data, GLenum usage);
-
-  void context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
-  {
-    scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer);
-    return drawElements (mode, count, type, indices);
-  }
 }

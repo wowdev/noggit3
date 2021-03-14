@@ -446,13 +446,13 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
   {
     opengl::scoped::vao_binder const _(_mfbo_bottom_vao);
     mfbo_shader.uniform("color", math::vector_4d(1.0f, 1.0f, 0.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), indices);
   }
 
   {
     opengl::scoped::vao_binder const _(_mfbo_top_vao);
     mfbo_shader.uniform("color", math::vector_4d(0.0f, 1.0f, 1.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), indices);
   }
 }
 

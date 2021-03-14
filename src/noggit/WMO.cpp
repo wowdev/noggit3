@@ -1191,7 +1191,7 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
       wmo->textures.at(mat.texture2)->bind();
     }
 
-    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(sizeof(std::uint16_t)*batch.index_start));
+    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{}, sizeof (std::uint16_t) * batch.index_start);
   }
 }
 

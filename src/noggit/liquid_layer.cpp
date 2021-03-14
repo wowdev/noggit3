@@ -507,7 +507,7 @@ void liquid_layer::draw ( liquid_render& render
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_buffer[_current_lod_level]);
   }
   
-  gl.drawElements (GL_TRIANGLES, _current_lod_indices_count, GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, _current_lod_indices_count, GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
 }
 
 void liquid_layer::crop(MapChunk* chunk)

@@ -22,12 +22,12 @@ namespace noggit
 
     opengl::scoped::vao_binder const _ (_vaos[static_cast<int>(cursor_mode)]);
 
-    gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, nullptr);
+    gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
 
     if (inner_radius_ratio > 0.f)
     {
       shader.uniform("radius", radius*inner_radius_ratio);
-      gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
     }
   }
 

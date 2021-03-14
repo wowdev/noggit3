@@ -315,7 +315,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
       shader.uniform("model_view_projection", model_view*projection);
       shader.uniform("camera_pos", camera_pos);
 
-      gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
     }
   }
 

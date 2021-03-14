@@ -1400,7 +1400,7 @@ void Model::draw( math::matrix_4x4 const& model_view
   {
     if (p.prepare_draw(m2_shader, this))
     {
-      gl.drawElements(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start);
+      gl.drawElements(GL_TRIANGLES, p.index_count, _indices, sizeof (_indices[0]) * p.index_start);
       p.after_draw();
     }
   }
@@ -1488,7 +1488,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     if (p.prepare_draw(m2_shader, this))
     {
-      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start, transform_matrix.size());
+      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, transform_matrix.size(), _indices, sizeof (_indices[0]) * p.index_start);
       p.after_draw();
     }
   }
@@ -1535,7 +1535,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
     m2_box_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
-  gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), GL_UNSIGNED_SHORT, indices.data(), box_count);
+  gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), box_count, indices);
 }
 
 
