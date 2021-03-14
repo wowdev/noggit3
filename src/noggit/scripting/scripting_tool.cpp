@@ -41,11 +41,13 @@ namespace noggit
     static std::string cur_profile = "Default";
     static std::mutex script_change_mutex;
 
+    static Loader loader;
+
     template <typename T>
     static T get_json_safe(std::string key, T def)
     {
       // TODO: this is terrible but accessing by reference didn't seem to work.
-      auto ssn = selected_script_name();
+      auto ssn = loader.selected_script_name();
       if (!_json.contains(ssn))
       {
         _json[ssn] = json();
@@ -67,7 +69,7 @@ namespace noggit
     template <typename T>
     static void set_json_safe(std::string key, T def)
     {
-      auto ssn = selected_script_name();
+      auto ssn = loader.selected_script_name();
       if (!_json.contains(ssn))
       {
         _json[ssn] = json();
@@ -84,13 +86,13 @@ namespace noggit
     template <typename T>
     static void set_json_unsafe(std::string key, T value)
     {
-      _json[selected_script_name()][cur_profile][key] = value;
+      _json[loader.selected_script_name()][cur_profile][key] = value;
     }
 
     template <typename T>
     static T get_json_unsafe(std::string key)
     {
-      return _json[selected_script_name()][cur_profile][key].get<T>();
+      return _json[loader.selected_script_name()][cur_profile][key].get<T>();
     }
 
     static scripting_tool* cur_tool = nullptr;
@@ -108,7 +110,7 @@ namespace noggit
       clearLog();
       try
       {
-        selection = load_scripts();
+        selection = loader.load_scripts();
       }
       catch (std::exception const& e)
       {
@@ -118,9 +120,9 @@ namespace noggit
       }
       _selection->clear();
 
-      for (int i = 0; i < script_count(); ++i)
+      for (int i = 0; i < loader.script_count(); ++i)
       {
-        _selection->addItem(get_script_display_name(i));
+        _selection->addItem(loader.get_script_display_name(i));
       }
 
       if (selection != -1)
@@ -138,7 +140,7 @@ namespace noggit
 
       cur_tool = this;
 
-      auto sn = get_script_name(selection);
+      auto sn = loader.get_script_name(selection);
       _profile_selection->clear();
       if (_json.contains(sn))
       {
@@ -171,7 +173,7 @@ namespace noggit
       }
 
       int next_profile = 0;
-      auto cur_script = get_script_name(selection);
+      auto cur_script = loader.get_script_name(selection);
       if (_json.contains(cur_script))
       {
         if (_json[cur_script].contains(CUR_PROFILE_PATH))
@@ -195,7 +197,7 @@ namespace noggit
         _json[cur_script] = json();
       }
       _json[cur_script][CUR_PROFILE_PATH] = cur_profile;
-      select_script(selection);
+      loader.select_script(selection);
 
       initialize_radius();
       for (auto& item : _string_arrays)
@@ -315,7 +317,7 @@ namespace noggit
       });
 
       connect(_profile_remove_button, &QPushButton::released, this, [this]() {
-        auto script_name = selected_script_name();
+        auto script_name = loader.selected_script_name();
         if (script_name.size() == 0)
         {
           // TODO: error?
@@ -346,7 +348,7 @@ namespace noggit
       });
 
       connect(_profile_create_button, &QPushButton::released, this, [this]() {
-        auto script_name = selected_script_name();
+        auto script_name = loader.selected_script_name();
 
         // do not allow invalid script
         if (script_name.size() == 0)
@@ -560,7 +562,7 @@ namespace noggit
       cur_tool = this;
       cur_profile = _profile_selection->itemText(profile).toStdString();
 
-      auto n = selected_script_name();
+      auto n = loader.selected_script_name();
       if (!_json.contains(n))
       {
         _json[n] = json();
@@ -570,7 +572,7 @@ namespace noggit
 
       initialize_radius();
 
-      select_script(get_selected_script());
+      loader.select_script(loader.get_selected_script());
       cur_tool = nullptr;
     }
 
@@ -596,29 +598,29 @@ namespace noggit
         {
           if (!_last_left)
           {
-            send_left_click();
+            loader.send_left_click();
           }
 
-          send_left_hold();
+          loader.send_left_hold();
         }
 
         if (right_mouse)
         {
           if (!_last_right)
           {
-            send_right_click();
+            loader.send_right_click();
           }
-          send_right_hold();
+          loader.send_right_hold();
         }
 
         if (!left_mouse && _last_left)
         {
-          send_left_release();
+          loader.send_left_release();
         }
 
         if (!right_mouse && _last_right)
         {
-          send_right_release();
+          loader.send_right_release();
         }
       }
       catch (std::exception const& e)

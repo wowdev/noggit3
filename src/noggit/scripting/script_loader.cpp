@@ -142,42 +142,42 @@ namespace noggit
 {
   namespace scripting
   {
-    int get_selected_script()
+    int Loader::get_selected_script()
     {
       return cur_script;
     }
 
-    std::string selected_script_name()
+    std::string Loader::selected_script_name()
     {
       return cur_script >= 0 && cur_script < containers.size()
                  ? containers[cur_script]._name
                  : "";
     }
 
-    std::string const &get_script_name(int id)
+    std::string const& Loader::get_script_name(int id)
     {
       return containers[id]._name;
     }
 
-    QString get_script_display_name(int id)
+    QString Loader::get_script_display_name(int id)
     {
       return containers[id]._display_name;
     }
 
-    int script_count()
+    int Loader::script_count()
     {
       return containers.size();
     }
 
-    void send_left_click(){CALL_FUNC(get_container(), left_click)};
-    void send_left_hold(){CALL_FUNC(get_container(), left_hold)};
-    void send_left_release(){CALL_FUNC(get_container(), left_release)};
+    void Loader::send_left_click(){CALL_FUNC(get_container(), left_click)};
+    void Loader::send_left_hold(){CALL_FUNC(get_container(), left_hold)};
+    void Loader::send_left_release(){CALL_FUNC(get_container(), left_release)};
 
-    void send_right_click(){CALL_FUNC(get_container(), right_click)};
-    void send_right_hold(){CALL_FUNC(get_container(), right_hold)};
-    void send_right_release(){CALL_FUNC(get_container(), right_release)};
+    void Loader::send_right_click(){CALL_FUNC(get_container(), right_click)};
+    void Loader::send_right_hold(){CALL_FUNC(get_container(), right_hold)};
+    void Loader::send_right_release(){CALL_FUNC(get_container(), right_release)};
 
-    int load_scripts()
+    int Loader::load_scripts()
     {
       static std::once_flag modules_installed;
       std::call_once (modules_installed, install_modules);
@@ -310,7 +310,7 @@ namespace noggit
       return new_index;
     }
 
-    void select_script(int index)
+    void Loader::select_script(int index)
     {
       // just for safety
       save_json();
