@@ -496,21 +496,18 @@ void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const
   _need_indice_buffer_update = true;
 }
 
-bool MapChunk::update_visibility ( const float& cull_distance
+void MapChunk::update_visibility ( const float& cull_distance
                                  , const math::frustum& frustum
                                  , const math::vector_3d& camera
                                  , display_mode display
                                  )
 {
+  auto lod = get_lod_level(camera, display);
+
   _is_visible = is_visible(cull_distance, frustum, camera, display);
   _need_visibility_update = false;
-
-  auto lod = get_lod_level(camera, display);
-  bool lod_changed = lod != _lod_level;
-
+  _need_lod_update |= lod != _lod_level;
   _lod_level = lod;
-
-  return lod_changed;
 }
 
 void MapChunk::draw ( math::frustum const& frustum
@@ -528,11 +525,9 @@ void MapChunk::draw ( math::frustum const& frustum
                     , display_mode display
                     )
 {
-  bool lod_changed = false;
-
   if (need_visibility_update || _need_visibility_update)
   {
-    lod_changed = update_visibility(cull_distance, frustum, camera, display);
+    update_visibility(cull_distance, frustum, camera, display);
   }
 
   if (!_is_visible)
@@ -544,7 +539,7 @@ void MapChunk::draw ( math::frustum const& frustum
   {
     upload();
     // force lod update on upload
-    lod_changed = true;
+    _need_lod_update = true;
     update_visibility(cull_distance, frustum, camera, display);
   }
 
@@ -595,13 +590,14 @@ void MapChunk::draw ( math::frustum const& frustum
   if (_need_indice_buffer_update)
   {
     update_indices_buffer();
-    lod_changed = true;
+    _need_lod_update = true;
   }
 
-  if (lod_changed)
+  if (_need_lod_update)
   {
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !_lod_level ? _indices_buffer : lod_indices[*_lod_level]);
     _lod_level_indice_count = !_lod_level ? strip_with_holes.size() : strip_lods[*_lod_level].size();
+    _need_lod_update = false;
   }
 
   gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
