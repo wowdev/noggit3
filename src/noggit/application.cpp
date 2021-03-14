@@ -224,14 +224,14 @@ Noggit::Noggit(int argc, char *argv[])
 
   while (!is_valid_game_path (path))
   {
-    QDir new_path (QFileDialog::getExistingDirectory (nullptr, "Open WoW Directory", "/", QFileDialog::ShowDirsOnly));
-    if (new_path.absolutePath () == "")
+    auto const new_path (QFileDialog::getExistingDirectory (nullptr, "Open WoW Directory", "/", QFileDialog::ShowDirsOnly));
+    if (new_path.isEmpty())
     {
       LogError << "Could not auto-detect game path "
         << "and user canceled the dialog." << std::endl;
-      throw std::runtime_error ("no folder chosen");
+      throw std::runtime_error ("Could not auto-detect game path and user canceled the dialog.");
     }
-    std::swap (new_path, path);
+    path = QDir (new_path);
   }
 
   wowpath = path.absolutePath().toStdString();
@@ -332,6 +332,7 @@ namespace
 }
 
 int main(int argc, char *argv[])
+try
 {
   noggit::RegisterErrorHandlers();
   std::set_terminate (noggit_terminate_handler);
@@ -343,4 +344,9 @@ int main(int argc, char *argv[])
   Noggit app (argc, argv);
 
   return qapp.exec();
+}
+catch (...)
+{
+  noggit_terminate_handler();
+  return 1;
 }

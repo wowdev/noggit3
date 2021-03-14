@@ -433,7 +433,7 @@ namespace noggit
         if (selection.which() == eEntry_Model)
         {
           float scale(1.f);
-          math::vector_3d rotation(0.f, 0.f, 0.f);
+          math::degrees::vec3 rotation(0_deg, 0_deg, 0_deg);
 
           if (_copy_model_stats)
           {
@@ -451,7 +451,7 @@ namespace noggit
         }
         else if (selection.which() == eEntry_WMO)
         {
-          math::vector_3d rotation(0.f, 0.f, 0.f);
+          math::degrees::vec3 rotation(0.0_deg, 0.0_deg, 0.0_deg);
           if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working

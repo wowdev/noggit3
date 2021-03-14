@@ -1462,6 +1462,7 @@ void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
   }
 
   _camera.position.y += 50.0f;
+  _camera_moved_since_last_draw = true;
 
   _minimap->update();
 }
@@ -1559,6 +1560,8 @@ void MapView::resizeGL (int width, int height)
 {
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width, height);
+
+  _camera_moved_since_last_draw = true;
 }
 
 
@@ -2702,6 +2705,15 @@ void MapView::focusOutEvent (QFocusEvent*)
   freelook = false;
 }
 
+void MapView::enterEvent(QEvent* event)
+{
+  // check if noggit is the currently active windows
+  if (static_cast<QApplication*>(QApplication::instance())->applicationState() & Qt::ApplicationActive)
+  {
+    activateWindow();
+  }
+}
+
 void MapView::mouseMoveEvent (QMouseEvent* event)
 {
   //! \todo:  move the function call requiring a context in tick ?
@@ -3078,7 +3090,7 @@ void MapView::save(save_mode mode)
     QMessageBox::warning
       ( nullptr
       , "Map NOT saved"
-      , "The map wasn NOT saved, don't forget to save before leaving"
+      , "The map was NOT saved, don't forget to save before leaving"
       , QMessageBox::Ok
       );
   }

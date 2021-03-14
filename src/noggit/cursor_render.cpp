@@ -22,12 +22,12 @@ namespace noggit
 
     opengl::scoped::vao_binder const _ (_vaos[static_cast<int>(cursor_mode)]);
 
-    gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, nullptr);
+    gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
 
     if (inner_radius_ratio > 0.f)
     {
       shader.uniform("radius", radius*inner_radius_ratio);
-      gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
     }
   }
 
@@ -82,7 +82,7 @@ namespace noggit
       opengl::scoped::vao_binder const _(_vaos[id]);
 
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
-      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();
     }
@@ -144,7 +144,7 @@ namespace noggit
       opengl::scoped::vao_binder const _(_vaos[id]);
 
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
-      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();
     }
@@ -175,7 +175,7 @@ namespace noggit
       opengl::scoped::vao_binder const _(_vaos[id]);
 
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
-      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();
     }
@@ -217,7 +217,7 @@ namespace noggit
       opengl::scoped::vao_binder const _(_vaos[id]);
 
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
-      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();
     }

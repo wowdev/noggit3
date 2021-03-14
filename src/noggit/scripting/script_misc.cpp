@@ -51,7 +51,7 @@ namespace noggit
           );
       }
       auto p = object_paste_params();
-      get_ctx("add_m2")->_world->addM2(filename, pos, scale, rotation,& p);
+      get_ctx("add_m2")->_world->addM2(filename, pos, scale, math::degrees::vec3 {rotation}, &p);
     }
 
     void add_wmo(char const* filename, math::vector_3d const& pos, math::vector_3d const& rotation)
@@ -62,7 +62,7 @@ namespace noggit
           "add_wmo",
           "empty string parameter (in call to add_wmo)");
       }
-      get_ctx("add_wmo")->_world->addWMO(filename, pos, rotation);
+      get_ctx("add_wmo")->_world->addWMO(filename, pos, math::degrees::vec3 {rotation});
     }
 
     float dt()

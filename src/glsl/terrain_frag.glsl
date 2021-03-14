@@ -11,7 +11,7 @@ uniform vec2 tex_anim_1;
 uniform vec2 tex_anim_2;
 uniform vec2 tex_anim_3;
 uniform sampler2D alphamap;
-uniform int layer_count;
+uniform bool is_textured;
 uniform bool has_mccv;
 uniform bool cant_paint;
 uniform bool draw_areaid_overlay;
@@ -58,7 +58,7 @@ const float UNITSIZE = HOLESIZE * 0.5;
 
 vec4 texture_blend() 
 {
-  if(layer_count == 0)
+  if(!is_textured)
     return vec4 (1.0, 1.0, 1.0, 1.0);
 
   vec3 alpha = texture(alphamap, vary_texcoord / 8.0).rgb;

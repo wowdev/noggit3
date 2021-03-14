@@ -8,6 +8,9 @@
 
 namespace opengl
 {
+  // The caller guarantees that the index buffer is already bound.
+  struct index_buffer_is_already_bound{};
+
   struct context
   {
     struct scoped_setter
@@ -95,9 +98,27 @@ namespace opengl
     void bufferData (GLenum target, GLsizeiptr size, GLvoid const* data, GLenum usage);
     GLvoid* mapBuffer (GLenum target, GLenum access);
     GLboolean unmapBuffer (GLenum);
-    void drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices);
-    void drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount);
-    void drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices);
+
+    // The drawElements() family uses indices. These indices can either
+    // - be already bound (`type, opengl::index_buffer_is_already_bound{}`, not checked, caller has to ensure),
+    // - automatically be bound from the buffer given (`type, index_buffer`), or
+    // - [TRY TO AVOID] be uploaded by the drawElements() function via a CPU buffer (`indices`).
+    //
+    // Regardless of the way chosen to specify the indices, indices_offset can be used to
+    // point into the buffer, e.g. to skip vertices also in the buffer.
+    //
+    // \note Not all combinations are implemented for sake of implementer's time.
+    // \todo Take index information via some object that encapsulates the mess.
+
+    void drawElements (GLenum mode, GLsizei count, GLenum type, GLuint index_buffer,           std::intptr_t indices_offset = 0);
+    void drawElements (GLenum mode, GLsizei count, GLenum type, index_buffer_is_already_bound, std::intptr_t indices_offset = 0);
+    template<typename T>
+      void drawElements (GLenum mode, GLsizei count, std::vector<T> const& indices,            std::intptr_t indices_offset = 0);
+    void drawElementsInstanced (GLenum mode, GLsizei count, GLsizei instancecount, GLenum type, index_buffer_is_already_bound, std::intptr_t indices_offset = 0);
+    void drawElementsInstanced (GLenum mode, GLsizei count, GLsizei instancecount, GLenum type, GLuint index_buffer,           std::intptr_t indices_offset = 0);
+    template<typename T>
+      void drawElementsInstanced (GLenum mode, GLsizei count, GLsizei instancecount, std::vector<T> const& indices,            std::intptr_t indices_offset = 0);
+    void drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, index_buffer_is_already_bound, std::intptr_t indices_offset = 0);
 
     void genPrograms (GLsizei programs, GLuint*);
     void deletePrograms (GLsizei programs, GLuint*);
@@ -164,8 +185,6 @@ namespace opengl
       void bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
     template<GLenum target, typename T>
       void bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage);
-
-    void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
   };
 }
 

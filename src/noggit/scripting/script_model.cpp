@@ -70,11 +70,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        return wmo_const(model)->dir;
+        return math::vector_3d {wmo_const(model)->dir};
       }
       else
       {
-        return m2_const(model)->dir;
+        return math::vector_3d {m2_const(model)->dir};
       }
     }
 
@@ -82,11 +82,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        wmo(model)->dir = rot;
+        wmo(model)->dir = math::degrees::vec3 {rot};
       }
       else
       {
-        m2(model)->dir = rot;
+        m2(model)->dir = math::degrees::vec3 {rot};
       }
     }
 
@@ -171,7 +171,7 @@ namespace noggit
       if (boost::ends_with(filename, ".wmo"))
       {
         auto wmo = get_ctx("model_replace")
-          ->_world->addWMO(filename, model_get_pos(model), model_get_rot(model));
+          ->_world->addWMO(filename, model_get_pos(model), math::degrees::vec3 {model_get_rot(model)});
         model._model = wmo;
         model._is_wmo = true;
       }
@@ -179,7 +179,7 @@ namespace noggit
       {
         auto params = object_paste_params();
         auto m2 = get_ctx("model_replace")
-          ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), model_get_rot(model),& params);
+          ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), math::degrees::vec3 {model_get_rot(model)}, &params);
         model._model = m2;
         model._is_wmo = false;
       }
