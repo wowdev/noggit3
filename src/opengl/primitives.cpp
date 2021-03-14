@@ -93,8 +93,7 @@ void main()
       gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
       
       opengl::scoped::vao_binder const _(_vao[0]);
-      scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices (_positions);
-      wire_box_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      wire_box_shader.attrib(_, "position", _positions, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       gl.drawElements (GL_LINE_STRIP, 16, GL_UNSIGNED_BYTE, _indices);
     }
@@ -212,8 +211,7 @@ void main()
       {
         opengl::scoped::vao_binder const _ (_vao[0]);
 
-        opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-        shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+        shader.attrib(_, "position", _vertices_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();
       }
@@ -321,8 +319,7 @@ void main()
       {
         opengl::scoped::vao_binder const _ (_vao[0]);
 
-        opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-        shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+        shader.attrib(_, "position", _vertices_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();
       }

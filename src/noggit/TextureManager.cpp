@@ -375,14 +375,10 @@ out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
 
     opengl::scoped::vao_binder const _ (vao[0]);
 
-    {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_binder (vertices_vbo);
-      shader.attrib(_, "position", 2, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-    {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> texcoords_binder (texcoords_vbo);
-      shader.attrib(_, "tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
-    }
+    shader.attrib(_, "position", vertices_vbo, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "tex_coord", texcoords_vbo, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(indices_vbo);
+
     gl.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices_vbo);
 
     QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));

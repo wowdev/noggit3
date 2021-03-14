@@ -1529,11 +1529,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     m2_box_shader.attrib(_, "transform", 0, 1);
   }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
-    m2_box_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
+  m2_box_shader.attrib(_, "position", _box_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), box_count, indices);
 }

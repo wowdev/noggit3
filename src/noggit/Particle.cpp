@@ -460,25 +460,17 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
 
   opengl::scoped::vao_binder const _ (_vao);
 
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-    shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
+  shader.attrib(_, "position", _vertices_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
   if(billboard)
   {
+    // \todo duplicate bind
     gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_offsets_vbo, offsets, GL_STREAM_DRAW);
+    shader.attrib(_, "offset", _offsets_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  }
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const offset_binder (_offsets_vbo);
-    shader.attrib(_, "offset", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder (_texcoord_vbo);
-    shader.attrib(_, "uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const colors_binder (_colors_vbo);
-    shader.attrib(_, "color", 4, GL_FLOAT, GL_FALSE, 0, 0);
-  }
+  shader.attrib(_, "uv", _texcoord_vbo, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  shader.attrib(_, "color", _colors_vbo, 4, GL_FLOAT, GL_FALSE, 0, 0);
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (transform_vbo);
     shader.attrib(_, "transform", 0, 1);
@@ -945,14 +937,8 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
 
   opengl::scoped::vao_binder const _(_vao);
 
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder(_vertices_vbo);
-    shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoord_vbo);
-    shader.attrib(_, "uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
-  }
+  shader.attrib(_, "position", _vertices_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  shader.attrib(_, "uv", _texcoord_vbo, 2, GL_FLOAT, GL_FALSE, 0, 0);
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder(transform_vbo);
     shader.attrib(_, "transform", 0, 1);
