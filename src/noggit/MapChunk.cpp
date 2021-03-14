@@ -430,6 +430,47 @@ float MapChunk::getMinHeight()
   return min;
 }
 
+boost::optional<float> MapChunk::get_exact_height_at(math::vector_3d const& pos)
+{
+  if (pos.x < vmin.x || pos.x > vmax.x || pos.z < vmin.z || pos.z > vmax.z)
+  {
+    return boost::none;
+  }
+
+  // put the ray above the max height to be sure always hit the terrain
+  math::ray ray({pos.x, vmax.y + 1.f, pos.z}, {0.f, -1.f, 0.f});
+
+  float diff_x = pos.x - xbase;
+  float diff_z = pos.z - zbase;
+
+  int idx = static_cast<int>(diff_x / UNITSIZE);
+  int idz = static_cast<int>(diff_z / UNITSIZE);
+
+  float dx = std::fmod(diff_x, UNITSIZE);
+  float dz = std::fmod(diff_z, UNITSIZE);
+
+  int id_0 = dx > dz
+           ? indexNoLoD(idz, idx+1)
+           : indexNoLoD(idz+1, idx)
+           ;
+  int id_1 = (UNITSIZE - dx) > dz
+           ? indexNoLoD(idz, idx)
+           : indexNoLoD(idz+1, idx+1)
+           ;
+  int id_center = indexLoD(idz, idx);
+
+  auto dist = ray.intersect_triangle(mVertices[id_0], mVertices[id_1], mVertices[id_center]);
+
+  if (dist)
+  {
+    return ray.position(dist.get()).y;
+  }
+  else
+  {
+    return boost::none;
+  }
+}
+
 void MapChunk::clearHeight()
 {
   for (int i = 0; i < mapbufsize; ++i)

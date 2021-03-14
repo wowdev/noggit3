@@ -184,6 +184,7 @@ public:
   bool GetVertex(float x, float z, math::vector_3d *V);
   float getHeight(int x, int z);
   float getMinHeight();
+  boost::optional<float> get_exact_height_at(math::vector_3d const& pos);
 
   void clearHeight();
 
