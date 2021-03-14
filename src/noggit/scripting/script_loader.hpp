@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <QtCore/QString>
+
 #include <string>
 
 namespace noggit
@@ -20,7 +22,7 @@ namespace noggit
     int script_count();
     std::string selected_script_name();
     std::string const& get_script_name(int id);
-    std::string const& get_script_display_name(int id);
+    QString get_script_display_name(int id);
     void select_script(int index);
     int get_selected_script();
   } // namespace scripting

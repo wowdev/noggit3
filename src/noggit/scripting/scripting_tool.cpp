@@ -120,7 +120,7 @@ namespace noggit
 
       for (int i = 0; i < script_count(); ++i)
       {
-        _selection->addItem(get_script_display_name(i).c_str());
+        _selection->addItem(get_script_display_name(i));
       }
 
       if (selection != -1)
@@ -147,7 +147,7 @@ namespace noggit
         {
           if (v.key() != CUR_PROFILE_PATH)
           {
-            items.push_back(v.key().c_str());
+            items.push_back(v.key());
           }
         }
 
@@ -161,7 +161,7 @@ namespace noggit
 
         for (auto& item : items)
         {
-          _profile_selection->addItem(item.c_str());
+          _profile_selection->addItem(QString::fromStdString (item));
         }
       }
 
@@ -179,7 +179,7 @@ namespace noggit
           auto str = _json[cur_script][CUR_PROFILE_PATH];
           for (int i = 0; i < _profile_selection->count(); ++i)
           {
-            if (_profile_selection->itemText(i).toUtf8().constData() == str)
+            if (_profile_selection->itemText(i) == QString::fromStdString (str))
             {
               next_profile = i;
               break;
@@ -188,7 +188,7 @@ namespace noggit
         }
       }
 
-      cur_profile = _profile_selection->itemText(next_profile).toUtf8().constData();
+      cur_profile = _profile_selection->itemText(next_profile).toStdString();
       _profile_selection->setCurrentIndex(next_profile);
       if (!_json.contains(cur_script))
       {
@@ -204,7 +204,7 @@ namespace noggit
         // is invalid (old script), so we just write it again to be safe.
         if (item.second->currentIndex() == 0)
         {
-          set_json_unsafe(item.first, item.second->itemText(0).toUtf8().constData());
+          set_json_unsafe(item.first, item.second->itemText(0).toStdString());
         }
       }
 
@@ -330,7 +330,7 @@ namespace noggit
           return;
         }
 
-        auto text = _profile_selection->itemText(index).toUtf8().constData();
+        auto text = _profile_selection->itemText(index).toStdString();
         _profile_selection->removeItem(index);
 
         if (_json.contains(script_name))
@@ -352,38 +352,38 @@ namespace noggit
         if (script_name.size() == 0)
           return;
 
-        std::string newText = _profile_name_entry->text().toUtf8().constData();
+        auto newText = _profile_name_entry->text();
 
         // do not allow empty profiles
-        if (newText.size() == 0)
+        if (newText.isEmpty())
           return;
 
         auto count = _profile_selection->count();
         for (int i = 0; i < count; ++i)
         {
           // do not allow duplicate profiles
-          if (_profile_selection->itemText(i).toUtf8().constData() == newText)
+          if (_profile_selection->itemText(i) == newText)
           {
             return;
           }
         }
 
         _profile_name_entry->clear();
-        _profile_selection->addItem(newText.c_str());
+        _profile_selection->addItem (newText);
         if (!_json.contains(script_name))
         {
           _json[script_name] = json();
         }
 
-        if (!_json[script_name].contains(newText))
+        if (!_json[script_name].contains(newText.toStdString()))
         {
           if (_json[script_name].contains(cur_profile))
           {
-            _json[script_name][newText] = _json[script_name][cur_profile];
+            _json[script_name][newText.toStdString()] = _json[script_name][cur_profile];
           }
           else
           {
-            _json[script_name][newText] = json();
+            _json[script_name][newText.toStdString()] = json();
           }
         }
 
@@ -499,7 +499,7 @@ namespace noggit
         auto label = new QLabel(this);
 
         connect(box, QOverload<int>::of(&QComboBox::activated), this, [=](auto index) {
-          set_json_unsafe<std::string>(name, box->itemText(index).toUtf8().constData());
+          set_json_unsafe (name, box->itemText(index).toStdString());
         });
 
         box->addItem(value);
@@ -533,12 +533,12 @@ namespace noggit
       auto label = new QLabel(this);
       label->setText(name);
       connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
-        set_json_unsafe<std::string>(name, text.toUtf8().constData());
+        set_json_unsafe (name, text.toStdString());
       });
       _script_widgets.push_back(label);
       _script_widgets.push_back(tline);
       _script_settings_layout->addRow(label, tline);
-      tline->setText(get_json_safe<std::string>(name, defstr).c_str());
+      tline->setText (QString::fromStdString (get_json_safe<std::string>(name, defstr)));
     }
 
     void scripting_tool::removeScriptWidgets()
@@ -558,7 +558,7 @@ namespace noggit
       removeScriptWidgets();
       clearDescription();
       cur_tool = this;
-      cur_profile = _profile_selection->itemText(profile).toUtf8().constData();
+      cur_profile = _profile_selection->itemText(profile).toStdString();
 
       auto n = selected_script_name();
       if (!_json.contains(n))
@@ -650,13 +650,13 @@ namespace noggit
     void scripting_tool::addDescription(char const* text)
     {
       std::string stext = text == nullptr ? "" : text;
-      _description->setText(_description->text() + "\n" + stext.c_str());
+      _description->setText(_description->text() + "\n" + QString::fromStdString (stext));
     }
 
     void scripting_tool::addLog(std::string const& text)
     {
       LogDebug << "[script window]: " << text << "\n";
-      _log->appendPlainText(text.c_str());
+      _log->appendPlainText (QString::fromStdString (text));
       _log->verticalScrollBar()->setValue(_log->verticalScrollBar()->maximum());
     }
 

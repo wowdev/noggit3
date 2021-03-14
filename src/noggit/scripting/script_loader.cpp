@@ -50,7 +50,7 @@ struct script_container
 {
   script_container(
       std::string name,
-      std::string display_name,
+      QString display_name,
       das::Context *ctx,
       bool select,
       bool left_click,
@@ -75,7 +75,7 @@ struct script_container
   das::Context *_ctx = nullptr;
 
   std::string _name;
-  std::string _display_name;
+  QString _display_name;
 
   bool _on_select = false;
 
@@ -160,7 +160,7 @@ namespace noggit
       return containers[id]._name;
     }
 
-    std::string const &get_script_display_name(int id)
+    QString get_script_display_name(int id)
     {
       return containers[id]._display_name;
     }
@@ -282,7 +282,7 @@ namespace noggit
             new_index = containers.size();
           }
 
-          auto display_name = module_name;
+          QString display_name = QString::fromStdString (module_name);
           auto title_fun = ctx->findFunction("title");
           if (title_fun)
           {
@@ -295,7 +295,7 @@ namespace noggit
               auto result = das::cast<char const *>::to(ctx->eval(title_fun));
               if (result)
               {
-                display_name = std::string(result);
+                display_name = result;
               }
             }
           }
