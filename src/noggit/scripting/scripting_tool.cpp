@@ -110,7 +110,7 @@ namespace noggit
       clearLog();
       try
       {
-        selection = loader.load_scripts();
+        selection = loader.load_scripts (this);
       }
       catch (std::exception const& e)
       {
@@ -197,7 +197,7 @@ namespace noggit
         _json[cur_script] = json();
       }
       _json[cur_script][CUR_PROFILE_PATH] = cur_profile;
-      loader.select_script(selection);
+      loader.select_script(selection, this);
 
       initialize_radius();
       for (auto& item : _string_arrays)
@@ -572,7 +572,7 @@ namespace noggit
 
       initialize_radius();
 
-      loader.select_script(loader.get_selected_script());
+      loader.select_script (loader.get_selected_script(), this);
       cur_tool = nullptr;
     }
 
@@ -598,29 +598,29 @@ namespace noggit
         {
           if (!_last_left)
           {
-            loader.send_left_click();
+            loader.send_left_click (this);
           }
 
-          loader.send_left_hold();
+          loader.send_left_hold (this);
         }
 
         if (right_mouse)
         {
           if (!_last_right)
           {
-            loader.send_right_click();
+            loader.send_right_click (this);
           }
-          loader.send_right_hold();
+          loader.send_right_hold (this);
         }
 
         if (!left_mouse && _last_left)
         {
-          loader.send_left_release();
+          loader.send_left_release (this);
         }
 
         if (!right_mouse && _last_right)
         {
-          loader.send_right_release();
+          loader.send_right_release (this);
         }
       }
       catch (std::exception const& e)

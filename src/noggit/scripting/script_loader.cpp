@@ -9,8 +9,6 @@
 
 #include <mutex>
 
-using noggit::scripting::get_cur_tool;
-
 class NoggitModule;
 
 // NEED_MODULE macros require to be called in the global namespace (they forward-declare a register function).
@@ -27,7 +25,7 @@ static void install_modules()
   NEED_MODULE (NoggitModule);
 }
 
-#define CALL_FUNC(ctr, type)                                         \
+#define CALL_FUNC(ctr, tool, type)                                   \
   if (ctr)                                                           \
   {                                                                  \
     if (ctr->_on_##type)                                             \
@@ -37,15 +35,44 @@ static void install_modules()
       ctr->_ctx->collectStringHeap(nullptr);                         \
       if (auto ex = ctr->_ctx->getException())                       \
       {                                                              \
-        get_cur_tool()->addLog("[error]: " + std::to_string(*ex));   \
-        get_cur_tool()->resetLogScroll();                            \
+        tool->addLog("[error]: " + std::to_string(*ex));             \
+        tool->resetLogScroll();                                      \
       }                                                              \
     }                                                                \
   }
 
-struct script_container
+static bool ends_with(std::string const &str, std::string const &suffix)
 {
-  script_container(
+  return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
+}
+
+// used to reroute 'print' to the script window log
+class NoggitContext : public das::Context
+{
+public:
+  NoggitContext(int stackSize, noggit::scripting::scripting_tool* tool)
+    : das::Context(stackSize)
+    , _tool (tool)
+  {}
+
+  virtual void to_out(char const *msg) override
+  {
+    // if string is empty, make an empty line
+    _tool->addLog(msg != nullptr ? msg : "");
+  }
+  virtual void to_err(char const *msg) override
+  {
+    _tool->addLog(msg != nullptr ? msg : "");
+  }
+
+  noggit::scripting::scripting_tool* _tool;
+};
+
+namespace noggit
+{
+  namespace scripting
+  {
+    Loader::script_container::script_container(
       std::string name,
       QString display_name,
       std::unique_ptr<das::Context> ctx,
@@ -65,72 +92,8 @@ struct script_container
                             _on_right_click(right_click),
                             _on_right_hold(right_hold),
                             _on_right_release(right_release)
-  {
-  }
-  script_container() = default;
+    {}
 
-  std::unique_ptr<das::Context> _ctx;
-
-  std::string _name;
-  QString _display_name;
-
-  bool _on_select = false;
-
-  bool _on_left_click = false;
-  bool _on_left_hold = false;
-  bool _on_left_release = false;
-
-  bool _on_right_click = false;
-  bool _on_right_hold = false;
-  bool _on_right_release = false;
-};
-
-static std::vector<script_container> containers;
-
-static bool ends_with(std::string const &str, std::string const &suffix)
-{
-  return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
-}
-
-// used to reroute 'print' to the script window log
-class NoggitContext : public das::Context
-{
-public:
-  NoggitContext(int stackSize) : das::Context(stackSize) {}
-  virtual void to_out(char const *msg) override
-  {
-    // if string is empty, make an empty line
-    get_cur_tool()->addLog(msg != nullptr ? msg : "");
-  }
-
-  virtual void to_err(char const *msg) override
-  {
-    get_cur_tool()->addLog(msg != nullptr ? msg : "");
-  }
-};
-
-class : public das::TextWriter
-{
-public:
-  virtual void output() override
-  {
-    int newPos = tellp();
-    if (newPos != pos)
-    {
-      das::string st(data.data() + pos, newPos - pos);
-      get_cur_tool()->addLog(st);
-      pos = newPos;
-    }
-  }
-
-protected:
-  int pos = 0;
-} _noggit_printer;
-
-namespace noggit
-{
-  namespace scripting
-  {
     int Loader::get_selected_script()
     {
       return cur_script;
@@ -158,22 +121,40 @@ namespace noggit
       return containers.size();
     }
 
-#define CURRENT_CONTEXT_CALL_FUNC(type)                                   \
+#define CURRENT_CONTEXT_CALL_FUNC(tool, type)                             \
   do                                                                      \
   {                                                                       \
     auto container (cur_script < 0 ? nullptr : &containers[cur_script]);  \
-    CALL_FUNC (container, type);                                          \
+    CALL_FUNC (container, tool, type);                                    \
   } while (false)
 
-    void Loader::send_left_click(){ CURRENT_CONTEXT_CALL_FUNC (left_click); };
-    void Loader::send_left_hold(){ CURRENT_CONTEXT_CALL_FUNC (left_hold); };
-    void Loader::send_left_release(){ CURRENT_CONTEXT_CALL_FUNC (left_release); };
+    void Loader::send_left_click (scripting_tool* tool)
+    {
+      CURRENT_CONTEXT_CALL_FUNC (tool, left_click);
+    }
+    void Loader::send_left_hold (scripting_tool* tool)
+    {
+      CURRENT_CONTEXT_CALL_FUNC (tool, left_hold);
+    }
+    void Loader::send_left_release (scripting_tool* tool)
+    {
+      CURRENT_CONTEXT_CALL_FUNC (tool, left_release);
+    }
 
-    void Loader::send_right_click(){ CURRENT_CONTEXT_CALL_FUNC (right_click); };
-    void Loader::send_right_hold(){ CURRENT_CONTEXT_CALL_FUNC (right_hold); };
-    void Loader::send_right_release(){ CURRENT_CONTEXT_CALL_FUNC (right_release); };
+    void Loader::send_right_click (scripting_tool* tool)
+    {
+      CURRENT_CONTEXT_CALL_FUNC (tool, right_click);
+    }
+    void Loader::send_right_hold (scripting_tool* tool)
+    {
+      CURRENT_CONTEXT_CALL_FUNC (tool, right_hold);
+    }
+    void Loader::send_right_release (scripting_tool* tool)
+    {
+      CURRENT_CONTEXT_CALL_FUNC (tool, right_release);
+    }
 
-    int Loader::load_scripts()
+    int Loader::load_scripts (scripting_tool* tool)
     {
       static std::once_flag modules_installed;
       std::call_once (modules_installed, install_modules);
@@ -199,8 +180,28 @@ namespace noggit
         if (!ends_with(file, ".das") || ends_with(file, ".spec.das"))
           continue;
 
+        struct Printer : public das::TextPrinter
+        {
+          Printer (scripting_tool* tool)
+            : _tool (tool)
+          {}
+
+          virtual void output() override
+          {
+            int newPos = tellp();
+            if (newPos != pos)
+            {
+              das::string st(data.data() + pos, newPos - pos);
+              _tool->addLog(st);
+              pos = newPos;
+            }
+          }
+
+          noggit::scripting::scripting_tool* _tool;
+        } noggit_printer = {tool};
+
         auto fAccess = das::make_smart<das::FsFileAccess>();
-        auto program = das::compileDaScript(file, fAccess, _noggit_printer, dummyLibGroup, false);
+        auto program = das::compileDaScript(file, fAccess, noggit_printer, dummyLibGroup, false);
 
         if (!program->options.find("persistent_heap", das::Type::tBool))
         {
@@ -217,16 +218,16 @@ namespace noggit
           program->options.push_back(das::AnnotationArgument("intern_strings", false));
         }
 
-        auto ctx = std::make_unique<NoggitContext> (program->getContextStackSize());
-        if (!program->simulate(*ctx, _noggit_printer))
+        auto ctx = std::make_unique<NoggitContext> (program->getContextStackSize(), tool);
+        if (!program->simulate(*ctx, noggit_printer))
         {
-          get_cur_tool()->setStyleSheet("background-color: #f0a5a5;");
-          get_cur_tool()->addLog("Script error:");
+          tool->setStyleSheet("background-color: #f0a5a5;");
+          tool->addLog("Script error:");
           for (auto &err : program->errors)
           {
-            get_cur_tool()->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
+            tool->addLog(reportError(err.at, err.what, err.extra, err.fixme, err.cerr));
           }
-          get_cur_tool()->resetLogScroll();
+          tool->resetLogScroll();
 
           containers.clear();
           return -1;
@@ -269,7 +270,7 @@ namespace noggit
           {
             if (!das::verifyCall<char const *>(title_fun->debugInfo, dummyLibGroup))
             {
-              get_cur_tool()->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
+              tool->addLog("Incorrect title type in " + module_name + " (signature should be 'def title(): string')");
             }
             else
             {
@@ -301,12 +302,12 @@ namespace noggit
       }
 
       // remove error color on successful compile
-      get_cur_tool()->setStyleSheet("");
+      tool->setStyleSheet("");
 
       return new_index;
     }
 
-    void Loader::select_script(int index)
+    void Loader::select_script (int index, scripting_tool* tool)
     {
       // just for safety
       save_json();
@@ -320,12 +321,12 @@ namespace noggit
       auto ref = &containers[index];
       try
       {
-        CALL_FUNC(ref, select);
+        CALL_FUNC(ref, tool, select);
       }
       catch (std::exception const &e)
       {
-        get_cur_tool()->addLog(("[error]: " + std::string(e.what())));
-        get_cur_tool()->resetLogScroll();
+        tool->addLog(("[error]: " + std::string(e.what())));
+        tool->resetLogScroll();
       }
     }
   } // namespace scripting
