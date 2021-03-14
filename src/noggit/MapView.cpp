@@ -3045,7 +3045,7 @@ void MapView::save(save_mode mode)
     QMessageBox::warning
       ( nullptr
       , "Map NOT saved"
-      , "The map wasn NOT saved, don't forget to save before leaving"
+      , "The map was NOT saved, don't forget to save before leaving"
       , QMessageBox::Ok
       );
   }
