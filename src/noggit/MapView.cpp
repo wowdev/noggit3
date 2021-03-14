@@ -2671,6 +2671,15 @@ void MapView::focusOutEvent (QFocusEvent*)
   freelook = false;
 }
 
+void MapView::enterEvent(QEvent* event)
+{
+  // check if noggit is the currently active windows
+  if (static_cast<QApplication*>(QApplication::instance())->applicationState() & Qt::ApplicationActive)
+  {
+    activateWindow();
+  }
+}
+
 void MapView::mouseMoveEvent (QMouseEvent* event)
 {
   //! \todo:  move the function call requiring a context in tick ?
