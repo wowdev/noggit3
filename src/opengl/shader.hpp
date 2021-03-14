@@ -93,10 +93,6 @@ namespace opengl
       // \note All attrib*() functions implicitly modify the state of the currently bound VAO.
       // Thus they ensure there is a VAO bound and the caller is aware of it being modified, by taking a reference to it.
 
-      void attrib (vao_binder const&, std::string const& name, std::vector<float> const&);
-      void attrib (vao_binder const&, std::string const& name, std::vector<math::vector_2d> const&);
-      void attrib (vao_binder const&, std::string const& name, std::vector<math::vector_3d> const&);
-      void attrib (vao_binder const&, std::string const& name, math::vector_3d const*);
       void attrib (vao_binder const&, std::string const& name, array_buffer_is_already_bound const&, math::matrix_4x4 const*, GLuint divisor = 0);
       void attrib (vao_binder const&, std::string const& name, array_buffer_is_already_bound const&, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (vao_binder const&, std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);

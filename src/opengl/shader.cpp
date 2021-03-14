@@ -187,30 +187,6 @@ namespace opengl
       tex->bind();
     }
 
-    void use_program::attrib (vao_binder const&, std::string const& name, std::vector<float> const& data)
-    {
-      GLuint const location (attrib_location (name));
-      gl.enableVertexAttribArray (location);
-      gl.vertexAttribPointer (location, 1, GL_FLOAT, GL_FALSE, 0, data.data());
-    }
-    void use_program::attrib (vao_binder const&, std::string const& name, std::vector<math::vector_2d> const& data)
-    {
-      GLuint const location (attrib_location (name));
-      gl.enableVertexAttribArray (location);
-      gl.vertexAttribPointer (location, 2, GL_FLOAT, GL_FALSE, 0, data.data());
-    }
-    void use_program::attrib (vao_binder const&, std::string const& name, std::vector<math::vector_3d> const& data)
-    {
-      GLuint const location (attrib_location (name));
-      gl.enableVertexAttribArray (location);
-      gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data.data());
-    }
-    void use_program::attrib (vao_binder const&, std::string const& name, math::vector_3d const* data)
-    {
-      GLuint const location (attrib_location (name));
-      gl.enableVertexAttribArray (location);
-      gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data);
-    }
     void use_program::attrib (vao_binder const&, std::string const& name, array_buffer_is_already_bound const&, math::matrix_4x4 const* data, GLuint divisor)
     {
       GLuint const location (attrib_location (name));
