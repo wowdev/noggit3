@@ -1136,11 +1136,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     _cursor_render.draw(mode, mvp, cursor_color, cursor_pos, brush_radius, inner_radius_ratio);
   }
 
-  if (terrainMode == editing_mode::object && has_multiple_model_selected())
-  {
-    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 2.f);
-  }
-
   if (use_ref_pos)
   {
     _sphere_render.draw(mvp, ref_pos, cursor_color, 2.f);
@@ -1408,6 +1403,14 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  if (terrainMode == editing_mode::object && has_multiple_model_selected())
+  {
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
+    
+    float dist = (camera_pos - _multi_select_pivot.get()).length();
+    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
+  }
 
   if (draw_water)
   {
