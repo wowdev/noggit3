@@ -1,10 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-// Note: This file is only a header to clean up selection.cpp,
+// Note: This file is only a header to clean up script_vert.cpp,
 // don't import it anywhere else!
-#pragma once
 
-#include <noggit/scripting/script_selection.hpp>
+struct TextureIndex
+{
+  short indices[MAX_TEXUNITS_PER_VERT];
+};
 
 static TextureIndex texture_index[145] = {
   TextureIndex{{0, 1, 2, 3, 64, 65, 66, 128, 129, 192, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}},

@@ -12,11 +12,6 @@
 class MapChunk;
 class World;
 
-struct TextureIndex
-{
-  short indices[36];
-};
-
 namespace das {
   class Context;
 }
