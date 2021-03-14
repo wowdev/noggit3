@@ -567,6 +567,8 @@ void MapChunk::draw ( math::frustum const& frustum
                     , int animtime
                     , display_mode display
                     , bool& previous_chunk_had_shadows
+                    , bool& previous_chunk_was_textured
+                    , bool& previous_chunk_could_be_painted
                     )
 {
   if (need_visibility_update || _need_visibility_update)
@@ -593,16 +595,14 @@ void MapChunk::draw ( math::frustum const& frustum
     update_vao(mcnk_shader, tex_coord_vbo);
   }
 
-  bool cantPaint = noggit::ui::selected_texture::get()
-                 && !canPaintTexture(*noggit::ui::selected_texture::get())
-                 && show_unpaintable_chunks
-                 && draw_paintability_overlay;
+  int texture_count = texture_set->num();
+  bool is_textured = texture_count != 0;
 
-  if (texture_set->num())
+  if (is_textured)
   {
     texture_set->bind_alpha(0);
 
-    for (int i = 0; i < texture_set->num(); ++i)
+    for (int i = 0; i < texture_count; ++i)
     {
       texture_set->bindTexture(i, i + 1);
 
@@ -622,8 +622,24 @@ void MapChunk::draw ( math::frustum const& frustum
   }
   previous_chunk_had_shadows = _has_shadow;
 
-  mcnk_shader.uniform("layer_count", (int)texture_set->num());
-  mcnk_shader.uniform("cant_paint", (int)cantPaint);
+  if (is_textured != previous_chunk_was_textured)
+  {
+    previous_chunk_was_textured = is_textured;
+    mcnk_shader.uniform("is_textured", (int)is_textured);
+  }
+
+  if (show_unpaintable_chunks && draw_paintability_overlay)
+  {
+    bool cant_paint = texture_count == 4 
+      && noggit::ui::selected_texture::get()
+      && !canPaintTexture(*noggit::ui::selected_texture::get());
+
+    if (cant_paint == previous_chunk_could_be_painted)
+    {
+      mcnk_shader.uniform("cant_paint", (int)cant_paint);
+      previous_chunk_could_be_painted = !cant_paint;
+    }    
+  }
 
   if (draw_chunk_flag_overlay)
   {
@@ -653,7 +669,7 @@ void MapChunk::draw ( math::frustum const& frustum
   gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
 
 
-  for (int i = 0; i < texture_set->num(); ++i)
+  for (int i = 0; i < texture_count; ++i)
   {
     if (texture_set->is_animated(i))
     {

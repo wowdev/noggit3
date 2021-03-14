@@ -85,6 +85,8 @@ public:
             , int animtime
             , display_mode display
             , bool& previous_chunk_had_shadows
+            , bool& previous_chunk_was_textured
+            , bool& previous_chunk_could_be_painted
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum

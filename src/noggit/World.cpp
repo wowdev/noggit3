@@ -1074,6 +1074,12 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("tex_anim_2", math::vector_2d());
     mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
+    bool previous_chunk_could_be_painted = true;
+    bool previous_chunk_was_textured = true;
+    mcnk_shader.uniform("cant_paint", 0);
+    mcnk_shader.uniform("is_textured", 1);
+
+
     // start true so the first chunk update the shadow texture regardless of whether it has shadows or not
     bool previous_chunk_had_shadows = true;    
 
@@ -1093,6 +1099,8 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , animtime
                  , display
                  , previous_chunk_had_shadows
+                 , previous_chunk_was_textured
+                 , previous_chunk_could_be_painted
                  );
     }
 
