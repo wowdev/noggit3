@@ -1452,6 +1452,7 @@ void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
   }
 
   _camera.position.y += 50.0f;
+  _camera_moved_since_last_draw = true;
 
   _minimap->update();
 }
