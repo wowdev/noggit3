@@ -94,7 +94,8 @@ namespace opengl
 
         std::string errors;
         std::size_t error_count = 0;
-        while (GLenum error = glGetError() && error_count < 10)
+        GLenum error (GL_NO_ERROR);
+        while ((error = glGetError()) != GL_NO_ERROR && error_count < 10)
         {
           switch (error)
           {
