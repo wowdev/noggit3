@@ -332,6 +332,7 @@ namespace
 }
 
 int main(int argc, char *argv[])
+try
 {
   noggit::RegisterErrorHandlers();
   std::set_terminate (noggit_terminate_handler);
@@ -343,4 +344,9 @@ int main(int argc, char *argv[])
   Noggit app (argc, argv);
 
   return qapp.exec();
+}
+catch (...)
+{
+  noggit_terminate_handler();
+  return 1;
 }
