@@ -481,7 +481,7 @@ void liquid_layer::draw ( liquid_render& render
     update_buffers();
   }
 
-  gl.bindVertexArray(_vao);
+  opengl::scoped::vao_binder const _ (_vao);
 
   if (_vao_need_update)
   {
