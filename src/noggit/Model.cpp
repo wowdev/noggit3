@@ -1388,12 +1388,12 @@ void Model::draw( math::matrix_4x4 const& model_view
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
-    m2_shader.attrib(_, "pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
-    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
-    m2_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) + 8));
-    m2_shader.attrib(_, "texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8));
-    m2_shader.attrib(_, "texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+    m2_shader.attrib(_, "pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
+    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
+    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
+    m2_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
+    m2_shader.attrib(_, "texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
+    m2_shader.attrib(_, "texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
   }
 
   for (ModelRenderPass& p : _render_passes)
@@ -1476,12 +1476,12 @@ void Model::draw ( math::matrix_4x4 const& model_view
   
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    m2_shader.attrib(_, "pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
-    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
-    m2_shader.attrib(_, "normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
-    m2_shader.attrib(_, "texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
-    m2_shader.attrib(_, "texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+    m2_shader.attrib(_, "pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
+    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
+    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
+    m2_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
+    m2_shader.attrib(_, "texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
+    m2_shader.attrib(_, "texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
   }
 
   for (ModelRenderPass& p : _render_passes)
