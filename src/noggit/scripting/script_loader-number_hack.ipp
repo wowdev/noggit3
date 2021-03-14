@@ -90,7 +90,7 @@ namespace wraps {
   }
 
   template <typename A, typename B>
-  float rand_float(random &rand, A low, B high)
+  float rand_float(noggit::scripting::random &rand, A low, B high)
   {
     return noggit::scripting::rand_float(rand, low, high);
   }
