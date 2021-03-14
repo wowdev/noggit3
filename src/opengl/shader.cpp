@@ -148,10 +148,6 @@ namespace opengl
     }
     use_program::~use_program()
     {
-      for (auto const& array : _enabled_vertex_attrib_arrays)
-      {
-        gl.disableVertexAttribArray (array);
-      }
       gl.useProgram (_old);
     }
 
@@ -195,28 +191,24 @@ namespace opengl
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
-      _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 1, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (vao_binder const&, std::string const& name, std::vector<math::vector_2d> const& data)
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
-      _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 2, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (vao_binder const&, std::string const& name, std::vector<math::vector_3d> const& data)
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
-      _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (vao_binder const&, std::string const& name, math::vector_3d const* data)
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
-      _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data);
     }
     void use_program::attrib (vao_binder const&, std::string const& name, math::matrix_4x4 const* data, GLuint divisor)
@@ -227,7 +219,6 @@ namespace opengl
       for (GLuint i = 0; i < 4; ++i)
       {
         gl.enableVertexAttribArray (location + i);
-        _enabled_vertex_attrib_arrays.emplace (location + i);
         gl.vertexAttribPointer (location + i, 4, GL_FLOAT, GL_FALSE, sizeof(math::matrix_4x4), vec4_ptr + i);
         gl.vertexAttribDivisor(location + i, divisor);
       }      
@@ -236,14 +227,12 @@ namespace opengl
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
-      _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
     }
     void use_program::attrib (vao_binder const&, std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data)
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
-      _enabled_vertex_attrib_arrays.emplace (location);
       scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
     }

@@ -108,7 +108,6 @@ namespace opengl
       std::unordered_map<std::string, GLuint> _attribs;
 
       program const& _program;
-      std::set<GLuint> _enabled_vertex_attrib_arrays;
 
       GLuint _old;
     };
