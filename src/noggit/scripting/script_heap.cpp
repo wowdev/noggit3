@@ -40,7 +40,7 @@ namespace noggit
 
     void script_heap_write_byte(const char* str, int offset, int byte)
     {
-      ((unsigned char*)str)[offset] = unsigned char(unsigned(byte));
+      ((unsigned char*)str)[offset] = static_cast<unsigned char>(unsigned(byte));
     }
 
     void script_free_all()
