@@ -64,6 +64,8 @@ namespace opengl
 
   namespace scoped
   {
+    class vao_binder;
+
     struct use_program
     {
       use_program (program const&);
@@ -85,15 +87,18 @@ namespace opengl
 
       void sampler (std::string const& name, GLenum texture_slot, texture*);
 
-      void attrib (std::string const& name, std::vector<float> const&);
-      void attrib (std::string const& name, std::vector<math::vector_2d> const&);
-      void attrib (std::string const& name, std::vector<math::vector_3d> const&);
-      void attrib (std::string const& name, math::vector_3d const*);
-      void attrib (std::string const& name, math::matrix_4x4 const*, GLuint divisor = 0);
-      void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
-      void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
+      // \note All attrib*() functions implicitly modify the state of the currently bound VAO.
+      // Thus they ensure there is a VAO bound and the caller is aware of it being modified, by taking a reference to it.
 
-      void attrib_divisor(std::string const& name, GLuint divisor, GLsizei range = 1);
+      void attrib (vao_binder const&, std::string const& name, std::vector<float> const&);
+      void attrib (vao_binder const&, std::string const& name, std::vector<math::vector_2d> const&);
+      void attrib (vao_binder const&, std::string const& name, std::vector<math::vector_3d> const&);
+      void attrib (vao_binder const&, std::string const& name, math::vector_3d const*);
+      void attrib (vao_binder const&, std::string const& name, math::matrix_4x4 const*, GLuint divisor = 0);
+      void attrib (vao_binder const&, std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
+      void attrib (vao_binder const&, std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
+
+      void attrib_divisor(vao_binder const&, std::string const& name, GLuint divisor, GLsizei range = 1);
 
     private:
       GLuint uniform_location (std::string const& name);

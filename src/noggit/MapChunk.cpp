@@ -517,22 +517,22 @@ void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
-    mcnk_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_normals_vbo);
-    mcnk_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mccv_vbo);
-    mcnk_shader.attrib("mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(tex_coord_vbo);
-    mcnk_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   _need_vao_update = false;

@@ -636,19 +636,19 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
   {
     opengl::scoped::vao_binder const _ (_vao);
 
-    wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib(_, "position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib(_, "normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attrib(_, "texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     if (header.flags.has_two_motv)
     {
-      wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+      wmo_shader.attrib(_, "texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     // even if the 2 flags are set there's only one vertex color vector, the 2nd chunk is used for alpha only
     if (header.flags.has_vertex_color || header.flags.use_mocv2_for_texture_blending)
     {
-      wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
+      wmo_shader.attrib(_, "vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     indices.bind();

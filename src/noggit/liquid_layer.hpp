@@ -101,7 +101,7 @@ private:
 
   void upload();
   void update_buffers();
-  void update_vao(opengl::scoped::use_program& water_shader);
+  void update_vao(opengl::scoped::vao_binder const& bound_vao, opengl::scoped::use_program& water_shader);
 
 private:
   math::vector_3d pos;

@@ -94,7 +94,7 @@ void main()
       
       opengl::scoped::vao_binder const _(_vao[0]);
       scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices (_positions);
-      wire_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      wire_box_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices (_indices);
 
@@ -215,7 +215,7 @@ void main()
         opengl::scoped::vao_binder const _ (_vao[0]);
 
         opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-        shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+        shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();
       }
@@ -324,7 +324,7 @@ void main()
         opengl::scoped::vao_binder const _ (_vao[0]);
 
         opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-        shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+        shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();
       }

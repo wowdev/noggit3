@@ -375,7 +375,7 @@ void map_horizon::render::draw( math::matrix_4x4 const& model_view
   shader.uniform ("projection", projection);
   shader.uniform ("color", color);
 
-  shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  shader.attrib (_, "position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder (_index_buffer);
 
