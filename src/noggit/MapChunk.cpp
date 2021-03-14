@@ -220,14 +220,14 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
   vcenter = (vmin + vmax) * 0.5f;
 }
 
-int MapChunk::indexLoD(int x, int y)
+int MapChunk::indexLoD(int z, int x)
 {
-  return (x + 1) * 9 + x * 8 + y;
+  return (z + 1) * 9 + z * 8 + x;
 }
 
-int MapChunk::indexNoLoD(int x, int y)
+int MapChunk::indexNoLoD(int z, int x)
 {
-  return x * 8 + x * 9 + y;
+  return z * 8 + z * 9 + x;
 }
 
 void MapChunk::update_intersect_points()

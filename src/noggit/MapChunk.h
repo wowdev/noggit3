@@ -58,8 +58,8 @@ private:
 
   void initStrip();
 
-  int indexNoLoD(int x, int y);
-  int indexLoD(int x, int y);
+  int indexNoLoD(int z, int x);
+  int indexLoD(int z, int x);
 
   std::vector<math::vector_3d> _intersect_points;
 
