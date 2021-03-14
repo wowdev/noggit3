@@ -110,7 +110,7 @@ namespace noggit
       {
         selection = load_scripts();
       }
-      catch (std::exception e)
+      catch (std::exception const& e)
       {
         addLog("[error]: " + std::string(e.what()));
         resetLogScroll();
