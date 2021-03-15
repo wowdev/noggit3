@@ -179,12 +179,12 @@ namespace noggit
 
     scripting_tool::scripting_tool(QWidget* parent) : QWidget(parent)
     {
-      auto layout(new QFormLayout(this));
+      auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
-      layout->addRow(_selection);
+      layout->addWidget(_selection);
 
       _reload_button = new QPushButton("Reload Scripts", this);
-      layout->addRow(_reload_button);
+      layout->addWidget(_reload_button);
       connect(_reload_button, &QPushButton::released, this, [this]() {
         doReload();
       });
@@ -205,7 +205,7 @@ namespace noggit
       _profile_select_column->addWidget(_profile_name_entry, 1, 0);
       _profile_select_column->addWidget(_profile_create_button, 1, 1);
 
-      layout->addRow(_profile_group);
+      layout->addWidget(_profile_group);
 
       _radius_spin = new QDoubleSpinBox(this);
       _radius_spin->setRange(0.0f, 1000.0f);
