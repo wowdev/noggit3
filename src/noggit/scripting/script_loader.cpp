@@ -31,19 +31,6 @@ DAS_FORWARD_DECLARE_MODULE (NoggitModule);
 
 class NoggitModule;
 
-static void install_modules()
-{
-  DAS_NEED_MODULE (Module_BuiltIn);
-  DAS_NEED_MODULE (Module_Math);
-  DAS_NEED_MODULE (Module_Strings);
-  DAS_NEED_MODULE (Module_Rtti);
-  DAS_NEED_MODULE (Module_Ast);
-  DAS_NEED_MODULE (Module_Debugger);
-  DAS_NEED_MODULE (Module_FIO);
-  DAS_NEED_MODULE (Module_Random);
-  DAS_NEED_MODULE (NoggitModule);
-}
-
 #define CALL_FUNC(ctr, tool, type)                                   \
   if (ctr)                                                           \
   {                                                                  \
@@ -164,7 +151,17 @@ namespace noggit
     int Loader::load_scripts (scripting_tool* tool)
     {
       static std::once_flag modules_installed;
-      std::call_once (modules_installed, install_modules);
+      std::call_once (modules_installed, [] {
+        DAS_NEED_MODULE (Module_BuiltIn);
+        DAS_NEED_MODULE (Module_Math);
+        DAS_NEED_MODULE (Module_Strings);
+        DAS_NEED_MODULE (Module_Rtti);
+        DAS_NEED_MODULE (Module_Ast);
+        DAS_NEED_MODULE (Module_Debugger);
+        DAS_NEED_MODULE (Module_FIO);
+        DAS_NEED_MODULE (Module_Random);
+        DAS_NEED_MODULE (NoggitModule);
+      });
 
       das::Module::Initialize();
 
