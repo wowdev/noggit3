@@ -243,6 +243,7 @@ namespace noggit
       layout->addWidget(_description);
 
       _log = new QPlainTextEdit(this);
+      _log->setFont (QFontDatabase::systemFont (QFontDatabase::FixedFont));
       _log->setReadOnly(true);
       layout->addWidget(_log);
 
