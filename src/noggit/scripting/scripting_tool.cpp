@@ -174,8 +174,43 @@ namespace noggit
       }
     }
 
+    namespace
+    {
+      void readScriptSettings (nlohmann::json& json)
+      {
+        if (!boost::filesystem::exists(SCRIPT_FILE))
+        {
+          return;
+        }
+
+        try
+        {
+          std::ifstream(SCRIPT_FILE) >> json;
+        }
+        catch (std::exception err)
+        {
+          if(!boost::filesystem::exists(SCRIPT_FILE))
+          {
+            return;
+          }
+          // back up broken script settings, since they won't be read and will be overwritten.
+          std::string backup_file = std::string(SCRIPT_FILE) + ".backup";
+          int i = 0;
+          while (boost::filesystem::exists(backup_file+std::to_string(i)))
+          {
+              ++i;
+          }
+          boost::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
+
+          // Add a message box here
+        }
+      }
+    }
+
     scripting_tool::scripting_tool(QWidget* parent) : QWidget(parent)
     {
+      readScriptSettings (_json);
+
       auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
       layout->addWidget(_selection);
@@ -354,34 +389,14 @@ namespace noggit
       doReload();
     }
 
-    void readScriptSettings()
+    scripting_tool::~scripting_tool()
     {
-      if (!boost::filesystem::exists(SCRIPT_FILE))
-      {
-        return;
+      save_json();
       }
 
-      try 
+    void scripting_tool::save_json() const
       {
-        std::ifstream(SCRIPT_FILE) >> _json;
-      }
-      catch (std::exception err)
-      {
-        if(!boost::filesystem::exists(SCRIPT_FILE))
-        {
-          return;
-        }
-        // back up broken script settings, since they won't be read and will be overwritten.
-        std::string backup_file = std::string(SCRIPT_FILE) + ".backup";
-        int i = 0;
-        while (boost::filesystem::exists(backup_file+std::to_string(i)))
-        {
-            ++i;
-        }
-        boost::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
-
-        // Add a message box here
-      }
+      std::ofstream(SCRIPT_FILE) << std::setw(4) << _json << "\n";
     }
 
 // i don't remember why this was a macro
@@ -732,11 +747,6 @@ namespace noggit
           + path
       );
       static_cast<Loader::Context*> (context)->_tool->addStringList(path, value);
-    }
-
-    void save_json()
-    {
-      std::ofstream(SCRIPT_FILE) << std::setw(4) << _json << "\n";
     }
   } // namespace scripting
 } // namespace noggit

@@ -33,12 +33,12 @@ namespace noggit
   class camera;
   namespace scripting
   {
-
-    void readScriptSettings();
     class scripting_tool : public QWidget
     {
     public:
       scripting_tool(QWidget* parent = nullptr);
+      ~scripting_tool();
+
       float brushRadius() const { return _radius; }
       float innerRadius() const { return _inner_radius; }
 
@@ -66,6 +66,8 @@ namespace noggit
       void addString(char const* name, char const* def = "");
       void addStringList(char const* name, char const* value);
       void removeScriptWidgets();
+
+      void save_json() const;
 
     private:
 
@@ -133,7 +135,5 @@ namespace noggit
     void add_float_param(char const* path, float min, float max, float def, int zeros, das::Context*);
     void add_bool_param(char const* path, bool def, das::Context*);
     void add_description(char const* desc, das::Context*);
-
-    void save_json();
   } // namespace scripting
 } // namespace noggit

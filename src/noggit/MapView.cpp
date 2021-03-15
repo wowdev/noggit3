@@ -192,7 +192,6 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 void MapView::createGUI()
 {
 #ifdef NOGGIT_HAS_SCRIPTING
-  noggit::scripting::readScriptSettings();
   _script_tool_dock = new QDockWidget("Scripting", this);
   scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock);
   _script_tool_dock->setWidget(scriptingTool);

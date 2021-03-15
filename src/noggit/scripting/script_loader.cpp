@@ -312,7 +312,7 @@ namespace noggit
     void Loader::select_script (int index, scripting_tool* tool)
     {
       // just for safety
-      save_json();
+      tool->save_json();
 
       if (index < 0 || index >= containers.size())
       {
