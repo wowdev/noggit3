@@ -23,6 +23,7 @@
 #include <QtWidgets/QGridLayout>
 
 #include <map>
+#include <mutex>
 
 class World;
 
@@ -82,6 +83,9 @@ namespace noggit
 
       Loader _loader;
       nlohmann::json _json;
+
+      std::mutex _script_change_mutex;
+      std::string _cur_profile;
 
       bool _last_left = false;
       bool _last_right = false;
