@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <noggit/scripting/script_loader.hpp>
 #include <noggit/tool_enums.hpp>
 
 #include <das/Context.fwd.hpp>
@@ -67,6 +68,16 @@ namespace noggit
       void removeScriptWidgets();
 
     private:
+
+      friend int get_int_param(char const* path, das::Context* ctx);
+      friend double get_double_param(char const* path, das::Context* ctx);
+      friend float get_float_param(char const* path, das::Context* ctx);
+      friend bool get_bool_param(char const* path, das::Context* ctx);
+      friend char const* get_string_param(char const* path, das::Context* ctx);
+      friend char const* get_string_list_param(char const* path, das::Context* ctx);
+
+      Loader _loader;
+
       bool _last_left = false;
       bool _last_right = false;
 
@@ -108,10 +119,10 @@ namespace noggit
       void initialize_radius();
     };
 
-    int get_int_param(char const* path);
-    double get_double_param(char const* path);
-    float get_float_param(char const* path);
-    bool get_bool_param(char const* path);
+    int get_int_param(char const* path, das::Context* ctx);
+    double get_double_param(char const* path, das::Context* ctx);
+    float get_float_param(char const* path, das::Context* ctx);
+    bool get_bool_param(char const* path, das::Context* ctx);
     char const* get_string_param(char const* path, das::Context* ctx);
     char const* get_string_list_param(char const* path, das::Context* ctx);
 
