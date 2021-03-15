@@ -31,7 +31,7 @@ namespace noggit
       math::vector_3d _size;
 
       int _chunks_size = 0;
-      
+
       char* _chunks;
       MapChunk** get_chunks() { return (MapChunk**) _chunks;}
       int _cur_chunk = -1;

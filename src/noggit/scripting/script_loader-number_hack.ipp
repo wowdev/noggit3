@@ -28,7 +28,7 @@
  * using int literals (10, 20 etc.) when calling functions like: vert(xVal,0,yVal);
  *
  * If/when anyone removes this hack, just keep in mind what functions are
- * registered here (look for <Wrapper Registry> at the bottom of the file) 
+ * registered here (look for <Wrapper Registry> at the bottom of the file)
  * and register them in the normal 'script_loader-noggit_module.ipp' file again.
  */
 
@@ -42,7 +42,7 @@
  *
  * Don't bother doing this in the other direction (allowing floats in int arguments),
  * there are so many more int parameters than floats and it's more likely to cause unexpected behavior.
- * 
+ *
  * Finally, to keep all this managable, please don't handle doubles/uints/int64s unless you absolutely have to.
  */
 
@@ -212,7 +212,7 @@ void register_hack_functions(das::Module *module, das::ModuleLibrary &lib)
    * - Register functions similarly to FUNC/FUNC_RETCLASS
    * - The number is the amount of templates the function has.
    * - Every combination of int/float will be registered.
-   * - The maximum supported amount of parameters is 3. 
+   * - The maximum supported amount of parameters is 3.
    *   Create a new FUNC_NUM_4/FUNC_NUM_4_RETCLASS if you need more
    */
   FUNC_NUM_3(wraps::vert_set_color, "vert_set_color", worstDefault);

@@ -49,7 +49,7 @@ namespace noggit
       {
         throw script_exception(
           "img_load_png",
-          "failed to load png image with error code:" 
+          "failed to load png image with error code:"
           + std::to_string (error));
       }
       img_resize(img, img._width, img._height, ctx);
@@ -96,9 +96,9 @@ namespace noggit
     unsigned img_get_pixel(image const& img, int x, int y)
     {
       unsigned index = img_get_index(img, x, y);
-      return img.get_image()[index] << 24 
-        | img.get_image()[index + 1] << 16 
-        | img.get_image()[index + 2] << 8 
+      return img.get_image()[index] << 24
+        | img.get_image()[index + 1] << 16
+        | img.get_image()[index + 2] << 8
         | img.get_image()[index + 3];
     }
 

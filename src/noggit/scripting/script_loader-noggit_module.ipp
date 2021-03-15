@@ -64,13 +64,13 @@
 /**
  * <Class Registry>
  * - Exposes a class to daScript (allowing functions to return it as a type)
- * 
+ *
  * - The registry name MUST match the class name (without the namespace)
- * 
+ *
  * - To expose fields to daScript (obj.fieldA, obj.fieldB etc.), use FIELD annotations
- * 
+ *
  * - You cannot expose methods.
- *  
+ *
  * - Remember to add a CLASS_ANNOTATION (<Class Annotations>)
  */
 
@@ -96,7 +96,7 @@ public:
 
     /**
      * <Class Annotations>
-     * 
+     *
      * - Simply add the non-namespaced name of classes registered with CLASS()
      */
     CLASS_ANNOTATION(vector_3d);
@@ -113,18 +113,18 @@ public:
     /**
      * <Function Registry>
      * - Used to expose functions to daScript.
-     * 
+     *
      * - "FUNC" will register a function with a script-side name and a side-effect
-     * 
+     *
      * - "FUNC_RETCLASS" must be used if your function returns a class (registered with CLASS())
-     * 
-     * - If your function takes float parameters and you want to also accept ints, 
+     *
+     * - If your function takes float parameters and you want to also accept ints,
      *   don't register them here, and see the file "script_loader-number_hack.ipp" instead.
-     * 
+     *
      * - If unsure, just use "worstDefault" for the side-effect.
-     * 
+     *
      * - Just like C++, two functions can have the same name if their parameter types differ.
-     * 
+     *
      * - Please keep the functions organized by file like below.
      */
 

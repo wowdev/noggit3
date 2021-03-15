@@ -19,7 +19,7 @@ namespace noggit
 
     script_context* get_ctx(const char* caller)
     {
-      if(ctx==nullptr) 
+      if(ctx==nullptr)
       {
         throw script_exception(
           caller,
@@ -33,10 +33,10 @@ namespace noggit
         _pos(pos),
         _outer_radius(outer_radius),
         _inner_radius(inner_radius),
-        _camera(camera), 
-        _holding_alt(alt), 
+        _camera(camera),
+        _holding_alt(alt),
         _holding_shift(shift),
-        _holding_ctrl(ctrl), 
+        _holding_ctrl(ctrl),
         _holding_space(space),
         _dt(dt)
     {

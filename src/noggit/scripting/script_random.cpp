@@ -50,7 +50,7 @@ namespace noggit
 
     long rand_int64(random& rand, long low, long high)
     {
-      if(low>=high) 
+      if(low>=high)
       {
         throw script_exception(
         "rand_int64",
@@ -61,7 +61,7 @@ namespace noggit
 
     double rand_double(random& rand, double low, double high)
     {
-      if(low>=high) 
+      if(low>=high)
       {
         throw script_exception(
         "rand_double",
@@ -76,7 +76,7 @@ namespace noggit
 
     float rand_float(random& rand, float low, float high)
     {
-      if(low>=high) 
+      if(low>=high)
       {
         throw script_exception(
         "rand_float",

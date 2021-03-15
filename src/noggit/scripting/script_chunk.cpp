@@ -47,7 +47,7 @@ namespace noggit
 
     void chunk_remove_texture(chunk& chunk, int index)
     {
-      if(index<0||index>3) 
+      if(index<0||index>3)
       {
         throw script_exception(
           "chunk_remove_texture",
@@ -181,8 +181,8 @@ namespace noggit
     void chunk_clear_colors(chunk& chunk)
     {
       std::fill (
-        chunk._chunk->mccv, 
-        chunk._chunk->mccv + mapbufsize, 
+        chunk._chunk->mccv,
+        chunk._chunk->mccv + mapbufsize,
         math::vector_3d (1.f, 1.f, 1.f)
       );
     }
