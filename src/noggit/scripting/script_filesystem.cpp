@@ -1,9 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <daScript/daScript.h> // must be on top
 
 #include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
+
+#include <das/Context.fwd.hpp>
 
 namespace fs = boost::filesystem;
 

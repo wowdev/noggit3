@@ -1,5 +1,3 @@
-#include <daScript/daScript.h>
-
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_image.hpp>
@@ -16,6 +14,13 @@
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_heap.hpp>
+
+#include <das/addExtern.hpp>
+#include <das/Context.fwd.hpp>
+#include <das/Module.hpp>
+#include <das/ModuleLibrary.hpp>
+#include <das/SideEffects.hpp>
+#include <das/SimNode_ExtFuncCallAndCopyOrMove.hpp>
 
 /**
  * This file contains a workaround for accepting int32 values in parameters that normally

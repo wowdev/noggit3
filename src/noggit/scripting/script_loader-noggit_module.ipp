@@ -21,11 +21,17 @@
 
 #include <math/vector_3d.hpp>
 
-#include <noggit/scripting/script_loader-number_hack.ipp>
-
-#include <daScript/daScript.h>
+#include <das/addExtern.hpp>
+#include <das/make_smart.hpp>
+#include <das/ManagedStructureAnnotation.hpp>
+#include <das/Module.hpp>
+#include <das/ModuleLibrary.hpp>
+#include <das/SideEffects.hpp>
+#include <das/SimNode_ExtFuncCallAndCopyOrMove.hpp>
 
 #include <string>
+
+#include <noggit/scripting/script_loader-number_hack.ipp>
 
 #define FUNC(name_in, name_out, side_effect) \
   das::addExtern<DAS_BIND_FUN(name_in)>(*this, lib, name_out, das::SideEffects::side_effect, name_out)

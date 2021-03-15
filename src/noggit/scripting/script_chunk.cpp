@@ -1,5 +1,4 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <daScript/daScript.h> // must be on top
 
 #include <noggit/scripting/script_chunk.hpp>
 #include <noggit/scripting/script_selection.hpp>
@@ -9,6 +8,8 @@
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/World.h>
+
+#include <das/Context.fwd.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 

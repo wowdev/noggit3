@@ -1,7 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <daScript/daScript.h> // must be on top
-
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/World.h>
 #include <noggit/ui/ObjectEditor.h>

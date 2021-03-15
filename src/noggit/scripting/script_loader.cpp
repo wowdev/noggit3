@@ -1,28 +1,47 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <daScript/daScript.h> // must be on top
-
 #include <noggit/Log.h>
 #include <noggit/scripting/script_loader.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 
+#include <das/AnnotationArgument.hpp>
+#include <das/cast.hpp>
+#include <das/compileDaScript.hpp>
+#include <das/FsFileAccess.hpp>
+#include <das/make_smart.hpp>
+#include <das/Module.hpp>
+#include <das/ModuleGroup.hpp>
+#include <das/need_module.hpp>
+#include <das/TextPrinter.hpp>
+#include <das/Type.hpp>
+#include <das/verifyCall.hpp>
+
 #include <mutex>
+
+DAS_FORWARD_DECLARE_MODULE (Module_BuiltIn);
+DAS_FORWARD_DECLARE_MODULE (Module_Math);
+DAS_FORWARD_DECLARE_MODULE (Module_Strings);
+DAS_FORWARD_DECLARE_MODULE (Module_Rtti);
+DAS_FORWARD_DECLARE_MODULE (Module_Ast);
+DAS_FORWARD_DECLARE_MODULE (Module_Debugger);
+DAS_FORWARD_DECLARE_MODULE (Module_FIO);
+DAS_FORWARD_DECLARE_MODULE (Module_Random);
+DAS_FORWARD_DECLARE_MODULE (NoggitModule);
 
 class NoggitModule;
 
-// NEED_MODULE macros require to be called in the global namespace (they forward-declare a register function).
 static void install_modules()
 {
-  NEED_MODULE (Module_BuiltIn);
-  NEED_MODULE (Module_Math);
-  NEED_MODULE (Module_Strings);
-  NEED_MODULE (Module_Rtti);
-  NEED_MODULE (Module_Ast);
-  NEED_MODULE (Module_Debugger);
-  NEED_MODULE (Module_FIO);
-  NEED_MODULE (Module_Random);
-  NEED_MODULE (NoggitModule);
+  DAS_NEED_MODULE (Module_BuiltIn);
+  DAS_NEED_MODULE (Module_Math);
+  DAS_NEED_MODULE (Module_Strings);
+  DAS_NEED_MODULE (Module_Rtti);
+  DAS_NEED_MODULE (Module_Ast);
+  DAS_NEED_MODULE (Module_Debugger);
+  DAS_NEED_MODULE (Module_FIO);
+  DAS_NEED_MODULE (Module_Random);
+  DAS_NEED_MODULE (NoggitModule);
 }
 
 #define CALL_FUNC(ctr, tool, type)                                   \
@@ -177,7 +196,7 @@ namespace noggit
             int newPos = tellp();
             if (newPos != pos)
             {
-              das::string st(data.data() + pos, newPos - pos);
+              std::string st(data.data() + pos, newPos - pos);
               _tool->addLog(st);
               pos = newPos;
             }

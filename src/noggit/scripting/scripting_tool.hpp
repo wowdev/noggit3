@@ -2,6 +2,9 @@
 #pragma once
 
 #include <noggit/tool_enums.hpp>
+
+#include <das/Context.fwd.hpp>
+
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
 
