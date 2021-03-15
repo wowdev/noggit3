@@ -10,6 +10,6 @@ std::ostream& _Log(const char * pFile, int pLine);
 
 #define LogError _LogError( __FILE__, __LINE__ )
 #define LogDebug _LogDebug( __FILE__, __LINE__ )
-#define Log _Log( __FILE__, __LINE__ )
+#define NOGGIT_LOG _Log( __FILE__, __LINE__ )
 
 void InitLogging();
