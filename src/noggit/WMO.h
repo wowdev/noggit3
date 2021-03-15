@@ -100,6 +100,16 @@ struct wmo_group_header
   int32_t unk2, unk3;
 };
 
+struct wmo_group_uniform_data
+{
+  int mocv = -1;
+  int exterior_lit = -1;
+  int blend_mode = -1;
+  int shader = -1;
+  int unfogged = -1;
+  int unlit = -1;
+};
+
 class WMOGroup 
 {
 public:
@@ -114,6 +124,7 @@ public:
            , const math::vector_3d& camera
            , bool draw_fog
            , bool world_has_skies
+           , wmo_group_uniform_data& wmo_uniform_data
            );
 
   void drawLiquid ( math::matrix_4x4 const& transform
@@ -265,6 +276,7 @@ public:
             , int animtime
             , bool world_has_skies
             , display_mode display
+            , wmo_group_uniform_data& wmo_uniform_data
             );
   bool draw_skybox( math::matrix_4x4 const& model_view
                   , math::vector_3d const& camera_pos
