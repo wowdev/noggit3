@@ -23,12 +23,12 @@ namespace noggit
       void send_right_hold (scripting_tool* tool);
       void send_right_release (scripting_tool* tool);
 
-      int script_count();
-      std::string selected_script_name();
-      std::string const& get_script_name(int id);
-      QString get_script_display_name(int id);
+      int script_count() const;
+      std::string selected_script_name() const;
+      std::string const& get_script_name(int id) const;
+      QString get_script_display_name(int id) const;
       void select_script(int index, scripting_tool*);
-      int get_selected_script();
+      int get_selected_script() const;
 
       class Context : public das::Context
       {

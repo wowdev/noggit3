@@ -82,29 +82,29 @@ namespace noggit
                             _on_right_release(right_release)
     {}
 
-    int Loader::get_selected_script()
+    int Loader::get_selected_script() const
     {
       return cur_script;
     }
 
-    std::string Loader::selected_script_name()
+    std::string Loader::selected_script_name() const
     {
       return cur_script >= 0 && cur_script < containers.size()
                  ? containers[cur_script]._name
                  : "";
     }
 
-    std::string const& Loader::get_script_name(int id)
+    std::string const& Loader::get_script_name(int id) const
     {
       return containers[id]._name;
     }
 
-    QString Loader::get_script_display_name(int id)
+    QString Loader::get_script_display_name(int id) const
     {
       return containers[id]._display_name;
     }
 
-    int Loader::script_count()
+    int Loader::script_count() const
     {
       return containers.size();
     }
