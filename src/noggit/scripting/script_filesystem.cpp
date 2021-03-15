@@ -12,17 +12,20 @@ namespace noggit
 {
   namespace scripting
   {
-    static void mkdirs(char const* pathstr)
+    namespace
     {
-      if(pathstr == nullptr)
+      void mkdirs(char const* pathstr)
       {
-        throw script_exception("mkdirs","empty path");
-      }
-      auto path = fs::path(pathstr);
-      auto parent_path = path.parent_path();
-      if (parent_path.string().size() > 0)
-      {
-        fs::create_directories(path.parent_path());
+        if(pathstr == nullptr)
+        {
+          throw script_exception("mkdirs","empty path");
+        }
+        auto path = fs::path(pathstr);
+        auto parent_path = path.parent_path();
+        if (parent_path.string().size() > 0)
+        {
+          fs::create_directories(path.parent_path());
+        }
       }
     }
 

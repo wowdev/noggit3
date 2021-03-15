@@ -105,32 +105,35 @@ namespace noggit
       chunk._chunk->setFlag(add, 0x2);
     }
 
-    static bool is_on_vert(chunk& chunk)
+    namespace
     {
-      return chunk._vert_index < 145;
-    }
-
-    static bool is_on_tex(chunk& chunk)
-    {
-      return chunk._tex_index < 4096;
-    }
-
-    static void skip_vertices(chunk& chunk)
-    {
-      auto sel = chunk._sel;
-      if (sel == nullptr)
-        return;
-      while (is_on_vert(chunk))
+      bool is_on_vert(chunk& chunk)
       {
-        auto& vert = chunk._chunk->mVertices[chunk._vert_index];
-        if (vert.x <= sel->_min.x || vert.x >= sel->_max.x ||
-          vert.z <= sel->_min.z || vert.z >= sel->_max.z)
+        return chunk._vert_index < 145;
+      }
+
+      bool is_on_tex(chunk& chunk)
+      {
+        return chunk._tex_index < 4096;
+      }
+
+      void skip_vertices(chunk& chunk)
+      {
+        auto sel = chunk._sel;
+        if (sel == nullptr)
+          return;
+        while (is_on_vert(chunk))
         {
-          ++chunk._vert_index;
-        }
-        else
-        {
-          break;
+          auto& vert = chunk._chunk->mVertices[chunk._vert_index];
+          if (vert.x <= sel->_min.x || vert.x >= sel->_max.x ||
+            vert.z <= sel->_min.z || vert.z >= sel->_max.z)
+          {
+            ++chunk._vert_index;
+          }
+          else
+          {
+            break;
+          }
         }
       }
     }

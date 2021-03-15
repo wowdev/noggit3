@@ -16,24 +16,25 @@ namespace noggit
 {
   namespace scripting
   {
-    static const WMOInstance* wmo_const(model const& model)
+    namespace
     {
-      return (const WMOInstance*)model._model;
-    }
+      WMOInstance const* as_wmo(model const& model)
+      {
+        return (const WMOInstance*)model._model;
+      }
+        WMOInstance* as_wmo(model& model)
+      {
+        return (WMOInstance*)model._model;
+      }
 
-    static const ModelInstance* m2_const(model const& model)
-    {
-      return (const ModelInstance*)model._model;
-    }
-
-    static WMOInstance* wmo(model& model)
-    {
-      return (WMOInstance*)model._model;
-    }
-
-    static ModelInstance* m2(model& model)
-    {
-      return (ModelInstance*)model._model;
+      ModelInstance const* as_m2(model const& model)
+      {
+        return (const ModelInstance*)model._model;
+      }
+      ModelInstance* as_m2(model& model)
+      {
+        return (ModelInstance*)model._model;
+      }
     }
 
     model::model(ModelInstance*model)
@@ -46,11 +47,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        return wmo_const(model)->pos;
+        return as_wmo(model)->pos;
       }
       else
       {
-        return m2_const(model)->pos;
+        return as_m2(model)->pos;
       }
     }
 
@@ -58,11 +59,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        wmo(model)->pos = pos;
+        as_wmo(model)->pos = pos;
       }
       else
       {
-        m2(model)->pos = pos;
+        as_m2(model)->pos = pos;
       }
     }
 
@@ -70,11 +71,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        return math::vector_3d {wmo_const(model)->dir};
+        return math::vector_3d {as_wmo(model)->dir};
       }
       else
       {
-        return math::vector_3d {m2_const(model)->dir};
+        return math::vector_3d {as_m2(model)->dir};
       }
     }
 
@@ -82,11 +83,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        wmo(model)->dir = math::degrees::vec3 {rot};
+        as_wmo(model)->dir = math::degrees::vec3 {rot};
       }
       else
       {
-        m2(model)->dir = math::degrees::vec3 {rot};
+        as_m2(model)->dir = math::degrees::vec3 {rot};
       }
     }
 
@@ -98,7 +99,7 @@ namespace noggit
       }
       else
       {
-        return m2_const(model)->scale;
+        return as_m2(model)->scale;
       }
     }
 
@@ -110,7 +111,7 @@ namespace noggit
       }
       else
       {
-        m2(model)->scale = scale;
+        as_m2(model)->scale = scale;
       }
     }
 
@@ -118,11 +119,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        return wmo_const(model)->mUniqueID;
+        return as_wmo(model)->mUniqueID;
       }
       else
       {
-        return m2_const(model)->uid;
+        return as_m2(model)->uid;
       }
     }
 
@@ -130,11 +131,11 @@ namespace noggit
     {
       if (model._is_wmo)
       {
-        return script_calloc_string(wmo_const(model)->wmo->filename, ctx);
+        return script_calloc_string(as_wmo(model)->wmo->filename, ctx);
       }
       else
       {
-        return script_calloc_string(m2_const(model)->model->filename, ctx);
+        return script_calloc_string(as_m2(model)->model->filename, ctx);
       }
     }
 

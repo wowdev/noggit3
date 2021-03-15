@@ -12,24 +12,27 @@ namespace noggit
 {
   namespace scripting
   {
-    static selection select_between_int(const char* caller,math::vector_3d const& point1, math::vector_3d const& point2)
+    namespace
     {
-      selection sel;
-      sel._world = get_ctx(caller)->_world;
-      sel._min = math::vector_3d(
-        std::min(point1.x, point2.x),
-        std::min(point1.y, point2.y),
-        std::min(point1.z, point2.z));
+      selection select_between_int(const char* caller,math::vector_3d const& point1, math::vector_3d const& point2)
+      {
+        selection sel;
+        sel._world = get_ctx(caller)->_world;
+        sel._min = math::vector_3d(
+          std::min(point1.x, point2.x),
+          std::min(point1.y, point2.y),
+          std::min(point1.z, point2.z));
 
-      sel._max = math::vector_3d(
-        std::max(point1.x, point2.x),
-        std::max(point1.y, point2.y),
-        std::max(point1.z, point2.z));
+        sel._max = math::vector_3d(
+          std::max(point1.x, point2.x),
+          std::max(point1.y, point2.y),
+          std::max(point1.z, point2.z));
 
-      sel._size = sel._max - sel._min;
-      sel._center = sel._min + (sel._size / 2);
-      sel._models = model_iterator(sel._world, sel._min, sel._max);
-      return sel;
+        sel._size = sel._max - sel._min;
+        sel._center = sel._min + (sel._size / 2);
+        sel._models = model_iterator(sel._world, sel._min, sel._max);
+        return sel;
+      }
     }
 
     selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius)
@@ -49,9 +52,12 @@ namespace noggit
     math::vector_3d sel_max(selection const& sel) { return sel._max; }
     math::vector_3d sel_size(selection const& sel) { return sel._size; }
 
-    static bool is_on_chunk(selection& sel)
+    namespace
     {
-      return sel._cur_chunk < sel._chunks_size;
+      bool is_on_chunk(selection& sel)
+      {
+        return sel._cur_chunk < sel._chunks_size;
+      }
     }
 
     bool sel_next_chunk(selection& sel, das::Context* ctx)

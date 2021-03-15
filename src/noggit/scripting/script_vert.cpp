@@ -134,9 +134,12 @@ namespace noggit
       return (vert._index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
     }
 
-    static bool is_tex_done(vert& vert)
+    namespace
     {
-      return vert._tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[vert._index].indices[vert._tex_index] == -1;
+      bool is_tex_done(vert& vert)
+      {
+        return vert._tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[vert._index].indices[vert._tex_index] == -1;
+      }
     }
 
     void vert_reset_tex(vert& vert)

@@ -13,23 +13,26 @@ namespace noggit
 {
   namespace scripting
   {
-    static void img_resize(image& img, int width, int height, das::Context* ctx)
+    namespace
     {
-      if(width<=0||height<=0)
+      void img_resize(image& img, int width, int height, das::Context* ctx)
       {
-        throw script_exception(
-          "img_resize",
-          std::string("tried to resize to invalid image size: x=")
-          + std::to_string(width)
-          + std::string(" y=")
-          + std::to_string(height)
-        );
+        if(width<=0||height<=0)
+        {
+          throw script_exception(
+            "img_resize",
+            std::string("tried to resize to invalid image size: x=")
+            + std::to_string(width)
+            + std::string(" y=")
+            + std::to_string(height)
+          );
+        }
+        // m is for more fun
+        img._size = width*height*4;
+        img._width = width;
+        img._height = height;
+        img._image = script_calloc(img._size, ctx);
       }
-      // m is for more fun
-      img._size = width*height*4;
-      img._width = width;
-      img._height = height;
-      img._image = script_calloc(img._size, ctx);
     }
 
     image load_png(char const* path, das::Context* ctx)

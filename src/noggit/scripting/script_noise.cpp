@@ -13,23 +13,26 @@ namespace noggit
 {
   namespace scripting
   {
-    static float noise_get_index(std::string const& caller, noisemap const& noise, int x, int y)
+    namespace
     {
-      unsigned index = x + y * noise._width;
-      if(index<0||index>=noise._size)
+      float noise_get_index(std::string const& caller, noisemap const& noise, int x, int y)
       {
-        throw script_exception(
-          caller,
-          std::string("noise coordinates out of bounds: x=")
-            + std::to_string(x)
-            + std::string(" y=")
-            + std::to_string(y)
-            + std::string(" width=")
-            + std::to_string(noise._width)
-            + std::string(" height=")
-            + std::to_string(noise._height));
+        unsigned index = x + y * noise._width;
+        if(index<0||index>=noise._size)
+        {
+          throw script_exception(
+            caller,
+            std::string("noise coordinates out of bounds: x=")
+              + std::to_string(x)
+              + std::string(" y=")
+              + std::to_string(y)
+              + std::string(" width=")
+              + std::to_string(noise._width)
+              + std::string(" height=")
+              + std::to_string(noise._height));
+        }
+        return noise.get_map()[index];
       }
-      return noise.get_map()[index];
     }
 
     float noise_get(noisemap& noise, math::vector_3d& pos)
