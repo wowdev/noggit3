@@ -41,11 +41,6 @@ static void install_modules()
     }                                                                \
   }
 
-static bool ends_with(std::string const &str, std::string const &suffix)
-{
-  return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
-}
-
 // used to reroute 'print' to the script window log
 class NoggitContext : public das::Context
 {
@@ -169,15 +164,13 @@ namespace noggit
 
       das::ModuleGroup dummyLibGroup;
 
-      boost::filesystem::recursive_directory_iterator dir("scripts"), end;
-
-      while (dir != end)
+      for (boost::filesystem::recursive_directory_iterator dir ("scripts"), end; dir != end; ++dir)
       {
         if (boost::filesystem::is_directory(dir->path()))
           continue;
-        std::string file = dir->path().string();
-        ++dir;
-        if (!ends_with(file, ".das") || ends_with(file, ".spec.das"))
+        if (dir->path().extension() != ".das")
+          continue;
+        if (dir->path().stem() == "noggit.spec")
           continue;
 
         struct Printer : public das::TextPrinter
@@ -201,7 +194,7 @@ namespace noggit
         } noggit_printer = {tool};
 
         auto fAccess = das::make_smart<das::FsFileAccess>();
-        auto program = das::compileDaScript(file, fAccess, noggit_printer, dummyLibGroup, false);
+        auto program = das::compileDaScript(dir->path().string(), fAccess, noggit_printer, dummyLibGroup, false);
 
         if (!program->options.find("persistent_heap", das::Type::tBool))
         {
@@ -258,7 +251,7 @@ namespace noggit
 
         if (is_any)
         {
-          auto module_name = file.substr(8, file.size() - 12);
+          auto module_name = dir->path().stem().string();
           if (module_name == old_module)
           {
             new_index = containers.size();
