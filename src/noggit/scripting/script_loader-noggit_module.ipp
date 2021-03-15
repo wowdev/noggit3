@@ -27,22 +27,20 @@
 
 #include <string>
 
-using namespace das;
-
 #define FUNC(name_in, name_out, side_effect) \
-  addExtern<DAS_BIND_FUN(name_in)>(*this, lib, name_out, SideEffects::side_effect, name_out)
+  das::addExtern<DAS_BIND_FUN(name_in)>(*this, lib, name_out, das::SideEffects::side_effect, name_out)
 
 #define FUNC_RETCLASS(name_in, name_out, side_effect) \
-  addExtern<DAS_BIND_FUN(name_in), SimNode_ExtFuncCallAndCopyOrMove>(*this, lib, name_out, SideEffects::side_effect, name_out)
+  das::addExtern<DAS_BIND_FUN(name_in), das::SimNode_ExtFuncCallAndCopyOrMove>(*this, lib, name_out, das::SideEffects::side_effect, name_out)
 
 #define FIELD(name) \
   addField<DAS_BIND_MANAGED_FIELD(name)>(#name);
 
 #define CLASS(name_in, name_out, ...)                                                \
   MAKE_TYPE_FACTORY(name_out, name_in);                                                     \
-  struct name_out##_annotation : public ManagedStructureAnnotation<name_in, true, true> \
+  struct name_out##_annotation : public das::ManagedStructureAnnotation<name_in, true, true> \
   {                                                                                  \
-    name_out##_annotation(ModuleLibrary &ml) : ManagedStructureAnnotation(#name_out, ml) \
+    name_out##_annotation(das::ModuleLibrary &ml) : ManagedStructureAnnotation(#name_out, ml) \
     {                                                                                \
       __VA_ARGS__                                                                    \
     }                                                                                \
@@ -55,7 +53,7 @@ using namespace das;
   };
 
 #define CLASS_ANNOTATION(name) \
-  addAnnotation(make_smart<name##_annotation>(lib));
+  addAnnotation(das::make_smart<name##_annotation>(lib));
 
 /**
  * <Class Registry>
@@ -81,12 +79,12 @@ CLASS(noggit::scripting::model_iterator, model_iterator)
 CLASS(noggit::scripting::random, random)
 CLASS(noggit::scripting::selection, selection)
 
-class NoggitModule : public Module
+class NoggitModule : public das::Module
 {
 public:
   NoggitModule() : Module("noggit")
   {
-    ModuleLibrary lib;
+    das::ModuleLibrary lib;
     lib.addModule(this);
     lib.addBuiltInModule();
 

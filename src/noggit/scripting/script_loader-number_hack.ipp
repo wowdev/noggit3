@@ -17,9 +17,6 @@
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_heap.hpp>
 
-using namespace noggit::scripting;
-using namespace das;
-
 /**
  * This file contains a workaround for accepting int32 values in parameters that normally
  * accept floats, since daScript does not convert them normally. This is to cause less frustration for scripters
@@ -48,43 +45,43 @@ namespace wraps {
   // You can use this one as a reference, it normally takes 3 float arguments, so it uses 3 templates.
   // ctrl+f "vert_set_color" to see how it's registered below.
   template <typename A, typename B, typename C>
-  void vert_set_color(vert &vert, A a, B b, C c)
+  void vert_set_color(noggit::scripting::vert& vert, A a, B b, C c)
   {
     noggit::scripting::vert_set_color(vert, a, b, c);
   }
 
   template <typename A>
-  void vert_set_alpha(vert &vert, int index, A alpha)
+  void vert_set_alpha(noggit::scripting::vert& vert, int index, A alpha)
   {
     noggit::scripting::vert_set_alpha(vert, index, alpha);
   }
 
   template <typename A>
-  void vert_set_water(vert &vert, int type, A height)
+  void vert_set_water(noggit::scripting::vert& vert, int type, A height)
   {
     noggit::scripting::vert_set_water(vert, type, height);
   }
 
   template <typename A>
-  void vert_set_height(vert &vert, A y)
+  void vert_set_height(noggit::scripting::vert& vert, A y)
   {
     noggit::scripting::vert_set_height(vert, y);
   }
 
   template <typename A>
-  void vert_add_height(vert &vert, A y)
+  void vert_add_height(noggit::scripting::vert& vert, A y)
   {
     noggit::scripting::vert_add_height(vert, y);
   }
 
   template <typename A>
-  void vert_sub_height(vert &vert, A y)
+  void vert_sub_height(noggit::scripting::vert& vert, A y)
   {
     noggit::scripting::vert_sub_height(vert, y);
   }
 
   template <typename A>
-  void tex_set_alpha(tex &tex, int index, A alpha)
+  void tex_set_alpha(noggit::scripting::tex& tex, int index, A alpha)
   {
     noggit::scripting::tex_set_alpha(tex, index, alpha);
   }
@@ -96,7 +93,7 @@ namespace wraps {
   }
 
   template <typename A>
-  void model_set_scale(model &model, A scale)
+  void model_set_scale(noggit::scripting::model& model, A scale)
   {
     noggit::scripting::model_set_scale(model, scale);
   }
@@ -137,19 +134,19 @@ namespace wraps {
   }
 
   template <typename A, typename B>
-  selection select_origin(math::vector_3d const &origin, A xRadius, B zRadius)
+  noggit::scripting::selection select_origin(math::vector_3d const &origin, A xRadius, B zRadius)
   {
     return noggit::scripting::select_origin(origin, xRadius, zRadius);
   }
 
   template <typename A>
-  noisemap make_noise_size(int start_x, int start_y, int width, int height, A frequency, char const *algorithm, char const *seed, das::Context *ctx)
+  noggit::scripting::noisemap make_noise_size(int start_x, int start_y, int width, int height, A frequency, char const *algorithm, char const *seed, das::Context *ctx)
   {
     return noggit::scripting::make_noise_size(start_x, start_y, width, height, frequency, algorithm, seed, ctx);
   }
 
   template <typename A>
-  noisemap make_noise_selection(selection const &sel, A frequency, int padding, char const *algorithm, char const *seed, das::Context *ctx)
+  noggit::scripting::noisemap make_noise_selection(noggit::scripting::selection const& sel, A frequency, int padding, char const *algorithm, char const *seed, das::Context *ctx)
   {
     return noggit::scripting::make_noise_selection(sel, frequency, padding, algorithm, seed, ctx);
   }
@@ -159,10 +156,10 @@ void register_hack_functions(das::Module *module, das::ModuleLibrary &lib)
 {
 
 #define FUNC_NUM_BASE(name_in, name_out, side_effect, ...) \
-  addExtern<DAS_BIND_FUN((name_in<__VA_ARGS__>))>(*module, lib, name_out, SideEffects::side_effect, name_out);
+  das::addExtern<DAS_BIND_FUN((name_in<__VA_ARGS__>))>(*module, lib, name_out, das::SideEffects::side_effect, name_out);
 
 #define FUNC_NUM_RETCLASS_BASE(name_in,name_out, side_effect, ...) \
-  addExtern<DAS_BIND_FUN((name_in<__VA_ARGS__>)), SimNode_ExtFuncCallAndCopyOrMove>(*module, lib, name_out, SideEffects::side_effect, name_out);
+  das::addExtern<DAS_BIND_FUN((name_in<__VA_ARGS__>)), das::SimNode_ExtFuncCallAndCopyOrMove>(*module, lib, name_out, das::SideEffects::side_effect, name_out);
 
   // the hall of shame...
 #define FUNC_NUM_1(name_in, name_out, side_effect)    \

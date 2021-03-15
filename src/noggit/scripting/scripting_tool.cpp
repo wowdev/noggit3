@@ -31,13 +31,12 @@
 #define OUTER_RADIUS_PATH "__outer_radius"
 #define CUR_PROFILE_PATH "__cur_profile"
 
-using json = nlohmann::json;
 namespace noggit
 {
   namespace scripting
   {
 
-    static json _json;
+    static nlohmann::json _json;
     static std::string cur_profile = "Default";
     static std::mutex script_change_mutex;
 
@@ -50,12 +49,12 @@ namespace noggit
       auto ssn = loader.selected_script_name();
       if (!_json.contains(ssn))
       {
-        _json[ssn] = json();
+        _json[ssn] = nlohmann::json();
       }
 
       if (!_json[ssn].contains(cur_profile))
       {
-        _json[ssn][cur_profile] = json();
+        _json[ssn][cur_profile] = nlohmann::json();
       }
 
       if (!_json[ssn][cur_profile].contains(key))
@@ -72,12 +71,12 @@ namespace noggit
       auto ssn = loader.selected_script_name();
       if (!_json.contains(ssn))
       {
-        _json[ssn] = json();
+        _json[ssn] = nlohmann::json();
       }
 
       if (!_json[ssn].contains(cur_profile))
       {
-        _json[ssn][cur_profile] = json();
+        _json[ssn][cur_profile] = nlohmann::json();
       }
 
       _json[ssn][cur_profile][key] = def;
@@ -194,7 +193,7 @@ namespace noggit
       _profile_selection->setCurrentIndex(next_profile);
       if (!_json.contains(cur_script))
       {
-        _json[cur_script] = json();
+        _json[cur_script] = nlohmann::json();
       }
       _json[cur_script][CUR_PROFILE_PATH] = cur_profile;
       loader.select_script(selection, this);
@@ -374,7 +373,7 @@ namespace noggit
         _profile_selection->addItem (newText);
         if (!_json.contains(script_name))
         {
-          _json[script_name] = json();
+          _json[script_name] = nlohmann::json();
         }
 
         if (!_json[script_name].contains(newText.toStdString()))
@@ -385,7 +384,7 @@ namespace noggit
           }
           else
           {
-            _json[script_name][newText.toStdString()] = json();
+            _json[script_name][newText.toStdString()] = nlohmann::json();
           }
         }
 
@@ -565,7 +564,7 @@ namespace noggit
       auto n = loader.selected_script_name();
       if (!_json.contains(n))
       {
-        _json[n] = json();
+        _json[n] = nlohmann::json();
       }
 
       _json[n][CUR_PROFILE_PATH] = cur_profile;
