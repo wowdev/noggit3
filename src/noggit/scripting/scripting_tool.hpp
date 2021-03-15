@@ -6,6 +6,8 @@
 
 #include <das/Context.fwd.hpp>
 
+#include <nlohmann/json.hpp>
+
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
 
@@ -79,6 +81,7 @@ namespace noggit
       friend char const* get_string_list_param(char const* path, das::Context* ctx);
 
       Loader _loader;
+      nlohmann::json _json;
 
       bool _last_left = false;
       bool _last_right = false;
