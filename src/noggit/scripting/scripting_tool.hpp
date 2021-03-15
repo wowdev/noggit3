@@ -126,6 +126,15 @@ namespace noggit
       void select_profile(int profile);
       void on_change_script(int script_index);
       void initialize_radius();
+
+      template <typename T>
+        T get_json_safe (std::string key, T def);
+      template <typename T>
+        T get_json_unsafe (std::string key);
+      template <typename T>
+        void set_json_safe (std::string key, T def);
+      template <typename T>
+        void set_json_unsafe (std::string key, T value);
     };
 
     int get_int_param(char const* path, das::Context* ctx);
