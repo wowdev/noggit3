@@ -181,7 +181,7 @@ namespace
       << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
     QString found_locale ("****");
 
-    foreach (const QString& locale, locales)
+    for (auto const& locale : locales)
     {
       if (path.exists (("Data/" + locale)))
       {
