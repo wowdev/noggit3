@@ -315,7 +315,7 @@ void MPQFile::SaveFile()
   std::ofstream output(_disk_path.string(), std::ios_base::binary | std::ios_base::out);
   if (output.is_open())
   {
-    Log << "Saving file \"" << _disk_path << "\"." << std::endl;
+    NOGGIT_LOG << "Saving file \"" << _disk_path << "\"." << std::endl;
 
     output.write(buffer.data(), buffer.size());
     output.close();

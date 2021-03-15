@@ -58,7 +58,7 @@ void MapTile::finishLoading()
 {
   MPQFile theFile(filename);
 
-  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
+  NOGGIT_LOG << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
 
   // - Parsing the file itself. --------------------------
 
@@ -245,9 +245,9 @@ void MapTile::finishLoading()
   // - MTFX ----------------------------------------------
   /*
   //! \todo Implement this or just use Terrain Cube maps?
-  Log << "MTFX offs: " << Header.mtfx << std::endl;
+  NOGGIT_LOG << "MTFX offs: " << Header.mtfx << std::endl;
   if(Header.mtfx != 0){
-  Log << "Try to load MTFX" << std::endl;
+  NOGGIT_LOG << "Try to load MTFX" << std::endl;
   theFile.seek( Header.mtfx + 0x14 );
 
   theFile.read( &fourcc, 4 );
@@ -263,7 +263,7 @@ void MapTile::finishLoading()
   while( lCurPos < lEnd ) {
   int temp = 0;
   theFile.read(&temp, 4);
-  Log << "Adding to " << mTextureFilenames[tCount].first << " texture effect: " << temp << std::endl;
+  NOGGIT_LOG << "Adding to " << mTextureFilenames[tCount].first << " texture effect: " << temp << std::endl;
   mTextureFilenames[tCount++].second = temp;
   lCurPos += 4;
   }
@@ -549,7 +549,7 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 
 void MapTile::saveTile(World* world)
 {
-  Log << "Saving ADT \"" << filename << "\"." << std::endl;
+  NOGGIT_LOG << "Saving ADT \"" << filename << "\"." << std::endl;
 
   int lID;  // This is a global counting variable. Do not store something in here you need later.
   std::vector<WMOInstance> lObjectInstances;

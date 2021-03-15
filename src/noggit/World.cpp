@@ -60,7 +60,7 @@ bool World::IsEditableWorld(int pMapId)
 
   if (!MPQFile::exists(ssfilename.str()))
   {
-    Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
+    NOGGIT_LOG << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 
