@@ -47,15 +47,6 @@ namespace noggit
     {
       // TODO: this is terrible but accessing by reference didn't seem to work.
       auto ssn = loader.selected_script_name();
-      if (!_json.contains(ssn))
-      {
-        _json[ssn] = nlohmann::json();
-      }
-
-      if (!_json[ssn].contains(cur_profile))
-      {
-        _json[ssn][cur_profile] = nlohmann::json();
-      }
 
       if (!_json[ssn][cur_profile].contains(key))
       {
@@ -69,16 +60,6 @@ namespace noggit
     static void set_json_safe(std::string key, T def)
     {
       auto ssn = loader.selected_script_name();
-      if (!_json.contains(ssn))
-      {
-        _json[ssn] = nlohmann::json();
-      }
-
-      if (!_json[ssn].contains(cur_profile))
-      {
-        _json[ssn][cur_profile] = nlohmann::json();
-      }
-
       _json[ssn][cur_profile][key] = def;
     }
 
@@ -191,10 +172,6 @@ namespace noggit
 
       cur_profile = _profile_selection->itemText(next_profile).toStdString();
       _profile_selection->setCurrentIndex(next_profile);
-      if (!_json.contains(cur_script))
-      {
-        _json[cur_script] = nlohmann::json();
-      }
       _json[cur_script][CUR_PROFILE_PATH] = cur_profile;
       loader.select_script(selection, this);
 
@@ -371,20 +348,12 @@ namespace noggit
 
         _profile_name_entry->clear();
         _profile_selection->addItem (newText);
-        if (!_json.contains(script_name))
-        {
-          _json[script_name] = nlohmann::json();
-        }
 
         if (!_json[script_name].contains(newText.toStdString()))
         {
           if (_json[script_name].contains(cur_profile))
           {
             _json[script_name][newText.toStdString()] = _json[script_name][cur_profile];
-          }
-          else
-          {
-            _json[script_name][newText.toStdString()] = nlohmann::json();
           }
         }
 
@@ -562,11 +531,6 @@ namespace noggit
       cur_profile = _profile_selection->itemText(profile).toStdString();
 
       auto n = loader.selected_script_name();
-      if (!_json.contains(n))
-      {
-        _json[n] = nlohmann::json();
-      }
-
       _json[n][CUR_PROFILE_PATH] = cur_profile;
 
       initialize_radius();
