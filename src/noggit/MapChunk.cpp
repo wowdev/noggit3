@@ -554,6 +554,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , bool& previous_chunk_had_shadows
                     , bool& previous_chunk_was_textured
                     , bool& previous_chunk_could_be_painted
+                    , std::vector<int>& textures_bound
                     )
 {
   if (need_visibility_update || _need_visibility_update)
@@ -589,7 +590,7 @@ void MapChunk::draw ( math::frustum const& frustum
 
     for (int i = 0; i < texture_count; ++i)
     {
-      texture_set->bindTexture(i, i + 1);
+      texture_set->bindTexture(i, i + 1, textures_bound);
 
       if (texture_set->is_animated(i))
       {

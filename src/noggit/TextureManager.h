@@ -33,6 +33,8 @@ struct blp_texture : public opengl::texture, AsyncObject
     return async_priority::low;
   }
 
+  int const public_id;
+
 private:
   bool _uploaded = false;
 
@@ -43,6 +45,8 @@ private:
   std::map<int, std::vector<uint32_t>> _data;
   std::map<int, std::vector<uint8_t>> _compressed_data;
   boost::optional<GLint> _compression_format;
+
+  static std::atomic<int> blp_tex_counter;
 };
 
 struct scoped_blp_texture_reference;
@@ -69,6 +73,8 @@ struct scoped_blp_texture_reference
   blp_texture* operator->() const;
   blp_texture* get() const;
 
+  int blp_id() const { return _blp_id; }
+
   bool operator== (scoped_blp_texture_reference const& other) const;
 
 private:
@@ -77,6 +83,7 @@ private:
     void operator() (blp_texture*) const;
   };
   std::unique_ptr<blp_texture, Deleter> _blp_texture;
+  int _blp_id = -1;
 };
 
 namespace noggit

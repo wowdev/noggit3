@@ -15,6 +15,8 @@
 
 #include <algorithm>
 
+std::atomic<int> blp_texture::blp_tex_counter = 0;
+
 decltype (TextureManager::_) TextureManager::_;
 
 void TextureManager::report()
@@ -215,6 +217,7 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
 
 blp_texture::blp_texture(const std::string& filenameArg)
   : AsyncObject(filenameArg)
+  , public_id(blp_tex_counter++)
 {
 }
 
@@ -397,10 +400,12 @@ out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
 
 scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename)
   : _blp_texture (TextureManager::_.emplace (filename))
+  , _blp_id(_blp_texture->public_id)
 {}
 
 scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
   : _blp_texture (other._blp_texture ? TextureManager::_.emplace (other._blp_texture->filename) : nullptr)
+  , _blp_id(other._blp_id)
 {}
 
 void scoped_blp_texture_reference::Deleter::operator() (blp_texture* texture) const
