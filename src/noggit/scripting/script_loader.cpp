@@ -41,32 +41,25 @@ static void install_modules()
     }                                                                \
   }
 
-// used to reroute 'print' to the script window log
-class NoggitContext : public das::Context
-{
-public:
-  NoggitContext(int stackSize, noggit::scripting::scripting_tool* tool)
-    : das::Context(stackSize)
-    , _tool (tool)
-  {}
-
-  virtual void to_out(char const *msg) override
-  {
-    // if string is empty, make an empty line
-    _tool->addLog(msg != nullptr ? msg : "");
-  }
-  virtual void to_err(char const *msg) override
-  {
-    _tool->addLog(msg != nullptr ? msg : "");
-  }
-
-  noggit::scripting::scripting_tool* _tool;
-};
-
 namespace noggit
 {
   namespace scripting
   {
+    Loader::Context::Context(int stackSize, noggit::scripting::scripting_tool* tool)
+      : das::Context(stackSize)
+      , _tool (tool)
+    {}
+
+    void Loader::Context::to_out(char const *msg)
+    {
+      // if string is empty, make an empty line
+      _tool->addLog(msg != nullptr ? msg : "");
+    }
+    void Loader::Context::to_err(char const *msg)
+    {
+      _tool->addLog(msg != nullptr ? msg : "");
+    }
+
     Loader::script_container::script_container(
       std::string name,
       QString display_name,
@@ -211,7 +204,7 @@ namespace noggit
           program->options.push_back(das::AnnotationArgument("intern_strings", false));
         }
 
-        auto ctx = std::make_unique<NoggitContext> (program->getContextStackSize(), tool);
+        auto ctx = std::make_unique<Loader::Context> (program->getContextStackSize(), tool);
         if (!program->simulate(*ctx, noggit_printer))
         {
           tool->setStyleSheet("background-color: #f0a5a5;");

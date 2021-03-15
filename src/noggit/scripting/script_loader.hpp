@@ -30,6 +30,17 @@ namespace noggit
       void select_script(int index, scripting_tool*);
       int get_selected_script();
 
+      class Context : public das::Context
+      {
+      public:
+        Context(int stackSize, noggit::scripting::scripting_tool* tool);
+
+        virtual void to_out(char const *msg) override;
+        virtual void to_err(char const *msg) override;
+
+        noggit::scripting::scripting_tool* _tool;
+      };
+
     private:
       struct script_container
       {
