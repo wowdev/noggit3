@@ -128,9 +128,9 @@ namespace wraps {
   }
 
   template <typename A, typename B, typename C>
-  void add_float_param(char const *path, A min, B max, C def, int zeros)
+  void add_float_param(char const *path, A min, B max, C def, int zeros, das::Context* context)
   {
-    return noggit::scripting::add_float_param(path, min, max, def, zeros);
+    return noggit::scripting::add_float_param(path, min, max, def, zeros, context);
   }
 
   template <typename A, typename B>

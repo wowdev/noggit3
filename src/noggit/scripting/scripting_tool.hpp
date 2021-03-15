@@ -112,17 +112,14 @@ namespace noggit
     char const* get_string_param(char const* path, das::Context* ctx);
     char const* get_string_list_param(char const* path, das::Context* ctx);
 
-    void add_string_list_param(char const* path, char const* value);
-    void add_string_param(char const* path, char const* def);
-    void add_int_param(char const* path, int min, int max, int def);
-    void add_double_param(char const* path, double min, double max, double def, int zeros);
-    void add_float_param(char const* path, float min, float max, float def, int zeros);
-    void add_bool_param(char const* path, bool def);
-    void add_description(char const* desc);
+    void add_string_list_param(char const* path, char const* value, das::Context*);
+    void add_string_param(char const* path, char const* def, das::Context*);
+    void add_int_param(char const* path, int min, int max, int def, das::Context*);
+    void add_double_param(char const* path, double min, double max, double def, int zeros, das::Context*);
+    void add_float_param(char const* path, float min, float max, float def, int zeros, das::Context*);
+    void add_bool_param(char const* path, bool def, das::Context*);
+    void add_description(char const* desc, das::Context*);
 
     void save_json();
-
-    // same as script_context, but must also be accessable during "select"
-    scripting_tool* get_cur_tool();
   } // namespace scripting
 } // namespace noggit

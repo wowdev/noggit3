@@ -75,16 +75,8 @@ namespace noggit
       return _json[loader.selected_script_name()][cur_profile][key].get<T>();
     }
 
-    static scripting_tool* cur_tool = nullptr;
-
-    scripting_tool* get_cur_tool()
-    {
-      return cur_tool;
-    }
-
     void scripting_tool::doReload()
     {
-      cur_tool = this;
       int selection = -1;
       removeScriptWidgets();
       clearLog();
@@ -117,8 +109,6 @@ namespace noggit
       std::lock_guard<std::mutex> const lock (script_change_mutex);
       removeScriptWidgets();
       clearDescription();
-
-      cur_tool = this;
 
       auto sn = loader.get_script_name(selection);
       _profile_selection->clear();
@@ -185,8 +175,6 @@ namespace noggit
           set_json_unsafe(item.first, item.second->itemText(0).toStdString());
         }
       }
-
-      cur_tool = nullptr;
     }
 
     scripting_tool::scripting_tool(QWidget* parent) : QWidget(parent)
@@ -198,9 +186,7 @@ namespace noggit
       _reload_button = new QPushButton("Reload Scripts", this);
       layout->addRow(_reload_button);
       connect(_reload_button, &QPushButton::released, this, [this]() {
-        cur_tool = this;
         doReload();
-        cur_tool = nullptr;
       });
 
       // Profiles
@@ -527,7 +513,6 @@ namespace noggit
     {
       removeScriptWidgets();
       clearDescription();
-      cur_tool = this;
       cur_profile = _profile_selection->itemText(profile).toStdString();
 
       auto n = loader.selected_script_name();
@@ -536,7 +521,6 @@ namespace noggit
       initialize_radius();
 
       loader.select_script (loader.get_selected_script(), this);
-      cur_tool = nullptr;
     }
 
     void scripting_tool::sendUpdate(
@@ -551,7 +535,6 @@ namespace noggit
         bool holding_alt,
         bool holding_space)
     {
-      cur_tool = this;
       script_context ctx(world, pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space, dt);
       set_ctx(&ctx);
 
@@ -595,7 +578,6 @@ namespace noggit
 
       script_free_all();
       set_ctx(nullptr);
-      cur_tool = nullptr;
       _last_left = left_mouse;
       _last_right = right_mouse;
     }
@@ -670,9 +652,9 @@ namespace noggit
       return get_json_unsafe<bool>(path);
     }
 
-    void add_string_param(char const* path, char const* def)
+    void add_string_param(char const* path, char const* def, das::Context* context)
     {
-      if(path==nullptr) 
+      if(path==nullptr)
       {
         throw script_exception(
           "add_string_param",
@@ -680,10 +662,10 @@ namespace noggit
           + std::string(def==nullptr ? "null" : def)
         );
       }
-      get_cur_tool()->addString(path, def != nullptr ? def : "");
+      static_cast<Loader::Context*> (context)->_tool->addString(path, def != nullptr ? def : "");
     }
 
-    void add_int_param(char const* path, int min, int max, int def)
+    void add_int_param(char const* path, int min, int max, int def, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -692,10 +674,10 @@ namespace noggit
           std::string("empty path to int parameter")
         );
       }
-      get_cur_tool()->addInt(path, min, max, def);
+      static_cast<Loader::Context*> (context)->_tool->addInt(path, min, max, def);
     }
 
-    void add_double_param(char const* path, double min, double max, double def, int zeros = 2)
+    void add_double_param(char const* path, double min, double max, double def, int zeros, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -704,10 +686,10 @@ namespace noggit
           std::string("empty path to double parameter")
         );
       }
-      get_cur_tool()->addDouble(path, min, max, def, zeros);
+      static_cast<Loader::Context*> (context)->_tool->addDouble(path, min, max, def, zeros);
     }
 
-    void add_float_param(char const* path, float min, float max, float def, int zeros)
+    void add_float_param(char const* path, float min, float max, float def, int zeros, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -716,10 +698,10 @@ namespace noggit
           std::string("empty path to float parameter")
         );
       }
-      get_cur_tool()->addDouble(path, min, max, def, zeros);
+      static_cast<Loader::Context*> (context)->_tool->addDouble(path, min, max, def, zeros);
     }
 
-    void add_bool_param(char const* path, bool def)
+    void add_bool_param(char const* path, bool def, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -728,15 +710,15 @@ namespace noggit
           std::string("empty path to bool parameter")
         );
       }
-      get_cur_tool()->addBool(path, def);
+      static_cast<Loader::Context*> (context)->_tool->addBool(path, def);
     }
 
-    void add_description(char const* path)
+    void add_description(char const* path, das::Context* context)
     {
-      get_cur_tool()->addDescription(path != nullptr ? path : "");
+      static_cast<Loader::Context*> (context)->_tool->addDescription(path != nullptr ? path : "");
     }
 
-    void add_string_list_param(char const* path, char const* value)
+    void add_string_list_param(char const* path, char const* value, das::Context* context)
     {
       if (path == nullptr)
       {
@@ -751,7 +733,7 @@ namespace noggit
           std::string("empty value to string list parameter ")
           + path
       );
-      get_cur_tool()->addStringList(path, value);
+      static_cast<Loader::Context*> (context)->_tool->addStringList(path, value);
     }
 
     void save_json()
