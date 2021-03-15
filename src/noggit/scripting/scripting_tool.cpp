@@ -43,7 +43,7 @@ namespace noggit
     static Loader loader;
 
     template <typename T>
-    static T get_json_safe(std::string key, T def)
+    static T get_json_safe (Loader const& loader, std::string key, T def)
     {
       // TODO: this is terrible but accessing by reference didn't seem to work.
       auto ssn = loader.selected_script_name();
@@ -57,20 +57,20 @@ namespace noggit
     }
 
     template <typename T>
-    static void set_json_safe(std::string key, T def)
+    static void set_json_safe (Loader const& loader, std::string key, T def)
     {
       auto ssn = loader.selected_script_name();
       _json[ssn][cur_profile][key] = def;
     }
 
     template <typename T>
-    static void set_json_unsafe(std::string key, T value)
+    static void set_json_unsafe (Loader const& loader, std::string key, T value)
     {
       _json[loader.selected_script_name()][cur_profile][key] = value;
     }
 
     template <typename T>
-    static T get_json_unsafe(std::string key)
+    static T get_json_unsafe (Loader const& loader, std::string key)
     {
       return _json[loader.selected_script_name()][cur_profile][key].get<T>();
     }
@@ -172,7 +172,7 @@ namespace noggit
         // is invalid (old script), so we just write it again to be safe.
         if (item.second->currentIndex() == 0)
         {
-          set_json_unsafe(item.first, item.second->itemText(0).toStdString());
+          set_json_unsafe (loader, item.first, item.second->itemText(0).toStdString());
         }
       }
     }
@@ -251,28 +251,28 @@ namespace noggit
         _radius = v;
         QSignalBlocker const blocker(_radius_slider);
         _radius_slider->setSliderPosition((int)std::round(v));
-        set_json_unsafe(OUTER_RADIUS_PATH, v);
+        set_json_unsafe (loader, OUTER_RADIUS_PATH, v);
       });
 
       connect(_radius_slider, &QSlider::valueChanged, [&](int v) {
         _radius = v;
         QSignalBlocker const blocker(_radius_spin);
         _radius_spin->setValue(v);
-        set_json_unsafe(OUTER_RADIUS_PATH, v);
+        set_json_unsafe (loader, OUTER_RADIUS_PATH, v);
       });
 
       connect(_inner_radius_spin, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double v) {
         _inner_radius = v;
         QSignalBlocker const blocker(_inner_radius_slider);
         _inner_radius_slider->setSliderPosition((int)std::round(v * 100));
-        set_json_unsafe(INNER_RADIUS_PATH, v);
+        set_json_unsafe (loader, INNER_RADIUS_PATH, v);
       });
 
       connect(_inner_radius_slider, &QSlider::valueChanged, [&](int v) {
         _inner_radius = v / 100.0f;
         QSignalBlocker const blocker(_inner_radius_spin);
         _inner_radius_spin->setValue(_inner_radius);
-        set_json_unsafe(INNER_RADIUS_PATH, _inner_radius);
+        set_json_unsafe (loader, INNER_RADIUS_PATH, _inner_radius);
       });
 
       connect(_profile_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
@@ -400,13 +400,13 @@ namespace noggit
   auto label = new QLabel(this);                                                     \
   label->setText(name);                                                              \
   connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=](double v) { \
-    set_json_unsafe<T>(path, (T)v);                                                  \
+    set_json_unsafe<T> (loader, path, (T)v);                                                  \
     QSignalBlocker const blocker(slider);                                            \
     slider->setSliderPosition((int)std::round(v * dp1));                             \
   });                                                                                \
   connect(slider, &QSlider::valueChanged, [=](int v) {                               \
     double t = double(v) / dp1;                                                      \
-    set_json_unsafe<T>(path, t);                                                     \
+    set_json_unsafe<T> (loader, path, t);                                                     \
     QSignalBlocker const blocker(spinner);                                           \
     spinner->setValue(t);                                                            \
   });                                                                                \
@@ -416,8 +416,8 @@ namespace noggit
   _script_widgets.push_back(label);                                                  \
   _script_widgets.push_back(spinner);                                                \
   _script_widgets.push_back(slider);                                                 \
-  set_json_safe<T>(path, std::min(max, std::max(min, get_json_safe<T>(path, def)))); \
-  auto v = get_json_safe<T>(path, def);                                              \
+  set_json_safe<T> (loader, path, std::min(max, std::max(min, get_json_safe<T> (loader, path, def)))); \
+  auto v = get_json_safe<T> (loader, path, def);                                              \
   slider->setSliderPosition((int)std::round(v * dp1));                               \
   spinner->setValue(v);
 
@@ -437,14 +437,14 @@ namespace noggit
       auto label = new QLabel(this);
       label->setText(name);
       connect(checkbox, &QCheckBox::stateChanged, this, [=](auto value) {
-        set_json_unsafe<bool>(name, value ? true : false);
+        set_json_unsafe<bool> (loader, name, value ? true : false);
       });
 
       _script_widgets.push_back(checkbox);
       _script_widgets.push_back(label);
       _script_settings_layout->addRow(label, checkbox);
 
-      checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+      checkbox->setCheckState(get_json_safe<bool> (loader, name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
 
     void scripting_tool::addStringList(char const* name, char const* value)
@@ -456,7 +456,7 @@ namespace noggit
         auto label = new QLabel(this);
 
         connect(box, QOverload<int>::of(&QComboBox::activated), this, [=](auto index) {
-          set_json_unsafe (name, box->itemText(index).toStdString());
+          set_json_unsafe (loader, name, box->itemText(index).toStdString());
         });
 
         box->addItem(value);
@@ -468,7 +468,7 @@ namespace noggit
         _script_settings_layout->addRow(label, box);
 
         // ensure there is at least one valid value in it
-        get_json_safe<std::string>(name, value);
+        get_json_safe<std::string> (loader, name, value);
       }
       else
       {
@@ -476,7 +476,7 @@ namespace noggit
         box->addItem(value);
 
         // we found the last selection, so change the index for that.
-        if (get_json_safe<std::string>(name, "") == value)
+        if (get_json_safe<std::string> (loader, name, "") == value)
         {
           box->setCurrentIndex(box->count() - 1);
         }
@@ -490,12 +490,12 @@ namespace noggit
       auto label = new QLabel(this);
       label->setText(name);
       connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
-        set_json_unsafe (name, text.toStdString());
+        set_json_unsafe (loader, name, text.toStdString());
       });
       _script_widgets.push_back(label);
       _script_widgets.push_back(tline);
       _script_settings_layout->addRow(label, tline);
-      tline->setText (QString::fromStdString (get_json_safe<std::string>(name, defstr)));
+      tline->setText (QString::fromStdString (get_json_safe<std::string> (loader, name, defstr)));
     }
 
     void scripting_tool::removeScriptWidgets()
@@ -585,8 +585,8 @@ namespace noggit
 
     void scripting_tool::initialize_radius()
     {
-      double inner_radius = get_json_safe<double>(INNER_RADIUS_PATH, 0.5);
-      double outer_radius = get_json_safe<double>(OUTER_RADIUS_PATH, 40);
+      double inner_radius = get_json_safe<double> (loader, INNER_RADIUS_PATH, 0.5);
+      double outer_radius = get_json_safe<double> (loader, OUTER_RADIUS_PATH, 40);
 
       _radius_spin->setValue(outer_radius);
       _inner_radius_spin->setValue(inner_radius);
@@ -625,7 +625,7 @@ namespace noggit
 
     char const* get_string_param(char const* path, das::Context * ctx)
     {
-      return script_calloc_string(get_json_unsafe<std::string>(path), ctx);
+      return script_calloc_string(get_json_unsafe<std::string> (loader, path), ctx);
     }
 
     char const* get_string_list_param(char const* path, das::Context * ctx)
@@ -635,22 +635,22 @@ namespace noggit
 
     int get_int_param(char const* path)
     {
-      return get_json_unsafe<int>(path);
+      return get_json_unsafe<int> (loader, path);
     }
 
     double get_double_param(char const* path)
     {
-      return get_json_unsafe<double>(path);
+      return get_json_unsafe<double> (loader, path);
     }
 
     float get_float_param(char const* path)
     {
-      return get_json_unsafe<double>(path);
+      return get_json_unsafe<double> (loader, path);
     }
 
     bool get_bool_param(char const* path)
     {
-      return get_json_unsafe<bool>(path);
+      return get_json_unsafe<bool> (loader, path);
     }
 
     void add_string_param(char const* path, char const* def, das::Context* context)
