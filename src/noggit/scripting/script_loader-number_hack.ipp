@@ -110,9 +110,9 @@ namespace wraps {
   }
 
   template <typename A>
-  void add_m2(char const *filename, math::vector_3d const &pos, A scale, math::vector_3d const &rotation)
+  void add_m2(char const *filename, math::vector_3d const &pos, A scale, math::vector_3d const &rotation, das::Context* context)
   {
-    noggit::scripting::add_m2(filename, pos, scale, rotation);
+    noggit::scripting::add_m2(filename, pos, scale, rotation, context);
   }
   template <typename A, typename B, typename C>
   float lerp(A from, B to, C amount)
@@ -139,9 +139,9 @@ namespace wraps {
   }
 
   template <typename A, typename B>
-  noggit::scripting::selection select_origin(math::vector_3d const &origin, A xRadius, B zRadius)
+  noggit::scripting::selection select_origin(math::vector_3d const &origin, A xRadius, B zRadius, das::Context* context)
   {
-    return noggit::scripting::select_origin(origin, xRadius, zRadius);
+    return noggit::scripting::select_origin(origin, xRadius, zRadius, context);
   }
 
   template <typename A>

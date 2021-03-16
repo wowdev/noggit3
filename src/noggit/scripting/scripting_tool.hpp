@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_loader.hpp>
 #include <noggit/tool_enums.hpp>
 
@@ -80,12 +81,15 @@ namespace noggit
       friend bool get_bool_param(char const* path, das::Context* ctx);
       friend char const* get_string_param(char const* path, das::Context* ctx);
       friend char const* get_string_list_param(char const* path, das::Context* ctx);
+      friend script_context* get_ctx (das::Context* context, const char* caller);
 
       Loader _loader;
       nlohmann::json _json;
 
       std::mutex _script_change_mutex;
       std::string _cur_profile;
+
+      script_context* _update_context;
 
       bool _last_left = false;
       bool _last_right = false;

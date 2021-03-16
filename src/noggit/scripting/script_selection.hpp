@@ -40,8 +40,8 @@ namespace noggit
       model_iterator _models;
     };
 
-    selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius);
-    selection select_between(math::vector_3d const& point1, math::vector_3d const& point2);
+    selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius, das::Context* context);
+    selection select_between(math::vector_3d const& point1, math::vector_3d const& point2, das::Context* context);
 
     bool sel_next_chunk(selection& sel, das::Context* ctx);
     chunk sel_get_chunk(selection& sel);

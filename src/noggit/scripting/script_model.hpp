@@ -60,7 +60,7 @@ namespace noggit
 
     unsigned model_get_uid(model const& model);
 
-    void model_remove(model& model);
+    void model_remove(model& model, das::Context* context);
 
     const char* model_get_filename(model const& model, das::Context* ctx);
     void model_replace(model& model, const char* filename, das::Context* ctx);

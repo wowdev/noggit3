@@ -202,6 +202,7 @@ namespace noggit
     scripting_tool::scripting_tool(QWidget* parent)
       : QWidget(parent)
       , _cur_profile ("Default")
+      , _update_context (nullptr)
     {
       readScriptSettings (_json);
 
@@ -543,7 +544,7 @@ namespace noggit
         bool holding_space)
     {
       script_context ctx(world, pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space, dt);
-      set_ctx(&ctx);
+      _update_context = &ctx;
 
       try
       {
@@ -584,7 +585,7 @@ namespace noggit
       }
 
       script_free_all();
-      set_ctx(nullptr);
+      _update_context = nullptr;
       _last_left = left_mouse;
       _last_right = right_mouse;
     }

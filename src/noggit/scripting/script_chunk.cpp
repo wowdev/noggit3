@@ -67,10 +67,10 @@ namespace noggit
       return script_calloc_string(chunk._chunk->texture_set->texture(index)->filename,ctx);
     }
 
-    void chunk_apply_heightmap(chunk& chunk)
+    void chunk_apply_heightmap (chunk& chunk, das::Context* context)
     {
       chunk._chunk->updateVerticesData();
-      get_ctx("chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
+      get_ctx (context, "chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
     }
 
     void chunk_apply_textures(chunk& chunk)
@@ -83,9 +83,9 @@ namespace noggit
       chunk._chunk->UpdateMCCV();
     }
 
-    void chunk_apply_all(chunk& chunk)
+    void chunk_apply_all(chunk& chunk, das::Context* context)
     {
-      chunk_apply_heightmap(chunk);
+      chunk_apply_heightmap(chunk, context);
       chunk_apply_textures(chunk);
       chunk_apply_vertex_color(chunk);
     }

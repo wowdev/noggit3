@@ -9,16 +9,10 @@ namespace noggit
 {
   namespace scripting
   {
-    // makes it easier for scripters to not pass this around
-    static script_context* ctx = nullptr;
-
-    void set_ctx(script_context* nctx)
+    script_context* get_ctx (das::Context* context, const char* caller)
     {
-      ctx = nctx;
-    }
+      auto const ctx (static_cast<Loader::Context*> (context)->_tool->_update_context);
 
-    script_context* get_ctx(const char* caller)
-    {
       if(ctx==nullptr)
       {
         throw script_exception(

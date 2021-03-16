@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <das/Context.fwd.hpp>
+
 #include <math/vector_3d.hpp>
 
 #include <string>
@@ -36,7 +38,6 @@ namespace noggit
       float _dt;
     };
 
-    script_context* get_ctx(const char* caller);
-    void set_ctx(script_context* ctx);
+    script_context* get_ctx (das::Context*, const char* caller);
   } // namespace scripting
 } // namespace noggit

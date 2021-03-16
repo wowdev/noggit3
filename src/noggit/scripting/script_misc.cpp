@@ -14,24 +14,24 @@ namespace noggit
 {
   namespace scripting
   {
-    float cam_pitch()
+    float cam_pitch (das::Context* context)
     {
-      return get_ctx("cam_pitch")->_camera->pitch()._;
+      return get_ctx(context, "cam_pitch")->_camera->pitch()._;
     }
 
-    float outer_radius()
+    float outer_radius (das::Context* context)
     {
-      return get_ctx("outer_radius")->_outer_radius;
+      return get_ctx(context, "outer_radius")->_outer_radius;
     }
 
-    float inner_radius()
+    float inner_radius (das::Context* context)
     {
-      return get_ctx("inner_radius")->_inner_radius;
+      return get_ctx(context, "inner_radius")->_inner_radius;
     }
 
-    float cam_yaw()
+    float cam_yaw (das::Context* context)
     {
-      return get_ctx("cam_yaw")->_camera->yaw()._;
+      return get_ctx(context, "cam_yaw")->_camera->yaw()._;
     }
 
     math::vector_3d vec(float x, float y, float z)
@@ -39,7 +39,7 @@ namespace noggit
       return math::vector_3d(x, y, z);
     }
 
-    void add_m2(char const* filename, math::vector_3d const& pos, float scale, math::vector_3d const& rotation)
+    void add_m2(char const* filename, math::vector_3d const& pos, float scale, math::vector_3d const& rotation, das::Context* context)
     {
       if(filename==nullptr)
       {
@@ -49,10 +49,10 @@ namespace noggit
           );
       }
       auto p = object_paste_params();
-      get_ctx("add_m2")->_world->addM2(filename, pos, scale, math::degrees::vec3 {rotation}, &p);
+      get_ctx(context, "add_m2")->_world->addM2(filename, pos, scale, math::degrees::vec3 {rotation}, &p);
     }
 
-    void add_wmo(char const* filename, math::vector_3d const& pos, math::vector_3d const& rotation)
+    void add_wmo(char const* filename, math::vector_3d const& pos, math::vector_3d const& rotation, das::Context* context)
     {
       if(filename==nullptr)
       {
@@ -60,42 +60,42 @@ namespace noggit
           "add_wmo",
           "empty string parameter (in call to add_wmo)");
       }
-      get_ctx("add_wmo")->_world->addWMO(filename, pos, math::degrees::vec3 {rotation});
+      get_ctx(context, "add_wmo")->_world->addWMO(filename, pos, math::degrees::vec3 {rotation});
     }
 
-    float dt()
+    float dt (das::Context* context)
     {
-      return get_ctx("dt")->_dt;
+      return get_ctx(context, "dt")->_dt;
     }
 
-    unsigned int get_map_id()
+    unsigned int get_map_id (das::Context* context)
     {
-      return get_ctx("get_map_id")->_world->getMapID();
+      return get_ctx(context, "get_map_id")->_world->getMapID();
     }
 
-    unsigned int get_area_id(math::vector_3d const& pos)
+    unsigned int get_area_id(math::vector_3d const& pos, das::Context* context)
     {
-      return get_ctx("get_area_id")->_world->getAreaID(pos);
+      return get_ctx (context, "get_area_id")->_world->getAreaID(pos);
     }
-    bool holding_alt()
+    bool holding_alt (das::Context* context)
     {
-      return get_ctx("holding_alt")->_holding_alt;
+      return get_ctx (context, "holding_alt")->_holding_alt;
     }
-    bool holding_shift()
+    bool holding_shift (das::Context* context)
     {
-      return get_ctx("holding_shift")->_holding_shift;
+      return get_ctx (context, "holding_shift")->_holding_shift;
     }
-    bool holding_ctrl()
+    bool holding_ctrl (das::Context* context)
     {
-      return get_ctx("holding_ctrl")->_holding_ctrl;
+      return get_ctx (context, "holding_ctrl")->_holding_ctrl;
     }
-    bool holding_space()
+    bool holding_space (das::Context* context)
     {
-      return get_ctx("holding_space")->_holding_space;
+      return get_ctx (context, "holding_space")->_holding_space;
     }
-    math::vector_3d pos()
+    math::vector_3d pos (das::Context* context)
     {
-      return get_ctx("pos")->_pos;
+      return get_ctx (context, "pos")->_pos;
     }
   } // namespace scripting
 } // namespace noggit
