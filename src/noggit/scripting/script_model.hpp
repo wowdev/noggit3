@@ -3,6 +3,8 @@
 
 #include <math/vector_3d.hpp>
 
+#include <boost/variant.hpp>
+
 class World;
 
 class ModelInstance;
@@ -22,8 +24,7 @@ namespace noggit
       model(WMOInstance* model);
       model() = default;
 
-      void* _model = nullptr;
-      bool _is_wmo = false;
+      boost::variant<ModelInstance*, WMOInstance*> _impl;
     };
 
     struct model_iterator
