@@ -392,7 +392,6 @@ set ( scripting_sources
     src/noggit/scripting/script_chunk.cpp
     src/noggit/scripting/script_context.cpp
     src/noggit/scripting/script_filesystem.cpp
-    src/noggit/scripting/script_heap.cpp
     src/noggit/scripting/script_image.cpp
     src/noggit/scripting/script_loader-noggit_module.ipp
     src/noggit/scripting/script_loader.cpp
@@ -422,7 +421,6 @@ set ( scripting_headers
     src/noggit/scripting/script_image.hpp
     src/noggit/scripting/script_loader.hpp
     src/noggit/scripting/script_math.hpp
-    src/noggit/scripting/script_heap.hpp
   )
 
 set ( opengl_headers

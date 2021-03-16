@@ -1,9 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <daScript/daScript.h>
-
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
-#include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/World.h>
 
@@ -53,13 +50,13 @@ namespace noggit
       return sel._cur_chunk < sel._chunks_size;
     }
 
-    bool sel_next_chunk(selection& sel, das::Context* ctx)
+    bool sel_next_chunk(selection& sel)
     {
       if (!sel._initialized_chunks)
       {
         std::vector<MapChunk*> chunks;
         sel._world->select_all_chunks_between(sel._min, sel._max, chunks);
-        sel._chunks = script_calloc(sizeof(MapChunk*) * chunks.size(), ctx);
+        sel._chunks = new char[sizeof(MapChunk*) * chunks.size()];
         sel._chunks_size = chunks.size();
         memcpy(sel.get_chunks(), chunks.data(), chunks.size() * sizeof(MapChunk*));
         sel._initialized_chunks = true;
@@ -85,9 +82,9 @@ namespace noggit
       return chunk(&sel, sel.get_chunks()[sel._cur_chunk]);
     }
 
-    bool sel_next_model(selection& sel, das::Context * ctx)
+    bool sel_next_model(selection& sel)
     {
-      return sel._models.next(ctx);
+      return sel._models.next();
     }
 
     model sel_get_model(selection& sel)
@@ -100,9 +97,9 @@ namespace noggit
       sel._models.reset_itr();
     }
 
-    void sel_requery_models(selection& sel, das::Context* ctx)
+    void sel_requery_models(selection& sel)
     {
-      sel._models.query(ctx);
+      sel._models.query();
     }
   } // namespace scripting
 } // namespace noggit

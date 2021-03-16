@@ -42,9 +42,9 @@ namespace noggit
       int _model_index = -1;
       int _models_size = 0;
 
-      bool next(das::Context * ctx);
+      bool next();
       void reset_itr();
-      void query(das::Context* ctx);
+      void query();
       model get();
     };
 
@@ -61,7 +61,7 @@ namespace noggit
 
     void model_remove(model& model);
 
-    const char* model_get_filename(model const& model, das::Context* ctx);
-    void model_replace(model& model, const char* filename, das::Context* ctx);
+    std::string model_get_filename(model const& model);
+    void model_replace(model& model, const char* filename);
   } // namespace scripting
 } // namespace noggit

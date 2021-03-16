@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <cmath>
 
-#include <daScript/daScript.h>
-
 #include <noggit/camera.hpp>
 #include <noggit/Log.h>
 #include <noggit/scripting/scripting_tool.hpp>
@@ -10,7 +8,6 @@
 #include <noggit/World.h>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_loader.hpp>
-#include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
 #include <nlohmann/json.hpp>
@@ -628,7 +625,6 @@ namespace noggit
         resetLogScroll();
       }
 
-      script_free_all();
       set_ctx(nullptr);
       cur_tool = nullptr;
       _last_left = left_mouse;
@@ -675,14 +671,15 @@ namespace noggit
       _description->clear();
     }
 
-    char const* get_string_param(char const* path, das::Context * ctx)
+    std::string get_string_param(char const* path)
     {
-      return script_calloc_string(get_json_unsafe<std::string>(path), ctx);
+      // TODO: FIXIFIIFIX
+      return get_json_unsafe<std::string>(path);
     }
 
-    char const* get_string_list_param(char const* path, das::Context * ctx)
+    std::string get_string_list_param(char const* path)
     {
-      return get_string_param(path, ctx);
+      return get_string_param(path);
     }
 
     int get_int_param(char const* path)

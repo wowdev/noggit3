@@ -1,7 +1,4 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <daScript/daScript.h> // must be on top
-
-#include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
 
@@ -25,7 +22,7 @@ namespace noggit
       }
     }
 
-    char const* read_file(char const* path, das::Context * ctx)
+    std::string read_file(char const* path)
     {
       if(path==nullptr)
       {
@@ -38,7 +35,7 @@ namespace noggit
       std::ifstream t(path);
       std::string str((std::istreambuf_iterator<char>(t)),
               std::istreambuf_iterator<char>());
-      return script_calloc_string(str, ctx);
+      return str;
     }
 
     void write_file(char const* path, char const* input)

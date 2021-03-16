@@ -1,10 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <daScript/daScript.h>
-
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
-#include <noggit/scripting/script_heap.hpp>
 
 #include <lodepng.h>
 
@@ -12,7 +9,7 @@ namespace noggit
 {
   namespace scripting
   {
-    static void img_resize(image& img, int width, int height, das::Context* ctx)
+    static void img_resize(image& img, int width, int height)
     {
       if(width<=0||height<=0)
       {
@@ -28,10 +25,11 @@ namespace noggit
       img._size = width*height*4;
       img._width = width;
       img._height = height;
-      img._image = script_calloc(img._size, ctx);
+      // TODO: leak
+      img._image = new char[img._size];
     }
 
-    image load_png(char const* path, das::Context* ctx)
+    image load_png(char const* path)
     {
       image img;
       if(path==nullptr)
@@ -48,15 +46,15 @@ namespace noggit
           "failed to load png image with error code:" 
           + std::to_string (error));
       }
-      img_resize(img, img._width, img._height, ctx);
+      img_resize(img, img._width, img._height);
       memcpy(img.get_image(), vec.data(), vec.size());
       return img;
     }
 
-    image create_image(int width, int height, das::Context * ctx)
+    image create_image(int width, int height)
     {
       image img;
-      img_resize(img,width,height, ctx);
+      img_resize(img,width,height);
       return img;
     }
 

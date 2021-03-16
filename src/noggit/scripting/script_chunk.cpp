@@ -1,10 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <daScript/daScript.h> // must be on top
-
 #include <noggit/scripting/script_chunk.hpp>
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
-#include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
@@ -55,7 +52,7 @@ namespace noggit
       chunk._chunk->texture_set->eraseTexture(index);
     }
 
-    char const* chunk_get_texture(chunk const& chunk, int index, das::Context * ctx)
+    std::string chunk_get_texture(chunk const& chunk, int index)
     {
       if(index<0||index>3)
       {
@@ -63,7 +60,7 @@ namespace noggit
           "chunk_get_texture",
           "invalid texture index, must be between 0-3");
       }
-      return script_calloc_string(chunk._chunk->texture_set->texture(index)->filename,ctx);
+      return chunk._chunk->texture_set->texture(index)->filename;
     }
 
     void chunk_apply_heightmap(chunk& chunk)

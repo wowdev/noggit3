@@ -2,8 +2,6 @@
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
-#include <noggit/scripting/script_heap.hpp>
-#include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
 #include <noggit/World.h>
@@ -126,15 +124,15 @@ namespace noggit
       }
     }
 
-    char const* model_get_filename(model const& model, das::Context * ctx)
+    std::string model_get_filename(model const& model)
     {
       if (model._is_wmo)
       {
-        return script_calloc_string(wmo_const(model)->wmo->filename, ctx);
+        return wmo_const(model)->wmo->filename;
       }
       else
       {
-        return script_calloc_string(m2_const(model)->model->filename, ctx);
+        return m2_const(model)->model->filename;
       }
     }
 
@@ -152,7 +150,7 @@ namespace noggit
       get_ctx("model_remove")->_world->delete_models(type);
     }
 
-    void model_replace(model& model, char const* filename, das::Context* ctx)
+    void model_replace(model& model, char const* filename)
     {
       if(filename==nullptr)
       {
@@ -161,7 +159,7 @@ namespace noggit
           "empty filename (in call to model_replace)");
       }
 
-      if (model_get_filename(model, ctx) == filename)
+      if (model_get_filename(model) == filename)
       {
         return;
       }
@@ -188,7 +186,7 @@ namespace noggit
     model_iterator::model_iterator(World* world, math::vector_3d min, math::vector_3d max)
       : _world(world), _min(min), _max(max) {}
 
-    void model_iterator::query(das::Context* ctx)
+    void model_iterator::query()
     {
       std::vector<model> models;
 
@@ -207,7 +205,8 @@ namespace noggit
 
       _models_size = models.size();
       size_t size = models.size() * sizeof(model);
-      _models = script_calloc(size,ctx);
+      // TODO: Leak
+      _models = new char[size];
       memcpy(get_models(), models.data(), size);
       _initialized = true;
       reset_itr();
@@ -218,11 +217,11 @@ namespace noggit
       _model_index = -1;
     }
 
-    bool model_iterator::next(das::Context* ctx)
+    bool model_iterator::next()
     {
       if (!_initialized)
       {
-        query(ctx);
+        query();
       }
 
       if (_model_index >= int(_models_size))

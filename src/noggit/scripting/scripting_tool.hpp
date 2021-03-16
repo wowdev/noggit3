@@ -109,8 +109,8 @@ namespace noggit
     double get_double_param(char const* path);
     float get_float_param(char const* path);
     bool get_bool_param(char const* path);
-    char const* get_string_param(char const* path, das::Context* ctx);
-    char const* get_string_list_param(char const* path, das::Context* ctx);
+    std::string get_string_param(char const* path);
+    std::string get_string_list_param(char const* path);
 
     void add_string_list_param(char const* path, char const* value);
     void add_string_param(char const* path, char const* def);

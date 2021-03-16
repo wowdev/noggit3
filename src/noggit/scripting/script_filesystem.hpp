@@ -5,10 +5,6 @@
 
 #include <string>
 
-namespace das {
-  class Context;
-}
-
 namespace noggit
 {
   namespace scripting
@@ -17,7 +13,7 @@ namespace noggit
 
     void write_file(char const* path, char const* content);
     void append_file(char const* , char const* content);
-    char const* read_file(char const* path, das::Context * ctx);
+    std::string read_file(char const* path);
     bool path_exists(char const* path);
   } // namespace scripting
 } // namespace noggit

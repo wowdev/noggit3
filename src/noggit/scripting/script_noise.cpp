@@ -1,9 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <daScript/daScript.h>
-
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
-#include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -87,8 +84,7 @@ namespace noggit
       , unsigned height
       , float frequency
       , const char* algorithm
-      , const char* seed
-      , das::Context * ctx)
+      , const char* seed)
     {
       if(algorithm==nullptr)
       {
@@ -118,7 +114,7 @@ namespace noggit
       _start_x = start_x;
       _start_y = start_y;
       _size = width*height;
-      _noise = script_calloc(width * height * sizeof(float), ctx);
+      _noise = new char[width * height * sizeof(float)];
 
       auto upper = boost::algorithm::to_upper_copy<std::string>(algorithm);
     
@@ -184,8 +180,7 @@ namespace noggit
       , int y_size 
       , float frequency 
       , const char* algorithm 
-      , const char* seed
-      , das::Context* ctx)
+      , const char* seed)
     {
       return noisemap(
         x_start
@@ -194,8 +189,7 @@ namespace noggit
         , y_size
         , frequency
         , algorithm
-        , seed
-        , ctx);
+        , seed);
     }
 
     noisemap make_noise_selection(
@@ -203,14 +197,13 @@ namespace noggit
       , float frequency
       , int padding
       , const char* algorithm
-      , const char* seed
-      , das::Context* ctx)
+      , const char* seed)
     {
       auto x_start = std::floor(selection._min.x) - (padding + 1);
       auto z_start = std::floor(selection._min.z) - (padding + 1);
       auto x_size = std::ceil(selection._max.x - selection._min.x) + (padding + 1) * 2;
       auto z_size = std::ceil(selection._max.z - selection._min.z) + (padding + 1) * 2;
-      return noisemap(x_start,z_start,x_size,z_size,frequency,algorithm,seed, ctx);
+      return noisemap(x_start,z_start,x_size,z_size,frequency,algorithm,seed);
     }
   } // namespace scripting
 } // namespace noggit

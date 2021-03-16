@@ -2,7 +2,6 @@
 #pragma once
 
 #include <noggit/scripting/script_selection.hpp>
-#include <noggit/scripting/script_heap.hpp>
 
 #include <math/vector_3d.hpp>
 
@@ -10,11 +9,6 @@
 #include <vector>
 #include <string>
 #include <memory>
-
-namespace das
-{
-  class Context;
-}
 
 namespace noggit
 {
@@ -29,8 +23,7 @@ namespace noggit
           , unsigned height 
           , float frequency
           , const char *algorithm 
-          , const char *seed
-          , das::Context* ctx);
+          , const char *seed);
       noisemap() = default;
       char *_noise;
       float *get_map() const { return (float *)_noise; };
@@ -54,15 +47,13 @@ namespace noggit
       , int height
       , float frequency
       , char const *algorithm
-      , char const *seed
-      , das::Context* ctx);
+      , char const *seed);
 
     noisemap make_noise_selection(
       selection const& sel
       , float frequency
       , int padding
       , char const *algorithm
-      , char const *seed
-      , das::Context* ctx);
+      , char const *seed);
   } // namespace scripting
 } // namespace noggit

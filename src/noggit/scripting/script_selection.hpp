@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
-#include <noggit/scripting/script_heap.hpp>
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_chunk.hpp>
 #include <math/vector_3d.hpp>
@@ -48,14 +47,14 @@ namespace noggit
     selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius);
     selection select_between(math::vector_3d const& point1, math::vector_3d const& point2);
 
-    bool sel_next_chunk(selection& sel, das::Context* ctx);
+    bool sel_next_chunk(selection& sel);
     chunk sel_get_chunk(selection& sel);
     void sel_reset_chunk_itr(selection& sel);
 
-    bool sel_next_model(selection& sel, das::Context * ctx);
+    bool sel_next_model(selection& sel);
     model sel_get_model(selection& sel);
     void sel_reset_model_itr(selection& sel);
-    void sel_requery_models(selection& sel, das::Context* ctx);
+    void sel_requery_models(selection& sel);
 
     math::vector_3d sel_center(selection const& sel);
     math::vector_3d sel_min(selection const& sel);
