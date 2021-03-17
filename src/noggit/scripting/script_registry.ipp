@@ -6,6 +6,7 @@
 #include <noggit/scripting/script_vert_iterator.hpp>
 #include <noggit/scripting/script_tex_iterator.hpp>
 #include <noggit/scripting/script_vert.hpp>
+#include <noggit/scripting/script_chunk.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit {
@@ -19,6 +20,7 @@ namespace noggit {
         register_vert_iterator(lua, tool);
         register_tex_iterator(lua, tool);
         register_vert(lua, tool);
+        register_chunk(lua, tool);
       }
     }
   }

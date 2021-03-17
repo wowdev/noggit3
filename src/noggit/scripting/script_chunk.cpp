@@ -14,18 +14,17 @@ namespace noggit
 {
   namespace scripting
   {
-    chunk::chunk(selection* sel, MapChunk* chunk)
+    chunk::chunk(MapChunk* chunk)
     {
-      _sel = sel;
       _chunk = chunk;
     }
 
-    void chunk_set_hole(chunk& chunk, bool hole)
+    void chunk::set_hole(bool hole)
     {
-      chunk._chunk->setHole(math::vector_3d(0, 0, 0), true, hole);
+      _chunk->setHole(math::vector_3d(0, 0, 0), true, hole);
     }
 
-    int chunk_add_texture(chunk& chunk, char const* texture)
+    int chunk::add_texture(char const* texture)
     {
       if(texture==nullptr)
       {
@@ -34,15 +33,15 @@ namespace noggit
           "empty texture");
       }
       std::string tex = std::string(texture);
-      return chunk._chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
+      return _chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
     }
 
-    void chunk_clear_textures(chunk& chunk)
+    void chunk::clear_textures()
     {
-      chunk._chunk->texture_set->eraseTextures();
+      _chunk->texture_set->eraseTextures();
     }
 
-    void chunk_remove_texture(chunk& chunk, int index)
+    void chunk::remove_texture(int index)
     {
       if(index<0||index>3)
       {
@@ -50,10 +49,10 @@ namespace noggit
           "chunk_remove_texture",
           "invalid texture index, must be between 0-3");
       }
-      chunk._chunk->texture_set->eraseTexture(index);
+      _chunk->texture_set->eraseTexture(index);
     }
 
-    std::string chunk_get_texture(chunk const& chunk, int index)
+    std::string chunk::get_texture(int index)
     {
       if(index<0||index>3)
       {
@@ -61,129 +60,75 @@ namespace noggit
           "chunk_get_texture",
           "invalid texture index, must be between 0-3");
       }
-      return chunk._chunk->texture_set->texture(index)->filename;
+      return _chunk->texture_set->texture(index)->filename;
     }
 
-    void chunk_apply_heightmap (chunk& chunk)
+    void chunk::apply_heightmap ()
     {
-      chunk._chunk->updateVerticesData();
+      _chunk->updateVerticesData();
       // TODO: fix
       //get_ctx (context, "chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
     }
 
-    void chunk_apply_textures(chunk& chunk)
+    void chunk::apply_textures()
     {
-      chunk._chunk->texture_set->apply_alpha_changes();
+      _chunk->texture_set->apply_alpha_changes();
     }
 
-    void chunk_apply_vertex_color(chunk& chunk)
+    void chunk::apply_vertex_color()
     {
-      chunk._chunk->UpdateMCCV();
+      _chunk->UpdateMCCV();
     }
 
-    void chunk_apply_all(chunk& chunk)
+    void chunk::apply_all()
     {
       // TODO: fix
       //chunk_apply_heightmap(chunk, context);
-      chunk_apply_textures(chunk);
-      chunk_apply_vertex_color(chunk);
+      apply_textures();
+      apply_vertex_color();
     }
 
-    int chunk_get_area_id(chunk const& chunk)
+    int chunk::get_area_id()
     {
-      return chunk._chunk->getAreaID();
+      return _chunk->getAreaID();
     }
 
-    void chunk_set_area_id(chunk& chunk, int value)
+    void chunk::set_area_id(int value)
     {
-      return chunk._chunk->setAreaID(value);
+      return _chunk->setAreaID(value);
     }
 
-    void chunk_set_impassable(chunk& chunk, bool add)
+    void chunk::set_impassable(bool add)
     {
-      chunk._chunk->setFlag(add, 0x2);
+      _chunk->setFlag(add, 0x2);
     }
 
-    namespace
-    {
-      bool is_on_vert(chunk& chunk)
-      {
-        return chunk._vert_index < 145;
-      }
-
-      bool is_on_tex(chunk& chunk)
-      {
-        return chunk._tex_index < 4096;
-      }
-
-      void skip_vertices(chunk& chunk)
-      {
-        auto sel = chunk._sel;
-        if (sel == nullptr)
-          return;
-        while (is_on_vert(chunk))
-        {
-          auto& vert = chunk._chunk->mVertices[chunk._vert_index];
-          if (vert.x <= sel->_min.x || vert.x >= sel->_max.x ||
-            vert.z <= sel->_min.z || vert.z >= sel->_max.z)
-          {
-            ++chunk._vert_index;
-          }
-          else
-          {
-            break;
-          }
-        }
-      }
-    }
-
-    bool chunk_next_vert(chunk& chunk)
-    {
-      ++chunk._vert_index;
-      if (is_on_vert(chunk))
-      {
-        skip_vertices(chunk);
-        return is_on_vert(chunk);
-      }
-      else
-      {
-        return false;
-      }
-    }
-
-    bool chunk_next_tex(chunk& chunk)
-    {
-      ++chunk._tex_index;
-      return is_on_tex(chunk);
-    }
-
-    void chunk_reset_vert_itr(chunk& chunk)
-    {
-      chunk._vert_index = -1;
-    }
-
-    void chunk_reset_tex_itr(chunk& chunk)
-    {
-      chunk._tex_index = -1;
-    }
-
-    vert chunk_get_vert(chunk const& chunk)
-    {
-      return vert(chunk._chunk, chunk._vert_index);
-    }
-
-    tex chunk_get_tex(chunk const& chunk)
-    {
-      return tex(chunk._chunk, chunk._tex_index);
-    }
-
-    void chunk_clear_colors(chunk& chunk)
+    void chunk::clear_colors()
     {
       std::fill (
-        chunk._chunk->mccv,
-        chunk._chunk->mccv + mapbufsize,
+        _chunk->mccv,
+        _chunk->mccv + mapbufsize,
         math::vector_3d (1.f, 1.f, 1.f)
       );
+    }
+
+    void register_chunk(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<chunk>("chunk"
+        , "remove_texture", &chunk::remove_texture
+        , "get_texture", &chunk::get_texture
+        , "add_texture", &chunk::add_texture
+        , "clear_textures", &chunk::clear_textures
+        , "set_hole", &chunk::set_hole
+        , "clear_colors", &chunk::clear_colors
+        , "apply_textures", &chunk::apply_textures
+        , "apply_heightmap", &chunk::apply_heightmap
+        , "apply_vertex_color", &chunk::apply_vertex_color
+        , "apply_all", &chunk::apply_all
+        , "set_impassable", &chunk::set_impassable
+        , "get_area_id", &chunk::get_area_id
+        , "set_area_id", &chunk::set_area_id
+      ); 
     }
   } // namespace scripting
 } // namespace noggit

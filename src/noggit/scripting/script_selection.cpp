@@ -87,7 +87,7 @@ namespace noggit
           "sel_get_chunk",
           "accessing invalid chunk: iterator is done");
       }
-      return chunk(&sel, sel.get_chunks()[sel._cur_chunk]);
+      return chunk(sel.get_chunks()[sel._cur_chunk]);
     }
 
     bool sel_next_model(selection& sel)

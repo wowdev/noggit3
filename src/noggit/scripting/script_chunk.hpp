@@ -8,36 +8,32 @@ namespace noggit
 {
   namespace scripting
   {
-    struct selection;
-
-    struct chunk
+    class chunk
     {
-      chunk(selection* sel, MapChunk* chunk);
+    public:
+      chunk(MapChunk* chunk);
       chunk() = default;
+
+      void remove_texture(int index);
+      std::string get_texture(int index);
+      int add_texture(char const* texture);
+      void clear_textures();
+      void set_hole(bool hole);
+      void clear_colors();
+      void apply_textures();
+      void apply_heightmap();
+      void apply_vertex_color();
+      void apply_all();
+      void set_impassable(bool add);
+      int get_area_id();
+      void set_area_id(int value);
+
+    private:
       MapChunk* _chunk;
-      selection* _sel;
       int _vert_index = -1;
       int _tex_index = -1;
     };
 
-    void chunk_remove_texture(chunk& chunk, int index);
-    std::string chunk_get_texture(chunk const& chunk, int index);
-    int chunk_add_texture(chunk& chunk, char const* texture);
-    void chunk_clear_textures(chunk& chunk);
-    void chunk_set_hole(chunk& chunk, bool hole);
-    void chunk_clear_colors(chunk& chunk);
-    void chunk_apply_textures(chunk& chunk);
-    void chunk_apply_heightmap(chunk& chunk);
-    void chunk_apply_vertex_color(chunk& chunk);
-    void chunk_apply_all(chunk& chunk);
-    void chunk_set_impassable(chunk& chunk, bool add);
-    int chunk_get_area_id(chunk const& chunk);
-    void chunk_set_area_id(chunk& chunk, int value);
-    bool chunk_next_vert(chunk& chunk);
-    bool chunk_next_tex(chunk& chunk);
-    void chunk_reset_vert_itr(chunk& chunk);
-    void chunk_reset_tex_itr(chunk& chunk);
-    vert chunk_get_vert(chunk const& chunk);
-    tex chunk_get_tex(chunk const& chunk);
+    void register_chunk(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit
