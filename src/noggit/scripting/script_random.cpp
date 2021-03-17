@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_random.hpp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
+#include <sol/sol.hpp>
 
 namespace noggit
 {
@@ -21,34 +23,7 @@ namespace noggit
     {
     }
 
-    int rand_int32(random& rand, int low, int high)
-    {
-      if(low>=high) throw script_exception(
-        "rand_int32",
-        "random lower bound "+ std::to_string(low) + " >= higher bound " + std::to_string(high));
-      return std::uniform_int_distribution<int>(low,high-1)(rand._state);
-    }
-
-    unsigned rand_uint32(random& rand, unsigned low, unsigned high)
-    {
-      if(low>=high) throw script_exception(
-        "rand_uint32",
-        "random lower bound "+ std::to_string(low) + " >= higher bound " + std::to_string(high));
-      return std::uniform_int_distribution<unsigned>(low,high-1)(rand._state);
-    }
-
-    unsigned long rand_uint64(random& rand, unsigned long low, unsigned long high)
-    {
-      if(low>=high)
-      {
-        throw script_exception(
-        "rand_uint64",
-        "random lower bound "+ std::to_string(low) + " >= higher bound " + std::to_string(high));
-      }
-      return std::uniform_int_distribution<unsigned long>(low,high-1)(rand._state);
-    }
-
-    long rand_int64(random& rand, long low, long high)
+    long random::integer(random& rand, long low, long high)
     {
       if(low>=high)
       {
@@ -59,7 +34,7 @@ namespace noggit
       return std::uniform_int_distribution<long>(low,high-1)(rand._state);
     }
 
-    double rand_double(random& rand, double low, double high)
+    double random::real(random& rand, double low, double high)
     {
       if(low>=high)
       {
@@ -74,21 +49,6 @@ namespace noggit
       return val;
     }
 
-    float rand_float(random& rand, float low, float high)
-    {
-      if(low>=high)
-      {
-        throw script_exception(
-        "rand_float",
-        "random lower bound "+ std::to_string(low) + " >= higher bound " + std::to_string(high));
-      }
-      float val;
-      do {
-        val = std::uniform_real_distribution<float>(low,high)(rand._state);
-      } while(val == high);
-      return val;
-    }
-
     random random_from_seed(char const* seed)
     {
       return random(std::string(seed));
@@ -97,6 +57,17 @@ namespace noggit
     random random_from_time()
     {
       return random();
+    }
+
+    void register_random(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<random>("random"
+        , "integer", &random::integer
+        , "real", &random::real
+      );
+
+      state->set_function("random_from_seed",random_from_seed);
+      state->set_function("random_from_time",random_from_time);
     }
   } // namespace scripting
 } // namespace noggit

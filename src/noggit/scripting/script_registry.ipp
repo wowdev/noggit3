@@ -8,6 +8,7 @@
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_chunk.hpp>
 #include <noggit/scripting/script_selection.hpp>
+#include <noggit/scripting/script_random.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit {
@@ -23,6 +24,7 @@ namespace noggit {
         register_vert(lua, tool);
         register_chunk(lua, tool);
         register_selection(lua, tool);
+        register_random(lua, tool);
       }
     }
   }

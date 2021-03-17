@@ -5,26 +5,28 @@
 #include <chrono>
 #include <memory>
 
+namespace sol {
+  class state;
+}
+
 namespace noggit
 {
   namespace scripting
   {
+    class scripting_tool;
     struct random
     {
       std::minstd_rand _state;
       random(unsigned seed);
       random(std::string const& seed);
       random();
+      long integer(random& rand, long low, long high);
+      double real(random& rand, double low, double high);
     };
-
-    int rand_int32(random& rand, int low, int high);
-    unsigned rand_uint32(random& rand, unsigned low, unsigned high);
-    unsigned long rand_uint64(random& rand, unsigned long low, unsigned long high);
-    long rand_int64(random& rand, long low, long high);
-    double rand_double(random& rand, double low, double high);
-    float rand_float(random& rand, float low, float high);
 
     random random_from_seed(char const* seed);
     random random_from_time();
+
+    void register_random(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit
