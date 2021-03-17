@@ -13,6 +13,7 @@
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_math.hpp>
 #include <noggit/scripting/script_image.hpp>
+#include <noggit/scripting/script_filesystem.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit {
@@ -32,6 +33,7 @@ namespace noggit {
         register_noise(lua, tool);
         register_math(lua, tool);
         register_image(lua, tool);
+        register_filesystem(lua, tool);
       }
     }
   }

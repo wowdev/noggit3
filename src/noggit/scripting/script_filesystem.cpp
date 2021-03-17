@@ -2,6 +2,9 @@
 
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
+
+#include <sol/sol.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -86,6 +89,14 @@ namespace noggit
         throw script_exception("path_exists","empty path");
       }
       return fs::exists(path);
+    }
+
+    void register_filesystem(sol::state * state, scripting_tool * tool)
+    {
+      state->set_function("write_file",write_file);
+      state->set_function("append_file",append_file);
+      state->set_function("read_file",read_file);
+      state->set_function("path_exists",path_exists);
     }
   } // namespace scripting
 } // namespace noggit
