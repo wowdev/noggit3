@@ -21,23 +21,15 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#include <mutex>
-
 #define SCRIPT_FILE "script_settings.json"
 #define INNER_RADIUS_PATH "__inner_radius"
 #define OUTER_RADIUS_PATH "__outer_radius"
 #define CUR_PROFILE_PATH "__cur_profile"
 
-using json = nlohmann::json;
 namespace noggit
 {
   namespace scripting
   {
-
-    static json _json;
-    static std::string cur_profile = "Default";
-    static std::mutex script_change_mutex;
-
     template <typename T>
     static T get_json_safe(std::string key, T def)
     {
@@ -101,6 +93,7 @@ namespace noggit
     {
       cur_tool = this;
       int selection = -1;
+
       removeScriptWidgets();
       clearLog();
       try
@@ -114,6 +107,7 @@ namespace noggit
         return;
       }
       _selection->clear();
+      for(auto& script: get_context()->)
 
       for (int i = 0; i < script_count(); ++i)
       {
@@ -654,6 +648,11 @@ namespace noggit
       LogDebug << "[script window]: " << text << "\n";
       _log->appendPlainText(text.c_str());
       _log->verticalScrollBar()->setValue(_log->verticalScrollBar()->maximum());
+    }
+
+    script_context* scripting_tool::get_context()
+    {
+      return _script_context;
     }
 
     void scripting_tool::resetLogScroll()

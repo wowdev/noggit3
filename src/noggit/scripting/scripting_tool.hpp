@@ -17,12 +17,9 @@
 #include <QtWidgets/QGridLayout>
 
 #include <map>
+#include <mutex>
 
 class World;
-
-namespace das {
-  class Context;
-}
 
 namespace noggit
 {
@@ -62,6 +59,7 @@ namespace noggit
       void addString(char const* name, char const* def = "");
       void addStringList(char const* name, char const* value);
       void removeScriptWidgets();
+      script_context* get_context();
 
     private:
       bool _last_left = false;
@@ -95,10 +93,20 @@ namespace noggit
       QPushButton* _profile_remove_button;
       QPushButton* _profile_create_button;
 
-
       std::vector<QWidget*> _script_widgets;
       std::vector<void*> _holders;
       std::map<std::string, QComboBox*> _string_arrays;
+      std::mutex _script_change_mutex;
+
+    private:
+      nlohmann::json _json;
+      template <typename T>
+      T get_json_safe(std::string const& key, T def);
+      template <typename T>
+      void set_json_safe(std::string const& key, T def);
+
+    private:
+      script_context _script_context;
 
       void select_profile(int profile);
       void on_change_script(int script_index);

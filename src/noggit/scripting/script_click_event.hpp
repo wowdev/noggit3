@@ -20,10 +20,9 @@ namespace noggit
   namespace scripting
   {
     struct script_vec;
-
-    struct script_context
+    struct script_click_event
     {
-      script_context(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space, float dt);
+      script_click_event(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space, float dt);
       World* _world;
       math::vector_3d _pos;
       float _outer_radius;
@@ -35,8 +34,5 @@ namespace noggit
       bool _holding_space;
       float _dt;
     };
-
-    script_context* get_ctx(const char* caller);
-    void set_ctx(script_context* ctx);
   } // namespace scripting
 } // namespace noggit

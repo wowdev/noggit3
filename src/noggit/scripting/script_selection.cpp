@@ -28,6 +28,11 @@ namespace noggit
       return sel;
     }
 
+    selection select_origin_test(math::vector_3d const& origin)
+    {
+      return select_origin(origin,1,1);
+    }
+
     selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius)
     {
       return select_between_int("select_origin",

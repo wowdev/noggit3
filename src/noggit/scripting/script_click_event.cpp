@@ -9,26 +9,18 @@ namespace noggit
 {
   namespace scripting
   {
-    // makes it easier for scripters to not pass this around
-    static script_context* ctx = nullptr;
+    script_click_event::script_click_event(
+        World* world
+      , math::vector_3d pos
+      , float outer_radius
+      , float inner_radius
+      , noggit::camera* camera
+      , bool alt
+      , bool shift
+      , bool ctrl
+      , bool space
+      , float dt)
 
-    void set_ctx(script_context* nctx)
-    {
-      ctx = nctx;
-    }
-
-    script_context* get_ctx(const char* caller)
-    {
-      if(ctx==nullptr) 
-      {
-        throw script_exception(
-          caller,
-          "accessing script context outside of interact (click/hold/release) event");
-      }
-      return ctx;
-    }
-
-    script_context::script_context(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space, float dt)
       : _world(world),
         _pos(pos),
         _outer_radius(outer_radius),
