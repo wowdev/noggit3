@@ -27,11 +27,8 @@ namespace noggit
       void set_impassable(bool add);
       int get_area_id();
       void set_area_id(int value);
-
     private:
       MapChunk* _chunk;
-      int _vert_index = -1;
-      int _tex_index = -1;
     };
 
     void register_chunk(sol::state * state, scripting_tool * tool);
