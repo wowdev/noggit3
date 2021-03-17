@@ -3,6 +3,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_brush.hpp>
 #include <noggit/scripting/script_global.hpp>
+#include <noggit/scripting/script_vert_iterator.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit {
@@ -13,6 +14,7 @@ namespace noggit {
         // Register your functions / add registry functions here!
         register_script_brush(lua, tool);
         register_global(lua, tool);
+        register_vert_iterator(lua, tool);
       }
     }
   }
