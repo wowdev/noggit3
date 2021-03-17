@@ -62,10 +62,6 @@ namespace noggit {
       return _tool->get_settings();
     }
 
-    void register_script_brush(sol::state * state, scripting_tool * tool)
-    {
-    }
-
     void script_brush::on_left_click(sol::protected_function evt)
     {
       _left_click = evt;
@@ -84,6 +80,11 @@ namespace noggit {
     void script_brush::on_right_click(sol::protected_function evt)
     {
       _right_click = evt;
+    }
+
+    void script_brush::on_right_hold(sol::protected_function evt)
+    {
+      _right_hold = evt;
     }
 
     void script_brush::on_right_release(sol::protected_function evt)
@@ -137,6 +138,27 @@ namespace noggit {
       {
         _right_release(evt);
       }
+    }
+
+    void register_script_brush(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<script_brush_event>("script_brush_event"
+        ,"pos",&script_brush_event::pos
+        ,"outer_radius",&script_brush_event::outer_radius
+        ,"inner_radius",&script_brush_event::inner_radius
+        ,"dt",&script_brush_event::dt
+        );
+
+      state->new_usertype<script_brush>("script_brush"
+        ,"set_name",&script_brush::set_name
+        ,"settings",&script_brush::settings
+        ,"on_left_click",&script_brush::on_left_click
+        ,"on_left_hold",&script_brush::on_left_hold
+        ,"on_left_release",&script_brush::on_left_release
+        ,"on_right_click",&script_brush::on_right_click
+        ,"on_right_hold",&script_brush::on_right_hold
+        ,"on_right_release",&script_brush::on_right_release
+        );
     }
   }
 }

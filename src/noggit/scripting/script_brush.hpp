@@ -45,6 +45,7 @@ namespace noggit {
       void on_left_hold(sol::protected_function fn);
       void on_left_release(sol::protected_function fn);
       void on_right_click(sol::protected_function fn);
+      void on_right_hold(sol::protected_function fn);
       void on_right_release(sol::protected_function fn);
 
       void send_left_click(script_brush_event evt);
