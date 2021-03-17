@@ -114,8 +114,7 @@ namespace noggit
       _start_x = start_x;
       _start_y = start_y;
       _size = width*height;
-      _noise = new char[width * height * sizeof(float)];
-
+      _noise.resize(_size);
       auto upper = boost::algorithm::to_upper_copy<std::string>(algorithm);
 
       FastNoise::SmartNode<> generator = nullptr;

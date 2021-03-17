@@ -35,9 +35,9 @@ namespace noggit
       unsigned height();
     
     private:
-      char *_noise;
+      std::vector<float> _noise;
       float get_index(std::string const& caller, int x, int y);
-      float *get_map() const { return (float *)_noise; };
+      float *get_map() { return _noise.data(); };
       unsigned _width = 0;
       unsigned _height = 0;
       unsigned _start_x = 0;
