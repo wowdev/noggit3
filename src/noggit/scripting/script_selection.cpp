@@ -6,11 +6,15 @@
 #include <noggit/World.h>
 #include <math/vector_3d.hpp>
 
+#include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/MapView.h>
+
 namespace noggit
 {
   namespace scripting
   {
-    selection::selection(const char* caller,math::vector_3d const& point1, math::vector_3d const& point2)
+    selection::selection(World * world, const char* caller,math::vector_3d const& point1, math::vector_3d const& point2)
+      : _world(world)
     {
       selection sel;
       // TODO: restore
@@ -27,19 +31,6 @@ namespace noggit
 
       _size = _max - _min;
       _center = _min + (_size / 2);
-      //_models = model_iterator(sel._world, sel._min, sel._max);
-    }
-
-    selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius)
-    {
-      return selection("select_origin",
-               math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
-               math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
-    }
-
-    selection select_between(math::vector_3d const& point1, math::vector_3d const& point2)
-    {
-      return selection("select_between",point1,point2);
     }
 
     math::vector_3d selection::center() 
@@ -59,14 +50,50 @@ namespace noggit
       return _size; 
     }
 
-    void register_selection(sol::state * state, scripting_tool * tool)
+    std::shared_ptr<std::vector<MapChunk*>> selection::get_chunks()
+    {
+      if(_chunks==nullptr)
+      {
+        _chunks = std::make_shared<std::vector<MapChunk*>>();
+        _world->select_all_chunks_between(_min,_max,*_chunks);
+      }
+      return _chunks;
+    }
+
+    std::shared_ptr<model_iterator> selection::get_model_iterator()
+    {
+      return std::make_shared<model_iterator>(_world, _min, _max);
+    }
+
+    std::shared_ptr<vert_iterator> selection::get_vert_iterator()
+    {
+      return std::make_shared<vert_iterator>(get_chunks(), _min, _max);
+    }
+
+    std::shared_ptr<tex_iterator> selection::get_tex_iterator()
+    {
+      return std::make_shared<tex_iterator>(get_chunks(), _min, _max);
+    }
+
+    void register_selection(sol::state* state, scripting_tool* tool)
     {
       state->new_usertype<selection>("selection"
         , "center", &selection::center
         , "min", &selection::min
         , "max", &selection::max
         , "size", &selection::size
-      );
+        );
+
+      state->set_function("select_origin", [tool](math::vector_3d const& origin, float xRadius, float zRadius) {
+        return std::make_shared<selection>(tool->get_view()->_world.get(), "select_origin",
+          math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
+          math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
+      });
+
+      state->set_function("select_between", [tool](math::vector_3d const& point1, math::vector_3d const& point2) {
+        return std::make_shared<selection>(tool->get_view()->_world.get(), "select_between",
+          point1,point2);
+      });
     }
   } // namespace scripting
 } // namespace noggit

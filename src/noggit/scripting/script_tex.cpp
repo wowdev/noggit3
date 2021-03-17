@@ -42,17 +42,18 @@ namespace noggit {
     }
 
     tex_iterator::tex_iterator(
-      std::vector<MapChunk*> chunks
-      , math::vector_2d const& min
-      , math::vector_2d const& max)
+      std::shared_ptr<std::vector<MapChunk*>> chunks
+      , math::vector_3d const& min
+      , math::vector_3d const& max)
       : _chunks(chunks)
+      , _chunk_iter(chunks->begin())
       , _min(min)
       , _max(max)
       {}
 
     bool tex_iterator::next()
     {
-      if(_chunk_iter==_chunks.end())
+      if(_chunk_iter==_chunks->end())
       {
         return false;
       }

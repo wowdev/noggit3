@@ -47,17 +47,17 @@ namespace noggit
     class vert_iterator {
       public:
         vert_iterator(
-          std::vector<MapChunk*> chunks
-          , math::vector_2d const& min
-          , math::vector_2d const& max);
+          std::shared_ptr<std::vector<MapChunk*>> chunks
+          , math::vector_3d const& min
+          , math::vector_3d const& max);
         bool next();
         vert get();
     private:
       std::vector<MapChunk*>::iterator _chunk_iter;
       int _vert_iter = -1;
-      std::vector<MapChunk*> _chunks;
-      math::vector_2d const& _min;
-      math::vector_2d const& _max;
+      std::shared_ptr<std::vector<MapChunk*>> _chunks;
+      math::vector_3d const& _min;
+      math::vector_3d const& _max;
     };
 
     void register_vert(sol::state * state, scripting_tool * tool);
