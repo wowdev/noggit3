@@ -12,7 +12,6 @@ namespace noggit
 {
   namespace scripting
   {
-    struct selection;
     class scripting_tool;
 
     class tex

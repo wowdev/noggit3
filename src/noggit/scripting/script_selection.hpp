@@ -19,10 +19,18 @@ namespace noggit
 {
   namespace scripting
   {
-    struct selection
+    class selection
     {
+    public:
+      selection(const char* caller,math::vector_3d const& point1, math::vector_3d const& point2);
       selection() = default;
 
+      math::vector_3d center();
+      math::vector_3d min();
+      math::vector_3d max();
+      math::vector_3d size();
+    
+    private:
       World* _world;
       math::vector_3d _center;
       math::vector_3d _min;
@@ -35,25 +43,11 @@ namespace noggit
       MapChunk** get_chunks() { return (MapChunk**) _chunks;}
       int _cur_chunk = -1;
       bool _initialized_chunks = false;
-
-      model_iterator _models;
     };
 
     selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius);
     selection select_between(math::vector_3d const& point1, math::vector_3d const& point2);
 
-    bool sel_next_chunk(selection& sel);
-    chunk sel_get_chunk(selection& sel);
-    void sel_reset_chunk_itr(selection& sel);
-
-    bool sel_next_model(selection& sel);
-    model sel_get_model(selection& sel);
-    void sel_reset_model_itr(selection& sel);
-    void sel_requery_models(selection& sel);
-
-    math::vector_3d sel_center(selection const& sel);
-    math::vector_3d sel_min(selection const& sel);
-    math::vector_3d sel_max(selection const& sel);
-    math::vector_3d sel_size(selection const& sel);
+    void register_selection(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit

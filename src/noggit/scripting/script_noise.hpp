@@ -49,11 +49,14 @@ namespace noggit
       , char const *algorithm
       , char const *seed);
 
+    // TODO: Restore
+    /*
     noisemap make_noise_selection(
       selection const& sel
       , float frequency
       , int padding
       , char const *algorithm
       , char const *seed);
+    */
   } // namespace scripting
 } // namespace noggit

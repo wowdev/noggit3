@@ -195,6 +195,7 @@ namespace noggit
         , seed);
     }
 
+    /*
     noisemap make_noise_selection(
       selection const& selection
       , float frequency
@@ -208,5 +209,6 @@ namespace noggit
       auto z_size = std::ceil(selection._max.z - selection._min.z) + (padding + 1) * 2;
       return noisemap(x_start,z_start,x_size,z_size,frequency,algorithm,seed);
     }
+    */
   } // namespace scripting
 } // namespace noggit
