@@ -402,7 +402,6 @@ set ( scripting_sources
     src/noggit/scripting/script_filesystem.cpp
     src/noggit/scripting/script_image.cpp
     src/noggit/scripting/script_math.cpp
-    src/noggit/scripting/script_misc.cpp
     src/noggit/scripting/script_model.cpp
     src/noggit/scripting/script_noise.cpp
     src/noggit/scripting/script_random.cpp
@@ -427,7 +426,6 @@ set ( scripting_headers
     src/noggit/scripting/script_selection.hpp
     src/noggit/scripting/scripting_tool.hpp
     src/noggit/scripting/script_context.hpp
-    src/noggit/scripting/script_misc.hpp
     src/noggit/scripting/script_brush.hpp
     src/noggit/scripting/script_image.hpp
     src/noggit/scripting/script_math.hpp
