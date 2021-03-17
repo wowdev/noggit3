@@ -1,1 +1,0 @@
-#include <noggit/scripting/script_context.hpp>
