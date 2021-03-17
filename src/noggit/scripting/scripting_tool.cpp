@@ -168,52 +168,43 @@ namespace noggit
       get_settings()->save_json();
     }
 
-    void scripting_tool::sendBrushEvent(math::vector_3d const& pos, float dt, bool is_right, brush_event_type type)
-    {
-      int sel = get_context()->get_selection();
-      if(sel<0)
-      {
-        return;
-      }
-
-      get_context()->get_scripts()[sel].send_click(
-        script_brush_event(
-            pos
-          , get_settings()->brushRadius()
-          , get_settings()->innerRadius()
-          , is_right
-          , type
-          , dt
-        )
-      );
-    }
-
     void scripting_tool::sendBrushEvent(math::vector_3d const& pos, float dt)
     {
       bool new_left = get_view()->leftMouse;
       bool new_right = get_view()->rightMouse;
 
+      auto evt = script_brush_event(
+          pos
+        , get_settings()->brushRadius()
+        , get_settings()->innerRadius()
+        , dt
+      );
+
       try
       {
+        int sel = get_context()->get_selection();
+        if(sel>=0)
+        {
+          auto brush = & get_context()->get_scripts()[sel];
+          if(new_left)
+          {
+            if(!_last_left) brush->send_left_click(evt);
+            else brush->send_left_hold(evt);
+          }
+          else
+          {
+            if(_last_left) brush->send_left_release(evt);
+          }
 
-        if(new_left)
-        {
-          if(!_last_left) sendBrushEvent(pos, dt, false, brush_event_type::CLICK);
-          else sendBrushEvent(pos, dt, false, brush_event_type::HOLD);
-        }
-        else
-        {
-          if(_last_left) sendBrushEvent(pos, dt, false, brush_event_type::RELEASE);
-        }
-
-        if(new_right)
-        {
-          if(!_last_right) sendBrushEvent(pos, dt, true, brush_event_type::CLICK);
-          else sendBrushEvent(pos, dt, true, brush_event_type::HOLD);
-        }
-        else
-        {
-          if(_last_right) sendBrushEvent(pos, dt, true, brush_event_type::RELEASE);
+          if(new_right)
+          {
+            if(!_last_right) brush->send_right_click(evt);
+            else brush->send_right_hold(evt);
+          }
+          else
+          {
+            if(_last_right) brush->send_right_release(evt);
+          }
         }
       }
       catch (std::exception const& e)

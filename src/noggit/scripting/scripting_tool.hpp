@@ -53,7 +53,6 @@ namespace noggit
       script_profiles* get_profiles();
 
     private:
-      void sendBrushEvent(math::vector_3d const& pos, float dt, bool is_right, brush_event_type type);
       std::mutex _script_change_mutex;
       std::string _cur_profile;
 
