@@ -194,7 +194,7 @@ void MapView::createGUI()
 {
 #ifdef NOGGIT_HAS_SCRIPTING
   _script_tool_dock = new QDockWidget("Scripting", this);
-  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock, this->_world.get(), &this->_camera);
+  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock, this);
   _script_tool_dock->setWidget(scriptingTool);
   _tool_properties_docks.insert(_script_tool_dock);
 #endif
@@ -1825,18 +1825,7 @@ void MapView::tick (float dt)
 #ifdef NOGGIT_HAS_SCRIPTING
       if (selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
       {
-        scriptingTool->sendUpdate
-          ( _world.get()
-          , _cursor_pos
-          , &_camera
-          , 7.5f * dt
-          , leftMouse
-          , rightMouse
-          , _mod_shift_down
-          , _mod_ctrl_down
-          , _mod_alt_down
-          , _mod_space_down
-          );
+        scriptingTool->sendBrushEvent(_cursor_pos, 7.5f * dt);
       }
 #endif
 

@@ -1,6 +1,7 @@
 #include <noggit/scripting/script_profiles.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_settings.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 // TODO: duplicate
 #define CUR_PROFILE_PATH "__cur_profile"

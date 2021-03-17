@@ -3,6 +3,8 @@
 #include <noggit/scripting/script_brush.hpp>
 #include <sol/sol.hpp>
 
+#include <functional>
+
 class World;
 
 namespace noggit {

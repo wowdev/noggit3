@@ -1,7 +1,6 @@
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
-#include <boost/scope_exit.hpp>
-#include <noggit/scripting/script_context-registry.ipp>
+#include <noggit/scripting/script_registry.ipp>
 
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
@@ -9,11 +8,14 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-
+#include <vector>
 namespace noggit
 {
   namespace scripting
   {
+    namespace {
+    }
+
     script_context::~script_context()
     {
       delete _lua;
@@ -61,12 +63,13 @@ namespace noggit
       std::string old_name = _selected > 0 ? _scripts[_selected].get_name() : "";
 
       script_scoped_function<void(std::string const&,sol::protected_function)> 
-        add_script(_lua,"add_script",
-        [this](std::string const& name, sol::protected_function select_event)
+        add_brush(_lua,"add_brush",
+        [this,tool](std::string const& name, sol::protected_function select_event)
         {
-          this->get_scripts().push_back(noggit::scripting::script_brush(name,select_event));
+          this->get_scripts().push_back(noggit::scripting::script_brush(tool, name,select_event));
         });
-      register_state(_lua, tool);
+
+      register_functions(_lua, tool);
 
       boost::filesystem::recursive_directory_iterator end;
       for (boost::filesystem::recursive_directory_iterator dir("scripts"); dir != end; ++dir)

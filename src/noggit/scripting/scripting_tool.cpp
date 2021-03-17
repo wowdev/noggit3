@@ -10,6 +10,7 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_profiles.hpp>
 #include <noggit/scripting/script_settings.hpp>
+#include <noggit/MapView.h>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QDoubleSpinBox>
@@ -64,7 +65,7 @@ namespace noggit
       clearDescription();
       get_settings()->clear();
 
-      auto sn = _script_context.get_scripts()[selection].get_name();
+      auto sn = _script_context->get_scripts()[selection].get_name();
 
       get_profiles()->clear();
 
@@ -123,11 +124,11 @@ namespace noggit
       get_settings()->initialize();
     }
 
-    scripting_tool::scripting_tool(QWidget* parent, World * world, noggit::camera * camera)
+    scripting_tool::scripting_tool(QWidget* parent, MapView* view)
       : QWidget(parent)
       , _cur_profile ("Default")
-      , _world(world)
-      , _camera(camera)
+      , _view(view)
+      , _script_context(new script_context())
     {
       auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
@@ -165,24 +166,55 @@ namespace noggit
     scripting_tool::~scripting_tool()
     {
       get_settings()->save_json();
-     }
+    }
 
-    void scripting_tool::sendUpdate(
-        World* world,
-        math::vector_3d pos_in,
-        noggit::camera* cam,
-        float dt,
-        bool left_mouse,
-        bool right_mouse,
-        bool holding_shift,
-        bool holding_ctrl,
-        bool holding_alt,
-        bool holding_space)
+    void scripting_tool::sendBrushEvent(math::vector_3d const& pos, float dt, bool is_right, brush_event_type type)
     {
-      //script_context ctx(pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space, dt);
+      int sel = get_context()->get_selection();
+      if(sel<0)
+      {
+        return;
+      }
+
+      get_context()->get_scripts()[sel].send_click(
+        script_brush_event(
+            pos
+          , get_settings()->brushRadius()
+          , get_settings()->innerRadius()
+          , is_right
+          , type
+          , dt
+        )
+      );
+    }
+
+    void scripting_tool::sendBrushEvent(math::vector_3d const& pos, float dt)
+    {
+      bool new_left = get_view()->leftMouse;
+      bool new_right = get_view()->rightMouse;
+
       try
       {
-        // TODO: fix
+
+        if(new_left)
+        {
+          if(!_last_left) sendBrushEvent(pos, dt, false, brush_event_type::CLICK);
+          else sendBrushEvent(pos, dt, false, brush_event_type::HOLD);
+        }
+        else
+        {
+          if(_last_left) sendBrushEvent(pos, dt, false, brush_event_type::RELEASE);
+        }
+
+        if(new_right)
+        {
+          if(!_last_right) sendBrushEvent(pos, dt, true, brush_event_type::CLICK);
+          else sendBrushEvent(pos, dt, true, brush_event_type::HOLD);
+        }
+        else
+        {
+          if(_last_right) sendBrushEvent(pos, dt, true, brush_event_type::RELEASE);
+        }
       }
       catch (std::exception const& e)
       {
@@ -190,8 +222,8 @@ namespace noggit
         addLog(("[error]: " + std::string(e.what())));
         resetLogScroll();
       }
-      _last_left = left_mouse;
-      _last_right = right_mouse;
+      _last_left = new_left;
+      _last_right = new_right;
     }
 
     void scripting_tool::addDescription(char const* text)
@@ -210,17 +242,12 @@ namespace noggit
 
     script_context* scripting_tool::get_context()
     {
-      return &_script_context;
+      return _script_context;
     }
 
-    World* scripting_tool::get_world()
+    MapView* scripting_tool::get_view()
     {
-      return _world;
-    }
-
-    noggit::camera* scripting_tool::get_camera()
-    {
-      return _camera;
+      return _view;
     }
 
     void scripting_tool::resetLogScroll()
@@ -247,6 +274,5 @@ namespace noggit
     {
       return _profiles;
     }
-
   } // namespace scripting
 } // namespace noggit

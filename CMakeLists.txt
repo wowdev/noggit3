@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.18)
 cmake_policy (SET CMP0057 NEW) # "Support new IN_LIST if() operator."
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Project name
@@ -394,6 +394,7 @@ set ( math_headers
 
 set ( scripting_sources
     src/noggit/scripting/script_brush.cpp
+    src/noggit/scripting/script_global.cpp
     src/noggit/scripting/script_chunk.cpp
     src/noggit/scripting/script_context.cpp
     src/noggit/scripting/script_filesystem.cpp
@@ -413,6 +414,7 @@ set ( scripting_sources
 
 set ( scripting_headers
     src/noggit/scripting/script_filesystem.hpp
+    src/noggit/scripting/script_global.hpp
     src/noggit/scripting/script_noise.hpp
     src/noggit/scripting/script_chunk.hpp
     src/noggit/scripting/script_model.hpp

@@ -1,6 +1,7 @@
 #include <noggit/scripting/script_settings.hpp>
 #include <noggit/scripting/script_profiles.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 #include <boost/filesystem.hpp>
 #include <iomanip>
@@ -137,82 +138,6 @@ namespace noggit
   auto v = get_json_safe<T>(path, def);                                                    \
   slider->setSliderPosition((int)std::round(v *dp1));                                      \
   spinner->setValue(v);
-
-    void script_settings::add_double(char const *name, double min, double max, double def, int zeros)
-    {
-      ADD_SLIDER(name, double, min, max, def, zeros);
-    }
-
-    void script_settings::add_int(char const *name, int min, int max, int def)
-    {
-      ADD_SLIDER(name, int, min, max, def, 0);
-    }
-
-    void script_settings::add_bool(char const *name, bool def)
-    {
-      auto checkbox = new QCheckBox(this);
-      auto label = new QLabel(this);
-      label->setText(name);
-      connect(checkbox, &QCheckBox::stateChanged, this, [=](auto value) {
-        set_json<bool>(name, value ? true : false);
-      });
-
-      _widgets.push_back(checkbox);
-      _widgets.push_back(label);
-      _layout->addRow(label, checkbox);
-
-      checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-    }
-
-    void script_settings::add_string(char const *name, char const *def) 
-    {
-      auto defstr = def == nullptr ? "" : def;
-      auto tline = new QLineEdit(this);
-      auto label = new QLabel(this);
-      label->setText(name);
-      connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
-        set_json(name, text.toStdString());
-      });
-      _widgets.push_back(label);
-      _widgets.push_back(tline);
-      _layout->addRow(label, tline);
-      tline->setText(QString::fromStdString(get_json_safe<std::string>(name, defstr)));
-    }
-
-    void script_settings::add_string_list(char const *name, char const *value)
-    {
-      if (_string_arrays.find(name) == _string_arrays.end())
-      {
-        auto box = new QComboBox(this);
-        auto label = new QLabel(this);
-
-        connect(box, QOverload<int>::of(&QComboBox::activated), this, [=](auto index) {
-          set_json(name, box->itemText(index).toStdString());
-        });
-
-        box->addItem(value);
-        label->setText(name);
-
-        _string_arrays[name] = box;
-        _widgets.push_back(box);
-        _widgets.push_back(label);
-        _layout->addRow(label, box);
-
-        // ensure there is at least one valid value in it
-        get_json_safe<std::string>(name, value);
-      }
-      else
-      {
-        auto box = _string_arrays[name];
-        box->addItem(value);
-
-        // we found the last selection, so change the index for that.
-        if (get_json_safe<std::string>(name, "") == value)
-        {
-          box->setCurrentIndex(box->count() - 1);
-        }
-      }
-    }
 
     double script_settings::get_double(char const *name)
     {
