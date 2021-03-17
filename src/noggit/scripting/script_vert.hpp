@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <noggit/scripting/script_tex.hpp>
+
 #include <noggit/MapChunk.h>
 #include <math/vector_3d.hpp>
 
@@ -13,21 +15,6 @@ namespace noggit
   namespace scripting
   {
     class scripting_tool;
-
-    class tex
-    {
-    public:
-      tex(MapChunk* chunk, int index);
-      tex() = default;
-
-      void set_alpha(int index, float alpha);
-      float get_alpha(int index);
-      math::vector_3d get_pos_2d();
-    
-    private:
-      MapChunk* _chunk;
-      int _index;
-    };
 
     class vert
     {

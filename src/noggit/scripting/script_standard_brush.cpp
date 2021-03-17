@@ -12,7 +12,7 @@
 namespace noggit {
   namespace scripting {
     standard_brush::standard_brush(World* world)
-    _world(world)
+    : _world(world)
     {}
 
     void standard_brush::set_area_id(math::vector_3d const& pos, int id, bool adt)

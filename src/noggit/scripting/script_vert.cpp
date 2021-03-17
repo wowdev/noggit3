@@ -7,8 +7,6 @@
 
 #include <vector>
 
-// amount of texunits per chunk length
-#define TEXTURE_UNITS_WIDTH 64
 // maximum amount of texunits that can be closest to a vertex
 #define MAX_TEXUNITS_PER_VERT 36
 // total amount of vertices in each pair of two rows
@@ -161,38 +159,6 @@ namespace noggit
       return tex(_chunk, texture_index[_index].indices[_tex_index]);
     }
 
-    float tex::get_alpha(int index)
-    {
-      auto& ts = _chunk->texture_set;
-      ts->create_temporary_alphamaps_if_needed();
-      return ts->tmp_edit_values.get()[index][_index];
-    }
-
-    void tex::set_alpha(int index, float value)
-    {
-      if(index<0||index>3)
-      {
-        throw script_exception(
-            "tex_set_alpha",
-            std::string("invalid texture layer: ")
-          + std::to_string(index)
-          + std::string(" (in call to tex_set_alpha)")
-          );
-      }
-      auto& ts = _chunk->texture_set;
-      ts->create_temporary_alphamaps_if_needed();
-      ts->tmp_edit_values.get()[index][_index] = value;
-    }
-
-    math::vector_3d tex::get_pos_2d()
-    {
-      float cx = _chunk->xbase;
-      float cz = _chunk->zbase;
-      float x = _index % TEXTURE_UNITS_WIDTH;
-      float z = (float(_index) / float(TEXTURE_UNITS_WIDTH));
-      return math::vector_3d(cx + x * TEXDETAILSIZE, 0, cz + z * TEXDETAILSIZE);
-    }
-
     void register_vert(sol::state * state, scripting_tool * tool)
     {
       state->new_usertype<vert>("vert"
@@ -209,12 +175,6 @@ namespace noggit
         , "reset_tex", &vert::reset_tex
         , "get_tex", &vert::get_tex
         , "is_water_aligned", &vert::is_water_aligned
-      );
-
-      state->new_usertype<tex>("tex"
-        , "set_alpha", &tex::set_alpha
-        , "get_alpha", &tex::get_alpha
-        , "get_pos_2d", &tex::get_pos_2d
       );
     }
   } // namespace scripting

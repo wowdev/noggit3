@@ -5,6 +5,7 @@
 #include <noggit/scripting/script_global.hpp>
 #include <noggit/scripting/script_vert_iterator.hpp>
 #include <noggit/scripting/script_tex_iterator.hpp>
+#include <noggit/scripting/script_tex.hpp>
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_chunk.hpp>
 #include <noggit/scripting/script_selection.hpp>
@@ -36,6 +37,7 @@ namespace noggit {
         register_image(lua, tool);
         register_filesystem(lua, tool);
         register_standard_brush(lua, tool);
+        register_tex(lua, tool);
       }
     }
   }

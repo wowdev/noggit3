@@ -5,8 +5,8 @@
 
 class World;
 
-namespace {
-  class sol;
+namespace sol {
+  class state;
 }
 
 namespace noggit
