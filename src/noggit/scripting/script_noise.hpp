@@ -14,8 +14,9 @@ namespace noggit
 {
   namespace scripting
   {
-    struct noisemap
+    class noisemap
     {
+    public:
       noisemap(
           unsigned start_x
           , unsigned start_y
@@ -25,7 +26,17 @@ namespace noggit
           , const char *algorithm 
           , const char *seed);
       noisemap() = default;
+
+      float get(math::vector_3d &pos);
+      bool is_highest(math::vector_3d &pos, int check_radius);
+      void set(int x, int y, float value);
+      math::vector_3d start();
+      unsigned width();
+      unsigned height();
+    
+    private:
       char *_noise;
+      float get_index(std::string const& caller, int x, int y);
       float *get_map() const { return (float *)_noise; };
       unsigned _width = 0;
       unsigned _height = 0;
@@ -34,12 +45,6 @@ namespace noggit
       unsigned _size = 0;
     };
 
-    float noise_get(noisemap &noise, math::vector_3d &pos);
-    bool noise_is_highest(noisemap &noise, math::vector_3d &pos, int check_radius);
-    void noise_set(noisemap &noise, int x, int y, float value);
-    math::vector_3d noise_start(noisemap const& noise);
-    unsigned noise_width(noisemap &noise);
-    unsigned noise_height(noisemap &noise);
     noisemap make_noise_size(
         int start_x
       , int start_y
@@ -58,5 +63,7 @@ namespace noggit
       , char const *algorithm
       , char const *seed);
     */
+
+    void register_noise(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit

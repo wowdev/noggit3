@@ -9,39 +9,36 @@ namespace noggit
 {
   namespace scripting
   {
-    namespace
+    float noisemap::get_index(std::string const& caller, int x, int y)
     {
-      float noise_get_index(std::string const& caller, noisemap const& noise, int x, int y)
+      unsigned index = x + y * _width;
+      if(index<0||index>=_size)
       {
-        unsigned index = x + y * noise._width;
-        if(index<0||index>=noise._size)
-        {
-          throw script_exception(
-            caller,
-            std::string("noise coordinates out of bounds: x=")
-              + std::to_string(x)
-              + std::string(" y=")
-              + std::to_string(y)
-              + std::string(" width=")
-              + std::to_string(noise._width)
-              + std::string(" height=")
-              + std::to_string(noise._height));
-        }
-        return noise.get_map()[index];
+        throw script_exception(
+          caller,
+          std::string("noise coordinates out of bounds: x=")
+            + std::to_string(x)
+            + std::string(" y=")
+            + std::to_string(y)
+            + std::string(" width=")
+            + std::to_string(_width)
+            + std::string(" height=")
+            + std::to_string(_height));
       }
+      return get_map()[index];
     }
 
-    float noise_get(noisemap& noise, math::vector_3d& pos)
+    float noisemap::get(math::vector_3d& pos)
     {
-      return noise_get_index("noise_get",noise, std::round(pos.x) - noise._start_x, std::round(pos.z) - noise._start_y);
+      return get_index("noise_get",std::round(pos.x) - _start_x, std::round(pos.z) - _start_y);
     }
 
-    bool noise_is_highest(noisemap& noise, math::vector_3d& pos, int check_radius)
+    bool noisemap::is_highest(math::vector_3d& pos, int check_radius)
     {
-      int x = std::round(pos.x) - noise._start_x;
-      int z = std::round(pos.z) - noise._start_y;
+      int x = std::round(pos.x) - _start_x;
+      int z = std::round(pos.z) - _start_y;
 
-      float own = noise_get_index("noise_is_highest",noise, x, z);
+      float own = get_index("noise_is_highest", x, z);
 
       for (int xc = x - check_radius; xc < x + check_radius; ++xc)
       {
@@ -52,7 +49,7 @@ namespace noggit
             continue;
           }
 
-          if (noise_get_index("noise_is_highest",noise, xc, zc) > own)
+          if (get_index("noise_is_highest",xc, zc) > own)
           {
             return false;
           }
@@ -61,23 +58,23 @@ namespace noggit
       return true;
     }
 
-    void noise_set(noisemap& noise, int x, int y, float value)
+    void noisemap::set(int x, int y, float value)
     {
-      unsigned index = x + y * noise._width;
-      if(index<0||index>=noise._size)
+      unsigned index = x + y * _width;
+      if(index<0||index>=_size)
       {
         throw script_exception(
-          "noise_set",
+          "noisemap::set",
           std::string("noisemap coordinates out of bounds: x=")
             + std::to_string(x)
             + std::string(" y=")
             + std::to_string(y)
             + std::string(" width=")
-            + std::to_string(noise._width)
+            + std::to_string(_width)
             + std::string(" height=")
-            + std::to_string(noise._height));
+            + std::to_string(_height));
       }
-      noise.get_map()[index] = value;
+      get_map()[index] = value;
     }
 
     noisemap::noisemap(
@@ -162,18 +159,18 @@ namespace noggit
       );
     }
 
-    math::vector_3d noise_start(noisemap const& noise)
+    math::vector_3d noisemap::start()
     {
-      return math::vector_3d(noise._start_x,0,noise._start_y);
+      return math::vector_3d(_start_x,0,_start_y);
     }
 
-    unsigned noise_width(noisemap& noise)
+    unsigned noisemap::width()
     {
-      return noise._width;
+      return _width;
     }
-    unsigned noise_height(noisemap& noise)
+    unsigned noisemap::height()
     {
-      return noise._height;
+      return _height;
     }
 
     noisemap make_noise_size(
@@ -210,5 +207,18 @@ namespace noggit
       return noisemap(x_start,z_start,x_size,z_size,frequency,algorithm,seed);
     }
     */
+
+    void register_noise(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<noisemap>("noisemap"
+        , "get", &noisemap::get
+        , "is_highest", &noisemap::is_highest
+        , "set", &noisemap::set
+        , "start", &noisemap::start
+        , "width", &noisemap::width
+        , "height", &noisemap::height
+      );
+      state->set_function("make_noise_size",make_noise_size);
+    }
   } // namespace scripting
 } // namespace noggit
