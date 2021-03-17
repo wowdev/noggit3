@@ -58,7 +58,7 @@ void MapTile::finishLoading()
 {
   MPQFile theFile(filename);
 
-  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
+  NOGGIT_LOG << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
 
   // - Parsing the file itself. --------------------------
 
@@ -245,9 +245,9 @@ void MapTile::finishLoading()
   // - MTFX ----------------------------------------------
   /*
   //! \todo Implement this or just use Terrain Cube maps?
-  Log << "MTFX offs: " << Header.mtfx << std::endl;
+  NOGGIT_LOG << "MTFX offs: " << Header.mtfx << std::endl;
   if(Header.mtfx != 0){
-  Log << "Try to load MTFX" << std::endl;
+  NOGGIT_LOG << "Try to load MTFX" << std::endl;
   theFile.seek( Header.mtfx + 0x14 );
 
   theFile.read( &fourcc, 4 );
@@ -263,7 +263,7 @@ void MapTile::finishLoading()
   while( lCurPos < lEnd ) {
   int temp = 0;
   theFile.read(&temp, 4);
-  Log << "Adding to " << mTextureFilenames[tCount].first << " texture effect: " << temp << std::endl;
+  NOGGIT_LOG << "Adding to " << mTextureFilenames[tCount].first << " texture effect: " << temp << std::endl;
   mTextureFilenames[tCount++].second = temp;
   lCurPos += 4;
   }
@@ -354,6 +354,9 @@ void MapTile::draw ( math::frustum const& frustum
                    , std::map<int, misc::random_color>& area_id_colors
                    , int animtime
                    , display_mode display
+                   , bool& previous_chunk_had_shadows
+                   , bool& previous_chunk_was_textured
+                   , bool& previous_chunk_could_be_painted
                    )
 {
   if (!finished)
@@ -378,6 +381,9 @@ void MapTile::draw ( math::frustum const& frustum
                           , area_id_colors
                           , animtime
                           , display
+                          , previous_chunk_had_shadows
+                          , previous_chunk_was_textured
+                          , previous_chunk_could_be_painted
                           );
     }
   }
@@ -425,13 +431,13 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
     {
       opengl::scoped::vao_binder const _ (_mfbo_bottom_vao);
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder (_mfbo_bottom_vbo);
-      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      mfbo_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     {
       opengl::scoped::vao_binder const _(_mfbo_top_vao);
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder(_mfbo_top_vbo);
-      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      mfbo_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     _mfbo_buffer_are_setup = true;
@@ -440,13 +446,13 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
   {
     opengl::scoped::vao_binder const _(_mfbo_bottom_vao);
     mfbo_shader.uniform("color", math::vector_4d(1.0f, 1.0f, 0.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), indices);
   }
 
   {
     opengl::scoped::vao_binder const _(_mfbo_top_vao);
     mfbo_shader.uniform("color", math::vector_4d(0.0f, 1.0f, 1.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), indices);
   }
 }
 
@@ -543,7 +549,7 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 
 void MapTile::saveTile(World* world)
 {
-  Log << "Saving ADT \"" << filename << "\"." << std::endl;
+  NOGGIT_LOG << "Saving ADT \"" << filename << "\"." << std::endl;
 
   int lID;  // This is a global counting variable. Do not store something in here you need later.
   std::vector<WMOInstance> lObjectInstances;
@@ -790,9 +796,9 @@ void MapTile::saveTile(World* world)
     lMDDF_Data[lID].pos[0] = model.pos.x;
     lMDDF_Data[lID].pos[1] = model.pos.y;
     lMDDF_Data[lID].pos[2] = model.pos.z;
-    lMDDF_Data[lID].rot[0] = model.dir.x;
-    lMDDF_Data[lID].rot[1] = model.dir.y;
-    lMDDF_Data[lID].rot[2] = model.dir.z;
+    lMDDF_Data[lID].rot[0] = model.dir.x._;
+    lMDDF_Data[lID].rot[1] = model.dir.y._;
+    lMDDF_Data[lID].rot[2] = model.dir.z._;
     lMDDF_Data[lID].scale = (uint16_t)(model.scale * 1024);
     lMDDF_Data[lID].flags = 0;
     lID++;
@@ -826,9 +832,9 @@ void MapTile::saveTile(World* world)
     lMODF_Data[lID].pos[0] = object.pos.x;
     lMODF_Data[lID].pos[1] = object.pos.y;
     lMODF_Data[lID].pos[2] = object.pos.z;
-    lMODF_Data[lID].rot[0] = object.dir.x;
-    lMODF_Data[lID].rot[1] = object.dir.y;
-    lMODF_Data[lID].rot[2] = object.dir.z;
+    lMODF_Data[lID].rot[0] = object.dir.x._;
+    lMODF_Data[lID].rot[1] = object.dir.y._;
+    lMODF_Data[lID].rot[2] = object.dir.z._;
 
     lMODF_Data[lID].extents[0][0] = object.extents[0].x;
     lMODF_Data[lID].extents[0][1] = object.extents[0].y;

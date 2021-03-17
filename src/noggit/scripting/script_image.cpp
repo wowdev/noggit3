@@ -1,7 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+<<<<<<< HEAD
+=======
+
+>>>>>>> default
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
+
+#include <das/Context.fwd.hpp>
 
 #include <lodepng.h>
 
@@ -11,17 +17,24 @@ namespace noggit
   {
     static void img_resize(image& img, int width, int height)
     {
-      if(width<=0||height<=0)
+      void img_resize(image& img, int width, int height, das::Context* ctx)
       {
-        throw script_exception(
-          "img_resize",
-          std::string("tried to resize to invalid image size: x=")
-          + std::to_string(width)
-          + std::string(" y=")
-          + std::to_string(height)
-        );
+        if(width<=0||height<=0)
+        {
+          throw script_exception(
+            "img_resize",
+            std::string("tried to resize to invalid image size: x=")
+            + std::to_string(width)
+            + std::string(" y=")
+            + std::to_string(height)
+          );
+        }
+        // m is for more fun
+        img._size = width*height*4;
+        img._width = width;
+        img._height = height;
+        img._image = script_calloc(img._size, ctx);
       }
-      // m is for more fun
       img._size = width*height*4;
       img._width = width;
       img._height = height;
@@ -43,7 +56,7 @@ namespace noggit
       {
         throw script_exception(
           "img_load_png",
-          "failed to load png image with error code:" 
+          "failed to load png image with error code:"
           + std::to_string (error));
       }
       img_resize(img, img._width, img._height);
@@ -90,9 +103,9 @@ namespace noggit
     unsigned img_get_pixel(image const& img, int x, int y)
     {
       unsigned index = img_get_index(img, x, y);
-      return img.get_image()[index] << 24 
-        | img.get_image()[index + 1] << 16 
-        | img.get_image()[index + 2] << 8 
+      return img.get_image()[index] << 24
+        | img.get_image()[index + 1] << 16
+        | img.get_image()[index + 2] << 8
         | img.get_image()[index + 3];
     }
 

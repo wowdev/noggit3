@@ -11,11 +11,6 @@
 class MapChunk;
 class World;
 
-struct TextureIndex
-{
-  short indices[36];
-};
-
 namespace das {
   class Context;
 }
@@ -35,7 +30,7 @@ namespace noggit
       math::vector_3d _size;
 
       int _chunks_size = 0;
-      
+
       char* _chunks;
       MapChunk** get_chunks() { return (MapChunk**) _chunks;}
       int _cur_chunk = -1;
@@ -44,7 +39,6 @@ namespace noggit
       model_iterator _models;
     };
 
-    selection select_origin_test(math::vector_3d const& origin);
     selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius);
     selection select_between(math::vector_3d const& point1, math::vector_3d const& point2);
 

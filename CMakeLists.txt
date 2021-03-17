@@ -291,6 +291,11 @@ set ( opengl_sources
       src/opengl/texture.cpp
     )
 
+if (NOT APPLE)
+  set_property (SOURCE "src/opengl/context.cpp" PROPERTY
+    COMPILE_DEFINITIONS NOGGIT_OPENGL_SUPPORTS_CPU_INDICES_IN_DRAW_ELEMENTS)
+endif()
+
 set ( util_sources
       src/util/exception_to_string.cpp
     )
@@ -715,4 +720,17 @@ if (NOGGIT_WITH_SCRIPTING)
     FastNoise
     nlohmann_json::nlohmann_json
   )
+
+  # If a source of this library fails to compile, the daScript API
+  # changed and needs adaption in our wrapper header.
+  add_library (DaScriptWrapperVerify STATIC)
+  target_link_libraries (DaScriptWrapperVerify PRIVATE libDaScript Qt5::Core)
+  file (GLOB_RECURSE _das_wrapper_headers LIST_DIRECTORIES false CONFIGURE_DEPENDS "src/das/*")
+  foreach (_das_wrapper_header IN LISTS _das_wrapper_headers)
+    file (GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${_das_wrapper_header}.cpp"
+      CONTENT "#include <QtCore/QtGlobal>
+      #include <${_das_wrapper_header}>"
+    )
+    target_sources (DaScriptWrapperVerify PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${_das_wrapper_header}.cpp")
+  endforeach()
 endif()

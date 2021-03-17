@@ -1388,19 +1388,19 @@ void Model::draw( math::matrix_4x4 const& model_view
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
-    m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
-    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
-    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) + 8));
-    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8));
-    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+    m2_shader.attrib(_, "pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
+    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
+    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
+    m2_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
+    m2_shader.attrib(_, "texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
+    m2_shader.attrib(_, "texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
   }
 
   for (ModelRenderPass& p : _render_passes)
   {
     if (p.prepare_draw(m2_shader, this))
     {
-      gl.drawElements(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start);
+      gl.drawElements(GL_TRIANGLES, p.index_count, _indices, sizeof (_indices[0]) * p.index_start);
       p.after_draw();
     }
   }
@@ -1471,24 +1471,24 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     gl.bufferData(GL_ARRAY_BUFFER, transform_matrix.size() * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
-    m2_shader.attrib("transform", 0, 1);
+    m2_shader.attrib(_, "transform", 0, 1);
   }
   
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
-    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
-    m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
-    m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
-    m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+    m2_shader.attrib(_, "pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, position));
+    //m2_shader.attrib(_, "bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, weights));
+    //m2_shader.attrib(_, "bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), (void*)offsetof (ModelVertex, bones));
+    m2_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, normal));
+    m2_shader.attrib(_, "texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[0]));
+    m2_shader.attrib(_, "texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), (void*)offsetof (ModelVertex, texcoords[1]));
   }
 
   for (ModelRenderPass& p : _render_passes)
   {
     if (p.prepare_draw(m2_shader, this))
     {
-      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, _indices.data() + p.index_start, transform_matrix.size());
+      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, transform_matrix.size(), _indices, sizeof (_indices[0]) * p.index_start);
       p.after_draw();
     }
   }
@@ -1527,15 +1527,15 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-    m2_box_shader.attrib("transform", 0, 1);
+    m2_box_shader.attrib(_, "transform", 0, 1);
   }
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
-    m2_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    m2_box_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
-  gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), GL_UNSIGNED_SHORT, indices.data(), box_count);
+  gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), box_count, indices);
 }
 
 

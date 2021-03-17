@@ -9,14 +9,52 @@
 
 namespace math
 {
+  namespace {
+    inline float normalize_degrees(float deg) {
+      return deg - std::floor((deg + 180.f) / 360.f) * 360.f;
+    }
+  }
+
   struct radians;
 
   struct degrees
   {
-    explicit degrees (float x) : _ (x) {}
+    explicit degrees (float x) : _ (normalize_degrees(x)) {}
     degrees (radians);
 
     float _;
+
+    inline degrees operator+ (const degrees &v) const
+    {
+      return degrees (_ + v._);
+    }
+
+    inline degrees operator- (const degrees &v) const
+    {
+      return degrees (_ - v._);
+    }
+
+    inline degrees operator-() const
+    {
+      return degrees (-_);
+    }
+
+    inline degrees& operator+= (const degrees &v)
+    {
+      return *this = *this + v;
+    }
+
+    inline degrees& operator-= (const degrees &v)
+    {
+      return *this = *this - v;
+    }
+
+    friend std::ostream& operator<< (std::ostream& os, degrees const& v)
+    {
+      return os << v << "°";
+    }
+
+    explicit operator float() const { return _; }
 
     using vec3 = vector_3d_base<degrees>;
   };
@@ -58,4 +96,14 @@ namespace math
   {
     return radians {std::atan2 (y, x)};
   }
+}
+
+inline math::degrees operator"" _deg (long double v)
+{
+  return math::degrees {static_cast<float> (v)};
+}
+
+inline math::degrees operator"" _deg (unsigned long long int v)
+{
+  return math::degrees {static_cast<float> (v)};
 }

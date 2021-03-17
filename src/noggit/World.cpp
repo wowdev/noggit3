@@ -60,7 +60,7 @@ bool World::IsEditableWorld(int pMapId)
 
   if (!MPQFile::exists(ssfilename.str()))
   {
-    Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
+    NOGGIT_LOG << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 
@@ -303,32 +303,17 @@ void World::snap_selected_models_to_the_ground()
       : boost::get<selected_wmo_type>(entry)->pos
       ;
 
-    selection_result hits;
-
-
-    for_chunk_at(pos, [&] (MapChunk* chunk)
-    {
-      {
-        math::ray intersect_ray(pos, math::vector_3d(0.f, -1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-      // object is below ground
-      if (hits.empty())
-      {
-        math::ray intersect_ray(pos, math::vector_3d(0.f, 1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-    });
+    boost::optional<float> height = get_exact_height_at(pos);
 
     // this should never happen
-    if (hits.empty())
+    if (!height)
     {
       LogError << "Snap to ground ray intersection failed" << std::endl;
       continue;
     }
 
     // the ground can only be intersected once
-    pos.y = boost::get<selected_chunk_type>(hits[0].second).position.y;
+    pos.y = height.get();
 
     if (entry_is_m2)
     {
@@ -472,7 +457,7 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
 
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
 {
-  math::vector_3d dir_change(rx._, ry._, rz._);
+  math::degrees::vec3 dir_change(rx, ry, rz);
   bool has_multi_select = has_multiple_model_selected();
 
   for (auto& entry : _current_selection)
@@ -500,7 +485,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
       pos += rot_result - diff_pos;
     }
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
         ? boost::get<selected_model_type>(entry)->dir
         : boost::get<selected_wmo_type>(entry)->dir
         ;
@@ -534,7 +519,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 
     updateTilesEntry(entry, model_update::remove);
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
       ? boost::get<selected_model_type>(entry)->dir
       : boost::get<selected_wmo_type>(entry)->dir
       ;
@@ -565,7 +550,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
-  math::vector_3d new_dir(rx._, ry._, rz._);
+  math::degrees::vec3 new_dir(rx, ry, rz);
 
   for (auto& entry : _current_selection)
   {
@@ -579,7 +564,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
 
     updateTilesEntry(entry, model_update::remove);
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
       ? boost::get<selected_model_type>(entry)->dir
       : boost::get<selected_wmo_type>(entry)->dir
       ;
@@ -641,7 +626,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
       : boost::get<selected_wmo_type>(entry)->pos
       ;
 
-    math::vector_3d& dir = entry_is_m2
+    math::degrees::vec3& dir = entry_is_m2
       ? boost::get<selected_model_type>(entry)->dir
       : boost::get<selected_wmo_type>(entry)->dir
       ;
@@ -722,7 +707,6 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
                     + (worldUp * varnormal));
     q.normalize();
 
-    math::vector_3d new_dir;
     // To euler, because wow
     dir = q.ToEulerAngles();
 
@@ -1090,6 +1074,15 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("tex_anim_2", math::vector_2d());
     mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
+    bool previous_chunk_could_be_painted = true;
+    bool previous_chunk_was_textured = true;
+    mcnk_shader.uniform("cant_paint", 0);
+    mcnk_shader.uniform("is_textured", 1);
+
+
+    // start true so the first chunk update the shadow texture regardless of whether it has shadows or not
+    bool previous_chunk_had_shadows = true;    
+
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->draw ( frustum
@@ -1105,6 +1098,9 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , area_id_colors
                  , animtime
                  , display
+                 , previous_chunk_had_shadows
+                 , previous_chunk_was_textured
+                 , previous_chunk_could_be_painted
                  );
     }
 
@@ -1135,11 +1131,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
 
     _cursor_render.draw(mode, mvp, cursor_color, cursor_pos, brush_radius, inner_radius_ratio);
-  }
-
-  if (terrainMode == editing_mode::object && has_multiple_model_selected())
-  {
-    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 2.f);
   }
 
   if (use_ref_pos)
@@ -1410,6 +1401,14 @@ void World::draw ( math::matrix_4x4 const& model_view
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  if (terrainMode == editing_mode::object && has_multiple_model_selected())
+  {
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
+    
+    float dist = (camera_pos - _multi_select_pivot.get()).length();
+    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
+  }
+
   if (draw_water)
   {
     _liquid_render->force_texture_update();
@@ -1609,6 +1608,18 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
   MapTile* adt = mapIndex.getTile(tile);
 
   return adt->finishedLoading() && adt->GetVertex(x, z, V);
+}
+
+boost::optional<float> World::get_exact_height_at(math::vector_3d const& pos)
+{
+  boost::optional<float> height;
+
+  for_chunk_at(pos, [&] (MapChunk* chunk)
+  {
+    height = chunk->get_exact_height_at(pos);
+  });
+
+  return height;
 }
 
 template<typename Fun>
@@ -1960,7 +1971,7 @@ void World::unload_every_model_and_wmo_instance()
 ModelInstance* World::addM2 ( std::string const& filename
                   , math::vector_3d newPos
                   , float scale
-                  , math::vector_3d rotation
+                  , math::degrees::vec3 rotation
                   , noggit::object_paste_params* paste_params
                   )
 {
@@ -1975,15 +1986,15 @@ ModelInstance* World::addM2 ( std::string const& filename
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
-    model_instance.dir.y += misc::randfloat(min, max);
+    model_instance.dir.y += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
-    model_instance.dir.x += misc::randfloat(min, max);
-    model_instance.dir.z += misc::randfloat(min, max);
+    model_instance.dir.x += math::degrees(misc::randfloat(min, max));
+    model_instance.dir.z += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_size", false).toBool ())
@@ -2005,7 +2016,7 @@ ModelInstance* World::addM2 ( std::string const& filename
 
 WMOInstance* World::addWMO ( std::string const& filename
                    , math::vector_3d newPos
-                   , math::vector_3d rotation
+                   , math::degrees::vec3 rotation
                    )
 {
   WMOInstance wmo_instance(filename);

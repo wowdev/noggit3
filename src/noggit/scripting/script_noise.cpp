@@ -1,7 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+<<<<<<< HEAD
+=======
+
+>>>>>>> default
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
+
+#include <das/Context.fwd.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -9,23 +15,26 @@ namespace noggit
 {
   namespace scripting
   {
-    static float noise_get_index(std::string const& caller, noisemap const& noise, int x, int y)
+    namespace
     {
-      unsigned index = x + y * noise._width;
-      if(index<0||index>=noise._size)
+      float noise_get_index(std::string const& caller, noisemap const& noise, int x, int y)
       {
-        throw script_exception(
-          caller,
-          std::string("noise coordinates out of bounds: x=")
-            + std::to_string(x)
-            + std::string(" y=")
-            + std::to_string(y)
-            + std::string(" width=")
-            + std::to_string(noise._width)
-            + std::string(" height=")
-            + std::to_string(noise._height));
+        unsigned index = x + y * noise._width;
+        if(index<0||index>=noise._size)
+        {
+          throw script_exception(
+            caller,
+            std::string("noise coordinates out of bounds: x=")
+              + std::to_string(x)
+              + std::string(" y=")
+              + std::to_string(y)
+              + std::string(" width=")
+              + std::to_string(noise._width)
+              + std::string(" height=")
+              + std::to_string(noise._height));
+        }
+        return noise.get_map()[index];
       }
-      return noise.get_map()[index];
     }
 
     float noise_get(noisemap& noise, math::vector_3d& pos)
@@ -117,7 +126,7 @@ namespace noggit
       _noise = new char[width * height * sizeof(float)];
 
       auto upper = boost::algorithm::to_upper_copy<std::string>(algorithm);
-    
+
       FastNoise::SmartNode<> generator = nullptr;
       if(upper=="SIMPLEX")
       {
@@ -149,12 +158,12 @@ namespace noggit
       }
 
       generator->GenUniformGrid2D(
-        get_map(), 
-        start_x, 
-        start_y, 
-        width, 
-        height, 
-        frequency, 
+        get_map(),
+        start_x,
+        start_y,
+        width,
+        height,
+        frequency,
         std::hash<std::string>()(std::string(seed))
       );
     }
@@ -164,18 +173,18 @@ namespace noggit
       return math::vector_3d(noise._start_x,0,noise._start_y);
     }
 
-    unsigned noise_width(noisemap& noise) 
-    { 
-      return noise._width; 
+    unsigned noise_width(noisemap& noise)
+    {
+      return noise._width;
     }
-    unsigned noise_height(noisemap& noise) 
-    { 
-      return noise._height; 
+    unsigned noise_height(noisemap& noise)
+    {
+      return noise._height;
     }
 
     noisemap make_noise_size(
         int x_start
-      , int y_start 
+      , int y_start
       , int x_size
       , int y_size 
       , float frequency 

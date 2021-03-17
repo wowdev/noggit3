@@ -317,6 +317,6 @@ namespace noggit
       }
     }
 
-    Log << "Deleted " << deleted_uids << " duplicate Model/WMO" << std::endl;
+    NOGGIT_LOG << "Deleted " << deleted_uids << " duplicate Model/WMO" << std::endl;
   }
 }

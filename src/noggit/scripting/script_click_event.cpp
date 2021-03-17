@@ -25,10 +25,10 @@ namespace noggit
         _pos(pos),
         _outer_radius(outer_radius),
         _inner_radius(inner_radius),
-        _camera(camera), 
-        _holding_alt(alt), 
+        _camera(camera),
+        _holding_alt(alt),
         _holding_shift(shift),
-        _holding_ctrl(ctrl), 
+        _holding_ctrl(ctrl),
         _holding_space(space),
         _dt(dt)
     {

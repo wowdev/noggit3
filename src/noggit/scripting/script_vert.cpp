@@ -1,6 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_vert.hpp>
-#include <noggit/scripting/script_vert-script_texture_index.ipp>
 #include <noggit/scripting/script_exception.hpp>
 
 #include <vector>
@@ -13,6 +12,8 @@
 #define VERTS_PER_TWO_ROWS 17
 // maximum vertex index on odd rows
 #define VERTS_ON_ODD_ROWS 8
+
+#include <noggit/scripting/script_vert-script_texture_index.ipp>
 
 namespace noggit
 {
@@ -133,9 +134,12 @@ namespace noggit
       return (vert._index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
     }
 
-    static bool is_tex_done(vert& vert)
+    namespace
     {
-      return vert._tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[vert._index].indices[vert._tex_index] == -1;
+      bool is_tex_done(vert& vert)
+      {
+        return vert._tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[vert._index].indices[vert._tex_index] == -1;
+      }
     }
 
     void vert_reset_tex(vert& vert)

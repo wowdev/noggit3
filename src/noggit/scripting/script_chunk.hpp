@@ -27,9 +27,9 @@ namespace noggit
     void chunk_set_hole(chunk& chunk, bool hole);
     void chunk_clear_colors(chunk& chunk);
     void chunk_apply_textures(chunk& chunk);
-    void chunk_apply_heightmap(chunk& chunk);
+    void chunk_apply_heightmap(chunk& chunk, das::Context* context);
     void chunk_apply_vertex_color(chunk& chunk);
-    void chunk_apply_all(chunk& chunk);
+    void chunk_apply_all(chunk& chunk, das::Context* context);
     void chunk_set_impassable(chunk& chunk, bool add);
     int chunk_get_area_id(chunk const& chunk);
     void chunk_set_area_id(chunk& chunk, int value);

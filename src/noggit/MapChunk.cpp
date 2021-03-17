@@ -126,7 +126,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
 
     assert(fourcc == 'MCSH');
 
-
     uint8_t compressed_shadow_map[64 * 64 / 8];
 
     // shadow map 64 x 64
@@ -154,12 +153,15 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
       }
       _shadow_map[63 * 64 + 63] = _shadow_map[62 * 64 + 62];
     }
+
+    _has_shadow = true;
   }
   else
   {
     /** We have no shadow map (MCSH), so we got no shadows at all!  **
     ** This results in everything being black.. Yay. Lets fake it! **/
     memset(_shadow_map, 0, 64 * 64);
+    _has_shadow = false;
   }
   // - MCCV ----------------------------------------------
   if(header.ofsMCCV)
@@ -220,14 +222,14 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
   vcenter = (vmin + vmax) * 0.5f;
 }
 
-int MapChunk::indexLoD(int x, int y)
+int MapChunk::indexLoD(int z, int x)
 {
-  return (x + 1) * 9 + x * 8 + y;
+  return (z + 1) * 9 + z * 8 + x;
 }
 
-int MapChunk::indexNoLoD(int x, int y)
+int MapChunk::indexNoLoD(int z, int x)
 {
-  return x * 8 + x * 9 + y;
+  return z * 8 + z * 9 + x;
 }
 
 void MapChunk::update_intersect_points()
@@ -324,7 +326,7 @@ std::vector<uint8_t> MapChunk::compressed_shadow_map() const
   return shadow_map;
 }
 
-bool MapChunk::has_shadows() const
+bool MapChunk::shadow_map_is_empty() const
 {
   for (int i = 0; i < 64 * 64; ++i)
   {
@@ -430,6 +432,47 @@ float MapChunk::getMinHeight()
   return min;
 }
 
+boost::optional<float> MapChunk::get_exact_height_at(math::vector_3d const& pos)
+{
+  if (pos.x < vmin.x || pos.x > vmax.x || pos.z < vmin.z || pos.z > vmax.z)
+  {
+    return boost::none;
+  }
+
+  // put the ray above the max height to be sure always hit the terrain
+  math::ray ray({pos.x, vmax.y + 1.f, pos.z}, {0.f, -1.f, 0.f});
+
+  float diff_x = pos.x - xbase;
+  float diff_z = pos.z - zbase;
+
+  int idx = static_cast<int>(diff_x / UNITSIZE);
+  int idz = static_cast<int>(diff_z / UNITSIZE);
+
+  float dx = std::fmod(diff_x, UNITSIZE);
+  float dz = std::fmod(diff_z, UNITSIZE);
+
+  int id_0 = dx > dz
+           ? indexNoLoD(idz, idx+1)
+           : indexNoLoD(idz+1, idx)
+           ;
+  int id_1 = (UNITSIZE - dx) > dz
+           ? indexNoLoD(idz, idx)
+           : indexNoLoD(idz+1, idx+1)
+           ;
+  int id_center = indexLoD(idz, idx);
+
+  auto dist = ray.intersect_triangle(mVertices[id_0], mVertices[id_1], mVertices[id_center]);
+
+  if (dist)
+  {
+    return ray.position(dist.get()).y;
+  }
+  else
+  {
+    return boost::none;
+  }
+}
+
 void MapChunk::clearHeight()
 {
   for (int i = 0; i < mapbufsize; ++i)
@@ -474,43 +517,40 @@ void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
-    mcnk_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_normals_vbo);
-    mcnk_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mccv_vbo);
-    mcnk_shader.attrib("mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(tex_coord_vbo);
-    mcnk_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    mcnk_shader.attrib(_, "texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   _need_vao_update = false;
   _need_indice_buffer_update = true;
 }
 
-bool MapChunk::update_visibility ( const float& cull_distance
+void MapChunk::update_visibility ( const float& cull_distance
                                  , const math::frustum& frustum
                                  , const math::vector_3d& camera
                                  , display_mode display
                                  )
 {
+  auto lod = get_lod_level(camera, display);
+
   _is_visible = is_visible(cull_distance, frustum, camera, display);
   _need_visibility_update = false;
-
-  auto lod = get_lod_level(camera, display);
-  bool lod_changed = lod != _lod_level;
-
+  _need_lod_update |= lod != _lod_level;
   _lod_level = lod;
-
-  return lod_changed;
 }
 
 void MapChunk::draw ( math::frustum const& frustum
@@ -526,13 +566,14 @@ void MapChunk::draw ( math::frustum const& frustum
                     , std::map<int, misc::random_color>& area_id_colors
                     , int animtime
                     , display_mode display
+                    , bool& previous_chunk_had_shadows
+                    , bool& previous_chunk_was_textured
+                    , bool& previous_chunk_could_be_painted
                     )
 {
-  bool lod_changed = false;
-
   if (need_visibility_update || _need_visibility_update)
   {
-    lod_changed = update_visibility(cull_distance, frustum, camera, display);
+    update_visibility(cull_distance, frustum, camera, display);
   }
 
   if (!_is_visible)
@@ -544,7 +585,7 @@ void MapChunk::draw ( math::frustum const& frustum
   {
     upload();
     // force lod update on upload
-    lod_changed = true;
+    _need_lod_update = true;
     update_visibility(cull_distance, frustum, camera, display);
   }
 
@@ -554,16 +595,14 @@ void MapChunk::draw ( math::frustum const& frustum
     update_vao(mcnk_shader, tex_coord_vbo);
   }
 
-  bool cantPaint = noggit::ui::selected_texture::get()
-                 && !canPaintTexture(*noggit::ui::selected_texture::get())
-                 && show_unpaintable_chunks
-                 && draw_paintability_overlay;
+  int texture_count = texture_set->num();
+  bool is_textured = texture_count != 0;
 
-  if (texture_set->num())
+  if (is_textured)
   {
     texture_set->bind_alpha(0);
 
-    for (int i = 0; i < texture_set->num(); ++i)
+    for (int i = 0; i < texture_count; ++i)
     {
       texture_set->bindTexture(i, i + 1);
 
@@ -574,11 +613,33 @@ void MapChunk::draw ( math::frustum const& frustum
     }
   }
 
-  opengl::texture::set_active_texture(5);
-  shadow.bind();
+  // only update the shadow texture if there's a shadow map used
+  // OR if the last chunk had a shadow and this one doesn't (bind the default all 0 texture)
+  if (_has_shadow || previous_chunk_had_shadows)
+  {
+    opengl::texture::set_active_texture(5);
+    shadow.bind();
+  }
+  previous_chunk_had_shadows = _has_shadow;
 
-  mcnk_shader.uniform("layer_count", (int)texture_set->num());
-  mcnk_shader.uniform("cant_paint", (int)cantPaint);
+  if (is_textured != previous_chunk_was_textured)
+  {
+    previous_chunk_was_textured = is_textured;
+    mcnk_shader.uniform("is_textured", (int)is_textured);
+  }
+
+  if (show_unpaintable_chunks && draw_paintability_overlay)
+  {
+    bool cant_paint = texture_count == 4 
+      && noggit::ui::selected_texture::get()
+      && !canPaintTexture(*noggit::ui::selected_texture::get());
+
+    if (cant_paint == previous_chunk_could_be_painted)
+    {
+      mcnk_shader.uniform("cant_paint", (int)cant_paint);
+      previous_chunk_could_be_painted = !cant_paint;
+    }    
+  }
 
   if (draw_chunk_flag_overlay)
   {
@@ -595,19 +656,20 @@ void MapChunk::draw ( math::frustum const& frustum
   if (_need_indice_buffer_update)
   {
     update_indices_buffer();
-    lod_changed = true;
+    _need_lod_update = true;
   }
 
-  if (lod_changed)
+  if (_need_lod_update)
   {
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !_lod_level ? _indices_buffer : lod_indices[*_lod_level]);
     _lod_level_indice_count = !_lod_level ? strip_with_holes.size() : strip_lods[*_lod_level].size();
+    _need_lod_update = false;
   }
 
-  gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, opengl::index_buffer_is_already_bound{});
 
 
-  for (int i = 0; i < texture_set->num(); ++i)
+  for (int i = 0; i < texture_count; ++i)
   {
     if (texture_set->is_animated(i))
     {
@@ -1052,6 +1114,7 @@ void MapChunk::update_shadows()
 
 void MapChunk::clear_shadows()
 {
+  _has_shadow = false;
   memset(_shadow_map, 0, 64 * 64);
 
   if (_uploaded)
@@ -1334,7 +1397,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   //        }
 
   // MCSH
-  if (has_shadows())
+  if (shadow_map_is_empty())
   {
     header_flags.flags.has_mcsh = 1;
 

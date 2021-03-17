@@ -4,8 +4,6 @@
 #include <noggit/MapChunk.h>
 #include <math/vector_3d.hpp>
 
-struct TextureIndex;
-
 namespace noggit
 {
   namespace scripting

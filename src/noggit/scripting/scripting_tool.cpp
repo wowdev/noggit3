@@ -7,10 +7,8 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
 #include <noggit/scripting/script_context.hpp>
-#include <noggit/scripting/script_loader.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
-#include <nlohmann/json.hpp>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
@@ -31,76 +29,49 @@ namespace noggit
   namespace scripting
   {
     template <typename T>
-    static T get_json_safe(std::string key, T def)
+      T scripting_tool::get_json_safe (std::string key, T def)
     {
       // TODO: this is terrible but accessing by reference didn't seem to work.
-      auto ssn = selected_script_name();
-      if (!_json.contains(ssn))
+      auto ssn = _loader.selected_script_name();
+
+      if (!_json[ssn][_cur_profile].contains(key))
       {
-        _json[ssn] = json();
+        _json[ssn][_cur_profile][key] = def;
       }
 
-      if (!_json[ssn].contains(cur_profile))
-      {
-        _json[ssn][cur_profile] = json();
-      }
-
-      if (!_json[ssn][cur_profile].contains(key))
-      {
-        _json[ssn][cur_profile][key] = def;
-      }
-
-      return _json[ssn][cur_profile][key];
+      return _json[ssn][_cur_profile][key];
     }
 
     template <typename T>
-    static void set_json_safe(std::string key, T def)
+      void scripting_tool::set_json_safe (std::string key, T def)
     {
-      auto ssn = selected_script_name();
-      if (!_json.contains(ssn))
-      {
-        _json[ssn] = json();
-      }
-
-      if (!_json[ssn].contains(cur_profile))
-      {
-        _json[ssn][cur_profile] = json();
-      }
-
-      _json[ssn][cur_profile][key] = def;
+      auto ssn = _loader.selected_script_name();
+      _json[ssn][_cur_profile][key] = def;
     }
 
     template <typename T>
-    static void set_json_unsafe(std::string key, T value)
+      void scripting_tool::set_json_unsafe (std::string key, T value)
     {
-      _json[selected_script_name()][cur_profile][key] = value;
+      _json[_loader.selected_script_name()][_cur_profile][key] = value;
     }
 
     template <typename T>
-    static T get_json_unsafe(std::string key)
+      T scripting_tool::get_json_unsafe (std::string key)
     {
-      return _json[selected_script_name()][cur_profile][key].get<T>();
-    }
-
-    static scripting_tool* cur_tool = nullptr;
-
-    scripting_tool* get_cur_tool()
-    {
-      return cur_tool;
+      return _json[_loader.selected_script_name()][_cur_profile][key].get<T>();
     }
 
     void scripting_tool::doReload()
     {
-      cur_tool = this;
       int selection = -1;
 
       removeScriptWidgets();
       clearLog();
       try
       {
-        selection = load_scripts();
+        selection = _loader.load_scripts (this);
       }
-      catch (std::exception e)
+      catch (std::exception const& e)
       {
         addLog("[error]: " + std::string(e.what()));
         resetLogScroll();
@@ -109,9 +80,9 @@ namespace noggit
       _selection->clear();
       for(auto& script: get_context()->)
 
-      for (int i = 0; i < script_count(); ++i)
+      for (int i = 0; i < _loader.script_count(); ++i)
       {
-        _selection->addItem(get_script_display_name(i).c_str());
+        _selection->addItem(_loader.get_script_display_name(i));
       }
 
       if (selection != -1)
@@ -123,13 +94,11 @@ namespace noggit
 
     void scripting_tool::on_change_script(int selection)
     {
-      std::lock_guard<std::mutex> const lock (script_change_mutex);
+      std::lock_guard<std::mutex> const lock (_script_change_mutex);
       removeScriptWidgets();
       clearDescription();
 
-      cur_tool = this;
-
-      auto sn = get_script_name(selection);
+      auto sn = _loader.get_script_name(selection);
       _profile_selection->clear();
       if (_json.contains(sn))
       {
@@ -138,7 +107,7 @@ namespace noggit
         {
           if (v.key() != CUR_PROFILE_PATH)
           {
-            items.push_back(v.key().c_str());
+            items.push_back(v.key());
           }
         }
 
@@ -152,7 +121,7 @@ namespace noggit
 
         for (auto& item : items)
         {
-          _profile_selection->addItem(item.c_str());
+          _profile_selection->addItem(QString::fromStdString (item));
         }
       }
 
@@ -162,7 +131,7 @@ namespace noggit
       }
 
       int next_profile = 0;
-      auto cur_script = get_script_name(selection);
+      auto cur_script = _loader.get_script_name(selection);
       if (_json.contains(cur_script))
       {
         if (_json[cur_script].contains(CUR_PROFILE_PATH))
@@ -170,7 +139,7 @@ namespace noggit
           auto str = _json[cur_script][CUR_PROFILE_PATH];
           for (int i = 0; i < _profile_selection->count(); ++i)
           {
-            if (_profile_selection->itemText(i).toUtf8().constData() == str)
+            if (_profile_selection->itemText(i) == QString::fromStdString (str))
             {
               next_profile = i;
               break;
@@ -179,14 +148,10 @@ namespace noggit
         }
       }
 
-      cur_profile = _profile_selection->itemText(next_profile).toUtf8().constData();
+      _cur_profile = _profile_selection->itemText(next_profile).toStdString();
       _profile_selection->setCurrentIndex(next_profile);
-      if (!_json.contains(cur_script))
-      {
-        _json[cur_script] = json();
-      }
-      _json[cur_script][CUR_PROFILE_PATH] = cur_profile;
-      select_script(selection);
+      _json[cur_script][CUR_PROFILE_PATH] = _cur_profile;
+      _loader.select_script(selection, this);
 
       initialize_radius();
       for (auto& item : _string_arrays)
@@ -195,25 +160,59 @@ namespace noggit
         // is invalid (old script), so we just write it again to be safe.
         if (item.second->currentIndex() == 0)
         {
-          set_json_unsafe(item.first, item.second->itemText(0).toUtf8().constData());
+          set_json_unsafe (item.first, item.second->itemText(0).toStdString());
         }
       }
-
-      cur_tool = nullptr;
     }
 
-    scripting_tool::scripting_tool(QWidget* parent) : QWidget(parent)
+    namespace
     {
-      auto layout(new QFormLayout(this));
+      void readScriptSettings (nlohmann::json& json)
+      {
+        if (!boost::filesystem::exists(SCRIPT_FILE))
+        {
+          return;
+        }
+
+        try
+        {
+          std::ifstream(SCRIPT_FILE) >> json;
+        }
+        catch (std::exception err)
+        {
+          if(!boost::filesystem::exists(SCRIPT_FILE))
+          {
+            return;
+          }
+          // back up broken script settings, since they won't be read and will be overwritten.
+          std::string backup_file = std::string(SCRIPT_FILE) + ".backup";
+          int i = 0;
+          while (boost::filesystem::exists(backup_file+std::to_string(i)))
+          {
+              ++i;
+          }
+          boost::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
+
+          // Add a message box here
+        }
+      }
+    }
+
+    scripting_tool::scripting_tool(QWidget* parent)
+      : QWidget(parent)
+      , _cur_profile ("Default")
+      , _update_context (nullptr)
+    {
+      readScriptSettings (_json);
+
+      auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
-      layout->addRow(_selection);
+      layout->addWidget(_selection);
 
       _reload_button = new QPushButton("Reload Scripts", this);
-      layout->addRow(_reload_button);
+      layout->addWidget(_reload_button);
       connect(_reload_button, &QPushButton::released, this, [this]() {
-        cur_tool = this;
         doReload();
-        cur_tool = nullptr;
       });
 
       // Profiles
@@ -232,7 +231,7 @@ namespace noggit
       _profile_select_column->addWidget(_profile_name_entry, 1, 0);
       _profile_select_column->addWidget(_profile_create_button, 1, 1);
 
-      layout->addRow(_profile_group);
+      layout->addWidget(_profile_group);
 
       _radius_spin = new QDoubleSpinBox(this);
       _radius_spin->setRange(0.0f, 1000.0f);
@@ -270,6 +269,7 @@ namespace noggit
       layout->addWidget(_description);
 
       _log = new QPlainTextEdit(this);
+      _log->setFont (QFontDatabase::systemFont (QFontDatabase::FixedFont));
       _log->setReadOnly(true);
       layout->addWidget(_log);
 
@@ -277,28 +277,28 @@ namespace noggit
         _radius = v;
         QSignalBlocker const blocker(_radius_slider);
         _radius_slider->setSliderPosition((int)std::round(v));
-        set_json_unsafe(OUTER_RADIUS_PATH, v);
+        set_json_unsafe (OUTER_RADIUS_PATH, v);
       });
 
       connect(_radius_slider, &QSlider::valueChanged, [&](int v) {
         _radius = v;
         QSignalBlocker const blocker(_radius_spin);
         _radius_spin->setValue(v);
-        set_json_unsafe(OUTER_RADIUS_PATH, v);
+        set_json_unsafe (OUTER_RADIUS_PATH, v);
       });
 
       connect(_inner_radius_spin, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double v) {
         _inner_radius = v;
         QSignalBlocker const blocker(_inner_radius_slider);
         _inner_radius_slider->setSliderPosition((int)std::round(v * 100));
-        set_json_unsafe(INNER_RADIUS_PATH, v);
+        set_json_unsafe (INNER_RADIUS_PATH, v);
       });
 
       connect(_inner_radius_slider, &QSlider::valueChanged, [&](int v) {
         _inner_radius = v / 100.0f;
         QSignalBlocker const blocker(_inner_radius_spin);
         _inner_radius_spin->setValue(_inner_radius);
-        set_json_unsafe(INNER_RADIUS_PATH, _inner_radius);
+        set_json_unsafe (INNER_RADIUS_PATH, _inner_radius);
       });
 
       connect(_profile_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
@@ -306,7 +306,7 @@ namespace noggit
       });
 
       connect(_profile_remove_button, &QPushButton::released, this, [this]() {
-        auto script_name = selected_script_name();
+        auto script_name = _loader.selected_script_name();
         if (script_name.size() == 0)
         {
           // TODO: error?
@@ -321,7 +321,7 @@ namespace noggit
           return;
         }
 
-        auto text = _profile_selection->itemText(index).toUtf8().constData();
+        auto text = _profile_selection->itemText(index).toStdString();
         _profile_selection->removeItem(index);
 
         if (_json.contains(script_name))
@@ -337,44 +337,36 @@ namespace noggit
       });
 
       connect(_profile_create_button, &QPushButton::released, this, [this]() {
-        auto script_name = selected_script_name();
+        auto script_name = _loader.selected_script_name();
 
         // do not allow invalid script
         if (script_name.size() == 0)
           return;
 
-        std::string newText = _profile_name_entry->text().toUtf8().constData();
+        auto newText = _profile_name_entry->text();
 
         // do not allow empty profiles
-        if (newText.size() == 0)
+        if (newText.isEmpty())
           return;
 
         auto count = _profile_selection->count();
         for (int i = 0; i < count; ++i)
         {
           // do not allow duplicate profiles
-          if (_profile_selection->itemText(i).toUtf8().constData() == newText)
+          if (_profile_selection->itemText(i) == newText)
           {
             return;
           }
         }
 
         _profile_name_entry->clear();
-        _profile_selection->addItem(newText.c_str());
-        if (!_json.contains(script_name))
-        {
-          _json[script_name] = json();
-        }
+        _profile_selection->addItem (newText);
 
-        if (!_json[script_name].contains(newText))
+        if (!_json[script_name].contains(newText.toStdString()))
         {
-          if (_json[script_name].contains(cur_profile))
+          if (_json[script_name].contains(_cur_profile))
           {
-            _json[script_name][newText] = _json[script_name][cur_profile];
-          }
-          else
-          {
-            _json[script_name][newText] = json();
+            _json[script_name][newText.toStdString()] = _json[script_name][_cur_profile];
           }
         }
 
@@ -391,34 +383,14 @@ namespace noggit
       doReload();
     }
 
-    void readScriptSettings()
+    scripting_tool::~scripting_tool()
     {
-      if (!boost::filesystem::exists(SCRIPT_FILE))
-      {
-        return;
+      save_json();
       }
 
-      try 
+    void scripting_tool::save_json() const
       {
-        std::ifstream(SCRIPT_FILE) >> _json;
-      }
-      catch (std::exception err)
-      {
-        if(!boost::filesystem::exists(SCRIPT_FILE))
-        {
-          return;
-        }
-        // back up broken script settings, since they won't be read and will be overwritten.
-        std::string backup_file = std::string(SCRIPT_FILE) + ".backup";
-        int i = 0;
-        while (boost::filesystem::exists(backup_file+std::to_string(i)))
-        {
-            ++i;
-        }
-        boost::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
-
-        // Add a message box here
-      }
+      std::ofstream(SCRIPT_FILE) << std::setw(4) << _json << "\n";
     }
 
 // i don't remember why this was a macro
@@ -434,13 +406,13 @@ namespace noggit
   auto label = new QLabel(this);                                                     \
   label->setText(name);                                                              \
   connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=](double v) { \
-    set_json_unsafe<T>(path, (T)v);                                                  \
+    set_json_unsafe<T> (path, (T)v);                                                  \
     QSignalBlocker const blocker(slider);                                            \
     slider->setSliderPosition((int)std::round(v * dp1));                             \
   });                                                                                \
   connect(slider, &QSlider::valueChanged, [=](int v) {                               \
     double t = double(v) / dp1;                                                      \
-    set_json_unsafe<T>(path, t);                                                     \
+    set_json_unsafe<T> (path, t);                                                     \
     QSignalBlocker const blocker(spinner);                                           \
     spinner->setValue(t);                                                            \
   });                                                                                \
@@ -450,8 +422,8 @@ namespace noggit
   _script_widgets.push_back(label);                                                  \
   _script_widgets.push_back(spinner);                                                \
   _script_widgets.push_back(slider);                                                 \
-  set_json_safe<T>(path, std::min(max, std::max(min, get_json_safe<T>(path, def)))); \
-  auto v = get_json_safe<T>(path, def);                                              \
+  set_json_safe<T> (path, std::min(max, std::max(min, get_json_safe<T> (path, def)))); \
+  auto v = get_json_safe<T> (path, def);                                              \
   slider->setSliderPosition((int)std::round(v * dp1));                               \
   spinner->setValue(v);
 
@@ -471,14 +443,14 @@ namespace noggit
       auto label = new QLabel(this);
       label->setText(name);
       connect(checkbox, &QCheckBox::stateChanged, this, [=](auto value) {
-        set_json_unsafe<bool>(name, value ? true : false);
+        set_json_unsafe<bool> (name, value ? true : false);
       });
 
       _script_widgets.push_back(checkbox);
       _script_widgets.push_back(label);
       _script_settings_layout->addRow(label, checkbox);
 
-      checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+      checkbox->setCheckState(get_json_safe<bool> (name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
 
     void scripting_tool::addStringList(char const* name, char const* value)
@@ -490,7 +462,7 @@ namespace noggit
         auto label = new QLabel(this);
 
         connect(box, QOverload<int>::of(&QComboBox::activated), this, [=](auto index) {
-          set_json_unsafe<std::string>(name, box->itemText(index).toUtf8().constData());
+          set_json_unsafe (name, box->itemText(index).toStdString());
         });
 
         box->addItem(value);
@@ -502,7 +474,7 @@ namespace noggit
         _script_settings_layout->addRow(label, box);
 
         // ensure there is at least one valid value in it
-        get_json_safe<std::string>(name, value);
+        get_json_safe<std::string> (name, value);
       }
       else
       {
@@ -510,7 +482,7 @@ namespace noggit
         box->addItem(value);
 
         // we found the last selection, so change the index for that.
-        if (get_json_safe<std::string>(name, "") == value)
+        if (get_json_safe<std::string> (name, "") == value)
         {
           box->setCurrentIndex(box->count() - 1);
         }
@@ -524,12 +496,12 @@ namespace noggit
       auto label = new QLabel(this);
       label->setText(name);
       connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
-        set_json_unsafe<std::string>(name, text.toUtf8().constData());
+        set_json_unsafe (name, text.toStdString());
       });
       _script_widgets.push_back(label);
       _script_widgets.push_back(tline);
       _script_settings_layout->addRow(label, tline);
-      tline->setText(get_json_safe<std::string>(name, defstr).c_str());
+      tline->setText (QString::fromStdString (get_json_safe<std::string> (name, defstr)));
     }
 
     void scripting_tool::removeScriptWidgets()
@@ -548,21 +520,14 @@ namespace noggit
     {
       removeScriptWidgets();
       clearDescription();
-      cur_tool = this;
-      cur_profile = _profile_selection->itemText(profile).toUtf8().constData();
+      _cur_profile = _profile_selection->itemText(profile).toStdString();
 
-      auto n = selected_script_name();
-      if (!_json.contains(n))
-      {
-        _json[n] = json();
-      }
-
-      _json[n][CUR_PROFILE_PATH] = cur_profile;
+      auto n = _loader.selected_script_name();
+      _json[n][CUR_PROFILE_PATH] = _cur_profile;
 
       initialize_radius();
 
-      select_script(get_selected_script());
-      cur_tool = nullptr;
+      _loader.select_script (_loader.get_selected_script(), this);
     }
 
     void scripting_tool::sendUpdate(
@@ -577,9 +542,8 @@ namespace noggit
         bool holding_alt,
         bool holding_space)
     {
-      cur_tool = this;
       script_context ctx(world, pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space, dt);
-      set_ctx(&ctx);
+      _update_context = &ctx;
 
       try
       {
@@ -587,29 +551,29 @@ namespace noggit
         {
           if (!_last_left)
           {
-            send_left_click();
+            _loader.send_left_click (this);
           }
 
-          send_left_hold();
+          _loader.send_left_hold (this);
         }
 
         if (right_mouse)
         {
           if (!_last_right)
           {
-            send_right_click();
+            _loader.send_right_click (this);
           }
-          send_right_hold();
+          _loader.send_right_hold (this);
         }
 
         if (!left_mouse && _last_left)
         {
-          send_left_release();
+          _loader.send_left_release (this);
         }
 
         if (!right_mouse && _last_right)
         {
-          send_right_release();
+          _loader.send_right_release (this);
         }
       }
       catch (std::exception const& e)
@@ -627,8 +591,8 @@ namespace noggit
 
     void scripting_tool::initialize_radius()
     {
-      double inner_radius = get_json_safe<double>(INNER_RADIUS_PATH, 0.5);
-      double outer_radius = get_json_safe<double>(OUTER_RADIUS_PATH, 40);
+      double inner_radius = get_json_safe<double> (INNER_RADIUS_PATH, 0.5);
+      double outer_radius = get_json_safe<double> (OUTER_RADIUS_PATH, 40);
 
       _radius_spin->setValue(outer_radius);
       _inner_radius_spin->setValue(inner_radius);
@@ -640,13 +604,13 @@ namespace noggit
     void scripting_tool::addDescription(char const* text)
     {
       std::string stext = text == nullptr ? "" : text;
-      _description->setText(_description->text() + "\n" + stext.c_str());
+      _description->setText(_description->text() + "\n" + QString::fromStdString (stext));
     }
 
     void scripting_tool::addLog(std::string const& text)
     {
       LogDebug << "[script window]: " << text << "\n";
-      _log->appendPlainText(text.c_str());
+      _log->appendPlainText (QString::fromStdString (text));
       _log->verticalScrollBar()->setValue(_log->verticalScrollBar()->maximum());
     }
 
@@ -672,7 +636,6 @@ namespace noggit
 
     std::string get_string_param(char const* path)
     {
-      // TODO: FIXIFIIFIX
       return get_json_unsafe<std::string>(path);
     }
 
@@ -681,29 +644,29 @@ namespace noggit
       return get_string_param(path);
     }
 
-    int get_int_param(char const* path)
+    int get_int_param(char const* path, das::Context* context)
     {
-      return get_json_unsafe<int>(path);
+      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<int> (path);
     }
 
-    double get_double_param(char const* path)
+    double get_double_param(char const* path, das::Context* context)
     {
-      return get_json_unsafe<double>(path);
+      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<double> (path);
     }
 
-    float get_float_param(char const* path)
+    float get_float_param(char const* path, das::Context* context)
     {
-      return get_json_unsafe<double>(path);
+      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<double> (path);
     }
 
-    bool get_bool_param(char const* path)
+    bool get_bool_param(char const* path, das::Context* context)
     {
-      return get_json_unsafe<bool>(path);
+      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<bool> (path);
     }
 
-    void add_string_param(char const* path, char const* def)
+    void add_string_param(char const* path, char const* def, das::Context* context)
     {
-      if(path==nullptr) 
+      if(path==nullptr)
       {
         throw script_exception(
           "add_string_param",
@@ -711,10 +674,10 @@ namespace noggit
           + std::string(def==nullptr ? "null" : def)
         );
       }
-      get_cur_tool()->addString(path, def != nullptr ? def : "");
+      static_cast<Loader::Context*> (context)->_tool->addString(path, def != nullptr ? def : "");
     }
 
-    void add_int_param(char const* path, int min, int max, int def)
+    void add_int_param(char const* path, int min, int max, int def, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -723,10 +686,10 @@ namespace noggit
           std::string("empty path to int parameter")
         );
       }
-      get_cur_tool()->addInt(path, min, max, def);
+      static_cast<Loader::Context*> (context)->_tool->addInt(path, min, max, def);
     }
 
-    void add_double_param(char const* path, double min, double max, double def, int zeros = 2)
+    void add_double_param(char const* path, double min, double max, double def, int zeros, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -735,10 +698,10 @@ namespace noggit
           std::string("empty path to double parameter")
         );
       }
-      get_cur_tool()->addDouble(path, min, max, def, zeros);
+      static_cast<Loader::Context*> (context)->_tool->addDouble(path, min, max, def, zeros);
     }
 
-    void add_float_param(char const* path, float min, float max, float def, int zeros)
+    void add_float_param(char const* path, float min, float max, float def, int zeros, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -747,10 +710,10 @@ namespace noggit
           std::string("empty path to float parameter")
         );
       }
-      get_cur_tool()->addDouble(path, min, max, def, zeros);
+      static_cast<Loader::Context*> (context)->_tool->addDouble(path, min, max, def, zeros);
     }
 
-    void add_bool_param(char const* path, bool def)
+    void add_bool_param(char const* path, bool def, das::Context* context)
     {
       if(path==nullptr)
       {
@@ -759,15 +722,15 @@ namespace noggit
           std::string("empty path to bool parameter")
         );
       }
-      get_cur_tool()->addBool(path, def);
+      static_cast<Loader::Context*> (context)->_tool->addBool(path, def);
     }
 
-    void add_description(char const* path)
+    void add_description(char const* path, das::Context* context)
     {
-      get_cur_tool()->addDescription(path != nullptr ? path : "");
+      static_cast<Loader::Context*> (context)->_tool->addDescription(path != nullptr ? path : "");
     }
 
-    void add_string_list_param(char const* path, char const* value)
+    void add_string_list_param(char const* path, char const* value, das::Context* context)
     {
       if (path == nullptr)
       {
@@ -782,12 +745,7 @@ namespace noggit
           std::string("empty value to string list parameter ")
           + path
       );
-      get_cur_tool()->addStringList(path, value);
-    }
-
-    void save_json()
-    {
-      std::ofstream(SCRIPT_FILE) << std::setw(4) << _json << "\n";
+      static_cast<Loader::Context*> (context)->_tool->addStringList(path, value);
     }
   } // namespace scripting
 } // namespace noggit

@@ -94,11 +94,9 @@ void main()
       
       opengl::scoped::vao_binder const _(_vao[0]);
       scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices (_positions);
-      wire_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      wire_box_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-      scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices (_indices);
-
-      gl.drawElements (GL_LINE_STRIP, _indices, 16, GL_UNSIGNED_BYTE, nullptr);
+      gl.drawElements (GL_LINE_STRIP, 16, GL_UNSIGNED_BYTE, _indices);
     }
   
 
@@ -121,7 +119,7 @@ void main()
       sphere_shader.uniform("color", color);
 
       opengl::scoped::vao_binder const _(_vao[0]);
-      gl.drawElements(GL_TRIANGLES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements(GL_TRIANGLES, _indice_count, GL_UNSIGNED_SHORT, _indices_vbo);
     }
   
 
@@ -215,7 +213,7 @@ void main()
         opengl::scoped::vao_binder const _ (_vao[0]);
 
         opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-        shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+        shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();
       }
@@ -247,7 +245,7 @@ void main()
       sphere_shader.uniform("color", color);
 
       opengl::scoped::vao_binder const _ (_vao[0]);
-      gl.drawElements(GL_TRIANGLES, _indices_vbo, 6, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, _indices_vbo);
     }
 
 
@@ -324,7 +322,7 @@ void main()
         opengl::scoped::vao_binder const _ (_vao[0]);
 
         opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-        shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+        shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();
       }

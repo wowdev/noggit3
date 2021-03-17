@@ -44,15 +44,15 @@ namespace noggit
       layout->addRow(new QLabel("- rotation and scale only\n  change when pressing enter", this));
       layout->addRow(new QLabel("- scaling is multiplicative", this));
 
-      _rotation_x->setRange (-1800.f, 1800.f);
+      _rotation_x->setRange (-180.f, 180.f);
       _rotation_x->setDecimals (3);
       _rotation_x->setWrapping(true);
       _rotation_x->setSingleStep(5.0f);
-      _rotation_z->setRange (-1800.f, 1800.f);
+      _rotation_z->setRange (-180.f, 180.f);
       _rotation_z->setDecimals (3);
       _rotation_z->setWrapping(true);
       _rotation_z->setSingleStep(5.0f);
-      _rotation_y->setRange (-1800.f, 3600.f);
+      _rotation_y->setRange (-180.f, 180.f);
       _rotation_y->setDecimals (3);
       _rotation_y->setWrapping(true);
       _rotation_y->setSingleStep(5.0f);
@@ -227,9 +227,9 @@ namespace noggit
             _position_x->setValue(model->pos.x);
             _position_y->setValue(model->pos.y);
             _position_z->setValue(model->pos.z);
-            _rotation_x->setValue(model->dir.x);
-            _rotation_y->setValue(model->dir.y);
-            _rotation_z->setValue(model->dir.z);
+            _rotation_x->setValue(model->dir.x._);
+            _rotation_y->setValue(model->dir.y._);
+            _rotation_z->setValue(model->dir.z._);
             _scale->setValue(model->scale);
 
             _scale->setEnabled(true);
@@ -240,9 +240,9 @@ namespace noggit
             _position_x->setValue(wmo->pos.x);
             _position_y->setValue(wmo->pos.y);
             _position_z->setValue(wmo->pos.z);
-            _rotation_x->setValue(wmo->dir.x);
-            _rotation_y->setValue(wmo->dir.y);
-            _rotation_z->setValue(wmo->dir.z);
+            _rotation_x->setValue(wmo->dir.x._);
+            _rotation_y->setValue(wmo->dir.y._);
+            _rotation_z->setValue(wmo->dir.z._);
 
             _scale->setValue(1.f);
             _scale->setEnabled(false);

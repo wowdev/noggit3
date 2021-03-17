@@ -462,31 +462,29 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
-    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
   if(billboard)
   {
     gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_offsets_vbo, offsets, GL_STREAM_DRAW);
 
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const offset_binder (_offsets_vbo);
-    shader.attrib("offset", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "offset", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder (_texcoord_vbo);
-    shader.attrib("uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const colors_binder (_colors_vbo);
-    shader.attrib("color", 4, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "color", 4, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (transform_vbo);
-    shader.attrib("transform", 0, 1);
+    shader.attrib(_, "transform", 0, 1);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder (_indices_vbo);
-  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
-
+  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), instances_count, GL_UNSIGNED_SHORT, _indices_vbo);
 }
 
 void ParticleSystem::upload()
@@ -949,19 +947,18 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder(_vertices_vbo);
-    shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoord_vbo);
-    shader.attrib("uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder(transform_vbo);
-    shader.attrib("transform", 0, 1);
+    shader.attrib(_, "transform", 0, 1);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder(_indices_vbo);
-  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
+  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), instances_count, GL_UNSIGNED_SHORT, _indices_vbo);
 }
 
 void RibbonEmitter::upload()

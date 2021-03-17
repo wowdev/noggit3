@@ -8,146 +8,96 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ui/ObjectEditor.h>
+
+#include <util/visit.hpp>
+
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
 {
   namespace scripting
   {
-    static const WMOInstance* wmo_const(model const& model)
-    {
-      return (const WMOInstance*)model._model;
-    }
+    model::model (ModelInstance* model)
+      : _impl (model)
+    {}
 
-    static const ModelInstance* m2_const(model const& model)
-    {
-      return (const ModelInstance*)model._model;
-    }
-
-    static WMOInstance* wmo(model& model)
-    {
-      return (WMOInstance*)model._model;
-    }
-
-    static ModelInstance* m2(model& model)
-    {
-      return (ModelInstance*)model._model;
-    }
-
-    model::model(ModelInstance*model)
-      : _model((void*)model), _is_wmo(false) {}
-
-    model::model(WMOInstance*model)
-      : _model((void*)model), _is_wmo(true) {}
+    model::model (WMOInstance* model)
+      : _impl (model)
+    {}
 
     math::vector_3d model_get_pos(model const& model)
     {
-      if (model._is_wmo)
-      {
-        return wmo_const(model)->pos;
-      }
-      else
-      {
-        return m2_const(model)->pos;
-      }
+      return util::visit (model._impl, [] (auto x) { return x->pos; });
     }
 
     void model_set_pos(model& model, math::vector_3d& pos)
     {
-      if (model._is_wmo)
-      {
-        wmo(model)->pos = pos;
-      }
-      else
-      {
-        m2(model)->pos = pos;
-      }
+      return util::visit (model._impl, [&] (auto x) { x->pos = pos; });
     }
 
     math::vector_3d model_get_rot(model const& model)
     {
-      if (model._is_wmo)
-      {
-        return wmo_const(model)->dir;
-      }
-      else
-      {
-        return m2_const(model)->dir;
-      }
+      return math::vector_3d {util::visit (model._impl, [] (auto x) { return x->dir; })};
     }
 
     void model_set_rot(model& model, math::vector_3d& rot)
     {
-      if (model._is_wmo)
-      {
-        wmo(model)->dir = rot;
-      }
-      else
-      {
-        m2(model)->dir = rot;
-      }
+      return util::visit (model._impl, [&] (auto x) { x->dir = math::degrees::vec3 {rot}; });
     }
 
     float model_get_scale(model const& model)
     {
-      if (model._is_wmo)
-      {
-        return 1;
-      }
-      else
-      {
-        return m2_const(model)->scale;
-      }
+      return util::visit ( model._impl
+                         , [] (ModelInstance const* as_m2) {
+                             return as_m2->scale;
+                           }
+                         , [] (WMOInstance const*) {
+                             return 1.0f;
+                           }
+                         );
     }
 
     void model_set_scale(model& model, float scale)
     {
-      if (model._is_wmo)
-      {
-        return;
-      }
-      else
-      {
-        m2(model)->scale = scale;
-      }
+      return util::visit ( model._impl
+                         , [&] (ModelInstance* as_m2) {
+                             as_m2->scale = scale;
+                           }
+                         , [] (WMOInstance*) {}
+                         );
     }
 
     unsigned model_get_uid(model const& model)
     {
-      if (model._is_wmo)
-      {
-        return wmo_const(model)->mUniqueID;
-      }
-      else
-      {
-        return m2_const(model)->uid;
-      }
-    }
+      return util::visit ( model._impl
+                         , [] (ModelInstance const* as_m2) {
+                             return as_m2->uid;
+                           }
+                         , [] (WMOInstance const* as_wmo) {
+                             return as_wmo->mUniqueID;
+                           }
+                         );
+          }
 
     std::string model_get_filename(model const& model)
     {
-      if (model._is_wmo)
-      {
-        return wmo_const(model)->wmo->filename;
-      }
-      else
-      {
-        return m2_const(model)->model->filename;
-      }
+      return util::visit ( model._impl
+                      , [] (ModelInstance const* as_m2) {
+                          return as_m2->model->filename;
+                        }
+                      , [] (WMOInstance const* as_wmo) {
+                          return as_wmo->wmo->filename;
+                        }
+                      );
     }
 
-    void model_remove(model& model)
+    void model_remove(model& model, das::Context* context)
     {
       std::vector<selection_type> type;
-      if (model._is_wmo)
-      {
-        type.push_back((WMOInstance*)model._model);
-      }
-      else
-      {
-        type.push_back((ModelInstance*)model._model);
-      }
-      get_ctx("model_remove")->_world->delete_models(type);
+
+      util::visit (model._impl, [&] (auto x) { type.emplace_back (x); });
+
+      get_ctx(context, "model_remove")->_world->delete_models(type);
     }
 
     void model_replace(model& model, char const* filename)
@@ -164,22 +114,18 @@ namespace noggit
         return;
       }
 
-      model_remove(model);
+      model_remove(model, ctx);
 
       if (boost::ends_with(filename, ".wmo"))
       {
-        auto wmo = get_ctx("model_replace")
-          ->_world->addWMO(filename, model_get_pos(model), model_get_rot(model));
-        model._model = wmo;
-        model._is_wmo = true;
+        model._impl = get_ctx(ctx, "model_replace")
+          ->_world->addWMO(filename, model_get_pos(model), math::degrees::vec3 {model_get_rot(model)});
       }
       else
       {
         auto params = object_paste_params();
-        auto m2 = get_ctx("model_replace")
-          ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), model_get_rot(model),& params);
-        model._model = m2;
-        model._is_wmo = false;
+        model._impl = get_ctx(ctx, "model_replace")
+          ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), math::degrees::vec3 {model_get_rot(model)}, &params);
       }
     }
 

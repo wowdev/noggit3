@@ -190,6 +190,7 @@ public:
   void rotate_selected_models_to_ground_normal(bool smoothNormals);
 
   bool GetVertex(float x, float z, math::vector_3d *V) const;
+  boost::optional<float> get_exact_height_at(math::vector_3d const& pos);
 
   // check if the cursor is under map or in an unloaded tile
   bool isUnderMap(math::vector_3d const& pos);
@@ -239,12 +240,12 @@ public:
 
   ModelInstance* addM2 ( std::string const& filename
              , math::vector_3d newPos
-             , float scale, math::vector_3d rotation
+             , float scale, math::degrees::vec3 rotation
              , noggit::object_paste_params*
              );
   WMOInstance* addWMO ( std::string const& filename
               , math::vector_3d newPos
-              , math::vector_3d rotation
+              , math::degrees::vec3 rotation
               );
 
   // add a m2 instance to the world (needs to be positioned already), return the uid

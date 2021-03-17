@@ -20,7 +20,7 @@ namespace noggit
           unsigned start_x
           , unsigned start_y
           , unsigned width
-          , unsigned height 
+          , unsigned height
           , float frequency
           , const char *algorithm 
           , const char *seed);

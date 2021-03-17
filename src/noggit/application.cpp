@@ -111,7 +111,7 @@ void Noggit::loadMPQs()
     if (boost::filesystem::exists (wowpath / "Data" / locales[i] / "realmlist.wtf"))
     {
       locale = locales[i];
-      Log << "Locale: " << locale << std::endl;
+      NOGGIT_LOG << "Locale: " << locale << std::endl;
       break;
     }
   }
@@ -181,7 +181,7 @@ namespace
       << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
     QString found_locale ("****");
 
-    foreach (const QString& locale, locales)
+    for (auto const& locale : locales)
     {
       if (path.exists (("Data/" + locale)))
       {
@@ -211,7 +211,7 @@ Noggit::Noggit(int argc, char *argv[])
   assert (argc >= 1); (void) argc;
   initPath(argv);
 
-  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+  NOGGIT_LOG << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
 
   QSettings settings;
@@ -224,24 +224,24 @@ Noggit::Noggit(int argc, char *argv[])
 
   while (!is_valid_game_path (path))
   {
-    QDir new_path (QFileDialog::getExistingDirectory (nullptr, "Open WoW Directory", "/", QFileDialog::ShowDirsOnly));
-    if (new_path.absolutePath () == "")
+    auto const new_path (QFileDialog::getExistingDirectory (nullptr, "Open WoW Directory", "/", QFileDialog::ShowDirsOnly));
+    if (new_path.isEmpty())
     {
       LogError << "Could not auto-detect game path "
         << "and user canceled the dialog." << std::endl;
-      throw std::runtime_error ("no folder chosen");
+      throw std::runtime_error ("Could not auto-detect game path and user canceled the dialog.");
     }
-    std::swap (new_path, path);
+    path = QDir (new_path);
   }
 
   wowpath = path.absolutePath().toStdString();
 
-  Log << "Game path: " << wowpath << std::endl;
+  NOGGIT_LOG << "Game path: " << wowpath << std::endl;
 
   std::string project_path = settings.value ("project/path", path.absolutePath()).toString().toStdString();
   settings.setValue ("project/path", QString::fromStdString (project_path));
 
-  Log << "Project path: " << project_path << std::endl;
+  NOGGIT_LOG << "Project path: " << project_path << std::endl;
 
   settings.setValue ("project/game_path", path.absolutePath());
   settings.setValue ("project/path", QString::fromStdString(project_path));
@@ -332,6 +332,7 @@ namespace
 }
 
 int main(int argc, char *argv[])
+try
 {
   noggit::RegisterErrorHandlers();
   std::set_terminate (noggit_terminate_handler);
@@ -343,4 +344,9 @@ int main(int argc, char *argv[])
   Noggit app (argc, argv);
 
   return qapp.exec();
+}
+catch (...)
+{
+  noggit_terminate_handler();
+  return 1;
 }

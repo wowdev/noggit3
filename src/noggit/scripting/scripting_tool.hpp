@@ -1,7 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_loader.hpp>
 #include <noggit/tool_enums.hpp>
+
+#include <nlohmann/json.hpp>
+
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
 
@@ -26,12 +31,12 @@ namespace noggit
   class camera;
   namespace scripting
   {
-
-    void readScriptSettings();
     class scripting_tool : public QWidget
     {
     public:
       scripting_tool(QWidget* parent = nullptr);
+      ~scripting_tool();
+
       float brushRadius() const { return _radius; }
       float innerRadius() const { return _inner_radius; }
 
@@ -61,7 +66,26 @@ namespace noggit
       void removeScriptWidgets();
       script_context* get_context();
 
+      void save_json() const;
+
     private:
+
+      friend int get_int_param(char const* path, das::Context* ctx);
+      friend double get_double_param(char const* path, das::Context* ctx);
+      friend float get_float_param(char const* path, das::Context* ctx);
+      friend bool get_bool_param(char const* path, das::Context* ctx);
+      friend char const* get_string_param(char const* path, das::Context* ctx);
+      friend char const* get_string_list_param(char const* path, das::Context* ctx);
+      friend script_context* get_ctx (das::Context* context, const char* caller);
+
+      Loader _loader;
+      nlohmann::json _json;
+
+      std::mutex _script_change_mutex;
+      std::string _cur_profile;
+
+      script_context* _update_context;
+
       bool _last_left = false;
       bool _last_right = false;
 
@@ -111,6 +135,15 @@ namespace noggit
       void select_profile(int profile);
       void on_change_script(int script_index);
       void initialize_radius();
+
+      template <typename T>
+        T get_json_safe (std::string key, T def);
+      template <typename T>
+        T get_json_unsafe (std::string key);
+      template <typename T>
+        void set_json_safe (std::string key, T def);
+      template <typename T>
+        void set_json_unsafe (std::string key, T value);
     };
 
     int get_int_param(char const* path);
@@ -120,17 +153,12 @@ namespace noggit
     std::string get_string_param(char const* path);
     std::string get_string_list_param(char const* path);
 
-    void add_string_list_param(char const* path, char const* value);
-    void add_string_param(char const* path, char const* def);
-    void add_int_param(char const* path, int min, int max, int def);
-    void add_double_param(char const* path, double min, double max, double def, int zeros);
-    void add_float_param(char const* path, float min, float max, float def, int zeros);
-    void add_bool_param(char const* path, bool def);
-    void add_description(char const* desc);
-
-    void save_json();
-
-    // same as script_context, but must also be accessable during "select"
-    scripting_tool* get_cur_tool();
+    void add_string_list_param(char const* path, char const* value, das::Context*);
+    void add_string_param(char const* path, char const* def, das::Context*);
+    void add_int_param(char const* path, int min, int max, int def, das::Context*);
+    void add_double_param(char const* path, double min, double max, double def, int zeros, das::Context*);
+    void add_float_param(char const* path, float min, float max, float def, int zeros, das::Context*);
+    void add_bool_param(char const* path, bool def, das::Context*);
+    void add_description(char const* desc, das::Context*);
   } // namespace scripting
 } // namespace noggit

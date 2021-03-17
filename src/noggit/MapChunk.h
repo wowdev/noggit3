@@ -44,6 +44,7 @@ private:
 
   void update_shadows();
 
+  bool _has_shadow;
   uint8_t _shadow_map[64 * 64];
   opengl::texture shadow;
 
@@ -52,12 +53,12 @@ private:
   std::map<int, std::vector<StripType>> strip_lods;
 
   std::vector<uint8_t> compressed_shadow_map() const;
-  bool has_shadows() const;
+  bool shadow_map_is_empty() const;
 
   void initStrip();
 
-  int indexNoLoD(int x, int y);
-  int indexLoD(int x, int y);
+  int indexNoLoD(int z, int x);
+  int indexLoD(int z, int x);
 
   std::vector<math::vector_3d> _intersect_points;
 
@@ -69,6 +70,7 @@ private:
 
   bool _uploaded = false;
   bool _need_indice_buffer_update = true;
+  bool _need_lod_update = true;
   bool _need_vao_update = true;
 
   void upload();
@@ -110,8 +112,7 @@ public:
                   , display_mode display
                   ) const;
 private:
-  // return true if the lod level changed
-  bool update_visibility ( const float& cull_distance
+  void update_visibility ( const float& cull_distance
                          , const math::frustum& frustum
                          , const math::vector_3d& camera
                          , display_mode display
@@ -136,6 +137,9 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , int animtime
             , display_mode display
+            , bool& previous_chunk_had_shadows
+            , bool& previous_chunk_was_textured
+            , bool& previous_chunk_could_be_painted
             );
   //! \todo only this function should be public, all others should be called from it
 
@@ -186,6 +190,7 @@ public:
   bool GetVertex(float x, float z, math::vector_3d *V);
   float getHeight(int x, int z);
   float getMinHeight();
+  boost::optional<float> get_exact_height_at(math::vector_3d const& pos);
 
   void clearHeight();
 

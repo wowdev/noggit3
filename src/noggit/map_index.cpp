@@ -156,7 +156,7 @@ void MapIndex::save()
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
-  //Log << "Saving WDT \"" << filename << "\"." << std::endl;
+  //NOGGIT_LOG << "Saving WDT \"" << filename << "\"." << std::endl;
 
   sExtendableArray wdtFile = sExtendableArray();
   int curPos = 0;
@@ -381,7 +381,7 @@ void MapIndex::unloadTile(const tile_index& tile)
   if (tileLoaded(tile))
   {
     mTiles[tile.z][tile.x].tile = nullptr;
-    Log << "Unload Tile " << tile.x << "-" << tile.z << std::endl;
+    NOGGIT_LOG << "Unload Tile " << tile.x << "-" << tile.z << std::endl;
   }
 }
 

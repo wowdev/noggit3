@@ -13,7 +13,7 @@
 WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
   : wmo(filename)
   , pos(math::vector_3d(d->pos[0], d->pos[1], d->pos[2]))
-  , dir(math::vector_3d(d->rot[0], d->rot[1], d->rot[2]))
+  , dir(math::degrees(d->rot[0]), math::degrees(d->rot[1]), math::degrees(d->rot[2]))
   , mUniqueID(d->uniqueID), mFlags(d->flags)
   , mUnknown(d->unknown), mNameset(d->nameSet)
   , _doodadset(d->doodadSet)
@@ -28,7 +28,7 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
 WMOInstance::WMOInstance(std::string const& filename)
   : wmo(filename)
   , pos(math::vector_3d(0.0f, 0.0f, 0.0f))
-  , dir(math::vector_3d(0.0f, 0.0f, 0.0f))
+  , dir(math::degrees::vec3(0_deg, 0_deg, 0_deg))
   , mUniqueID(0)
   , mFlags(0)
   , mUnknown(0)
@@ -42,7 +42,7 @@ bool WMOInstance::is_a_duplicate_of(WMOInstance const& other)
 {
   return wmo->filename == other.wmo->filename
       && misc::vec3d_equals(pos, other.pos)
-      && misc::vec3d_equals(dir, other.dir);
+      && misc::deg_vec3d_equals(dir, other.dir);
 }
 
 void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
@@ -106,9 +106,9 @@ void WMOInstance::update_transform_matrix()
   math::matrix_4x4 mat( math::matrix_4x4(math::matrix_4x4::translation, pos)
                       * math::matrix_4x4
                         ( math::matrix_4x4::rotation_yzx
-                        , { math::degrees(-dir.z)
-                          , math::degrees(dir.y - 90.0f)
-                          , math::degrees(dir.x)
+                        , { -dir.z
+                          , dir.y - 90_deg
+                          , dir.x
                           }
                         )
                       );
@@ -217,7 +217,7 @@ void WMOInstance::update_doodads()
 
 void WMOInstance::resetDirection()
 {
-  dir = math::vector_3d(0.0f, dir.y, 0.0f);
+  dir = math::degrees::vec3(0.0_deg, dir.y, 0.0_deg);
   recalcExtents();
 }
 

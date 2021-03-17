@@ -8,115 +8,115 @@
 
 namespace noggit {
   namespace scripting {
-    void brush_set_area_id(math::vector_3d const& pos, int id, bool adt)
+    void brush_set_area_id(math::vector_3d const& pos, int id, bool adt, das::Context* context)
     {
-      get_ctx("brush_set_area_id")
+      get_ctx(context, "brush_set_area_id")
         ->_world->setAreaID(pos, id, adt);
     }
 
-    void brush_change_vertex_color(math::vector_3d const& pos, math::vector_3d const& color, float alpha, float change, float radius, bool editMode)
+    void brush_change_vertex_color(math::vector_3d const& pos, math::vector_3d const& color, float alpha, float change, float radius, bool editMode, das::Context* context)
     {
       auto v = color;
-      get_ctx("brush_change_vertex_color")
+      get_ctx(context, "brush_change_vertex_color")
         ->_world->changeShader(pos, math::vector_4d(v.x, v.y, v.z, alpha), change, radius, editMode);
     }
 
-    math::vector_3d brush_get_vertex_color(math::vector_3d const& pos)
+    math::vector_3d brush_get_vertex_color(math::vector_3d const& pos, das::Context* context)
     {
-      return get_ctx("brush_get_vertex_color")
+      return get_ctx(context, "brush_get_vertex_color")
         ->_world->pickShaderColor(pos);
     }
 
-    void brush_flatten_terrain(math::vector_3d const& pos, float remain, float radius, int brush_type, bool lower, bool raise, math::vector_3d const& origin, double angle, double orientation)
+    void brush_flatten_terrain(math::vector_3d const& pos, float remain, float radius, int brush_type, bool lower, bool raise, math::vector_3d const& origin, double angle, double orientation, das::Context* context)
     {
-      get_ctx("brush_flatten_terrain")
+      get_ctx(context, "brush_flatten_terrain")
         ->_world->flattenTerrain(pos, remain, radius, brush_type, flatten_mode(raise, lower), origin, math::degrees(angle), math::degrees(orientation));
     }
 
-    void brush_blur_terrain(math::vector_3d const& pos, float remain, float radius, int brush_type, bool lower, bool raise)
+    void brush_blur_terrain(math::vector_3d const& pos, float remain, float radius, int brush_type, bool lower, bool raise, das::Context* context)
     {
-      get_ctx("brush_blur_terrain")
+      get_ctx(context, "brush_blur_terrain")
         ->_world->blurTerrain(pos, remain, radius, brush_type, flatten_mode(raise, lower));
     }
 
-    void brush_erase_textures(math::vector_3d const& pos)
+    void brush_erase_textures(math::vector_3d const& pos, das::Context* context)
     {
-      get_ctx("brush_erase_textures")
+      get_ctx(context, "brush_erase_textures")
         ->_world->eraseTextures(pos);
     }
 
-    void brush_clear_shadows(math::vector_3d const& pos)
+    void brush_clear_shadows(math::vector_3d const& pos, das::Context* context)
     {
-      get_ctx("brush_clear_shadows")
+      get_ctx(context, "brush_clear_shadows")
         ->_world->clear_shadows(pos);
     }
 
-    void brush_clear_textures(math::vector_3d const& pos)
+    void brush_clear_textures(math::vector_3d const& pos, das::Context* context)
     {
-      get_ctx("brush_clear_textures")
+      get_ctx(context, "brush_clear_textures")
         ->_world->clearTextures(pos);
     }
 
-    void brush_clear_height(math::vector_3d const& pos)
+    void brush_clear_height(math::vector_3d const& pos, das::Context* context)
     {
-      get_ctx("brush_clear_height")
+      get_ctx(context, "brush_clear_height")
         ->_world->clearHeight(pos);
     }
 
-    void brush_set_hole(math::vector_3d const& pos, bool big, bool hole)
+    void brush_set_hole(math::vector_3d const& pos, bool big, bool hole, das::Context* context)
     {
-      get_ctx("brush_set_hole")
+      get_ctx(context, "brush_set_hole")
         ->_world->setHole(pos, big, hole);
     }
 
-    void brush_set_hole_adt(math::vector_3d const& pos, bool hole)
+    void brush_set_hole_adt(math::vector_3d const& pos, bool hole, das::Context* context)
     {
-      get_ctx("brush_set_hole_adt")
+      get_ctx(context, "brush_set_hole_adt")
         ->_world->setHoleADT(pos, hole);
     }
 
-    void brush_update_vertices()
+    void brush_update_vertices (das::Context* context)
     {
-      get_ctx("brush_update_vertices")->_world->updateVertexCenter();
-      get_ctx("brush_update_vertices")->_world->updateSelectedVertices();
+      get_ctx(context, "brush_update_vertices")->_world->updateVertexCenter();
+      get_ctx(context, "brush_update_vertices")->_world->updateSelectedVertices();
     }
 
-    void brush_deselect_vertices(math::vector_3d const& pos, float radius)
+    void brush_deselect_vertices(math::vector_3d const& pos, float radius, das::Context* context)
     {
-      get_ctx("brush_deselect_vertices")
+      get_ctx(context, "brush_deselect_vertices")
         ->_world->deselectVertices(pos, radius);
     }
 
-    void brush_move_vertices(float h)
+    void brush_move_vertices(float h, das::Context* context)
     {
-      get_ctx("brush_move_vertices")
+      get_ctx(context, "brush_move_vertices")
         ->_world->moveVertices(h);
     }
 
-    void brush_flatten_vertices(float h)
+    void brush_flatten_vertices(float h, das::Context* context)
     {
-        get_ctx("brush_flatten_vertices")
+        get_ctx(context, "brush_flatten_vertices")
           ->_world->flattenVertices(h);
     }
 
-    void brush_clear_vertex_selection()
+    void brush_clear_vertex_selection (das::Context* context)
     {
-      get_ctx("brush_clear_vertex_selection")
+      get_ctx(context, "brush_clear_vertex_selection")
         ->_world->clearVertexSelection();
     }
 
-    void brush_paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, char const* texture)
+    void brush_paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, char const* texture, das::Context* context)
     {
       auto brush = Brush();
       brush.setHardness(hardness);
       brush.setRadius(radius);
-      get_ctx("brush_paint_texture")
+      get_ctx(context, "brush_paint_texture")
         ->_world->paintTexture(pos, &brush, strength, pressure, scoped_blp_texture_reference(std::string(texture)));
     }
 
-    void brush_change_terrain(math::vector_3d const& pos, float change, float radius, float inner_radius, int brush_type)
+    void brush_change_terrain(math::vector_3d const& pos, float change, float radius, float inner_radius, int brush_type, das::Context* context)
     {
-      get_ctx("brush_change_terrain")
+      get_ctx(context, "brush_change_terrain")
         ->_world->changeTerrain(pos, change, radius, brush_type, inner_radius);
     }
   }
