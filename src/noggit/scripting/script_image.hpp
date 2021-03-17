@@ -5,34 +5,41 @@
 #include <string>
 #include <memory>
 
-namespace das {
-  class Context;
+namespace sol {
+  class state;
 }
 
 namespace noggit
 {
   namespace scripting
   {
-    struct image
+    class scripting_tool;
+    class image
     {
+    public:
       image() = default;
+      image(char const* path);
+      image(int width, int height);
       char* _image;
+
+      int get_index(int x, int y);
+      unsigned get_pixel(int x, int y);
+      float gradient_scale(float rel);
+      void set_pixel(int x, int y, unsigned value);
+      void save(char const* filename);
+      int width();
+      int height();
+    private:
+      void resize(int width, int height);
       unsigned char* get_image() const {return (unsigned char*)_image;}
       unsigned _width = 0;
       unsigned _height = 0;
       unsigned _size = 0;
     };
 
-    int img_get_index(image const& img, int x, int y);
-    unsigned img_get_pixel(image const& img, int x, int y);
-
-    float img_gradient_scale(image const& img, float rel);
-
-    void img_set_pixel(image& img, int x, int y, unsigned value);
-    void img_save(image& img, char const* filename);
-    int img_width(image const& img);
-    int img_height(image const& img);
     image create_image(int width, int height);
     image load_png(const char* path);
+
+    void register_image(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit

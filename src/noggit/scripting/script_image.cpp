@@ -3,13 +3,14 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
+#include <sol/sol.hpp>
 #include <lodepng.h>
 
 namespace noggit
 {
   namespace scripting
   {
-    static void img_resize(image& img, int width, int height)
+    void image::resize(int width, int height)
     {
         if(width<=0||height<=0)
         {
@@ -21,23 +22,22 @@ namespace noggit
             + std::to_string(height)
           );
         }
-        img._size = width*height*4;
-        img._width = width;
-        img._height = height;
+        _size = width*height*4;
+        _width = width;
+        _height = height;
         // TODO: leak
-        img._image = new char[img._size];
+        _image = new char[_size];
     }
 
-    image load_png(char const* path)
+    image::image(char const* path)
     {
-      image img;
       if(path==nullptr)
       {
           throw script_exception("load_png","empty png path");
       }
       // annoying, but lodepng only takes a vector
       std::vector<unsigned char> vec;
-      unsigned error = lodepng::decode(vec, img._width, img._height, path);
+      unsigned error = lodepng::decode(vec, _width, _height, path);
       if (error)
       {
         throw script_exception(
@@ -45,32 +45,29 @@ namespace noggit
           "failed to load png image with error code:"
           + std::to_string (error));
       }
-      img_resize(img, img._width, img._height);
-      memcpy(img.get_image(), vec.data(), vec.size());
-      return img;
+      resize(_width, _height);
+      memcpy(get_image(), vec.data(), vec.size());
     }
 
-    image create_image(int width, int height)
+    image::image(int width, int height)
     {
-      image img;
-      img_resize(img,width,height);
-      return img;
+      resize(width,height);
     }
 
-    int img_width(image const& img)
+    int image::width()
     {
-      return img._width;
+      return _width;
     }
 
-    int img_height(image const& img)
+    int image::height()
     {
-      return img._height;
+      return _height;
     }
 
-    int img_get_index(image const& img, int x, int y)
+    int image::get_index(int x, int y)
     {
-      int index = ((x + y * img._width) * 4);
-      if(index<0||index>=img._size)
+      int index = ((x + y * _width) * 4);
+      if(index<0||index>=_size)
       {
         throw script_exception(
           "img_get_index",
@@ -79,34 +76,34 @@ namespace noggit
             + " y="
             + std::to_string(y)
             + " width="
-            + std::to_string(img._width)
+            + std::to_string(_width)
             + " height="
-            + std::to_string(img._height));
+            + std::to_string(_height));
       }
       return index;
     }
 
-    unsigned img_get_pixel(image const& img, int x, int y)
+    unsigned image::get_pixel(int x, int y)
     {
-      unsigned index = img_get_index(img, x, y);
-      return img.get_image()[index] << 24
-        | img.get_image()[index + 1] << 16
-        | img.get_image()[index + 2] << 8
-        | img.get_image()[index + 3];
+      unsigned index = get_index(x, y);
+      return get_image()[index] << 24
+        | get_image()[index + 1] << 16
+        | get_image()[index + 2] << 8
+        | get_image()[index + 3];
     }
 
-    void img_set_pixel(image& img, int x, int y, unsigned value)
+    void image::set_pixel(int x, int y, unsigned value)
     {
-      unsigned index = img_get_index(img, x, y);
-      img.get_image()[index] = (value << 24);
-      img.get_image()[index + 1] = (value << 16) & 0xff;
-      img.get_image()[index + 2] = (value << 8) & 0xff;
-      img.get_image()[index + 3] = (value) & 0xff;
+      unsigned index = get_index(x, y);
+      get_image()[index] = (value << 24);
+      get_image()[index + 1] = (value << 16) & 0xff;
+      get_image()[index + 2] = (value << 8) & 0xff;
+      get_image()[index + 3] = (value) & 0xff;
     }
 
-    void img_save(image& img, char const* filename)
+    void image::save(char const* filename)
     {
-      unsigned error = lodepng::encode(filename, img.get_image(), img._width, img._height);
+      unsigned error = lodepng::encode(filename, get_image(), _width, _height);
       if (error)
       {
         throw script_exception(
@@ -116,7 +113,7 @@ namespace noggit
       }
     }
 
-    float img_gradient_scale(image const& img, float rel)
+    float image::gradient_scale(float rel)
     {
       if(rel<0||rel>=1)
       {
@@ -126,9 +123,35 @@ namespace noggit
             + std::to_string(rel)
             + " (should be >= 0 and < 1)");
       }
-      int x = std::floor(rel * float(img._width));
+      int x = std::floor(rel * float(_width));
       // read red channel, but it shouldn't matter.
-      return float(img.get_image()[x * 4]) / 255.0;
+      return float(get_image()[x * 4]) / 255.0;
+    }
+
+    image create_image(int width ,int height)
+    {
+      return image(width, height);
+    }
+
+    image load_png(const char* path)
+    {
+      return image(path);
+    }
+
+    void register_image(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<image>("image"
+        , "get_index", &image::get_index
+        , "get_pixel", &image::get_pixel
+        , "gradient_scale", &image::gradient_scale
+        , "set_pixel", &image::set_pixel
+        , "save", &image::save
+        , "width", &image::width
+        , "height", &image::height
+      );
+
+      state->set_function("create_image",create_image);
+      state->set_function("load_png",load_png);
     }
   } // namespace scripting
 } // namespace noggit

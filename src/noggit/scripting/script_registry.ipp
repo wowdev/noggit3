@@ -12,6 +12,7 @@
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_math.hpp>
+#include <noggit/scripting/script_image.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit {
@@ -30,6 +31,7 @@ namespace noggit {
         register_random(lua, tool);
         register_noise(lua, tool);
         register_math(lua, tool);
+        register_image(lua, tool);
       }
     }
   }
