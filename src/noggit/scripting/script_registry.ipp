@@ -14,6 +14,7 @@
 #include <noggit/scripting/script_math.hpp>
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
+#include <noggit/scripting/script_standard_brush.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit {
@@ -34,6 +35,7 @@ namespace noggit {
         register_math(lua, tool);
         register_image(lua, tool);
         register_filesystem(lua, tool);
+        register_standard_brush(lua, tool);
       }
     }
   }
