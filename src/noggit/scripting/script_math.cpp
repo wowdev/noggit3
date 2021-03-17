@@ -1,6 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_math.hpp>
 
+#include <sol/sol.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
+
 #include <cmath>
 
 namespace noggit
@@ -54,6 +57,36 @@ namespace noggit
       float nz = lx * s + lz * c + origin.z;
 
       return math::vector_3d(nx, point.y, nz);
+    }
+
+    void register_math(sol::state * state, scripting_tool * tool)
+    {
+      state->set_function("round",round);
+      state->set_function("pow",pow);
+      state->set_function("log10",log10);
+      state->set_function("log",log);
+      state->set_function("ceil",ceil);
+      state->set_function("floor",floor);
+      state->set_function("exp",exp);
+      state->set_function("cbrt",cbrt);
+      state->set_function("acosh",acosh);
+      state->set_function("asinh",asinh);
+      state->set_function("atanh",atanh);
+      state->set_function("cosh",cosh);
+      state->set_function("sinh",sinh);
+      state->set_function("tanh",tanh);
+      state->set_function("acos",acos);
+      state->set_function("asin",asin);
+      state->set_function("atan",atan);
+      state->set_function("cos",cos);
+      state->set_function("sin",sin);
+      state->set_function("tan",tan);
+      state->set_function("sqrt",sqrt);
+      state->set_function("abs",abs);
+      state->set_function("lerp",lerp);
+      state->set_function("dist_2d",dist_2d);
+      state->set_function("dist_2d_compare",dist_2d_compare);
+      state->set_function("rotate_2d",rotate_2d);
     }
   } // namespace scripting
 } // namespace noggit

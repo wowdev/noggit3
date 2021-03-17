@@ -6,10 +6,15 @@
 #include <memory>
 #include <string>
 
+namespace sol {
+  class state;
+}
+
 namespace noggit
 {
   namespace scripting
   {
+    class scripting_tool;
     float round(float a1);
     float pow(float a1, float a2);
     float log10(float arg);
@@ -36,5 +41,7 @@ namespace noggit
     float dist_2d(math::vector_3d const& from, math::vector_3d const& to);
     int dist_2d_compare(math::vector_3d const& from, math::vector_3d const& to, float dist);
     math::vector_3d rotate_2d(math::vector_3d const& point, math::vector_3d const& origin, float angleDeg);
+
+    void register_math(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit
