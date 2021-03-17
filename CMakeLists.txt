@@ -395,8 +395,6 @@ set ( math_headers
 set ( scripting_sources
     src/noggit/scripting/script_standard_brush.cpp
     src/noggit/scripting/script_tex.cpp
-    src/noggit/scripting/script_vert_iterator.cpp
-    src/noggit/scripting/script_tex_iterator.cpp
     src/noggit/scripting/script_brush.cpp
     src/noggit/scripting/script_global.cpp
     src/noggit/scripting/script_chunk.cpp
@@ -418,8 +416,6 @@ set ( scripting_sources
 set ( scripting_headers
     src/noggit/scripting/script_standard_brush.hpp
     src/noggit/scripting/script_tex.hpp
-    src/noggit/scripting/script_vert_iterator.hpp
-    src/noggit/scripting/script_tex_iterator.hpp
     src/noggit/scripting/script_filesystem.hpp
     src/noggit/scripting/script_global.hpp
     src/noggit/scripting/script_noise.hpp
