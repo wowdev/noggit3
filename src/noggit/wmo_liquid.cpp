@@ -228,14 +228,9 @@ void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
   {
     opengl::scoped::vao_binder const _ (_vao);
     
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_buffer);
-    water_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const tex_coord_binder(_tex_coord_buffer);
-    water_shader.attrib(_, "tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const depth_binder(_depth_buffer);
-    water_shader.attrib(_, "depth", 1, GL_FLOAT, GL_FALSE, 0, 0);
+    water_shader.attrib(_, "position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    water_shader.attrib(_, "tex_coord", _tex_coord_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    water_shader.attrib(_, "depth", _depth_buffer, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
     indices_binder.bind();
   }

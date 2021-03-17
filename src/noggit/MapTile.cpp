@@ -357,6 +357,7 @@ void MapTile::draw ( math::frustum const& frustum
                    , bool& previous_chunk_had_shadows
                    , bool& previous_chunk_was_textured
                    , bool& previous_chunk_could_be_painted
+                   , std::vector<int>& textures_bound
                    )
 {
   if (!finished)
@@ -384,6 +385,7 @@ void MapTile::draw ( math::frustum const& frustum
                           , previous_chunk_had_shadows
                           , previous_chunk_was_textured
                           , previous_chunk_could_be_painted
+                          , textures_bound
                           );
     }
   }
@@ -430,14 +432,12 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 
     {
       opengl::scoped::vao_binder const _ (_mfbo_bottom_vao);
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder (_mfbo_bottom_vbo);
-      mfbo_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      mfbo_shader.attrib(_, "position", _mfbo_bottom_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     {
       opengl::scoped::vao_binder const _(_mfbo_top_vao);
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder(_mfbo_top_vbo);
-      mfbo_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+      mfbo_shader.attrib(_, "position", _mfbo_top_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     _mfbo_buffer_are_setup = true;

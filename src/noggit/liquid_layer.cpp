@@ -442,20 +442,9 @@ void liquid_layer::update_buffers()
 
 void liquid_layer::update_vao(opengl::scoped::vao_binder const& bound_vao, opengl::scoped::use_program& water_shader)
 {
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
-    water_shader.attrib(bound_vao, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_depth_vbo);
-    water_shader.attrib(bound_vao, "depth", 1, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_tex_coord_vbo);
-    water_shader.attrib(bound_vao, "tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
-  }
+  water_shader.attrib(bound_vao, "position", _vertices_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  water_shader.attrib(bound_vao, "depth", _depth_vbo, 1, GL_FLOAT, GL_FALSE, 0, 0);
+  water_shader.attrib(bound_vao, "tex_coord", _tex_coord_vbo, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   _vao_need_update = false;
 }

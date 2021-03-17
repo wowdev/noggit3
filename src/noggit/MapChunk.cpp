@@ -515,25 +515,10 @@ void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const
 {
   opengl::scoped::vao_binder const _ (_vao);
 
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
-    mcnk_shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_normals_vbo);
-    mcnk_shader.attrib(_, "normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mccv_vbo);
-    mcnk_shader.attrib(_, "mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(tex_coord_vbo);
-    mcnk_shader.attrib(_, "texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
-  }
+  mcnk_shader.attrib(_, "position", _vertices_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  mcnk_shader.attrib(_, "normal", _normals_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  mcnk_shader.attrib(_, "mccv", _mccv_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  mcnk_shader.attrib(_, "texcoord", tex_coord_vbo, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   _need_vao_update = false;
   _need_indice_buffer_update = true;
@@ -569,6 +554,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , bool& previous_chunk_had_shadows
                     , bool& previous_chunk_was_textured
                     , bool& previous_chunk_could_be_painted
+                    , std::vector<int>& textures_bound
                     )
 {
   if (need_visibility_update || _need_visibility_update)
@@ -604,7 +590,7 @@ void MapChunk::draw ( math::frustum const& frustum
 
     for (int i = 0; i < texture_count; ++i)
     {
-      texture_set->bindTexture(i, i + 1);
+      texture_set->bindTexture(i, i + 1, textures_bound);
 
       if (texture_set->is_animated(i))
       {
