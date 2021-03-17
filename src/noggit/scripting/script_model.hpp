@@ -62,12 +62,10 @@ namespace noggit
       math::vector_3d _min;
       math::vector_3d _max;
 
-      char* _models = nullptr;
-      model* get_models() { return (model*)_models;}
+      std::vector<model> _models;
 
       bool _initialized = false;
       int _model_index = -1;
-      int _models_size = 0;
     };
 
     void register_model(sol::state * state, scripting_tool * tool);

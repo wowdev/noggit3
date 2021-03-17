@@ -136,26 +136,20 @@ namespace noggit
 
     void model_iterator::query()
     {
-      std::vector<model> models;
-
+      _models.clear();
       _world->for_each_m2_instance([&](ModelInstance& mod) {
         if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
-          models.push_back(model(&mod));
+          _models.push_back(model(&mod));
         }
       });
       _world->for_each_wmo_instance([&](WMOInstance& mod) {
         if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
-          models.push_back(model(&mod));
+          _models.push_back(model(&mod));
         }
       });
 
-      _models_size = models.size();
-      size_t size = models.size() * sizeof(model);
-      // TODO: Leak
-      _models = new char[size];
-      memcpy(get_models(), models.data(), size);
       _initialized = true;
       reset();
     }
@@ -172,25 +166,25 @@ namespace noggit
         query();
       }
 
-      if (_model_index >= int(_models_size))
+      if (_model_index >= _models.size())
       {
         return false;
       }
 
       ++_model_index;
-      return _model_index < _models_size;
+      return _model_index < _models.size();
     }
 
     model model_iterator::get()
     {
-      if(_model_index >= int(_models_size))
+      if(_model_index >= _models.size())
       {
         throw script_exception(
           "model_iterator#get",
           "accessing invalid model: iterator is done");
       }
 
-      return get_models()[_model_index];
+      return _models[_model_index];
     }
 
     void register_model(sol::state * state, scripting_tool * tool)
