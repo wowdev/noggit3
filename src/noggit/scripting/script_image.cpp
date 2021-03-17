@@ -25,8 +25,6 @@ namespace noggit
         _size = width*height*4;
         _width = width;
         _height = height;
-        // TODO: leak
-        _image = new char[_size];
     }
 
     image::image(char const* path)
@@ -35,9 +33,7 @@ namespace noggit
       {
           throw script_exception("load_png","empty png path");
       }
-      // annoying, but lodepng only takes a vector
-      std::vector<unsigned char> vec;
-      unsigned error = lodepng::decode(vec, _width, _height, path);
+      unsigned error = lodepng::decode(_image, _width, _height, path);
       if (error)
       {
         throw script_exception(
@@ -46,7 +42,6 @@ namespace noggit
           + std::to_string (error));
       }
       resize(_width, _height);
-      memcpy(get_image(), vec.data(), vec.size());
     }
 
     image::image(int width, int height)

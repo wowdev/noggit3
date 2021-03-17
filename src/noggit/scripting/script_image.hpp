@@ -20,7 +20,7 @@ namespace noggit
       image() = default;
       image(char const* path);
       image(int width, int height);
-      char* _image;
+      std::vector<unsigned char> _image;
 
       int get_index(int x, int y);
       unsigned get_pixel(int x, int y);
@@ -31,7 +31,7 @@ namespace noggit
       int height();
     private:
       void resize(int width, int height);
-      unsigned char* get_image() const {return (unsigned char*)_image;}
+      unsigned char* get_image() {return _image.data();}
       unsigned _width = 0;
       unsigned _height = 0;
       unsigned _size = 0;
