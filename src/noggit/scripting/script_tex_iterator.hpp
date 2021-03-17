@@ -10,7 +10,7 @@ namespace sol {
 
 namespace noggit {
   namespace scripting {
-    struct tex;
+    class tex;
     class scripting_tool;
     class tex_iterator {
       public:

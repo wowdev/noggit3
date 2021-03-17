@@ -2,6 +2,9 @@
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_exception.hpp>
 
+#include <sol/sol.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
+
 #include <vector>
 
 // amount of texunits per chunk length
@@ -29,66 +32,65 @@ namespace noggit
     {
     }
 
-    void vert_set_height(vert& vert, float value)
+    void vert::set_height(float value)
     {
-      vert._chunk->mVertices[vert._index].y = value;
+      _chunk->mVertices[_index].y = value;
     }
 
-    void vert_add_height(vert& vert, float value)
+    void vert::add_height(float value)
     {
-      vert._chunk->mVertices[vert._index].y += value;
+      _chunk->mVertices[_index].y += value;
     }
 
-    void vert_sub_height(vert& vert, float value)
+    void vert::sub_height(float value)
     {
-      vert._chunk->mVertices[vert._index].y -= value;
+      _chunk->mVertices[_index].y -= value;
     }
 
-    void vert_set_color(vert& vert, float r, float g, float b)
+    void vert::set_color(float r, float g, float b)
     {
-      vert._chunk->maybe_create_mccv();
-      vert._chunk->mccv[vert._index] = math::vector_3d(r, g, b);
+      _chunk->maybe_create_mccv();
+      _chunk->mccv[_index] = math::vector_3d(r, g, b);
     }
 
-    void vert_set_water(vert& vert, int type, float height)
+    void vert::set_water(int type, float height)
     {
-      if (!vert_is_water_aligned(vert))
+      if (is_water_aligned())
       {
         return;
       }
 
       // TODO: Extremely inefficient
-      vert._chunk->liquid_chunk()->paintLiquid(vert_get_pos(vert), 1, type, true, math::radians(0), math::radians(0), true, math::vector_3d(0, height, 0), true, true, vert._chunk, 1);
+      _chunk->liquid_chunk()->paintLiquid(get_pos(), 1, type, true, math::radians(0), math::radians(0), true, math::vector_3d(0, height, 0), true, true, _chunk, 1);
     }
 
-    void vert_set_hole(vert& vert, bool add)
+    void vert::set_hole(bool add)
     {
-      vert._chunk->setHole(vert_get_pos(vert), false, add);
+      _chunk->setHole(get_pos(), false, add);
     }
 
-    math::vector_3d vert_get_pos(vert const& vert)
+    math::vector_3d vert::get_pos()
     {
-      return vert._chunk->mVertices[vert._index];
+      return _chunk->mVertices[_index];
     }
 
-    void vert_set_alpha(vert& vert, int index, float alpha)
+    void vert::set_alpha(int index, float alpha)
     {
       if(index<0||index>3)
       {
         throw script_exception(
-            "vert_set_alpha",
+            "vert::set_alpha",
             std::string("invalid texture layer: ")
-          + std::to_string(index)
-          + std::string(" (in call to vert_set_alpha)"));
+          + std::to_string(index));
       }
       if (index == 0)
       {
         return;
       }
-      auto& ts = vert._chunk->texture_set;
+      auto& ts = _chunk->texture_set;
       ts->create_temporary_alphamaps_if_needed();
 
-      auto tex_indices = texture_index[vert._index];
+      auto tex_indices = texture_index[_index];
 
       for (auto iter = std::begin(tex_indices.indices); iter != std::end(tex_indices.indices); ++iter)
       {
@@ -98,24 +100,22 @@ namespace noggit
       }
     }
 
-    float vert_get_alpha(vert const& vert, int index)
+    float vert::get_alpha(int index)
     {
       if(index<0||index>3)
       {
         throw script_exception(
-            "vert_get_alpha",
-            std::string("invalid texture layer: ")
-          + std::to_string(index)
-          + std::string(" (in call to vert_get_alpha)")
-          );
+          "vert::get_alpha",
+          std::string("invalid texture layer: ")
+          + std::to_string(index));
       }
       if (index == 0)
       {
         return 1;
       }
-      auto& ts = vert._chunk->texture_set;
+      auto& ts = _chunk->texture_set;
       ts->create_temporary_alphamaps_if_needed();
-      auto tex_indices = texture_index[vert._index];
+      auto tex_indices = texture_index[_index];
 
       float sum = 0;
       int ctr = 0;
@@ -129,49 +129,46 @@ namespace noggit
       return sum / float(ctr);
     }
 
-    bool vert_is_water_aligned(vert const& vert)
+    bool vert::is_water_aligned()
     {
-      return (vert._index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
+      return (_index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
     }
 
-    namespace
+    bool vert::is_tex_done()
     {
-      bool is_tex_done(vert& vert)
-      {
-        return vert._tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[vert._index].indices[vert._tex_index] == -1;
-      }
+      return _tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[_index].indices[_tex_index] == -1;
     }
 
-    void vert_reset_tex(vert& vert)
+    void vert::reset_tex()
     {
-      vert._tex_index = -1;
+      _tex_index = -1;
     }
 
-    bool vert_next_tex(vert& vert)
+    bool vert::next_tex()
     {
-      ++vert._tex_index;
-      return !is_tex_done(vert);
+      ++_tex_index;
+      return !is_tex_done();
     }
 
-    tex vert_get_tex(vert& vert)
+    tex vert::get_tex()
     {
-      if(is_tex_done(vert))
+      if(is_tex_done())
       {
         throw script_exception(
-          "vert_get_tex",
+          "vert::get_tex",
           "accessing invalid texture unit: iterator is done");
       }
-      return tex(vert._chunk, texture_index[vert._index].indices[vert._tex_index]);
+      return tex(_chunk, texture_index[_index].indices[_tex_index]);
     }
 
-    float tex_get_alpha(tex const& tex, int index)
+    float tex::get_alpha(int index)
     {
-      auto& ts = tex._chunk->texture_set;
+      auto& ts = _chunk->texture_set;
       ts->create_temporary_alphamaps_if_needed();
-      return ts->tmp_edit_values.get()[index][tex._index];
+      return ts->tmp_edit_values.get()[index][_index];
     }
 
-    void tex_set_alpha(tex& tex, int index, float value)
+    void tex::set_alpha(int index, float value)
     {
       if(index<0||index>3)
       {
@@ -182,18 +179,43 @@ namespace noggit
           + std::string(" (in call to tex_set_alpha)")
           );
       }
-      auto& ts = tex._chunk->texture_set;
+      auto& ts = _chunk->texture_set;
       ts->create_temporary_alphamaps_if_needed();
-      ts->tmp_edit_values.get()[index][tex._index] = value;
+      ts->tmp_edit_values.get()[index][_index] = value;
     }
 
-    math::vector_3d tex_get_pos_2d(tex const& tex)
+    math::vector_3d tex::get_pos_2d()
     {
-      float cx = tex._chunk->xbase;
-      float cz = tex._chunk->zbase;
-      float x = tex._index % TEXTURE_UNITS_WIDTH;
-      float z = (float(tex._index) / float(TEXTURE_UNITS_WIDTH));
+      float cx = _chunk->xbase;
+      float cz = _chunk->zbase;
+      float x = _index % TEXTURE_UNITS_WIDTH;
+      float z = (float(_index) / float(TEXTURE_UNITS_WIDTH));
       return math::vector_3d(cx + x * TEXDETAILSIZE, 0, cz + z * TEXDETAILSIZE);
+    }
+
+    void register_vert(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<vert>("vert"
+        , "get_pos", &vert::get_pos
+        , "set_height", &vert::set_height
+        , "add_height", &vert::add_height
+        , "sub_height", &vert::sub_height
+        , "set_color", &vert::set_color
+        , "set_water", &vert::set_water
+        , "set_hole", &vert::set_hole
+        , "set_alpha", &vert::set_alpha
+        , "get_alpha", &vert::get_alpha
+        , "next_tex", &vert::next_tex
+        , "reset_tex", &vert::reset_tex
+        , "get_tex", &vert::get_tex
+        , "is_water_aligned", &vert::is_water_aligned
+      );
+
+      state->new_usertype<tex>("tex"
+        , "set_alpha", &tex::set_alpha
+        , "get_alpha", &tex::get_alpha
+        , "get_pos_2d", &tex::get_pos_2d
+      );
     }
   } // namespace scripting
 } // namespace noggit

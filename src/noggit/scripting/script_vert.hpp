@@ -4,47 +4,60 @@
 #include <noggit/MapChunk.h>
 #include <math/vector_3d.hpp>
 
+namespace sol {
+  class state;
+}
+
 namespace noggit
 {
   namespace scripting
   {
     struct selection;
+    class scripting_tool;
 
-    struct vert
+    class tex
     {
+    public:
+      tex(MapChunk* chunk, int index);
+      tex() = default;
+
+      void set_alpha(int index, float alpha);
+      float get_alpha(int index);
+      math::vector_3d get_pos_2d();
+    
+    private:
+      MapChunk* _chunk;
+      int _index;
+    };
+
+    class vert
+    {
+    public:
       vert(MapChunk* chunk, int index);
       vert() = default;
+      math::vector_3d get_pos();
+      void set_height(float y);
+      void add_height(float y);
+      void sub_height(float y);
+
+      void set_color(float r, float g, float b);
+      void set_water(int type, float height);
+      void set_hole(bool add);
+      void set_alpha(int index, float alpha);
+      float get_alpha(int index);
+      bool next_tex();
+      void reset_tex();
+
+      tex get_tex();
+      bool is_water_aligned();
+
+    private:
+      bool is_tex_done();
       MapChunk* _chunk;
       int _index;
       int _tex_index = -1;
     };
 
-    struct tex
-    {
-      tex() = default;
-      tex(MapChunk* chunk, int index);
-      MapChunk* _chunk;
-      int _index;
-    };
-
-    math::vector_3d vert_get_pos(vert const& vert);
-    void vert_set_height(vert& vert, float y);
-    void vert_add_height(vert& vert, float y);
-    void vert_sub_height(vert& vert, float y);
-
-    void vert_set_color(vert& vert, float r, float g, float b);
-    void vert_set_water(vert& vert, int type, float height);
-    void vert_set_hole(vert& vert, bool add);
-    void vert_set_alpha(vert& vert, int index, float alpha);
-    float vert_get_alpha(vert const& vert, int index);
-    bool vert_next_tex(vert& vert);
-    void vert_reset_tex(vert& vert);
-
-    tex vert_get_tex(vert& vert);
-    bool vert_is_water_aligned(vert const& chunk);
-
-    void tex_set_alpha(tex& tex, int index, float alpha);
-    float tex_get_alpha(tex const& tex, int index);
-    math::vector_3d tex_get_pos_2d(tex const& tex);
+    void register_vert(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit

@@ -10,7 +10,7 @@ namespace sol {
 
 namespace noggit {
   namespace scripting {
-    struct vert;
+    class vert;
     class scripting_tool;
 
     class vert_iterator {
