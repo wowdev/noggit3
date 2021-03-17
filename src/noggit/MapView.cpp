@@ -2704,7 +2704,7 @@ void MapView::focusOutEvent (QFocusEvent*)
   freelook = false;
 }
 
-void MapView::enterEvent(QEvent* event)
+void MapView::enterEvent(QEvent*)
 {
   // check if noggit is the currently active windows
   if (static_cast<QApplication*>(QApplication::instance())->applicationState() & Qt::ApplicationActive)

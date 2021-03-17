@@ -435,11 +435,8 @@ void Skies::update_vao(opengl::scoped::use_program& shader)
   {
     opengl::scoped::vao_binder const _ (_vao);
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_buffer (_vertices_vbo);
-    shader.attrib(_, "position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> colors_buffer (_colors_vbo);
-    shader.attrib(_, "color", 3, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "position", _vertices_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    shader.attrib(_, "color", _colors_vbo, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     indices_binder.bind();
   }
