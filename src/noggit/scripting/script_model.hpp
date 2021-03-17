@@ -10,24 +10,54 @@ class World;
 class ModelInstance;
 class WMOInstance;
 
+namespace sol {
+  class state;
+}
+
 namespace noggit
 {
   namespace scripting
   {
-    struct model
+    class scripting_tool;
+    class model
     {
+    public:
       model(ModelInstance* model);
       model(WMOInstance* model);
       model() = default;
 
+      math::vector_3d get_pos();
+      void set_pos(math::vector_3d& pos);
+
+      math::vector_3d get_rot();
+      void set_rot(math::vector_3d& rot);
+
+      float get_scale();
+      void set_scale(float scale);
+
+      unsigned get_uid();
+
+      void remove();
+
+      std::string get_filename();
+      void replace(const char* filename);
+
+    private:
       boost::variant<ModelInstance*, WMOInstance*> _impl;
     };
 
-    struct model_iterator
+    class model_iterator
     {
+    public:
       model_iterator(World* world, math::vector_3d min, math::vector_3d max);
       model_iterator() = default;
 
+      bool next();
+      void reset();
+      void query();
+      model get();
+
+    private:
       World* _world;
       math::vector_3d _min;
       math::vector_3d _max;
@@ -38,27 +68,8 @@ namespace noggit
       bool _initialized = false;
       int _model_index = -1;
       int _models_size = 0;
-
-      bool next();
-      void reset_itr();
-      void query();
-      model get();
     };
 
-    math::vector_3d model_get_pos(model const& model);
-    void model_set_pos(model& model, math::vector_3d& pos);
-
-    math::vector_3d model_get_rot(model const& model);
-    void model_set_rot(model& model, math::vector_3d& rot);
-
-    float model_get_scale(model const& model);
-    void model_set_scale(model& model, float scale);
-
-    unsigned model_get_uid(model const& model);
-
-    void model_remove(model& model);
-
-    std::string model_get_filename(model const& model);
-    void model_replace(model& model, const char* filename);
+    void register_model(sol::state * state, scripting_tool * tool);
   } // namespace scripting
 } // namespace noggit

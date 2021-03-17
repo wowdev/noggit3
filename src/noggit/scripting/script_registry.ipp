@@ -10,6 +10,7 @@
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_random.hpp>
 #include <noggit/scripting/script_noise.hpp>
+#include <noggit/scripting/script_model.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit {

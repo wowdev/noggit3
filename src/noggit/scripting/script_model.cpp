@@ -11,6 +11,7 @@
 
 #include <util/visit.hpp>
 
+#include <sol/sol.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
@@ -25,29 +26,29 @@ namespace noggit
       : _impl (model)
     {}
 
-    math::vector_3d model_get_pos(model const& model)
+    math::vector_3d model::get_pos()
     {
-      return util::visit (model._impl, [] (auto x) { return x->pos; });
+      return util::visit (_impl, [] (auto x) { return x->pos; });
     }
 
-    void model_set_pos(model& model, math::vector_3d& pos)
+    void model::set_pos(math::vector_3d& pos)
     {
-      return util::visit (model._impl, [&] (auto x) { x->pos = pos; });
+      return util::visit (_impl, [&] (auto x) { x->pos = pos; });
     }
 
-    math::vector_3d model_get_rot(model const& model)
+    math::vector_3d model::get_rot()
     {
-      return math::vector_3d {util::visit (model._impl, [] (auto x) { return x->dir; })};
+      return math::vector_3d {util::visit (_impl, [] (auto x) { return x->dir; })};
     }
 
-    void model_set_rot(model& model, math::vector_3d& rot)
+    void model::set_rot(math::vector_3d& rot)
     {
-      return util::visit (model._impl, [&] (auto x) { x->dir = math::degrees::vec3 {rot}; });
+      return util::visit (_impl, [&] (auto x) { x->dir = math::degrees::vec3 {rot}; });
     }
 
-    float model_get_scale(model const& model)
+    float model::get_scale()
     {
-      return util::visit ( model._impl
+      return util::visit ( _impl
                          , [] (ModelInstance const* as_m2) {
                              return as_m2->scale;
                            }
@@ -57,9 +58,9 @@ namespace noggit
                          );
     }
 
-    void model_set_scale(model& model, float scale)
+    void model::set_scale(float scale)
     {
-      return util::visit ( model._impl
+      return util::visit ( _impl
                          , [&] (ModelInstance* as_m2) {
                              as_m2->scale = scale;
                            }
@@ -67,9 +68,9 @@ namespace noggit
                          );
     }
 
-    unsigned model_get_uid(model const& model)
+    unsigned model::get_uid()
     {
-      return util::visit ( model._impl
+      return util::visit ( _impl
                          , [] (ModelInstance const* as_m2) {
                              return as_m2->uid;
                            }
@@ -79,9 +80,9 @@ namespace noggit
                          );
           }
 
-    std::string model_get_filename(model const& model)
+    std::string model::get_filename()
     {
-      return util::visit ( model._impl
+      return util::visit ( _impl
                       , [] (ModelInstance const* as_m2) {
                           return as_m2->model->filename;
                         }
@@ -91,17 +92,15 @@ namespace noggit
                       );
     }
 
-    void model_remove(model& model)
+    void model::remove()
     {
       std::vector<selection_type> type;
-
-      util::visit (model._impl, [&] (auto x) { type.emplace_back (x); });
-
+      util::visit (_impl, [&] (auto x) { type.emplace_back (x); });
       // TODO: fix
       //get_ctx(context, "model_remove")->_world->delete_models(type);
     }
 
-    void model_replace(model& model, char const* filename)
+    void model::replace(char const* filename)
     {
       if(filename==nullptr)
       {
@@ -110,12 +109,12 @@ namespace noggit
           "empty filename (in call to model_replace)");
       }
 
-      if (model_get_filename(model) == filename)
+      if (get_filename() == filename)
       {
         return;
       }
 
-      model_remove(model);
+      remove();
 
       if (boost::ends_with(filename, ".wmo"))
       {
@@ -158,10 +157,10 @@ namespace noggit
       _models = new char[size];
       memcpy(get_models(), models.data(), size);
       _initialized = true;
-      reset_itr();
+      reset();
     }
 
-    void model_iterator::reset_itr()
+    void model_iterator::reset()
     {
       _model_index = -1;
     }
@@ -192,6 +191,28 @@ namespace noggit
       }
 
       return get_models()[_model_index];
+    }
+
+    void register_model(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<model>("model"
+        , "get_pos", &model::get_pos
+        , "set_pos", &model::set_pos
+        , "get_rot", &model::get_rot
+        , "set_rot", &model::set_rot
+        , "get_scale", &model::get_scale
+        , "set_scale", &model::set_scale
+        , "get_uid", &model::get_uid
+        , "remove", &model::remove
+        , "get_filename", &model::get_filename
+        , "replace", &model::replace
+      );
+
+      state->new_usertype<model_iterator>("model_iterator"
+        , "next", &model_iterator::next
+        , "reset", &model_iterator::reset
+        , "get", &model_iterator::get
+      );
     }
   } // namespace scripting
 } // namespace noggit
