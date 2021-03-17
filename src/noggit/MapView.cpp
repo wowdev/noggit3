@@ -36,6 +36,7 @@
 #include <noggit/ui/texture_palette_small.hpp>
 #ifdef NOGGIT_HAS_SCRIPTING
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_settings.hpp>
 #endif
 #include <opengl/scoped.hpp>
 
@@ -193,7 +194,7 @@ void MapView::createGUI()
 {
 #ifdef NOGGIT_HAS_SCRIPTING
   _script_tool_dock = new QDockWidget("Scripting", this);
-  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock);
+  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock, this->_world.get(), &this->_camera);
   _script_tool_dock->setWidget(scriptingTool);
   _tool_properties_docks.insert(_script_tool_dock);
 #endif
@@ -2419,8 +2420,8 @@ void MapView::draw_map()
     break;
 #ifdef NOGGIT_HAS_SCRIPTING
   case editing_mode::scripting:
-    radius = scriptingTool->brushRadius();
-    inner_radius = scriptingTool->innerRadius();
+    radius = scriptingTool->get_settings()->brushRadius();
+    inner_radius = scriptingTool->get_settings()->innerRadius();
     break;
 #endif
   }

@@ -1,13 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-<<<<<<< HEAD
-=======
-
->>>>>>> default
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
-
-#include <das/Context.fwd.hpp>
 
 #include <lodepng.h>
 
@@ -17,8 +11,6 @@ namespace noggit
   {
     static void img_resize(image& img, int width, int height)
     {
-      void img_resize(image& img, int width, int height, das::Context* ctx)
-      {
         if(width<=0||height<=0)
         {
           throw script_exception(
@@ -29,17 +21,11 @@ namespace noggit
             + std::to_string(height)
           );
         }
-        // m is for more fun
         img._size = width*height*4;
         img._width = width;
         img._height = height;
-        img._image = script_calloc(img._size, ctx);
-      }
-      img._size = width*height*4;
-      img._width = width;
-      img._height = height;
-      // TODO: leak
-      img._image = new char[img._size];
+        // TODO: leak
+        img._image = new char[img._size];
     }
 
     image load_png(char const* path)

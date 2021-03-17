@@ -24,8 +24,7 @@ namespace noggit
     struct script_vec;
     struct script_click_event
     {
-      script_click_event(World* world, math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space, float dt);
-      World* _world;
+      script_click_event(math::vector_3d pos, float outer_radius, float inner_radius, noggit::camera* camera, bool alt, bool shift, bool ctrl, bool space, float dt);
       math::vector_3d _pos;
       float _outer_radius;
       float _inner_radius;

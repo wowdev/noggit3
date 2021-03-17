@@ -11,10 +11,11 @@ namespace noggit
   {
     namespace
     {
-      selection select_between_int(das::Context* context, const char* caller,math::vector_3d const& point1, math::vector_3d const& point2)
+      selection select_between_int(const char* caller,math::vector_3d const& point1, math::vector_3d const& point2)
       {
         selection sel;
-        sel._world = get_ctx(context, caller)->_world;
+        // TODO: restore
+        //sel._world = get_ctx(context, caller)->_world;
         sel._min = math::vector_3d(
           std::min(point1.x, point2.x),
           std::min(point1.y, point2.y),
@@ -34,14 +35,14 @@ namespace noggit
 
     selection select_origin(math::vector_3d const& origin, float xRadius, float zRadius)
     {
-      return select_between_int(context, "select_origin",
+      return select_between_int("select_origin",
                math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
                math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
     }
 
-    selection select_between(math::vector_3d const& point1, math::vector_3d const& point2, das::Context* context)
+    selection select_between(math::vector_3d const& point1, math::vector_3d const& point2)
     {
-      return select_between_int(context, "select_between",point1,point2);
+      return select_between_int("select_between",point1,point2);
     }
 
     math::vector_3d sel_center(selection const& sel) { return sel._center; }

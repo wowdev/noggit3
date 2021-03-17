@@ -2,10 +2,7 @@
 #pragma once
 
 #include <noggit/scripting/script_context.hpp>
-#include <noggit/scripting/script_loader.hpp>
 #include <noggit/tool_enums.hpp>
-
-#include <nlohmann/json.hpp>
 
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
@@ -31,14 +28,14 @@ namespace noggit
   class camera;
   namespace scripting
   {
+    class script_context;
+    class script_settings;
+    class script_profiles;
     class scripting_tool : public QWidget
     {
     public:
-      scripting_tool(QWidget* parent = nullptr);
+      scripting_tool(QWidget* parent, World* world, noggit::camera* camera);
       ~scripting_tool();
-
-      float brushRadius() const { return _radius; }
-      float innerRadius() const { return _inner_radius; }
 
       void addDescription(char const* text);
       void clearDescription();
@@ -58,107 +55,33 @@ namespace noggit
         bool holding_alt,
         bool holding_space);
 
-      void addDouble(char const* name, double min, double max, double def = 0, int zeros = 2);
-      void addInt(char const* name, int min, int max, int def = 0);
-      void addBool(char const* name, bool def = false);
-      void addString(char const* name, char const* def = "");
-      void addStringList(char const* name, char const* value);
-      void removeScriptWidgets();
+      World* get_world();
+      noggit::camera* get_camera();
       script_context* get_context();
-
-      void save_json() const;
+      script_settings* get_settings();
+      script_profiles* get_profiles();
 
     private:
-
-      friend int get_int_param(char const* path, das::Context* ctx);
-      friend double get_double_param(char const* path, das::Context* ctx);
-      friend float get_float_param(char const* path, das::Context* ctx);
-      friend bool get_bool_param(char const* path, das::Context* ctx);
-      friend char const* get_string_param(char const* path, das::Context* ctx);
-      friend char const* get_string_list_param(char const* path, das::Context* ctx);
-      friend script_context* get_ctx (das::Context* context, const char* caller);
-
-      Loader _loader;
-      nlohmann::json _json;
-
       std::mutex _script_change_mutex;
       std::string _cur_profile;
 
-      script_context* _update_context;
-
       bool _last_left = false;
       bool _last_right = false;
-
-      float _radius = 0;
-      float _inner_radius = 0;
 
     private:
       QComboBox* _selection;
       QPushButton* _reload_button;
 
-      QGroupBox* _radius_group;
-      QFormLayout* _radius_layout;
-      QDoubleSpinBox* _radius_spin;
-      QSlider* _radius_slider;
-
-      QDoubleSpinBox* _inner_radius_spin;
-      QSlider* _inner_radius_slider;
-
       QLabel* _description;
       QPlainTextEdit* _log;
 
-      QGroupBox* _script_settings_group;
-      QFormLayout* _script_settings_layout;
-
-      QGroupBox* _profile_group;
-      QGridLayout* _profile_select_column;
-      QComboBox* _profile_selection;
-      QLineEdit* _profile_name_entry;
-      QPushButton* _profile_remove_button;
-      QPushButton* _profile_create_button;
-
-      std::vector<QWidget*> _script_widgets;
-      std::vector<void*> _holders;
-      std::map<std::string, QComboBox*> _string_arrays;
-      std::mutex _script_change_mutex;
-
-    private:
-      nlohmann::json _json;
-      template <typename T>
-      T get_json_safe(std::string const& key, T def);
-      template <typename T>
-      void set_json_safe(std::string const& key, T def);
-
+      script_settings *_settings;
+      script_profiles *_profiles;
     private:
       script_context _script_context;
-
-      void select_profile(int profile);
-      void on_change_script(int script_index);
-      void initialize_radius();
-
-      template <typename T>
-        T get_json_safe (std::string key, T def);
-      template <typename T>
-        T get_json_unsafe (std::string key);
-      template <typename T>
-        void set_json_safe (std::string key, T def);
-      template <typename T>
-        void set_json_unsafe (std::string key, T value);
+      World *_world;
+      noggit::camera *_camera;
+      void change_script(int script_index);
     };
-
-    int get_int_param(char const* path);
-    double get_double_param(char const* path);
-    float get_float_param(char const* path);
-    bool get_bool_param(char const* path);
-    std::string get_string_param(char const* path);
-    std::string get_string_list_param(char const* path);
-
-    void add_string_list_param(char const* path, char const* value, das::Context*);
-    void add_string_param(char const* path, char const* def, das::Context*);
-    void add_int_param(char const* path, int min, int max, int def, das::Context*);
-    void add_double_param(char const* path, double min, double max, double def, int zeros, das::Context*);
-    void add_float_param(char const* path, float min, float max, float def, int zeros, das::Context*);
-    void add_bool_param(char const* path, bool def, das::Context*);
-    void add_description(char const* desc, das::Context*);
   } // namespace scripting
 } // namespace noggit

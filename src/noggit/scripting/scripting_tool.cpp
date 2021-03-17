@@ -8,6 +8,8 @@
 #include <noggit/World.h>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_profiles.hpp>
+#include <noggit/scripting/script_settings.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QDoubleSpinBox>
@@ -19,57 +21,19 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#define SCRIPT_FILE "script_settings.json"
-#define INNER_RADIUS_PATH "__inner_radius"
-#define OUTER_RADIUS_PATH "__outer_radius"
 #define CUR_PROFILE_PATH "__cur_profile"
 
 namespace noggit
 {
   namespace scripting
   {
-    template <typename T>
-      T scripting_tool::get_json_safe (std::string key, T def)
-    {
-      // TODO: this is terrible but accessing by reference didn't seem to work.
-      auto ssn = _loader.selected_script_name();
-
-      if (!_json[ssn][_cur_profile].contains(key))
-      {
-        _json[ssn][_cur_profile][key] = def;
-      }
-
-      return _json[ssn][_cur_profile][key];
-    }
-
-    template <typename T>
-      void scripting_tool::set_json_safe (std::string key, T def)
-    {
-      auto ssn = _loader.selected_script_name();
-      _json[ssn][_cur_profile][key] = def;
-    }
-
-    template <typename T>
-      void scripting_tool::set_json_unsafe (std::string key, T value)
-    {
-      _json[_loader.selected_script_name()][_cur_profile][key] = value;
-    }
-
-    template <typename T>
-      T scripting_tool::get_json_unsafe (std::string key)
-    {
-      return _json[_loader.selected_script_name()][_cur_profile][key].get<T>();
-    }
-
     void scripting_tool::doReload()
     {
-      int selection = -1;
-
-      removeScriptWidgets();
+      get_settings()->clear();
       clearLog();
       try
       {
-        selection = _loader.load_scripts (this);
+        get_context()->reset(this);
       }
       catch (std::exception const& e)
       {
@@ -77,33 +41,39 @@ namespace noggit
         resetLogScroll();
         return;
       }
-      _selection->clear();
-      for(auto& script: get_context()->)
+      int selection = get_context()->get_selection();
 
-      for (int i = 0; i < _loader.script_count(); ++i)
+      _selection->clear();
+
+      for(auto& script : get_context()->get_scripts())
       {
-        _selection->addItem(_loader.get_script_display_name(i));
+        _selection->addItem(script.get_name().c_str());
       }
 
       if (selection != -1)
       {
         _selection->setCurrentIndex(selection);
-        on_change_script(selection);
+        change_script(selection);
       }
     }
 
-    void scripting_tool::on_change_script(int selection)
+    void scripting_tool::change_script(int selection)
     {
       std::lock_guard<std::mutex> const lock (_script_change_mutex);
-      removeScriptWidgets();
-      clearDescription();
 
-      auto sn = _loader.get_script_name(selection);
-      _profile_selection->clear();
-      if (_json.contains(sn))
+      clearDescription();
+      get_settings()->clear();
+
+      auto sn = _script_context.get_scripts()[selection].get_name();
+
+      get_profiles()->clear();
+
+      auto json = get_settings()->get_raw_json();
+
+      if (json->contains(sn))
       {
         std::vector<std::string> items;
-        for (auto& v : _json[sn].items())
+        for (auto& v : (*json)[sn].items())
         {
           if (v.key() != CUR_PROFILE_PATH)
           {
@@ -121,25 +91,25 @@ namespace noggit
 
         for (auto& item : items)
         {
-          _profile_selection->addItem(QString::fromStdString (item));
+          get_profiles()->add_profile(item);
         }
       }
 
-      if (_profile_selection->count() == 0)
+      if (get_profiles()->profile_count() == 0)
       {
-        _profile_selection->addItem("Default");
+        get_profiles()->add_profile("Default");
       }
 
       int next_profile = 0;
-      auto cur_script = _loader.get_script_name(selection);
-      if (_json.contains(cur_script))
+      auto cur_script = get_context()->get_scripts()[selection].get_name();
+      if (json->contains(cur_script))
       {
-        if (_json[cur_script].contains(CUR_PROFILE_PATH))
+        if ((*json)[cur_script].contains(CUR_PROFILE_PATH))
         {
-          auto str = _json[cur_script][CUR_PROFILE_PATH];
-          for (int i = 0; i < _profile_selection->count(); ++i)
+          auto str = (*json)[cur_script][CUR_PROFILE_PATH];
+          for (int i = 0; i < get_profiles()->profile_count(); ++i)
           {
-            if (_profile_selection->itemText(i) == QString::fromStdString (str))
+            if (get_profiles()->get_profile(i) == str)
             {
               next_profile = i;
               break;
@@ -148,63 +118,17 @@ namespace noggit
         }
       }
 
-      _cur_profile = _profile_selection->itemText(next_profile).toStdString();
-      _profile_selection->setCurrentIndex(next_profile);
-      _json[cur_script][CUR_PROFILE_PATH] = _cur_profile;
-      _loader.select_script(selection, this);
-
-      initialize_radius();
-      for (auto& item : _string_arrays)
-      {
-        // if the index is 0, that MIGHT mean the value we have
-        // is invalid (old script), so we just write it again to be safe.
-        if (item.second->currentIndex() == 0)
-        {
-          set_json_unsafe (item.first, item.second->itemText(0).toStdString());
-        }
-      }
+      get_profiles()->set_profile(next_profile);
+      get_context()->select_script(selection);
+      get_settings()->initialize();
     }
 
-    namespace
-    {
-      void readScriptSettings (nlohmann::json& json)
-      {
-        if (!boost::filesystem::exists(SCRIPT_FILE))
-        {
-          return;
-        }
-
-        try
-        {
-          std::ifstream(SCRIPT_FILE) >> json;
-        }
-        catch (std::exception err)
-        {
-          if(!boost::filesystem::exists(SCRIPT_FILE))
-          {
-            return;
-          }
-          // back up broken script settings, since they won't be read and will be overwritten.
-          std::string backup_file = std::string(SCRIPT_FILE) + ".backup";
-          int i = 0;
-          while (boost::filesystem::exists(backup_file+std::to_string(i)))
-          {
-              ++i;
-          }
-          boost::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
-
-          // Add a message box here
-        }
-      }
-    }
-
-    scripting_tool::scripting_tool(QWidget* parent)
+    scripting_tool::scripting_tool(QWidget* parent, World * world, noggit::camera * camera)
       : QWidget(parent)
       , _cur_profile ("Default")
-      , _update_context (nullptr)
+      , _world(world)
+      , _camera(camera)
     {
-      readScriptSettings (_json);
-
       auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
       layout->addWidget(_selection);
@@ -215,55 +139,12 @@ namespace noggit
         doReload();
       });
 
-      // Profiles
-      _profile_group = new QGroupBox("Script Profiles");
-      _profile_select_column = new QGridLayout(_profile_group);
+      _profiles = new script_profiles(this);
+      layout->addWidget(_profiles);
 
-      _profile_selection = new QComboBox(this);
-      _profile_selection->addItem("Default");
-      _profile_remove_button = new QPushButton("X", this);
-      _profile_name_entry = new QLineEdit(this);
-      _profile_create_button = new QPushButton("Add", this);
-
-      _profile_select_column->addWidget(_profile_selection, 0, 0);
-      _profile_select_column->addWidget(_profile_remove_button, 0, 1);
-
-      _profile_select_column->addWidget(_profile_name_entry, 1, 0);
-      _profile_select_column->addWidget(_profile_create_button, 1, 1);
-
-      layout->addWidget(_profile_group);
-
-      _radius_spin = new QDoubleSpinBox(this);
-      _radius_spin->setRange(0.0f, 1000.0f);
-      _radius_spin->setDecimals(2);
-      _radius_spin->setValue(_radius);
-
-      _radius_slider = new QSlider(Qt::Orientation::Horizontal, this);
-      _radius_slider->setRange(0, 1000);
-      _radius_slider->setSliderPosition((int)std::round(_radius));
-
-      _inner_radius_spin = new QDoubleSpinBox(this);
-      _inner_radius_spin->setRange(0.0f, 1.0f);
-      _inner_radius_spin->setDecimals(2);
-      _inner_radius_spin->setValue(_inner_radius);
-      _inner_radius_spin->setSingleStep(0.05f);
-
-      _inner_radius_slider = new QSlider(Qt::Orientation::Horizontal, this);
-      _inner_radius_slider->setRange(0, 100);
-      _inner_radius_slider->setSliderPosition((int)std::round(_inner_radius * 100));
-
-      _radius_group = new QGroupBox("Radius");
-      _radius_layout = new QFormLayout(_radius_group);
-      _radius_layout->addRow("Outer:", _radius_spin);
-      _radius_layout->addRow(_radius_slider);
-      _radius_layout->addRow("Inner:", _inner_radius_spin);
-      _radius_layout->addRow(_inner_radius_slider);
-
-      layout->addWidget(_radius_group);
-
-      _script_settings_group = new QGroupBox("Script Settings");
-      _script_settings_layout = new QFormLayout(_script_settings_group);
-      layout->addWidget(_script_settings_group);
+      _settings = new script_settings(this);
+      _settings->load_json();
+      layout->addWidget(_settings);
 
       _description = new QLabel(this);
       layout->addWidget(_description);
@@ -273,111 +154,9 @@ namespace noggit
       _log->setReadOnly(true);
       layout->addWidget(_log);
 
-      connect(_radius_spin, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double v) {
-        _radius = v;
-        QSignalBlocker const blocker(_radius_slider);
-        _radius_slider->setSliderPosition((int)std::round(v));
-        set_json_unsafe (OUTER_RADIUS_PATH, v);
-      });
-
-      connect(_radius_slider, &QSlider::valueChanged, [&](int v) {
-        _radius = v;
-        QSignalBlocker const blocker(_radius_spin);
-        _radius_spin->setValue(v);
-        set_json_unsafe (OUTER_RADIUS_PATH, v);
-      });
-
-      connect(_inner_radius_spin, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double v) {
-        _inner_radius = v;
-        QSignalBlocker const blocker(_inner_radius_slider);
-        _inner_radius_slider->setSliderPosition((int)std::round(v * 100));
-        set_json_unsafe (INNER_RADIUS_PATH, v);
-      });
-
-      connect(_inner_radius_slider, &QSlider::valueChanged, [&](int v) {
-        _inner_radius = v / 100.0f;
-        QSignalBlocker const blocker(_inner_radius_spin);
-        _inner_radius_spin->setValue(_inner_radius);
-        set_json_unsafe (INNER_RADIUS_PATH, _inner_radius);
-      });
-
-      connect(_profile_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
-        select_profile(index);
-      });
-
-      connect(_profile_remove_button, &QPushButton::released, this, [this]() {
-        auto script_name = _loader.selected_script_name();
-        if (script_name.size() == 0)
-        {
-          // TODO: error?
-          return;
-        }
-
-        auto index = _profile_selection->currentIndex();
-
-        // do not allow deleting default settings
-        if (index == 0)
-        {
-          return;
-        }
-
-        auto text = _profile_selection->itemText(index).toStdString();
-        _profile_selection->removeItem(index);
-
-        if (_json.contains(script_name))
-        {
-          if (_json[script_name].contains(text))
-          {
-            _json[script_name].erase(text);
-          }
-        }
-
-        // go back to default, so we don't accidentally delete another profile
-        select_profile(0);
-      });
-
-      connect(_profile_create_button, &QPushButton::released, this, [this]() {
-        auto script_name = _loader.selected_script_name();
-
-        // do not allow invalid script
-        if (script_name.size() == 0)
-          return;
-
-        auto newText = _profile_name_entry->text();
-
-        // do not allow empty profiles
-        if (newText.isEmpty())
-          return;
-
-        auto count = _profile_selection->count();
-        for (int i = 0; i < count; ++i)
-        {
-          // do not allow duplicate profiles
-          if (_profile_selection->itemText(i) == newText)
-          {
-            return;
-          }
-        }
-
-        _profile_name_entry->clear();
-        _profile_selection->addItem (newText);
-
-        if (!_json[script_name].contains(newText.toStdString()))
-        {
-          if (_json[script_name].contains(_cur_profile))
-          {
-            _json[script_name][newText.toStdString()] = _json[script_name][_cur_profile];
-          }
-        }
-
-        _profile_selection->setCurrentIndex(count);
-
-        select_profile(count);
-      });
-
       connect(_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
         clearLog();
-        on_change_script(index);
+        change_script(index);
       });
 
       doReload();
@@ -385,150 +164,8 @@ namespace noggit
 
     scripting_tool::~scripting_tool()
     {
-      save_json();
-      }
-
-    void scripting_tool::save_json() const
-      {
-      std::ofstream(SCRIPT_FILE) << std::setw(4) << _json << "\n";
-    }
-
-// i don't remember why this was a macro
-#define ADD_SLIDER(path, T, min, max, def, decimals)                                 \
-  double dp1 = decimals > 0 ? decimals + 5 : decimals + 1;                           \
-  auto spinner = new QDoubleSpinBox(this);                                           \
-  spinner->setRange(min, max);                                                       \
-  spinner->setDecimals(decimals);                                                    \
-  spinner->setValue(def);                                                            \
-  auto slider = new QSlider(Qt::Orientation::Horizontal, this);                      \
-  slider->setRange(min * dp1, max * dp1);                                            \
-  slider->setSliderPosition((int)std::round(def * dp1));                             \
-  auto label = new QLabel(this);                                                     \
-  label->setText(name);                                                              \
-  connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=](double v) { \
-    set_json_unsafe<T> (path, (T)v);                                                  \
-    QSignalBlocker const blocker(slider);                                            \
-    slider->setSliderPosition((int)std::round(v * dp1));                             \
-  });                                                                                \
-  connect(slider, &QSlider::valueChanged, [=](int v) {                               \
-    double t = double(v) / dp1;                                                      \
-    set_json_unsafe<T> (path, t);                                                     \
-    QSignalBlocker const blocker(spinner);                                           \
-    spinner->setValue(t);                                                            \
-  });                                                                                \
-                                                                                     \
-  _script_settings_layout->addRow(label, spinner);                                   \
-  _script_settings_layout->addRow("", slider);                                       \
-  _script_widgets.push_back(label);                                                  \
-  _script_widgets.push_back(spinner);                                                \
-  _script_widgets.push_back(slider);                                                 \
-  set_json_safe<T> (path, std::min(max, std::max(min, get_json_safe<T> (path, def)))); \
-  auto v = get_json_safe<T> (path, def);                                              \
-  slider->setSliderPosition((int)std::round(v * dp1));                               \
-  spinner->setValue(v);
-
-    void scripting_tool::addDouble(char const* name, double min, double max, double def, int zeros)
-    {
-      ADD_SLIDER(name, double, min, max, def, zeros);
-    }
-
-    void scripting_tool::addInt(char const* name, int min, int max, int def)
-    {
-      ADD_SLIDER(name, int, min, max, def, 0);
-    }
-
-    void scripting_tool::addBool(char const* name, bool def)
-    {
-      auto checkbox = new QCheckBox(this);
-      auto label = new QLabel(this);
-      label->setText(name);
-      connect(checkbox, &QCheckBox::stateChanged, this, [=](auto value) {
-        set_json_unsafe<bool> (name, value ? true : false);
-      });
-
-      _script_widgets.push_back(checkbox);
-      _script_widgets.push_back(label);
-      _script_settings_layout->addRow(label, checkbox);
-
-      checkbox->setCheckState(get_json_safe<bool> (name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-    }
-
-    void scripting_tool::addStringList(char const* name, char const* value)
-    {
-
-      if (_string_arrays.find(name) == _string_arrays.end())
-      {
-        auto box = new QComboBox(this);
-        auto label = new QLabel(this);
-
-        connect(box, QOverload<int>::of(&QComboBox::activated), this, [=](auto index) {
-          set_json_unsafe (name, box->itemText(index).toStdString());
-        });
-
-        box->addItem(value);
-        label->setText(name);
-
-        _string_arrays[name] = box;
-        _script_widgets.push_back(box);
-        _script_widgets.push_back(label);
-        _script_settings_layout->addRow(label, box);
-
-        // ensure there is at least one valid value in it
-        get_json_safe<std::string> (name, value);
-      }
-      else
-      {
-        auto box = _string_arrays[name];
-        box->addItem(value);
-
-        // we found the last selection, so change the index for that.
-        if (get_json_safe<std::string> (name, "") == value)
-        {
-          box->setCurrentIndex(box->count() - 1);
-        }
-      }
-    }
-
-    void scripting_tool::addString(char const* name, char const* def)
-    {
-      auto defstr = def == nullptr ? "" : def;
-      auto tline = new QLineEdit(this);
-      auto label = new QLabel(this);
-      label->setText(name);
-      connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
-        set_json_unsafe (name, text.toStdString());
-      });
-      _script_widgets.push_back(label);
-      _script_widgets.push_back(tline);
-      _script_settings_layout->addRow(label, tline);
-      tline->setText (QString::fromStdString (get_json_safe<std::string> (name, defstr)));
-    }
-
-    void scripting_tool::removeScriptWidgets()
-    {
-      for (auto& widget : _script_widgets)
-      {
-        _script_settings_layout->removeWidget(widget);
-        delete widget;
-      }
-
-      _script_widgets.clear();
-      _string_arrays.clear();
-    }
-
-    void scripting_tool::select_profile(int profile)
-    {
-      removeScriptWidgets();
-      clearDescription();
-      _cur_profile = _profile_selection->itemText(profile).toStdString();
-
-      auto n = _loader.selected_script_name();
-      _json[n][CUR_PROFILE_PATH] = _cur_profile;
-
-      initialize_radius();
-
-      _loader.select_script (_loader.get_selected_script(), this);
-    }
+      get_settings()->save_json();
+     }
 
     void scripting_tool::sendUpdate(
         World* world,
@@ -542,39 +179,10 @@ namespace noggit
         bool holding_alt,
         bool holding_space)
     {
-      script_context ctx(world, pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space, dt);
-      _update_context = &ctx;
-
+      //script_context ctx(pos_in, brushRadius(), innerRadius(), cam, holding_alt, holding_shift, holding_ctrl, holding_space, dt);
       try
       {
-        if (left_mouse)
-        {
-          if (!_last_left)
-          {
-            _loader.send_left_click (this);
-          }
-
-          _loader.send_left_hold (this);
-        }
-
-        if (right_mouse)
-        {
-          if (!_last_right)
-          {
-            _loader.send_right_click (this);
-          }
-          _loader.send_right_hold (this);
-        }
-
-        if (!left_mouse && _last_left)
-        {
-          _loader.send_left_release (this);
-        }
-
-        if (!right_mouse && _last_right)
-        {
-          _loader.send_right_release (this);
-        }
+        // TODO: fix
       }
       catch (std::exception const& e)
       {
@@ -582,23 +190,8 @@ namespace noggit
         addLog(("[error]: " + std::string(e.what())));
         resetLogScroll();
       }
-
-      set_ctx(nullptr);
-      cur_tool = nullptr;
       _last_left = left_mouse;
       _last_right = right_mouse;
-    }
-
-    void scripting_tool::initialize_radius()
-    {
-      double inner_radius = get_json_safe<double> (INNER_RADIUS_PATH, 0.5);
-      double outer_radius = get_json_safe<double> (OUTER_RADIUS_PATH, 40);
-
-      _radius_spin->setValue(outer_radius);
-      _inner_radius_spin->setValue(inner_radius);
-
-      _radius_slider->setValue(std::round(outer_radius));
-      _inner_radius_slider->setSliderPosition((int)std::round(inner_radius*100));
     }
 
     void scripting_tool::addDescription(char const* text)
@@ -609,6 +202,7 @@ namespace noggit
 
     void scripting_tool::addLog(std::string const& text)
     {
+
       LogDebug << "[script window]: " << text << "\n";
       _log->appendPlainText (QString::fromStdString (text));
       _log->verticalScrollBar()->setValue(_log->verticalScrollBar()->maximum());
@@ -616,7 +210,17 @@ namespace noggit
 
     script_context* scripting_tool::get_context()
     {
-      return _script_context;
+      return &_script_context;
+    }
+
+    World* scripting_tool::get_world()
+    {
+      return _world;
+    }
+
+    noggit::camera* scripting_tool::get_camera()
+    {
+      return _camera;
     }
 
     void scripting_tool::resetLogScroll()
@@ -634,118 +238,15 @@ namespace noggit
       _description->clear();
     }
 
-    std::string get_string_param(char const* path)
+    script_settings* scripting_tool::get_settings()
     {
-      return get_json_unsafe<std::string>(path);
+      return _settings;
     }
 
-    std::string get_string_list_param(char const* path)
+    script_profiles* scripting_tool::get_profiles()
     {
-      return get_string_param(path);
+      return _profiles;
     }
 
-    int get_int_param(char const* path, das::Context* context)
-    {
-      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<int> (path);
-    }
-
-    double get_double_param(char const* path, das::Context* context)
-    {
-      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<double> (path);
-    }
-
-    float get_float_param(char const* path, das::Context* context)
-    {
-      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<double> (path);
-    }
-
-    bool get_bool_param(char const* path, das::Context* context)
-    {
-      return static_cast<Loader::Context*> (context)->_tool->get_json_unsafe<bool> (path);
-    }
-
-    void add_string_param(char const* path, char const* def, das::Context* context)
-    {
-      if(path==nullptr)
-      {
-        throw script_exception(
-          "add_string_param",
-          std::string("empty name to string list parameter, default value =")
-          + std::string(def==nullptr ? "null" : def)
-        );
-      }
-      static_cast<Loader::Context*> (context)->_tool->addString(path, def != nullptr ? def : "");
-    }
-
-    void add_int_param(char const* path, int min, int max, int def, das::Context* context)
-    {
-      if(path==nullptr)
-      {
-        throw script_exception(
-          "add_int_param",
-          std::string("empty path to int parameter")
-        );
-      }
-      static_cast<Loader::Context*> (context)->_tool->addInt(path, min, max, def);
-    }
-
-    void add_double_param(char const* path, double min, double max, double def, int zeros, das::Context* context)
-    {
-      if(path==nullptr)
-      {
-        throw script_exception(
-          "add_double_param",
-          std::string("empty path to double parameter")
-        );
-      }
-      static_cast<Loader::Context*> (context)->_tool->addDouble(path, min, max, def, zeros);
-    }
-
-    void add_float_param(char const* path, float min, float max, float def, int zeros, das::Context* context)
-    {
-      if(path==nullptr)
-      {
-        throw script_exception(
-          "add_float_param",
-          std::string("empty path to float parameter")
-        );
-      }
-      static_cast<Loader::Context*> (context)->_tool->addDouble(path, min, max, def, zeros);
-    }
-
-    void add_bool_param(char const* path, bool def, das::Context* context)
-    {
-      if(path==nullptr)
-      {
-        throw script_exception(
-          "add_bool_param",
-          std::string("empty path to bool parameter")
-        );
-      }
-      static_cast<Loader::Context*> (context)->_tool->addBool(path, def);
-    }
-
-    void add_description(char const* path, das::Context* context)
-    {
-      static_cast<Loader::Context*> (context)->_tool->addDescription(path != nullptr ? path : "");
-    }
-
-    void add_string_list_param(char const* path, char const* value, das::Context* context)
-    {
-      if (path == nullptr)
-      {
-          throw script_exception(
-              "add_string_list_param",
-              std::string("empty name to string list parameter, default value =")
-              + std::string(value == nullptr ? "" : value)
-          );
-      }
-      if (value == nullptr) throw script_exception(
-          "add_string_list_param",
-          std::string("empty value to string list parameter ")
-          + path
-      );
-      static_cast<Loader::Context*> (context)->_tool->addStringList(path, value);
-    }
   } // namespace scripting
 } // namespace noggit

@@ -91,13 +91,14 @@ namespace noggit
                       );
     }
 
-    void model_remove(model& model, das::Context* context)
+    void model_remove(model& model)
     {
       std::vector<selection_type> type;
 
       util::visit (model._impl, [&] (auto x) { type.emplace_back (x); });
 
-      get_ctx(context, "model_remove")->_world->delete_models(type);
+      // TODO: fix
+      //get_ctx(context, "model_remove")->_world->delete_models(type);
     }
 
     void model_replace(model& model, char const* filename)
@@ -114,18 +115,20 @@ namespace noggit
         return;
       }
 
-      model_remove(model, ctx);
+      model_remove(model);
 
       if (boost::ends_with(filename, ".wmo"))
       {
-        model._impl = get_ctx(ctx, "model_replace")
-          ->_world->addWMO(filename, model_get_pos(model), math::degrees::vec3 {model_get_rot(model)});
+        // TODO: Fix
+        //model._impl = get_ctx(ctx, "model_replace")
+        //  ->_world->addWMO(filename, model_get_pos(model), math::degrees::vec3 {model_get_rot(model)});
       }
       else
       {
         auto params = object_paste_params();
-        model._impl = get_ctx(ctx, "model_replace")
-          ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), math::degrees::vec3 {model_get_rot(model)}, &params);
+        // TODO: Fix
+        //model._impl = get_ctx(ctx, "model_replace")
+        //  ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), math::degrees::vec3 {model_get_rot(model)}, &params);
       }
     }
 

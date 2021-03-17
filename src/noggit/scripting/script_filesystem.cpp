@@ -3,8 +3,6 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
 
-#include <das/Context.fwd.hpp>
-
 namespace fs = boost::filesystem;
 
 namespace noggit

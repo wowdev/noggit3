@@ -8,8 +8,6 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/World.h>
 
-#include <das/Context.fwd.hpp>
-
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
@@ -66,10 +64,11 @@ namespace noggit
       return chunk._chunk->texture_set->texture(index)->filename;
     }
 
-    void chunk_apply_heightmap (chunk& chunk, das::Context* context)
+    void chunk_apply_heightmap (chunk& chunk)
     {
       chunk._chunk->updateVerticesData();
-      get_ctx (context, "chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
+      // TODO: fix
+      //get_ctx (context, "chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
     }
 
     void chunk_apply_textures(chunk& chunk)
@@ -82,9 +81,10 @@ namespace noggit
       chunk._chunk->UpdateMCCV();
     }
 
-    void chunk_apply_all(chunk& chunk, das::Context* context)
+    void chunk_apply_all(chunk& chunk)
     {
-      chunk_apply_heightmap(chunk, context);
+      // TODO: fix
+      //chunk_apply_heightmap(chunk, context);
       chunk_apply_textures(chunk);
       chunk_apply_vertex_color(chunk);
     }

@@ -10,10 +10,6 @@ class World;
 class ModelInstance;
 class WMOInstance;
 
-namespace das {
-  class Context;
-}
-
 namespace noggit
 {
   namespace scripting
@@ -60,7 +56,7 @@ namespace noggit
 
     unsigned model_get_uid(model const& model);
 
-    void model_remove(model& model, das::Context* context);
+    void model_remove(model& model);
 
     std::string model_get_filename(model const& model);
     void model_replace(model& model, const char* filename);

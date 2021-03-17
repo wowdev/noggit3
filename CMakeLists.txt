@@ -398,8 +398,6 @@ set ( scripting_sources
     src/noggit/scripting/script_context.cpp
     src/noggit/scripting/script_filesystem.cpp
     src/noggit/scripting/script_image.cpp
-    src/noggit/scripting/script_loader-noggit_module.ipp
-    src/noggit/scripting/script_loader.cpp
     src/noggit/scripting/script_math.cpp
     src/noggit/scripting/script_misc.cpp
     src/noggit/scripting/script_model.cpp
@@ -409,6 +407,8 @@ set ( scripting_sources
     src/noggit/scripting/script_vert-script_texture_index.ipp
     src/noggit/scripting/script_vert.cpp
     src/noggit/scripting/scripting_tool.cpp
+    src/noggit/scripting/script_profiles.cpp
+    src/noggit/scripting/script_settings.cpp
   )
 
 set ( scripting_headers
@@ -424,8 +424,9 @@ set ( scripting_headers
     src/noggit/scripting/script_misc.hpp
     src/noggit/scripting/script_brush.hpp
     src/noggit/scripting/script_image.hpp
-    src/noggit/scripting/script_loader.hpp
     src/noggit/scripting/script_math.hpp
+    src/noggit/scripting/script_profiles.hpp
+    src/noggit/scripting/script_settings.hpp
   )
 
 set ( opengl_headers
@@ -651,13 +652,6 @@ target_link_libraries (noggit
 )
 
 if (NOGGIT_WITH_SCRIPTING)
-  # The macros to define and use modules are missing prototypes but also don't work well with anon namespaces/static.
-  set (dascript_loader_warning_flags "")
-  add_compiler_flag_if_supported (dascript_loader_warning_flags -Wno-missing-prototypes)
-  if( NOT dascript_loader_warning_flags STREQUAL "")
-    set_source_files_properties ("src/noggit/scripting/script_loader.cpp" PROPERTIES COMPILE_FLAGS ${dascript_loader_warning_flags})
-  endif()
-
   # Dependency: json.hpp
   FetchContent_Declare (json
     GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
@@ -697,40 +691,19 @@ if (NOGGIT_WITH_SCRIPTING)
   endif()
   add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
 
-  # Dependency: daScript
-  FetchContent_Declare (dascript
-    GIT_REPOSITORY https://github.com/GaijinEntertainment/daScript.git
-    GIT_TAG 7b93bd95db57009856473216048c2612fbb6ca84
-    # don't fetch submodules
-    GIT_SUBMODULES ""
-    PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_dascript.cmake"
-    UPDATE_DISCONNECTED true
-  )
-  FetchContent_GetProperties (dascript)
-  if (NOT dascript_POPULATED)
-    message (STATUS "Installing daScript...")
-    FetchContent_Populate (dascript)
-  endif()
-  add_subdirectory (${dascript_SOURCE_DIR} ${dascript_BINARY_DIR} EXCLUDE_FROM_ALL)
-  target_include_directories (libDaScript SYSTEM PUBLIC "${dascript_SOURCE_DIR}/include")
-
   target_link_libraries (noggit
-    libDaScript
     lodepng
     FastNoise
     nlohmann_json::nlohmann_json
   )
 
-  # If a source of this library fails to compile, the daScript API
-  # changed and needs adaption in our wrapper header.
-  add_library (DaScriptWrapperVerify STATIC)
-  target_link_libraries (DaScriptWrapperVerify PRIVATE libDaScript Qt5::Core)
-  file (GLOB_RECURSE _das_wrapper_headers LIST_DIRECTORIES false CONFIGURE_DEPENDS "src/das/*")
-  foreach (_das_wrapper_header IN LISTS _das_wrapper_headers)
-    file (GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${_das_wrapper_header}.cpp"
-      CONTENT "#include <QtCore/QtGlobal>
-      #include <${_das_wrapper_header}>"
-    )
-    target_sources (DaScriptWrapperVerify PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${_das_wrapper_header}.cpp")
-  endforeach()
+  # TODO: Fix and linux
+  target_include_directories(noggit SYSTEM PUBLIC ${SOL_DIR})
+  target_include_directories(noggit SYSTEM PUBLIC ${LUAJIT_DIR})
+  target_link_libraries(noggit
+    ${LUAJIT_DIR}/luajit.lib
+    ${LUAJIT_DIR}/lua51.lib
+    ${LUAJIT_DIR}/buildvm.lib
+    ${LUAJIT_DIR}/minilua.lib
+  )
 endif()
