@@ -29,6 +29,7 @@ namespace noggit
 
     image::image(char const* path)
     {
+      _tool = tool;
       if(path==nullptr)
       {
           throw script_exception("load_png","empty png path");
@@ -123,16 +124,6 @@ namespace noggit
       return float(get_image()[x * 4]) / 255.0;
     }
 
-    image create_image(int width ,int height)
-    {
-      return image(width, height);
-    }
-
-    image load_png(const char* path)
-    {
-      return image(path);
-    }
-
     void register_image(sol::state * state, scripting_tool * tool)
     {
       state->new_usertype<image>("image"
@@ -145,8 +136,13 @@ namespace noggit
         , "height", &image::height
       );
 
-      state->set_function("create_image",create_image);
-      state->set_function("load_png",load_png);
+      state->set_function("create_image",[](int width ,int height){
+        return std::make_shared<image>(width,height);
+      });
+
+      state->set_function("load_png", [tool](const char* path) {
+        return std::make_shared<image>(path, tool);
+      });
     }
   } // namespace scripting
 } // namespace noggit

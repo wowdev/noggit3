@@ -75,7 +75,7 @@ namespace noggit
     {
       _selected = index;
       auto v = &get_scripts()[_selected];
-      v->_select.call("(select)",*v);
+      v->_select.call("(select)",v);
     }
 
     int script_context::get_selection()

@@ -44,7 +44,7 @@ namespace noggit {
       , sol::protected_function select_event)
       : _tool(tool)
       , _name(name)
-      , _select(lua_function<script_brush const&>(select_event))
+      , _select(lua_function<script_brush*>(select_event))
       {};
 
     void script_brush::set_name(std::string const& name)

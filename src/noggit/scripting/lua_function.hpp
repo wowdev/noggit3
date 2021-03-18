@@ -36,6 +36,11 @@ namespace noggit {
         }
       }
 
+      bool is_null()
+      {
+        return _is_null;
+      }
+
     private:
       sol::protected_function _fn;
       bool _is_null;
@@ -81,6 +86,11 @@ namespace noggit {
           throw script_exception(caller, "incorrect return type");
         }
         return ret.get<T>();
+      }
+
+      bool is_null()
+      {
+        return _is_null;
       }
     private:
       bool _is_null;

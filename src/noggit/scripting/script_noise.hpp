@@ -23,8 +23,8 @@ namespace noggit
           , unsigned width
           , unsigned height
           , float frequency
-          , const char *algorithm 
-          , const char *seed);
+          , std::string const& algorithm 
+          , std::string const& seed);
       noisemap() = default;
 
       float get(math::vector_3d &pos);
@@ -45,24 +45,14 @@ namespace noggit
       unsigned _size = 0;
     };
 
-    noisemap make_noise_size(
+    std::shared_ptr<noisemap> make_noise(
         int start_x
       , int start_y
       , int width
       , int height
       , float frequency
-      , char const *algorithm
-      , char const *seed);
-
-    // TODO: Restore
-    /*
-    noisemap make_noise_selection(
-      selection const& sel
-      , float frequency
-      , int padding
-      , char const *algorithm
-      , char const *seed);
-    */
+      , std::string const& algorithm
+      , std::string const& seed);
 
     void register_noise(sol::state * state, scripting_tool * tool);
   } // namespace scripting

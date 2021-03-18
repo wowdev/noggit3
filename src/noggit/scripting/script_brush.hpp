@@ -50,7 +50,7 @@ namespace noggit {
       void on_right_hold(sol::protected_function fn);
       void on_right_release(sol::protected_function fn);
 
-      lua_function<script_brush const&> _select;
+      lua_function<script_brush*> _select;
       lua_function<script_brush_event const&> _left_click;
       lua_function<script_brush_event const&> _left_hold;
       lua_function<script_brush_event const&> _left_release;

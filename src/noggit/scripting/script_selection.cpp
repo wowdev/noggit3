@@ -9,6 +9,8 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/MapView.h>
 
+#include <noggit/scripting/script_noise.hpp>
+
 namespace noggit
 {
   namespace scripting
@@ -73,6 +75,11 @@ namespace noggit
     std::shared_ptr<tex_iterator> selection::get_tex_iterator()
     {
       return std::make_shared<tex_iterator>(get_chunks(), _min, _max);
+    }
+
+    std::shared_ptr<noisemap> selection::make_noise(float frequency, std::string const& algorithm, std::string const& seed)
+    {
+      return noggit::scripting::make_noise(_min.x,_min.z,_size.x,_size.z,frequency, algorithm, seed);
     }
 
     void register_selection(sol::state* state, scripting_tool* tool)

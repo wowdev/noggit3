@@ -21,7 +21,6 @@ namespace noggit
       image(char const* path);
       image(int width, int height);
       std::vector<unsigned char> _image;
-
       int get_index(int x, int y);
       unsigned get_pixel(int x, int y);
       float gradient_scale(float rel);
@@ -36,9 +35,6 @@ namespace noggit
       unsigned _height = 0;
       unsigned _size = 0;
     };
-
-    image create_image(int width, int height);
-    image load_png(const char* path);
 
     void register_image(sol::state * state, scripting_tool * tool);
   } // namespace scripting

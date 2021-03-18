@@ -83,21 +83,9 @@ namespace noggit
       , unsigned width
       , unsigned height
       , float frequency
-      , const char* algorithm
-      , const char* seed)
+      , std::string const& algorithm
+      , std::string const& seed)
     {
-      if(algorithm==nullptr)
-      {
-          throw script_exception(
-              "make_script_noise"
-              , std::string("invalid noise algorithm (empty string)")
-          );
-      }
-      if (seed == nullptr)
-      {
-          seed = "";
-      }
-
       if(width<=0||height<=0)
       {
         throw script_exception(
@@ -144,7 +132,7 @@ namespace noggit
       }
       else
       {
-        generator = FastNoise::NewFromEncodedNodeTree(algorithm);
+        generator = FastNoise::NewFromEncodedNodeTree(algorithm.c_str());
       }
 
       generator->GenUniformGrid2D(
@@ -172,16 +160,16 @@ namespace noggit
       return _height;
     }
 
-    noisemap make_noise_size(
+    std::shared_ptr<noisemap> make_noise(
         int x_start
       , int y_start
       , int x_size
       , int y_size 
       , float frequency 
-      , const char* algorithm 
-      , const char* seed)
+      , std::string const& algorithm 
+      , std::string const& seed)
     {
-      return noisemap(
+      return std::make_shared<noisemap>(
         x_start
         , y_start
         , x_size
@@ -217,7 +205,7 @@ namespace noggit
         , "width", &noisemap::width
         , "height", &noisemap::height
       );
-      state->set_function("make_noise_size",make_noise_size);
+      state->set_function("make_noise",make_noise);
     }
   } // namespace scripting
 } // namespace noggit
