@@ -1,5 +1,7 @@
 #pragma once
 
+#include <noggit/scripting/lua_function.hpp>
+
 #include <sol/sol.hpp>
 #include <string>
 #include <math/vector_3d.hpp>
@@ -48,29 +50,14 @@ namespace noggit {
       void on_right_hold(sol::protected_function fn);
       void on_right_release(sol::protected_function fn);
 
-      void send_left_click(script_brush_event evt);
-      void send_left_hold(script_brush_event evt);
-      void send_left_release(script_brush_event evt);
-
-      void send_right_click(script_brush_event evt);
-      void send_right_hold(script_brush_event evt);
-      void send_right_release(script_brush_event evt);
-
-      void send_select();
-
-      // <script_brush_event>
-      sol::protected_function _left_click;
-      sol::protected_function _left_hold;
-      sol::protected_function _left_release;
-
-      sol::protected_function _right_click;
-      sol::protected_function _right_hold;
-      sol::protected_function _right_release;
-
+      lua_function<script_brush const&> _select;
+      lua_function<script_brush_event const&> _left_click;
+      lua_function<script_brush_event const&> _left_hold;
+      lua_function<script_brush_event const&> _left_release;
+      lua_function<script_brush_event const&> _right_click;
+      lua_function<script_brush_event const&> _right_hold;
+      lua_function<script_brush_event const&> _right_release;
     private:
-      // <script_brush>
-      sol::protected_function _select_event;
-
       std::string _name;
       scripting_tool * _tool;
     };

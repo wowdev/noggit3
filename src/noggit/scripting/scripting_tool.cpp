@@ -46,8 +46,6 @@ namespace noggit
 
       _selection->clear();
 
-      addLog("Scripts size "+std::to_string(get_context()->get_scripts().size()));
-
       for(auto& script : get_context()->get_scripts())
       {
         _selection->addItem(script.get_name().c_str());
@@ -122,7 +120,13 @@ namespace noggit
       }
 
       get_profiles()->select_profile(next_profile);
-      get_context()->select_script(selection);
+
+      try {
+        get_context()->select_script(selection);
+      } catch(script_exception &const err)
+      {
+        addLog(err.what());
+      }
       get_settings()->initialize();
     }
 
@@ -190,22 +194,22 @@ namespace noggit
           auto brush = & get_context()->get_scripts()[sel];
           if(new_left)
           {
-            if(!_last_left) brush->send_left_click(evt);
-            else brush->send_left_hold(evt);
+            if(!_last_left) brush->_left_click.call_if_not_null("(brush_event)",evt);
+            else brush->_left_hold.call_if_not_null("(brush_event)",evt);
           }
           else
           {
-            if(_last_left) brush->send_left_release(evt);
+            if(_last_left) brush->_left_release.call_if_not_null("(brush_event)",evt);
           }
 
           if(new_right)
           {
-            if(!_last_right) brush->send_right_click(evt);
-            else brush->send_right_hold(evt);
+            if(!_last_right) brush->_right_click.call_if_not_null("(brush_event)",evt);
+            else brush->_right_hold.call_if_not_null("(brush_event)",evt);
           }
           else
           {
-            if(_last_right) brush->send_right_release(evt);
+            if(_last_right) brush->_right_release.call_if_not_null("(brush_event)",evt);
           }
         }
       }

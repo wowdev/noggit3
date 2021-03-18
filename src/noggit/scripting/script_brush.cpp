@@ -44,7 +44,7 @@ namespace noggit {
       , sol::protected_function select_event)
       : _tool(tool)
       , _name(name)
-      , _select_event(select_event)
+      , _select(lua_function<script_brush const&>(select_event))
       {};
 
     void script_brush::set_name(std::string const& name)
@@ -64,85 +64,32 @@ namespace noggit {
 
     void script_brush::on_left_click(sol::protected_function evt)
     {
-      _left_click = evt;
+      _left_click = lua_function<script_brush_event const&>(evt);
     }
 
     void script_brush::on_left_hold(sol::protected_function evt)
     {
-      _left_hold = evt;
+      _left_hold = lua_function<script_brush_event const&>(evt);
     }
 
     void script_brush::on_left_release(sol::protected_function evt)
     {
-      _left_release = evt;
+      _left_release = lua_function<script_brush_event const&>(evt);
     }
 
     void script_brush::on_right_click(sol::protected_function evt)
     {
-      _right_click = evt;
+      _right_click = lua_function<script_brush_event const&>(evt);
     }
 
     void script_brush::on_right_hold(sol::protected_function evt)
     {
-      _right_hold = evt;
+      _right_hold = lua_function<script_brush_event const&>(evt);
     }
 
     void script_brush::on_right_release(sol::protected_function evt)
     {
-      _right_release = evt;
-    }
-
-    void script_brush::send_select()
-    {
-      _select_event(this);
-    }
-
-    void script_brush::send_left_click(script_brush_event evt)
-    {
-      if(_left_click)
-      {
-        _left_click(evt);
-      }
-    }
-
-    void script_brush::send_left_hold(script_brush_event evt)
-    {
-      if(_left_hold)
-      {
-        _left_hold(evt);
-      }
-    }
-
-    void script_brush::send_left_release(script_brush_event evt)
-    {
-      if(_left_release)
-      {
-        _left_release(evt);
-      }
-    }
-
-    void script_brush::send_right_click(script_brush_event evt)
-    {
-      if(_right_click)
-      {
-        _right_click(evt);
-      }
-    }
-
-    void script_brush::send_right_hold(script_brush_event evt)
-    {
-      if(_right_hold)
-      {
-        _right_hold(evt);
-      }
-    }
-
-    void script_brush::send_right_release(script_brush_event evt)
-    {
-      if(_right_release)
-      {
-        _right_release(evt);
-      }
+      _right_release = lua_function<script_brush_event const&>(evt);
     }
 
     void register_script_brush(sol::state * state, scripting_tool * tool)
