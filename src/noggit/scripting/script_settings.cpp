@@ -3,7 +3,9 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
 
+#include <sol/sol.hpp>
 #include <boost/filesystem.hpp>
+#include <nlohmann/json.hpp>
 #include <iomanip>
 
 #define INNER_RADIUS_PATH "__inner_radius"
@@ -82,11 +84,13 @@ namespace noggit
       // TODO: this is terrible but accessing by reference didn't seem to work.
       auto ssn = _tool->get_context()->get_selected_name();
       auto prof = _tool->get_profiles()->get_cur_profile();
-      if (!(_json)[ssn][prof].contains(key))
+
+      if(!_json[ssn][prof].contains(key))
       {
-        (_json)[ssn][prof] = def;
+        _json[ssn][prof][key] = def;
+        return def;
       }
-      return (_json)[ssn][prof][key];
+      return _json[ssn][prof][key];
     }
 
     template <typename T>
@@ -102,7 +106,7 @@ namespace noggit
     {
       auto ssn = _tool->get_context()->get_selected_name();
       auto prof = _tool->get_profiles()->get_cur_profile();
-      (_json)[ssn][prof][key] = def;
+      _json[ssn][prof][key] = def;
     }
 
 // i don't remember why this was a macro
@@ -162,6 +166,85 @@ namespace noggit
     std::string script_settings::get_string_list(char const *name)
     {
       return get_json_unsafe<std::string>(name);
+    }
+
+    void script_settings::add_double(const char *name, double min, double max, double def, int zeros)
+    {
+      ADD_SLIDER(name, double, min, max, def, zeros);
+    }
+
+    void script_settings::add_int(const char *name, int min, int max, int def)
+    {
+      ADD_SLIDER(name, int, min, max, def, 0);
+    }
+
+    void script_settings::add_string(const char *name, const char *def)
+    {
+      auto defstr = def == nullptr ? "" : def;
+      auto tline = new QLineEdit(this);
+      auto label = new QLabel(this);
+      label->setText(name);
+      connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
+        set_json<std::string>(name, text.toUtf8().constData());
+      });
+      _widgets.push_back(label);
+      _widgets.push_back(tline);
+      _layout->addRow(label, tline);
+      tline->setText(get_json_safe<std::string>(name, defstr).c_str());
+    }
+
+    void script_settings::add_bool(const char *name, bool def)
+    {
+      auto checkbox = new QCheckBox(this);
+      auto label = new QLabel(this);
+      label->setText(name);
+      connect(checkbox, &QCheckBox::stateChanged, this, [=](auto value) {
+        set_json<bool>(name, value ? true : false);
+      });
+
+      _widgets.push_back(checkbox);
+      _widgets.push_back(label);
+      _layout->addRow(label, checkbox);
+
+      checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    }
+
+
+
+    void script_settings::add_string_list(const char *name, const char *value)
+    {
+      if (_string_arrays.find(name) == _string_arrays.end())
+      {
+        auto layout = new QFormLayout(this);
+        auto box = new QComboBox(this);
+        auto label = new QLabel(this);
+
+        connect(box, QOverload<int>::of(&QComboBox::activated), this, [=](auto index) {
+          set_json<std::string>(name, box->itemText(index).toUtf8().constData());
+        });
+
+        box->addItem(value);
+        label->setText(name);
+
+        _string_arrays[name] = box;
+        _widgets.push_back(box);
+        _widgets.push_back(label);
+        _layout->addRow(label, box);
+
+        // ensure there is at least one valid value in it
+        get_json_safe<std::string>(name, value);
+      }
+      else
+      {
+        auto box = _string_arrays[name];
+        box->addItem(value);
+
+        // we found the last selection, so change the index for that.
+        if (get_json_safe<std::string>(name, "") == value)
+        {
+          box->setCurrentIndex(box->count() - 1);
+        }
+      }
     }
 
     void script_settings::clear()
@@ -236,5 +319,20 @@ namespace noggit
       return &_json;
     }
 
+    void register_settings(sol::state * state, scripting_tool * tool)
+    {
+      state->new_usertype<script_settings>("settings"
+        , "add_double", &script_settings::add_double
+        , "add_int", &script_settings::add_int
+        , "add_bool", &script_settings::add_bool
+        , "add_string", &script_settings::add_string
+        , "add_string_list", &script_settings::add_string_list
+        , "get_double", &script_settings::get_double
+        , "get_int", &script_settings::get_int
+        , "get_bool", &script_settings::get_bool
+        , "get_string", &script_settings::get_string
+        , "get_string_list", &script_settings::get_string_list
+      );
+    }
   } // namespace scripting
 } // namespace noggit

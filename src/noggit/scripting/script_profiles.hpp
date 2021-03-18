@@ -22,7 +22,6 @@ namespace noggit {
       void add_profile(std::string const& profile);
       int profile_count();
       std::string get_profile(int index);
-      void set_profile(int index);
     private:
       noggit::scripting::scripting_tool* _tool;
       QGridLayout* _select_column;

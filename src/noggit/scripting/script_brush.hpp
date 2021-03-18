@@ -56,14 +56,16 @@ namespace noggit {
       void send_right_hold(script_brush_event evt);
       void send_right_release(script_brush_event evt);
 
-      // <script_brush_event>
-      sol::protected_function _left_click = nullptr;
-      sol::protected_function _left_hold = nullptr;
-      sol::protected_function _left_release = nullptr;
+      void send_select();
 
-      sol::protected_function _right_click = nullptr;
-      sol::protected_function _right_hold = nullptr;
-      sol::protected_function _right_release = nullptr;
+      // <script_brush_event>
+      sol::protected_function _left_click;
+      sol::protected_function _left_hold;
+      sol::protected_function _left_release;
+
+      sol::protected_function _right_click;
+      sol::protected_function _right_hold;
+      sol::protected_function _right_release;
 
     private:
       // <script_brush>

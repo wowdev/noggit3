@@ -29,6 +29,10 @@ namespace noggit
 
       connect(_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
         select_profile(index);
+        this->_tool->clearDescription();
+        this->_tool->get_context()->select_script(_tool->get_context()->get_selection());
+        // string array / brush settings have changed
+        this->_tool->get_settings()->initialize();
       });
 
       connect(_remove_button, &QPushButton::released, this, [this]() {
@@ -109,11 +113,10 @@ namespace noggit
     void script_profiles::select_profile(int profile)
     {
       _tool->get_settings()->clear();
-      _tool->clearDescription();
       _cur_profile = _selection->itemText(profile).toStdString();
       auto n = _tool->get_context()->get_selected_name();
+      _selection->setCurrentIndex(profile);
       (*_tool->get_settings()->get_raw_json())[n][CUR_PROFILE_PATH] = _cur_profile;
-      _tool->get_context()->select_script(_tool->get_context()->get_selection());
     }
 
     std::string script_profiles::get_cur_profile()
@@ -139,12 +142,6 @@ namespace noggit
     std::string script_profiles::get_profile(int index)
     {
       return _selection->itemText(index).toStdString();
-    }
-
-    void script_profiles::set_profile(int index)
-    {
-      _cur_profile = get_profile(index);
-      (*_tool->get_settings()->get_raw_json())[_tool->get_context()->get_selected_name()] = _cur_profile;
     }
   } // namespace scripting
 } // namespace noggit

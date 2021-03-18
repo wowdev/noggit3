@@ -40,7 +40,7 @@ namespace noggit {
       script_context() = default;
       ~script_context();
       sol::state * get_state();
-      std::vector<noggit::scripting::script_brush> get_scripts();
+      std::vector<noggit::scripting::script_brush>& get_scripts();
       void reset(noggit::scripting::scripting_tool * tool);
       void select_script(int index);
       int get_selection();

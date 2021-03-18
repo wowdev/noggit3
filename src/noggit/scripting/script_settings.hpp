@@ -10,6 +10,10 @@
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
 
+namespace sol {
+  class state;
+}
+
 namespace noggit {
   namespace scripting {
     class scripting_tool;
@@ -67,5 +71,7 @@ namespace noggit {
       nlohmann::json _json;
       std::map<std::string, QComboBox*> _string_arrays;
     };
+
+    void register_settings(sol::state * state, scripting_tool * tool);
   }
 }

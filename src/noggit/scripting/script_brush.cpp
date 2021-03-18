@@ -92,6 +92,11 @@ namespace noggit {
       _right_release = evt;
     }
 
+    void script_brush::send_select()
+    {
+      _select_event(this);
+    }
+
     void script_brush::send_left_click(script_brush_event evt)
     {
       if(_left_click)

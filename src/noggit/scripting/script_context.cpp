@@ -35,7 +35,7 @@ namespace noggit
       return _lua;
     }
 
-    std::vector<noggit::scripting::script_brush> script_context::get_scripts()
+    std::vector<noggit::scripting::script_brush> & script_context::get_scripts()
     {
       return _scripts;
     }
@@ -43,6 +43,7 @@ namespace noggit
     void script_context::select_script(int index)
     {
       _selected = index;
+      get_scripts()[_selected].send_select();
     }
 
     int script_context::get_selection()
@@ -52,15 +53,16 @@ namespace noggit
 
     void script_context::reset(noggit::scripting::scripting_tool * tool)
     {
+      std::string old_name = _selected > 0 ? _scripts[_selected].get_name() : "";
+      _scripts.clear();
+
       // TODO: can you do this without deleting it?
       if (_lua != nullptr)
       {
         delete _lua;
       }
       _lua = new sol::state();
-      _scripts.clear();
       _selected = -1;
-      std::string old_name = _selected > 0 ? _scripts[_selected].get_name() : "";
 
       script_scoped_function<void(std::string const&,sol::protected_function)> 
         add_brush(_lua,"add_brush",
@@ -102,7 +104,7 @@ namespace noggit
         }
       }
       
-      if(_scripts.size() > 0)
+      if(_scripts.size() > 0 && _selected < 0)
       {
         _selected = 0;
       }

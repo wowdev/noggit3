@@ -46,6 +46,8 @@ namespace noggit
 
       _selection->clear();
 
+      addLog("Scripts size "+std::to_string(get_context()->get_scripts().size()));
+
       for(auto& script : get_context()->get_scripts())
       {
         _selection->addItem(script.get_name().c_str());
@@ -107,7 +109,7 @@ namespace noggit
       {
         if ((*json)[cur_script].contains(CUR_PROFILE_PATH))
         {
-          auto str = (*json)[cur_script][CUR_PROFILE_PATH];
+          auto str = (*json)[cur_script][CUR_PROFILE_PATH].get<std::string>();
           for (int i = 0; i < get_profiles()->profile_count(); ++i)
           {
             if (get_profiles()->get_profile(i) == str)
@@ -119,7 +121,7 @@ namespace noggit
         }
       }
 
-      get_profiles()->set_profile(next_profile);
+      get_profiles()->select_profile(next_profile);
       get_context()->select_script(selection);
       get_settings()->initialize();
     }
