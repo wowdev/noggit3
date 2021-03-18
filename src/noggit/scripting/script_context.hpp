@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <map>
+#include <set>
 
 class World;
 
@@ -36,27 +37,6 @@ namespace noggit
       std::string _name;
     };
 
-    enum class script_module_state
-    {
-      UNLOADED,
-      LOADING,
-      ERRORED,
-      LOADED
-    };
-
-    class script_module
-    {
-    public:
-      script_module() = default;
-      script_module(sol::function fn);
-      sol::table require();
-
-    private:
-      script_module_state _state;
-      sol::table _table;
-      lua_function_ret<sol::table> _fn;
-    };
-
     class script_context
     {
     public:
@@ -68,8 +48,12 @@ namespace noggit
       int get_selection();
       std::string get_selected_name();
       std::vector<noggit::scripting::script_brush> &get_scripts();
-
-      std::map<std::string, script_module> _modules;
+      sol::table require(std::string const& path);
+      std::map<std::string, sol::table> _modules;
+      std::vector<std::string> file_stack;
+      void execute_file(std::string const& filename);
+      std::string file_to_module(std::string const& file);
+      std::string module_to_file(std::string const& module);
     private:
       sol::state *_lua = new sol::state();
 

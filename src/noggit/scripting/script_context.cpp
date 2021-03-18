@@ -16,37 +16,6 @@ namespace noggit
 {
   namespace scripting
   {
-
-    script_module::script_module(sol::function fn)
-    : _fn(lua_function_ret<sol::table>(sol::type::table,fn))
-    , _state(script_module_state::UNLOADED)
-    {}
-
-    sol::table script_module::require()
-    {
-      switch(_state)
-      {
-        case script_module_state::LOADED:
-          return _table;
-        case script_module_state::LOADING:
-          throw script_exception("require","Circular dependency in require chain");
-        case script_module_state::ERRORED:
-          throw script_exception("require", "Tried to require module with errors");
-        case script_module_state::UNLOADED:
-          _state = script_module_state::LOADING;
-          try {
-            _table = _fn.call("require");
-          }
-          catch (script_exception const& err)
-          {
-            _state = script_module_state::ERRORED;
-            throw err;
-          }
-          _state = script_module_state::LOADED;
-          return _table;
-      }
-    }
-
     script_context::~script_context()
     {
       delete _lua;
@@ -83,6 +52,49 @@ namespace noggit
       return _selected;
     }
 
+    sol::table script_context::require(std::string const& mod)
+    {
+      std::string err_str;
+      for(auto& val: this->file_stack)
+      {
+        err_str+=val;
+        if(val==mod)
+        {
+          throw script_exception("require","circular dependency: "+err_str);
+        }
+        err_str+="->";
+      }
+      if(_modules.find(mod)==_modules.end())
+      {
+        execute_file(module_to_file(mod));
+      }
+      return _modules[mod];
+    }
+
+    std::string script_context::file_to_module(std::string const& file)
+    {
+      auto rel = boost::filesystem::relative(boost::filesystem::path(file),boost::filesystem::path("scripts"))
+        .string();
+      std::replace(rel.begin(),rel.end(),'\\','/');
+      return rel.substr(0,rel.size()-strlen(".lua"));
+    }
+
+    std::string script_context::module_to_file(std::string const& mod)
+    {
+      return (boost::filesystem::path("scripts") / boost::filesystem::path(mod + ".lua")).string();
+    }
+
+    void script_context::execute_file(std::string const& file)
+    {
+      auto mod = file_to_module(file);
+      file_stack.push_back(mod);
+      sol::protected_function_result res = _lua->script_file(file);
+      _modules[mod] = res.get_type() == sol::type::table 
+        ? res.get<sol::table>()
+        : _lua->create_table();
+      file_stack.pop_back();
+    }
+
     void script_context::reset(noggit::scripting::scripting_tool * tool)
     {
       std::string old_name = _selected > 0 ? _scripts[_selected].get_name() : "";
@@ -104,16 +116,8 @@ namespace noggit
           this->get_scripts().push_back(noggit::scripting::script_brush(tool, name,select_event));
         });
 
-      std::string * _cur_name = new std::string();
-      script_scoped_function<void(sol::protected_function)> 
-        _module(_lua,"module",
-        [this,tool,_cur_name](sol::protected_function cb)
-        {
-          this->_modules[std::string(*_cur_name)] = script_module(cb);
-        });
-
       _lua->set_function("require", [this](std::string const& name) {
-        return this->_modules[name].require();
+        return this->require(name);
       });
 
       register_functions(_lua, tool);
@@ -129,13 +133,7 @@ namespace noggit
 
         try
         {
-          auto rel = boost::filesystem::relative(dir->path(),boost::filesystem::path("scripts"))
-            .string();
-          std::replace(rel.begin(),rel.end(), '\\', '.');
-          std::replace(rel.begin(),rel.end(), '/', '.');
-          *_cur_name = rel;
-          *_cur_name = _cur_name->substr(0,_cur_name->size()-strlen(".lua"));
-          _lua->script_file(file);
+          execute_file(dir->path().string());
         }
         catch (std::exception e)
         {
