@@ -16,7 +16,7 @@ namespace noggit
 
       void remove_texture(int index);
       std::string get_texture(int index);
-      int add_texture(char const* texture);
+      int add_texture(std::string const& texture);
       void clear_textures();
       void set_hole(bool hole);
       void clear_colors();

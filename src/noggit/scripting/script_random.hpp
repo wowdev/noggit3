@@ -24,7 +24,7 @@ namespace noggit
       double real(random& rand, double low, double high);
     };
 
-    random random_from_seed(char const* seed);
+    random random_from_seed(std::string const& seed);
     random random_from_time();
 
     void register_random(sol::state * state, scripting_tool * tool);

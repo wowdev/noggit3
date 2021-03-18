@@ -49,7 +49,7 @@ namespace noggit
       return val;
     }
 
-    random random_from_seed(char const* seed)
+    random random_from_seed(std::string const& seed)
     {
       return random(std::string(seed));
     }

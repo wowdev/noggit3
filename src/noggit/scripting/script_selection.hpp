@@ -28,7 +28,7 @@ namespace noggit
     class selection
     {
     public:
-      selection(World* world, const char* caller,math::vector_3d const& point1, math::vector_3d const& point2);
+      selection(World* world, std::string const& caller,math::vector_3d const& point1, math::vector_3d const& point2);
       selection() = default;
 
       std::shared_ptr<noisemap> make_noise(float frequency, std::string const& algorithm, std::string const& seed);

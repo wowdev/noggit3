@@ -97,7 +97,7 @@ namespace noggit {
       _world->clearVertexSelection();
     }
 
-    void standard_brush::paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, char const* texture)
+    void standard_brush::paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, std::string const& texture)
     {
       auto brush = Brush();
       brush.setHardness(hardness);

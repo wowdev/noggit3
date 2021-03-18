@@ -39,7 +39,7 @@ namespace noggit
       scripting_tool(QWidget* parent, MapView* view);
       ~scripting_tool();
 
-      void addDescription(char const* text);
+      void addDescription(std::string const& text);
       void clearDescription();
       void addLog(std::string const& text);
       void resetLogScroll();

@@ -27,13 +27,8 @@ namespace noggit
         _height = height;
     }
 
-    image::image(char const* path)
+    image::image(std::string const& path)
     {
-      _tool = tool;
-      if(path==nullptr)
-      {
-          throw script_exception("load_png","empty png path");
-      }
       unsigned error = lodepng::decode(_image, _width, _height, path);
       if (error)
       {
@@ -97,7 +92,7 @@ namespace noggit
       get_image()[index + 3] = (value) & 0xff;
     }
 
-    void image::save(char const* filename)
+    void image::save(std::string const& filename)
     {
       unsigned error = lodepng::encode(filename, get_image(), _width, _height);
       if (error)
@@ -140,8 +135,8 @@ namespace noggit
         return std::make_shared<image>(width,height);
       });
 
-      state->set_function("load_png", [tool](const char* path) {
-        return std::make_shared<image>(path, tool);
+      state->set_function("load_png", [tool](std::string const& path) {
+        return std::make_shared<image>(path);
       });
     }
   } // namespace scripting

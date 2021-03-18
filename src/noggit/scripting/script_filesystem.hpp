@@ -15,10 +15,10 @@ namespace noggit
   {
     class scripting_tool;
     namespace fs = boost::filesystem;
-    void write_file(char const* path, char const* content);
-    void append_file(char const* , char const* content);
-    std::string read_file(char const* path);
-    bool path_exists(char const* path);
+    void write_file(std::string const& path, std::string const& content);
+    void append_file(std::string const& path, std::string const& content);
+    std::string read_file(std::string const& path);
+    bool path_exists(std::string const& path);
     void register_filesystem(sol::state* state, scripting_tool* tool);
   } // namespace scripting
 } // namespace noggit

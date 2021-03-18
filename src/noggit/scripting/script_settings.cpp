@@ -79,7 +79,7 @@ namespace noggit
     }
 
     template <typename T>
-    T script_settings::get_json_safe(std::string key, T def)
+    T script_settings::get_json_safe(std::string const& key, T def)
     {
       // TODO: this is terrible but accessing by reference didn't seem to work.
       auto ssn = _tool->get_context()->get_selected_name();
@@ -94,7 +94,7 @@ namespace noggit
     }
 
     template <typename T>
-    T script_settings::get_json_unsafe(std::string key)
+    T script_settings::get_json_unsafe(std::string const& key)
     {
       auto ssn = _tool->get_context()->get_selected_name();
       auto prof = _tool->get_profiles()->get_cur_profile();
@@ -102,7 +102,7 @@ namespace noggit
     }
 
     template <typename T>
-    void script_settings::set_json(std::string key, T def)
+    void script_settings::set_json(std::string const& key, T def)
     {
       auto ssn = _tool->get_context()->get_selected_name();
       auto prof = _tool->get_profiles()->get_cur_profile();
@@ -120,7 +120,7 @@ namespace noggit
   slider->setRange(min *dp1, max *dp1);                                                    \
   slider->setSliderPosition((int)std::round(def *dp1));                                    \
   auto label = new QLabel(this);                                                           \
-  label->setText(name);                                                                    \
+  label->setText(name.c_str());                                                                    \
   connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=](double v) { \
     set_json<T>(path, (T)v);                                                        \
     QSignalBlocker const blocker(slider);                                                  \
@@ -143,61 +143,60 @@ namespace noggit
   slider->setSliderPosition((int)std::round(v *dp1));                                      \
   spinner->setValue(v);
 
-    double script_settings::get_double(char const *name)
+    double script_settings::get_double(std::string const& name)
     {
       return get_json_unsafe<double>(name);
     }
 
-    int script_settings::get_int(char const *name)
+    int script_settings::get_int(std::string const& name)
     {
       return get_json_unsafe<int>(name);
     }
 
-    bool script_settings::get_bool(char const *name)
+    bool script_settings::get_bool(std::string const& name)
     {
       return get_json_unsafe<bool>(name);
     }
 
-    std::string script_settings::get_string(char const *name)
+    std::string script_settings::get_string(std::string const& name)
     {
       return get_json_unsafe<std::string>(name);
     }
 
-    std::string script_settings::get_string_list(char const *name)
+    std::string script_settings::get_string_list(std::string const& name)
     {
       return get_json_unsafe<std::string>(name);
     }
 
-    void script_settings::add_double(const char *name, double min, double max, double def, int zeros)
+    void script_settings::add_double(std::string const& name, double min, double max, double def, int zeros)
     {
       ADD_SLIDER(name, double, min, max, def, zeros);
     }
 
-    void script_settings::add_int(const char *name, int min, int max, int def)
+    void script_settings::add_int(std::string const& name, int min, int max, int def)
     {
       ADD_SLIDER(name, int, min, max, def, 0);
     }
 
-    void script_settings::add_string(const char *name, const char *def)
+    void script_settings::add_string(std::string const& name, std::string const& def)
     {
-      auto defstr = def == nullptr ? "" : def;
       auto tline = new QLineEdit(this);
       auto label = new QLabel(this);
-      label->setText(name);
+      label->setText(name.c_str());
       connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
         set_json<std::string>(name, text.toUtf8().constData());
       });
       _widgets.push_back(label);
       _widgets.push_back(tline);
       _layout->addRow(label, tline);
-      tline->setText(get_json_safe<std::string>(name, defstr).c_str());
+      tline->setText(get_json_safe<std::string>(name, def).c_str());
     }
 
-    void script_settings::add_bool(const char *name, bool def)
+    void script_settings::add_bool(std::string const& name, bool def)
     {
       auto checkbox = new QCheckBox(this);
       auto label = new QLabel(this);
-      label->setText(name);
+      label->setText(name.c_str());
       connect(checkbox, &QCheckBox::stateChanged, this, [=](auto value) {
         set_json<bool>(name, value ? true : false);
       });
@@ -211,7 +210,7 @@ namespace noggit
 
 
 
-    void script_settings::add_string_list(const char *name, const char *value)
+    void script_settings::add_string_list(std::string const& name, std::string const& value)
     {
       if (_string_arrays.find(name) == _string_arrays.end())
       {
@@ -223,8 +222,8 @@ namespace noggit
           set_json<std::string>(name, box->itemText(index).toUtf8().constData());
         });
 
-        box->addItem(value);
-        label->setText(name);
+        box->addItem(value.c_str());
+        label->setText(name.c_str());
 
         _string_arrays[name] = box;
         _widgets.push_back(box);
@@ -237,7 +236,7 @@ namespace noggit
       else
       {
         auto box = _string_arrays[name];
-        box->addItem(value);
+        box->addItem(value.c_str());
 
         // we found the last selection, so change the index for that.
         if (get_json_safe<std::string>(name, "") == value)

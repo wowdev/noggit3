@@ -100,15 +100,8 @@ namespace noggit
       //get_ctx(context, "model_remove")->_world->delete_models(type);
     }
 
-    void model::replace(char const* filename)
+    void model::replace(std::string const& filename)
     {
-      if(filename==nullptr)
-      {
-        throw script_exception(
-          "model_replace",
-          "empty filename (in call to model_replace)");
-      }
-
       if (get_filename() == filename)
       {
         return;

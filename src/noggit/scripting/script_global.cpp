@@ -15,7 +15,7 @@ namespace noggit {
       });
 
       state->set_function("add_m2",[global](
-        char const* filename
+        std::string const& filename
         , math::vector_3d const& pos
         , float scale
         , math::vector_3d const& rotation)
@@ -25,7 +25,7 @@ namespace noggit {
 
       state->set_function("add_wmo",[global](
         scripting_tool * global
-        , char const* filename
+        , std::string const& filename
         , math::vector_3d const& pos
         , math::vector_3d const& rotation)
       {

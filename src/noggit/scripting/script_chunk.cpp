@@ -24,14 +24,8 @@ namespace noggit
       _chunk->setHole(math::vector_3d(0, 0, 0), true, hole);
     }
 
-    int chunk::add_texture(char const* texture)
+    int chunk::add_texture(std::string const& texture)
     {
-      if(texture==nullptr)
-      {
-        throw script_exception(
-          "chunk_add_texture",
-          "empty texture");
-      }
       std::string tex = std::string(texture);
       return _chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
     }

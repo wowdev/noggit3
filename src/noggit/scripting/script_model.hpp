@@ -40,7 +40,7 @@ namespace noggit
       void remove();
 
       std::string get_filename();
-      void replace(const char* filename);
+      void replace(std::string const& filename);
 
     private:
       boost::variant<ModelInstance*, WMOInstance*> _impl;

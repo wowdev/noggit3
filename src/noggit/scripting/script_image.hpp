@@ -18,14 +18,14 @@ namespace noggit
     {
     public:
       image() = default;
-      image(char const* path);
+      image(std::string const& path);
       image(int width, int height);
       std::vector<unsigned char> _image;
       int get_index(int x, int y);
       unsigned get_pixel(int x, int y);
       float gradient_scale(float rel);
       void set_pixel(int x, int y, unsigned value);
-      void save(char const* filename);
+      void save(std::string const& filename);
       int width();
       int height();
     private:

@@ -34,7 +34,7 @@ namespace noggit
       void move_vertices(float h);
       void flatten_vertices(float h);
       void update_vertices ();
-      void paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, char const* texture);
+      void paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, std::string const& texture);
     private:
       World* _world;
     };

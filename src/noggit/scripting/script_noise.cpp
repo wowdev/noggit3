@@ -179,22 +179,6 @@ namespace noggit
         , seed);
     }
 
-    /*
-    noisemap make_noise_selection(
-      selection const& selection
-      , float frequency
-      , int padding
-      , const char* algorithm
-      , const char* seed)
-    {
-      auto x_start = std::floor(selection._min.x) - (padding + 1);
-      auto z_start = std::floor(selection._min.z) - (padding + 1);
-      auto x_size = std::ceil(selection._max.x - selection._min.x) + (padding + 1) * 2;
-      auto z_size = std::ceil(selection._max.z - selection._min.z) + (padding + 1) * 2;
-      return noisemap(x_start,z_start,x_size,z_size,frequency,algorithm,seed);
-    }
-    */
-
     void register_noise(sol::state * state, scripting_tool * tool)
     {
       state->new_usertype<noisemap>("noisemap"

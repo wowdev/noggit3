@@ -15,7 +15,7 @@ namespace noggit
 {
   namespace scripting
   {
-    selection::selection(World * world, const char* caller,math::vector_3d const& point1, math::vector_3d const& point2)
+    selection::selection(World * world, std::string const& caller,math::vector_3d const& point1, math::vector_3d const& point2)
       : _world(world)
     {
       selection sel;

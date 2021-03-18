@@ -223,9 +223,8 @@ namespace noggit
       _last_right = new_right;
     }
 
-    void scripting_tool::addDescription(char const* text)
+    void scripting_tool::addDescription(std::string const& stext)
     {
-      std::string stext = text == nullptr ? "" : text;
       _description->setText(_description->text() + "\n" + QString::fromStdString (stext));
     }
 
