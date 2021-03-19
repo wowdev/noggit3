@@ -57,28 +57,40 @@ namespace noggit {
       return _name;
     }
 
-    std::shared_ptr<int_tag> script_brush::add_int_tag(std::string const& item, int low, int high, int def)
+    std::shared_ptr<int_tag> script_brush::add_int_tag(
+        std::string const& item
+      , int low
+      , int high
+      , int def)
     {
       auto tag = std::make_shared<int_tag>(_name, item, state()->tool(), low, high, def);
       _tags.push_back(tag);
       return tag;
     }
 
-    std::shared_ptr<real_tag> script_brush::add_real_tag(std::string const& item, double low, double high, double def)
+    std::shared_ptr<real_tag> script_brush::add_real_tag(
+        std::string const& item
+      , double low
+      , double high
+      , double def)
     {
       auto tag = std::make_shared<real_tag>(_name, item, state()->tool(), low, high, def);
       _tags.push_back(tag);
       return tag;
     }
 
-    std::shared_ptr<string_tag> script_brush::add_string_tag(std::string const& item, std::string const& def)
+    std::shared_ptr<string_tag> script_brush::add_string_tag(
+        std::string const& item
+      , std::string const& def)
     {
       auto tag = std::make_shared<string_tag>(_name, item, state()->tool(), def);
       _tags.push_back(tag);
       return tag;
     }
 
-    std::shared_ptr<string_list_tag> script_brush::add_string_list_tag(std::string const& item, sol::variadic_args va)
+    std::shared_ptr<string_list_tag> script_brush::add_string_list_tag(
+        std::string const& item
+      , sol::variadic_args va)
     {
       std::vector<std::string> vec;
       for(auto v : va)

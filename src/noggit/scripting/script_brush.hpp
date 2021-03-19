@@ -4,6 +4,7 @@
 #include <math/vector_3d.hpp>
 
 #include <sol/sol.hpp>
+
 #include <string>
 #include <memory>
 
@@ -51,17 +52,39 @@ namespace noggit {
       std::string get_name();
       void on_selected();
 
-      LUA_MEMBER_FUNC(script_brush,std::shared_ptr<script_brush_event>,on_left_click);
-      LUA_MEMBER_FUNC(script_brush,std::shared_ptr<script_brush_event>,on_left_hold);
-      LUA_MEMBER_FUNC(script_brush,std::shared_ptr<script_brush_event>,on_left_release);
-      LUA_MEMBER_FUNC(script_brush,std::shared_ptr<script_brush_event>,on_right_click);
-      LUA_MEMBER_FUNC(script_brush,std::shared_ptr<script_brush_event>,on_right_hold);
-      LUA_MEMBER_FUNC(script_brush,std::shared_ptr<script_brush_event>,on_right_release);
+      std::shared_ptr<int_tag> add_int_tag(
+        std::string const& item
+        , int low
+        , int high, int def
+        );
 
-      std::shared_ptr<int_tag> add_int_tag(std::string const& item, int low, int high, int def);
-      std::shared_ptr<real_tag> add_real_tag(std::string const& item, double low, double high, double def);
-      std::shared_ptr<string_tag> add_string_tag(std::string const& item, std::string const& def);
-      std::shared_ptr<string_list_tag> add_string_list_tag(std::string const& item, sol::variadic_args va);
+      std::shared_ptr<real_tag> add_real_tag(
+        std::string const& item
+        , double low
+        , double high
+        , double def
+        );
+
+      std::shared_ptr<string_tag> add_string_tag(
+          std::string const& item
+        , std::string const& def);
+                                                
+      std::shared_ptr<string_list_tag> add_string_list_tag(
+          std::string const& item
+        , sol::variadic_args va);
+
+      LUA_MEMBER_FUNC(
+        script_brush,std::shared_ptr<script_brush_event>,on_left_click);
+      LUA_MEMBER_FUNC(
+        script_brush,std::shared_ptr<script_brush_event>,on_left_hold);
+      LUA_MEMBER_FUNC(
+        script_brush,std::shared_ptr<script_brush_event>,on_left_release);
+      LUA_MEMBER_FUNC(
+        script_brush,std::shared_ptr<script_brush_event>,on_right_click);
+      LUA_MEMBER_FUNC(
+        script_brush,std::shared_ptr<script_brush_event>,on_right_hold);
+      LUA_MEMBER_FUNC(
+        script_brush,std::shared_ptr<script_brush_event>,on_right_release);
 
     private:
       std::vector<std::shared_ptr<tag>> _tags;
