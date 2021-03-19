@@ -14,6 +14,7 @@ namespace noggit
   namespace scripting
   {
     class scripting_tool;
+    class lua_state;
     struct random
     {
       std::minstd_rand _state;
@@ -27,6 +28,6 @@ namespace noggit
     random random_from_seed(std::string const& seed);
     random random_from_time();
 
-    void register_random(sol::state * state, scripting_tool * tool);
+    void register_random(lua_state * state);
   } // namespace scripting
 } // namespace noggit

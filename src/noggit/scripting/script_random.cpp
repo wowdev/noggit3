@@ -2,6 +2,7 @@
 #include <noggit/scripting/script_random.hpp>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_context.hpp>
 #include <sol/sol.hpp>
 
 namespace noggit
@@ -59,13 +60,12 @@ namespace noggit
       return random();
     }
 
-    void register_random(sol::state * state, scripting_tool * tool)
+    void register_random(lua_state * state)
     {
       state->new_usertype<random>("random"
         , "integer", &random::integer
         , "real", &random::real
       );
-
       state->set_function("random_from_seed",random_from_seed);
       state->set_function("random_from_time",random_from_time);
     }

@@ -2,6 +2,7 @@
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -179,7 +180,7 @@ namespace noggit
         , seed);
     }
 
-    void register_noise(sol::state * state, scripting_tool * tool)
+    void register_noise(lua_state * state)
     {
       state->new_usertype<noisemap>("noisemap"
         , "get", &noisemap::get

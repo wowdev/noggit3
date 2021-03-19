@@ -1,6 +1,7 @@
 #include <noggit/scripting/script_tex.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 #include <sol/sol.hpp>
 
@@ -78,7 +79,7 @@ namespace noggit {
       return tex(*_chunk_iter,_tex_iter);
     }
     
-    void register_tex(sol::state * state, scripting_tool * tool)
+    void register_tex(lua_state * state)
     {
       state->new_usertype<tex>("tex"
         , "set_alpha", &tex::set_alpha

@@ -13,12 +13,13 @@ namespace noggit
 {
   namespace scripting
   {
+    class lua_state;
     class scripting_tool;
     namespace fs = boost::filesystem;
     void write_file(std::string const& path, std::string const& content);
     void append_file(std::string const& path, std::string const& content);
     std::string read_file(std::string const& path);
     bool path_exists(std::string const& path);
-    void register_filesystem(sol::state* state, scripting_tool* tool);
+    void register_filesystem(lua_state * state);
   } // namespace scripting
 } // namespace noggit

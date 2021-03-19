@@ -34,7 +34,7 @@ namespace noggit
       clearLog();
       try
       {
-        get_context()->reset(this);
+        get_context()->reset();
       }
       catch (std::exception const& e)
       {
@@ -48,7 +48,7 @@ namespace noggit
 
       for(auto& script : get_context()->get_scripts())
       {
-        _selection->addItem(script.get_name().c_str());
+        _selection->addItem(script->get_name().c_str());
       }
 
       if (selection != -1)
@@ -65,7 +65,7 @@ namespace noggit
       clearDescription();
       get_settings()->clear();
 
-      auto sn = _script_context->get_scripts()[selection].get_name();
+      auto sn = _script_context->get_scripts()[selection]->get_name();
 
       get_profiles()->clear();
 
@@ -102,7 +102,7 @@ namespace noggit
       }
 
       int next_profile = 0;
-      auto cur_script = get_context()->get_scripts()[selection].get_name();
+      auto cur_script = get_context()->get_scripts()[selection]->get_name();
       if (json->contains(cur_script))
       {
         if ((*json)[cur_script].contains(CUR_PROFILE_PATH))
@@ -134,7 +134,7 @@ namespace noggit
       : QWidget(parent)
       , _cur_profile ("Default")
       , _view(view)
-      , _script_context(new script_context())
+      , _script_context(new script_context(this))
     {
       auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
@@ -179,7 +179,7 @@ namespace noggit
       bool new_left = get_view()->leftMouse;
       bool new_right = get_view()->rightMouse;
 
-      auto evt = script_brush_event(
+      auto evt = std::make_shared<script_brush_event>(
           pos
         , get_settings()->brushRadius()
         , get_settings()->innerRadius()
@@ -191,25 +191,24 @@ namespace noggit
         int sel = get_context()->get_selection();
         if(sel>=0)
         {
-          auto brush = & get_context()->get_scripts()[sel];
+          auto brush = get_context()->get_scripts()[sel];
           if(new_left)
           {
-            if(!_last_left) brush->_left_click.call_if_not_null("(brush_event)",evt);
-            else brush->_left_hold.call_if_not_null("(brush_event)",evt);
+            if(!_last_left ) brush->on_left_click.call_if_exists("brush_event",evt);
           }
           else
           {
-            if(_last_left) brush->_left_release.call_if_not_null("(brush_event)",evt);
+            //if(_last_left) brush->on_left_release.call_if_not_null("(brush_event)",evt);
           }
 
           if(new_right)
           {
-            if(!_last_right) brush->_right_click.call_if_not_null("(brush_event)",evt);
-            else brush->_right_hold.call_if_not_null("(brush_event)",evt);
+            //if(!_last_right) brush->on_right_click.call_if_not_null("(brush_event)",evt);
+            //else brush->on_right_hold.call_if_not_null("(brush_event)",evt);
           }
           else
           {
-            if(_last_right) brush->_right_release.call_if_not_null("(brush_event)",evt);
+            //if(_last_right) brush->on_right_release.call_if_not_null("(brush_event)",evt);
           }
         }
       }

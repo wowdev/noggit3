@@ -16,13 +16,21 @@ namespace noggit
   {
     class scripting_tool;
 
+    class lua_state : public sol::state
+    {
+    public:
+      lua_state(scripting_tool* tool);
+      scripting_tool* tool();
+    private:
+      scripting_tool* _tool;
+    };
 
     template <typename T>
     class script_scoped_function
     {
     public:
       script_scoped_function(
-          sol::state *lua, std::string const &name, std::function<T> fun)
+          lua_state *lua, std::string const &name, std::function<T> fun)
           : _lua(lua), _name(name)
       {
         lua->set_function(name, fun);
@@ -33,21 +41,21 @@ namespace noggit
       }
 
     private:
-      sol::state *_lua;
+      lua_state * _lua;
       std::string _name;
     };
 
     class script_context
     {
     public:
-      script_context() = default;
+      script_context(scripting_tool * tool);
       ~script_context();
-      sol::state *get_state();
-      void reset(noggit::scripting::scripting_tool *tool);
+      lua_state * get_state();
+      void reset();
       void select_script(int index);
       int get_selection();
       std::string get_selected_name();
-      std::vector<noggit::scripting::script_brush> &get_scripts();
+      std::vector<std::shared_ptr<noggit::scripting::script_brush>> &get_scripts();
       sol::table require(std::string const& path);
       std::map<std::string, sol::table> _modules;
       std::vector<std::string> file_stack;
@@ -55,10 +63,9 @@ namespace noggit
       std::string file_to_module(std::string const& file);
       std::string module_to_file(std::string const& module);
     private:
-      sol::state *_lua = new sol::state();
-
-      std::vector<noggit::scripting::script_brush> _scripts;
-
+      scripting_tool * _tool;
+      lua_state * _lua;
+      std::vector<std::shared_ptr<script_brush>> _scripts;
       int _selected = -1;
     };
   } // namespace scripting

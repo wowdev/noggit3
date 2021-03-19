@@ -2,6 +2,7 @@
 #include <noggit/scripting/script_image.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 #include <sol/sol.hpp>
 #include <lodepng.h>
@@ -119,7 +120,7 @@ namespace noggit
       return float(get_image()[x * 4]) / 255.0;
     }
 
-    void register_image(sol::state * state, scripting_tool * tool)
+    void register_image(lua_state * state)
     {
       state->new_usertype<image>("image"
         , "get_index", &image::get_index
@@ -135,7 +136,7 @@ namespace noggit
         return std::make_shared<image>(width,height);
       });
 
-      state->set_function("load_png", [tool](std::string const& path) {
+      state->set_function("load_png", [](std::string const& path) {
         return std::make_shared<image>(path);
       });
     }

@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_exception.hpp>
-
-#include <sol/sol.hpp>
+#include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 
+#include <sol/sol.hpp>
 #include <vector>
 
 // maximum amount of texunits that can be closest to a vertex
@@ -204,7 +204,7 @@ namespace noggit
       return vert(*_chunk_iter,_vert_iter);
     }
 
-    void register_vert(sol::state * state, scripting_tool * tool)
+    void register_vert(lua_state * state)
     {
       state->new_usertype<vert>("vert"
         , "get_pos", &vert::get_pos

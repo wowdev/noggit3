@@ -20,22 +20,22 @@
 namespace noggit {
   namespace scripting {
     namespace {
-      void register_functions(sol::state * lua, noggit::scripting::scripting_tool * tool)
+      void register_functions(lua_state * lua)
       {
         // Register your functions / add registry functions here!
-        register_script_brush(lua, tool);
-        register_global(lua, tool);
-        register_vert(lua, tool);
-        register_tex(lua, tool);
-        register_chunk(lua, tool);
-        register_selection(lua, tool);
-        register_random(lua, tool);
-        register_noise(lua, tool);
-        register_math(lua, tool);
-        register_image(lua, tool);
-        register_filesystem(lua, tool);
-        register_standard_brush(lua, tool);
-        register_settings(lua, tool);
+        register_script_brush(lua);
+        register_global(lua);
+        register_vert(lua);
+        register_tex(lua);
+        register_chunk(lua);
+        register_selection(lua);
+        register_random(lua);
+        register_noise(lua);
+        register_math(lua);
+        register_image(lua);
+        register_filesystem(lua);
+        register_standard_brush(lua);
+        register_settings(lua);
       }
     }
   }

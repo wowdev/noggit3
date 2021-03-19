@@ -31,6 +31,6 @@ namespace noggit
       MapChunk* _chunk;
     };
 
-    void register_chunk(sol::state * state, scripting_tool * tool);
+    void register_chunk(lua_state * state);
   } // namespace scripting
 } // namespace noggit

@@ -3,6 +3,7 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 #include <sol/sol.hpp>
 
@@ -56,7 +57,7 @@ namespace noggit
       return fs::exists(path);
     }
 
-    void register_filesystem(sol::state * state, scripting_tool * tool)
+    void register_filesystem(lua_state * state)
     {
       state->set_function("write_file",write_file);
       state->set_function("append_file",append_file);

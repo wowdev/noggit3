@@ -14,6 +14,7 @@ namespace noggit
   namespace scripting
   {
     class scripting_tool;
+    class lua_state;
     class standard_brush {
     public:
       standard_brush(World* world);
@@ -39,6 +40,6 @@ namespace noggit
       World* _world;
     };
 
-    void register_standard_brush(sol::state * state, scripting_tool * tool);
+    void register_standard_brush(lua_state * state);
   } // namespace scripting
 } // namespace noggit

@@ -54,6 +54,6 @@ namespace noggit
       , std::string const& algorithm
       , std::string const& seed);
 
-    void register_noise(sol::state * state, scripting_tool * tool);
+    void register_noise(lua_state * state);
   } // namespace scripting
 } // namespace noggit

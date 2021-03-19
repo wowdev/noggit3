@@ -60,6 +60,6 @@ namespace noggit
       math::vector_3d const& _max;
     };
 
-    void register_vert(sol::state * state, scripting_tool * tool);
+    void register_vert(lua_state * state);
   } // namespace scripting
 } // namespace noggit

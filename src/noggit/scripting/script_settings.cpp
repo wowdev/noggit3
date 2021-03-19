@@ -318,20 +318,79 @@ namespace noggit
       return &_json;
     }
 
-    void register_settings(sol::state * state, scripting_tool * tool)
+    int_tag::int_tag(std::string const& script, std::string const& item, scripting_tool * tool, int min, int max, int def)
+      : tag(script,item,tool)
+      , _min(min)
+      , _max(max)
+      , _def(def)
+    {}
+
+    int int_tag::get()
     {
-      state->new_usertype<script_settings>("settings"
-        , "add_double", &script_settings::add_double
-        , "add_int", &script_settings::add_int
-        , "add_bool", &script_settings::add_bool
-        , "add_string", &script_settings::add_string
-        , "add_string_list", &script_settings::add_string_list
-        , "get_double", &script_settings::get_double
-        , "get_int", &script_settings::get_int
-        , "get_bool", &script_settings::get_bool
-        , "get_string", &script_settings::get_string
-        , "get_string_list", &script_settings::get_string_list
-      );
+      return _tool->get_settings()->get_setting<int>(_script,_tool->get_profiles()->get_cur_profile(),_item,_def);
+    }
+
+    void int_tag::add_to_settings()
+    {
+      _tool->get_settings()->add_int(_item, _min,_max,_def);
+    }
+
+    real_tag::real_tag(std::string const& script, std::string const& item, scripting_tool * tool, double min, double max, double def)
+      : tag(script,item,tool)
+      , _min(min)
+      , _max(max)
+      , _def(def)
+    {}
+
+    double real_tag::get()
+    {
+      return _tool->get_settings()->get_setting<double>(_script,_tool->get_profiles()->get_cur_profile(),_item,_def);
+    }
+
+    void real_tag::add_to_settings()
+    {
+      _tool->get_settings()->add_double(_item, _min,_max,_def);
+    }
+
+    string_tag::string_tag(std::string const& script, std::string const& item, scripting_tool * tool, std::string const& def)
+      : tag(script,item,tool)
+      , _def(def)
+    {}
+
+    std::string string_tag::get()
+    {
+      return _tool->get_settings()->get_setting<std::string>(_script,_tool->get_profiles()->get_cur_profile(),_item,_def);
+    }
+
+    void string_tag::add_to_settings()
+    {
+      _tool->get_settings()->add_string(_item ,_def);
+    }
+
+    string_list_tag::string_list_tag(std::string const& script, std::string const& item, scripting_tool * tool, std::vector<std::string> const& values)
+      : tag(script,item,tool)
+      , _values(values)
+    {}
+
+    std::string string_list_tag::get()
+    {
+      return _tool->get_settings()->get_setting<std::string>(_script,_tool->get_profiles()->get_cur_profile(),_item,_values[0]);
+    }
+
+    void string_list_tag::add_to_settings()
+    {
+      for(auto& val: _values)
+      {
+        _tool->get_settings()->add_string_list(_item, val);
+      }
+    }
+
+    void register_settings(lua_state * state)
+    {
+      state->new_usertype<int_tag>("int_tag","get",&int_tag::get);
+      state->new_usertype<real_tag>("real_tag","get",&real_tag::get);
+      state->new_usertype<string_tag>("string_tag","get",&string_tag::get);
+      state->new_usertype<string_list_tag>("string_list_tag","get",&string_list_tag::get);
     }
   } // namespace scripting
 } // namespace noggit

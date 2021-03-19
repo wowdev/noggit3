@@ -1,6 +1,8 @@
 #include <noggit/scripting/script_brush.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_settings.hpp>
+#include <noggit/scripting/script_profiles.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 #include <string>
 #include <map>
@@ -39,12 +41,12 @@ namespace noggit {
     }
 
     script_brush::script_brush(
-      scripting_tool * tool
-      , std::string const& name
-      , sol::protected_function select_event)
-      : _tool(tool)
+      lua_state * state
+      , scripting_tool * tool
+      , std::string const& name)
+      : script_object(state)
+      , _tool(tool)
       , _name(name)
-      , _select(lua_function<script_brush*>(select_event))
       {};
 
     void script_brush::set_name(std::string const& name)
@@ -57,42 +59,48 @@ namespace noggit {
       return _name;
     }
 
-    script_settings * script_brush::settings()
+    std::shared_ptr<int_tag> script_brush::add_int_tag(std::string const& item, int low, int high, int def)
     {
-      return _tool->get_settings();
+      auto tag = std::make_shared<int_tag>(_name, item, _tool, low, high, def);
+      _tags.push_back(tag);
+      return tag;
     }
 
-    void script_brush::on_left_click(sol::protected_function evt)
+    std::shared_ptr<real_tag> script_brush::add_real_tag(std::string const& item, double low, double high, double def)
     {
-      _left_click = lua_function<script_brush_event const&>(evt);
+      auto tag = std::make_shared<real_tag>(_name, item, _tool, low, high, def);
+      _tags.push_back(tag);
+      return tag;
     }
 
-    void script_brush::on_left_hold(sol::protected_function evt)
+    std::shared_ptr<string_tag> script_brush::add_string_tag(std::string const& item, std::string const& def)
     {
-      _left_hold = lua_function<script_brush_event const&>(evt);
+      auto tag = std::make_shared<string_tag>(_name, item, _tool, def);
+      _tags.push_back(tag);
+      return tag;
     }
 
-    void script_brush::on_left_release(sol::protected_function evt)
+    std::shared_ptr<string_list_tag> script_brush::add_string_list_tag(std::string const& item, sol::variadic_args va)
     {
-      _left_release = lua_function<script_brush_event const&>(evt);
+      std::vector<std::string> vec;
+      for(auto v : va)
+      {
+        vec.push_back(v);
+      }
+      auto tag = std::make_shared<string_list_tag>(_name, item, _tool, vec);
+      _tags.push_back(tag);
+      return tag;
     }
 
-    void script_brush::on_right_click(sol::protected_function evt)
+    void script_brush::on_selected()
     {
-      _right_click = lua_function<script_brush_event const&>(evt);
+      for(auto tag : _tags)
+      {
+        tag->add_to_settings();
+      }
     }
 
-    void script_brush::on_right_hold(sol::protected_function evt)
-    {
-      _right_hold = lua_function<script_brush_event const&>(evt);
-    }
-
-    void script_brush::on_right_release(sol::protected_function evt)
-    {
-      _right_release = lua_function<script_brush_event const&>(evt);
-    }
-
-    void register_script_brush(sol::state * state, scripting_tool * tool)
+    void register_script_brush(lua_state * state)
     {
       state->new_usertype<script_brush_event>("script_brush_event"
         ,"pos",&script_brush_event::pos
@@ -102,14 +110,13 @@ namespace noggit {
         );
 
       state->new_usertype<script_brush>("script_brush"
-        ,"set_name",&script_brush::set_name
-        ,"settings",&script_brush::settings
-        ,"on_left_click",&script_brush::on_left_click
-        ,"on_left_hold",&script_brush::on_left_hold
-        ,"on_left_release",&script_brush::on_left_release
-        ,"on_right_click",&script_brush::on_right_click
-        ,"on_right_hold",&script_brush::on_right_hold
-        ,"on_right_release",&script_brush::on_right_release
+        , sol::meta_function::new_index, &script_brush::set
+        , sol::meta_function::index, &script_brush::get
+        ,"get_name",&script_brush::get_name
+        ,"add_int_tag",&script_brush::add_int_tag
+        ,"add_real_tag",&script_brush::add_real_tag
+        ,"add_string_tag",&script_brush::add_string_tag
+        ,"add_string_list_tag",&script_brush::add_string_list_tag
         );
     }
   }

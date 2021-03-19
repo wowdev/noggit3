@@ -19,6 +19,7 @@ namespace noggit
   namespace scripting
   {
     class scripting_tool;
+    class lua_state;
     class model
     {
     public:
@@ -68,6 +69,6 @@ namespace noggit
       int _model_index = -1;
     };
 
-    void register_model(sol::state * state, scripting_tool * tool);
+    void register_model(lua_state * state);
   } // namespace scripting
 } // namespace noggit

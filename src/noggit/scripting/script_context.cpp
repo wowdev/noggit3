@@ -2,6 +2,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_registry.ipp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_object.hpp>
 
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
@@ -16,6 +17,21 @@ namespace noggit
 {
   namespace scripting
   {
+    lua_state::lua_state(scripting_tool * tool)
+    : sol::state()
+    , _tool(tool)
+    {}
+
+    scripting_tool * lua_state::tool()
+    {
+      return _tool;
+    }
+    
+    script_context::script_context(scripting_tool * tool)
+    : _tool(tool)
+    , _lua(new lua_state(tool))
+    {}
+
     script_context::~script_context()
     {
       delete _lua;
@@ -27,15 +43,15 @@ namespace noggit
       {
         return "";
       }
-      return _scripts[_selected].get_name();
+      return _scripts[_selected]->get_name();
     }
 
-    sol::state *script_context::get_state()
+    lua_state * script_context::get_state()
     {
       return _lua;
     }
 
-    std::vector<noggit::scripting::script_brush> & script_context::get_scripts()
+    std::vector<std::shared_ptr<script_brush>> & script_context::get_scripts()
     {
       return _scripts;
     }
@@ -43,8 +59,8 @@ namespace noggit
     void script_context::select_script(int index)
     {
       _selected = index;
-      auto v = &get_scripts()[_selected];
-      v->_select.call("(select)",v);
+      auto v = get_scripts()[_selected];
+      v->on_selected();
     }
 
     int script_context::get_selection()
@@ -95,9 +111,9 @@ namespace noggit
       file_stack.pop_back();
     }
 
-    void script_context::reset(noggit::scripting::scripting_tool * tool)
+    void script_context::reset()
     {
-      std::string old_name = _selected > 0 ? _scripts[_selected].get_name() : "";
+      std::string old_name = _selected > 0 ? _scripts[_selected]->get_name() : "";
       _scripts.clear();
       _modules.clear();
 
@@ -106,21 +122,23 @@ namespace noggit
       {
         delete _lua;
       }
-      _lua = new sol::state();
+      _lua = new lua_state(this->_tool);
       _selected = -1;
 
-      script_scoped_function<void(std::string const&,sol::protected_function)> 
+      script_scoped_function<std::shared_ptr<script_brush>(std::string const&)> 
         add_brush(_lua,"brush",
-        [this,tool](std::string const& name, sol::protected_function select_event)
+        [this](std::string const& name)
         {
-          this->get_scripts().push_back(noggit::scripting::script_brush(tool, name,select_event));
+          auto brush = std::make_shared<script_brush>(_lua, this->_tool,name);
+          this->get_scripts().push_back(brush);
+          return brush;
         });
 
       _lua->set_function("require", [this](std::string const& name) {
         return this->require(name);
       });
 
-      register_functions(_lua, tool);
+      register_functions(_lua);
 
       boost::filesystem::recursive_directory_iterator end;
       for (boost::filesystem::recursive_directory_iterator dir("scripts"); dir != end; ++dir)
@@ -137,16 +155,16 @@ namespace noggit
         }
         catch (std::exception e)
         {
-          tool->setStyleSheet("background-color: #f0a5a5;");
-          tool->addLog("Script error:" + std::string(e.what()));
-          tool->resetLogScroll();
+          _tool->setStyleSheet("background-color: #f0a5a5;");
+          _tool->addLog("Script error:" + std::string(e.what()));
+          _tool->resetLogScroll();
         }
       }
 
       // restore the old selection if we can find the same name
       for (int i = 0; i < _scripts.size(); ++i)
       {
-        if (_scripts[i].get_name() == old_name)
+        if (_scripts[i]->get_name() == old_name)
         {
           _selected = i;
           break;

@@ -7,8 +7,9 @@
 
 namespace noggit {
   namespace scripting {
-    void register_global(sol::state * state, scripting_tool * global)
+    void register_global(lua_state * state)
     {
+      scripting_tool * global = state->tool();
       state->set_function("camera_pos",[global]()
       { 
         return global->get_view()->_camera.position;

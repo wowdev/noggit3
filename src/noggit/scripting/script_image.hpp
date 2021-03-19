@@ -14,6 +14,7 @@ namespace noggit
   namespace scripting
   {
     class scripting_tool;
+    class lua_state;
     class image
     {
     public:
@@ -36,6 +37,6 @@ namespace noggit
       unsigned _size = 0;
     };
 
-    void register_image(sol::state * state, scripting_tool * tool);
+    void register_image(lua_state * state);
   } // namespace scripting
 } // namespace noggit

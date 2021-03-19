@@ -5,6 +5,7 @@
 namespace noggit {
   namespace scripting {
     class scripting_tool;
-    void register_global(sol::state * state, scripting_tool * tool);
+    class lua_state;
+    void register_global(lua_state * state);
   }
 }

@@ -82,7 +82,7 @@ namespace noggit
       return noggit::scripting::make_noise(_min.x,_min.z,_size.x,_size.z,frequency, algorithm, seed);
     }
 
-    void register_selection(sol::state* state, scripting_tool* tool)
+    void register_selection(lua_state* state)
     {
       state->new_usertype<selection>("selection"
         , "center", &selection::center
@@ -91,14 +91,14 @@ namespace noggit
         , "size", &selection::size
         );
 
-      state->set_function("select_origin", [tool](math::vector_3d const& origin, float xRadius, float zRadius) {
-        return std::make_shared<selection>(tool->get_view()->_world.get(), "select_origin",
+      state->set_function("select_origin", [state](math::vector_3d const& origin, float xRadius, float zRadius) {
+        return std::make_shared<selection>(state->tool()->get_view()->_world.get(), "select_origin",
           math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
           math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
       });
 
-      state->set_function("select_between", [tool](math::vector_3d const& point1, math::vector_3d const& point2) {
-        return std::make_shared<selection>(tool->get_view()->_world.get(), "select_between",
+      state->set_function("select_between", [state](math::vector_3d const& point1, math::vector_3d const& point2) {
+        return std::make_shared<selection>(state->tool()->get_view()->_world.get(), "select_between",
           point1,point2);
       });
     }

@@ -11,6 +11,7 @@ namespace sol {
 namespace noggit {
   namespace scripting {
     class scripting_tool;
+    class lua_state;
 
     class tex
     {
@@ -44,6 +45,6 @@ namespace noggit {
         math::vector_3d const& _max;
     };
 
-    void register_tex(sol::state * state, scripting_tool * tool);
+    void register_tex(lua_state * state);
   }
 }

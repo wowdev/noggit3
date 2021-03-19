@@ -3,6 +3,7 @@
 
 #include <sol/sol.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_context.hpp>
 
 #include <cmath>
 
@@ -59,7 +60,7 @@ namespace noggit
       return math::vector_3d(nx, point.y, nz);
     }
 
-    void register_math(sol::state * state, scripting_tool * tool)
+    void register_math(lua_state * state)
     {
       state->set_function("round",round);
       state->set_function("pow",pow);
