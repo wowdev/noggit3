@@ -110,7 +110,7 @@ namespace noggit {
       _world->changeTerrain(pos, change, radius, brush_type, inner_radius);
     }
 
-    void register_standard_brush(lua_state * state)
+    void register_standard_brush(script_context * state)
     {
       state->new_usertype<standard_brush>("standard_brush"
         , "change_terrain", &standard_brush::change_terrain

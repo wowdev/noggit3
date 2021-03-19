@@ -60,7 +60,7 @@ namespace noggit
       return math::vector_3d(nx, point.y, nz);
     }
 
-    void register_math(lua_state * state)
+    void register_math(script_context * state)
     {
       state->set_function("round",round);
       state->set_function("pow",pow);

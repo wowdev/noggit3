@@ -16,7 +16,7 @@ namespace noggit {
     class string_tag;
     class string_list_tag;
     class tag;
-    class lua_state;
+    class script_context;
 
     enum class brush_event_type
     {
@@ -46,7 +46,7 @@ namespace noggit {
 
     class script_brush: public script_object {
     public:
-      script_brush(lua_state * state, scripting_tool * tool, std::string const& name);
+      script_brush(script_context * state, std::string const& name);
       void set_name(std::string const& name);
       std::string get_name();
       void on_selected();
@@ -66,9 +66,8 @@ namespace noggit {
     private:
       std::vector<std::shared_ptr<tag>> _tags;
       std::string _name;
-      scripting_tool * _tool;
     };
 
-    void register_script_brush(lua_state * state);
+    void register_script_brush(script_context * state);
   }
 }

@@ -15,7 +15,7 @@ namespace noggit
   namespace scripting
   {
     class scripting_tool;
-    class lua_state;
+    class script_context;
     float round(float a1);
     float pow(float a1, float a2);
     float log10(float arg);
@@ -43,6 +43,6 @@ namespace noggit
     int dist_2d_compare(math::vector_3d const& from, math::vector_3d const& to, float dist);
     math::vector_3d rotate_2d(math::vector_3d const& point, math::vector_3d const& origin, float angleDeg);
 
-    void register_math(lua_state * state);
+    void register_math(script_context * state);
   } // namespace scripting
 } // namespace noggit

@@ -79,7 +79,7 @@ namespace noggit {
       return tex(*_chunk_iter,_tex_iter);
     }
     
-    void register_tex(lua_state * state)
+    void register_tex(script_context * state)
     {
       state->new_usertype<tex>("tex"
         , "set_alpha", &tex::set_alpha

@@ -4,24 +4,25 @@
 
 namespace noggit {
   namespace scripting {
-    class lua_state;
+    class script_context;
     class scripting_tool;
 
     class script_object {
     public:
       // TODO: We can probably get this in a more intelligent way
-      script_object(lua_state * state);
+      script_object(script_context * state);
       virtual sol::object set(const std::string& key, sol::stack_object obj); 
       virtual sol::object get(const std::string& key); 
 
-      lua_state * state();
+      script_context * state();
       scripting_tool * tool();
       sol::table table();
+      bool has_table();
     protected:
       sol::table _table;
     private:
       bool _initialized = false;
-      lua_state * _state;
+      script_context * _state;
     };
 
     template <typename O, typename ...Ts>
@@ -34,6 +35,11 @@ namespace noggit {
 
       bool exists()
       {
+        if (!_obj->has_table())
+        {
+          return false;
+        }
+
         auto fn = _obj->table()[_func];
         if (!fn.valid())
         {
@@ -44,7 +50,7 @@ namespace noggit {
         {
           return true;
         }
-        return true;
+        return false;
       }
 
       void call_if_exists(std::string caller, Ts...args)

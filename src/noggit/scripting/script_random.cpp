@@ -60,7 +60,7 @@ namespace noggit
       return random();
     }
 
-    void register_random(lua_state * state)
+    void register_random(script_context * state)
     {
       state->new_usertype<random>("random"
         , "integer", &random::integer

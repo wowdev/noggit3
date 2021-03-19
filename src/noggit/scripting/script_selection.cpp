@@ -82,7 +82,7 @@ namespace noggit
       return noggit::scripting::make_noise(_min.x,_min.z,_size.x,_size.z,frequency, algorithm, seed);
     }
 
-    void register_selection(lua_state* state)
+    void register_selection(script_context* state)
     {
       state->new_usertype<selection>("selection"
         , "center", &selection::center

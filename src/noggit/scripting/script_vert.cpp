@@ -204,7 +204,7 @@ namespace noggit
       return vert(*_chunk_iter,_vert_iter);
     }
 
-    void register_vert(lua_state * state)
+    void register_vert(script_context * state)
     {
       state->new_usertype<vert>("vert"
         , "get_pos", &vert::get_pos

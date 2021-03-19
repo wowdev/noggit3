@@ -180,7 +180,7 @@ namespace noggit
         , seed);
     }
 
-    void register_noise(lua_state * state)
+    void register_noise(script_context * state)
     {
       state->new_usertype<noisemap>("noisemap"
         , "get", &noisemap::get

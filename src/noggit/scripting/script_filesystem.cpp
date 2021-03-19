@@ -57,7 +57,7 @@ namespace noggit
       return fs::exists(path);
     }
 
-    void register_filesystem(lua_state * state)
+    void register_filesystem(script_context * state)
     {
       state->set_function("write_file",write_file);
       state->set_function("append_file",append_file);

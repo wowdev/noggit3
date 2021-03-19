@@ -4,7 +4,7 @@
 
 namespace noggit {
   namespace scripting {
-      script_object::script_object(lua_state * state)
+      script_object::script_object(script_context * state)
       : _state(state)
       {}
 
@@ -19,6 +19,11 @@ namespace noggit {
         return obj;
       }
 
+      bool script_object::has_table()
+      {
+        return _initialized;
+      }
+
       sol::object script_object::get(const std::string& key)
       {
         return _table[key];
@@ -29,7 +34,7 @@ namespace noggit {
         return _table;
       }
 
-      lua_state * script_object::state()
+      script_context * script_object::state()
       {
         return _state;
       }

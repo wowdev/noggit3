@@ -41,11 +41,9 @@ namespace noggit {
     }
 
     script_brush::script_brush(
-      lua_state * state
-      , scripting_tool * tool
+      script_context * state
       , std::string const& name)
       : script_object(state)
-      , _tool(tool)
       , _name(name)
       {};
 
@@ -61,21 +59,21 @@ namespace noggit {
 
     std::shared_ptr<int_tag> script_brush::add_int_tag(std::string const& item, int low, int high, int def)
     {
-      auto tag = std::make_shared<int_tag>(_name, item, _tool, low, high, def);
+      auto tag = std::make_shared<int_tag>(_name, item, state()->tool(), low, high, def);
       _tags.push_back(tag);
       return tag;
     }
 
     std::shared_ptr<real_tag> script_brush::add_real_tag(std::string const& item, double low, double high, double def)
     {
-      auto tag = std::make_shared<real_tag>(_name, item, _tool, low, high, def);
+      auto tag = std::make_shared<real_tag>(_name, item, state()->tool(), low, high, def);
       _tags.push_back(tag);
       return tag;
     }
 
     std::shared_ptr<string_tag> script_brush::add_string_tag(std::string const& item, std::string const& def)
     {
-      auto tag = std::make_shared<string_tag>(_name, item, _tool, def);
+      auto tag = std::make_shared<string_tag>(_name, item, state()->tool(), def);
       _tags.push_back(tag);
       return tag;
     }
@@ -87,7 +85,7 @@ namespace noggit {
       {
         vec.push_back(v);
       }
-      auto tag = std::make_shared<string_list_tag>(_name, item, _tool, vec);
+      auto tag = std::make_shared<string_list_tag>(_name, item, state()->tool(), vec);
       _tags.push_back(tag);
       return tag;
     }
@@ -100,7 +98,7 @@ namespace noggit {
       }
     }
 
-    void register_script_brush(lua_state * state)
+    void register_script_brush(script_context * state)
     {
       state->new_usertype<script_brush_event>("script_brush_event"
         ,"pos",&script_brush_event::pos

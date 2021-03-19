@@ -69,7 +69,7 @@ namespace noggit
       script_settings *_settings;
       script_profiles *_profiles;
     private:
-      script_context * _script_context;
+      std::unique_ptr<script_context> _script_context;
       MapView* _view;
       void change_script(int script_index);
     };

@@ -106,7 +106,7 @@ namespace noggit
       );
     }
 
-    void register_chunk(lua_state * state)
+    void register_chunk(script_context * state)
     {
       state->new_usertype<chunk>("chunk"
         , "remove_texture", &chunk::remove_texture

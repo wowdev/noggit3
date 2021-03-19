@@ -32,9 +32,25 @@ namespace noggit
     {
       get_settings()->clear();
       clearLog();
+      int old_selection = -1;
       try
       {
-        get_context()->reset();
+        std::string old_name = get_context()->get_selected_name();
+        _script_context = std::make_unique<script_context>(this);
+        for(int i=0;i<get_context()->get_scripts().size(); ++i)
+        {
+          if(get_context()->get_scripts()[i]->get_name() == old_name)
+          {
+            old_selection = i;
+            break;
+          }
+        }
+        
+        // default to 0 if there are entries
+        if(get_context()->get_scripts().size()>0 && old_selection < 0)
+        {
+          old_selection = 0;
+        }
       }
       catch (std::exception const& e)
       {
@@ -42,7 +58,6 @@ namespace noggit
         resetLogScroll();
         return;
       }
-      int selection = get_context()->get_selection();
 
       _selection->clear();
 
@@ -51,10 +66,10 @@ namespace noggit
         _selection->addItem(script->get_name().c_str());
       }
 
-      if (selection != -1)
+      if (old_selection >= 0)
       {
-        _selection->setCurrentIndex(selection);
-        change_script(selection);
+        _selection->setCurrentIndex(old_selection);
+        change_script(old_selection);
       }
     }
 
@@ -134,8 +149,8 @@ namespace noggit
       : QWidget(parent)
       , _cur_profile ("Default")
       , _view(view)
-      , _script_context(new script_context(this))
     {
+      _script_context = std::make_unique<script_context>(this);
       auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
       layout->addWidget(_selection);
@@ -237,7 +252,7 @@ namespace noggit
 
     script_context* scripting_tool::get_context()
     {
-      return _script_context;
+      return _script_context.get();
     }
 
     MapView* scripting_tool::get_view()

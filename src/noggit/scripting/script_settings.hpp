@@ -18,7 +18,7 @@ namespace noggit {
   namespace scripting {
     class scripting_tool;
     class script_profiles;
-    class lua_state;
+    class script_context;
 
     class script_settings : public QGroupBox {
     public:
@@ -137,6 +137,6 @@ namespace noggit {
         std::vector<std::string> _values;
     };
 
-    void register_settings(lua_state * state);
+    void register_settings(script_context * state);
   }
 }

@@ -385,7 +385,7 @@ namespace noggit
       }
     }
 
-    void register_settings(lua_state * state)
+    void register_settings(script_context * state)
     {
       state->new_usertype<int_tag>("int_tag","get",&int_tag::get);
       state->new_usertype<real_tag>("real_tag","get",&real_tag::get);

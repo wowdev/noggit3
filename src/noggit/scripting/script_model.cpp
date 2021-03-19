@@ -180,7 +180,7 @@ namespace noggit
       return _models[_model_index];
     }
 
-    void register_model(lua_state * state)
+    void register_model(script_context * state)
     {
       state->new_usertype<model>("model"
         , "get_pos", &model::get_pos

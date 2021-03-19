@@ -120,7 +120,7 @@ namespace noggit
       return float(get_image()[x * 4]) / 255.0;
     }
 
-    void register_image(lua_state * state)
+    void register_image(script_context * state)
     {
       state->new_usertype<image>("image"
         , "get_index", &image::get_index

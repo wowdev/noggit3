@@ -52,6 +52,6 @@ namespace noggit
       math::vector_3d _size;
     };
 
-    void register_selection(lua_state * state);
+    void register_selection(script_context * state);
   } // namespace scripting
 } // namespace noggit

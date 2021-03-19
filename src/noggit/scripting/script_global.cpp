@@ -7,7 +7,7 @@
 
 namespace noggit {
   namespace scripting {
-    void register_global(lua_state * state)
+    void register_global(script_context * state)
     {
       scripting_tool * global = state->tool();
       state->set_function("camera_pos",[global]()

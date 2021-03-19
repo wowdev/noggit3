@@ -20,7 +20,7 @@
 namespace noggit {
   namespace scripting {
     namespace {
-      void register_functions(lua_state * lua)
+      void register_functions(script_context * lua)
       {
         // Register your functions / add registry functions here!
         register_script_brush(lua);

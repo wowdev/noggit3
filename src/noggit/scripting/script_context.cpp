@@ -17,24 +17,49 @@ namespace noggit
 {
   namespace scripting
   {
-    lua_state::lua_state(scripting_tool * tool)
-    : sol::state()
-    , _tool(tool)
-    {}
-
-    scripting_tool * lua_state::tool()
-    {
-      return _tool;
-    }
-    
     script_context::script_context(scripting_tool * tool)
     : _tool(tool)
-    , _lua(new lua_state(tool))
-    {}
-
-    script_context::~script_context()
     {
-      delete _lua;
+      script_scoped_function<std::shared_ptr<script_brush>(std::string const&)> 
+        add_brush(this,"brush",
+        [this](std::string const& name)
+        {
+          auto brush = std::make_shared<script_brush>(this, name);
+          this->get_scripts().push_back(brush);
+          return brush;
+        });
+
+      set_function("require", [this](std::string const& name) {
+        return this->require(name);
+      });
+
+      register_functions(this);
+
+      boost::filesystem::recursive_directory_iterator end;
+      for (boost::filesystem::recursive_directory_iterator dir("scripts"); dir != end; ++dir)
+      {
+        std::string file = dir->path().string();
+        if (!boost::ends_with(file, ".lua") || boost::ends_with(file, ".spec.lua"))
+        {
+          continue;
+        }
+
+        try
+        {
+          execute_file(dir->path().string());
+        }
+        catch (std::exception e)
+        {
+          _tool->setStyleSheet("background-color: #f0a5a5;");
+          _tool->addLog("Script error:" + std::string(e.what()));
+          _tool->resetLogScroll();
+        }
+      }
+    }
+
+    scripting_tool * script_context::tool()
+    {
+      return _tool;
     }
 
     std::string script_context::get_selected_name()
@@ -44,11 +69,6 @@ namespace noggit
         return "";
       }
       return _scripts[_selected]->get_name();
-    }
-
-    lua_state * script_context::get_state()
-    {
-      return _lua;
     }
 
     std::vector<std::shared_ptr<script_brush>> & script_context::get_scripts()
@@ -104,77 +124,11 @@ namespace noggit
     {
       auto mod = file_to_module(file);
       file_stack.push_back(mod);
-      sol::protected_function_result res = _lua->script_file(file);
+      sol::protected_function_result res = script_file(file);
       _modules[mod] = res.get_type() == sol::type::table 
         ? res.get<sol::table>()
-        : _lua->create_table();
+        : create_table();
       file_stack.pop_back();
-    }
-
-    void script_context::reset()
-    {
-      std::string old_name = _selected > 0 ? _scripts[_selected]->get_name() : "";
-      _scripts.clear();
-      _modules.clear();
-
-      // TODO: can you do this without deleting it?
-      if (_lua != nullptr)
-      {
-        delete _lua;
-      }
-      _lua = new lua_state(this->_tool);
-      _selected = -1;
-
-      script_scoped_function<std::shared_ptr<script_brush>(std::string const&)> 
-        add_brush(_lua,"brush",
-        [this](std::string const& name)
-        {
-          auto brush = std::make_shared<script_brush>(_lua, this->_tool,name);
-          this->get_scripts().push_back(brush);
-          return brush;
-        });
-
-      _lua->set_function("require", [this](std::string const& name) {
-        return this->require(name);
-      });
-
-      register_functions(_lua);
-
-      boost::filesystem::recursive_directory_iterator end;
-      for (boost::filesystem::recursive_directory_iterator dir("scripts"); dir != end; ++dir)
-      {
-        std::string file = dir->path().string();
-        if (!boost::ends_with(file, ".lua") || boost::ends_with(file, ".spec.lua"))
-        {
-          continue;
-        }
-
-        try
-        {
-          execute_file(dir->path().string());
-        }
-        catch (std::exception e)
-        {
-          _tool->setStyleSheet("background-color: #f0a5a5;");
-          _tool->addLog("Script error:" + std::string(e.what()));
-          _tool->resetLogScroll();
-        }
-      }
-
-      // restore the old selection if we can find the same name
-      for (int i = 0; i < _scripts.size(); ++i)
-      {
-        if (_scripts[i]->get_name() == old_name)
-        {
-          _selected = i;
-          break;
-        }
-      }
-      
-      if(_scripts.size() > 0 && _selected < 0)
-      {
-        _selected = 0;
-      }
     }
   } // namespace scripting
 } // namespace noggit
