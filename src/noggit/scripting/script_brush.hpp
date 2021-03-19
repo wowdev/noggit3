@@ -29,15 +29,14 @@ namespace noggit {
     class script_brush_event
     {
     public:
-      script_brush_event(
-        math::vector_3d const& pos
-        , float outer_radius
-        , float inner_radius
-        , float dt);
-        math::vector_3d pos();
-        float outer_radius();
-        float inner_radius();
-        float dt();
+      script_brush_event(math::vector_3d const& pos
+                        , float outer_radius
+                        , float inner_radius
+                        , float dt);
+      math::vector_3d pos();
+      float outer_radius();
+      float inner_radius();
+      float dt();
     private:
       math::vector_3d _pos;
       float _outer_radius;
@@ -58,12 +57,11 @@ namespace noggit {
         , int high, int def
         );
 
-      std::shared_ptr<real_tag> add_real_tag(
-        std::string const& item
-        , double low
-        , double high
-        , double def
-        );
+      std::shared_ptr<real_tag> add_real_tag(std::string const& item
+                                            , double low
+                                            , double high
+                                            , double def
+                                            );
 
       std::shared_ptr<string_tag> add_string_tag(
           std::string const& item

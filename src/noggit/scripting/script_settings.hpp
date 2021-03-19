@@ -3,7 +3,6 @@
 #include <noggit/scripting/script_object.hpp>
 
 #include <nlohmann/json.hpp>
-
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QComboBox>
@@ -21,9 +20,21 @@ namespace noggit {
     class script_settings : public QGroupBox {
     public:
       script_settings(scripting_tool* tool);
-      void add_double(std::string const& name, double min, double max, double def = 0, int zeros = 2);
-      void add_int(std::string const& name, int min, int max, int def = 0);
-      void add_bool(std::string const& name, bool def = false);
+      void add_double( std::string const& name
+                     , double min
+                     , double max
+                     , double def = 0
+                     , int zeros = 2
+                     );
+
+      void add_int( std::string const& name
+                  , int min
+                  , int max
+                  , int def = 0
+                  );
+
+      void add_bool( std::string const& name, bool def = false);
+
       void add_string(std::string const& name, std::string const& def = "");
       void add_string_list(std::string const& name, std::string const& value);
 
@@ -44,7 +55,11 @@ namespace noggit {
       nlohmann::json * get_raw_json();
 
       template <typename T>
-      T get_setting(std::string const& script, std::string const& profile, std::string const& item, T def)
+      T get_setting(std::string const& script
+                   , std::string const& profile
+                   , std::string const& item
+                   , T def
+                   )
       {
         if(!_json[script][profile].contains(item))
         {
@@ -128,7 +143,11 @@ namespace noggit {
 
     class string_tag : public tag {
       public:
-        string_tag(script_context * ctx, std::string const& script, std::string const& item, std::string const& def);
+        string_tag( script_context * ctx
+                  , std::string const& script
+                  , std::string const& item
+                  , std::string const& def
+                  );
         std::string get();
         virtual void add_to_settings() override;
       private:
@@ -137,7 +156,11 @@ namespace noggit {
 
     class string_list_tag : public tag {
       public:
-        string_list_tag(script_context * ctx, std::string const& script, std::string const& item, std::vector<std::string> const& strings);
+        string_list_tag( script_context * ctx
+                       , std::string const& script
+                       , std::string const& item
+                       , std::vector<std::string> const& strings
+                       );
         std::string get();
         virtual void add_to_settings() override;
       private:

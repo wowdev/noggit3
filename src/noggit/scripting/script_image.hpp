@@ -7,10 +7,6 @@
 #include <string>
 #include <memory>
 
-namespace sol {
-  class state;
-}
-
 namespace noggit
 {
   namespace scripting

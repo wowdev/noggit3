@@ -3,6 +3,7 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
+
 #include <sol/sol.hpp>
 
 namespace noggit

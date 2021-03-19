@@ -5,10 +5,6 @@
 
 #include <string>
 
-namespace sol {
-  class state;
-}
-
 namespace noggit
 {
   namespace scripting

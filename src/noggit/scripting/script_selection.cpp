@@ -3,13 +3,12 @@
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_noise.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
+
+#include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <math/vector_3d.hpp>
-
-#include <noggit/scripting/scripting_tool.hpp>
-#include <noggit/MapView.h>
-
-#include <noggit/scripting/script_noise.hpp>
 
 namespace noggit
 {
@@ -75,9 +74,21 @@ namespace noggit
       return std::make_shared<tex_iterator>(state(),get_chunks(), _min, _max);
     }
 
-    std::shared_ptr<noisemap> selection::make_noise(float frequency, std::string const& algorithm, std::string const& seed)
+    std::shared_ptr<noisemap> selection::make_noise(
+        float frequency
+      , std::string const& algorithm
+      , std::string const& seed)
     {
-      return noggit::scripting::make_noise(state(), _min.x, _min.z, _size.x, _size.z, frequency, algorithm, seed);
+      return noggit::scripting::make_noise(
+          state()
+        , _min.x
+        , _min.z
+        , _size.x
+        , _size.z
+        , frequency
+        , algorithm
+        , seed
+        );
     }
 
     void register_selection(script_context* state)
@@ -89,13 +100,22 @@ namespace noggit
         , "size", &selection::size
         );
 
-      state->set_function("select_origin", [state](math::vector_3d const& origin, float xRadius, float zRadius) {
+      state->set_function("select_origin", [state](
+          math::vector_3d const& origin
+        , float xRadius
+        , float zRadius
+        ) 
+      {
         return std::make_shared<selection>(state, "select_origin",
           math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
           math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
       });
 
-      state->set_function("select_between", [state](math::vector_3d const& point1, math::vector_3d const& point2) {
+      state->set_function("select_between", [state](
+          math::vector_3d const& point1
+        , math::vector_3d const& point2
+        )
+      {
         return std::make_shared<selection>(state, "select_between",
           point1,point2);
       });

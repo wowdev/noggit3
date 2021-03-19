@@ -5,6 +5,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 
 #include <sol/sol.hpp>
+
 #include <vector>
 
 // maximum amount of texunits that can be closest to a vertex
@@ -87,7 +88,10 @@ namespace noggit
 
       auto tex_indices = texture_index[_index];
 
-      for (auto iter = std::begin(tex_indices.indices); iter != std::end(tex_indices.indices); ++iter)
+      for ( auto iter = std::begin(tex_indices.indices)
+          ; iter != std::end(tex_indices.indices)
+          ; ++iter
+          )
       {
         if (*iter == -1)
           break;
@@ -114,7 +118,10 @@ namespace noggit
 
       float sum = 0;
       int ctr = 0;
-      for (auto iter = std::begin(tex_indices.indices); iter != std::end(tex_indices.indices); ++iter)
+      for (auto iter = std::begin(tex_indices.indices)
+          ; iter != std::end(tex_indices.indices)
+          ; ++iter
+          )
       {
         if (*iter == -1)
           break;
@@ -131,7 +138,8 @@ namespace noggit
 
     bool vert::is_tex_done()
     {
-      return _tex_index >= MAX_TEXUNITS_PER_VERT || texture_index[_index].indices[_tex_index] == -1;
+      return _tex_index >= MAX_TEXUNITS_PER_VERT 
+        || texture_index[_index].indices[_tex_index] == -1;
     }
 
     void vert::reset_tex()

@@ -12,10 +12,6 @@ class World;
 class ModelInstance;
 class WMOInstance;
 
-namespace sol {
-  class state;
-}
-
 namespace noggit
 {
   namespace scripting
@@ -51,7 +47,11 @@ namespace noggit
     class model_iterator: public script_object
     {
     public:
-      model_iterator(script_context * ctx, World* world, math::vector_3d min, math::vector_3d max);
+      model_iterator(script_context * ctx
+                    , World* world
+                    , math::vector_3d min
+                    , math::vector_3d max
+                    );
 
       bool next();
       void reset();

@@ -16,9 +16,8 @@ namespace noggit
   {
     chunk::chunk(script_context * ctx, MapChunk* chunk)
     : script_object(ctx)
-    {
-      _chunk = chunk;
-    }
+    , _chunk(chunk)
+    {}
 
     void chunk::set_hole(bool hole)
     {
@@ -61,8 +60,7 @@ namespace noggit
     void chunk::apply_heightmap ()
     {
       _chunk->updateVerticesData();
-      // TODO: fix
-      //get_ctx (context, "chunk_apply_heightmap")->_world->recalc_norms(chunk._chunk);
+      world()->recalc_norms(_chunk);
     }
 
     void chunk::apply_textures()
@@ -77,8 +75,7 @@ namespace noggit
 
     void chunk::apply_all()
     {
-      // TODO: fix
-      //chunk_apply_heightmap(chunk, context);
+      apply_heightmap();
       apply_textures();
       apply_vertex_color();
     }

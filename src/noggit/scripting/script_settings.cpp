@@ -6,6 +6,7 @@
 #include <sol/sol.hpp>
 #include <boost/filesystem.hpp>
 #include <nlohmann/json.hpp>
+
 #include <iomanip>
 
 #define INNER_RADIUS_PATH "__inner_radius"
@@ -318,23 +319,33 @@ namespace noggit
       return &_json;
     }
 
-    tag::tag(script_context * ctx, std::string const& script, std::string const& item)
-      : script_object(ctx)
-      , _script(script)
-      , _item(item)
-      , _tool(ctx->tool())
+    tag::tag( script_context * ctx
+            , std::string const& script
+            , std::string const& item
+            )
+            : script_object(ctx)
+            , _script(script)
+            , _item(item)
+            , _tool(ctx->tool())
       {}
 
-    int_tag::int_tag(script_context * ctx, std::string const& script, std::string const& item, int min, int max, int def)
-      : tag(ctx,script,item)
-      , _min(min)
-      , _max(max)
-      , _def(def)
+    int_tag::int_tag(script_context * ctx
+                    , std::string const& script
+                    , std::string const& item
+                    , int min
+                    , int max
+                    , int def
+                    )
+                    : tag(ctx,script,item)
+                    , _min(min)
+                    , _max(max)
+                    , _def(def)
     {}
 
     int int_tag::get()
     {
-      return _tool->get_settings()->get_setting<int>(_script,_tool->get_profiles()->get_cur_profile(),_item,_def);
+      return _tool->get_settings()->get_setting<int>(
+        _script,_tool->get_profiles()->get_cur_profile(),_item,_def);
     }
 
     void int_tag::add_to_settings()
@@ -342,16 +353,23 @@ namespace noggit
       _tool->get_settings()->add_int(_item, _min,_max,_def);
     }
 
-    real_tag::real_tag(script_context * ctx, std::string const& script, std::string const& item, double min, double max, double def)
-      : tag(ctx,script,item)
-      , _min(min)
-      , _max(max)
-      , _def(def)
+    real_tag::real_tag(script_context * ctx
+                      , std::string const& script
+                      , std::string const& item
+                      , double min
+                      , double max
+                      , double def
+                      )
+                      : tag(ctx,script,item)
+                      , _min(min)
+                      , _max(max)
+                      , _def(def)
     {}
 
     double real_tag::get()
     {
-      return _tool->get_settings()->get_setting<double>(_script,_tool->get_profiles()->get_cur_profile(),_item,_def);
+      return _tool->get_settings()->get_setting<double>(
+        _script,_tool->get_profiles()->get_cur_profile(),_item,_def);
     }
 
     void real_tag::add_to_settings()
@@ -359,14 +377,19 @@ namespace noggit
       _tool->get_settings()->add_double(_item, _min,_max,_def);
     }
 
-    string_tag::string_tag(script_context * ctx, std::string const& script, std::string const& item, std::string const& def)
-      : tag(ctx,script,item)
-      , _def(def)
+    string_tag::string_tag(script_context * ctx
+                          , std::string const& script
+                          , std::string const& item
+                          , std::string const& def
+                          )
+                          : tag(ctx,script,item)
+                          , _def(def)
     {}
 
     std::string string_tag::get()
     {
-      return _tool->get_settings()->get_setting<std::string>(_script,_tool->get_profiles()->get_cur_profile(),_item,_def);
+      return _tool->get_settings()->get_setting<std::string>(
+        _script,_tool->get_profiles()->get_cur_profile(),_item,_def);
     }
 
     void string_tag::add_to_settings()
@@ -374,14 +397,19 @@ namespace noggit
       _tool->get_settings()->add_string(_item ,_def);
     }
 
-    string_list_tag::string_list_tag(script_context * ctx, std::string const& script, std::string const& item, std::vector<std::string> const& values)
+    string_list_tag::string_list_tag(script_context * ctx
+                                    , std::string const& script
+                                    , std::string const& item
+                                    , std::vector<std::string> const& values
+                                    )
       : tag(ctx,script,item)
       , _values(values)
     {}
 
     std::string string_list_tag::get()
     {
-      return _tool->get_settings()->get_setting<std::string>(_script,_tool->get_profiles()->get_cur_profile(),_item,_values[0]);
+      return _tool->get_settings()->get_setting<std::string>(
+        _script,_tool->get_profiles()->get_cur_profile(),_item,_values[0]);
     }
 
     void string_list_tag::add_to_settings()

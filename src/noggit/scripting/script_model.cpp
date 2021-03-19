@@ -113,34 +113,39 @@ namespace noggit
 
       if (boost::ends_with(filename, ".wmo"))
       {
-        // TODO: Fix
-        //model._impl = get_ctx(ctx, "model_replace")
-        //  ->_world->addWMO(filename, model_get_pos(model), math::degrees::vec3 {model_get_rot(model)});
+        _impl = 
+          world()->addWMO(filename, get_pos(), math::degrees::vec3 {get_rot()});
       }
       else
       {
         auto params = object_paste_params();
-        // TODO: Fix
-        //model._impl = get_ctx(ctx, "model_replace")
-        //  ->_world->addM2(filename, model_get_pos(model), model_get_scale(model), math::degrees::vec3 {model_get_rot(model)}, &params);
+        _impl =
+          world()->addM2(filename, get_pos(), get_scale(), math::degrees::vec3 {get_rot()}, &params);
       }
     }
 
-    model_iterator::model_iterator(script_context * ctx, World* world, math::vector_3d min, math::vector_3d max)
-      : script_object(ctx)
-      , _world(world), _min(min), _max(max) {}
+    model_iterator::model_iterator(
+          script_context * ctx
+        , World* world
+        , math::vector_3d min
+        , math::vector_3d max
+        )
+        : script_object(ctx)
+        , _world(world), _min(min), _max(max) {}
 
     void model_iterator::query()
     {
       _models.clear();
       _world->for_each_m2_instance([&](ModelInstance& mod) {
-        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
+        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x 
+         && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
           _models.push_back(model(state(),&mod));
         }
       });
       _world->for_each_wmo_instance([&](WMOInstance& mod) {
-        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
+        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x 
+         && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
           _models.push_back(model(state(),&mod));
         }

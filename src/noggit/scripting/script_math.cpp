@@ -1,10 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_math.hpp>
+#include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
 
 #include <sol/sol.hpp>
-#include <noggit/scripting/scripting_tool.hpp>
-#include <noggit/scripting/script_context.hpp>
-
 #include <cmath>
 
 namespace noggit

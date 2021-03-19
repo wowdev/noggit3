@@ -15,6 +15,7 @@
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/script_standard_brush.hpp>
 #include <noggit/scripting/script_settings.hpp>
+
 #include <sol/sol.hpp>
 
 namespace noggit {

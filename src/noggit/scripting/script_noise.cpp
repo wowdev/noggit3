@@ -139,13 +139,13 @@ namespace noggit
       }
 
       generator->GenUniformGrid2D(
-        get_map(),
-        start_x,
-        start_y,
-        width,
-        height,
-        frequency,
-        std::hash<std::string>()(std::string(seed))
+          get_map()
+        , start_x
+        , start_y
+        , width
+        , height
+        , frequency
+        , std::hash<std::string>()(std::string(seed))
       );
     }
 
@@ -164,7 +164,7 @@ namespace noggit
     }
 
     std::shared_ptr<noisemap> make_noise(
-      script_context * ctx
+        script_context * ctx
       , int x_start
       , int y_start
       , int x_size
@@ -197,12 +197,20 @@ namespace noggit
           int sx
         , int sy
         , int width 
-        ,int height
+        , int height
         , float frequency
         , std::string const& algorithm
         , std::string const& seed)
         {
-          return make_noise(state,sx,sy,width,height,frequency,algorithm,seed);
+          return make_noise( state
+                           , sx
+                           , sy
+                           , width
+                           , height
+                           , frequency
+                           , algorithm
+                           , seed
+                           );
         });
     }
   } // namespace scripting

@@ -30,7 +30,10 @@ namespace noggit {
         , math::vector_3d const& pos
         , math::vector_3d const& rotation)
       {
-        global->get_view()->_world.get()->addWMO(filename,pos,math::degrees::vec3(rotation));
+        global->get_view()->_world.get()->addWMO(
+           filename
+          ,pos
+          ,math::degrees::vec3(rotation));
       });
 
       state->set_function("get_map_id",[global]()
@@ -38,7 +41,8 @@ namespace noggit {
         return global->get_view()->_world.get()->getMapID();
       });
 
-      state->set_function("get_area_id",[global](math::vector_3d const& pos)
+      state->set_function("get_area_id",[global](
+        math::vector_3d const& pos)
       {
         return global->get_view()->_world.get()->getAreaID(pos);
       });

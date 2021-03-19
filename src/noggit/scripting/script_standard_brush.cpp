@@ -5,6 +5,7 @@
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
 #include <noggit/Brush.h>
+
 #include <math/vector_4d.hpp>
 
 #include <sol/sol.hpp>
@@ -15,30 +16,68 @@ namespace noggit {
     : script_object(ctx)
     {}
 
-    void standard_brush::set_area_id(math::vector_3d const& pos, int id, bool adt)
+    void standard_brush::set_area_id(math::vector_3d const& pos
+                                    , int id
+                                    , bool adt
+                                    )
     {
       world()->setAreaID(pos, id, adt);
     }
 
-    void standard_brush::change_vertex_color(math::vector_3d const& pos, math::vector_3d const& color, float alpha, float change, float radius, bool editMode)
+    void standard_brush::change_vertex_color(
+          math::vector_3d const& pos
+        , math::vector_3d const& color
+        , float alpha
+        , float change
+        , float radius
+        , bool editMode
+        )
     {
       auto v = color;
-      world()->changeShader(pos, math::vector_4d(v.x, v.y, v.z, alpha), change, radius, editMode);
+      world()->changeShader(
+        pos, math::vector_4d(v.x, v.y, v.z, alpha), change, radius, editMode);
     }
 
-    math::vector_3d standard_brush::get_vertex_color(math::vector_3d const& pos)
+    math::vector_3d standard_brush::get_vertex_color(
+      math::vector_3d const& pos)
     {
       return world()->pickShaderColor(pos);
     }
 
-    void standard_brush::flatten_terrain(math::vector_3d const& pos, float remain, float radius, int brush_type, bool lower, bool raise, math::vector_3d const& origin, double angle, double orientation)
+    void standard_brush::flatten_terrain(math::vector_3d const& pos
+                                        , float remain
+                                        , float radius
+                                        , int brush_type
+                                        , bool lower
+                                        , bool raise
+                                        , math::vector_3d const& origin
+                                        , double angle
+                                        , double orientation
+                                        )
     {
-      world()->flattenTerrain(pos, remain, radius, brush_type, flatten_mode(raise, lower), origin, math::degrees(angle), math::degrees(orientation));
+      world()->flattenTerrain( pos
+                             , remain
+                             , radius
+                             , brush_type
+                             , flatten_mode(raise, lower)
+                             , origin
+                             , math::degrees(angle)
+                             , math::degrees(orientation));
     }
 
-    void standard_brush::blur_terrain(math::vector_3d const& pos, float remain, float radius, int brush_type, bool lower, bool raise)
+    void standard_brush::blur_terrain(math::vector_3d const& pos
+                                     , float remain
+                                     , float radius
+                                     , int brush_type
+                                     , bool lower
+                                     , bool raise
+                                     )
     {
-      world()->blurTerrain(pos, remain, radius, brush_type, flatten_mode(raise, lower));
+      world()->blurTerrain( pos
+                          , remain
+                          , radius
+                          , brush_type
+                          , flatten_mode(raise, lower));
     }
 
     void standard_brush::erase_textures(math::vector_3d const& pos)
@@ -61,12 +100,17 @@ namespace noggit {
       world()->clearHeight(pos);
     }
 
-    void standard_brush::set_hole(math::vector_3d const& pos, bool big, bool hole)
+    void standard_brush::set_hole( math::vector_3d const& pos
+                                 , bool big
+                                 , bool hole
+                                 )
     {
       world()->setHole(pos, big, hole);
     }
 
-    void standard_brush::set_hole_adt(math::vector_3d const& pos, bool hole)
+    void standard_brush::set_hole_adt( math::vector_3d const& pos
+                                     , bool hole
+                                     )
     {
       world()->setHoleADT(pos, hole);
     }
@@ -77,7 +121,9 @@ namespace noggit {
       world()->updateSelectedVertices();
     }
 
-    void standard_brush::deselect_vertices(math::vector_3d const& pos, float radius)
+    void standard_brush::deselect_vertices( math::vector_3d const& pos
+                                          , float radius
+                                          )
     {
       world()->deselectVertices(pos, radius);
     }
@@ -97,17 +143,37 @@ namespace noggit {
       world()->clearVertexSelection();
     }
 
-    void standard_brush::paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, std::string const& texture)
+    void standard_brush::paint_texture( math::vector_3d const& pos
+                                      , float strength
+                                      , float pressure
+                                      , float hardness
+                                      , float radius
+                                      , std::string const& texture
+                                      )
     {
       auto brush = Brush();
       brush.setHardness(hardness);
       brush.setRadius(radius);
-      world()->paintTexture(pos, &brush, strength, pressure, scoped_blp_texture_reference(std::string(texture)));
+      world()->paintTexture(pos
+                           , &brush
+                           , strength
+                           , pressure
+                           , scoped_blp_texture_reference(std::string(texture)));
     }
 
-    void standard_brush::change_terrain(math::vector_3d const& pos, float change, float radius, float inner_radius, int brush_type)
+    void standard_brush::change_terrain( math::vector_3d const& pos
+                                       , float change
+                                       , float radius
+                                       , float inner_radius
+                                       , int brush_type
+                                       )
     {
-      world()->changeTerrain(pos, change, radius, brush_type, inner_radius);
+      world()->changeTerrain( pos
+                            , change
+                            , radius
+                            , brush_type
+                            , inner_radius
+                            );
     }
 
     void register_standard_brush(script_context * state)

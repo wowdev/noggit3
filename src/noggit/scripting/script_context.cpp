@@ -4,7 +4,6 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_object.hpp>
 
-
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
@@ -19,8 +18,8 @@ namespace noggit
 {
   namespace scripting
   {
-    script_context::script_context(scripting_tool * tool)
-    : _tool(tool)
+
+    script_context::script_context(scripting_tool * tool): _tool(tool)
     {
       script_scoped_function<std::shared_ptr<script_brush>(std::string const&)> 
         add_brush(this,"brush",
@@ -93,7 +92,7 @@ namespace noggit
     sol::table script_context::require(std::string const& mod)
     {
       std::string err_str;
-      for(auto& val: this->file_stack)
+      for(auto& val: this->_file_stack)
       {
         err_str+=val;
         if(val==mod)
@@ -130,12 +129,12 @@ namespace noggit
     void script_context::execute_file(std::string const& file)
     {
       auto mod = file_to_module(file);
-      file_stack.push_back(mod);
+      _file_stack.push_back(mod);
       sol::protected_function_result res = script_file(file);
       _modules[mod] = res.get_type() == sol::type::table 
         ? res.get<sol::table>()
         : create_table();
-      file_stack.pop_back();
+      _file_stack.pop_back();
     }
   } // namespace scripting
 } // namespace noggit

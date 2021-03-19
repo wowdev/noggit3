@@ -6,10 +6,6 @@
 
 class MapChunk;
 
-namespace sol {
-  class state;
-}
-
 namespace noggit {
   namespace scripting {
     class scripting_tool;
@@ -30,11 +26,11 @@ namespace noggit {
 
     class tex_iterator : public script_object {
       public:
-        tex_iterator(
-            script_context * ctx
-          , std::shared_ptr<std::vector<MapChunk*>> chunks
-          , math::vector_3d const& min
-          , math::vector_3d const& max);
+        tex_iterator( script_context * ctx
+                    , std::shared_ptr<std::vector<MapChunk*>> chunks
+                    , math::vector_3d const& min
+                    , math::vector_3d const& max
+                    );
         bool next();
         tex get();
 

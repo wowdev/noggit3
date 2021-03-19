@@ -1,15 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <cmath>
-
+#include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_profiles.hpp>
+#include <noggit/scripting/script_settings.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/Log.h>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
-#include <noggit/scripting/script_context.hpp>
-#include <noggit/scripting/script_exception.hpp>
-#include <noggit/scripting/script_profiles.hpp>
-#include <noggit/scripting/script_settings.hpp>
 #include <noggit/MapView.h>
 
 #include <QtWidgets/QFormLayout>
@@ -21,6 +19,8 @@
 #include <QtWidgets/QCheckBox>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
+
+#include <cmath>
 
 #define CUR_PROFILE_PATH "__cur_profile"
 
@@ -176,10 +176,14 @@ namespace noggit
       _log->setReadOnly(true);
       layout->addWidget(_log);
 
-      connect(_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
-        clearLog();
-        change_script(index);
-      });
+      connect(_selection
+             , QOverload<int>::of(&QComboBox::activated)
+             , this
+             , [this](auto index) 
+             {
+               clearLog();
+               change_script(index);
+             });
 
       doReload();
     }
@@ -239,7 +243,10 @@ namespace noggit
 
     void scripting_tool::addDescription(std::string const& stext)
     {
-      _description->setText(_description->text() + "\n" + QString::fromStdString (stext));
+      _description->setText(_description->text() 
+                           + "\n" 
+                           + QString::fromStdString (stext)
+                           );
     }
 
     void scripting_tool::addLog(std::string const& text)
