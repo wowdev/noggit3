@@ -2,6 +2,7 @@
 #pragma once
 
 #include <noggit/scripting/script_selection.hpp>
+#include <noggit/scripting/script_object.hpp>
 
 #include <math/vector_3d.hpp>
 
@@ -14,18 +15,19 @@ namespace noggit
 {
   namespace scripting
   {
-    class noisemap
+    class script_context;
+    class noisemap: public script_object
     {
     public:
       noisemap(
-          unsigned start_x
+          script_context * ctx
+          , unsigned start_x
           , unsigned start_y
           , unsigned width
           , unsigned height
           , float frequency
           , std::string const& algorithm 
           , std::string const& seed);
-      noisemap() = default;
 
       float get(math::vector_3d &pos);
       bool is_highest(math::vector_3d &pos, int check_radius);
@@ -46,7 +48,8 @@ namespace noggit
     };
 
     std::shared_ptr<noisemap> make_noise(
-        int start_x
+      script_context * ctx
+      , int start_x
       , int start_y
       , int width
       , int height

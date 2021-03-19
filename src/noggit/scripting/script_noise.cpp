@@ -79,13 +79,15 @@ namespace noggit
     }
 
     noisemap::noisemap(
-        unsigned start_x
+        script_context * ctx
+      , unsigned start_x
       , unsigned start_y
       , unsigned width
       , unsigned height
       , float frequency
       , std::string const& algorithm
       , std::string const& seed)
+    : script_object(ctx)
     {
       if(width<=0||height<=0)
       {
@@ -162,7 +164,8 @@ namespace noggit
     }
 
     std::shared_ptr<noisemap> make_noise(
-        int x_start
+      script_context * ctx
+      , int x_start
       , int y_start
       , int x_size
       , int y_size 
@@ -170,14 +173,14 @@ namespace noggit
       , std::string const& algorithm 
       , std::string const& seed)
     {
-      return std::make_shared<noisemap>(
-        x_start
-        , y_start
-        , x_size
-        , y_size
-        , frequency
-        , algorithm
-        , seed);
+      return std::make_shared<noisemap>( ctx
+                                       , x_start
+                                       , y_start
+                                       , x_size
+                                       , y_size
+                                       , frequency
+                                       , algorithm
+                                       , seed);
     }
 
     void register_noise(script_context * state)
@@ -190,7 +193,17 @@ namespace noggit
         , "width", &noisemap::width
         , "height", &noisemap::height
       );
-      state->set_function("make_noise",make_noise);
+      state->set_function("make_noise",[state](
+          int sx
+        , int sy
+        , int width 
+        ,int height
+        , float frequency
+        , std::string const& algorithm
+        , std::string const& seed)
+        {
+          return make_noise(state,sx,sy,width,height,frequency,algorithm,seed);
+        });
     }
   } // namespace scripting
 } // namespace noggit

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <noggit/scripting/script_object.hpp>
+
 #include <math/vector_3d.hpp>
 
 class MapChunk;
@@ -13,12 +15,10 @@ namespace noggit {
     class scripting_tool;
     class script_context;
 
-    class tex
+    class tex: public script_object
     {
     public:
-      tex(MapChunk* chunk, int index);
-      tex() = default;
-
+      tex(script_context * ctx, MapChunk* chunk, int index);
       void set_alpha(int index, float alpha);
       float get_alpha(int index);
       math::vector_3d get_pos_2d();
@@ -28,10 +28,11 @@ namespace noggit {
       int _index;
     };
 
-    class tex_iterator {
+    class tex_iterator : public script_object {
       public:
         tex_iterator(
-          std::shared_ptr<std::vector<MapChunk*>> chunks
+            script_context * ctx
+          , std::shared_ptr<std::vector<MapChunk*>> chunks
           , math::vector_3d const& min
           , math::vector_3d const& max);
         bool next();

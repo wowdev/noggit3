@@ -4,6 +4,8 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_object.hpp>
 
+
+#include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
 
@@ -105,6 +107,11 @@ namespace noggit
         execute_file(module_to_file(mod));
       }
       return _modules[mod];
+    }
+
+    World * script_context::world()
+    {
+      return _tool->get_view()->_world.get();
     }
 
     std::string script_context::file_to_module(std::string const& file)

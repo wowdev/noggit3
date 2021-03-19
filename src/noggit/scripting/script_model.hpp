@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <noggit/scripting/script_object.hpp>
+
 #include <math/vector_3d.hpp>
 
 #include <boost/variant.hpp>
@@ -20,12 +22,11 @@ namespace noggit
   {
     class scripting_tool;
     class script_context;
-    class model
+    class model : public script_object
     {
     public:
-      model(ModelInstance* model);
-      model(WMOInstance* model);
-      model() = default;
+      model(script_context * ctx, ModelInstance* model);
+      model(script_context * ctx, WMOInstance* model);
 
       math::vector_3d get_pos();
       void set_pos(math::vector_3d& pos);
@@ -47,11 +48,10 @@ namespace noggit
       boost::variant<ModelInstance*, WMOInstance*> _impl;
     };
 
-    class model_iterator
+    class model_iterator: public script_object
     {
     public:
-      model_iterator(World* world, math::vector_3d min, math::vector_3d max);
-      model_iterator() = default;
+      model_iterator(script_context * ctx, World* world, math::vector_3d min, math::vector_3d max);
 
       bool next();
       void reset();

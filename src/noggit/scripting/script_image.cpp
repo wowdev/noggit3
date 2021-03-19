@@ -28,7 +28,8 @@ namespace noggit
         _height = height;
     }
 
-    image::image(std::string const& path)
+    image::image(script_context * ctx, std::string const& path)
+    : script_object(ctx)
     {
       unsigned error = lodepng::decode(_image, _width, _height, path);
       if (error)
@@ -41,7 +42,8 @@ namespace noggit
       resize(_width, _height);
     }
 
-    image::image(int width, int height)
+    image::image(script_context * ctx, int width, int height)
+    : script_object(ctx)
     {
       resize(width,height);
     }
@@ -132,12 +134,12 @@ namespace noggit
         , "height", &image::height
       );
 
-      state->set_function("create_image",[](int width ,int height){
-        return std::make_shared<image>(width,height);
+      state->set_function("create_image",[state](int width ,int height){
+        return std::make_shared<image>(state, width,height);
       });
 
-      state->set_function("load_png", [](std::string const& path) {
-        return std::make_shared<image>(path);
+      state->set_function("load_png", [state](std::string const& path) {
+        return std::make_shared<image>(state, path);
       });
     }
   } // namespace scripting

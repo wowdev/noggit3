@@ -18,12 +18,14 @@ namespace noggit
 {
   namespace scripting
   {
-    model::model (ModelInstance* model)
-      : _impl (model)
+    model::model (script_context * ctx, ModelInstance* model)
+      : script_object(ctx)
+      , _impl (model)
     {}
 
-    model::model (WMOInstance* model)
-      : _impl (model)
+    model::model (script_context * ctx, WMOInstance* model)
+      : script_object(ctx)
+      , _impl (model)
     {}
 
     math::vector_3d model::get_pos()
@@ -124,8 +126,9 @@ namespace noggit
       }
     }
 
-    model_iterator::model_iterator(World* world, math::vector_3d min, math::vector_3d max)
-      : _world(world), _min(min), _max(max) {}
+    model_iterator::model_iterator(script_context * ctx, World* world, math::vector_3d min, math::vector_3d max)
+      : script_object(ctx)
+      , _world(world), _min(min), _max(max) {}
 
     void model_iterator::query()
     {
@@ -133,13 +136,13 @@ namespace noggit
       _world->for_each_m2_instance([&](ModelInstance& mod) {
         if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
-          _models.push_back(model(&mod));
+          _models.push_back(model(state(),&mod));
         }
       });
       _world->for_each_wmo_instance([&](WMOInstance& mod) {
         if (mod.pos.x >= _min.x && mod.pos.x <= _max.x && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
         {
-          _models.push_back(model(&mod));
+          _models.push_back(model(state(),&mod));
         }
       });
 

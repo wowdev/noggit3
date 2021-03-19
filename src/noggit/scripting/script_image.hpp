@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <noggit/scripting/script_object.hpp>
+
 #include <vector>
 #include <string>
 #include <memory>
@@ -15,12 +17,11 @@ namespace noggit
   {
     class scripting_tool;
     class script_context;
-    class image
+    class image: public script_object
     {
     public:
-      image() = default;
-      image(std::string const& path);
-      image(int width, int height);
+      image(script_context * ctx, std::string const& path);
+      image(script_context * ctx, int width, int height);
       std::vector<unsigned char> _image;
       int get_index(int x, int y);
       unsigned get_pixel(int x, int y);

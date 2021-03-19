@@ -15,12 +15,10 @@ namespace noggit
 {
   namespace scripting
   {
-    selection::selection(World * world, std::string const& caller,math::vector_3d const& point1, math::vector_3d const& point2)
-      : _world(world)
+    selection::selection(script_context * ctx, std::string const& caller,math::vector_3d const& point1, math::vector_3d const& point2)
+      : script_object(ctx)
+      , _world(ctx->world())
     {
-      selection sel;
-      // TODO: restore
-      //sel._world = get_ctx(context, caller)->_world;
       _min = math::vector_3d(
         std::min(point1.x, point2.x),
         std::min(point1.y, point2.y),
@@ -64,22 +62,22 @@ namespace noggit
 
     std::shared_ptr<model_iterator> selection::get_model_iterator()
     {
-      return std::make_shared<model_iterator>(_world, _min, _max);
+      return std::make_shared<model_iterator>(state(),_world, _min, _max);
     }
 
     std::shared_ptr<vert_iterator> selection::get_vert_iterator()
     {
-      return std::make_shared<vert_iterator>(get_chunks(), _min, _max);
+      return std::make_shared<vert_iterator>(state(),get_chunks(), _min, _max);
     }
 
     std::shared_ptr<tex_iterator> selection::get_tex_iterator()
     {
-      return std::make_shared<tex_iterator>(get_chunks(), _min, _max);
+      return std::make_shared<tex_iterator>(state(),get_chunks(), _min, _max);
     }
 
     std::shared_ptr<noisemap> selection::make_noise(float frequency, std::string const& algorithm, std::string const& seed)
     {
-      return noggit::scripting::make_noise(_min.x,_min.z,_size.x,_size.z,frequency, algorithm, seed);
+      return noggit::scripting::make_noise(state(), _min.x, _min.z, _size.x, _size.z, frequency, algorithm, seed);
     }
 
     void register_selection(script_context* state)
@@ -92,13 +90,13 @@ namespace noggit
         );
 
       state->set_function("select_origin", [state](math::vector_3d const& origin, float xRadius, float zRadius) {
-        return std::make_shared<selection>(state->tool()->get_view()->_world.get(), "select_origin",
+        return std::make_shared<selection>(state, "select_origin",
           math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
           math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
       });
 
       state->set_function("select_between", [state](math::vector_3d const& point1, math::vector_3d const& point2) {
-        return std::make_shared<selection>(state->tool()->get_view()->_world.get(), "select_between",
+        return std::make_shared<selection>(state, "select_between",
           point1,point2);
       });
     }

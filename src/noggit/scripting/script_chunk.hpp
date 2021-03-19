@@ -2,18 +2,18 @@
 #pragma once
 
 #include <noggit/scripting/script_vert.hpp>
+#include <noggit/scripting/script_object.hpp>
 #include <noggit/MapChunk.h>
 
 namespace noggit
 {
   namespace scripting
   {
-    class chunk
+    class script_context;
+    class chunk: public script_object
     {
     public:
-      chunk(MapChunk* chunk);
-      chunk() = default;
-
+      chunk(script_context * ctx, MapChunk* chunk);
       void remove_texture(int index);
       std::string get_texture(int index);
       int add_texture(std::string const& texture);

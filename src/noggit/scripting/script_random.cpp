@@ -9,18 +9,21 @@ namespace noggit
 {
   namespace scripting
   {
-    random::random(unsigned seed)
-      : _state(seed)
+    random::random(script_context * ctx, unsigned seed)
+      : script_object(ctx)
+      , _state(seed)
     {
     }
 
-    random::random(std::string const& seed)
-      : _state(std::hash<std::string>()(seed))
+    random::random(script_context * ctx, std::string const& seed)
+      : script_object(ctx)
+      , _state(std::hash<std::string>()(seed))
     {
     }
 
-    random::random()
-      : _state(std::chrono::high_resolution_clock::now().time_since_epoch().count())
+    random::random(script_context * ctx)
+      : script_object(ctx)
+      , _state(std::chrono::high_resolution_clock::now().time_since_epoch().count())
     {
     }
 
@@ -50,14 +53,14 @@ namespace noggit
       return val;
     }
 
-    random random_from_seed(std::string const& seed)
+    random random_from_seed(script_context * ctx, std::string const& seed)
     {
-      return random(std::string(seed));
+      return random(ctx, std::string(seed));
     }
 
-    random random_from_time()
+    random random_from_time(script_context * ctx)
     {
-      return random();
+      return random(ctx);
     }
 
     void register_random(script_context * state)
@@ -66,8 +69,15 @@ namespace noggit
         , "integer", &random::integer
         , "real", &random::real
       );
-      state->set_function("random_from_seed",random_from_seed);
-      state->set_function("random_from_time",random_from_time);
+      state->set_function("random_from_seed",[state](std::string const& seed)
+      {
+        return random_from_seed(state, seed);
+      });
+
+      state->set_function("random_from_time",[state]()
+      {
+        return random_from_time(state);
+      });
     }
   } // namespace scripting
 } // namespace noggit

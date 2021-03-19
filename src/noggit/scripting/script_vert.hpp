@@ -2,25 +2,22 @@
 #pragma once
 
 #include <noggit/scripting/script_tex.hpp>
+#include <noggit/scripting/script_object.hpp>
 
 #include <noggit/MapChunk.h>
 #include <math/vector_3d.hpp>
-
-namespace sol {
-  class state;
-}
 
 namespace noggit
 {
   namespace scripting
   {
     class scripting_tool;
+    class script_context;
 
-    class vert
+    class vert: public script_object
     {
     public:
-      vert(MapChunk* chunk, int index);
-      vert() = default;
+      vert(script_context * ctx, MapChunk* chunk, int index);
       math::vector_3d get_pos();
       void set_height(float y);
       void add_height(float y);
@@ -44,10 +41,11 @@ namespace noggit
       int _tex_index = -1;
     };
 
-    class vert_iterator {
+    class vert_iterator: public script_object {
       public:
         vert_iterator(
-          std::shared_ptr<std::vector<MapChunk*>> chunks
+          script_context * ctx
+          , std::shared_ptr<std::vector<MapChunk*>> chunks
           , math::vector_3d const& min
           , math::vector_3d const& max);
         bool next();

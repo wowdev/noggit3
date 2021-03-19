@@ -2,6 +2,8 @@
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 
+#include <noggit/World.h>
+
 namespace noggit {
   namespace scripting {
       script_object::script_object(script_context * state)
@@ -22,6 +24,11 @@ namespace noggit {
       bool script_object::has_table()
       {
         return _initialized;
+      }
+
+      World * script_object::world()
+      {
+        return _state->world();
       }
 
       sol::object script_object::get(const std::string& key)

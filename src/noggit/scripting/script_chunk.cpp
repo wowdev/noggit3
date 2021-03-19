@@ -14,7 +14,8 @@ namespace noggit
 {
   namespace scripting
   {
-    chunk::chunk(MapChunk* chunk)
+    chunk::chunk(script_context * ctx, MapChunk* chunk)
+    : script_object(ctx)
     {
       _chunk = chunk;
     }

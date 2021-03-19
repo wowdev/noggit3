@@ -318,8 +318,15 @@ namespace noggit
       return &_json;
     }
 
-    int_tag::int_tag(std::string const& script, std::string const& item, scripting_tool * tool, int min, int max, int def)
-      : tag(script,item,tool)
+    tag::tag(script_context * ctx, std::string const& script, std::string const& item)
+      : script_object(ctx)
+      , _script(script)
+      , _item(item)
+      , _tool(ctx->tool())
+      {}
+
+    int_tag::int_tag(script_context * ctx, std::string const& script, std::string const& item, int min, int max, int def)
+      : tag(ctx,script,item)
       , _min(min)
       , _max(max)
       , _def(def)
@@ -335,8 +342,8 @@ namespace noggit
       _tool->get_settings()->add_int(_item, _min,_max,_def);
     }
 
-    real_tag::real_tag(std::string const& script, std::string const& item, scripting_tool * tool, double min, double max, double def)
-      : tag(script,item,tool)
+    real_tag::real_tag(script_context * ctx, std::string const& script, std::string const& item, double min, double max, double def)
+      : tag(ctx,script,item)
       , _min(min)
       , _max(max)
       , _def(def)
@@ -352,8 +359,8 @@ namespace noggit
       _tool->get_settings()->add_double(_item, _min,_max,_def);
     }
 
-    string_tag::string_tag(std::string const& script, std::string const& item, scripting_tool * tool, std::string const& def)
-      : tag(script,item,tool)
+    string_tag::string_tag(script_context * ctx, std::string const& script, std::string const& item, std::string const& def)
+      : tag(ctx,script,item)
       , _def(def)
     {}
 
@@ -367,8 +374,8 @@ namespace noggit
       _tool->get_settings()->add_string(_item ,_def);
     }
 
-    string_list_tag::string_list_tag(std::string const& script, std::string const& item, scripting_tool * tool, std::vector<std::string> const& values)
-      : tag(script,item,tool)
+    string_list_tag::string_list_tag(script_context * ctx, std::string const& script, std::string const& item, std::vector<std::string> const& values)
+      : tag(ctx,script,item)
       , _values(values)
     {}
 

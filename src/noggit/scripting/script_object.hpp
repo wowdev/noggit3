@@ -2,6 +2,8 @@
 
 #include <sol/sol.hpp>
 
+class World;
+
 namespace noggit {
   namespace scripting {
     class script_context;
@@ -16,6 +18,7 @@ namespace noggit {
 
       script_context * state();
       scripting_tool * tool();
+      World * world();
       sol::table table();
       bool has_table();
     protected:

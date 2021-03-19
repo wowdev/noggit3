@@ -20,13 +20,10 @@ namespace noggit
 {
   namespace scripting
   {
-    vert::vert(MapChunk* chunk, int index)
-      : _chunk(chunk), _index(index)
-    {
-    }
-
-    tex::tex(MapChunk* chunk, int index)
-      : _chunk(chunk), _index(index)
+    vert::vert(script_context * ctx, MapChunk* chunk, int index)
+      : script_object(ctx)
+      , _chunk(chunk)
+      , _index(index)
     {
     }
 
@@ -156,14 +153,16 @@ namespace noggit
           "vert::get_tex",
           "accessing invalid texture unit: iterator is done");
       }
-      return tex(_chunk, texture_index[_index].indices[_tex_index]);
+      return tex(state(), _chunk, texture_index[_index].indices[_tex_index]);
     }
 
     vert_iterator::vert_iterator(
-      std::shared_ptr<std::vector<MapChunk*>> chunks
+      script_context * ctx
+      , std::shared_ptr<std::vector<MapChunk*>> chunks
       , math::vector_3d const& min
       , math::vector_3d const& max)
-      : _chunks(chunks)
+      : script_object(ctx)
+      , _chunks(chunks)
       , _chunk_iter(chunks->begin())
       , _min(min)
       , _max(max)
@@ -201,7 +200,7 @@ namespace noggit
 
     vert vert_iterator::get()
     {
-      return vert(*_chunk_iter,_vert_iter);
+      return vert(state(), *_chunk_iter,_vert_iter);
     }
 
     void register_vert(script_context * state)

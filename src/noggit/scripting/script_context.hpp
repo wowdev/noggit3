@@ -43,6 +43,7 @@ namespace noggit
       void select_script(int index);
       int get_selection();
 
+      World * world();
       scripting_tool * tool();
       std::string get_selected_name();
       std::vector<std::shared_ptr<noggit::scripting::script_brush>> &get_scripts();

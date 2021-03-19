@@ -10,6 +10,13 @@
 
 namespace noggit {
   namespace scripting {
+
+    tex::tex(script_context * ctx, MapChunk* chunk, int index)
+      : script_object(ctx)
+      , _chunk(chunk)
+      , _index(index)
+    {}
+
     float tex::get_alpha(int index)
     {
       auto& ts = _chunk->texture_set;
@@ -43,10 +50,12 @@ namespace noggit {
     }
 
     tex_iterator::tex_iterator(
-      std::shared_ptr<std::vector<MapChunk*>> chunks
+        script_context * ctx
+      , std::shared_ptr<std::vector<MapChunk*>> chunks
       , math::vector_3d const& min
       , math::vector_3d const& max)
-      : _chunks(chunks)
+      : script_object(ctx)
+      , _chunks(chunks)
       , _chunk_iter(chunks->begin())
       , _min(min)
       , _max(max)
@@ -76,7 +85,7 @@ namespace noggit {
 
     tex tex_iterator::get()
     {
-      return tex(*_chunk_iter,_tex_iter);
+      return tex(state(), *_chunk_iter,_tex_iter);
     }
     
     void register_tex(script_context * state)

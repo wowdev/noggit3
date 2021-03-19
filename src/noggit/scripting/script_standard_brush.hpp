@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 
+#include <noggit/scripting/script_object.hpp>
+
 #include <math/vector_3d.hpp>
 
 class World;
@@ -15,9 +17,9 @@ namespace noggit
   {
     class scripting_tool;
     class script_context;
-    class standard_brush {
+    class standard_brush : public script_object {
     public:
-      standard_brush(World* world);
+      standard_brush(script_context * ctx);
       void change_terrain(math::vector_3d const&, float change, float radius, float inner_radius, int brush_type);
       void set_area_id(math::vector_3d const&, int id, bool adt);
       void change_vertex_color(math::vector_3d const& pos, math::vector_3d const& color, float alpha, float change, float radius, bool editMode);
@@ -36,8 +38,6 @@ namespace noggit
       void flatten_vertices(float h);
       void update_vertices ();
       void paint_texture(math::vector_3d const& pos, float strength, float pressure, float hardness, float radius, std::string const& texture);
-    private:
-      World* _world;
     };
 
     void register_standard_brush(script_context * state);

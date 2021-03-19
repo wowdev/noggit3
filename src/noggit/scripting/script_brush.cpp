@@ -63,7 +63,7 @@ namespace noggit {
       , int high
       , int def)
     {
-      auto tag = std::make_shared<int_tag>(_name, item, state()->tool(), low, high, def);
+      auto tag = std::make_shared<int_tag>(state(), _name, item, low, high, def);
       _tags.push_back(tag);
       return tag;
     }
@@ -74,7 +74,7 @@ namespace noggit {
       , double high
       , double def)
     {
-      auto tag = std::make_shared<real_tag>(_name, item, state()->tool(), low, high, def);
+      auto tag = std::make_shared<real_tag>(state(), _name, item, low, high, def);
       _tags.push_back(tag);
       return tag;
     }
@@ -83,7 +83,7 @@ namespace noggit {
         std::string const& item
       , std::string const& def)
     {
-      auto tag = std::make_shared<string_tag>(_name, item, state()->tool(), def);
+      auto tag = std::make_shared<string_tag>(state(),_name, item, def);
       _tags.push_back(tag);
       return tag;
     }
@@ -97,7 +97,7 @@ namespace noggit {
       {
         vec.push_back(v);
       }
-      auto tag = std::make_shared<string_list_tag>(_name, item, state()->tool(), vec);
+      auto tag = std::make_shared<string_list_tag>(state(),_name, item, vec);
       _tags.push_back(tag);
       return tag;
     }

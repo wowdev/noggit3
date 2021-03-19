@@ -1,5 +1,7 @@
 #pragma once
 
+#include <noggit/scripting/script_object.hpp>
+
 #include <nlohmann/json.hpp>
 
 #include <QtWidgets/QFormLayout>
@@ -9,10 +11,6 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
-
-namespace sol {
-  class state;
-}
 
 namespace noggit {
   namespace scripting {
@@ -84,15 +82,13 @@ namespace noggit {
       std::map<std::string, QComboBox*> _string_arrays;
     };
 
-    class tag {
+    class tag : public script_object {
       public:
-        tag(std::string const& script, std::string const& item, scripting_tool * tool)
-          : _script(script)
-          , _item(item)
-          , _tool(tool)
-          {}
-          virtual void add_to_settings() = 0;
-
+        tag( script_context * ctx
+           , std::string const& script
+           , std::string const& item
+           );
+        virtual void add_to_settings() = 0;
       protected:
         scripting_tool * _tool;
         std::string _script;
@@ -102,7 +98,12 @@ namespace noggit {
 
     class int_tag : public tag {
       public:
-        int_tag(std::string const& script, std::string const& item, scripting_tool * tool, int min, int max, int def);
+        int_tag(script_context * ctx
+               , std::string const& script
+               , std::string const& item
+               , int min
+               , int max
+               , int def);
         int get();
         virtual void add_to_settings() override;
 
@@ -112,7 +113,13 @@ namespace noggit {
 
     class real_tag : public tag {
       public:
-        real_tag(std::string const& script, std::string const& item, scripting_tool * tool, double min, double max, double def);
+        real_tag( script_context * ctx
+                  , std::string const& script
+                  , std::string const& item
+                  , double min
+                  , double max
+                  , double def
+                  );
         double get();
         virtual void add_to_settings() override;
       private:
@@ -121,7 +128,7 @@ namespace noggit {
 
     class string_tag : public tag {
       public:
-        string_tag(std::string const& script, std::string const& item, scripting_tool * tool, std::string const& def);
+        string_tag(script_context * ctx, std::string const& script, std::string const& item, std::string const& def);
         std::string get();
         virtual void add_to_settings() override;
       private:
@@ -130,7 +137,7 @@ namespace noggit {
 
     class string_list_tag : public tag {
       public:
-        string_list_tag(std::string const& script, std::string const& item, scripting_tool * tool, std::vector<std::string> const& strings);
+        string_list_tag(script_context * ctx, std::string const& script, std::string const& item, std::vector<std::string> const& strings);
         std::string get();
         virtual void add_to_settings() override;
       private:
