@@ -25,6 +25,7 @@ namespace noggit {
       {
         // Register your functions / add registry functions here!
         register_script_brush(lua);
+        register_model(lua);
         register_global(lua);
         register_vert(lua);
         register_tex(lua);

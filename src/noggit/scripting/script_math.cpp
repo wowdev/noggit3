@@ -10,12 +10,12 @@ namespace noggit
 {
   namespace scripting
   {
-    float round(float a1) { return ::round(a1); }
+    int round(float a1) { return std::floor(a1); }
     float pow(float a1, float a2) { return ::pow(a1, a2); }
     float log10(float arg) { return ::log10(arg); }
     float log(float arg) { return ::log(arg); }
-    float ceil(float arg) { return (int)::ceil(arg); }
-    float floor(float arg) { return (int)::floor(arg); }
+    int ceil(float arg) { return ::ceil(arg); }
+    int floor(float arg) { return std::floor(arg); }
     float exp(float arg) { return ::exp(arg); }
     float cbrt(float arg) { return ::cbrt(arg); }
     float acosh(float arg) { return ::acosh(arg); }
@@ -87,6 +87,12 @@ namespace noggit
       state->set_function("dist_2d",dist_2d);
       state->set_function("dist_2d_compare",dist_2d_compare);
       state->set_function("rotate_2d",rotate_2d);
+
+      state->new_usertype<math::vector_3d>("vector_3d"
+        , "x", &math::vector_3d::x
+        , "y", &math::vector_3d::y
+        , "z", &math::vector_3d::z
+      );
     }
   } // namespace scripting
 } // namespace noggit

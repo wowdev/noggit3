@@ -21,8 +21,7 @@ namespace noggit
     class script_scoped_function
     {
     public:
-      script_scoped_function(
-                              script_context *lua
+      script_scoped_function( script_context *lua
                             , std::string const &name
                             , std::function<T> fun
                             )

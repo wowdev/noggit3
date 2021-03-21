@@ -12,12 +12,12 @@ namespace noggit
   {
     class scripting_tool;
     class script_context;
-    float round(float a1);
+    int round(float a1);
     float pow(float a1, float a2);
     float log10(float arg);
     float log(float arg);
-    float ceil(float arg);
-    float floor(float arg);
+    int ceil(float arg);
+    int floor(float arg);
     float exp(float arg);
     float cbrt(float arg);
     float acosh(float arg);

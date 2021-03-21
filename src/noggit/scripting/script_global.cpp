@@ -25,8 +25,7 @@ namespace noggit {
       });
 
       state->set_function("add_wmo",[global](
-        scripting_tool * global
-        , std::string const& filename
+          std::string const& filename
         , math::vector_3d const& pos
         , math::vector_3d const& rotation)
       {
@@ -87,9 +86,29 @@ namespace noggit {
         return global->get_view()->rightMouse;
       });
 
-      state->set_function("print",[global](std::string const& msg)
+      state->set_function("print",[global](sol::variadic_args va)
       {
-        return global->addLog(msg);
+        std::string str = "";
+        for(auto v : va)
+        {
+          switch (v.get_type())
+          {
+          case sol::type::boolean:
+            str += std::to_string((bool)v);
+            break;
+          case sol::type::number:
+            str += std::to_string(v.get<float>());
+            break;
+          case sol::type::string:
+            str += v.get<std::string>();
+            break;
+          case sol::type::table:
+            // TODO: implement
+            str += "{table}";
+            break;
+          }
+        }
+        return global->addLog(str);
       });
     }
   }

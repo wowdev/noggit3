@@ -61,7 +61,7 @@ namespace noggit
 
     std::shared_ptr<model_iterator> selection::get_model_iterator()
     {
-      return std::make_shared<model_iterator>(state(),_world, _min, _max);
+      return std::make_shared<model_iterator>(state(),_min, _max);
     }
 
     std::shared_ptr<vert_iterator> selection::get_vert_iterator()
@@ -72,6 +72,20 @@ namespace noggit
     std::shared_ptr<tex_iterator> selection::get_tex_iterator()
     {
       return std::make_shared<tex_iterator>(state(),get_chunks(), _min, _max);
+    }
+
+    std::shared_ptr<chunk_iterator> selection::get_chunk_iterator()
+    {
+      return std::make_shared<chunk_iterator>(state(),get_chunks());
+    }
+
+    void selection::apply_noise(std::shared_ptr<noisemap> noise, float ratio)
+    {
+      auto verts = this->get_vert_iterator();
+      while(verts->next())
+      {
+        auto vert = verts->get();
+      }
     }
 
     std::shared_ptr<noisemap> selection::make_noise(
@@ -91,6 +105,14 @@ namespace noggit
         );
     }
 
+    void selection::apply()
+    {
+      for(auto& chnk: *get_chunks())
+      {
+        chunk(state(),chnk).apply_all();
+      }
+    }
+
     void register_selection(script_context* state)
     {
       state->new_usertype<selection>("selection"
@@ -98,6 +120,11 @@ namespace noggit
         , "min", &selection::min
         , "max", &selection::max
         , "size", &selection::size
+        , "apply", &selection::apply
+        , "verts", &selection::get_vert_iterator
+        , "tex", &selection::get_tex_iterator
+        , "models", &selection::get_model_iterator
+        , "chunks", &selection::get_chunk_iterator
         );
 
       state->set_function("select_origin", [state](

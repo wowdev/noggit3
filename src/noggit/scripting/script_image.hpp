@@ -26,6 +26,7 @@ namespace noggit
       void save(std::string const& filename);
       int width();
       int height();
+      int get_blue();
     private:
       void resize(int width, int height);
       unsigned char* get_image() {return _image.data();}

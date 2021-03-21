@@ -104,6 +104,36 @@ namespace noggit
       );
     }
 
+    chunk_iterator::chunk_iterator(script_context * ctx, std::shared_ptr<std::vector<MapChunk*>> chunks)
+    : script_object(ctx)
+    , _chunks(chunks)
+    {}
+
+    bool chunk_iterator::next()
+    {
+      if(_cur>=_chunks->size()-1)
+      {
+        return false;
+      }
+      ++_cur;
+      return true;
+    }
+
+    chunk chunk_iterator::get()
+    {
+      return chunk(state(), (*_chunks)[_cur]);
+    }
+
+    void chunk_iterator::reset()
+    {
+      _cur = 0;
+    }
+
+    std::shared_ptr<selection> chunk::to_selection()
+    {
+      return std::make_shared<selection>(state(), "chunk#to_selection", _chunk->vmin,_chunk->vmax);
+    }
+
     void register_chunk(script_context * state)
     {
       state->new_usertype<chunk>("chunk"
@@ -120,7 +150,14 @@ namespace noggit
         , "set_impassable", &chunk::set_impassable
         , "get_area_id", &chunk::get_area_id
         , "set_area_id", &chunk::set_area_id
+        , "to_selection", &chunk::to_selection
       ); 
+
+      state->new_usertype<chunk_iterator>("chunk_iterator"
+        , "next", &chunk_iterator::next
+        , "get", &chunk_iterator::get
+        , "reset", &chunk_iterator::reset
+      );
     }
   } // namespace scripting
 } // namespace noggit

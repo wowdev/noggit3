@@ -214,20 +214,21 @@ namespace noggit
           if(new_left)
           {
             if(!_last_left ) brush->on_left_click.call_if_exists("brush_event",evt);
+            else brush->on_left_hold.call_if_exists("brush_event",evt);
           }
           else
           {
-            //if(_last_left) brush->on_left_release.call_if_not_null("(brush_event)",evt);
+            if(_last_left) brush->on_left_release.call_if_exists("(brush_event)",evt);
           }
 
           if(new_right)
           {
-            //if(!_last_right) brush->on_right_click.call_if_not_null("(brush_event)",evt);
-            //else brush->on_right_hold.call_if_not_null("(brush_event)",evt);
+            if(!_last_right) brush->on_right_hold.call_if_exists("brush_event",evt);
+            else brush->on_right_hold.call_if_exists("brush_event",evt);
           }
           else
           {
-            //if(_last_right) brush->on_right_release.call_if_not_null("(brush_event)",evt);
+            if(_last_right) brush->on_right_release.call_if_exists("(brush_event)",evt);
           }
         }
       }

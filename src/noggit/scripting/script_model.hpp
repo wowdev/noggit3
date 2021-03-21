@@ -48,7 +48,6 @@ namespace noggit
     {
     public:
       model_iterator(script_context * ctx
-                    , World* world
                     , math::vector_3d min
                     , math::vector_3d max
                     );
@@ -59,7 +58,6 @@ namespace noggit
       model get();
 
     private:
-      World* _world;
       math::vector_3d _min;
       math::vector_3d _max;
 
