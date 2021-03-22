@@ -44,12 +44,16 @@ macro (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
 endmacro ()
 ## end copy ]]
 
-macro (add_compiler_flag_if_supported _FLAG)
-  string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_FLAG}" _test_variable)
-  check_cxx_compiler_flag ("${_FLAG}" ${_test_variable})
+macro (add_local_compiler_flag_if_supported _flag _variable)
+  string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_flag}" _test_variable)
+  check_cxx_compiler_flag ("${_flag}" ${_test_variable})
   if (${_test_variable})
-    list (APPEND NOGGIT_CXX_FLAGS "${_FLAG}")
+    list (APPEND ${_variable} "${_flag}")
   endif()
+endmacro()
+
+macro (add_compiler_flag_if_supported _flag)
+  add_local_compiler_flag_if_supported (${_flag} NOGGIT_CXX_FLAGS)
 endmacro()
 
 macro (add_global_compiler_flag_if_supported_config _flag) #, _configs...
