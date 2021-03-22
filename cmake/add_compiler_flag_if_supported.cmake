@@ -51,3 +51,13 @@ macro (add_compiler_flag_if_supported _FLAG)
     list (APPEND NOGGIT_CXX_FLAGS "${_FLAG}")
   endif()
 endmacro()
+
+macro (add_global_compiler_flag_if_supported_config _flag) #, _configs...
+  string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_flag}" _test_variable)
+  check_cxx_compiler_flag ("${_flag}" ${_test_variable})
+  if (${_test_variable})
+    foreach (_config IN ITEMS ${ARGN})
+      add_compile_options ("$<$<CONFIG:${_config}>:${_flag}>")
+    endforeach()
+  endif()
+endmacro()

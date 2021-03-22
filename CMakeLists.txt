@@ -8,7 +8,6 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 # Project name
 project(Noggit)
 
-option (ADDITIONAL_OPTIMIZATION_FLAGS "Enable OpenGL error check ?" OFF)
 option (NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 option (NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF)
 option (NOGGIT_OPENGL_ERROR_CHECK "Enable OpenGL error check ?" ON)
@@ -95,15 +94,12 @@ add_compiler_flag_if_supported (/EHa)
 # multi core building for visual studio
 add_compiler_flag_if_supported (/MP)
 
-if (ADDITIONAL_OPTIMIZATION_FLAGS)
-  message ( STATUS "Enabled additional optimization flags for msvc.")
-  add_compiler_flag_if_supported (/Ob2) # inline any suitable functions
-  add_compiler_flag_if_supported (/Oi)  # enable intrasic functions
-  add_compiler_flag_if_supported (/Ot)  # favor fast code
-  add_compiler_flag_if_supported (/GL)  # whole program optimization
-  add_compiler_flag_if_supported (-flto)
-  add_compiler_flag_if_supported (-O3)
-endif()
+add_global_compiler_flag_if_supported_config (/Ob2 Release RelWithDebInfo) # inline any suitable functions
+add_global_compiler_flag_if_supported_config (/Oi Release RelWithDebInfo)  # enable intrasic functions
+add_global_compiler_flag_if_supported_config (/Ot Release RelWithDebInfo)  # favor fast code
+add_global_compiler_flag_if_supported_config (/GL Release RelWithDebInfo)  # whole program optimization
+add_global_compiler_flag_if_supported_config (-flto Release RelWithDebInfo)
+add_global_compiler_flag_if_supported_config (-O3 Release RelWithDebInfo)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 # todo: why?
