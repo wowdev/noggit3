@@ -98,8 +98,7 @@ namespace noggit
     {
       std::vector<selection_type> type;
       util::visit (_impl, [&] (auto x) { type.emplace_back (x); });
-      // TODO: fix
-      //get_ctx(context, "model_remove")->_world->delete_models(type);
+      world()->delete_models(type);
     }
 
     void model::replace(std::string const& filename)
@@ -166,18 +165,18 @@ namespace noggit
         query();
       }
 
-      if (_model_index >= _models.size())
+      if (_model_index >= int(_models.size()))
       {
         return false;
       }
 
       ++_model_index;
-      return _model_index < _models.size();
+      return _model_index < int(_models.size());
     }
 
     model model_iterator::get()
     {
-      if(_model_index >= _models.size())
+      if(_model_index >= int(_models.size()))
       {
         throw script_exception(
           "model_iterator#get",

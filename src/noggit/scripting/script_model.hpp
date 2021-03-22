@@ -60,7 +60,6 @@ namespace noggit
     private:
       math::vector_3d _min;
       math::vector_3d _max;
-
       std::vector<model> _models;
 
       bool _initialized = false;

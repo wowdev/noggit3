@@ -86,6 +86,21 @@ namespace noggit
         | get_image()[index + 3];
     }
 
+    int image::get_blue(int x, int y)
+    {
+      return (get_pixel(x,y) >> 8) & 0xff;
+    }
+
+    int image::get_green(int x, int y)
+    {
+      return (get_pixel(x,y) >> 16) & 0xff;
+    }
+
+    int image::get_red(int x, int y)
+    {
+      return (get_pixel(x,y) >> 24) & 0xff;
+    }
+
     void image::set_pixel(int x, int y, unsigned value)
     {
       unsigned index = get_index(x, y);
@@ -126,6 +141,9 @@ namespace noggit
     {
       state->new_usertype<image>("image"
         , "get_index", &image::get_index
+        , "get_blue", &image::get_blue
+        , "get_red", &image::get_red
+        , "get_green", &image::get_green
         , "get_pixel", &image::get_pixel
         , "gradient_scale", &image::gradient_scale
         , "set_pixel", &image::set_pixel

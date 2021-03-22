@@ -111,12 +111,12 @@ namespace noggit
 
     bool chunk_iterator::next()
     {
-      if(_cur>=_chunks->size()-1)
+      if(_cur>=int(_chunks->size()-1))
       {
         return false;
       }
       ++_cur;
-      return true;
+      return _cur<_chunks->size();
     }
 
     chunk chunk_iterator::get()
@@ -126,7 +126,7 @@ namespace noggit
 
     void chunk_iterator::reset()
     {
-      _cur = 0;
+      _cur = -1;
     }
 
     std::shared_ptr<selection> chunk::to_selection()
