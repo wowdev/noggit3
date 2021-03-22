@@ -16,83 +16,83 @@ option (VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" ON)
 
 include ("cmake/add_compiler_flag_if_supported.cmake")
 
-add_compiler_flag_if_supported (-fcolor-diagnostics)
+add_global_compiler_flag_if_supported (-fcolor-diagnostics)
 
-add_compiler_flag_if_supported (-Werror=reorder)
-add_compiler_flag_if_supported (-Werror=conditional-uninitialized)
-add_compiler_flag_if_supported (-Werror=unused)
-add_compiler_flag_if_supported (-Werror=unused-parameter)
-add_compiler_flag_if_supported (-Werror=unused-private-field)
-add_compiler_flag_if_supported (-Werror=missing-variable-declarations)
-add_compiler_flag_if_supported (-Werror=missing-prototypes)
-add_compiler_flag_if_supported (-Werror=deprecated)
-add_compiler_flag_if_supported (-Werror=missing-braces)
-add_compiler_flag_if_supported (-Werror=inconsistent-missing-override)
-add_compiler_flag_if_supported (-Werror=parentheses)
-add_compiler_flag_if_supported (-Werror=shift-sign-overflow)
-add_compiler_flag_if_supported (-Werror=string-plus-int)
-add_compiler_flag_if_supported (-Werror=self-assign-field)
+add_noggit_compiler_flag_if_supported (-Werror=reorder)
+add_noggit_compiler_flag_if_supported (-Werror=conditional-uninitialized)
+add_noggit_compiler_flag_if_supported (-Werror=unused)
+add_noggit_compiler_flag_if_supported (-Werror=unused-parameter)
+add_noggit_compiler_flag_if_supported (-Werror=unused-private-field)
+add_noggit_compiler_flag_if_supported (-Werror=missing-variable-declarations)
+add_noggit_compiler_flag_if_supported (-Werror=missing-prototypes)
+add_noggit_compiler_flag_if_supported (-Werror=deprecated)
+add_noggit_compiler_flag_if_supported (-Werror=missing-braces)
+add_noggit_compiler_flag_if_supported (-Werror=inconsistent-missing-override)
+add_noggit_compiler_flag_if_supported (-Werror=parentheses)
+add_noggit_compiler_flag_if_supported (-Werror=shift-sign-overflow)
+add_noggit_compiler_flag_if_supported (-Werror=string-plus-int)
+add_noggit_compiler_flag_if_supported (-Werror=self-assign-field)
 
 # covered by CMAKE_CXX_STANDARD
-add_compiler_flag_if_supported (-Wno-c++98-compat)
-add_compiler_flag_if_supported (-Wno-c++98-compat-pedantic)
+add_global_compiler_flag_if_supported (-Wno-c++98-compat)
+add_global_compiler_flag_if_supported (-Wno-c++98-compat-pedantic)
 
 # covered by compilers used
-add_compiler_flag_if_supported (-Wno-gnu-anonymous-struct)
-add_compiler_flag_if_supported (-Wno-variadic-macros)
-add_compiler_flag_if_supported (-Wno-vla)
-add_compiler_flag_if_supported (-Wno-vla-extension)
-add_compiler_flag_if_supported (-Wno-zero-length-array)
-add_compiler_flag_if_supported (-Wno-gnu-zero-variadic-macro-arguments)
-add_compiler_flag_if_supported (-Wno-nested-anon-types)
-add_compiler_flag_if_supported (-Wno-four-char-constants)
+add_global_compiler_flag_if_supported (-Wno-gnu-anonymous-struct)
+add_global_compiler_flag_if_supported (-Wno-variadic-macros)
+add_global_compiler_flag_if_supported (-Wno-vla)
+add_global_compiler_flag_if_supported (-Wno-vla-extension)
+add_global_compiler_flag_if_supported (-Wno-zero-length-array)
+add_global_compiler_flag_if_supported (-Wno-gnu-zero-variadic-macro-arguments)
+add_global_compiler_flag_if_supported (-Wno-nested-anon-types)
+add_global_compiler_flag_if_supported (-Wno-four-char-constants)
 
 # we assume that our constructors and destructors do not access other global state
-add_compiler_flag_if_supported (-Wno-exit-time-destructors)
-add_compiler_flag_if_supported (-Wno-global-constructors)
+add_noggit_compiler_flag_if_supported (-Wno-exit-time-destructors)
+add_noggit_compiler_flag_if_supported (-Wno-global-constructors)
 
 # is fine with GNU, required due to our libstdc
-add_compiler_flag_if_supported (-Wno-disabled-macro-expansion)
+add_noggit_compiler_flag_if_supported (-Wno-disabled-macro-expansion)
 
 # we can live with the compilation unit containing the vtable not being fixed
-add_compiler_flag_if_supported (-Wno-weak-vtables)
-add_compiler_flag_if_supported (-Wno-weak-template-vtables)
+add_noggit_compiler_flag_if_supported (-Wno-weak-vtables)
+add_noggit_compiler_flag_if_supported (-Wno-weak-template-vtables)
 
 # __DATE__ and __TIME__ not being reproducible is exactly why they exist.
-add_compiler_flag_if_supported (-Wno-date-time)
+add_noggit_compiler_flag_if_supported (-Wno-date-time)
 
 # we don't care for a few bytes
-add_compiler_flag_if_supported (-Wno-padded)
+add_noggit_compiler_flag_if_supported (-Wno-padded)
 
 # msvc++ mangles struct/class into name, thus symbols may be called differently
 # with a bad forward-decl. we want compilation to fail, not linking.
-add_compiler_flag_if_supported (/we4099)
-add_compiler_flag_if_supported (-Werror=mismatched-tags)
+add_global_compiler_flag_if_supported (/we4099)
+add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
 
 # yes, we intend to use multi-character character constants
-add_compiler_flag_if_supported (-Wno-multichar)
+add_global_compiler_flag_if_supported (-Wno-multichar)
 
 # declaration of 'identifier' hides previous:
-add_compiler_flag_if_supported (/we4456) # local declaration
-add_compiler_flag_if_supported (/we4457) # function parameter
-add_compiler_flag_if_supported (/we4458) # class members
-add_compiler_flag_if_supported (/we4459) # global declaration
-add_compiler_flag_if_supported (-Werror=shadow)
+add_noggit_compiler_flag_if_supported (/we4456) # local declaration
+add_noggit_compiler_flag_if_supported (/we4457) # function parameter
+add_noggit_compiler_flag_if_supported (/we4458) # class members
+add_noggit_compiler_flag_if_supported (/we4459) # global declaration
+add_noggit_compiler_flag_if_supported (-Werror=shadow)
 
 if( NOGGIT_ALL_WARNINGS )
   MESSAGE( STATUS "Spilling out mass warnings." )
-  add_compiler_flag_if_supported (-W)
-  add_compiler_flag_if_supported (-Wall)
-  add_compiler_flag_if_supported (-Wextra)
-  add_compiler_flag_if_supported (-Weverything)
-  add_compiler_flag_if_supported (/W4)
-  add_compiler_flag_if_supported (/Wall)
+  add_noggit_compiler_flag_if_supported (-W)
+  add_noggit_compiler_flag_if_supported (-Wall)
+  add_noggit_compiler_flag_if_supported (-Wextra)
+  add_noggit_compiler_flag_if_supported (-Weverything)
+  add_noggit_compiler_flag_if_supported (/W4)
+  add_noggit_compiler_flag_if_supported (/Wall)
 endif( NOGGIT_ALL_WARNINGS )
 
 # better exception handling for visual studio, particularly for the asynchronous stuff
-add_compiler_flag_if_supported (/EHa)
+add_global_compiler_flag_if_supported (/EHa)
 # multi core building for visual studio
-add_compiler_flag_if_supported (/MP)
+add_global_compiler_flag_if_supported (/MP)
 
 add_global_compiler_flag_if_supported_config (/Ob2 Release RelWithDebInfo) # inline any suitable functions
 add_global_compiler_flag_if_supported_config (/Oi Release RelWithDebInfo)  # enable intrasic functions
@@ -178,7 +178,7 @@ if (APPLE)
   # todo: sounds bogus
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_INCLUDE_DIR)
 elseif (WIN32)
-  add_compiler_flag_if_supported (/vmg)
+  add_global_compiler_flag_if_supported (/vmg)
   add_compile_definitions (NOMINMAX)
 
   # mark 32 bit executables large address aware so they can use > 2GB address space

@@ -52,8 +52,16 @@ macro (add_local_compiler_flag_if_supported _flag _variable)
   endif()
 endmacro()
 
-macro (add_compiler_flag_if_supported _flag)
+macro (add_noggit_compiler_flag_if_supported _flag)
   add_local_compiler_flag_if_supported (${_flag} NOGGIT_CXX_FLAGS)
+endmacro()
+
+macro (add_global_compiler_flag_if_supported _flag)
+  string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_flag}" _test_variable)
+  check_cxx_compiler_flag ("${_flag}" ${_test_variable})
+  if (${_test_variable})
+    add_compile_options ("${_flag}")
+  endif()
 endmacro()
 
 macro (add_global_compiler_flag_if_supported_config _flag) #, _configs...
