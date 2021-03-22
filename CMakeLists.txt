@@ -32,6 +32,8 @@ add_compiler_flag_if_supported (-Werror=missing-braces)
 add_compiler_flag_if_supported (-Werror=inconsistent-missing-override)
 add_compiler_flag_if_supported (-Werror=parentheses)
 add_compiler_flag_if_supported (-Werror=shift-sign-overflow)
+add_compiler_flag_if_supported (-Werror=string-plus-int)
+add_compiler_flag_if_supported (-Werror=self-assign-field)
 
 # covered by CMAKE_CXX_STANDARD
 add_compiler_flag_if_supported (-Wno-c++98-compat)
