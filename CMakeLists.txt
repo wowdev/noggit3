@@ -481,7 +481,8 @@ ADD_EXECUTABLE ( noggit
                   ${compiled_resource_files}
                   ${shaders}
                 )
-                
+target_compile_options (noggit PRIVATE ${NOGGIT_CXX_FLAGS})
+
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   stormlib::stormlib
@@ -614,6 +615,7 @@ add_library (noggit-math STATIC
   "src/math/vector_2d.cpp"
 )
 add_library (noggit::math ALIAS noggit-math)
+target_compile_options (noggit-math PRIVATE ${NOGGIT_CXX_FLAGS})
 
 include (CTest)
 enable_testing()
@@ -637,15 +639,18 @@ endif()
 
 add_executable (math-vector_2d.test test/math/vector_2d.cpp)
 target_compile_definitions (math-vector_2d.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
+target_compile_options (math-vector_2d.test PRIVATE ${NOGGIT_CXX_FLAGS})
 target_link_libraries (math-vector_2d.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-vector_2d COMMAND $<TARGET_FILE:math-vector_2d.test>)
 
 add_executable (math-trig.test test/math/trig.cpp)
 target_compile_definitions (math-trig.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
+target_compile_options (math-trig.test PRIVATE ${NOGGIT_CXX_FLAGS})
 target_link_libraries (math-trig.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-trig COMMAND $<TARGET_FILE:math-trig.test>)
 
 add_executable (math-matrix_4x4.test test/math/matrix_4x4.cpp)
 target_compile_definitions (math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
+target_compile_options (math-matrix_4x4.test PRIVATE ${NOGGIT_CXX_FLAGS})
 target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
