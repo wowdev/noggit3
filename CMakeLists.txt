@@ -9,7 +9,6 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 project(Noggit)
 
 option (ADDITIONAL_OPTIMIZATION_FLAGS "Enable OpenGL error check ?" OFF)
-option (NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)
 option (NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 option (NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF)
 option (NOGGIT_OPENGL_ERROR_CHECK "Enable OpenGL error check ?" ON)
@@ -74,21 +73,18 @@ add_compiler_flag_if_supported (-Werror=mismatched-tags)
 # yes, we intend to use multi-character character constants
 add_compiler_flag_if_supported (-Wno-multichar)
 
-if (NAME_REUSE_AS_ERROR)
-  # declaration of 'identifier' hides previous:
-  add_compiler_flag_if_supported (/we4456) # local declaration
-  add_compiler_flag_if_supported (/we4457) # function parameter
-  add_compiler_flag_if_supported (/we4458) # class members
-  add_compiler_flag_if_supported (/we4459) # global declaration
-  add_compiler_flag_if_supported (-Werror=shadow)
-endif()
+# declaration of 'identifier' hides previous:
+add_compiler_flag_if_supported (/we4456) # local declaration
+add_compiler_flag_if_supported (/we4457) # function parameter
+add_compiler_flag_if_supported (/we4458) # class members
+add_compiler_flag_if_supported (/we4459) # global declaration
+add_compiler_flag_if_supported (-Werror=shadow)
 
 if( NOGGIT_ALL_WARNINGS )
   MESSAGE( STATUS "Spilling out mass warnings." )
   add_compiler_flag_if_supported (-W)
   add_compiler_flag_if_supported (-Wall)
   add_compiler_flag_if_supported (-Wextra)
-  add_compiler_flag_if_supported (-Wshadow)
   add_compiler_flag_if_supported (-Weverything)
   add_compiler_flag_if_supported (/W4)
   add_compiler_flag_if_supported (/Wall)
