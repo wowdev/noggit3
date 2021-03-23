@@ -25,8 +25,7 @@ namespace noggit {
       });
 
       state->set_function("add_wmo",[global](
-        scripting_tool * global
-        , std::string const& filename
+          std::string const& filename
         , math::vector_3d const& pos
         , math::vector_3d const& rotation)
       {
