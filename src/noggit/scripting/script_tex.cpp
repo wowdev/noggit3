@@ -52,13 +52,13 @@ namespace noggit {
     tex_iterator::tex_iterator(
         script_context * ctx
       , std::shared_ptr<std::vector<MapChunk*>> chunks
-      , math::vector_3d const& min
-      , math::vector_3d const& max)
+      , math::vector_3d const&
+      , math::vector_3d const& )
       : script_object(ctx)
       , _chunks(chunks)
       , _chunk_iter(_chunks->begin())
-      , _min(min)
-      , _max(max)
+      //, _min(min)
+      //, _max(max)
       {}
 
     bool tex_iterator::next()
