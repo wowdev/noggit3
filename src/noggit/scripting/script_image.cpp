@@ -86,19 +86,24 @@ namespace noggit
         | get_image()[index + 3];
     }
 
-    int image::get_blue(int x, int y)
+    float image::get_alpha(int x, int y)
     {
-      return (get_pixel(x,y) >> 8) & 0xff;
+      return float(get_pixel(x,y) & 0xff)/255.0;
     }
 
-    int image::get_green(int x, int y)
+    float image::get_blue(int x, int y)
     {
-      return (get_pixel(x,y) >> 16) & 0xff;
+      return float((get_pixel(x,y) >> 8) & 0xff)/255.0;
     }
 
-    int image::get_red(int x, int y)
+    float image::get_green(int x, int y)
     {
-      return (get_pixel(x,y) >> 24) & 0xff;
+      return float((get_pixel(x,y) >> 16) & 0xff)/255.0;
+    }
+
+    float image::get_red(int x, int y)
+    {
+      return float((get_pixel(x,y) >> 24) & 0xff)/255.0;
     }
 
     void image::set_pixel(int x, int y, unsigned value)
@@ -143,6 +148,7 @@ namespace noggit
         , "get_index", &image::get_index
         , "get_blue", &image::get_blue
         , "get_red", &image::get_red
+        , "get_alpha", &image::get_alpha
         , "get_green", &image::get_green
         , "get_pixel", &image::get_pixel
         , "gradient_scale", &image::gradient_scale
