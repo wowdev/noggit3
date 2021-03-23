@@ -138,7 +138,7 @@ namespace noggit
 
       try {
         get_context()->select_script(selection);
-      } catch(script_exception &const err)
+      } catch(script_exception const& err)
       {
         addLog(err.what());
       }
