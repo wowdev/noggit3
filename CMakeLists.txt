@@ -764,19 +764,30 @@ if (NOGGIT_WITH_SCRIPTING)
   endif()
   add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
 
+  # Dependency: Lua
+  find_package (Lua REQUIRED)
+  add_library (Lua-Lua INTERFACE)
+  add_library (Lua::Lua ALIAS Lua-Lua)
+  target_link_libraries (Lua-Lua INTERFACE ${LUA_LIBRARIES})
+  target_include_directories (Lua-Lua INTERFACE ${LUA_INCLUDE_DIR})
+
+  # Dependency: sol2
+  FetchContent_Declare (sol2
+    GIT_REPOSITORY https://github.com/ThePhD/sol2
+    GIT_TAG v3.2.3
+  )
+  FetchContent_MakeAvailable (sol2)
+  # sol2::sol2 neither links lua nor sets include directories as system so will clobber us with
+  # loads of warnings, sadly. It also wants to be install(EXPORT)ed which is not what we want.
+  add_library (sane-sol2 INTERFACE)
+  add_library (sol2::sane ALIAS sane-sol2)
+  target_link_libraries (sane-sol2 INTERFACE Lua::Lua)
+  target_include_directories (sane-sol2 SYSTEM INTERFACE "${sol2_SOURCE_DIR}/include")
+
   target_link_libraries (noggit
     lodepng
     FastNoise
     nlohmann_json::nlohmann_json
-  )
-
-  # TODO: Fix and linux
-  target_include_directories(noggit SYSTEM PUBLIC ${SOL_DIR})
-  target_include_directories(noggit SYSTEM PUBLIC ${LUAJIT_DIR})
-  target_link_libraries(noggit
-    ${LUAJIT_DIR}/luajit.lib
-    ${LUAJIT_DIR}/lua51.lib
-    ${LUAJIT_DIR}/buildvm.lib
-    ${LUAJIT_DIR}/minilua.lib
+    sol2::sane
   )
 endif()
