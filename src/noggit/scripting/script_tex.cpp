@@ -81,6 +81,8 @@ namespace noggit {
         _tex_iter = -1;
         return next();
       }
+
+      std::abort();
     }
 
     tex tex_iterator::get()

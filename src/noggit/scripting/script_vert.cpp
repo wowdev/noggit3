@@ -204,6 +204,8 @@ namespace noggit
         _vert_iter = -1;
         return next();
       }
+
+      std::abort();
     }
 
     vert vert_iterator::get()
