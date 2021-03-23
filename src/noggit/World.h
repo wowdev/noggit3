@@ -305,6 +305,18 @@ public:
   void selectVertices(math::vector_3d const& pos, float radius);
   void delete_models(std::vector<selection_type> const& types);
 
+  template<typename Fun>
+  void for_each_wmo_instance(Fun&& function)
+  {
+    _model_instance_storage.for_each_wmo_instance(function);
+  }
+
+  template<typename Fun>
+  void for_each_m2_instance(Fun&& function)
+  {
+    _model_instance_storage.for_each_m2_instance(function);
+  }
+
   void moveVertices(float h);
   void orientVertices ( math::vector_3d const& ref_pos
                       , math::degrees vertex_angle
