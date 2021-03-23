@@ -1970,7 +1970,7 @@ void World::unload_every_model_and_wmo_instance()
   _models_by_filename.clear();
 }
 
-void World::addM2 ( std::string const& filename
+ModelInstance* World::addM2 ( std::string const& filename
                   , math::vector_3d newPos
                   , float scale
                   , math::degrees::vec3 rotation
@@ -2011,11 +2011,12 @@ void World::addM2 ( std::string const& filename
   model_instance.recalcExtents();
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
-
-  _models_by_filename[filename].push_back(_model_instance_storage.get_model_instance(uid).get());
+  auto model = _model_instance_storage.get_model_instance(uid).get();
+  _models_by_filename[filename].push_back(model);
+  return model;
 }
 
-void World::addWMO ( std::string const& filename
+WMOInstance* World::addWMO ( std::string const& filename
                    , math::vector_3d newPos
                    , math::degrees::vec3 rotation
                    )
@@ -2030,7 +2031,8 @@ void World::addWMO ( std::string const& filename
   wmo_instance.wmo->wait_until_loaded();
   wmo_instance.recalcExtents();
 
-  _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
+  auto uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
+  return _model_instance_storage.get_wmo_instance(uid).get();
 }
 
 std::uint32_t World::add_model_instance(ModelInstance model_instance, bool from_reloading)

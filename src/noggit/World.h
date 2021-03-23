@@ -238,12 +238,12 @@ public:
   void setHole(math::vector_3d const& pos, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);
 
-  void addM2 ( std::string const& filename
+  ModelInstance* addM2 ( std::string const& filename
              , math::vector_3d newPos
              , float scale, math::degrees::vec3 rotation
              , noggit::object_paste_params*
              );
-  void addWMO ( std::string const& filename
+  WMOInstance* addWMO ( std::string const& filename
               , math::vector_3d newPos
               , math::degrees::vec3 rotation
               );
