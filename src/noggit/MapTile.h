@@ -65,6 +65,8 @@ public:
   MapChunk* getChunk(unsigned int x, unsigned int z);
   //! \todo map_index style iterators
   std::vector<MapChunk*> chunks_in_range (math::vector_3d const& pos, float radius) const;
+  //! \note inclusive, i.e. getting both ADTs if point is on a border
+  std::vector<MapChunk*> chunks_between (math::vector_3d const& pos1, math::vector_3d const& pos2) const;
 
   const tile_index index;
   float xbase, zbase;
