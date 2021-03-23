@@ -2313,6 +2313,12 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
   });
 }
 
+void World::delete_models(std::vector<selection_type> const& types)
+{
+  _model_instance_storage.delete_instances(types);
+  need_model_updates = true;
+}
+
 bool World::deselectVertices(math::vector_3d const& pos, float radius)
 {
   _vertex_center_updated = false;

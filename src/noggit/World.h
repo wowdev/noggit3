@@ -303,6 +303,7 @@ public:
 
   bool deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);
+  void delete_models(std::vector<selection_type> const& types);
 
   void moveVertices(float h);
   void orientVertices ( math::vector_3d const& ref_pos
