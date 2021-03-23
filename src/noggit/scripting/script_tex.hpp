@@ -35,9 +35,9 @@ namespace noggit {
         tex get();
 
       private:
-        std::vector<MapChunk*>::iterator _chunk_iter;
         int _tex_iter = -1;
         std::shared_ptr<std::vector<MapChunk*>> _chunks;
+        std::vector<MapChunk*>::iterator _chunk_iter;
         math::vector_3d const& _min;
         math::vector_3d const& _max;
     };

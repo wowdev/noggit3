@@ -56,7 +56,7 @@ namespace noggit {
       , math::vector_3d const& max)
       : script_object(ctx)
       , _chunks(chunks)
-      , _chunk_iter(chunks->begin())
+      , _chunk_iter(_chunks->begin())
       , _min(min)
       , _max(max)
       {}
