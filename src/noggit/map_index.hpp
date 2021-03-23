@@ -136,6 +136,8 @@ public:
 
   tile_range<false> loaded_tiles();
   tile_range<true> tiles_in_range (math::vector_3d const& pos, float radius);
+  //! inclusive
+  tile_range<true> tiles_between (math::vector_3d const& pos1, math::vector_3d const& pos2);
 
   MapIndex(const std::string& pBasename, int map_id, World*);
 
