@@ -111,7 +111,7 @@ void Noggit::loadMPQs()
     if (boost::filesystem::exists (wowpath / "Data" / locales[i] / "realmlist.wtf"))
     {
       locale = locales[i];
-      Log << "Locale: " << locale << std::endl;
+      NOGGIT_LOG << "Locale: " << locale << std::endl;
       break;
     }
   }
@@ -181,7 +181,7 @@ namespace
       << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
     QString found_locale ("****");
 
-    foreach (const QString& locale, locales)
+    for (auto const& locale : locales)
     {
       if (path.exists (("Data/" + locale)))
       {
@@ -211,7 +211,7 @@ Noggit::Noggit(int argc, char *argv[])
   assert (argc >= 1); (void) argc;
   initPath(argv);
 
-  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+  NOGGIT_LOG << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
 
   QSettings settings;
@@ -236,12 +236,12 @@ Noggit::Noggit(int argc, char *argv[])
 
   wowpath = path.absolutePath().toStdString();
 
-  Log << "Game path: " << wowpath << std::endl;
+  NOGGIT_LOG << "Game path: " << wowpath << std::endl;
 
   std::string project_path = settings.value ("project/path", path.absolutePath()).toString().toStdString();
   settings.setValue ("project/path", QString::fromStdString (project_path));
 
-  Log << "Project path: " << project_path << std::endl;
+  NOGGIT_LOG << "Project path: " << project_path << std::endl;
 
   settings.setValue ("project/game_path", path.absolutePath());
   settings.setValue ("project/path", QString::fromStdString(project_path));

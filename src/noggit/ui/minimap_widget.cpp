@@ -108,7 +108,7 @@ namespace noggit
 
         if (draw_skies() && world()->skies)
         {
-          foreach (Sky sky, world()->skies->skies)
+          for (auto const& sky : world()->skies->skies)
           {
             //! \todo Get actual color from sky.
             //! \todo Get actual radius.

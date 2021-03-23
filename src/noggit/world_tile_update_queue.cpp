@@ -13,6 +13,7 @@ namespace noggit
   struct instance_update
   {
     virtual void apply(World* const) = 0;
+    virtual ~instance_update() = default;
   };
 
   struct model_instance_update : public instance_update
