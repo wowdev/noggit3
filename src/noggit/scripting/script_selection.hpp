@@ -33,8 +33,6 @@ namespace noggit
                , math::vector_3d const& point2
                );
 
-      selection() = default;
-
       std::shared_ptr<noisemap> make_noise(
           float frequency
         , std::string const& algorithm
