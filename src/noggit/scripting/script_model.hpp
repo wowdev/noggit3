@@ -33,6 +33,8 @@ namespace noggit
       float get_scale();
       void set_scale(float scale);
 
+      bool has_filename(std::string const& name);
+
       unsigned get_uid();
 
       void remove();

@@ -13,6 +13,7 @@
 
 #include <sol/sol.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace noggit
 {
@@ -92,6 +93,14 @@ namespace noggit
                           return as_wmo->wmo->filename;
                         }
                       );
+    }
+
+    bool model::has_filename(std::string const& name)
+    {
+      std::string copy = std::string(name);
+      boost::to_lower(copy);
+      std::replace(copy.begin(),copy.end(),'\\','/');
+      return copy == get_filename();
     }
 
     void model::remove()
@@ -198,6 +207,7 @@ namespace noggit
         , "get_uid", &model::get_uid
         , "remove", &model::remove
         , "get_filename", &model::get_filename
+        , "has_filename", &model::has_filename
         , "replace", &model::replace
       );
 
