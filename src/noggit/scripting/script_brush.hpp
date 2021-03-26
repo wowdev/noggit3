@@ -74,6 +74,8 @@ namespace noggit {
           std::string const& item
         , sol::variadic_args va);
 
+      void add_null_tag();
+
       LUA_MEMBER_FUNC(
         script_brush,std::shared_ptr<script_brush_event>,on_left_click);
       LUA_MEMBER_FUNC(

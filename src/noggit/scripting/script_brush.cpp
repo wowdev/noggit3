@@ -69,6 +69,11 @@ namespace noggit {
       return tag;
     }
 
+    void script_brush::add_null_tag()
+    {
+      _tags.push_back(std::make_shared<null_tag>(state(),_name,"__null"+std::to_string(_tags.size())));
+    }
+
     std::shared_ptr<real_tag> script_brush::add_real_tag(
         std::string const& item
       , double low
@@ -129,6 +134,7 @@ namespace noggit {
         ,"add_real_tag",&script_brush::add_real_tag
         ,"add_string_tag",&script_brush::add_string_tag
         ,"add_string_list_tag",&script_brush::add_string_list_tag
+        ,"add_null_tag",&script_brush::add_null_tag
         );
     }
   }

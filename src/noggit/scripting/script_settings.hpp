@@ -36,7 +36,7 @@ namespace noggit {
                   );
 
       void add_bool( std::string const& name, bool def = false);
-
+      void add_null();
       void add_string(std::string const& name, std::string const& def = "");
       void add_string_list(std::string const& name, std::string const& value);
 
@@ -146,6 +146,15 @@ namespace noggit {
       private:
         double _min,_max,_def;
         bool _has_slider;
+    };
+
+    class null_tag : public tag {
+    public:
+      null_tag(script_context* ctx
+        , std::string const& script
+        , std::string const& item
+      );
+      virtual void add_to_settings() override;
     };
 
     class string_tag : public tag {

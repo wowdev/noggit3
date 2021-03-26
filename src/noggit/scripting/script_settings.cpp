@@ -220,7 +220,12 @@ namespace noggit
       checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
 
-
+    void script_settings::add_null()
+    {
+      auto label = new QLabel(this);
+      _widgets.push_back(label);
+      _layout->addRow(label);
+    }
 
     void script_settings::add_string_list(std::string const& name, std::string const& value)
     {
@@ -365,6 +370,19 @@ namespace noggit
       _tool->get_settings()->add_int(_item, _min,_max,_def);
     }
 
+    null_tag::null_tag(
+        script_context * ctx
+      , std::string const& script
+      , std::string const& item
+      )
+      : tag(ctx,script,item)
+      {}
+
+    void null_tag::add_to_settings()
+    {
+      _tool->get_settings()->add_null();
+    }
+
     real_tag::real_tag(script_context * ctx
                       , std::string const& script
                       , std::string const& item
@@ -379,6 +397,7 @@ namespace noggit
                       , _def(def)
                       , _has_slider(has_slider)
     {}
+
 
     double real_tag::get()
     {
