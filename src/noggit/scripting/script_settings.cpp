@@ -111,7 +111,7 @@ namespace noggit
     }
 
 // i don't remember why this was a macro
-#define ADD_SLIDER(path, T, min, max, def, decimals)                                       \
+#define ADD_SLIDER(path, T, min, max, def, decimals, has_slider)                           \
   double dp1 = decimals > 0 ? decimals + 5 : decimals + 1;                                 \
   auto spinner = new QDoubleSpinBox(this);                                                 \
   spinner->setRange(min, max);                                                             \
@@ -135,7 +135,7 @@ namespace noggit
   });                                                                                      \
                                                                                            \
   _layout->addRow(label, spinner);                                                         \
-  _layout->addRow("", slider);                                                             \
+  if(has_slider) _layout->addRow("", slider);                                              \
   _widgets.push_back(label);                                                               \
   _widgets.push_back(spinner);                                                             \
   _widgets.push_back(slider);                                                              \
@@ -169,15 +169,26 @@ namespace noggit
       return get_json_unsafe<std::string>(name);
     }
 
-    void script_settings::add_double(std::string const& name, double min, double max, double def, int zeros)
-    {
-      ADD_SLIDER(name, double, min, max, def, zeros);
-    }
+    void script_settings::add_double(
+        std::string const& name
+      , double min
+      , double max
+      , double def
+      , int zeros
+      , bool has_slider
+      ){
+        ADD_SLIDER(name, double, min, max, def, zeros, has_slider);
+      }
 
-    void script_settings::add_int(std::string const& name, int min, int max, int def)
-    {
-      ADD_SLIDER(name, int, min, max, def, 0);
-    }
+    void script_settings::add_int(
+        std::string const& name
+      , int min
+      , int max
+      , int def
+      , bool has_slider
+      ){
+        ADD_SLIDER(name, int, min, max, def, 0, has_slider);
+      }
 
     void script_settings::add_string(std::string const& name, std::string const& def)
     {
@@ -334,11 +345,13 @@ namespace noggit
                     , int min
                     , int max
                     , int def
+                    , bool has_slider
                     )
                     : tag(ctx,script,item)
                     , _min(min)
                     , _max(max)
                     , _def(def)
+                    , _has_slider(has_slider)
     {}
 
     int int_tag::get()
@@ -358,11 +371,13 @@ namespace noggit
                       , double min
                       , double max
                       , double def
+                      , bool has_slider
                       )
                       : tag(ctx,script,item)
                       , _min(min)
                       , _max(max)
                       , _def(def)
+                      , _has_slider(has_slider)
     {}
 
     double real_tag::get()

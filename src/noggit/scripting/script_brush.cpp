@@ -61,9 +61,10 @@ namespace noggit {
         std::string const& item
       , int low
       , int high
-      , int def)
-    {
-      auto tag = std::make_shared<int_tag>(state(), _name, item, low, high, def);
+      , int def
+      , bool has_slider
+      ){
+      auto tag = std::make_shared<int_tag>(state(), _name, item, low, high, def, has_slider);
       _tags.push_back(tag);
       return tag;
     }
@@ -72,9 +73,10 @@ namespace noggit {
         std::string const& item
       , double low
       , double high
-      , double def)
-    {
-      auto tag = std::make_shared<real_tag>(state(), _name, item, low, high, def);
+      , double def
+      , bool has_slider
+      ){
+      auto tag = std::make_shared<real_tag>(state(), _name, item, low, high, def, has_slider);
       _tags.push_back(tag);
       return tag;
     }

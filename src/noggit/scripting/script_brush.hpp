@@ -54,13 +54,16 @@ namespace noggit {
       std::shared_ptr<int_tag> add_int_tag(
         std::string const& item
         , int low
-        , int high, int def
+        , int high
+        , int def
+        , bool has_slider = false
         );
 
       std::shared_ptr<real_tag> add_real_tag(std::string const& item
                                             , double low
                                             , double high
                                             , double def
+                                            , bool has_slider = false
                                             );
 
       std::shared_ptr<string_tag> add_string_tag(

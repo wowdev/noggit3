@@ -25,12 +25,14 @@ namespace noggit {
                      , double max
                      , double def = 0
                      , int zeros = 2
+                     , bool has_slider = false
                      );
 
       void add_int( std::string const& name
                   , int min
                   , int max
                   , int def = 0
+                  , bool has_slider = false
                   );
 
       void add_bool( std::string const& name, bool def = false);
@@ -118,12 +120,15 @@ namespace noggit {
                , std::string const& item
                , int min
                , int max
-               , int def);
+               , int def
+               , bool has_slider
+               );
         int get();
         virtual void add_to_settings() override;
 
       private:
         int _min,_max,_def;
+        bool _has_slider;
     };
 
     class real_tag : public tag {
@@ -134,11 +139,13 @@ namespace noggit {
                   , double min
                   , double max
                   , double def
+                  , bool has_slider
                   );
         double get();
         virtual void add_to_settings() override;
       private:
         double _min,_max,_def;
+        bool _has_slider;
     };
 
     class string_tag : public tag {
