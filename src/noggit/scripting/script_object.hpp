@@ -1,5 +1,7 @@
 #pragma once
 
+#include <noggit/scripting/script_exception.hpp>
+
 #include <sol/sol.hpp>
 
 class World;

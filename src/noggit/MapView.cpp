@@ -1314,6 +1314,7 @@ MapView::MapView( math::degrees camera_yaw0
                 , bool from_bookmark
                 )
   : _camera (camera_pos, camera_yaw0, camera_pitch0)
+  , _world (std::move (world))
   , mTimespeed(0.0f)
   , _uid_fix (uid_fix)
   , _from_bookmark (from_bookmark)
@@ -1322,7 +1323,6 @@ MapView::MapView( math::degrees camera_yaw0
   , shader_color (1.f, 1.f, 1.f, 1.f)
   , cursor_type (static_cast<unsigned int>(cursor_mode::terrain))
   , _main_window (main_window)
-  , _world (std::move (world))
   , _status_position (new QLabel (this))
   , _status_selection (new QLabel (this))
   , _status_area (new QLabel (this))

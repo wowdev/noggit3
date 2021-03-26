@@ -215,7 +215,6 @@ namespace noggit
     {
       if (_string_arrays.find(name) == _string_arrays.end())
       {
-        auto layout = new QFormLayout(this);
         auto box = new QComboBox(this);
         auto label = new QLabel(this);
 
@@ -324,9 +323,9 @@ namespace noggit
             , std::string const& item
             )
             : script_object(ctx)
+            , _tool(ctx->tool())
             , _script(script)
             , _item(item)
-            , _tool(ctx->tool())
       {}
 
     int_tag::int_tag(script_context * ctx

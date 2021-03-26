@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-std::atomic<int> blp_texture::blp_tex_counter = 0;
+std::atomic<int> blp_texture::blp_tex_counter = {0};
 
 decltype (TextureManager::_) TextureManager::_;
 
