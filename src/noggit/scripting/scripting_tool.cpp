@@ -145,10 +145,15 @@ namespace noggit
       get_settings()->initialize();
     }
 
-    scripting_tool::scripting_tool(QWidget* parent, MapView* view)
+    scripting_tool::scripting_tool(
+        QWidget* parent
+      , MapView* view
+      , QSettings* noggit_settings
+      )
       : QWidget(parent)
       , _cur_profile ("Default")
       , _view(view)
+      , _noggit_settings(noggit_settings)
     {
       _script_context = std::make_unique<script_context>(this);
       auto layout(new QVBoxLayout(this));
@@ -291,6 +296,11 @@ namespace noggit
     script_profiles* scripting_tool::get_profiles()
     {
       return _profiles;
+    }
+
+    QSettings* scripting_tool::get_noggit_settings()
+    {
+      return _noggit_settings;
     }
   } // namespace scripting
 } // namespace noggit

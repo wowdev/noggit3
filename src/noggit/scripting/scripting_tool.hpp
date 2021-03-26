@@ -17,6 +17,7 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QGridLayout>
+#include <QSettings>
 
 #include <map>
 #include <mutex>
@@ -35,7 +36,10 @@ namespace noggit
     class scripting_tool : public QWidget
     {
     public:
-      scripting_tool(QWidget* parent, MapView* view);
+      scripting_tool(QWidget* parent
+                    , MapView* view
+                    , QSettings * noggit_settings
+                    );
       ~scripting_tool();
 
       void addDescription(std::string const& text);
@@ -50,6 +54,7 @@ namespace noggit
       script_context* get_context();
       script_settings* get_settings();
       script_profiles* get_profiles();
+      QSettings* get_noggit_settings();
 
     private:
       std::mutex _script_change_mutex;
@@ -70,6 +75,7 @@ namespace noggit
     private:
       std::unique_ptr<script_context> _script_context;
       MapView* _view;
+      QSettings * _noggit_settings;
       void change_script(int script_index);
     };
   } // namespace scripting

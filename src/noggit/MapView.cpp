@@ -194,7 +194,7 @@ void MapView::createGUI()
 {
 #ifdef NOGGIT_HAS_SCRIPTING
   _script_tool_dock = new QDockWidget("Scripting", this);
-  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock, this);
+  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock, this, this->_settings);
   _script_tool_dock->setWidget(scriptingTool);
   _tool_properties_docks.insert(_script_tool_dock);
 #endif
