@@ -21,6 +21,7 @@ namespace noggit
 
     script_context::script_context(scripting_tool * tool): _tool(tool)
     {
+      open_libraries(sol::lib::base,sol::lib::table,sol::lib::string);
       script_scoped_function<std::shared_ptr<script_brush>(std::string const&)> 
         add_brush(this,"brush",
         [this](std::string const& name)
