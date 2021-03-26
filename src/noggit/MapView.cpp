@@ -1536,12 +1536,12 @@ void MapView::paintGL()
 
   _last_frame_durations.emplace_back (now - _last_update);
 
-  tick (now - _last_update);
-  _last_update = now;
-
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   draw_map();
+
+  tick (now - _last_update);
+  _last_update = now;
 
   if (_world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
   {
