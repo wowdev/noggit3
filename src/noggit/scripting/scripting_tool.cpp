@@ -35,7 +35,7 @@ namespace noggit
       int old_selection = -1;
       try
       {
-        std::string old_name = get_context()->get_selected_name();
+        std::string old_name = get_context() == nullptr ? "" : get_context()->get_selected_name();
         _script_context = std::make_unique<script_context>(this);
         for(int i=0;i<get_context()->get_scripts().size(); ++i)
         {
@@ -155,7 +155,6 @@ namespace noggit
       , _view(view)
       , _noggit_settings(noggit_settings)
     {
-      _script_context = std::make_unique<script_context>(this);
       auto layout(new QVBoxLayout(this));
       _selection = new QComboBox();
       layout->addWidget(_selection);

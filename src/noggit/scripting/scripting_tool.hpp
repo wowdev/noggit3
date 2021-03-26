@@ -73,7 +73,7 @@ namespace noggit
       script_settings *_settings;
       script_profiles *_profiles;
     private:
-      std::unique_ptr<script_context> _script_context;
+      std::unique_ptr<script_context> _script_context = nullptr;
       MapView* _view;
       QSettings * _noggit_settings;
       void change_script(int script_index);
