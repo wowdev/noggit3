@@ -69,7 +69,7 @@ namespace noggit {
         {
           throw script_exception(caller,"calling null function");
         }
-        auto fn = _obj->table()[_func];
+        sol::protected_function fn = _obj->table()[_func];
         auto ret = fn(_obj, args...);
         if (!ret.valid())
         {
