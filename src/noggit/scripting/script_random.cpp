@@ -28,7 +28,7 @@ namespace noggit
     {
     }
 
-    long random::integer(random& rand, long low, long high)
+    long random::integer(long low, long high)
     {
       if(low>=high)
       {
@@ -36,10 +36,10 @@ namespace noggit
         "rand_int64",
         "random lower bound "+ std::to_string(low) + " >= higher bound " + std::to_string(high));
       }
-      return std::uniform_int_distribution<long>(low,high-1)(rand._state);
+      return std::uniform_int_distribution<long>(low,high-1)(_state);
     }
 
-    double random::real(random& rand, double low, double high)
+    double random::real(double low, double high)
     {
       if(low>=high)
       {
@@ -49,19 +49,19 @@ namespace noggit
       }
       double val;
       do {
-        val = std::uniform_real_distribution<double>(low,high)(rand._state);
+        val = std::uniform_real_distribution<double>(low,high)(_state);
       } while(val == high);
       return val;
     }
 
-    random random_from_seed(script_context * ctx, std::string const& seed)
+    std::shared_ptr<random> random_from_seed(script_context * ctx, std::string const& seed)
     {
-      return random(ctx, std::string(seed));
+      return std::make_shared<random>(ctx, std::string(seed));
     }
 
-    random random_from_time(script_context * ctx)
+    std::shared_ptr<random> random_from_time(script_context * ctx)
     {
-      return random(ctx);
+      return std::make_shared<random>(ctx);
     }
 
     void register_random(script_context * state)
