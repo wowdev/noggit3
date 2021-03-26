@@ -95,10 +95,10 @@ namespace noggit
     {
       return noggit::scripting::make_noise(
           state()
-        , _min.x
-        , _min.z
-        , _size.x
-        , _size.z
+        , std::floor(_min.x)-10
+        , std::floor(_min.z)-10
+        , std::ceil(_size.x)+20
+        , std::ceil(_size.z)+20
         , frequency
         , algorithm
         , seed
@@ -125,6 +125,7 @@ namespace noggit
         , "tex", &selection::get_tex_iterator
         , "models", &selection::get_model_iterator
         , "chunks", &selection::get_chunk_iterator
+        , "make_noise", &selection::make_noise
         );
 
       state->set_function("select_origin", [state](
