@@ -5,6 +5,8 @@
 
 #include <noggit/scripting/script_context.hpp>
 
+#include <noggit/ui/ObjectEditor.h>
+
 namespace noggit {
   namespace scripting {
     void register_global(script_context * state)
@@ -21,7 +23,13 @@ namespace noggit {
         , float scale
         , math::vector_3d const& rotation)
       { 
-        global->get_view()->_world.get()->addM2(filename,pos,scale,math::degrees::vec3(rotation), nullptr);
+        object_paste_params p;
+        global->get_view()->_world.get()->
+          addM2(filename,pos,scale,math::degrees::vec3(rotation), &p);
+      });
+
+      state->set_function("vec",[](float x, float y, float z){
+        return math::vector_3d(x,y,z);
       });
 
       state->set_function("add_wmo",[global](
@@ -30,9 +38,9 @@ namespace noggit {
         , math::vector_3d const& rotation)
       {
         global->get_view()->_world.get()->addWMO(
-           filename
-          ,pos
-          ,math::degrees::vec3(rotation));
+            filename
+          , pos
+          , math::degrees::vec3(rotation));
       });
 
       state->set_function("get_map_id",[global]()
