@@ -82,7 +82,7 @@ namespace noggit {
         return next();
       }
 
-      std::abort();
+      return true;
     }
 
     tex tex_iterator::get()

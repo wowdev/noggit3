@@ -184,6 +184,8 @@ namespace noggit
       }
 
       ++_vert_iter;
+
+      // skip verts outside of the selection
       while(_vert_iter < 145)
       {
         auto& vert = (*_chunk_iter)->mVertices[_vert_iter];
@@ -198,6 +200,7 @@ namespace noggit
         }
       }
 
+      // restart if we used too many verts
       if(_vert_iter >= 145)
       {
         ++_chunk_iter;
@@ -205,7 +208,7 @@ namespace noggit
         return next();
       }
 
-      std::abort();
+      return true;
     }
 
     vert vert_iterator::get()
