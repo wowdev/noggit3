@@ -774,8 +774,8 @@ if (NOGGIT_WITH_SCRIPTING)
 
   # Dependency: sol2
   FetchContent_Declare (sol2
-    GIT_REPOSITORY https://github.com/ThePhD/sol2
-    GIT_TAG v3.2.3
+    GIT_REPOSITORY https://github.com/tswow/sol2
+    GIT_TAG b9c83d5ecf6bc9503dc66779f2395dc32dffb1e5
   )
   FetchContent_MakeAvailable (sol2)
   # sol2::sol2 neither links lua nor sets include directories as system so will clobber us with
