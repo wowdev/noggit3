@@ -1,17 +1,21 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 /**
- * This file documents the Noggit scripting API
- * 
- * While the language here is in TypeScript, everything here applies to 
- * lua as well.
+ * This is the documentation for the Noggit scripting API.
+ * Functions not connected to a class are global and can be called from
+ * anywhere in a script.
  */
+
+// While the language in this file is TypeScript,
+// everything here applies to lua as well.
+
+type nil = undefined;
 
 /**
  * Callback functions are unassigned by default, but may be assigned to
  * by the user
  */
-type callback<T> = T|undefined
+type callback<T> = T|nil
 
 /**
  * The type of callback used for brush events.
@@ -101,6 +105,13 @@ declare class script_brush {
      * @param def 
      */
     add_string_tag(item: string, def: string): tag<string>;
+
+    /**
+     * Adds a bool tag to the settings panel
+     * @param item
+     * @param def
+     */
+    add_bool_tag(item: string, def: boolean): tag<boolean>;
 
     /**
      * Adds a dropdown menu to the settings panel
