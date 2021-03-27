@@ -25,6 +25,7 @@ namespace noggit {
       bool has_table();
     protected:
       sol::table _table;
+      void initialize_table();
     private:
       bool _initialized = false;
       script_context * _state;

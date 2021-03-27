@@ -12,11 +12,7 @@ namespace noggit {
 
       sol::object script_object::set(const std::string& key, sol::stack_object obj)
       {
-        if(!_initialized)
-        {
-          _table = _state->create_table();
-          _initialized = true;
-        }
+        initialize_table();
         _table[key] = obj;
         return obj;
       }
@@ -31,13 +27,24 @@ namespace noggit {
         return _state->world();
       }
 
+      void script_object::initialize_table()
+      {
+        if(!_initialized)
+        {
+          _table = _state->create_table();
+          _initialized = true;
+        }
+      }
+
       sol::object script_object::get(const std::string& key)
       {
+        initialize_table();
         return _table[key];
       }
 
       sol::table script_object::table()
       {
+        initialize_table();
         return _table;
       }
 
