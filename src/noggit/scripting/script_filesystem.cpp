@@ -45,30 +45,31 @@ namespace noggit
 
     namespace {
       std::set<boost::filesystem::path> allowed_files;
-      bool get_write_permission(script_context * state, std::string const& path)
-      {
-        if (state->tool()->get_noggit_settings()->value("allow_scripts_write_any_file", false).toBool())
-        {
-          return true;
-        }
+    }
 
-        boost::filesystem::path boost_path = boost::filesystem::weakly_canonical(boost::filesystem::path(path));
-        if (allowed_files.find(boost_path) != allowed_files.end())
-        {
-          return true;
-        }
-        QMessageBox prompt;
-        prompt.setText(std::string("A script wants to write to the file "+boost_path.string()).c_str());
-        prompt.setInformativeText(std::string("Do you want to allow the script to write to "+boost_path.string()+"?").c_str());
-        prompt.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
-        prompt.setDefaultButton(QMessageBox::No);
-        bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
-        if(answer)
-        {
-          allowed_files.insert(boost_path);
-        }
-        return answer;
+    bool get_write_permission(script_context * state, std::string const& path)
+    {
+      if (state->tool()->get_noggit_settings()->value("allow_scripts_write_any_file", false).toBool())
+      {
+        return true;
       }
+
+      boost::filesystem::path boost_path = boost::filesystem::weakly_canonical(boost::filesystem::path(path));
+      if (allowed_files.find(boost_path) != allowed_files.end())
+      {
+        return true;
+      }
+      QMessageBox prompt;
+      prompt.setText(std::string("A script wants to write to the file "+boost_path.string()).c_str());
+      prompt.setInformativeText(std::string("Do you want to allow the script to write to "+boost_path.string()+"?").c_str());
+      prompt.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+      prompt.setDefaultButton(QMessageBox::No);
+      bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
+      if(answer)
+      {
+        allowed_files.insert(boost_path);
+      }
+      return answer;
     }
 
     void write_file(script_context * ctx, std::string const& path, std::string const& input)

@@ -3,6 +3,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_filesystem.hpp>
 
 #include <sol/sol.hpp>
 #include <lodepng.h>
@@ -117,6 +118,11 @@ namespace noggit
 
     void image::save(std::string const& filename)
     {
+      if(!get_write_permission(state(), filename))
+      {
+        throw script_exception("image::save","Not allowed to write to "+filename);
+      }
+
       unsigned error = lodepng::encode(filename, get_image(), _width, _height);
       if (error)
       {
