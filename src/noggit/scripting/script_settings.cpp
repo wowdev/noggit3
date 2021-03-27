@@ -389,12 +389,14 @@ namespace noggit
                       , double min
                       , double max
                       , double def
+                      , int zeros
                       , bool has_slider
                       )
                       : tag(ctx,script,item)
                       , _min(min)
                       , _max(max)
                       , _def(def)
+                      , _zeros(zeros)
                       , _has_slider(has_slider)
     {}
 
@@ -407,7 +409,7 @@ namespace noggit
 
     void real_tag::add_to_settings()
     {
-      _tool->get_settings()->add_double(_item, _min,_max,_def);
+      _tool->get_settings()->add_double(_item, _min,_max,_def, _zeros, _has_slider);
     }
 
     string_tag::string_tag(script_context * ctx

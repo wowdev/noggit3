@@ -63,6 +63,7 @@ namespace noggit {
                                             , double low
                                             , double high
                                             , double def
+                                            , int zeros = 5
                                             , bool has_slider = false
                                             );
 

@@ -79,9 +79,10 @@ namespace noggit {
       , double low
       , double high
       , double def
+      , int zeros
       , bool has_slider
       ){
-      auto tag = std::make_shared<real_tag>(state(), _name, item, low, high, def, has_slider);
+      auto tag = std::make_shared<real_tag>(state(), _name, item, low, high, def, zeros, has_slider);
       _tags.push_back(tag);
       return tag;
     }

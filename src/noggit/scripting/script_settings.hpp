@@ -139,12 +139,14 @@ namespace noggit {
                   , double min
                   , double max
                   , double def
+                  , int zeros
                   , bool has_slider
                   );
         double get();
         virtual void add_to_settings() override;
       private:
         double _min,_max,_def;
+        int _zeros;
         bool _has_slider;
     };
 
