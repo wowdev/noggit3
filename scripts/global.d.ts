@@ -237,10 +237,10 @@ declare class chunk {
  * This iterator always starts out "before" the first entry, 
  * meaning you must call "next" before you call "get":
  * 
- * @example
- * while(chunk_iter.next()) {
- *    let chunk = chunk_iter.get()
- * }
+ * @example (lua)
+ * while chunk_iter:next() do
+ *    local chunk = chunk_iter:get()
+ * end
  */
 declare class chunk_iterator {
     /**
@@ -560,10 +560,10 @@ declare class model {
  * This iterator always starts out "before" the first entry, 
  * meaning you must call "next" before you call "get":
  * 
- * @example
- * while(model_iter.next()) {
- *    let model = model_iter.get()
- * }
+ * @example (lua)
+ * while model_iter:next() do
+ *    local model = model_iter:get()
+ * end
  */
 declare class model_iterator {
     /**
@@ -751,10 +751,10 @@ declare class tex {
  * This iterator always starts out "before" the first entry, 
  * meaning you must call "next" before you call "get":
  * 
- * @example
- * while(tex_iter.next()) {
- *    let tex_unit = tex_iter.get()
- * }
+ * @example (lua)
+ * while tex_iter:next() do
+ *    local tex_unit = tex_iter:get()
+ * end
  */
 declare class tex_iterator {
     /**
@@ -848,10 +848,10 @@ declare class vert {
  * This iterator always starts out "before" the first entry, 
  * meaning you must call "next" before you call "get":
  * 
- * @example
- * while(vert_iter.next()) {
- *    let vertex = vert_iter.get()
- * }
+ * @example (lua)
+ * while vert_iter:next() do
+ *    local vert_unit = vert_iter:get()
+ * end
  */
 declare class vert_iterator {
     /**
