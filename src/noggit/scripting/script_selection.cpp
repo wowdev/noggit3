@@ -131,9 +131,13 @@ namespace noggit
       state->set_function("select_origin", [state](
           math::vector_3d const& origin
         , float xRadius
-        , float zRadius
-        ) 
+        , float zRadius = -1
+        )
       {
+        if(zRadius <= 0)
+        {
+          zRadius = xRadius;
+        }
         return std::make_shared<selection>(state, "select_origin",
           math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
           math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
