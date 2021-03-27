@@ -1,3 +1,4 @@
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/scripting/script_tex.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/scripting/script_exception.hpp>
