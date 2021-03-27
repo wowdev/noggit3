@@ -12,6 +12,7 @@ namespace noggit {
   namespace scripting {
     class scripting_tool;
     class script_settings;
+    class bool_tag;
     class int_tag;
     class real_tag;
     class string_tag;
@@ -74,6 +75,11 @@ namespace noggit {
       std::shared_ptr<string_list_tag> add_string_list_tag(
           std::string const& item
         , sol::variadic_args va);
+
+      std::shared_ptr<bool_tag> add_bool_tag(
+          std::string const& item
+        , bool def
+      );
 
       void add_null_tag();
 

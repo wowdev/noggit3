@@ -455,6 +455,29 @@ namespace noggit
       }
     }
 
+    bool_tag::bool_tag(
+        script_context * ctx
+      , std::string const& script
+      , std::string const& item
+      , bool def
+      )
+      : tag(ctx,script,item)
+      , _def(def)
+    {}
+
+    bool bool_tag::get()
+    {
+      return _tool->get_settings()->get_setting<bool>
+      (
+        _script,_tool->get_profiles()->get_cur_profile(),_item,_def
+      );
+    }
+
+    void bool_tag::add_to_settings()
+    {
+      _tool->get_settings()->add_bool(_item,_def);
+    }
+
     void register_settings(script_context * state)
     {
       state->new_usertype<int_tag>("int_tag","get",&int_tag::get);

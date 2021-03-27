@@ -185,6 +185,19 @@ namespace noggit {
         std::vector<std::string> _values;
     };
 
+    class bool_tag : public tag {
+      public:
+        bool_tag( script_context * ctx
+                , std::string const& script
+                , std::string const& item
+                , bool def
+                );
+        virtual void add_to_settings() override;
+        bool get();
+      private:
+        bool _def;
+    };
+
     void register_settings(script_context * state);
   }
 }

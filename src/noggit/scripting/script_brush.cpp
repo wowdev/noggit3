@@ -110,6 +110,15 @@ namespace noggit {
       return tag;
     }
 
+    std::shared_ptr<bool_tag> script_brush::add_bool_tag(
+        std::string const& item
+      , bool def
+    ) {
+      auto tag = std::make_shared<bool_tag>(state(),_name,item,def);
+      _tags.push_back(tag);
+      return tag;
+    }
+
     void script_brush::on_selected()
     {
       for(auto tag : _tags)
@@ -132,6 +141,7 @@ namespace noggit {
         , sol::meta_function::index, &script_brush::get
         ,"get_name",&script_brush::get_name
         ,"add_int_tag",&script_brush::add_int_tag
+        ,"add_bool_tag",&script_brush::add_int_tag
         ,"add_real_tag",&script_brush::add_real_tag
         ,"add_string_tag",&script_brush::add_string_tag
         ,"add_string_list_tag",&script_brush::add_string_list_tag
