@@ -416,6 +416,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
         if (!misc::float_equals(current_alpha, strength))
         {
+          float totOthers = 0.0f;
           for (int layer = 0; layer < nTextures; ++layer)
           {
             if (layer == tex_layer)
@@ -425,11 +426,23 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
             else
             {
               amaps[layer][offset] -= alpha_change * (amaps[layer][offset] / sum_other_alphas);
+
             }
+
+            if (amaps[layer][offset] > 1.0f)
+                amaps[layer][offset] = 1.0f;
+            else if (amaps[layer][offset] < 0.0f || isnan(amaps[layer][offset]))
+                    amaps[layer][offset] = 0.0f;
+
+            if(layer != 0)
+                totOthers += amaps[layer][offset];
           }
+
+          amaps[0][offset] = std::max(0.0f, std::min(1.0f - totOthers, 1.0f));
 
           changed = true;
         }
+
       }
 
       xPos += TEXDETAILSIZE;
