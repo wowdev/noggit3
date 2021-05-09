@@ -66,7 +66,7 @@ namespace noggit
 
       float alpha_target() const
       {
-        return static_cast<float>(_brush_level) / 255.f;
+        return static_cast<float>(_brush_level);
       }
 
       current_texture* _current_texture;
