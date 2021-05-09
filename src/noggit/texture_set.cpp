@@ -416,6 +416,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
         if (!misc::float_equals(current_alpha, strength))
         {
+          float totOthers = 0.0f;
           for (int layer = 0; layer < nTextures; ++layer)
           {
             if (layer == tex_layer)
@@ -425,11 +426,40 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
             else
             {
               amaps[layer][offset] -= alpha_change * (amaps[layer][offset] / sum_other_alphas);
+
             }
+
+            if (amaps[layer][offset] > 1.0f)
+                amaps[layer][offset] = 1.0f;
+            else if (amaps[layer][offset] < 0.0f || isnan(amaps[layer][offset]))
+                    amaps[layer][offset] = 0.0f;
+
+            if(layer != 0)
+                totOthers += amaps[layer][offset];
           }
+          if (totOthers > 1)
+          {
+            float mul = (1 / totOthers);
+
+            amaps[1][offset] = amaps[1][offset] * mul;
+            totOthers = amaps[1][offset];
+            if (nTextures > 2)
+            {
+                amaps[2][offset] = amaps[2][offset] * mul;
+                totOthers += amaps[2][offset];
+            }
+            if (nTextures > 3)
+            {
+                amaps[3][offset] = amaps[3][offset] * mul;
+                totOthers += amaps[3][offset];
+            }
+            
+          }
+          amaps[0][offset] = std::max(0.0f, std::min(1.0f - totOthers, 1.0f));
 
           changed = true;
         }
+
       }
 
       xPos += TEXDETAILSIZE;
@@ -922,7 +952,7 @@ void TextureSet::update_lod_texture_map()
 
 uint8_t TextureSet::sum_alpha(size_t offset) const
 {
-  uint8_t sum = 0;
+  int sum = 0;
 
   for (auto const& amap : alphamaps)
   {
@@ -931,6 +961,9 @@ uint8_t TextureSet::sum_alpha(size_t offset) const
       sum += amap->getAlpha(offset);
     }
   }
+  // This can happen with some previous version saved adts.
+  if (sum > 255)
+      sum = 255;
 
   return sum;
 }
@@ -946,24 +979,35 @@ namespace
 bool TextureSet::apply_alpha_changes()
 {
   if (!tmp_edit_values || nTextures < 2)
-  {
-    tmp_edit_values = boost::none;
-    return false;
-  }
-
-  auto& new_amaps = tmp_edit_values.get();
-
-  for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
-  {
-    std::array<std::uint8_t, 64 * 64> values;
-
-    for (int i = 0; i < 64 * 64; ++i)
     {
-      values[i] = float_alpha_to_uint8(new_amaps[alpha_layer + 1][i] * 255.f);
+        tmp_edit_values = boost::none;
+        return false;
     }
 
-    alphamaps[alpha_layer]->setAlpha(values.data());
-  }
+    auto& new_amaps = tmp_edit_values.get();
+
+    std::array<std::uint8_t, 64 * 64> values[3]{};
+    for (int i = 0; i < 64 * 64; ++i)
+    {
+        for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
+        {
+            values[alpha_layer][i] = float_alpha_to_uint8(new_amaps[alpha_layer + 1][i] * 255.f);
+        }
+        float totVal = (float)(values[0][i]) + values[1][i] + values[2][i];
+        if (totVal > 255)
+        {
+            float mul = (255 / totVal);
+            float vals[3] = { std::floorf(values[0][i] *mul), std::floorf(values[1][i]*mul), std::floorf(values[2][i] *mul)};
+
+            values[0][i] = float_alpha_to_uint8(vals[0]);
+            values[1][i] = float_alpha_to_uint8(vals[1]);
+            values[2][i] = float_alpha_to_uint8(vals[2]);
+        }
+    }
+    for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
+    {
+        alphamaps[alpha_layer]->setAlpha(values[alpha_layer].data());
+    }
 
   _need_amap_update = true;
   _need_lod_texture_map_update = true;
