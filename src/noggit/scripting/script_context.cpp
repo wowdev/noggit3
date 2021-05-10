@@ -39,6 +39,8 @@ namespace noggit
       register_functions(this);
 
       boost::filesystem::recursive_directory_iterator end;
+
+      unsigned int error_count = 0;
       for (boost::filesystem::recursive_directory_iterator dir("scripts"); dir != end; ++dir)
       {
         std::string file = dir->path().string();
@@ -53,10 +55,21 @@ namespace noggit
         }
         catch (std::exception e)
         {
+          ++error_count;
           _tool->setStyleSheet("background-color: #f0a5a5;");
-          _tool->addLog("Script error:" + std::string(e.what()));
+          std::string what = e.what();
+          if (what.size() == 0)
+          {
+            what = std::string("Generic error in file during initialization (check function names and arguments)");
+          }
+          _tool->addLog("[error]: \"" + what +"\" (in file "+file+")");
           _tool->resetLogScroll();
         }
+      }
+
+      if(error_count == 0)
+      {
+        _tool->setStyleSheet("");
       }
     }
 
