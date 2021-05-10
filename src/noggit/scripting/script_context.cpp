@@ -20,6 +20,15 @@ namespace noggit
   namespace scripting
   {
 
+    namespace
+    {
+      void set_tool_error(scripting_tool * tool)
+      {
+          tool->resetLogScroll();
+          tool->setStyleSheet("background-color: #f0a5a5;");
+      }
+    }
+
     script_context::script_context(scripting_tool * tool): _tool(tool)
     {
       open_libraries(sol::lib::base,sol::lib::table,sol::lib::string);
@@ -40,7 +49,23 @@ namespace noggit
 
       boost::filesystem::recursive_directory_iterator end;
 
+      if(!boost::filesystem::exists("scripts"))
+      {
+          _tool->addLog("[error]: 'scripts' directory does not exist");
+          set_tool_error(_tool);
+          return;
+      }
+
+      if(!boost::filesystem::is_directory("scripts"))
+      {
+          _tool->addLog("[error]: 'scripts' is not a directory");
+          set_tool_error(_tool);
+          return;
+      }
+
       unsigned int error_count = 0;
+      unsigned int file_count = 0;
+
       for (boost::filesystem::recursive_directory_iterator dir("scripts"); dir != end; ++dir)
       {
         std::string file = dir->path().string();
@@ -49,6 +74,8 @@ namespace noggit
           continue;
         }
 
+        ++file_count;
+
         try
         {
           execute_file(dir->path().string());
@@ -56,15 +83,21 @@ namespace noggit
         catch (std::exception e)
         {
           ++error_count;
-          _tool->setStyleSheet("background-color: #f0a5a5;");
           std::string what = e.what();
           if (what.size() == 0)
           {
             what = std::string("Generic error in file during initialization (check function names and arguments)");
           }
-          _tool->addLog("[error]: \"" + what +"\" (in file "+file+")");
-          _tool->resetLogScroll();
+          _tool->addLog("[error]: " + what + " (in file "+file+")");
+          set_tool_error(_tool);
         }
+      }
+
+      if(file_count == 0)
+      {
+        _tool->addLog("[error]: no script files found (check your 'scripts' directory)");
+        set_tool_error(_tool);
+        ++error_count;
       }
 
       if(error_count == 0)
