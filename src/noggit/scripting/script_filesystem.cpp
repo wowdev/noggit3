@@ -47,50 +47,43 @@ namespace noggit
       std::set<boost::filesystem::path> allowed_files;
     }
 
-    bool get_write_permission(script_context * state, std::string const& path)
+    boost::filesystem::path get_writable_path(std::string const& caller, script_context * state, std::string const& path)
     {
+      auto canonical = boost::filesystem::weakly_canonical(boost::filesystem::path(path));
       if (state->tool()->get_noggit_settings()->value("allow_scripts_write_any_file", false).toBool())
       {
-        return true;
+        return canonical;
       }
-
-      boost::filesystem::path boost_path = boost::filesystem::weakly_canonical(boost::filesystem::path(path));
-      if (allowed_files.find(boost_path) != allowed_files.end())
+      if (allowed_files.find(canonical) != allowed_files.end())
       {
-        return true;
+        return canonical;
       }
       QMessageBox prompt;
-      prompt.setText(std::string("A script wants to write to the file "+boost_path.string()).c_str());
-      prompt.setInformativeText(std::string("Do you want to allow the script to write to "+boost_path.string()+"?").c_str());
+      prompt.setText(std::string("A script wants to write to the file "+canonical.string()).c_str());
+      prompt.setInformativeText(std::string("Do you want to allow the script to write to "+canonical.string()+"?").c_str());
       prompt.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
       prompt.setDefaultButton(QMessageBox::No);
       bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
-      if(answer)
+      if(!answer)
       {
-        allowed_files.insert(boost_path);
+        throw script_exception(caller,"No permission to write file "+canonical.string());
       }
-      return answer;
+      return *allowed_files.emplace (canonical).first;
     }
 
     void write_file(script_context * ctx, std::string const& path, std::string const& input)
     {
-      if(!get_write_permission(ctx, path))
-      {
-        throw script_exception("write_file","Not allowed to write to "+path);
-      }
-      mkdirs(path);
-      std::ofstream(path) << input;
+      auto writable_path = get_writable_path("write_file",ctx,path);
+      mkdirs(writable_path.string());
+      std::ofstream(writable_path.string()) << input;
     }
 
     void append_file(script_context * ctx, std::string const& path, std::string const& input)
     {
-      if(!get_write_permission(ctx, path))
-      {
-        throw script_exception("write_file","Not allowed to write to "+path);
-      }
-      mkdirs(path);
+      auto writable_path = get_writable_path("append_file",ctx,path);
+      mkdirs(writable_path.string());
       std::ofstream outfile;
-      outfile.open(path, std::ios_base::app); // append instead of overwrite
+      outfile.open(writable_path.string(), std::ios_base::app); // append instead of overwrite
       outfile << input;
     }
 

@@ -118,11 +118,7 @@ namespace noggit
 
     void image::save(std::string const& filename)
     {
-      if(!get_write_permission(state(), filename))
-      {
-        throw script_exception("image::save","Not allowed to write to "+filename);
-      }
-
+      auto writable_path = get_writable_path("image::save", state(), filename);
       unsigned error = lodepng::encode(filename, get_image(), _width, _height);
       if (error)
       {

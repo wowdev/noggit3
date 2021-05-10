@@ -12,7 +12,7 @@ namespace noggit
     class script_context;
     class scripting_tool;
     namespace fs = boost::filesystem;
-    bool get_write_permission(script_context * state, std::string const& path);
+    boost::filesystem::path get_writable_path(std::string const& caller, script_context * state, std::string const& path);
     void write_file(script_context * ctx, std::string const& path, std::string const& content);
     void append_file(script_context * ctx, std::string const& path, std::string const& content);
     std::string read_file(std::string const& path);
