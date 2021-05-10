@@ -1030,6 +1030,8 @@ bool TextureSet::apply_alpha_changes()
   }
 
   auto& new_amaps = tmp_edit_values.get();
+  std::array<std::uint16_t, 64 * 64> totals;
+  totals.fill(0);
 
   for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
   {
@@ -1038,6 +1040,14 @@ bool TextureSet::apply_alpha_changes()
     for (int i = 0; i < 64 * 64; ++i)
     {
       values[i] = float_alpha_to_uint8(new_amaps[alpha_layer + 1][i]);
+      totals[i] += values[i];
+
+      // remove the possible overflow with rounding
+      // max 2 if all 4 values round up so it won't change the layer's alpha much
+      if (totals[i] > 255)
+      {
+        values[i] -= static_cast<std::uint8_t>(totals[i] - 255);
+      }
     }
 
     alphamaps[alpha_layer]->setAlpha(values.data());
