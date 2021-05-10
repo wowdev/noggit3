@@ -78,8 +78,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
 
     if (tmp_edit_values && nTextures == 1)
     {
-      // default values for the layer 0 are 255 (uint8) or 1.f (float) !
-      tmp_edit_values.get()[0].fill(1.f);
+      tmp_edit_values.get()[0].fill(255.f);
     }
   }
 
@@ -406,26 +405,105 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     {
       dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
 
-      if (dist<=radius)
+      if (dist <= radius)
       {
         std::size_t offset = i + 64 * j;
 
-        float current_alpha = amaps[tex_layer][i + 64 * j];
-        float sum_other_alphas = 1.f - current_alpha;
-        float alpha_change = (strength - current_alpha)* pressure * brush->getValue(dist);
+        // use double for more precision
+        std::array<double,4> alpha_values;
+        double total = 0.;
+
+        for (int n = 0; n < 4; ++n)
+        {
+          total += alpha_values[n] = amaps[n][i + 64 * j];
+        }
+
+        double current_alpha = alpha_values[tex_layer];
+        double sum_other_alphas = (total - current_alpha);
+        double alpha_change = (strength - current_alpha) * pressure * brush->getValue(dist);
+
+        // alpha too low, set it to 0 directly
+        if (alpha_change < 0. && current_alpha + alpha_change < 1.)
+        {
+          alpha_change = -current_alpha;
+        }
 
         if (!misc::float_equals(current_alpha, strength))
         {
-          for (int layer = 0; layer < nTextures; ++layer)
+          if (sum_other_alphas < 1.)
           {
-            if (layer == tex_layer)
+            // alpha is currently at 254/255 -> set it at 255 and clear the rest of the values
+            if (alpha_change > 0.f)
             {
-              amaps[layer][offset] += alpha_change;
+              for (int layer = 0; layer < nTextures; ++layer)
+              {
+                alpha_values[layer] = layer == tex_layer ? 255. : 0.f;
+              }
             }
+            // all the other textures amount for less an 1/255 -> add the alpha_change (negative) to current texture and remove it from the first non current texture, clear the rest
             else
             {
-              amaps[layer][offset] -= alpha_change * (amaps[layer][offset] / sum_other_alphas);
+              bool change_applied = false;
+
+              for (int layer = 0; layer < nTextures; ++layer)
+              {
+                if (layer == tex_layer)
+                {
+                  alpha_values[layer] += alpha_change;
+                }
+                else
+                {
+                  if (!change_applied)
+                  {
+                    alpha_values[layer] -= alpha_change;
+                  }
+                  else
+                  {
+                    alpha_values[tex_layer] += alpha_values[layer];
+                    alpha_values[layer] = 0.;
+                  }
+
+                  change_applied = true;
+                }
+              }
             }
+          }
+          else
+          {
+            for (int layer = 0; layer < nTextures; ++layer)
+            {
+              if (layer == tex_layer)
+              {
+                alpha_values[layer] += alpha_change;
+              }
+              else
+              {
+                alpha_values[layer] -= alpha_change * alpha_values[layer] / sum_other_alphas;
+
+                // clear values too low to be visible
+                if (alpha_values[layer] < 1.)
+                {
+                  alpha_values[tex_layer] += alpha_values[layer];
+                  alpha_values[layer] = 0.f;
+                }
+              }
+            }
+          }
+
+          double total_final = std::accumulate(alpha_values.begin(), alpha_values.end(), 0.);
+
+          // failsafe in case the sum of all alpha values deviate
+          if (std::abs(total_final - 255.) > 0.001)
+          {
+            for (double& d : alpha_values)
+            {
+              d = d * 255. / total_final;
+            }
+          }
+
+          for (int n = 0; n < 4; ++n)
+          {
+            amaps[n][i + 64 * j] = static_cast<float>(alpha_values[n]);
           }
 
           changed = true;
@@ -827,7 +905,7 @@ void TextureSet::bind_alpha(std::size_t id)
         {
           for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
           {
-            amap[i * 3 + alpha_id] = tmp_amaps[alpha_id+1][i];
+            amap[i * 3 + alpha_id] = tmp_amaps[alpha_id + 1][i] / 255.f;
           }
         }
 
@@ -952,6 +1030,8 @@ bool TextureSet::apply_alpha_changes()
   }
 
   auto& new_amaps = tmp_edit_values.get();
+  std::array<std::uint16_t, 64 * 64> totals;
+  totals.fill(0);
 
   for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
   {
@@ -959,7 +1039,15 @@ bool TextureSet::apply_alpha_changes()
 
     for (int i = 0; i < 64 * 64; ++i)
     {
-      values[i] = float_alpha_to_uint8(new_amaps[alpha_layer + 1][i] * 255.f);
+      values[i] = float_alpha_to_uint8(new_amaps[alpha_layer + 1][i]);
+      totals[i] += values[i];
+
+      // remove the possible overflow with rounding
+      // max 2 if all 4 values round up so it won't change the layer's alpha much
+      if (totals[i] > 255)
+      {
+        values[i] -= static_cast<std::uint8_t>(totals[i] - 255);
+      }
     }
 
     alphamaps[alpha_layer]->setAlpha(values.data());
@@ -986,11 +1074,11 @@ void TextureSet::create_temporary_alphamaps_if_needed()
 
   for (int i = 0; i < 64 * 64; ++i)
   {
-    float base_alpha = 1.f;
+    float base_alpha = 255.f;
 
-    for (int alpha_layer = 0; alpha_layer < nTextures-1; ++alpha_layer)
+    for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
     {
-      float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha(i)) / 255.f;
+      float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha(i));
 
       values[alpha_layer + 1][i] = f;
       base_alpha -= f;

@@ -136,9 +136,9 @@ void MPQArchive::unloadAllMPQs()
   _openArchives.clear();
 }
 
-bool MPQArchive::hasFile(std::string const& filename_in) const
+bool MPQArchive::hasFile(std::string const& file) const
 {
-  return SFileHasFile(_archiveHandle, noggit::mpq::normalized_filename_insane (filename_in).c_str());
+  return SFileHasFile(_archiveHandle, noggit::mpq::normalized_filename_insane (file).c_str());
 }
 
 void MPQArchive::unloadMPQ(std::string const& filename)
@@ -152,10 +152,10 @@ void MPQArchive::unloadMPQ(std::string const& filename)
   }
 }
 
-bool MPQArchive::openFile(std::string const& filename_in, HANDLE* fileHandle) const
+bool MPQArchive::openFile(std::string const& file, HANDLE* fileHandle) const
 {
   assert(fileHandle);
-  return SFileOpenFileEx(_archiveHandle, noggit::mpq::normalized_filename_insane (filename_in).c_str(), 0, fileHandle);
+  return SFileOpenFileEx(_archiveHandle, noggit::mpq::normalized_filename_insane (file).c_str(), 0, fileHandle);
 }
 
 namespace

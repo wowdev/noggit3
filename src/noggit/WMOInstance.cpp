@@ -59,6 +59,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                        , int animtime
                        , bool world_has_skies
                        , display_mode display
+                       , wmo_group_uniform_data& wmo_uniform_data
                        )
 {
   if (!wmo->finishedLoading() || wmo->loading_failed())
@@ -88,6 +89,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
               , animtime
               , world_has_skies
               , display
+              , wmo_uniform_data
               );
   }
 

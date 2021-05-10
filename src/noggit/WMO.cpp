@@ -335,6 +335,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , int animtime
                , bool world_has_skies
                , display_mode display
+               , wmo_group_uniform_data& wmo_uniform_data
                )
 { 
   wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
@@ -352,6 +353,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , camera
                , draw_fog
                , world_has_skies
+               , wmo_uniform_data
                );
 
     group.drawLiquid ( transform_matrix_transposed
@@ -1107,6 +1109,7 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
                    , const math::vector_3d& //camera
                    , bool // draw_fog
                    , bool // world_has_skies
+                   , wmo_group_uniform_data& wmo_uniform_data
                    )
 {
   if (!_uploaded)
@@ -1119,22 +1122,32 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
     setup_vao(wmo_shader);
   }
 
-  bool exterior_lit = header.flags.exterior_lit | header.flags.exterior;
+  int exterior_lit = header.flags.exterior_lit | header.flags.exterior;
   int has_mocv = header.flags.has_vertex_color | header.flags.use_mocv2_for_texture_blending;
 
-  wmo_shader.uniform("use_vertex_color", has_mocv);
-  wmo_shader.uniform("exterior_lit", (int)exterior_lit);
+  if (has_mocv != wmo_uniform_data.mocv)
+  {
+    wmo_shader.uniform("use_vertex_color", has_mocv);
+    wmo_uniform_data.mocv = has_mocv;
+  }
+  if (exterior_lit != wmo_uniform_data.exterior_lit)
+  {
+    wmo_shader.uniform("exterior_lit", exterior_lit);
+    wmo_uniform_data.exterior_lit = exterior_lit;
+  }
+  
 
   opengl::scoped::vao_binder const _ (_vao);
 
   for (wmo_batch& batch : _batches)
   {
     WMOMaterial const& mat (wmo->materials.at (batch.texture));
-    
     float alpha_test = 0.003921568f; // 1/255
 
-    switch (mat.blend_mode)
+    if (mat.blend_mode != wmo_uniform_data.blend_mode)
     {
+      switch (mat.blend_mode)
+      {
       case 1:
         gl.disable(GL_BLEND);
         alpha_test = 0.878431372f; // 224/255
@@ -1164,13 +1177,27 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
         alpha_test = -1.f;
         gl.disable(GL_BLEND);
         break;
-    }    
+      }
 
-    wmo_shader.uniform("shader_id", (int)mat.shader);
+      wmo_shader.uniform("alpha_test", alpha_test);
+      wmo_uniform_data.blend_mode = mat.blend_mode;
+    }
 
-    wmo_shader.uniform("alpha_test", alpha_test);
-    wmo_shader.uniform("unfogged", (int)mat.flags.unfogged);
-    wmo_shader.uniform("unlit", (int)mat.flags.unlit);
+    if (mat.shader != wmo_uniform_data.shader)
+    {
+      wmo_shader.uniform("shader_id", (int)mat.shader);
+      wmo_uniform_data.shader = mat.shader;
+    }
+    if (mat.flags.unfogged != wmo_uniform_data.unfogged)
+    {
+      wmo_shader.uniform("unfogged", (int)mat.flags.unfogged);
+      wmo_uniform_data.unfogged = mat.flags.unfogged;
+    }
+    if (mat.flags.unlit != wmo_uniform_data.unlit)
+    {
+      wmo_shader.uniform("unlit", (int)mat.flags.unlit);
+      wmo_uniform_data.unlit = mat.flags.unlit;
+    }
 
     if (mat.flags.unculled)
     {

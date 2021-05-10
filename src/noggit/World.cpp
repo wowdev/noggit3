@@ -1335,6 +1335,8 @@ void World::draw ( math::matrix_4x4 const& model_view
       wmo_program.uniform("exterior_diffuse_color", diffuse_color);
       wmo_program.uniform("exterior_ambient_color", ambient_color);
 
+      wmo_group_uniform_data wmo_uniform_data;
+
       _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
       {
         bool is_hidden = wmo.wmo->is_hidden();
@@ -1354,6 +1356,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                   , animtime
                   , skies->hasSkies()
                   , display
+                  , wmo_uniform_data
                   );
         }
       });
