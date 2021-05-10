@@ -28,6 +28,16 @@ namespace noggit
 {
   namespace scripting
   {
+    // TEMP: remove when exceptions are working
+    namespace
+    {
+      std::string cur_exception = "";
+    }
+    void set_cur_exception(std::string const& exception)
+    {
+      cur_exception = exception;
+    }
+
     void scripting_tool::doReload()
     {
       get_settings()->clear();
@@ -239,7 +249,16 @@ namespace noggit
       catch (std::exception const& e)
       {
         doReload();
-        addLog(("[error]: " + std::string(e.what())));
+        // TEMP: remove when exceptions are working
+        if(std::string(e.what()).find("C++ exception") == 0 && cur_exception.size()>0)
+        {
+          addLog("[error]: "+std::string(cur_exception));
+          cur_exception = "";
+        }
+        else
+        {
+          addLog(("[error]: " + std::string(e.what())));
+        }
         resetLogScroll();
       }
       _last_left = new_left;

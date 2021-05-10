@@ -78,5 +78,8 @@ namespace noggit
       QSettings * _noggit_settings;
       void change_script(int script_index);
     };
+
+    // TEMP: remove when exceptions are working
+    void set_cur_exception(std::string const& exception);
   } // namespace scripting
 } // namespace noggit

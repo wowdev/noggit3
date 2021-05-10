@@ -11,8 +11,7 @@ namespace noggit
     class script_exception : public std::runtime_error
     {
     public:
-      script_exception(std::string const& funcName, std::string const& msg) 
-        : std::runtime_error(msg+" (in function "+funcName+")") {}
+      script_exception(std::string const& funcName, std::string const& msg);
     };
   } // namespace scripting
 } // namespace noggit

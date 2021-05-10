@@ -402,6 +402,7 @@ set ( scripting_sources
     src/noggit/scripting/scripting_tool.cpp
     src/noggit/scripting/script_profiles.cpp
     src/noggit/scripting/script_settings.cpp
+    src/noggit/scripting/script_exception.cpp
   )
 
 set ( scripting_headers
