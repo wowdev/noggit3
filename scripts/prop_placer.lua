@@ -8,8 +8,8 @@ function Prop(index)
     local prop = {}
 
     prop.model_name = prop_placer:add_string_tag("Prop "..index)
-    prop.min_scale = prop_placer:add_real_tag("Prop "..index.." Min Scale",0.001,10,0.7)
-    prop.max_scale = prop_placer:add_real_tag("Prop "..index.." Max Scale",0.001,10,0.7)
+    prop.min_scale = prop_placer:add_real_tag("Prop "..index.." Min Scale",0.001,10,0.7,2)
+    prop.max_scale = prop_placer:add_real_tag("Prop "..index.." Max Scale",0.001,10,0.7,2)
 
     function prop:place(evt)
         if string.len(self.model_name:get())==0 then
