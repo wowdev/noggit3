@@ -31,6 +31,7 @@ namespace noggit {
       QPushButton* _create_button;
       std::string _cur_profile;
       void on_change_script(int selection);
+      void select_profile_gui(int profile);
     };
   }
 }

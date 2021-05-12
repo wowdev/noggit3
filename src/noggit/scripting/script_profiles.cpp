@@ -29,11 +29,7 @@ namespace noggit
       _select_column->addWidget(_create_button, 1, 1);
 
       connect(_selection, QOverload<int>::of(&QComboBox::activated), this, [this](auto index) {
-        select_profile(index);
-        this->_tool->clearDescription();
-        this->_tool->get_context()->select_script(_tool->get_context()->get_selection());
-        // string array / brush settings have changed
-        this->_tool->get_settings()->initialize();
+        select_profile_gui(index);
       });
 
       connect(_remove_button, &QPushButton::released, this, [this]() {
@@ -65,8 +61,7 @@ namespace noggit
           }
         }
 
-        // go back to default, so we don't accidentally delete another profile
-        select_profile(0);
+        select_profile_gui(0);
       });
 
       connect(_create_button, &QPushButton::released, this, [this]() {
@@ -107,8 +102,17 @@ namespace noggit
 
         _selection->setCurrentIndex(count);
 
-        select_profile(count);
+        select_profile_gui(count);
       });
+    }
+
+    void script_profiles::select_profile_gui(int profile)
+    {
+      select_profile(profile);
+      _tool->clearDescription();
+      _tool->get_context()->select_script(_tool->get_context()->get_selection());
+      // string array / brush settings have changed
+      _tool->get_settings()->initialize();
     }
 
     void script_profiles::select_profile(int profile)
