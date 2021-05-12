@@ -30,6 +30,11 @@ namespace noggit
 
     long random::integer(long low, long high)
     {
+      if (low == high)
+      {
+        return low;
+      }
+
       if(low>=high)
       {
         throw script_exception(
@@ -41,6 +46,11 @@ namespace noggit
 
     double random::real(double low, double high)
     {
+      if (low == high)
+      {
+        return low;
+      }
+
       if(low>=high)
       {
         throw script_exception(
