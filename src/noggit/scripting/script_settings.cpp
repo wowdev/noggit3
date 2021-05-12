@@ -49,7 +49,11 @@ namespace noggit
       _radius_layout->addRow("Inner:", _inner_radius_spin);
       _radius_layout->addRow(_inner_radius_slider);
 
+      _custom_group = new QFrame();
+      _custom_layout = new QFormLayout(_custom_group);
+
       _layout->addWidget(_radius_group);
+      _layout->addWidget(_custom_group);
 
       connect(_radius_spin, qOverload<double>(&QDoubleSpinBox::valueChanged), [&](double v) {
         _radius = v;
@@ -135,8 +139,8 @@ namespace noggit
     spinner->setValue(t);                                                                  \
   });                                                                                      \
                                                                                            \
-  _layout->addRow(label, spinner);                                                         \
-  if(has_slider) _layout->addRow("", slider);                                              \
+  _custom_layout->addRow(label, spinner);                                                         \
+  if(has_slider) _custom_layout->addRow("", slider);                                              \
   _widgets.push_back(label);                                                               \
   _widgets.push_back(spinner);                                                             \
   _widgets.push_back(slider);                                                              \
@@ -201,8 +205,8 @@ namespace noggit
       });
       _widgets.push_back(label);
       _widgets.push_back(tline);
-      _layout->addRow(label, tline);
       tline->setText(get_json_safe<std::string>(name, def).c_str());
+      _custom_layout->addRow(label, tline);
     }
 
     void script_settings::add_bool(std::string const& name, bool def)
@@ -216,7 +220,7 @@ namespace noggit
 
       _widgets.push_back(checkbox);
       _widgets.push_back(label);
-      _layout->addRow(label, checkbox);
+      _custom_layout->addRow(label, checkbox);
 
       checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
@@ -225,7 +229,7 @@ namespace noggit
     {
       auto label = new QLabel(this);
       _widgets.push_back(label);
-      _layout->addRow(label);
+      _custom_layout->addRow(label);
     }
 
     void script_settings::add_string_list(std::string const& name, std::string const& value)
@@ -245,7 +249,7 @@ namespace noggit
         _string_arrays[name] = box;
         _widgets.push_back(box);
         _widgets.push_back(label);
-        _layout->addRow(label, box);
+        _custom_layout->addRow(label, box);
 
         // ensure there is at least one valid value in it
         get_json_safe<std::string>(name, value);
@@ -267,7 +271,7 @@ namespace noggit
     {
       for (auto &widget : _widgets)
       {
-        _layout->removeWidget(widget);
+        _custom_layout->removeWidget(widget);
         delete widget;
       }
       _widgets.clear();

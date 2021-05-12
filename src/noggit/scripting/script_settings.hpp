@@ -91,6 +91,9 @@ namespace noggit {
 
       QFormLayout* _layout;
 
+      QFrame* _custom_group;
+      QFormLayout* _custom_layout;
+
       float _radius = 0;
       float _inner_radius = 0;
     private:
