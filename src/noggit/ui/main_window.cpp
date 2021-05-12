@@ -43,6 +43,9 @@ namespace noggit
     {
       std::stringstream title;
       title << "Noggit - " << STRPRODUCTVER;
+#ifdef TESTING_VERSION
+      title << " -- UNOFFICIAL TESTING VERSION";
+#endif
       setWindowTitle (QString::fromStdString (title.str()));
       setWindowIcon (QIcon (":/icon"));
 
