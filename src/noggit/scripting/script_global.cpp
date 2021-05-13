@@ -25,8 +25,10 @@ namespace noggit {
         , math::vector_3d const& rotation)
       { 
         object_paste_params p;
+        p.minScale = scale;
+        p.maxScale = scale;
         global->get_view()->_world.get()->
-          addM2(filename,pos,scale,math::degrees::vec3(rotation), &p);
+          addM2(filename,pos,1,math::degrees::vec3(rotation), &p);
       });
 
       state->set_function("vec",[](float x, float y, float z){
