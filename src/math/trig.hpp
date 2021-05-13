@@ -51,7 +51,7 @@ namespace math
 
     friend std::ostream& operator<< (std::ostream& os, degrees const& v)
     {
-      return os << v << "°";
+      return os << v._ << "°";
     }
 
     using vec3 = vector_3d_base<degrees>;
