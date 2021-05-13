@@ -75,7 +75,7 @@ namespace noggit {
       void initialize();
     private:
       template <typename T>
-      T get_json_safe(std::string const& key, T def);
+      T get_json_safe(std::string const& key, T def, std::function<bool(nlohmann::basic_json<>)>);
       template <typename T>
       T get_json_unsafe(std::string const& key);
       template <typename T>

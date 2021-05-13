@@ -85,7 +85,7 @@ namespace noggit
     }
 
     template <typename T>
-    T script_settings::get_json_safe(std::string const& key, T def)
+    T script_settings::get_json_safe(std::string const& key, T def, std::function<bool(nlohmann::basic_json<>)> check)
     {
       // TODO: this is terrible but accessing by reference didn't seem to work.
       auto ssn = _tool->get_context()->get_selected_name();
@@ -96,6 +96,13 @@ namespace noggit
         _json[ssn][prof][key] = def;
         return def;
       }
+
+      auto v = _json[ssn][prof][key];
+      if (!check(v))
+      {
+        _json[ssn][prof][key] = def;
+      }
+
       return _json[ssn][prof][key];
     }
 
@@ -144,8 +151,8 @@ namespace noggit
   _widgets.push_back(label);                                                               \
   _widgets.push_back(spinner);                                                             \
   _widgets.push_back(slider);                                                              \
-  set_json<T>(path, std::min(max, std::max(min, get_json_safe<T>(path, def))));       \
-  auto v = get_json_safe<T>(path, def);                                                    \
+  set_json<T>(path, std::min(max, std::max(min, get_json_safe<T>(path, def, [](auto json){ return json.is_number();}))));       \
+  auto v = get_json_safe<T>(path, def,[](auto json){ return json.is_number(); });                                                    \
   slider->setSliderPosition((int)std::round(v *dp1));                                      \
   spinner->setValue(v);
 
@@ -205,7 +212,7 @@ namespace noggit
       });
       _widgets.push_back(label);
       _widgets.push_back(tline);
-      tline->setText(get_json_safe<std::string>(name, def).c_str());
+      tline->setText(get_json_safe<std::string>(name, def, [](auto json) {return json.is_string(); }).c_str());
       _custom_layout->addRow(label, tline);
     }
 
@@ -222,7 +229,7 @@ namespace noggit
       _widgets.push_back(label);
       _custom_layout->addRow(label, checkbox);
 
-      checkbox->setCheckState(get_json_safe<bool>(name, def) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+      checkbox->setCheckState(get_json_safe<bool>(name, def, [](auto json) { return json.is_boolean(); }) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
 
     void script_settings::add_null()
@@ -252,7 +259,7 @@ namespace noggit
         _custom_layout->addRow(label, box);
 
         // ensure there is at least one valid value in it
-        get_json_safe<std::string>(name, value);
+        get_json_safe<std::string>(name, value, [](auto json) {return json.is_string(); });
       }
       else
       {
@@ -260,7 +267,7 @@ namespace noggit
         box->addItem(value.c_str());
 
         // we found the last selection, so change the index for that.
-        if (get_json_safe<std::string>(name, "") == value)
+        if (get_json_safe<std::string>(name, "", [](auto json) {return json.is_string(); }) == value)
         {
           box->setCurrentIndex(box->count() - 1);
         }
@@ -314,8 +321,8 @@ namespace noggit
 
     void script_settings::initialize()
     {
-      double inner_radius = get_json_safe<double>(INNER_RADIUS_PATH, 0.5);
-      double outer_radius = get_json_safe<double>(OUTER_RADIUS_PATH, 40);
+      double inner_radius = get_json_safe<double>(INNER_RADIUS_PATH, 0.5, [](auto json) {return json.is_number(); });
+      double outer_radius = get_json_safe<double>(OUTER_RADIUS_PATH, 40, [](auto json) {return json.is_number(); });
 
       _radius_spin->setValue(outer_radius);
       _inner_radius_spin->setValue(inner_radius);
