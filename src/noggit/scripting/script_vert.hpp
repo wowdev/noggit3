@@ -23,6 +23,7 @@ namespace noggit
       void add_height(float y);
       void sub_height(float y);
 
+      math::vector_3d get_color();
       void set_color(float r, float g, float b);
       void set_water(int type, float height);
       void set_hole(bool add);

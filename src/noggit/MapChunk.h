@@ -149,6 +149,7 @@ public:
   //! Initialize MCCV to 1,1,1, do nothing if already exists.
   void maybe_create_mccv();
   void UpdateMCCV();
+  bool hasColors();
   math::vector_3d pickMCCV(math::vector_3d const& pos);
 
   ChunkWater* liquid_chunk() const;

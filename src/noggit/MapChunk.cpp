@@ -821,6 +821,11 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
+bool MapChunk::hasColors()
+{
+  return hasMCCV;
+}
+
 void MapChunk::maybe_create_mccv()
 {
   if (!hasMCCV)

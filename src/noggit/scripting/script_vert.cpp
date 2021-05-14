@@ -49,6 +49,18 @@ namespace noggit
       _chunk->mccv[_index] = math::vector_3d(r, g, b);
     }
 
+    math::vector_3d vert::get_color()
+    {
+      if (!_chunk->hasColors())
+      {
+        return math::vector_3d(1, 1, 1);
+      }
+      else
+      {
+        return math::vector_3d(_chunk->mccv[_index]);
+      }
+    }
+
     void vert::set_water(int type, float height)
     {
       if (is_water_aligned())
@@ -224,6 +236,7 @@ namespace noggit
         , "add_height", &vert::add_height
         , "sub_height", &vert::sub_height
         , "set_color", &vert::set_color
+        , "get_color", &vert::get_color
         , "set_water", &vert::set_water
         , "set_hole", &vert::set_hole
         , "set_alpha", &vert::set_alpha
