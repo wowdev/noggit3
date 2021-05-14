@@ -27,6 +27,7 @@ namespace noggit
         _size = width*height*4;
         _width = width;
         _height = height;
+        _image.resize(_width * _height * 4);
     }
 
     image::image(script_context * ctx, std::string const& path)
