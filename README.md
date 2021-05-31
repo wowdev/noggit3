@@ -102,6 +102,19 @@ If the build pass correctly without errors, you can go into build/bin/
 and run noggit. Note that `make install` will probably work but is not
 tested, and nobody has built distributable packages in years.
 
+# Building the Scripting documentation #
+To generate the scripting API documentation, install any new version of Node.js and run: 
+
+```
+npm i -g typedoc typedoc-plugin-markdown
+```
+
+Then, enter the "scripting" directory in this repository and run this command:
+
+```
+typedoc --disableSources --plugin typedoc-plugin-markdown --hideBreadcrumbs --out docs/api global.d.ts && rm docs/api/README.md
+```
+
 # DEVELOPMENT #
 Feel free to ask the owner of the official repository
 (https://github.com/wowdev/noggit3) for write access or
