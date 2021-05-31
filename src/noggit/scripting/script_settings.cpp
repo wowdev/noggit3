@@ -511,6 +511,7 @@ namespace noggit
     void register_settings(script_context * state)
     {
       state->new_usertype<int_tag>("int_tag","get",&int_tag::get);
+      state->new_usertype<bool_tag>("bool_tag", "get", &bool_tag::get);
       state->new_usertype<real_tag>("real_tag","get",&real_tag::get);
       state->new_usertype<string_tag>("string_tag","get",&string_tag::get);
       state->new_usertype<string_list_tag>("string_list_tag","get",&string_list_tag::get);

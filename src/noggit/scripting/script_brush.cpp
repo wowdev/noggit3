@@ -157,7 +157,7 @@ namespace noggit {
         , sol::meta_function::index, &script_brush::get
         ,"get_name",&script_brush::get_name
         ,"add_int_tag",&script_brush::add_int_tag
-        ,"add_bool_tag",&script_brush::add_int_tag
+        ,"add_bool_tag",&script_brush::add_bool_tag
         ,"add_real_tag",&script_brush::add_real_tag
         ,"add_string_tag",&script_brush::add_string_tag
         ,"add_string_list_tag",&script_brush::add_string_list_tag
