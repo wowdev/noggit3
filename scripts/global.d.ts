@@ -461,6 +461,17 @@ declare class image {
     set_pixel(x: number, y: number, value: number): void;
 
     /**
+     * Sets the pixel value at an image coordinate
+     * @param x
+     * @param y
+     * @param r - should be between 0-1
+     * @param g - should be between 0-1
+     * @param b - should be between 0-1
+     * @param a - should be between 0-1
+     */
+    set_pixel_floats(x: number, y: number, r: number, g: number, b: number, a: number): void;
+
+    /**
      * Saves this image to a file
      * @param filename 
      */

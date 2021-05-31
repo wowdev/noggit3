@@ -117,6 +117,15 @@ namespace noggit
       get_image()[index + 3] = (value) & 0xff;
     }
 
+    void image::set_pixel_floats(int x, int y, float r, float g, float b, float a)
+    {
+      unsigned index = get_index(x, y);
+      get_image()[index] = std::max(std::min(int(r * 255),255),0);
+      get_image()[index + 1] = std::max(std::min(int(g * 255),255),0);
+      get_image()[index + 2] = std::max(std::min(int(b * 255),255),0);
+      get_image()[index + 3] = std::max(std::min(int(a * 255),255),0);
+    }
+
     void image::save(std::string const& filename)
     {
       auto writable_path = get_writable_path("image::save", state(), filename);
@@ -156,6 +165,7 @@ namespace noggit
         , "get_pixel", &image::get_pixel
         , "gradient_scale", &image::gradient_scale
         , "set_pixel", &image::set_pixel
+        , "set_pixel_floats", &image::set_pixel_floats
         , "save", &image::save
         , "width", &image::width
         , "height", &image::height
