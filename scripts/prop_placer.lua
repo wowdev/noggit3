@@ -3,6 +3,8 @@ local prop_placer = brush("Prop Placer")
 
 local seed = prop_placer:add_string_tag("Seed","noggit")
 local dist = prop_placer:add_int_tag("Distance",1,50,5)
+local delete_all = prop_placer:add_bool_tag("Delete all models",false)
+local circle_brush = prop_placer:add_bool_tag("Circle brush",false)
 
 function Prop(index)
     local prop = {}
@@ -11,45 +13,6 @@ function Prop(index)
     prop.min_scale = prop_placer:add_real_tag("Prop "..index.." Min Scale",0.001,10,0.7,2)
     prop.max_scale = prop_placer:add_real_tag("Prop "..index.." Max Scale",0.001,10,0.7,2)
 
-    function prop:place(evt)
-        if string.len(self.model_name:get())==0 then
-            return 
-        end
-
-        local sel = select_origin(evt:pos(),evt:outer_radius(),evt:outer_radius())
-
-        local models = sel:models()
-        while models:next() do
-            local model = models:get()
-            if(model:has_filename(self.model_name:get())) then
-                model:remove()
-            end
-        end
-
-        local verts = sel:verts()
-
-        local map = make_noise(
-              sel:min().x-dist:get()
-            , sel:min().z-dist:get()
-            , sel:size().x+2*dist:get()
-            , sel:size().z+2*dist:get()
-            , 10.0
-            , "SIMPLEX"
-            , seed:get()..self.model_name:get()
-        )
-
-        while verts:next() do
-            local vert = verts:get()
-            local loc = vert:get_pos()
-            if map:is_highest(loc,dist:get()) then
-                local rnd = random_from_seed(seed:get().." "..loc.x.." "..loc.z)
-                local size = rnd:real(self.min_scale:get(),self.max_scale:get())
-                local rot = rnd:real(0,360.0)
-                add_m2(self.model_name:get(),loc,size,vec(0,rot,0))
-            end
-        end
-        sel:apply()
-    end
     return prop
 end
 
@@ -60,8 +23,69 @@ local prop2 = Prop(2);
 prop_placer:add_null_tag();
 local prop3 = Prop(3);
 
-function prop_placer:on_left_hold(ctx)
-    prop1:place(ctx)
-    prop2:place(ctx)
-    prop3:place(ctx)
+local props = {prop1,prop2,prop3}
+
+function prop_placer:on_left_hold(evt)
+    local cur_props = {}
+    local count = 0
+    for _,v in pairs(props) do
+        if string.len(v.model_name:get())>0 then
+            table.insert(cur_props,v)
+            count = count + 1
+        end
+    end
+
+    if count == 0 then 
+        print("No models selected")
+        return 
+    end
+
+    local sel = select_origin(evt:pos(),evt:outer_radius(),evt:outer_radius())
+    for _,v in pairs(cur_props) do
+        local models = sel:models()
+        while models:next() do
+            local model = models:get()
+            if(
+                (delete_all:get() or model:has_filename(v))
+                and 
+                ((not circle_brush:get()) 
+                    or dist_2d(
+                          model:get_pos()
+                        , evt:pos()) < evt:outer_radius())
+            ) then
+                model:remove()
+            end
+        end
+    end
+
+    local map = make_noise(
+        sel:min().x-dist:get()
+      , sel:min().z-dist:get()
+      , sel:size().x+2*dist:get()
+      , sel:size().z+2*dist:get()
+      , 1
+      , "SIMPLEX"
+      , seed:get()
+    )
+
+    local verts = sel:verts()
+    while verts:next() do
+        local vert = verts:get()
+        if (not circle_brush:get()) or dist_2d(
+            vert:get_pos(),
+            evt:pos()
+        ) < evt:outer_radius() then
+            local loc = vert:get_pos()
+            if map:is_highest(loc,dist:get()) then
+                local rnd = random_from_seed(seed:get().." "..loc.x.." "..loc.z)
+                local index = rnd:integer(1,count+1)
+                local prop = cur_props[index]
+                local size = rnd:real(prop.min_scale:get(),prop.max_scale:get())
+                local rot = rnd:real(0,360.0)
+                add_m2(prop.model_name:get(),loc,size,vec(0,rot,0))
+            end
+        end
+    end
+
+    sel:apply()
 end
