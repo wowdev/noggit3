@@ -148,6 +148,7 @@ namespace noggit
                                                                                            \
   _custom_layout->addRow(label, spinner);                                                         \
   if(has_slider) _custom_layout->addRow("", slider);                                              \
+  else slider->hide();                                                                     \
   _widgets.push_back(label);                                                               \
   _widgets.push_back(spinner);                                                             \
   _widgets.push_back(slider);                                                              \
