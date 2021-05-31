@@ -54,6 +54,8 @@ namespace math
       return os << v._ << "°";
     }
 
+    explicit operator float() const { return _; }
+
     using vec3 = vector_3d_base<degrees>;
   };
 

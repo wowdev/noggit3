@@ -171,6 +171,10 @@ namespace noggit
 
       layout->addRow("Additional file loading log", _additional_file_loading_log = new QCheckBox(this));
 
+#ifdef NOGGIT_HAS_SCRIPTING
+      layout->addRow("Allow scripts to write to any file",_allow_scripts_write_any_file = new QCheckBox(this));
+#endif
+
       auto warning (new QWidget (this));
       new QHBoxLayout (warning);
       auto icon (new QLabel (warning));
@@ -226,7 +230,9 @@ namespace noggit
       _adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
       _uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
       _additional_file_loading_log->setChecked(_settings->value("additional_file_loading_log", false).toBool());
-
+#ifdef NOGGIT_HAS_SCRIPTING
+      _allow_scripts_write_any_file->setChecked(_settings->value("allow_scripts_write_any_file",false).toBool());
+#endif
 #ifdef USE_MYSQL_UID_STORAGE
       _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
       _mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
@@ -259,6 +265,10 @@ namespace noggit
       _settings->setValue ("unload_interval", _adt_unload_check_interval->value());
       _settings->setValue ("uid_startup_check", _uid_cb->isChecked());
       _settings->setValue ("additional_file_loading_log", _additional_file_loading_log->isChecked());
+
+#ifdef NOGGIT_HAS_SCRIPTING
+      _settings->setValue ("allow_scripts_write_any_file", _allow_scripts_write_any_file->isChecked());
+#endif
 
 #ifdef USE_MYSQL_UID_STORAGE
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());

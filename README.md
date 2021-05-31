@@ -5,12 +5,14 @@ the COPYING file.
 # DISCORD #
 You can follow Noggit's development and get the latest build here: https://discord.gg/UbdFHyM
 
+# SCRIPTING #
+Noggit can be scripted using the Lua (5.1) programming language. See the [scripting documentation](scripts/docs/README.md).
+
 # BUILDING #
 This project requires CMake to be built. It also requires the
 following libraries:
 
 * OpenGL
-* StormLib (by Ladislav Zezula)
 * Boost
 * Qt 5
 
@@ -18,6 +20,13 @@ Further following libraries are required for MySQL GUID Storage builds:
 
 * LibMySQL
 * MySQLCPPConn
+
+The following libraries are automatically installed:
+* StormLib (by Ladislav Zezula)
+* FastNoise2 (scripting only)
+* daScript (scripting only)
+* lodepng (scripting only)
+* nlohmann/json (scripting only)
 
 ## Windows ##
 Text in `<brackets>` below are up to your choice but shall be replaced
@@ -29,7 +38,7 @@ remember which version you chose as later on you will have to pick
 corresponding versions for other dependencies.
 
 ### CMake ###
-Any recent CMake 3.x version should work. Just take the latest.
+Any recent CMake version >= 3.11 should work. Just take the latest.
 
 ### Boost ###
 Install boost to `<boost-install>`. The easiest is to download a pre-built
@@ -46,18 +55,6 @@ https://www.qt.io/download-open-source/#section-2.
 Note that during installation you only need **one** version of Qt and
 also only **one** compiler version. If download size is noticably large
 (more than a few hundred MB), you're probably downloading way too much.
-
-### StormLib ###
-Download StormLib from https://github.com/ladislav-zezula/StormLib (any
-recent version).
-
-* open CMake GUI
-* set `CMAKE_INSTALL_PREFIX` (path) to `<Stormlib-install>` (folder should
-  not yet exist). No other things should need to be configured.
-* open solution with visual studio
-* build ALL_BUILD
-* build INSTALL
-* Repeat for both release and debug.
 
 ### Noggit ###
 * open CMake GUI
@@ -104,6 +101,19 @@ Instead of `make -j $(nproc)` you may want to pick a bigger number than
 If the build pass correctly without errors, you can go into build/bin/
 and run noggit. Note that `make install` will probably work but is not
 tested, and nobody has built distributable packages in years.
+
+# Building the Scripting documentation #
+To generate the scripting API documentation, install any new version of Node.js and run: 
+
+```
+npm i -g typedoc typedoc-plugin-markdown
+```
+
+Then, enter the "scripting" directory in this repository and run this command:
+
+```
+typedoc --disableSources --plugin typedoc-plugin-markdown --hideBreadcrumbs --out docs/api global.d.ts && rm docs/api/README.md
+```
 
 # DEVELOPMENT #
 Feel free to ask the owner of the official repository

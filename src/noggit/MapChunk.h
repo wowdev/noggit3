@@ -52,8 +52,6 @@ private:
   std::vector<StripType> strip_without_holes;
   std::map<int, std::vector<StripType>> strip_lods;
 
-  math::vector_3d mccv[mapbufsize];
-
   std::vector<uint8_t> compressed_shadow_map() const;
   bool shadow_map_is_empty() const;
 
@@ -106,6 +104,7 @@ public:
 
   math::vector_3d mNormals[mapbufsize];
   math::vector_3d mVertices[mapbufsize];
+  math::vector_3d mccv[mapbufsize];
 
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
@@ -147,6 +146,10 @@ public:
 
   void intersect (math::ray const&, selection_result*);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
+  //! Initialize MCCV to 1,1,1, do nothing if already exists.
+  void maybe_create_mccv();
+  void UpdateMCCV();
+  bool hasColors();
   math::vector_3d pickMCCV(math::vector_3d const& pos);
 
   ChunkWater* liquid_chunk() const;
@@ -200,4 +203,6 @@ public:
   bool fixGapLeft(const MapChunk* chunk);
   // fix the gaps with the chunk above
   bool fixGapAbove(const MapChunk* chunk);
+
+  void selectVertex(math::vector_3d const& minPos, math::vector_3d const& maxPos, std::set<math::vector_3d*>& vertices);
 };

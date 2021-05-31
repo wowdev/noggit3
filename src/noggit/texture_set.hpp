@@ -57,6 +57,7 @@ public:
   size_t const& num() const { return nTextures; }
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
+  void setEffect(size_t id, int value);
   bool is_animated(std::size_t id) const;
   void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
@@ -75,6 +76,10 @@ public:
   std::vector<uint8_t> lod_texture_map();
 
   bool apply_alpha_changes();
+  
+  void create_temporary_alphamaps_if_needed();
+  size_t nTextures;
+  boost::optional<tmp_edit_alpha_values> tmp_edit_values;
 private:
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
 
@@ -89,16 +94,11 @@ private:
   std::array<boost::optional<Alphamap>, 3> alphamaps;
   opengl::texture amap_gl_tex;
   bool _need_amap_update = true;
-  size_t nTextures;
 
   std::vector<uint8_t> _lod_texture_map;
   bool _need_lod_texture_map_update = false;
 
   ENTRY_MCLY _layers_info[4];
-
-  boost::optional<tmp_edit_alpha_values> tmp_edit_values;
-
-  void create_temporary_alphamaps_if_needed();
 
   bool _do_not_convert_alphamaps;
 };

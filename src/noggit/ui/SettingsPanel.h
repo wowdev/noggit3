@@ -54,6 +54,10 @@ namespace noggit
 
       QCheckBox* _additional_file_loading_log;
 
+#ifdef NOGGIT_HAS_SCRIPTING
+      QCheckBox* _allow_scripts_write_any_file;
+#endif
+
       QGroupBox* _mysql_box;
 #ifdef USE_MYSQL_UID_STORAGE
       QLineEdit* _mysql_server_field;

@@ -1,0 +1,21 @@
+/** 
+ * This file has a working configuration to write 
+ * script brushes with TypeScriptToLua
+ * (https://github.com/TypeScriptToLua/TypeScriptToLua)
+ */
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./_tsbuild",
+    "forceConsistentCasingInFileNames": true
+  },
+  "tstl": {
+    "luaTarget": "5.1",
+    "luaPlugins": [],
+    "noImplicitSelf": true,
+  }
+}

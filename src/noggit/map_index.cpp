@@ -590,7 +590,7 @@ uint32_t MapIndex::newGUID()
 
   if (settings->value ("project/mysql/enabled", false).toBool())
   {
-    mysql::updateUIDinDB(_map_id, highestGUID + 1); // update the highest uid in db, note that if the user don't save these uid won't be used (not really a problem tho) 
+    mysql::updateUIDinDB(_map_id, highestGUID + 1); // update the highest uid in db, note that if the user don't save these uid won't be used (not really a problem tho)
   }
 #endif
   return ++highestGUID;
