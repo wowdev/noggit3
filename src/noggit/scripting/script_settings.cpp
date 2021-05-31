@@ -232,9 +232,10 @@ namespace noggit
       checkbox->setCheckState(get_json_safe<bool>(name, def, [](auto json) { return json.is_boolean(); }) ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     }
 
-    void script_settings::add_null()
+    void script_settings::add_null(std::string const& text)
     {
       auto label = new QLabel(this);
+      label->setText(text.c_str());
       _widgets.push_back(label);
       _custom_layout->addRow(label);
     }
@@ -400,13 +401,15 @@ namespace noggit
         script_context * ctx
       , std::string const& script
       , std::string const& item
+      , std::string const& text
       )
       : tag(ctx,script,item)
+      , _text(text)
       {}
 
     void null_tag::add_to_settings()
     {
-      _tool->get_settings()->add_null();
+      _tool->get_settings()->add_null(_text);
     }
 
     real_tag::real_tag(script_context * ctx

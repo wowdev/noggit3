@@ -80,7 +80,12 @@ namespace noggit {
 
     void script_brush::add_null_tag()
     {
-      _tags.push_back(std::make_shared<null_tag>(state(),_name,"__null"+std::to_string(_tags.size())));
+      add_description("");
+    }
+
+    void script_brush::add_description(std::string const& text)
+    {
+      _tags.push_back(std::make_shared<null_tag>(state(),_name,"__null"+std::to_string(_tags.size()),text));
     }
 
     std::shared_ptr<real_tag> script_brush::add_real_tag(
@@ -157,6 +162,7 @@ namespace noggit {
         ,"add_string_tag",&script_brush::add_string_tag
         ,"add_string_list_tag",&script_brush::add_string_list_tag
         ,"add_null_tag",&script_brush::add_null_tag
+        ,"add_description",&script_brush::add_description
         );
     }
   }

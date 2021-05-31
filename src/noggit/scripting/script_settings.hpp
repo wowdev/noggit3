@@ -37,9 +37,10 @@ namespace noggit {
                   );
 
       void add_bool( std::string const& name, bool def = false);
-      void add_null();
+      void add_null( std::string const& text = "");
       void add_string(std::string const& name, std::string const& def = "");
       void add_string_list(std::string const& name, std::string const& value);
+      void add_description(std::string const& description);
 
       double get_double(std::string const& name);
       int get_int(std::string const& name);
@@ -163,8 +164,11 @@ namespace noggit {
       null_tag(script_context* ctx
         , std::string const& script
         , std::string const& item
+        , std::string const& text = ""
       );
       virtual void add_to_settings() override;
+    private:
+      std::string _text;
     };
 
     class string_tag : public tag {

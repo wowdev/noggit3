@@ -85,6 +85,7 @@ namespace noggit {
       );
 
       void add_null_tag();
+      void add_description(std::string const& text);
 
       LUA_MEMBER_FUNC(
         script_brush,std::shared_ptr<script_brush_event>,on_left_click);

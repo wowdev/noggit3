@@ -94,6 +94,12 @@ declare class script_brush {
     add_null_tag();
 
     /**
+     * Adds a description row to the brush window
+     * @param text 
+     */
+    add_description(text: string);
+
+    /**
      * Adds an integer tag to the settings panel
      * @param item 
      * @param low 
