@@ -623,6 +623,11 @@ unsigned int TextureSet::flag(size_t id)
   return _layers_info[id].flags;
 }
 
+void TextureSet::setEffect(size_t id, int value)
+{
+  _layers_info[id].effectID = value;
+}
+
 unsigned int TextureSet::effect(size_t id)
 {
   return _layers_info[id].effectID;

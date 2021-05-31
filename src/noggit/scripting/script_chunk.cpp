@@ -24,10 +24,27 @@ namespace noggit
       _chunk->setHole(math::vector_3d(0, 0, 0), true, hole);
     }
 
-    int chunk::add_texture(std::string const& texture)
+    int chunk::add_texture(std::string const& texture, int effectID)
     {
       std::string tex = std::string(texture);
-      return _chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
+      int tex_index = _chunk->texture_set->addTexture(scoped_blp_texture_reference(tex));
+      if (effectID >= -1)
+      {
+        set_effect(tex_index, effectID);
+        _chunk->texture_set->setEffect(tex_index, effectID);
+      }
+      return tex_index;
+    }
+
+    int chunk::get_effect(int index)
+    {
+      return _chunk->texture_set->effect(index);
+    }
+
+    void chunk::set_effect(int index, int value)
+    {
+      _chunk->texture_set->setEffect(index, value);
+      _chunk->texture_set->lod_texture_map();
     }
 
     void chunk::clear_textures()
@@ -46,6 +63,11 @@ namespace noggit
       _chunk->texture_set->eraseTexture(index);
     }
 
+    int chunk::get_texture_count()
+    {
+      return _chunk->texture_set->nTextures;
+    }
+
     std::string chunk::get_texture(int index)
     {
       if(index<0||index>3)
@@ -54,6 +76,15 @@ namespace noggit
           "chunk_get_texture",
           "invalid texture index, must be between 0-3");
       }
+
+      if (_chunk->texture_set->nTextures <= index)
+      {
+        throw script_exception(
+          "chunk_get_texture",
+          "texture index out of range"
+        );
+      }
+
       return _chunk->texture_set->texture(index)->filename;
     }
 
@@ -138,7 +169,10 @@ namespace noggit
     {
       state->new_usertype<chunk>("chunk"
         , "remove_texture", &chunk::remove_texture
+        , "get_texture_count", &chunk::get_texture_count
         , "get_texture", &chunk::get_texture
+        , "get_effect", &chunk::get_effect
+        , "set_effect", &chunk::set_effect
         , "add_texture", &chunk::add_texture
         , "clear_textures", &chunk::clear_textures
         , "set_hole", &chunk::set_hole

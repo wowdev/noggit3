@@ -57,6 +57,7 @@ public:
   size_t const& num() const { return nTextures; }
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
+  void setEffect(size_t id, int value);
   bool is_animated(std::size_t id) const;
   void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 

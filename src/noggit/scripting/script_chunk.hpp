@@ -17,7 +17,10 @@ namespace noggit
       chunk(script_context * ctx, MapChunk* chunk);
       void remove_texture(int index);
       std::string get_texture(int index);
-      int add_texture(std::string const& texture);
+      int get_effect(int index);
+      void set_effect(int index, int effectID);
+      int add_texture(std::string const& texture, int effectID = -2);
+      int get_texture_count();
       void clear_textures();
       void set_hole(bool hole);
       void clear_colors();
