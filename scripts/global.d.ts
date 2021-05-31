@@ -39,6 +39,18 @@ declare class vector_3d {
  */
 declare class script_brush_event {
     /**
+     * Sets the outer radius in the settings panel for this brush
+     * @param value 
+     */
+    set_outer_radius(value: number);
+
+    /**
+     * Sets the outer radius in the settings panel for this brush
+     * @param value - should be between 0-1
+     */
+    set_inner_radius(value: number);
+
+    /**
      * Returns the current outer radius configured in the settings panel
      */
     outer_radius(): number;
@@ -185,9 +197,27 @@ declare class chunk {
      * Adds a new texture at the current topmost layer.
      * 
      * @param texture 
+     * @param effect - effect id to add
+     * -                -2 (default): does not change effect
+     * -                -1: clears current effect index
+     * -                0+: change to this effect index
      * @note A chunk can hold at most 4 texture layers.
+     * @return texture index added to
      */
-    add_texture(texture: string): number;
+    add_texture(texture: string, effect: number): number;
+
+    /**
+     * Changes the effect id at a texture layer
+     * @param layer 
+     * @param effect - effect id to set (-1 to remove effects)
+     */
+    set_effect(layer: number, effect: number)
+
+    /**
+     * Returns the effect id at a texture layer
+     * @param layer 
+     */
+    get_effect(layer: number): number
 
     /**
      * Removes all texture layers in this chunk
