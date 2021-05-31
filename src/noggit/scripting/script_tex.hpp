@@ -4,6 +4,7 @@
 #include <noggit/scripting/script_object.hpp>
 
 #include <math/vector_3d.hpp>
+#include <noggit/scripting/script_image.hpp>
 
 class MapChunk;
 
@@ -35,12 +36,14 @@ namespace noggit {
         bool next();
         tex get();
 
+        void paint_image(image & img, int layer, float pressure, float angle);
+
       private:
         int _tex_iter = -1;
         std::shared_ptr<std::vector<MapChunk*>> _chunks;
         std::vector<MapChunk*>::iterator _chunk_iter;
-        //math::vector_3d const& _min;
-        //math::vector_3d const& _max;
+        math::vector_3d const& _min;
+        math::vector_3d const& _max;
     };
 
     void register_tex(script_context * state);

@@ -3,6 +3,8 @@
 #include <noggit/MapChunk.h>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_math.hpp>
+#include <noggit/scripting/script_image.hpp>
 
 #include <sol/sol.hpp>
 
@@ -53,14 +55,48 @@ namespace noggit {
     tex_iterator::tex_iterator(
         script_context * ctx
       , std::shared_ptr<std::vector<MapChunk*>> chunks
-      , math::vector_3d const&
-      , math::vector_3d const& )
+      , math::vector_3d const& min
+      , math::vector_3d const& max)
       : script_object(ctx)
       , _chunks(chunks)
       , _chunk_iter(_chunks->begin())
-      //, _min(min)
-      //, _max(max)
+      , _min(min)
+      , _max(max)
       {}
+
+    void tex_iterator::paint_image(image & img, int layer, float pressure, float angle)
+    {
+      tex_iterator cpy(state(), _chunks, _min, _max);
+      auto center = math::vector_3d(_min.x + (_max.x-_min.x)/2,0,_min.z + (_max.z-_min.z)/2);
+      auto outer_radius = (_max.x - _min.x) / 2;
+
+      int width = img.width();
+      int height = img.height();
+
+      float half_width = float(width) / 2;
+      float half_height = float(height) / 2;
+
+      while(cpy.next())
+      {
+        auto tex = cpy.get();
+        auto global_pos = tex.get_pos_2d();
+        auto dist = dist_2d(global_pos, center) / outer_radius;
+        global_pos = rotate_2d(global_pos,center,angle);
+
+        auto rel_x = (global_pos.x - center.x) / outer_radius;
+        auto rel_z = (global_pos.z - center.z) / outer_radius;
+
+        if(!(rel_x < -1 || rel_x > 1 || rel_z < -1 || rel_z > 1)) 
+        {
+            auto img_x = round(half_width + half_width * rel_x);
+            auto img_z = round(half_height + half_height * rel_z);
+            if(img_x>=0 && img_x<width && img_z>=0 && img_z<height) {
+                auto old = tex.get_alpha(layer);
+                tex.set_alpha(layer, old + (img.get_red(img_x, img_z) * pressure * (1 - dist)));
+            }
+        }
+      }
+    }
 
     bool tex_iterator::next()
     {
@@ -102,6 +138,7 @@ namespace noggit {
       state->new_usertype<tex_iterator>("tex_iterator"
         , "next", &tex_iterator::next
         , "get", &tex_iterator::get
+        , "paint_image", &tex_iterator::paint_image
       );
     }
   }
