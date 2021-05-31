@@ -1,9 +1,5 @@
 # 
 
-This is the documentation for the Noggit scripting API.
-Functions not connected to a class are global and can be called from
-anywhere in a script.
-
 ## Table of contents
 
 ### Classes
@@ -29,6 +25,7 @@ anywhere in a script.
 
 - [brush\_callback](modules.md#brush_callback)
 - [callback](modules.md#callback)
+- [nil](modules.md#nil)
 
 ### Functions
 
@@ -100,7 +97,7 @@ ___
 
 ### callback
 
-Ƭ **callback**<T\>: T \| *undefined*
+Ƭ **callback**<T\>: T \| [*nil*](modules.md#nil)
 
 Callback functions are unassigned by default, but may be assigned to
 by the user
@@ -110,6 +107,16 @@ by the user
 Name |
 :------ |
 `T` |
+
+___
+
+### nil
+
+Ƭ **nil**: *undefined*
+
+This is the documentation for the Noggit scripting API.
+Functions not connected to a class are global and can be called from
+anywhere in a script.
 
 ## Functions
 

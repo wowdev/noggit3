@@ -21,6 +21,7 @@ images can be created from create_image or load_png
 - [height](image.md#height)
 - [save](image.md#save)
 - [set\_pixel](image.md#set_pixel)
+- [set\_pixel\_floats](image.md#set_pixel_floats)
 - [width](image.md#width)
 
 ## Constructors
@@ -173,6 +174,27 @@ Name | Type |
 `x` | *number* |
 `y` | *number* |
 `value` | *number* |
+
+**Returns:** *void*
+
+___
+
+### set\_pixel\_floats
+
+▸ **set_pixel_floats**(`x`: *number*, `y`: *number*, `r`: *number*, `g`: *number*, `b`: *number*, `a`: *number*): *void*
+
+Sets the pixel value at an image coordinate
+
+#### Parameters:
+
+Name | Type | Description |
+:------ | :------ | :------ |
+`x` | *number* |  |
+`y` | *number* |  |
+`r` | *number* | should be between 0-1   |
+`g` | *number* | should be between 0-1   |
+`b` | *number* | should be between 0-1   |
+`a` | *number* | should be between 0-1    |
 
 **Returns:** *void*
 

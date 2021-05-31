@@ -19,6 +19,8 @@ Represents a script brush in the script window.
 
 ### Methods
 
+- [add\_bool\_tag](script_brush.md#add_bool_tag)
+- [add\_description](script_brush.md#add_description)
 - [add\_int\_tag](script_brush.md#add_int_tag)
 - [add\_null\_tag](script_brush.md#add_null_tag)
 - [add\_real\_tag](script_brush.md#add_real_tag)
@@ -90,6 +92,39 @@ The function to call when the user releases the right mouse button
 in the world with this brush
 
 ## Methods
+
+### add\_bool\_tag
+
+▸ **add_bool_tag**(`item`: *string*, `def`: *boolean*): [*tag*](tag.md)<boolean\>
+
+Adds a bool tag to the settings panel
+
+#### Parameters:
+
+Name | Type |
+:------ | :------ |
+`item` | *string* |
+`def` | *boolean* |
+
+**Returns:** [*tag*](tag.md)<boolean\>
+
+___
+
+### add\_description
+
+▸ **add_description**(`text`: *string*): *any*
+
+Adds a description row to the brush window
+
+#### Parameters:
+
+Name | Type |
+:------ | :------ |
+`text` | *string* |
+
+**Returns:** *any*
+
+___
 
 ### add\_int\_tag
 
