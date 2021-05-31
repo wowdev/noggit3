@@ -200,6 +200,11 @@ declare class chunk {
     get_texture(index: number): string;
 
     /**
+     * Returns the amount of textures on this chunk
+     */
+    get_texture_count(): number
+
+    /**
      * Adds a new texture at the current topmost layer.
      * 
      * @param texture 
