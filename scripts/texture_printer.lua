@@ -1,6 +1,8 @@
 local texture_printer = brush("Texture Printer");
 
-texture_printer:add_description("<b>Description</b>: Prints out texture paths and effect ids in the clicked chunk")
+texture_printer:add_description("<b>Description</b>:")
+texture_printer:add_description("Prints out texture paths and effect ids ")
+texture_printer:add_description("in the clicked chunk.")
 texture_printer:add_null_tag()
 
 function texture_printer:on_left_click(evt)
