@@ -213,9 +213,8 @@ namespace noggit
       bool new_right = get_view()->rightMouse;
 
       auto evt = std::make_shared<script_brush_event>(
-          pos
-        , get_settings()->brushRadius()
-        , get_settings()->innerRadius()
+          get_settings()
+        , pos
         , dt
       );
 

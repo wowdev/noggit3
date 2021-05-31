@@ -274,6 +274,20 @@ namespace noggit
       }
     }
 
+    void script_settings::setOuterRadius(float outerRadius)
+    {
+      _radius_spin->setValue(outerRadius);
+      _radius_slider->setSliderPosition(outerRadius);
+      set_json (OUTER_RADIUS_PATH, outerRadius);
+    }
+
+    void script_settings::setInnerRadius(float innerRadius)
+    {
+      _inner_radius_spin->setValue(innerRadius);
+      _inner_radius_slider->setSliderPosition(innerRadius*100);
+      set_json (INNER_RADIUS_PATH, innerRadius);
+    }
+
     void script_settings::clear()
     {
       for (auto &widget : _widgets)
@@ -376,7 +390,7 @@ namespace noggit
       return _tool->get_settings()->get_setting<int>(
         _script,_tool->get_profiles()->get_cur_profile(),_item,_def);
     }
-
+    
     void int_tag::add_to_settings()
     {
       _tool->get_settings()->add_int(_item, _min,_max,_def);

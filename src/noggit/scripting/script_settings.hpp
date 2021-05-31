@@ -50,6 +50,9 @@ namespace noggit {
       float brushRadius() const { return _radius; }
       float innerRadius() const { return _inner_radius; }
 
+      void setOuterRadius(float outerRadius);
+      void setInnerRadius(float innerRadius);
+
       void clear();
 
       void save_json();
@@ -128,6 +131,7 @@ namespace noggit {
                , bool has_slider
                );
         int get();
+        void set(int value);
         virtual void add_to_settings() override;
 
       private:

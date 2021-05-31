@@ -11,13 +11,11 @@
 namespace noggit {
   namespace scripting {
       script_brush_event::script_brush_event(
-        math::vector_3d const& pos
-        , float outer_radius
-        , float inner_radius
+          script_settings * settings
+        , math::vector_3d const& pos
         , float dt)
-        : _pos(pos)
-        , _outer_radius(outer_radius)
-        , _inner_radius(inner_radius)
+        : _settings(settings)
+        , _pos(pos)
         , _dt(dt)
         {}
 
@@ -28,12 +26,22 @@ namespace noggit {
 
     float script_brush_event::outer_radius()
     {
-      return _outer_radius;
+      return _settings->brushRadius();
     }
 
     float script_brush_event::inner_radius()
     {
-      return _inner_radius;
+      return _settings->innerRadius();
+    }
+
+    void script_brush_event::set_outer_radius(float radius)
+    {
+      _settings->setOuterRadius(radius);
+    }
+
+    void script_brush_event::set_inner_radius(float radius)
+    {
+      _settings->setInnerRadius(radius);
     }
 
     float script_brush_event::dt()
@@ -132,6 +140,8 @@ namespace noggit {
     {
       state->new_usertype<script_brush_event>("script_brush_event"
         ,"pos",&script_brush_event::pos
+        ,"set_outer_radius",&script_brush_event::set_outer_radius
+        ,"set_inner_radius",&script_brush_event::set_inner_radius
         ,"outer_radius",&script_brush_event::outer_radius
         ,"inner_radius",&script_brush_event::inner_radius
         ,"dt",&script_brush_event::dt

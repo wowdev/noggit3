@@ -31,18 +31,20 @@ namespace noggit {
     class script_brush_event
     {
     public:
-      script_brush_event(math::vector_3d const& pos
-                        , float outer_radius
-                        , float inner_radius
+      script_brush_event( script_settings * settings
+                        , math::vector_3d const& pos
                         , float dt);
       math::vector_3d pos();
       float outer_radius();
       float inner_radius();
+
+      void set_outer_radius(float radius);
+      void set_inner_radius(float radius);
+
       float dt();
     private:
+      script_settings * _settings;
       math::vector_3d _pos;
-      float _outer_radius;
-      float _inner_radius;
       float _dt;
     };
 
