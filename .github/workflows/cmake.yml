@@ -75,7 +75,7 @@ jobs:
       with:
         name: ${{ matrix.platform }}-${{ matrix.compiler }}-appimage
         path: Noggit_3-${{ github.sha }}-x86_64.AppImage
-      if: ${{ matrix.platform == 'ubuntu-18.04' && matrix.compiler == 'g++9' }}
+      if: ${{ matrix.platform == 'ubuntu-18.04' }}
 
     - run: |
         mkdir dependencies/
@@ -84,7 +84,7 @@ jobs:
       shell: bash
     - run: |
         mkdir dependencies/plugins/
-        cp -av "${{ env.QT_PLUGIN_PATH }}/" dependencies/plugins/
+        cp -av "${{ env.QT_PLUGIN_PATH }}/" dependencies/
       if: ${{ matrix.platform == 'windows-2019' }}
       shell: bash
 
