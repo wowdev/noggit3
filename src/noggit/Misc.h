@@ -134,10 +134,23 @@ public:
     data.insert (data.begin() + pPosition, pAdditionalData, pAdditionalData + pAddition);
 	}
 
+  template<typename T>
+    struct LazyPointer
+  {
+    std::vector<char>& _data;
+    std::size_t _position;
+    LazyPointer (std::vector<char>& data, std::size_t position);
+    T* get() const;
+    T& operator*() const;
+    T* operator->() const;
+    T& operator[] (std::size_t) const;
+    LazyPointer<T>& operator+= (std::size_t);
+  };
+
 	template<typename To>
-	To * GetPointer(unsigned long pPosition = 0)
+	LazyPointer<To> GetPointer(unsigned long pPosition = 0)
 	{
-		return(reinterpret_cast<To*>(data.data() + pPosition));
+    return {data, pPosition};
 	}
 
   sExtendableArray() = default;
@@ -156,3 +169,35 @@ void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSi
 
 bool pointInside(math::vector_3d point, math::vector_3d extents[2]);
 void minmax(math::vector_3d* a, math::vector_3d* b);
+
+template<typename T>
+  sExtendableArray::LazyPointer<T>::LazyPointer (std::vector<char>& data, std::size_t position)
+  : _data (data)
+  , _position (position)
+{}
+template<typename T>
+  T* sExtendableArray::LazyPointer<T>::get() const
+{
+  return reinterpret_cast<T*> (_data.data() + _position);
+}
+template<typename T>
+  T& sExtendableArray::LazyPointer<T>::operator*() const
+{
+  return *get();
+}
+template<typename T>
+  T* sExtendableArray::LazyPointer<T>::operator->() const
+{
+  return get();
+}
+template<typename T>
+T& sExtendableArray::LazyPointer<T>::operator[] (std::size_t i) const
+{
+  return *(get() + i);
+}
+template<typename T>
+sExtendableArray::LazyPointer<T>& sExtendableArray::LazyPointer<T>::operator+= (std::size_t num)
+{
+  _position += num * sizeof (T);
+  return *this;
+}
