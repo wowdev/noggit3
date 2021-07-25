@@ -910,14 +910,11 @@ void MapTile::saveTile(World* world)
   }
 #endif
 
-  // \todo This sounds wrong. Not that it is named allocate, but that
-  // the fact that there *are* unused nulls.
-  lADTFile.Allocate(lCurrentPosition); // cleaning unused nulls at the end of file
-
-
   {
     MPQFile f(filename);
-    f.setBuffer(lADTFile.all_data());
+    // \todo This sounds wrong. There shouldn't *be* unused nulls to
+    // begin with.
+    f.setBuffer(lADTFile.data_up_to (lCurrentPosition)); // cleaning unused nulls at the end of file
     f.SaveFile();
   }
 

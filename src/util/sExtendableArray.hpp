@@ -12,8 +12,6 @@ namespace util
     std::vector<char> data;
 
   public:
-    void Allocate (unsigned long pSize);
-
     //! Equivalent to `Allocate ($size + pAddition)`.
     void Extend (long pAddition);
 
@@ -44,6 +42,7 @@ namespace util
       LazyPointer<To> GetPointer(unsigned long pPosition = 0);
 
     std::vector<char> all_data() const;
+    std::vector<char> data_up_to (std::size_t position) const;
 
     sExtendableArray() = default;
     sExtendableArray(unsigned long pSize, const char *pData);

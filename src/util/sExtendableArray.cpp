@@ -4,11 +4,6 @@
 
 namespace util
 {
-  void sExtendableArray::Allocate (unsigned long pSize)
-  {
-    data.resize (pSize);
-  }
-
   void sExtendableArray::Extend (long pAddition)
   {
     data.resize (data.size() + pAddition);
@@ -27,7 +22,11 @@ namespace util
 
   std::vector<char> sExtendableArray::all_data() const
   {
-    return data;
+    return data_up_to (data.size());
+  }
+  std::vector<char> sExtendableArray::data_up_to (std::size_t position) const
+  {
+    return std::vector<char> (data.begin(), data.begin() + position);
   }
 
   sExtendableArray::sExtendableArray(unsigned long pSize, const char *pData)
