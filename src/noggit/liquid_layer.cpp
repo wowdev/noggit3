@@ -237,7 +237,7 @@ liquid_layer& liquid_layer::operator=(liquid_layer const& other)
   return *this;
 }
 
-void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const
+void liquid_layer::save(util::sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const
 {
   int min_x = 9, min_z = 9, max_x = 0, max_z = 0;
   bool filled = true;

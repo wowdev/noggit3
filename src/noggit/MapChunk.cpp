@@ -1134,7 +1134,7 @@ void MapChunk::setFlag(bool changeto, uint32_t flag)
   }
 }
 
-void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
+void MapChunk::save(util::sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
 {
   int lID;
   int lMCNK_Size = 0x80;

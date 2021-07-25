@@ -97,7 +97,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 }
 
 
-void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
+void ChunkWater::save(util::sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
 {
   MH2O_Header header;
 

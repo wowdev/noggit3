@@ -14,6 +14,7 @@
 #include <noggit/texture_set.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <QtCore/QSettings>
 
@@ -645,7 +646,7 @@ void MapTile::saveTile(World* world)
     texture.second = lID++;
 
   // Now write the file.
-  sExtendableArray lADTFile;
+  util::sExtendableArray lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -909,12 +910,14 @@ void MapTile::saveTile(World* world)
   }
 #endif
 
-  lADTFile.Extend(lCurrentPosition - lADTFile.data.size()); // cleaning unused nulls at the end of file
+  // \todo This sounds wrong. Not that it is named allocate, but that
+  // the fact that there *are* unused nulls.
+  lADTFile.Allocate(lCurrentPosition); // cleaning unused nulls at the end of file
 
 
   {
     MPQFile f(filename);
-    f.setBuffer(lADTFile.data);
+    f.setBuffer(lADTFile.all_data());
     f.SaveFile();
   }
 

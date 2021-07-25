@@ -7,11 +7,11 @@
 #include <noggit/MPQ.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <memory>
 
 class MapTile;
-class sExtendableArray;
 
 class TileWater
 {
@@ -21,7 +21,7 @@ public:
   ChunkWater* getChunk(int x, int z);
 
   void readFromFile(MPQFile &theFile, size_t basePos);
-  void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
+  void saveToFile(util::sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 
   void draw ( math::frustum const& frustum
             , const float& cull_distance

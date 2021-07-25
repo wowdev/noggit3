@@ -77,7 +77,7 @@ void TileWater::autoGen(float factor)
   }
 }
 
-void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
+void TileWater::saveToFile(util::sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
 {
   if (!hasData(0))
   {

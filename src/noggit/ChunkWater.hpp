@@ -7,12 +7,12 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <vector>
 #include <set>
 
 class MPQFile;
-class sExtendableArray;
 class MapChunk;
 
 class ChunkWater
@@ -28,7 +28,7 @@ public:
 
   void from_mclq(std::vector<mclq>& layers);
   void fromFile(MPQFile &f, size_t basePos);
-  void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
+  void save(util::sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
   void draw ( math::frustum const& frustum
             , const float& cull_distance

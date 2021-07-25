@@ -3,17 +3,18 @@
 #pragma once
 
 #include <math/quaternion.hpp> // math::vector_4d
-#include <noggit/map_enums.hpp>
 #include <noggit/MapTile.h> // MapTile
+#include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h>
 #include <noggit/WMOInstance.h>
+#include <noggit/map_enums.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
-#include <noggit/Misc.h>
+#include <util/sExtendableArray.hpp>
 
 #include <map>
 #include <memory>
@@ -26,7 +27,6 @@ namespace math
 }
 class Brush;
 class ChunkWater;
-class sExtendableArray;
 
 using StripType = uint16_t;
 static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
@@ -194,7 +194,7 @@ public:
   void clearHeight();
 
   //! \todo this is ugly create a build struct or sth
-  void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances);
+  void save(util::sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances);
 
   // fix the gaps with the chunk to the left
   bool fixGapLeft(const MapChunk* chunk);

@@ -6,10 +6,9 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/liquid_render.hpp>
 #include <opengl/scoped.hpp>
+#include <util/sExtendableArray.hpp>
 
 class MapChunk;
-class sExtendableArray;
-
 
 // handle liquids like oceans, lakes, rivers, slime, magma
 class liquid_layer
@@ -26,7 +25,7 @@ public:
   liquid_layer& operator=(liquid_layer&&);
   liquid_layer& operator=(liquid_layer const& other);
 
-  void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
+  void save(util::sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
 
   void draw ( liquid_render& render
             , opengl::scoped::use_program& water_shader
