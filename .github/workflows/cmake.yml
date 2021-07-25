@@ -74,7 +74,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.platform }}-${{ matrix.compiler }}-appimage
-        path: Noggit_3-${{ github.sha }}-x86_64.AppImage
+        path: Noggit*.AppImage
       if: ${{ matrix.platform == 'ubuntu-18.04' }}
 
     - run: |
