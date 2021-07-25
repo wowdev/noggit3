@@ -69,29 +69,29 @@ namespace math
     {
       math::degrees::vec3 retVal;
 
-      double sqw = w * w;
-      double sqx = x * x;
-      double sqy = y * y;
-      double sqz = z * z;
-      double unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
-      double test = x * y + z * w;
-      if (test > 0.499 * unit) // singularity at north pole
+      float sqw = w * w;
+      float sqx = x * x;
+      float sqy = y * y;
+      float sqz = z * z;
+      float unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+      float test = x * y + z * w;
+      if (test > 0.499f * unit) // singularity at north pole
       {
         retVal.y = -math::degrees(math::radians(2.0f * std::atan2(x, w)));
-        retVal.x = math::degrees(math::radians(math::constants::pi / 2));
+        retVal.x = math::degrees(math::radians(math::constants::pi / 2.f));
         retVal.z = 0_deg;
       }
-      else if (test < -0.499 * unit) // singularity at south pole
+      else if (test < -0.499f * unit) // singularity at south pole
       {
         retVal.y = -math::degrees(math::radians(-2.0f * std::atan2(x, w)));
-        retVal.x = -math::degrees(math::radians(math::constants::pi / 2));
+        retVal.x = -math::degrees(math::radians(math::constants::pi / 2.f));
         retVal.z = 0_deg;
       }
       else
       {
-        retVal.y = -math::degrees(math::radians(std::atan2(2 * y * w - 2 * x * z, sqx - sqy - sqz + sqw)));
-        retVal.x = math::degrees(math::radians(std::asin(2 * test / unit)));
-        retVal.z = math::degrees(math::radians(std::atan2(2 * x * w - 2 * y * z, -sqx + sqy - sqz + sqw)));
+        retVal.y = -math::degrees(math::radians(std::atan2(2.f * y * w - 2.f * x * z, sqx - sqy - sqz + sqw)));
+        retVal.x = math::degrees(math::radians(std::asin(2.f * test / unit)));
+        retVal.z = math::degrees(math::radians(std::atan2(2.f * x * w - 2.f * y * z, -sqx + sqy - sqz + sqw)));
       }
 
       return retVal;
