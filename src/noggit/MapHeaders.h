@@ -203,7 +203,7 @@ struct MH2O_Information{
 
 struct mh2o_uv
 {
-  mh2o_uv(std::uint16_t x = 0, std::uint16_t y = 0) : x(x), y(y) {}
+  mh2o_uv(std::uint16_t x_ = 0, std::uint16_t y_ = 0) : x(x_), y(y_) {}
 
   std::uint16_t x;
   std::uint16_t y;

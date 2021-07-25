@@ -113,17 +113,12 @@ namespace noggit
 #endif
       else
       {
-        auto uidFixWindow(new uid_fix_window(pos, camera_pitch, camera_yaw));
+        auto uidFixWindow(new uid_fix_window());
         uidFixWindow->show();
 
         connect( uidFixWindow
                , &noggit::ui::uid_fix_window::fix_uid
-               , [this, from_bookmark] 
-                   ( math::vector_3d pos
-                   , math::degrees camera_pitch
-                   , math::degrees camera_yaw
-                   , uid_fix_mode uid_fix
-                   )
+               , [this, pos, camera_pitch, camera_yaw, from_bookmark] (uid_fix_mode uid_fix)
                  {
                    enterMapAt(pos, camera_pitch, camera_yaw, uid_fix, from_bookmark);
                  }

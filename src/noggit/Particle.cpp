@@ -322,7 +322,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
     //vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
   }
 
-  auto add_quad_indices([] (std::vector<std::uint16_t>& indices, std::uint16_t& start)
+  auto add_quad_indices([&indices] (std::uint16_t& start)
   {
     indices.push_back(start + 0);
     indices.push_back(start + 1);
@@ -379,7 +379,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
         offsets.push_back(-(vRight - vUp) * size);
         colors_data.push_back(it->color);
 
-        add_quad_indices(indices, indice);
+        add_quad_indices(indice);
       }
     }
     else 
@@ -407,7 +407,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
         vertices.push_back(it->pos + it->corners[3] * it->size);
         colors_data.push_back(it->color);
 
-        add_quad_indices(indices, indice);
+        add_quad_indices(indice);
       }
     }
   }  
@@ -446,7 +446,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
       vertices.push_back(it->origin + bv0 * it->size);
       colors_data.push_back(it->color);
 
-      add_quad_indices(indices, indice);
+      add_quad_indices(indice);
     }
   }
 
@@ -892,7 +892,7 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
   shader.uniform("color", tcolor);
 
   std::uint16_t indice = 0;
-  auto add_quad_indices([] (std::vector<std::uint16_t>& indices, std::uint16_t& start)
+  auto add_quad_indices([&indices] (std::uint16_t& start)
   {
     indices.push_back(start + 0);
     indices.push_back(start + 1);
@@ -918,7 +918,7 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
 
     l += it->len;
 
-    add_quad_indices(indices, indice);
+    add_quad_indices(indice);
   }
 
   if (segs.size() > 1) 

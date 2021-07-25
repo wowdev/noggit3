@@ -7,15 +7,11 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 
-
 namespace noggit
 {
   namespace ui
   {
-    uid_fix_window::uid_fix_window ( math::vector_3d pos
-                                   , math::degrees camera_pitch
-                                   , math::degrees camera_yaw
-                                   )
+    uid_fix_window::uid_fix_window()
       : QDialog (nullptr)
     {
       setWindowIcon (QIcon (":/icon"));
@@ -70,7 +66,7 @@ namespace noggit
               , [=]
                 {
                   hide();
-                  emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid);
+                  emit fix_uid(uid_fix_mode::max_uid);
                   deleteLater();
                 }
               );
@@ -79,7 +75,7 @@ namespace noggit
               , [=]
                 {
                   hide();
-                  emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::fix_all_fail_on_model_loading_error);
+                  emit fix_uid(uid_fix_mode::fix_all_fail_on_model_loading_error);
                   deleteLater();
                 }
               );
@@ -88,7 +84,7 @@ namespace noggit
               , [=]
                 {
                   hide();
-                  emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::fix_all_fuckporting_edition);
+                  emit fix_uid(uid_fix_mode::fix_all_fuckporting_edition);
                   deleteLater();
                 }
               );

@@ -2,14 +2,7 @@
 
 #pragma once
 
-#include <math/vector_3d.hpp>
-#include <math/trig.hpp>
-
 #include <QtWidgets/QDialog>
-
-#include <functional>
-
-class World;
 
 enum class uid_fix_mode
 {
@@ -28,14 +21,10 @@ namespace noggit
     Q_OBJECT
 
     public:
-      uid_fix_window (math::vector_3d pos, math::degrees camera_pitch, math::degrees camera_yaw);
+      uid_fix_window();
 
     signals:
-      void fix_uid  ( math::vector_3d pos
-                    , math::degrees camera_pitch
-                    , math::degrees camera_yaw
-                    , uid_fix_mode uid_fix
-                    );
+      void fix_uid (uid_fix_mode uid_fix);
     };
   }
 }

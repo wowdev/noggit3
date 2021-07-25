@@ -18,20 +18,20 @@ namespace math
       : quaternion (0.f, 0.f, 0.f, 1.0f)
     {}
 
-    quaternion ( const float& x
-               , const float& y
-               , const float& z
-               , const float& w
+    quaternion ( const float& x_
+               , const float& y_
+               , const float& z_
+               , const float& w_
                )
-      : vector_4d(x, y, z, w)
+      : vector_4d(x_, y_, z_, w_)
     { }
 
     explicit quaternion (const vector_4d& v)
       : vector_4d(v)
     { }
 
-    quaternion (const vector_3d& v, const float w)
-      : vector_4d(v, w)
+    quaternion (const vector_3d& v, const float w_)
+      : vector_4d(v, w_)
     { }
 
     // heading = rotation around y

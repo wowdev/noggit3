@@ -8,13 +8,13 @@ namespace util
   namespace
   {
     std::string exception_to_string_impl
-      (std::exception_ptr const& e, std::size_t indentation, bool is_first)
+      (std::exception_ptr const& ep, std::size_t indentation, bool is_first)
     {
       auto const prefix {(is_first ? "" : "\n") + std::string (indentation, ' ')};
 
       try
       {
-        std::rethrow_exception (e);
+        std::rethrow_exception (ep);
       }
       catch (std::exception const& e)
       {

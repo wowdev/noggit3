@@ -4,11 +4,11 @@
 
 namespace noggit
 {
-  camera::camera ( math::vector_3d const& position
+  camera::camera ( math::vector_3d const& position_
                  , math::degrees yaw_
                  , math::degrees pitch_
                  )
-    : position (position)
+    : position (position_)
     , move_speed (200.6f)
     , _roll (0.0f)
     , _yaw (0.f)

@@ -39,8 +39,8 @@ void MPQArchive::loadMPQ (AsyncLoader* loader, std::string const& filename, bool
   loader->queue_for_load(_openArchives.back().second.get());
 }
 
-MPQArchive::MPQArchive(std::string const& filename, bool doListfile)
-  : AsyncObject(filename)
+MPQArchive::MPQArchive(std::string const& filename_, bool doListfile)
+  : AsyncObject(filename_)
   ,_archiveHandle(nullptr)
 {
   if (!SFileOpenArchive (filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE | STREAM_FLAG_READ_ONLY, &_archiveHandle))
