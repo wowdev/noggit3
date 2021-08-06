@@ -73,6 +73,7 @@ add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
 add_global_compiler_flag_if_supported (-Wno-multichar)
 
 # declaration of 'identifier' hides previous:
+<<<<<<< HEAD
 
 #add_noggit_compiler_flag_if_supported (/we4456) # local declaration
 #add_noggit_compiler_flag_if_supported (/we4457) # function parameter
@@ -84,6 +85,11 @@ add_global_compiler_flag_if_supported (-Wno-multichar)
 add_global_compiler_flag_if_supported (/EHa)
 # multi core building for visual studio
 add_global_compiler_flag_if_supported (/MP)
+#add_noggit_compiler_flag_if_supported (/we4456) # local declaration
+add_noggit_compiler_flag_if_supported (/we4457) # function parameter
+add_noggit_compiler_flag_if_supported (/we4458) # class members
+add_noggit_compiler_flag_if_supported (/we4459) # global declaration
+add_noggit_compiler_flag_if_supported (-Werror=shadow)
 
 if( NOGGIT_ALL_WARNINGS )
   MESSAGE( STATUS "Spilling out mass warnings." )
