@@ -820,8 +820,16 @@ declare class vert {
     is_water_aligned(): boolean;
 }
 
+/**
+ * Contains some general-purpose procedures that don't fit anywhere else.
+ * 
+ * Access these functions through the global singleton "procedures".
+ */
 declare class procedures_class {
     paint_texture(sel: selection, img: image, layer: number, pressure: number, angle: number);
 }
 
+/**
+ * singleton
+ */
 declare const procedures: procedures_class;

@@ -56,11 +56,11 @@ ___
 
 ### chunks
 
-▸ **chunks**(): [*chunk\_iterator*](chunk_iterator.md)
+▸ **chunks**(): [*chunk*](chunk.md)[]
 
 Creates and returns an iterator for all chunks inside this selection
 
-**Returns:** [*chunk\_iterator*](chunk_iterator.md)
+**Returns:** [*chunk*](chunk.md)[]
 
 ___
 
@@ -104,11 +104,11 @@ ___
 
 ### models
 
-▸ **models**(): [*model\_iterator*](model_iterator.md)
+▸ **models**(): [*model*](model.md)[]
 
 Creates and returns an iterator for all models inside this selection
 
-**Returns:** [*model\_iterator*](model_iterator.md)
+**Returns:** [*model*](model.md)[]
 
 ___
 
@@ -126,18 +126,18 @@ ___
 
 ### tex
 
-▸ **tex**(): [*tex\_iterator*](tex_iterator.md)
+▸ **tex**(): [*tex*](tex.md)[]
 
 Creates and returns an iterator for all texture units inside this selection
 
-**Returns:** [*tex\_iterator*](tex_iterator.md)
+**Returns:** [*tex*](tex.md)[]
 
 ___
 
 ### verts
 
-▸ **verts**(): [*vert\_iterator*](vert_iterator.md)
+▸ **verts**(): [*vert*](vert.md)[]
 
 Creates and returns an iterator for all vertices inside this selection
 
-**Returns:** [*vert\_iterator*](vert_iterator.md)
+**Returns:** [*vert*](vert.md)[]

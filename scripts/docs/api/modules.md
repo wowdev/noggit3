@@ -5,27 +5,28 @@
 ### Classes
 
 - [chunk](classes/chunk.md)
-- [chunk\_iterator](classes/chunk_iterator.md)
 - [image](classes/image.md)
 - [model](classes/model.md)
-- [model\_iterator](classes/model_iterator.md)
 - [noisemap](classes/noisemap.md)
+- [procedures\_class](classes/procedures_class.md)
 - [random](classes/random.md)
 - [script\_brush](classes/script_brush.md)
 - [script\_brush\_event](classes/script_brush_event.md)
 - [selection](classes/selection.md)
 - [tag](classes/tag.md)
 - [tex](classes/tex.md)
-- [tex\_iterator](classes/tex_iterator.md)
 - [vector\_3d](classes/vector_3d.md)
 - [vert](classes/vert.md)
-- [vert\_iterator](classes/vert_iterator.md)
 
 ### Type aliases
 
 - [brush\_callback](modules.md#brush_callback)
 - [callback](modules.md#callback)
 - [nil](modules.md#nil)
+
+### Variables
+
+- [procedures](modules.md#procedures)
 
 ### Functions
 
@@ -117,6 +118,14 @@ ___
 This is the documentation for the Noggit scripting API.
 Functions not connected to a class are global and can be called from
 anywhere in a script.
+
+## Variables
+
+### procedures
+
+• `Const` **procedures**: [*procedures\_class*](classes/procedures_class.md)
+
+singleton object
 
 ## Functions
 
