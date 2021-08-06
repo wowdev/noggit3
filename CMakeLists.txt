@@ -73,7 +73,6 @@ add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
 add_global_compiler_flag_if_supported (-Wno-multichar)
 
 # declaration of 'identifier' hides previous:
-<<<<<<< HEAD
 
 #add_noggit_compiler_flag_if_supported (/we4456) # local declaration
 #add_noggit_compiler_flag_if_supported (/we4457) # function parameter
