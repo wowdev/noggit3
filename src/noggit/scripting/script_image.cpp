@@ -50,17 +50,17 @@ namespace noggit
       resize(width,height);
     }
 
-    int image::width()
+    int image::width() const
     {
       return _width;
     }
 
-    int image::height()
+    int image::height() const
     {
       return _height;
     }
 
-    int image::get_index(int x, int y)
+    int image::get_index(int x, int y) const
     {
       int index = ((x + y * _width) * 4);
       if(index<0||index>=_size)
@@ -79,7 +79,7 @@ namespace noggit
       return index;
     }
 
-    unsigned image::get_pixel(int x, int y)
+    unsigned image::get_pixel(int x, int y) const
     {
       unsigned index = get_index(x, y);
       return get_image()[index] << 24
@@ -88,22 +88,22 @@ namespace noggit
         | get_image()[index + 3];
     }
 
-    float image::get_alpha(int x, int y)
+    float image::get_alpha(int x, int y) const
     {
       return float(get_pixel(x,y) & 0xff)/255.0;
     }
 
-    float image::get_blue(int x, int y)
+    float image::get_blue(int x, int y) const
     {
       return float((get_pixel(x,y) >> 8) & 0xff)/255.0;
     }
 
-    float image::get_green(int x, int y)
+    float image::get_green(int x, int y) const
     {
       return float((get_pixel(x,y) >> 16) & 0xff)/255.0;
     }
 
-    float image::get_red(int x, int y)
+    float image::get_red(int x, int y) const
     {
       return float((get_pixel(x,y) >> 24) & 0xff)/255.0;
     }
@@ -111,19 +111,19 @@ namespace noggit
     void image::set_pixel(int x, int y, unsigned value)
     {
       unsigned index = get_index(x, y);
-      get_image()[index] = (value << 24);
-      get_image()[index + 1] = (value << 16) & 0xff;
-      get_image()[index + 2] = (value << 8) & 0xff;
-      get_image()[index + 3] = (value) & 0xff;
+      get_image_w()[index] = (value << 24);
+      get_image_w()[index + 1] = (value << 16) & 0xff;
+      get_image_w()[index + 2] = (value << 8) & 0xff;
+      get_image_w()[index + 3] = (value) & 0xff;
     }
 
     void image::set_pixel_floats(int x, int y, float r, float g, float b, float a)
     {
       unsigned index = get_index(x, y);
-      get_image()[index] = std::max(std::min(int(r * 255),255),0);
-      get_image()[index + 1] = std::max(std::min(int(g * 255),255),0);
-      get_image()[index + 2] = std::max(std::min(int(b * 255),255),0);
-      get_image()[index + 3] = std::max(std::min(int(a * 255),255),0);
+      get_image_w()[index] = std::max(std::min(int(r * 255),255),0);
+      get_image_w()[index + 1] = std::max(std::min(int(g * 255),255),0);
+      get_image_w()[index + 2] = std::max(std::min(int(b * 255),255),0);
+      get_image_w()[index + 3] = std::max(std::min(int(a * 255),255),0);
     }
 
     void image::save(std::string const& filename)
@@ -139,7 +139,7 @@ namespace noggit
       }
     }
 
-    float image::gradient_scale(float rel)
+    float image::gradient_scale(float rel) const
     {
       if(rel<0||rel>=1)
       {

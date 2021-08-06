@@ -148,84 +148,15 @@ namespace noggit
       return (_index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
     }
 
-    bool vert::is_tex_done()
+    sol::as_table_t<std::vector<vert>> vert::textures()
     {
-      return _tex_index >= MAX_TEXUNITS_PER_VERT 
-        || texture_index[_index].indices[_tex_index] == -1;
-    }
-
-    void vert::reset_tex()
-    {
-      _tex_index = -1;
-    }
-
-    bool vert::next_tex()
-    {
-      ++_tex_index;
-      return !is_tex_done();
-    }
-
-    tex vert::get_tex()
-    {
-      if(is_tex_done())
+      std::vector<tex> texVec;
+      for (int i = 0; i < MAX_TEXUNITS_PER_VERT; ++i)
       {
-        throw script_exception(
-          "vert::get_tex",
-          "accessing invalid texture unit: iterator is done");
+        if (texture_index[_index].indices[i] == -1) break;
+        texVec.emplace_back(state(), _chunk, texture_index[_index].indices[i]);
       }
-      return tex(state(), _chunk, texture_index[_index].indices[_tex_index]);
-    }
-
-    vert_iterator::vert_iterator(
-      script_context * ctx
-      , std::shared_ptr<std::vector<MapChunk*>> chunks
-      , math::vector_3d const& min
-      , math::vector_3d const& max)
-      : script_object(ctx)
-      , _chunks(chunks)
-      , _chunk_iter(_chunks->begin())
-      , _min(min)
-      , _max(max)
-      {}
-
-    bool vert_iterator::next()
-    {
-      if(_chunk_iter==_chunks->end())
-      {
-        return false;
-      }
-
-      ++_vert_iter;
-
-      // skip verts outside of the selection
-      while(_vert_iter < 145)
-      {
-        auto& vert = (*_chunk_iter)->mVertices[_vert_iter];
-        if (vert.x <= _min.x || vert.x >= _max.x ||
-          vert.z <= _min.z || vert.z >= _max.z)
-        {
-          ++_vert_iter;
-        }
-        else
-        {
-          break;
-        }
-      }
-
-      // restart if we used too many verts
-      if(_vert_iter >= 145)
-      {
-        ++_chunk_iter;
-        _vert_iter = -1;
-        return next();
-      }
-
-      return true;
-    }
-
-    vert vert_iterator::get()
-    {
-      return vert(state(), *_chunk_iter,_vert_iter);
+      return sol::as_table(texVec);
     }
 
     void register_vert(script_context * state)
@@ -241,15 +172,8 @@ namespace noggit
         , "set_hole", &vert::set_hole
         , "set_alpha", &vert::set_alpha
         , "get_alpha", &vert::get_alpha
-        , "next_tex", &vert::next_tex
-        , "reset_tex", &vert::reset_tex
-        , "get_tex", &vert::get_tex
+        , "tex", &vert::textures
         , "is_water_aligned", &vert::is_water_aligned
-      );
-
-      state->new_usertype<vert_iterator>("vert_iterator"
-        , "next", &vert_iterator::next
-        , "get", &vert_iterator::get
       );
     }
   } // namespace scripting

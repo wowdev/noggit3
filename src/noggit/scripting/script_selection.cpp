@@ -49,45 +49,6 @@ namespace noggit
       return _size; 
     }
 
-    std::shared_ptr<std::vector<MapChunk*>> selection::get_chunks()
-    {
-      if(_chunks==nullptr)
-      {
-        _chunks = std::make_shared<std::vector<MapChunk*>>();
-        _world->select_all_chunks_between(_min,_max,*_chunks);
-      }
-      return _chunks;
-    }
-
-    std::shared_ptr<model_iterator> selection::get_model_iterator()
-    {
-      return std::make_shared<model_iterator>(state(),_min, _max);
-    }
-
-    std::shared_ptr<vert_iterator> selection::get_vert_iterator()
-    {
-      return std::make_shared<vert_iterator>(state(),get_chunks(), _min, _max);
-    }
-
-    std::shared_ptr<tex_iterator> selection::get_tex_iterator()
-    {
-      return std::make_shared<tex_iterator>(state(),get_chunks(), _min, _max);
-    }
-
-    std::shared_ptr<chunk_iterator> selection::get_chunk_iterator()
-    {
-      return std::make_shared<chunk_iterator>(state(),get_chunks());
-    }
-
-    void selection::apply_noise(std::shared_ptr<noisemap> noise, float ratio)
-    {
-      auto verts = this->get_vert_iterator();
-      while(verts->next())
-      {
-        auto vert = verts->get();
-      }
-    }
-
     std::shared_ptr<noisemap> selection::make_noise(
         float frequency
       , std::string const& algorithm
@@ -95,21 +56,87 @@ namespace noggit
     {
       return noggit::scripting::make_noise(
           state()
-        , std::floor(_min.x)-10
-        , std::floor(_min.z)-10
-        , std::ceil(_size.x)+20
-        , std::ceil(_size.z)+20
+        // padding to ensure we get no rounding errors (should be smaller?)
+        , std::floor(_min.x)-2
+        , std::floor(_min.z)-2
+        , std::ceil(_size.x)+4
+        , std::ceil(_size.z)+4
         , frequency
         , algorithm
         , seed
         );
     }
 
+    std::vector<chunk> selection::chunks_raw()
+    {
+      std::vector<MapChunk*> mapChunks;
+      _world->select_all_chunks_between(_min, _max, mapChunks);
+      std::vector<chunk> chunks;
+      chunks.reserve(mapChunks.size());
+      for (auto& chnk : mapChunks) chunks.emplace_back(state(), chnk);
+      return chunks;
+    }
+
+    std::vector<vert> selection::verts_raw()
+    {
+      std::vector<vert> verts;
+      for (auto chunk : chunks_raw())
+      {
+        for (int i = 0; i < mapbufsize; ++i)
+        {
+          auto& v = chunk._chunk->mVertices[i];
+          if (v.x >= _min.x && v.x <= _max.x &&
+            v.z >= _min.z && v.z <= _max.z)
+          {
+            verts.emplace_back(state(),chunk._chunk,i);
+          }
+        }
+      }
+      return verts;
+    }
+
+    std::vector<tex> selection::textures_raw()
+    {
+      std::vector<tex> texvec;
+      for (auto chnk : chunks_raw())
+      {
+        collect_textures(state(), chnk._chunk, texvec, _min, _max);
+      }
+      return texvec;
+    }
+
+    std::vector<model> selection::models_raw()
+    {
+      std::vector<model> models;
+      collect_models(state(), world(), _min, _max, models);
+      return models;
+    }
+
+    sol::as_table_t<std::vector<chunk>> selection::chunks()
+    {
+      return sol::as_table(chunks_raw());
+    }
+
+    sol::as_table_t<std::vector<vert>> selection::verts()
+    {
+      return sol::as_table(verts_raw());
+    }
+
+    sol::as_table_t<std::vector<tex>> selection::textures()
+    {
+      return sol::as_table(textures_raw());
+    }
+
+    sol::as_table_t<std::vector<model>> selection::models()
+    {
+      return sol::as_table(models_raw());
+    }
+
     void selection::apply()
     {
-      for(auto& chnk: *get_chunks())
+      for (auto& chnk : chunks_raw())
       {
-        chunk(state(),chnk).apply_all();
+        chnk.apply_all();
       }
     }
 
@@ -121,10 +148,10 @@ namespace noggit
         , "max", &selection::max
         , "size", &selection::size
         , "apply", &selection::apply
-        , "verts", &selection::get_vert_iterator
-        , "tex", &selection::get_tex_iterator
-        , "models", &selection::get_model_iterator
-        , "chunks", &selection::get_chunk_iterator
+        , "verts", &selection::verts
+        , "tex", &selection::textures
+        , "models", &selection::models
+        , "chunks", &selection::chunks
         , "make_noise", &selection::make_noise
         );
 

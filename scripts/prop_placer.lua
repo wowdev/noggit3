@@ -42,9 +42,8 @@ function prop_placer:on_left_hold(evt)
 
     local sel = select_origin(evt:pos(),evt:outer_radius(),evt:outer_radius())
     for _,v in pairs(cur_props) do
-        local models = sel:models()
-        while models:next() do
-            local model = models:get()
+
+        for i,model in pairs(sel:models()) do
             if(
                 (delete_all:get() or model:has_filename(v))
                 and 
@@ -68,9 +67,7 @@ function prop_placer:on_left_hold(evt)
       , seed:get()
     )
 
-    local verts = sel:verts()
-    while verts:next() do
-        local vert = verts:get()
+    for i,vert in pairs(sel:verts()) do
         if (not circle_brush:get()) or dist_2d(
             vert:get_pos(),
             evt:pos()

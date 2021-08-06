@@ -46,27 +46,13 @@ namespace noggit
       boost::variant<ModelInstance*, WMOInstance*> _impl;
     };
 
-    class model_iterator: public script_object
-    {
-    public:
-      model_iterator(script_context * ctx
-                    , math::vector_3d min
-                    , math::vector_3d max
-                    );
-
-      bool next();
-      void reset();
-      void query();
-      model get();
-
-    private:
-      math::vector_3d _min;
-      math::vector_3d _max;
-      std::vector<model> _models;
-
-      bool _initialized = false;
-      int _model_index = -1;
-    };
+    void collect_models(
+        script_context * ctx
+      , World * world
+      , math::vector_3d const& min
+      , math::vector_3d const& max
+      , std::vector<model>& vec
+    );
 
     void register_model(script_context * state);
   } // namespace scripting

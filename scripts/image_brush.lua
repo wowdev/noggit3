@@ -12,9 +12,8 @@ function painter_brush:on_left_click(evt)
     local half_width = width / 2
     local half_height = height / 2
     local sel = select_origin(origin, width, height)
-    local verts = sel:verts()
-    while verts:next() do
-        local vert = verts:get()
+
+    for i,vert in pairs(sel:verts()) do
         local angle = cam_yaw() - 90
         local pos = rotate_2d(
             vert:get_pos(),

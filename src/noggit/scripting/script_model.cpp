@@ -132,67 +132,28 @@ namespace noggit
       }
     }
 
-    model_iterator::model_iterator(
-          script_context * ctx
-        , math::vector_3d min
-        , math::vector_3d max
-        )
-        : script_object(ctx)
-        , _min(min), _max(max) {}
-
-    void model_iterator::query()
+    void collect_models(
+        script_context * ctx
+      , World * world
+      , math::vector_3d const& min
+      , math::vector_3d const& max
+      , std::vector<model> & vec
+    )
     {
-      _models.clear();
-      world()->for_each_m2_instance([&](ModelInstance& mod) {
-        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x 
-         && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
+      world->for_each_m2_instance([&](ModelInstance& mod) {
+        if (mod.pos.x >= min.x && mod.pos.x <= max.x
+          && mod.pos.z >= min.z && mod.pos.z <= max.z)
         {
-          _models.push_back(model(state(),&mod));
+          vec.push_back(model(ctx, &mod));
         }
       });
-      world()->for_each_wmo_instance([&](WMOInstance& mod) {
-        if (mod.pos.x >= _min.x && mod.pos.x <= _max.x 
-         && mod.pos.z >= _min.z && mod.pos.z <= _max.z)
+      world->for_each_wmo_instance([&](WMOInstance& mod) {
+        if (mod.pos.x >= min.x && mod.pos.x <= max.x
+          && mod.pos.z >= min.z && mod.pos.z <= max.z)
         {
-          _models.push_back(model(state(),&mod));
+          vec.push_back(model(ctx, &mod));
         }
       });
-
-      _initialized = true;
-      reset();
-    }
-
-    void model_iterator::reset()
-    {
-      _model_index = -1;
-    }
-
-    bool model_iterator::next()
-    {
-      if (!_initialized)
-      {
-        query();
-      }
-
-      if (_model_index >= int(_models.size()))
-      {
-        return false;
-      }
-
-      ++_model_index;
-      return _model_index < int(_models.size());
-    }
-
-    model model_iterator::get()
-    {
-      if(_model_index >= int(_models.size()))
-      {
-        throw script_exception(
-          "model_iterator#get",
-          "accessing invalid model: iterator is done");
-      }
-
-      return _models[_model_index];
     }
 
     void register_model(script_context * state)
@@ -209,12 +170,6 @@ namespace noggit
         , "get_filename", &model::get_filename
         , "has_filename", &model::has_filename
         , "replace", &model::replace
-      );
-
-      state->new_usertype<model_iterator>("model_iterator"
-        , "next", &model_iterator::next
-        , "reset", &model_iterator::reset
-        , "get", &model_iterator::get
       );
     }
   } // namespace scripting

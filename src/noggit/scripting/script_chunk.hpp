@@ -34,18 +34,7 @@ namespace noggit
       std::shared_ptr<selection> to_selection();
     private:
       MapChunk* _chunk;
-    };
-
-    class chunk_iterator : public script_object
-    {
-    public:
-      chunk_iterator(script_context* ctx, std::shared_ptr<std::vector<MapChunk*>> chunks);
-      bool next();
-      chunk get();
-      void reset();
-    private:
-      int _cur = -1;
-      std::shared_ptr<std::vector<MapChunk*>> _chunks;
+      friend class selection;
     };
 
     void register_chunk(script_context * state);

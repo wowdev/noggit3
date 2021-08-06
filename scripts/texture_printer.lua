@@ -7,10 +7,8 @@ texture_printer:add_null_tag()
 
 function texture_printer:on_left_click(evt)
     local sel = select_origin(evt:pos(), 1, 1)
-    local chunks = sel:chunks()
-    while chunks:next() do
-        local chunk = chunks:get()
-        
+
+    for i,chunk in pairs(sel:chunks()) do
         if chunk:get_texture_count() == 0 then
             print("Chunk has no textures")
         end

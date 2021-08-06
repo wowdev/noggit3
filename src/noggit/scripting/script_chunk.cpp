@@ -135,31 +135,6 @@ namespace noggit
       );
     }
 
-    chunk_iterator::chunk_iterator(script_context * ctx, std::shared_ptr<std::vector<MapChunk*>> chunks)
-    : script_object(ctx)
-    , _chunks(chunks)
-    {}
-
-    bool chunk_iterator::next()
-    {
-      if(_cur>=int(_chunks->size()-1))
-      {
-        return false;
-      }
-      ++_cur;
-      return _cur<_chunks->size();
-    }
-
-    chunk chunk_iterator::get()
-    {
-      return chunk(state(), (*_chunks)[_cur]);
-    }
-
-    void chunk_iterator::reset()
-    {
-      _cur = -1;
-    }
-
     std::shared_ptr<selection> chunk::to_selection()
     {
       return std::make_shared<selection>(state(), "chunk#to_selection", _chunk->vmin,_chunk->vmax);
@@ -186,12 +161,6 @@ namespace noggit
         , "set_area_id", &chunk::set_area_id
         , "to_selection", &chunk::to_selection
       ); 
-
-      state->new_usertype<chunk_iterator>("chunk_iterator"
-        , "next", &chunk_iterator::next
-        , "get", &chunk_iterator::get
-        , "reset", &chunk_iterator::reset
-      );
     }
   } // namespace scripting
 } // namespace noggit

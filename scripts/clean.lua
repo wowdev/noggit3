@@ -15,9 +15,7 @@ local prop_layer_4 = clean:add_int_tag("Effect layer 4",-2,9999999999,-2)
 function clean:on_left_hold(evt)
     local sel = select_origin(evt:pos(), evt:outer_radius(), evt:outer_radius())
     if(holding_shift()) then
-        local chunks = sel:chunks()
-        while chunks:next() do
-            local chunk = chunks:get()
+        for i,chunk in pairs(sel:chunks()) do
             chunk:clear_textures()
             chunk:clear_colors()
             if tex_layer_1:get() ~= "" then chunk:add_texture(tex_layer_1:get(),prop_layer_1:get()) end
@@ -29,17 +27,13 @@ function clean:on_left_hold(evt)
     end
 
     if(holding_ctrl()) then
-        local verts = sel:verts()
-        while verts:next() do
-            local vert = verts:get()
+        for i,vert in pairs(sel:verts()) do
             vert:set_height(def_height:get())
         end
     end
 
     if(holding_alt()) then
-        local models = sel:models()
-        while models:next() do
-            local model = models:get()
+        for i,model in pairs(sel:models()) do
             model:remove()
         end
     end

@@ -403,6 +403,7 @@ set ( scripting_sources
     src/noggit/scripting/script_profiles.cpp
     src/noggit/scripting/script_settings.cpp
     src/noggit/scripting/script_exception.cpp
+    src/noggit/scripting/script_procedures.cpp
   )
 
 set ( scripting_headers
@@ -424,6 +425,7 @@ set ( scripting_headers
     src/noggit/scripting/script_math.hpp
     src/noggit/scripting/script_profiles.hpp
     src/noggit/scripting/script_settings.hpp
+    src/noggit/scripting/script_procedures.hpp
   )
 
 set ( opengl_headers

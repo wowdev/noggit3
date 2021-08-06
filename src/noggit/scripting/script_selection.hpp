@@ -39,23 +39,24 @@ namespace noggit
         , std::string const& seed
         );
 
-      void apply_noise(std::shared_ptr<noisemap> noise, float ratio = 1);
-
       math::vector_3d center();
       math::vector_3d min();
       math::vector_3d max();
       math::vector_3d size();
 
-      std::shared_ptr<model_iterator> get_model_iterator();
-      std::shared_ptr<vert_iterator> get_vert_iterator();
-      std::shared_ptr<tex_iterator> get_tex_iterator();
-      std::shared_ptr<chunk_iterator> get_chunk_iterator();
+      std::vector<chunk> chunks_raw();
+      std::vector<vert> verts_raw();
+      std::vector<tex> textures_raw();
+      std::vector<model> models_raw();
+
+      sol::as_table_t<std::vector<chunk>> chunks();
+      sol::as_table_t<std::vector<vert>> verts();
+      sol::as_table_t<std::vector<tex>> textures();
+      sol::as_table_t<std::vector<model>> models();
 
       void apply();
     
     private:
-      std::shared_ptr<std::vector<MapChunk*>> _chunks = nullptr;
-      std::shared_ptr<std::vector<MapChunk*>> get_chunks();
       World* _world;
       math::vector_3d _center;
       math::vector_3d _min;

@@ -284,36 +284,6 @@ declare class chunk {
 }
 
 /**
- * An iterator of chunks in the world.
- * 
- * This iterator always starts out "before" the first entry, 
- * meaning you must call "next" before you call "get":
- * 
- * @example (lua)
- * while chunk_iter:next() do
- *    local chunk = chunk_iter:get()
- * end
- */
-declare class chunk_iterator {
-    /**
-     * Selects the next chunk in this iterator.
-     */
-    next(): boolean;
-
-    /**
-     * Returns the currently selected chunk.
-     * 
-     * May only be called after a call to 'next' has returned true.
-     */
-    get(): chunk;
-
-    /**
-     * Resets this iterator to again point _before_ the first entry.
-     */
-    reset(): void;
-}
-
-/**
  * Writes text to a file
  * @param file 
  * @param content 
@@ -618,36 +588,6 @@ declare class model {
 }
 
 /**
- * An iterator of models in the world. Iterates both m2 and wmo models.
- * 
- * This iterator always starts out "before" the first entry, 
- * meaning you must call "next" before you call "get":
- * 
- * @example (lua)
- * while model_iter:next() do
- *    local model = model_iter:get()
- * end
- */
-declare class model_iterator {
-    /**
-     * Selects the next model in this iterator.
-     */
-    next(): boolean;
-
-    /**
-     * Resets this iterator to again point _before_ the first entry.
-     */
-    reset(): void;
-
-    /**
-     * Returns the currently selected vertex.
-     * 
-     * May only be called after a call to 'next' has returned true.
-     */
-    get(): model;
-}
-
-/**
  * Represents a map of floats values, typically use with a 
  * noise generator.
  */
@@ -743,22 +683,22 @@ declare class selection {
     /**
      * Creates and returns an iterator for all models inside this selection
      */
-    models(): model_iterator;
+    models(): model[];
 
     /**
      * Creates and returns an iterator for all vertices inside this selection
      */
-    verts(): vert_iterator;
+    verts(): vert[];
 
     /**
      * Creates and returns an iterator for all texture units inside this selection
      */
-    tex(): tex_iterator;
+    tex(): tex[];
 
     /**
      * Creates and returns an iterator for all chunks inside this selection
      */
-    chunks(): chunk_iterator;
+    chunks(): chunk[];
     
     /**
      * Applies all changes made inside this selection. 
@@ -806,31 +746,6 @@ declare class tex {
     set_alpha(index: number, alpha: number): void;
     get_alpha(index: number): number;
     get_pos_2d(): vector_3d;
-}
-
-/**
- * An iterator of texture units in the worlds texture layers.
- * 
- * This iterator always starts out "before" the first entry, 
- * meaning you must call "next" before you call "get":
- * 
- * @example (lua)
- * while tex_iter:next() do
- *    local tex_unit = tex_iter:get()
- * end
- */
-declare class tex_iterator {
-    /**
-     * Selects the next vertex in this iterator.
-     */
-    next(): boolean;
-
-    /**
-     * Returns the currently selected vertex.
-     * 
-     * May only be called after a call to 'next' has returned true.
-     */
-    get(): tex;
 }
 
 /**
@@ -905,27 +820,8 @@ declare class vert {
     is_water_aligned(): boolean;
 }
 
-/**
- * An iterator of vertices in the worlds heightmap.
- * 
- * This iterator always starts out "before" the first entry, 
- * meaning you must call "next" before you call "get":
- * 
- * @example (lua)
- * while vert_iter:next() do
- *    local vert_unit = vert_iter:get()
- * end
- */
-declare class vert_iterator {
-    /**
-     * Selects the next vertex in this iterator.
-     */
-    next(): boolean;
-
-    /**
-     * Returns the currently selected vertex.
-     * 
-     * May only be called after a call to 'next' has returned true.
-     */
-    get(): vert;
+declare class procedures_class {
+    paint_texture(sel: selection, img: image, layer: number, pressure: number, angle: number);
 }
+
+declare const procedures: procedures_class;

@@ -26,6 +26,14 @@ namespace noggit {
       int _index;
     };
 
+    void collect_textures(
+        script_context* ctx
+      , MapChunk* chnk
+      , std::vector<tex>& vec
+      , math::vector_3d const& min
+      , math::vector_3d const& max
+    );
+
     class tex_iterator : public script_object {
       public:
         tex_iterator( script_context * ctx

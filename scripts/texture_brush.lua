@@ -18,12 +18,6 @@ texture_brush.on_left_hold = function(brush, evt)
         evt:outer_radius(),
         evt:outer_radius()
     )
-    local texes = sel:tex()
-    texes:paint_image(
-        image,
-        index:get(),
-        pressure:get(),
-        cam_yaw() - 90
-    )
+    procedures:paint_texture(sel,image,index:get(),pressure:get(),cam_yaw()-90)
     sel:apply()
 end

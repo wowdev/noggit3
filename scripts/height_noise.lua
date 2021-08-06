@@ -12,14 +12,12 @@ function noise_brush:on_left_hold(evt)
         evt:outer_radius(),
         evt:outer_radius()
     )
-    local verts = sel:verts()
     local map = sel:make_noise(
         frequency:get(),
         algo:get(),
         seed:get()
     )
-    while verts:next() do
-        local vert = verts:get()
+    for i,vert in pairs(sel:verts()) do
         local height = map:get(
             vert:get_pos()
         ) * amplitude:get()

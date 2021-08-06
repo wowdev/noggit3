@@ -29,34 +29,12 @@ namespace noggit
       void set_hole(bool add);
       void set_alpha(int index, float alpha);
       float get_alpha(int index);
-      bool next_tex();
-      void reset_tex();
-
-      tex get_tex();
+      sol::as_table_t<std::vector<vert>> textures();
       bool is_water_aligned();
 
     private:
-      bool is_tex_done();
       MapChunk* _chunk;
       int _index;
-      int _tex_index = -1;
-    };
-
-    class vert_iterator: public script_object {
-      public:
-        vert_iterator(
-          script_context * ctx
-          , std::shared_ptr<std::vector<MapChunk*>> chunks
-          , math::vector_3d const& min
-          , math::vector_3d const& max);
-        bool next();
-        vert get();
-    private:
-      int _vert_iter = -1;
-      std::shared_ptr<std::vector<MapChunk*>> _chunks;
-      std::vector<MapChunk*>::iterator _chunk_iter;
-      math::vector_3d const& _min;
-      math::vector_3d const& _max;
     };
 
     void register_vert(script_context * state);

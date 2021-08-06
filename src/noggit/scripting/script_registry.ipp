@@ -16,6 +16,7 @@
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/script_standard_brush.hpp>
 #include <noggit/scripting/script_settings.hpp>
+#include <noggit/scripting/script_procedures.hpp>
 
 #include <sol/sol.hpp>
 
@@ -38,6 +39,7 @@ namespace noggit {
         register_image(lua);
         register_filesystem(lua);
         register_standard_brush(lua);
+        register_procedures(lua);
         register_settings(lua);
       }
     }
