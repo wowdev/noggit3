@@ -29,7 +29,7 @@ namespace noggit
       void set_hole(bool add);
       void set_alpha(int index, float alpha);
       float get_alpha(int index);
-      sol::as_table_t<std::vector<vert>> textures();
+      sol::as_table_t<std::vector<tex>> textures();
       bool is_water_aligned();
 
     private:

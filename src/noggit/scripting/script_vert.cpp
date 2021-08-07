@@ -148,7 +148,7 @@ namespace noggit
       return (_index % VERTS_PER_TWO_ROWS) > VERTS_ON_ODD_ROWS;
     }
 
-    sol::as_table_t<std::vector<vert>> vert::textures()
+    sol::as_table_t<std::vector<tex>> vert::textures()
     {
       std::vector<tex> texVec;
       for (int i = 0; i < MAX_TEXUNITS_PER_VERT; ++i)
