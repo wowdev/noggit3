@@ -24,7 +24,7 @@ Further following libraries are required for MySQL GUID Storage builds:
 The following libraries are automatically installed:
 * StormLib (by Ladislav Zezula)
 * FastNoise2 (scripting only)
-* daScript (scripting only)
+* sol2 (scripting only)
 * lodepng (scripting only)
 * nlohmann/json (scripting only)
 
@@ -56,10 +56,21 @@ Note that during installation you only need **one** version of Qt and
 also only **one** compiler version. If download size is noticably large
 (more than a few hundred MB), you're probably downloading way too much.
 
+### LuaJIT ###
+_(Not necessary if disabling `NOGGIT_WITH_SCRIPTING`)_
+* Clone luajit to `<Lua-install>` using git: `git clone https://luajit.org/git/luajit.git`
+* Open up the visual studio command prompt (cmd / powershell does **NOT** work)
+  * The program is usually called something like "x64 Native Tools Command Prompt for VS 20xx"
+  * Usually enough to search for "x64 native" in the windows start menu
+  * It will open a command prompt that looks like the normal windows command prompt, but has a bunch of necessary visual studio variables set.
+* Navigate to the `<Lua-install>/src` (with the visual studio command prompt)
+* Run "msvcbuild.bat" (with the visual studio command prompt)
+* If successful, should give a message similar to `=== Successfully built LuaJIT for Windows/x64 ===`
+
 ### Noggit ###
 * open CMake GUI
-* set `CMAKE_PREFIX_PATH` (path) to `"<Qt-install>;<Stormlib-install>"`,
-  e.g. `"C:/Qt/5.6/msvc2015;D:/StormLib/install"`
+* set `CMAKE_PREFIX_PATH` (path) to `"<Qt-install>"`,
+  e.g. `"C:/Qt/5.6/msvc2015"`
 * set `BOOST_ROOT` (path) to `<boost-install>`, e.g. `"C:/local/boost_1_60_0"`
 * (**unlikely to be required:**) move the libraries of Boost from where
   they are into `BOOST_ROOT/lib` so that CMake finds them automatically or
@@ -67,17 +78,21 @@ also only **one** compiler version. If download size is noticably large
   is **highly** unlikely to be required.
 * set `CMAKE_INSTALL_PREFIX` (path) to an empty destination, e.g. 
   `"C:/Users/blurb/Documents/noggitinstall`
+* set `LUA_INCLUDE_DIR` to `<Lua-install>/src`
+* set `LUA_LIBRARY` to `<Lua-install>/src/lua51.lib`
 * configure, generate
 * open solution with visual studio
 * build ALL_BUILD
 * build INSTALL
- 
+
 To launch noggit you will need the following DLLs from Qt loadable. Install
 them in the system, or copy them from `C:/Qt/X.X/msvcXXXX/bin` into the
 directory containing noggit.exe, i.e. `CMAKE_INSTALL_PREFIX` configured.
 
 * release: Qt5Core, Qt5OpenGL, Qt5Widgets, Qt5Gui
 * debug: Qt5Cored, Qt5OpenGLd, Qt5Widgetsd, Qt5Guid 
+
+* If using scripting, you will also need to copy `<Lua-install>/src/lua51.dll` to `CMAKE_INSTALL_PREFIX`
 
 ## Linux ##
 On **Ubuntu** you can install the building requirements using:
