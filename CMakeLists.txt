@@ -88,7 +88,7 @@ add_global_compiler_flag_if_supported (/MP)
 add_noggit_compiler_flag_if_supported (/we4457) # function parameter
 add_noggit_compiler_flag_if_supported (/we4458) # class members
 add_noggit_compiler_flag_if_supported (/we4459) # global declaration
-add_noggit_compiler_flag_if_supported (-Werror=shadow)
+#add_noggit_compiler_flag_if_supported (-Werror=shadow)
 
 if( NOGGIT_ALL_WARNINGS )
   MESSAGE( STATUS "Spilling out mass warnings." )
