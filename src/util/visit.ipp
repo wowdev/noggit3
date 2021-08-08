@@ -23,11 +23,14 @@ namespace util
   template <typename Variant, typename... Funs>
     auto visit (Variant& variant, Funs... funs)
   {
-    struct only_inherit_funs : Funs... {};
+    struct only_inherit_funs : Funs... {
+      using Funs::operator()...;
+    };
     using Ret = typename detail::require_all_results_same_for_variant_apply<std::remove_const_t<Variant>, only_inherit_funs>::type;
 
     struct lambda_visitor : boost::static_visitor<Ret>, Funs...
     {
+      using Funs::operator()...;
       lambda_visitor (Funs... funs)
         : Funs (funs)...
       {}
