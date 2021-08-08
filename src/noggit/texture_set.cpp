@@ -407,8 +407,6 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
       if (dist <= radius)
       {
-        std::size_t offset = i + 64 * j;
-
         // use double for more precision
         std::array<double,4> alpha_values;
         double total = 0.;
