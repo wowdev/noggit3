@@ -69,47 +69,24 @@ function selection_brush:on_left_click(evt)
     local sel = select_origin(evt:pos(), evt:outer_radius())
 
     -- iterate selected chunks
-    local chunks = sel:chunks()
-    while(chunks:next()) do
-        local chunk = chunks:get()
+    for i,chunk in pairs(sel:chunks()) do
         -- do something to the chunk here
     end
     
     -- iterate selected vertices
-    local verts = sel:verts()
-    while(verts:next()) do
-        local vert = verts:get()
+    for i,vert in pairs(sel:verts()) do
         -- do something to the vertex here
     end
 
     -- iterate selected texture units
-    local tex_units = sel:tex()
-    while(tex_units:next()) do
-        local tex = tex_units:get()
+    for i,tex in pairs(sel:tex()) do
         -- do something to the texture unit here
     end
 
-    -- iterate selected models
-    local models = sel:models()
-    while(models:next()) do
-        local model = models:get()
+    -- iterate selected models (m2 and wmo)
+    for i,model in pairs(sel:model()) do
         -- do something to the model here
     end
-end
-```
-
-### Small warning about iterators
-
-It is important that we actually create iterators **before** we start looping them, since each time we call the function we create a new iterator. The following code illustrates the difference:
-
-```lua
--- INCORRECT: creates a new reset iterator every loop, so this code will never finish
-while(sel:models():next()) do
-end
-
--- CORRECT: create the iterator first, then iterate it
-local models = sel:models()
-while(models:next()) do
 end
 ```
 
