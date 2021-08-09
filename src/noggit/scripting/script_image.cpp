@@ -165,7 +165,10 @@ namespace noggit
         , "get_pixel", &image::get_pixel
         , "gradient_scale", &image::gradient_scale
         , "set_pixel", &image::set_pixel
-        , "set_pixel_floats", &image::set_pixel_floats
+        , "set_pixel_floats", sol::overload(
+            &image::set_pixel_floats
+          , &image::set_pixel_floats_1
+          )
         , "save", &image::save
         , "width", &image::width
         , "height", &image::height

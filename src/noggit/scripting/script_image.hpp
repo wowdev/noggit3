@@ -23,7 +23,11 @@ namespace noggit
       unsigned get_pixel(int x, int y) const;
       float gradient_scale(float rel) const;
       void set_pixel(int x, int y, unsigned value);
-      void set_pixel_floats(int x, int y, float r, float g, float b, float a = 1.0);
+      void set_pixel_floats(int x, int y, float r, float g, float b, float a /*= 1.0*/);
+      void set_pixel_floats_1(int x, int y, float r, float g, float b)
+      {
+        set_pixel_floats(x,y,r,g,b,1.0);
+      }
       void save(std::string const& filename);
       int width() const;
       int height() const;

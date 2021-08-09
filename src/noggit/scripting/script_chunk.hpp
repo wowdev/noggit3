@@ -19,7 +19,9 @@ namespace noggit
       std::string get_texture(int index);
       int get_effect(int index);
       void set_effect(int index, int effectID);
-      int add_texture(std::string const& texture, int effectID = -2);
+      int add_texture(std::string const& texture, int effectID /* = -2*/);
+      int add_texture_1(std::string const& texture)
+      { return add_texture(texture,-2);}
       int get_texture_count();
       void clear_textures();
       void set_hole(bool hole);

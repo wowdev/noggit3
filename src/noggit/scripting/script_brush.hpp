@@ -59,30 +59,64 @@ namespace noggit {
         std::string const& item
         , int low
         , int high
-        , int def
-        , bool has_slider = false
+        , int def /* = low */
+        , bool has_slider /* = false */
         );
+      std::shared_ptr<int_tag> add_int_tag_1(
+        std::string const& item
+        , int low
+        , int high
+        , int def
+        ) { return add_int_tag(item,low,high,def, false);}
+      std::shared_ptr<int_tag> add_int_tag_2(
+        std::string const& item
+        , int low
+        , int high
+        ) { return add_int_tag_1(item,low,high,low);}
 
-      std::shared_ptr<real_tag> add_real_tag(std::string const& item
-                                            , double low
-                                            , double high
-                                            , double def
-                                            , int zeros = 5
-                                            , bool has_slider = false
-                                            );
+      std::shared_ptr<real_tag> add_real_tag(
+          std::string const& item
+        , double low
+        , double high
+        , double def
+        , int zeros /* = 5 */
+        , bool has_slider /* = false */
+        );
+      std::shared_ptr<real_tag> add_real_tag_1(
+          std::string const& item
+        , double low
+        , double high
+        , double def
+        , int zeros
+        )
+      { return add_real_tag(item,low,high,def,zeros, false); }
+      std::shared_ptr<real_tag> add_real_tag_2(
+          std::string const& item
+        , double low
+        , double high
+        , double def
+        )
+      { return add_real_tag_1(item,low,high,def,5); }
 
       std::shared_ptr<string_tag> add_string_tag(
           std::string const& item
-        , std::string const& def);
-                                                
+        , std::string const& def /* = "" */
+        );
+      std::shared_ptr<string_tag> add_string_tag_1(
+        std::string const& item)
+      { return add_string_tag(item,"");}
+
       std::shared_ptr<string_list_tag> add_string_list_tag(
           std::string const& item
         , sol::variadic_args va);
 
       std::shared_ptr<bool_tag> add_bool_tag(
           std::string const& item
-        , bool def
+        , bool def /* = false */
       );
+      std::shared_ptr<bool_tag> add_bool_tag_1(
+        std::string const& item
+      ) { return add_bool_tag(item,false); }
 
       void add_null_tag();
       void add_description(std::string const& text);

@@ -148,7 +148,10 @@ namespace noggit
         , "get_texture", &chunk::get_texture
         , "get_effect", &chunk::get_effect
         , "set_effect", &chunk::set_effect
-        , "add_texture", &chunk::add_texture
+        , "add_texture", sol::overload(
+            &chunk::add_texture
+          , &chunk::add_texture_1
+          )
         , "clear_textures", &chunk::clear_textures
         , "set_hole", &chunk::set_hole
         , "clear_colors", &chunk::clear_colors
