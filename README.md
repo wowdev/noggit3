@@ -95,27 +95,61 @@ directory containing noggit.exe, i.e. `CMAKE_INSTALL_PREFIX` configured.
 * If using scripting, you will also need to copy `<Lua-install>/src/lua51.dll` to `CMAKE_INSTALL_PREFIX`
 
 ## Linux ##
+
+These instructions assume a working directory `<Linux-Build>`, for example `/home/myuser/`
+
+### Dependencies ###
+
 On **Ubuntu** you can install the building requirements using:
 
 ```bash
-sudo apt install freeglut3-dev libboost-all-dev qt5-default libstorm-dev
+sudo apt install freeglut3-dev libboost-all-dev qt5-default libsdl2-dev libbz2-dev
 ```
 
-Compile and build using:
+### LuaJIT ###
+
+From `<Linux-Build>`, build luajit using:
+```bash
+git clone https://luajit.org/git/luajit.git
+cd luajit
+make
+cd ..
+```
+
+`<Linux-Build>/luajit` should now exist.
+
+### Build Noggit ###
+
+From `<Linux-Build>`, clone Noggit3 (change repo as needed):
+```bash
+git clone https://github.com/wowdev/noggit3
+```
+
+`<Linux-Build>/noggit3` should now exist.
+
+From `<Linux-Build>`, compile and build using the following commands. 
+Note that `<Linux-Build>` should be written as the **full** path in the commands below.
+For example: `cmake -DLUA_LIBRARIES=/home/myuser/luajit/src/libluajit.so -DLUA_INCLUDE_DIR=/home/myuser/luajit/src ../noggit3`
 
 ```bash
 mkdir build
 cd build
-cmake ..
+cmake -DLUA_LIBRARIES=<Linux-Build>/luajit/src/libluajit.so -DLUA_INCLUDE_DIR=<Linux-Build>/luajit/src ../noggit3
 make -j $(nproc)
 ```
 
 Instead of `make -j $(nproc)` you may want to pick a bigger number than
 `$(nproc)`, e.g. the number of `CPU cores * 1.5`.
 
-If the build pass correctly without errors, you can go into build/bin/
-and run noggit. Note that `make install` will probably work but is not
-tested, and nobody has built distributable packages in years.
+From `<Linux-Build>/build`, if the build pass correctly without errors, you can finish the installation using:
+```bash
+cp -r ../noggit3/scripts ./bin/scripts
+cp ../luajit/src/libluajit.a ./bin/libluajit.a
+```
+
+You can now go into `<Linux-Build>/build/bin` and run noggit.
+
+Note that `make install` will probably not work.
 
 # Building the Scripting documentation #
 To generate the scripting API documentation, install any new version of Node.js and run: 
