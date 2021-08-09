@@ -5,12 +5,14 @@ the COPYING file.
 # DISCORD #
 You can follow Noggit's development and get the latest build here: https://discord.gg/UbdFHyM
 
+# SCRIPTING #
+Noggit can be scripted using the Lua (5.1) programming language. See the [scripting documentation](scripts/docs/README.md).
+
 # BUILDING #
 This project requires CMake to be built. It also requires the
 following libraries:
 
 * OpenGL
-* StormLib (by Ladislav Zezula)
 * Boost
 * Qt 5
 
@@ -18,6 +20,13 @@ Further following libraries are required for MySQL GUID Storage builds:
 
 * LibMySQL
 * MySQLCPPConn
+
+The following libraries are automatically installed:
+* StormLib (by Ladislav Zezula)
+* FastNoise2 (scripting only)
+* sol2 (scripting only)
+* lodepng (scripting only)
+* nlohmann/json (scripting only)
 
 ## Windows ##
 Text in `<brackets>` below are up to your choice but shall be replaced
@@ -29,7 +38,7 @@ remember which version you chose as later on you will have to pick
 corresponding versions for other dependencies.
 
 ### CMake ###
-Any recent CMake 3.x version should work. Just take the latest.
+Any recent CMake version >= 3.11 should work. Just take the latest.
 
 ### Boost ###
 Install boost to `<boost-install>`. The easiest is to download a pre-built
@@ -47,22 +56,21 @@ Note that during installation you only need **one** version of Qt and
 also only **one** compiler version. If download size is noticably large
 (more than a few hundred MB), you're probably downloading way too much.
 
-### StormLib ###
-Download StormLib from https://github.com/ladislav-zezula/StormLib (any
-recent version).
-
-* open CMake GUI
-* set `CMAKE_INSTALL_PREFIX` (path) to `<Stormlib-install>` (folder should
-  not yet exist). No other things should need to be configured.
-* open solution with visual studio
-* build ALL_BUILD
-* build INSTALL
-* Repeat for both release and debug.
+### LuaJIT ###
+_(Not necessary if disabling `NOGGIT_WITH_SCRIPTING`)_
+* Clone luajit to `<Lua-install>` using git: `git clone https://luajit.org/git/luajit.git`
+* Open up the visual studio command prompt (cmd / powershell does **NOT** work)
+  * The program is usually called something like "x64 Native Tools Command Prompt for VS 20xx"
+  * Usually enough to search for "x64 native" in the windows start menu
+  * It will open a command prompt that looks like the normal windows command prompt, but has a bunch of necessary visual studio variables set.
+* Navigate to the `<Lua-install>/src` (with the visual studio command prompt)
+* Run "msvcbuild.bat" (with the visual studio command prompt)
+* If successful, should give a message similar to `=== Successfully built LuaJIT for Windows/x64 ===`
 
 ### Noggit ###
 * open CMake GUI
-* set `CMAKE_PREFIX_PATH` (path) to `"<Qt-install>;<Stormlib-install>"`,
-  e.g. `"C:/Qt/5.6/msvc2015;D:/StormLib/install"`
+* set `CMAKE_PREFIX_PATH` (path) to `"<Qt-install>"`,
+  e.g. `"C:/Qt/5.6/msvc2015"`
 * set `BOOST_ROOT` (path) to `<boost-install>`, e.g. `"C:/local/boost_1_60_0"`
 * (**unlikely to be required:**) move the libraries of Boost from where
   they are into `BOOST_ROOT/lib` so that CMake finds them automatically or
@@ -70,11 +78,13 @@ recent version).
   is **highly** unlikely to be required.
 * set `CMAKE_INSTALL_PREFIX` (path) to an empty destination, e.g. 
   `"C:/Users/blurb/Documents/noggitinstall`
+* set `LUA_INCLUDE_DIR` to `<Lua-install>/src`
+* set `LUA_LIBRARY` to `<Lua-install>/src/lua51.lib`
 * configure, generate
 * open solution with visual studio
 * build ALL_BUILD
 * build INSTALL
- 
+
 To launch noggit you will need the following DLLs from Qt loadable. Install
 them in the system, or copy them from `C:/Qt/X.X/msvcXXXX/bin` into the
 directory containing noggit.exe, i.e. `CMAKE_INSTALL_PREFIX` configured.
@@ -82,28 +92,77 @@ directory containing noggit.exe, i.e. `CMAKE_INSTALL_PREFIX` configured.
 * release: Qt5Core, Qt5OpenGL, Qt5Widgets, Qt5Gui
 * debug: Qt5Cored, Qt5OpenGLd, Qt5Widgetsd, Qt5Guid 
 
+* If using scripting, you will also need to copy `<Lua-install>/src/lua51.dll` to `CMAKE_INSTALL_PREFIX`
+
 ## Linux ##
+
+These instructions assume a working directory `<Linux-Build>`, for example `/home/myuser/`
+
+### Dependencies ###
+
 On **Ubuntu** you can install the building requirements using:
 
 ```bash
-sudo apt install freeglut3-dev libboost-all-dev qt5-default libstorm-dev
+sudo apt install freeglut3-dev libboost-all-dev qt5-default libsdl2-dev libbz2-dev
 ```
 
-Compile and build using:
+### LuaJIT ###
+
+From `<Linux-Build>`, build luajit using:
+```bash
+git clone https://luajit.org/git/luajit.git
+cd luajit
+make
+cd ..
+```
+
+`<Linux-Build>/luajit` should now exist.
+
+### Build Noggit ###
+
+From `<Linux-Build>`, clone Noggit3 (change repo as needed):
+```bash
+git clone https://github.com/wowdev/noggit3
+```
+
+`<Linux-Build>/noggit3` should now exist.
+
+From `<Linux-Build>`, compile and build using the following commands. 
+Note that `<Linux-Build>` should be written as the **full** path in the commands below.
+For example: `cmake -DLUA_LIBRARIES=/home/myuser/luajit/src/libluajit.so -DLUA_INCLUDE_DIR=/home/myuser/luajit/src ../noggit3`
 
 ```bash
 mkdir build
 cd build
-cmake ..
+cmake -DLUA_LIBRARIES=<Linux-Build>/luajit/src/libluajit.so -DLUA_INCLUDE_DIR=<Linux-Build>/luajit/src ../noggit3
 make -j $(nproc)
 ```
 
 Instead of `make -j $(nproc)` you may want to pick a bigger number than
 `$(nproc)`, e.g. the number of `CPU cores * 1.5`.
 
-If the build pass correctly without errors, you can go into build/bin/
-and run noggit. Note that `make install` will probably work but is not
-tested, and nobody has built distributable packages in years.
+From `<Linux-Build>/build`, if the build pass correctly without errors, you can finish the installation using:
+```bash
+cp -r ../noggit3/scripts ./bin/scripts
+cp ../luajit/src/libluajit.a ./bin/libluajit.a
+```
+
+You can now go into `<Linux-Build>/build/bin` and run noggit.
+
+Note that `make install` will probably not work.
+
+# Building the Scripting documentation #
+To generate the scripting API documentation, install any new version of Node.js and run: 
+
+```
+npm i -g typedoc typedoc-plugin-markdown
+```
+
+Then, enter the "scripting" directory in this repository and run this command:
+
+```
+typedoc --disableSources --plugin typedoc-plugin-markdown --hideBreadcrumbs --out docs/api global.d.ts && rm docs/api/README.md
+```
 
 # DEVELOPMENT #
 Feel free to ask the owner of the official repository

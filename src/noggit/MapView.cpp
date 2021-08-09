@@ -34,6 +34,10 @@
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
+#ifdef NOGGIT_HAS_SCRIPTING
+#include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_settings.hpp>
+#endif
 #include <opengl/scoped.hpp>
 
 #include "revision.h"
@@ -49,6 +53,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QComboBox>
 #include <QWidgetAction>
 
 #include <algorithm>
@@ -120,9 +125,11 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
   case editing_mode::object:
     _object_editor_dock->setVisible(!ui_hidden);
     break;
+#ifdef NOGGIT_HAS_SCRIPTING
+  case editing_mode::scripting:
+    _script_tool_dock->setVisible(!ui_hidden);
+#endif
   }
-
-  
 }
 
 void MapView::ResetSelectedObjectRotation()
@@ -185,7 +192,12 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::createGUI()
 {
-  // create tool widgets
+#ifdef NOGGIT_HAS_SCRIPTING
+  _script_tool_dock = new QDockWidget("Scripting", this);
+  scriptingTool = new noggit::scripting::scripting_tool(_script_tool_dock, this, this->_settings);
+  _script_tool_dock->setWidget(scriptingTool);
+  _tool_properties_docks.insert(_script_tool_dock);
+#endif
 
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
   terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
@@ -497,8 +509,6 @@ void MapView::createGUI()
             );                                                    \
   }                                                               \
   while (false)
-
-
 
   ADD_ACTION (file_menu, "Save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); });
   ADD_ACTION (file_menu, "Save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); });
@@ -1304,6 +1314,7 @@ MapView::MapView( math::degrees camera_yaw0
                 , bool from_bookmark
                 )
   : _camera (camera_pos, camera_yaw0, camera_pitch0)
+  , _world (std::move (world))
   , mTimespeed(0.0f)
   , _uid_fix (uid_fix)
   , _from_bookmark (from_bookmark)
@@ -1312,7 +1323,6 @@ MapView::MapView( math::degrees camera_yaw0
   , shader_color (1.f, 1.f, 1.f, 1.f)
   , cursor_type (static_cast<unsigned int>(cursor_mode::terrain))
   , _main_window (main_window)
-  , _world (std::move (world))
   , _status_position (new QLabel (this))
   , _status_selection (new QLabel (this))
   , _status_area (new QLabel (this))
@@ -1526,12 +1536,12 @@ void MapView::paintGL()
 
   _last_frame_durations.emplace_back (now - _last_update);
 
-  tick (now - _last_update);
-  _last_update = now;
-
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   draw_map();
+
+  tick (now - _last_update);
+  _last_update = now;
 
   if (_world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
   {
@@ -1812,6 +1822,13 @@ void MapView::tick (float dt)
 
     for (auto& selection : currentSelection)
     {
+#ifdef NOGGIT_HAS_SCRIPTING
+      if (selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
+      {
+        scriptingTool->sendBrushEvent(_cursor_pos, 7.5f * dt);
+      }
+#endif
+
       if (leftMouse && selection.which() == eEntry_MapChunk)
       {
         bool underMap = _world->isUnderMap(_cursor_pos);
@@ -2390,6 +2407,12 @@ void MapView::draw_map()
   case editing_mode::mccv:
     radius = shaderTool->brushRadius();
     break;
+#ifdef NOGGIT_HAS_SCRIPTING
+  case editing_mode::scripting:
+    radius = scriptingTool->get_settings()->brushRadius();
+    inner_radius = scriptingTool->get_settings()->innerRadius();
+    break;
+#endif
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.

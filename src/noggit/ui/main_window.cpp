@@ -20,6 +20,9 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#ifdef NOGGIT_HAS_SCRIPTING
+#include <noggit/scripting/scripting_tool.hpp>
+#endif
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
@@ -40,6 +43,9 @@ namespace noggit
     {
       std::stringstream title;
       title << "Noggit - " << STRPRODUCTVER;
+#ifdef TESTING_VERSION
+      title << " -- UNOFFICIAL TESTING VERSION";
+#endif
       setWindowTitle (QString::fromStdString (title.str()));
       setWindowIcon (QIcon (":/icon"));
 
@@ -329,6 +335,7 @@ namespace noggit
       prompt.addButton ("Return to menu", QMessageBox::AcceptRole);
       prompt.setDefaultButton (prompt.addButton ("Cancel", QMessageBox::RejectRole));
       prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
 
       prompt.exec();
 

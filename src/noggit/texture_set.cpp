@@ -407,8 +407,6 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
       if (dist <= radius)
       {
-        std::size_t offset = i + 64 * j;
-
         // use double for more precision
         std::array<double,4> alpha_values;
         double total = 0.;
@@ -621,6 +619,11 @@ bool TextureSet::replace_texture( float xbase
 unsigned int TextureSet::flag(size_t id)
 {
   return _layers_info[id].flags;
+}
+
+void TextureSet::setEffect(size_t id, int value)
+{
+  _layers_info[id].effectID = value;
 }
 
 unsigned int TextureSet::effect(size_t id)

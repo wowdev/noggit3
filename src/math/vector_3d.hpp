@@ -32,6 +32,13 @@ namespace math
       , z (z_)
     {}
 
+    template<typename U>
+        explicit vector_3d_base<T> (vector_3d_base<U> const& other)
+      : x (other.x)
+      , y (other.y)
+      , z (other.z)
+    {}
+
     inline static vector_3d_base<T> min()
     {
       return {std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest()};

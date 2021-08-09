@@ -821,6 +821,20 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
+bool MapChunk::hasColors()
+{
+  return hasMCCV;
+}
+
+void MapChunk::maybe_create_mccv()
+{
+  if (!hasMCCV)
+  {
+    std::fill (mccv, mccv + mapbufsize, math::vector_3d (1.f, 1.f, 1.f));
+    hasMCCV = true;
+  }
+}
+
 bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
   float dist;
@@ -873,6 +887,15 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   }
 
   return changed;
+}
+
+void MapChunk::UpdateMCCV()
+{
+  if(_uploaded)
+  {
+    gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    _need_vao_update = true;
+  }
 }
 
 math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
@@ -1490,6 +1513,20 @@ void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<m
   for (int i = 0; i < mapbufsize; ++i)
   {
     if (misc::dist(pos.x, pos.z, mVertices[i].x, mVertices[i].z) <= radius)
+    {
+      vertices.emplace(&mVertices[i]);
+    }
+  }
+}
+
+void MapChunk::selectVertex(math::vector_3d const& pos1, math::vector_3d const& pos2, std::set<math::vector_3d*>& vertices)
+{
+  for(int i = 0; i< mapbufsize; ++i)
+  {
+    if(
+      pos1.x<=mVertices[i].x && pos2.x>=mVertices[i].x &&
+      pos1.z<=mVertices[i].z && pos2.z>=mVertices[i].z
+    )
     {
       vertices.emplace(&mVertices[i]);
     }

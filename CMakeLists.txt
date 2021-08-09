@@ -1,8 +1,8 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.18)
 cmake_policy (SET CMP0057 NEW) # "Support new IN_LIST if() operator."
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Project name
@@ -73,11 +73,22 @@ add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
 add_global_compiler_flag_if_supported (-Wno-multichar)
 
 # declaration of 'identifier' hides previous:
+
+#add_noggit_compiler_flag_if_supported (/we4456) # local declaration
+#add_noggit_compiler_flag_if_supported (/we4457) # function parameter
+#add_noggit_compiler_flag_if_supported (/we4458) # class members
+#add_noggit_compiler_flag_if_supported (/we4459) # global declaration
+#add_noggit_compiler_flag_if_supported (-Werror=shadow)
+
+# better exception handling for visual studio, particularly for the asynchronous stuff
+add_global_compiler_flag_if_supported (/EHa)
+# multi core building for visual studio
+add_global_compiler_flag_if_supported (/MP)
 #add_noggit_compiler_flag_if_supported (/we4456) # local declaration
 add_noggit_compiler_flag_if_supported (/we4457) # function parameter
 add_noggit_compiler_flag_if_supported (/we4458) # class members
 add_noggit_compiler_flag_if_supported (/we4459) # global declaration
-add_noggit_compiler_flag_if_supported (-Werror=shadow)
+#add_noggit_compiler_flag_if_supported (-Werror=shadow)
 
 if( NOGGIT_ALL_WARNINGS )
   MESSAGE( STATUS "Spilling out mass warnings." )
@@ -88,11 +99,6 @@ if( NOGGIT_ALL_WARNINGS )
   add_noggit_compiler_flag_if_supported (/W4)
   add_noggit_compiler_flag_if_supported (/Wall)
 endif( NOGGIT_ALL_WARNINGS )
-
-# better exception handling for visual studio, particularly for the asynchronous stuff
-add_global_compiler_flag_if_supported (/EHa)
-# multi core building for visual studio
-add_global_compiler_flag_if_supported (/MP)
 
 add_global_compiler_flag_if_supported_config (/Ob2 Release RelWithDebInfo) # inline any suitable functions
 add_global_compiler_flag_if_supported_config (/Oi Release RelWithDebInfo)  # enable intrasic functions
@@ -130,7 +136,6 @@ endif()
 
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
-FIND_PACKAGE( stormlib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
 if (USE_SQL)
@@ -189,6 +194,10 @@ elseif (WIN32)
 
   set(ResFiles media/res.rc)
 endif()
+
+option (NOGGIT_WITH_SCRIPTING "Enable scripting support?" ON)
+
+include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
@@ -378,6 +387,52 @@ set ( math_headers
       src/math/vector_4d.hpp
     )
 
+set ( scripting_sources
+    src/noggit/scripting/script_object.cpp
+    src/noggit/scripting/script_standard_brush.cpp
+    src/noggit/scripting/script_tex.cpp
+    src/noggit/scripting/script_brush.cpp
+    src/noggit/scripting/script_global.cpp
+    src/noggit/scripting/script_chunk.cpp
+    src/noggit/scripting/script_context.cpp
+    src/noggit/scripting/script_filesystem.cpp
+    src/noggit/scripting/script_image.cpp
+    src/noggit/scripting/script_math.cpp
+    src/noggit/scripting/script_model.cpp
+    src/noggit/scripting/script_noise.cpp
+    src/noggit/scripting/script_random.cpp
+    src/noggit/scripting/script_selection.cpp
+    src/noggit/scripting/script_vert-script_texture_index.ipp
+    src/noggit/scripting/script_vert.cpp
+    src/noggit/scripting/scripting_tool.cpp
+    src/noggit/scripting/script_profiles.cpp
+    src/noggit/scripting/script_settings.cpp
+    src/noggit/scripting/script_exception.cpp
+    src/noggit/scripting/script_procedures.cpp
+  )
+
+set ( scripting_headers
+    src/noggit/scripting/script_object.hpp
+    src/noggit/scripting/script_standard_brush.hpp
+    src/noggit/scripting/script_tex.hpp
+    src/noggit/scripting/script_filesystem.hpp
+    src/noggit/scripting/script_global.hpp
+    src/noggit/scripting/script_noise.hpp
+    src/noggit/scripting/script_chunk.hpp
+    src/noggit/scripting/script_model.hpp
+    src/noggit/scripting/script_vert.hpp
+    src/noggit/scripting/script_random.hpp
+    src/noggit/scripting/script_selection.hpp
+    src/noggit/scripting/scripting_tool.hpp
+    src/noggit/scripting/script_context.hpp
+    src/noggit/scripting/script_brush.hpp
+    src/noggit/scripting/script_image.hpp
+    src/noggit/scripting/script_math.hpp
+    src/noggit/scripting/script_profiles.hpp
+    src/noggit/scripting/script_settings.hpp
+    src/noggit/scripting/script_procedures.hpp
+  )
+
 set ( opengl_headers
       src/opengl/context.hpp
       src/opengl/primitives.hpp
@@ -449,6 +504,9 @@ source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
+if (NOGGIT_WITH_SCRIPTING)
+  source_group ("scripting" FILES ${scripting_sources} ${scripting_headers})
+endif()
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
@@ -477,9 +535,13 @@ ADD_EXECUTABLE ( noggit
                 )
 target_compile_options (noggit PRIVATE ${NOGGIT_CXX_FLAGS})
 
+if (NOGGIT_WITH_SCRIPTING)
+  target_sources (noggit PRIVATE ${scripting_sources} ${scripting_headers})
+  add_compile_definitions (NOGGIT_HAS_SCRIPTING)
+endif()
+
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
-  stormlib::stormlib
   Boost::thread
   Boost::filesystem
   Boost::system
@@ -648,3 +710,93 @@ target_compile_definitions (math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"
 target_compile_options (math-matrix_4x4.test PRIVATE ${NOGGIT_CXX_FLAGS})
 target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
+
+include (FetchContent)
+
+# Dependency: StormLib
+
+FetchContent_Declare (storm
+  GIT_REPOSITORY https://github.com/ladislav-zezula/StormLib.git
+  GIT_TAG 60c2dd0fa16d3506722e25fee9b6fa4082b0c1e5
+)
+FetchContent_GetProperties (storm)
+if (NOT storm_POPULATED)
+  message (STATUS "Installing StormLib...")
+  FetchContent_Populate (storm)
+endif()
+add_subdirectory (${storm_SOURCE_DIR} ${storm_BINARY_DIR} EXCLUDE_FROM_ALL)
+set (storm_warning_disable_flags "")
+add_local_compiler_flag_if_supported (-Wno-implicit-function-declaration storm_warning_disable_flags)
+target_compile_options (storm PRIVATE ${storm_warning_disable_flags})
+
+target_link_libraries (noggit
+  storm
+)
+
+if (NOGGIT_WITH_SCRIPTING)
+  # Dependency: json.hpp
+  FetchContent_Declare (json
+    GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+    GIT_TAG v3.9.1
+  )
+  FetchContent_GetProperties (json)
+  if (NOT json_POPULATED)
+    message (STATUS "Installing json.hpp...")
+    FetchContent_Populate (json)
+  endif()
+  add_subdirectory (${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+  # Dependency: lodepng
+  FetchContent_Declare (lodepng
+    GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
+    GIT_TAG 7fdcc96a5e5864eee72911c3ca79b1d9f0d12292
+  )
+  FetchContent_GetProperties (lodepng)
+  if (NOT lodepng_POPULATED)
+    message (STATUS "Installing lodepng...")
+    FetchContent_Populate (lodepng)
+  endif()
+  add_library (lodepng "${lodepng_SOURCE_DIR}/lodepng.cpp")
+  target_include_directories (lodepng SYSTEM PUBLIC ${lodepng_SOURCE_DIR})
+
+  # Dependency: FastNoise2
+  FetchContent_Declare (fastnoise2
+    GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+    GIT_TAG v0.0.1-heightmap
+    PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_fastnoise2.cmake"
+    UPDATE_DISCONNECTED true
+  )
+  FetchContent_GetProperties (fastnoise2)
+  if (NOT fastnoise2_POPULATED)
+    message (STATUS "Installing FastNoise2... (big repo, large download)")
+    FetchContent_Populate (fastnoise2)
+  endif()
+  add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+  # Dependency: Lua
+  find_package (Lua REQUIRED)
+  add_library (Lua-Lua INTERFACE)
+  add_library (Lua::Lua ALIAS Lua-Lua)
+  target_link_libraries (Lua-Lua INTERFACE ${LUA_LIBRARIES})
+  target_include_directories (Lua-Lua INTERFACE ${LUA_INCLUDE_DIR})
+
+  # Dependency: sol2
+  FetchContent_Declare (sol2
+    GIT_REPOSITORY https://github.com/tswow/sol2
+    GIT_TAG b9c83d5ecf6bc9503dc66779f2395dc32dffb1e5
+  )
+  FetchContent_MakeAvailable (sol2)
+  # sol2::sol2 neither links lua nor sets include directories as system so will clobber us with
+  # loads of warnings, sadly. It also wants to be install(EXPORT)ed which is not what we want.
+  add_library (sane-sol2 INTERFACE)
+  add_library (sol2::sane ALIAS sane-sol2)
+  target_link_libraries (sane-sol2 INTERFACE Lua::Lua)
+  target_include_directories (sane-sol2 SYSTEM INTERFACE "${sol2_SOURCE_DIR}/include")
+
+  target_link_libraries (noggit
+    lodepng
+    FastNoise
+    nlohmann_json::nlohmann_json
+    sol2::sane
+  )
+endif()

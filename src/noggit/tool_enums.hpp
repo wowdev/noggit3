@@ -70,6 +70,9 @@ enum class editing_mode
   water,
   mccv,
   object,
+#ifdef NOGGIT_HAS_SCRIPTING
+  scripting
+#endif
 };
 
 enum water_opacity

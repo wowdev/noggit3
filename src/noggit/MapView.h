@@ -51,6 +51,12 @@ namespace noggit
     struct main_window;
     struct tileset_chooser;
   }
+#ifdef NOGGIT_HAS_SCRIPTING
+  namespace scripting
+  {
+    class scripting_tool;
+  }
+#endif
 }
 
 enum class save_mode
@@ -63,12 +69,19 @@ enum class save_mode
 class MapView : public QOpenGLWidget
 {
   Q_OBJECT
-private:
+public:
+  /// \todo getters?
   bool _mod_alt_down = false;
   bool _mod_ctrl_down = false;
   bool _mod_shift_down = false;
   bool _mod_space_down = false;
   bool _mod_num_down = false;
+  bool  leftMouse = false;
+  bool  leftClicked = false;
+  bool  rightMouse = false;
+  noggit::camera _camera;
+  std::unique_ptr<World> _world;
+private:
 
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
@@ -77,7 +90,6 @@ private:
   bool look, freelook;
   bool ui_hidden = false;
 
-  noggit::camera _camera;
   bool _camera_moved_since_last_draw = true;
 
   noggit::bool_toggle_property _draw_contour = {false};
@@ -135,10 +147,6 @@ private:
   std::vector<selection_type> lastSelected;
 
   bool _rotation_editor_need_update = false;
-
-  bool  leftMouse = false;
-  bool  leftClicked = false;
-  bool  rightMouse = false;
 
   // Vars for the ground editing toggle mode store the status of some
   // view settings when the ground editing mode is switched on to
@@ -249,8 +257,6 @@ private:
   math::vector_4d normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
 
-  std::unique_ptr<World> _world;
-
   float _tablet_pressure;
   bool _tablet_active = false;
 
@@ -312,4 +318,8 @@ private:
   QDockWidget* _vertex_shading_dock;
   noggit::ui::texturing_tool* texturingTool;
   QDockWidget* _texturing_dock;
+#ifdef NOGGIT_HAS_SCRIPTING
+  noggit::scripting::scripting_tool* scriptingTool;
+  QDockWidget* _script_tool_dock;
+#endif
 };
