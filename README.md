@@ -113,6 +113,7 @@ From `<Linux-Build>`, build luajit using:
 git clone https://luajit.org/git/luajit.git
 cd luajit
 make
+sudo make install
 cd ..
 ```
 
@@ -141,10 +142,9 @@ make -j $(nproc)
 Instead of `make -j $(nproc)` you may want to pick a bigger number than
 `$(nproc)`, e.g. the number of `CPU cores * 1.5`.
 
-From `<Linux-Build>/build`, if the build pass correctly without errors, you can finish the installation using:
+From `<Linux-Build>/build`, if the build pass correctly without errors, you can install the default lua scripts using:
 ```bash
 cp -r ../noggit3/scripts ./bin/scripts
-cp ../luajit/src/libluajit.a ./bin/libluajit.a
 ```
 
 You can now go into `<Linux-Build>/build/bin` and run noggit.
