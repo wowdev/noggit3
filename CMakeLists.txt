@@ -771,7 +771,12 @@ if (NOGGIT_WITH_SCRIPTING)
     message (STATUS "Installing FastNoise2... (big repo, large download)")
     FetchContent_Populate (fastnoise2)
   endif()
-  add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+  if (FASTNOISE2_NOISETOOL)
+    add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR})
+  else()
+    add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
 
   # Dependency: Lua
   find_package (Lua REQUIRED)
