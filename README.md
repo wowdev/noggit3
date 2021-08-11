@@ -155,13 +155,14 @@ Note that `make install` will probably not work.
 To generate the scripting API documentation, install any new version of Node.js and run: 
 
 ```
-npm i -g typedoc typedoc-plugin-markdown
+npm i -g typedoc@0.20.28 typedoc-plugin-markdown@3.5.0 typescript@4.0
 ```
 
-Then, enter the "scripting" directory in this repository and run this command:
+Then, enter the "scripting" directory in this repository and run the following commands:
 
 ```
-typedoc --disableSources --plugin typedoc-plugin-markdown --hideBreadcrumbs --out docs/api global.d.ts && rm docs/api/README.md
+typedoc --disableSources --plugin typedoc-plugin-markdown --hideBreadcrumbs --out docs/api global.d.ts
+rm docs/api/README.md
 ```
 
 # DEVELOPMENT #
