@@ -129,7 +129,8 @@ namespace noggit
     void image::save(std::string const& filename)
     {
       auto writable_path = get_writable_path("image::save", state(), filename);
-      unsigned error = lodepng::encode(filename, get_image(), _width, _height);
+      mkdirs(writable_path.string());
+      unsigned error = lodepng::encode(writable_path.string(), get_image(), _width, _height);
       if (error)
       {
         throw script_exception(

@@ -18,5 +18,6 @@ namespace noggit
     std::string read_file(std::string const& path);
     bool path_exists(std::string const& path);
     void register_filesystem(script_context * state);
+    void mkdirs(std::string const& path);
   } // namespace scripting
 } // namespace noggit

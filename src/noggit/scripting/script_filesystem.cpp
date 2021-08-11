@@ -18,16 +18,13 @@ namespace noggit
 {
   namespace scripting
   {
-    namespace
+    void mkdirs(std::string const& pathstr)
     {
-      void mkdirs(std::string const& pathstr)
+      auto path = fs::path(pathstr);
+      auto parent_path = path.parent_path();
+      if (parent_path.string().size() > 0)
       {
-        auto path = fs::path(pathstr);
-        auto parent_path = path.parent_path();
-        if (parent_path.string().size() > 0)
-        {
-          fs::create_directories(path.parent_path());
-        }
+        fs::create_directories(path.parent_path());
       }
     }
 
