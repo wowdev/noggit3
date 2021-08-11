@@ -26,6 +26,7 @@ Represents a chunk in the world
 - [set\_effect](chunk.md#set_effect)
 - [set\_hole](chunk.md#set_hole)
 - [set\_impassable](chunk.md#set_impassable)
+- [to\_selection](chunk.md#to_selection)
 
 ## Constructors
 
@@ -249,3 +250,15 @@ Name | Type |
 `impassable` | *boolean* |
 
 **Returns:** *void*
+
+___
+
+### to\_selection
+
+▸ **to_selection**(): [*selection*](selection.md)
+
+Returns a selection spanning this chunk
+
+**`note`** - iterating will include border vert/texels
+
+**Returns:** [*selection*](selection.md)

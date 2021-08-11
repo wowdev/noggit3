@@ -125,7 +125,7 @@ anywhere in a script.
 
 • `Const` **procedures**: [*procedures\_class*](classes/procedures_class.md)
 
-singleton object
+singleton
 
 ## Functions
 

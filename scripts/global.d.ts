@@ -281,6 +281,13 @@ declare class chunk {
      * @param value 
      */
     set_area_id(value: number): void;
+
+    /**
+     * Returns a selection spanning this chunk
+     *
+     * @note - iterating will include border vert/texels
+     */
+    to_selection(): selection;
 }
 
 /**
