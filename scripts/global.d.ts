@@ -288,6 +288,18 @@ declare class chunk {
      * @note - iterating will include border vert/texels
      */
     to_selection(): selection;
+
+    /**
+     * Returns a texel by index in this chunk
+     * @param index valid in range [0-4095]
+     */
+    get_tex(index: number): tex;
+
+    /**
+     * Returns a vertex by index in this chunk
+     * @param index valid in range [0-144]
+     */
+    get_vert(index: number): vert;
 }
 
 /**

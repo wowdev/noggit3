@@ -11,6 +11,8 @@ namespace noggit
   {
     class script_context;
     class selection;
+    class tex;
+    class vert;
     class chunk: public script_object
     {
     public:
@@ -33,6 +35,8 @@ namespace noggit
       void set_impassable(bool add);
       int get_area_id();
       void set_area_id(int value);
+      tex get_tex(int index);
+      vert get_vert(int index);
       std::shared_ptr<selection> to_selection();
     private:
       MapChunk* _chunk;

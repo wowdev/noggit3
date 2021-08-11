@@ -4,6 +4,8 @@
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_vert.hpp>
+#include <noggit/scripting/script_tex.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/World.h>
@@ -135,6 +137,16 @@ namespace noggit
       );
     }
 
+    tex chunk::get_tex(int index)
+    {
+      return tex(state(),_chunk,index);
+    }
+
+    vert chunk::get_vert(int index)
+    {
+      return vert(state(), _chunk, index);
+    }
+
     std::shared_ptr<selection> chunk::to_selection()
     {
       return std::make_shared<selection>(state(), "chunk#to_selection", _chunk->vmin,_chunk->vmax);
@@ -163,6 +175,8 @@ namespace noggit
         , "get_area_id", &chunk::get_area_id
         , "set_area_id", &chunk::set_area_id
         , "to_selection", &chunk::to_selection
+        , "get_tex", &chunk::get_tex
+        , "get_vert", &chunk::get_vert
       ); 
     }
   } // namespace scripting
