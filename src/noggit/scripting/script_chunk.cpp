@@ -176,6 +176,7 @@ namespace noggit
         , "apply_heightmap", &chunk::apply_heightmap
         , "apply_vertex_color", &chunk::apply_vertex_color
         , "apply_all", &chunk::apply_all
+        , "apply", &chunk::apply_all
         , "set_impassable", &chunk::set_impassable
         , "get_area_id", &chunk::get_area_id
         , "set_area_id", &chunk::set_area_id
