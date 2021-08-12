@@ -24,11 +24,13 @@ namespace noggit {
         , float scale
         , math::vector_3d const& rotation)
       { 
+        // note: we set both min/max random scale and the normal scale parameter,
+        // because noggit picks one based on random scale settings in the object tool
         object_paste_params p;
         p.minScale = scale;
         p.maxScale = scale;
         global->get_view()->_world.get()->
-          addM2(filename,pos,1,math::degrees::vec3(rotation), &p);
+          addM2(filename,pos,scale,math::degrees::vec3(rotation), &p);
       });
 
       state->set_function("vec",[](float x, float y, float z){
