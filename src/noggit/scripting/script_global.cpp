@@ -5,6 +5,7 @@
 #include <noggit/World.h>
 
 #include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_chunk.hpp>
 
 #include <noggit/ui/ObjectEditor.h>
 

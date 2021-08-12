@@ -6,10 +6,11 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_tex.hpp>
+#include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
+#include <noggit/MapView.h>
 #include <noggit/World.h>
-
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
@@ -154,6 +155,10 @@ namespace noggit
 
     void register_chunk(script_context * state)
     {
+      state->set_function("get_chunk", [state](math::vector_3d const& pos) {
+        return chunk(state,state->tool()->get_view()->_world->get_chunk_at(pos));
+      });
+
       state->new_usertype<chunk>("chunk"
         , "remove_texture", &chunk::remove_texture
         , "get_texture_count", &chunk::get_texture_count

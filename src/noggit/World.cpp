@@ -1889,6 +1889,16 @@ template<typename Fun>
     }
   }
 
+MapChunk * World::get_chunk_at(math::vector_3d const& pos)
+{
+  MapTile* tile(mapIndex.getTile(pos));
+  if (tile && tile->finishedLoading())
+  {
+    return tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE);
+  }
+  return nullptr;
+}
+
 void World::convert_alphamap(bool to_big_alpha)
 {
   if (to_big_alpha == mapIndex.hasBigAlpha())
