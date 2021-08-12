@@ -236,7 +236,7 @@ namespace noggit
 
           if(new_right)
           {
-            if(!_last_right) brush->on_right_hold.call_if_exists("brush_event",evt);
+            if(!_last_right) brush->on_right_click.call_if_exists("brush_event",evt);
             else brush->on_right_hold.call_if_exists("brush_event",evt);
           }
           else
