@@ -267,6 +267,11 @@ declare class chunk {
     apply_all(): void;
 
     /**
+     * Same as apply_all
+     */
+    apply(): void;
+
+    /**
      * Sets whether this chunk should be impassable for players or not
      */
     set_impassable(impassable: boolean): void;
@@ -743,6 +748,14 @@ declare function select_between(point1: vector_3d, point2: vector_3d): selection
  * @returns selection
  */
 declare function select_origin(origin: vector_3d, xRadius: number, zRadius: number): selection;
+
+/**
+ * Returns the chunk at a given position.
+ * The tile at the position must be loaded into memory for the
+ * operation to be successful.
+ * @param position
+ */
+declare function get_chunk(position: vector_3d): chunk
 
 /**
  * Represents a settings tag that can be accessed at any time by a script.

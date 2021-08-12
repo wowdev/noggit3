@@ -11,6 +11,7 @@ Represents a chunk in the world
 ### Methods
 
 - [add\_texture](chunk.md#add_texture)
+- [apply](chunk.md#apply)
 - [apply\_all](chunk.md#apply_all)
 - [apply\_heightmap](chunk.md#apply_heightmap)
 - [apply\_textures](chunk.md#apply_textures)
@@ -19,8 +20,10 @@ Represents a chunk in the world
 - [clear\_textures](chunk.md#clear_textures)
 - [get\_area\_id](chunk.md#get_area_id)
 - [get\_effect](chunk.md#get_effect)
+- [get\_tex](chunk.md#get_tex)
 - [get\_texture](chunk.md#get_texture)
 - [get\_texture\_count](chunk.md#get_texture_count)
+- [get\_vert](chunk.md#get_vert)
 - [remove\_texture](chunk.md#remove_texture)
 - [set\_area\_id](chunk.md#set_area_id)
 - [set\_effect](chunk.md#set_effect)
@@ -56,6 +59,16 @@ Name | Type | Description |
 **Returns:** *number*
 
 texture index added to
+
+___
+
+### apply
+
+▸ **apply**(): *void*
+
+Same as apply_all
+
+**Returns:** *void*
 
 ___
 
@@ -145,6 +158,22 @@ Name | Type |
 
 ___
 
+### get\_tex
+
+▸ **get_tex**(`index`: *number*): [*tex*](tex.md)
+
+Returns a texel by index in this chunk
+
+#### Parameters:
+
+Name | Type | Description |
+:------ | :------ | :------ |
+`index` | *number* | valid in range [0-4095]    |
+
+**Returns:** [*tex*](tex.md)
+
+___
+
 ### get\_texture
 
 ▸ **get_texture**(`index`: *number*): *string*
@@ -168,6 +197,22 @@ ___
 Returns the amount of textures on this chunk
 
 **Returns:** *number*
+
+___
+
+### get\_vert
+
+▸ **get_vert**(`index`: *number*): [*vert*](vert.md)
+
+Returns a vertex by index in this chunk
+
+#### Parameters:
+
+Name | Type | Description |
+:------ | :------ | :------ |
+`index` | *number* | valid in range [0-144]    |
+
+**Returns:** [*vert*](vert.md)
 
 ___
 

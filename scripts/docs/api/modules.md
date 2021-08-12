@@ -54,6 +54,7 @@
 - [exp](modules.md#exp)
 - [floor](modules.md#floor)
 - [get\_area\_id](modules.md#get_area_id)
+- [get\_chunk](modules.md#get_chunk)
 - [get\_map\_id](modules.md#get_map_id)
 - [holding\_alt](modules.md#holding_alt)
 - [holding\_ctrl](modules.md#holding_ctrl)
@@ -484,6 +485,24 @@ Name | Type |
 `pos` | [*vector\_3d*](classes/vector_3d.md) |
 
 **Returns:** *number*
+
+___
+
+### get\_chunk
+
+▸ **get_chunk**(`position`: [*vector\_3d*](classes/vector_3d.md)): [*chunk*](classes/chunk.md)
+
+Returns the chunk at a given position.
+The tile at the position must be loaded into memory for the
+operation to be successful.
+
+#### Parameters:
+
+Name | Type |
+:------ | :------ |
+`position` | [*vector\_3d*](classes/vector_3d.md) |
+
+**Returns:** [*chunk*](classes/chunk.md)
 
 ___
 
