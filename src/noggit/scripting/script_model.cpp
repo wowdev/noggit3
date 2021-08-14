@@ -36,7 +36,20 @@ namespace noggit
 
     void model::set_pos(math::vector_3d& pos)
     {
-      return util::visit (_impl, [&] (auto x) { x->pos = pos; });
+      return util::visit ( _impl
+                         , [&, this] (ModelInstance * as_m2) {
+                            this->world()->updateTilesModel(as_m2, model_update::remove);
+                            as_m2->pos = pos;
+                            as_m2->recalcExtents();
+                            this->world()->updateTilesModel(as_m2, model_update::add);
+                         }
+                         , [&, this] (WMOInstance * as_wmo) {
+                           this->world()->updateTilesWMO(as_wmo, model_update::remove);
+                           as_wmo->pos = pos;
+                           as_wmo->recalcExtents();
+                           this->world()->updateTilesWMO(as_wmo, model_update::add);
+                         }
+      );
     }
 
     math::vector_3d model::get_rot()
