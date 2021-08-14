@@ -59,7 +59,20 @@ namespace noggit
 
     void model::set_rot(math::vector_3d& rot)
     {
-      return util::visit (_impl, [&] (auto x) { x->dir = math::degrees::vec3 {rot}; });
+      math::degrees::vec3 dir = math::degrees::vec3{ rot };
+      return util::visit ( _impl
+                         , [dir, this] (ModelInstance * as_m2) {
+                            this->world()->updateTilesModel(as_m2, model_update::remove);
+                            as_m2->dir = dir;
+                            as_m2->recalcExtents();
+                            this->world()->updateTilesModel(as_m2, model_update::add);
+                         }
+                         , [dir, this] (WMOInstance * as_wmo) {
+                           this->world()->updateTilesWMO(as_wmo, model_update::remove);
+                           as_wmo->dir = dir;
+                           as_wmo->recalcExtents();
+                           this->world()->updateTilesWMO(as_wmo, model_update::add);
+                         });
     }
 
     float model::get_scale()
@@ -77,10 +90,13 @@ namespace noggit
     void model::set_scale(float scale)
     {
       return util::visit ( _impl
-                         , [&] (ModelInstance* as_m2) {
-                             as_m2->scale = scale;
-                           }
-                         , [] (WMOInstance*) {}
+                         , [scale, this] (ModelInstance * as_m2) {
+                            this->world()->updateTilesModel(as_m2, model_update::remove);
+                            as_m2->scale = scale;
+                            as_m2->recalcExtents();
+                            this->world()->updateTilesModel(as_m2, model_update::add);
+                         }
+                         , [] (WMOInstance *) {}
                          );
     }
 
