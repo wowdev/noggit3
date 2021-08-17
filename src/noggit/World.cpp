@@ -646,10 +646,11 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
       }
     });
 
-    // We shouldn't end up with empty ever.
+    // !\ todo We shouldn't end up with empty ever (but we do, on completely flat ground)
     if (results.empty())
     {
-      LogError << "rotate_selected_models_to_ground_normal ray intersection failed" << std::endl;
+      // just to avoid models disappearing when this happens
+      updateTilesEntry(entry, model_update::add);
       continue;
     }
 
