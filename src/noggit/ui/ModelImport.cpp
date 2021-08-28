@@ -33,6 +33,10 @@ namespace noggit
               );
 
       layout->addWidget (_list = new QListWidget (this));
+        
+      auto list_size_policy {_list->sizePolicy()};
+      list_size_policy.setVerticalStretch (1);
+      _list->setSizePolicy (list_size_policy);
 
       buildModelList();
 
