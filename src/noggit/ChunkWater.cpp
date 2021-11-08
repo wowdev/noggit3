@@ -66,7 +66,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
   //render
   if (header.ofsRenderMask)
   {
-    f.seek(basePos + header.ofsRenderMask + sizeof(MH2O_Render));
+    f.seek(basePos + header.ofsRenderMask);
     f.read(&Render, sizeof(MH2O_Render));
   }
 
