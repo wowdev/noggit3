@@ -11,6 +11,7 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
+#include <noggit/ChunkWater.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
@@ -148,6 +149,45 @@ namespace noggit
       return vert(state(), _chunk, index);
     }
 
+    void chunk::set_deep_flag(std::uint32_t low, std::uint32_t high)
+    {
+        _chunk->liquid_chunk()->Render.fatigue = std::uint64_t(low)|(std::uint64_t(high)<<32);
+    }
+
+    void chunk::set_deep_flag_1(std::uint32_t low)
+    {
+        set_deep_flag(low, 0);
+    }
+
+    uint32_t chunk::get_deep_flag()
+    {
+        return _chunk->liquid_chunk()->Render.fatigue;
+    }
+
+    uint32_t chunk::get_deep_flag_high()
+    {
+        return _chunk->liquid_chunk()->Render.fatigue>>32;
+    }
+
+    void chunk::set_fishable_flag(std::uint32_t low, std::uint32_t high)
+    {
+        _chunk->liquid_chunk()->Render.fishable = std::uint64_t(low) | (std::uint64_t(high) << 32);
+    }
+
+    void chunk::set_fishable_flag_1(std::uint32_t low)
+    {
+        set_fishable_flag(low, 0);
+    }
+
+    std::uint32_t chunk::get_fishable_flag()
+    {
+        return _chunk->liquid_chunk()->Render.fishable;
+    }
+    std::uint32_t chunk::get_fishable_flag_high()
+    {
+        return _chunk->liquid_chunk()->Render.fishable>>32;
+    }
+
     std::shared_ptr<selection> chunk::to_selection()
     {
       return std::make_shared<selection>(state(), "chunk#to_selection", _chunk->vmin,_chunk->vmax);
@@ -183,7 +223,19 @@ namespace noggit
         , "to_selection", &chunk::to_selection
         , "get_tex", &chunk::get_tex
         , "get_vert", &chunk::get_vert
-      ); 
+        , "set_deep_flag", sol::overload(
+            &chunk::set_deep_flag
+          , &chunk::set_deep_flag_1
+          )
+        , "get_deep_flag", &chunk::get_deep_flag
+        , "get_deep_flag_high", &chunk::get_deep_flag_high
+        , "set_fishable_flag", sol::overload(
+            &chunk::set_fishable_flag
+          , &chunk::set_fishable_flag_1
+        )
+        , "get_fishable_flag", &chunk::get_fishable_flag
+        , "get_fishable_flag_high", &chunk::get_fishable_flag_high
+        );
     }
   } // namespace scripting
 } // namespace noggit

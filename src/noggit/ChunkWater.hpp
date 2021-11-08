@@ -15,6 +15,12 @@ class MPQFile;
 class sExtendableArray;
 class MapChunk;
 
+namespace noggit {
+    namespace scripting {
+        class chunk;
+    }
+}
+
 class ChunkWater
 {
 public:
@@ -88,4 +94,6 @@ private:
   MH2O_Render Render;
 
   std::vector<liquid_layer> _layers;
+
+  friend noggit::scripting::chunk;
 };

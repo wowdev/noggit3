@@ -4,6 +4,7 @@
 #include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/script_object.hpp>
 #include <noggit/MapChunk.h>
+#include <cstdint>
 
 namespace noggit
 {
@@ -32,6 +33,17 @@ namespace noggit
       void apply_heightmap();
       void apply_vertex_color();
       void apply_all();
+
+      void set_deep_flag(std::uint32_t low, std::uint32_t high);
+      void set_deep_flag_1(std::uint32_t low);
+      std::uint32_t get_deep_flag();
+      std::uint32_t get_deep_flag_high();
+
+      void set_fishable_flag(std::uint32_t low, std::uint32_t high);
+      void set_fishable_flag_1(std::uint32_t low);
+      std::uint32_t get_fishable_flag();
+      std::uint32_t get_fishable_flag_high();
+
       void set_impassable(bool add);
       int get_area_id();
       void set_area_id(int value);
