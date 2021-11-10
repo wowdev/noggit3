@@ -43,6 +43,7 @@ namespace noggit
       void set_fishable_flag_1(std::uint32_t low);
       std::uint32_t get_fishable_flag();
       std::uint32_t get_fishable_flag_high();
+      bool has_render_flags();
 
       void set_impassable(bool add);
       int get_area_id();
@@ -51,6 +52,8 @@ namespace noggit
       vert get_vert(int index);
       std::shared_ptr<selection> to_selection();
     private:
+      MH2O_Render getRenderOrDefault();
+      MH2O_Render& getOrCreateRender();
       MapChunk* _chunk;
       friend class selection;
     };

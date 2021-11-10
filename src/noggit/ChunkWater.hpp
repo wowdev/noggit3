@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <set>
+#include <optional>
 
 class MPQFile;
 class sExtendableArray;
@@ -90,10 +91,9 @@ private:
 
   void copy_height_to_layer(liquid_layer& target, math::vector_3d const& pos, float radius);
 
-
-  MH2O_Render Render;
+  std::optional<MH2O_Render> Render;
 
   std::vector<liquid_layer> _layers;
 
-  friend noggit::scripting::chunk;
+  friend class noggit::scripting::chunk;
 };

@@ -18,7 +18,7 @@ ChunkWater::ChunkWater(float x, float z, bool use_mclq_green_lava)
 void ChunkWater::from_mclq(std::vector<mclq>& layers)
 {
   math::vector_3d pos(xbase, 0.0f, zbase);
-
+  if (!Render.has_value()) Render.emplace();
   for (mclq& liquid : layers)
   {
     std::uint8_t mclq_liquid_type = 0;
@@ -29,8 +29,8 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
       {
         mclq_tile const& tile = liquid.tiles[z * 8 + x];
 
-        misc::bit_or(Render.fishable, x, z, tile.fishable);
-        misc::bit_or(Render.fatigue, x, z, tile.fatigue);
+        misc::bit_or(Render.value().fishable, x, z, tile.fishable);
+        misc::bit_or(Render.value().fatigue, x, z, tile.fatigue);
 
         if (!tile.dont_render)
         {
@@ -66,8 +66,9 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
   //render
   if (header.ofsRenderMask)
   {
+    Render.emplace();
     f.seek(basePos + header.ofsRenderMask);
-    f.read(&Render, sizeof(MH2O_Render));
+    f.read(&Render.value(), sizeof(MH2O_Render));
   }
 
   for (std::size_t k = 0; k < header.nLayers; ++k)
@@ -107,9 +108,17 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
   if (hasData(0))
   {
     header.nLayers = _layers.size();
-    header.ofsRenderMask = current_pos - base_pos;
-    adt.Insert(current_pos, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render));
-    current_pos += sizeof(MH2O_Render);
+
+    if (Render.has_value())
+    {
+        header.ofsRenderMask = current_pos - base_pos;
+        adt.Insert(current_pos, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render.value()));
+        current_pos += sizeof(MH2O_Render);
+    }
+    else
+    {
+        header.ofsRenderMask = 0;
+    }
 
     header.ofsInformation = current_pos - base_pos;
     int info_pos = current_pos;
