@@ -305,6 +305,66 @@ declare class chunk {
      * @param index valid in range [0-144]
      */
     get_vert(index: number): vert;
+
+    /**
+     * Returns true if the water in this chunk has deep/fishable flag data.
+     */
+    has_render_flags(): bool
+
+    /**
+     * Sets the fishable flag for the water in this chunk.
+     * If render flag data is not present, it is automatically created.
+     *
+     * - high is 0 by default
+     */
+    set_fishable_flag(low: number, high?: number): void;
+
+    /**
+     * Returns the lower bits of the fishable flag
+     * for the water in this chunk.
+     *
+     * If chunk has no render data, 0xffffffff is returned
+     *
+     * @note Only contains the lower 32 bits.
+     *       For the higher bits, use get_fishable_flag_high
+     */
+    get_fishable_flag(): number;
+
+    /**
+     * Returns the higher bits of the fishable flag
+     * for the water in this chunk.
+     *
+     * If chunk has no render data, 0xffffffff is returned
+     */
+    get_fishable_flag_high(): number;
+
+    /**
+     * Sets the deep flags for the water in this chunk.
+     * If the first bit is set (it is for value=1), emulators typically interpret this
+     * to mean fatigue should be applied here.
+     *
+     * -high is 0 by default.
+     */
+    set_deep_flag(low: number, high?: number): void;
+
+    /**
+     * Returns the lower bits of the deep flag
+     * for the water in this chunk.
+     *
+     * If chunk has no render data, 0 is returned
+     *
+     * @note Only contains the lower 32 bits.
+     *       For the higher bits, use get_fishable_flag_high
+     */
+    get_deep_flag(): number;
+
+    /**
+     * Returns the higher bits of the fishable flag
+     * for the water in this chunk.
+     *
+     * If chunk has no render data, 0 is returned
+     */
+    get_deep_flag_high(): number;
 }
 
 /**
