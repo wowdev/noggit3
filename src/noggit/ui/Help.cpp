@@ -280,6 +280,9 @@ namespace noggit
       generate_hotkey_row({ font_noggit::shift },                                                        "Holding \a 1 / 3 - Double speed", object_layout);
       generate_hotkey_row({ font_noggit::ctrl },                                                         "Holding \a 1 / 3 - Triple speed", object_layout);
       generate_hotkey_row({ font_noggit::shift, font_noggit::ctrl },                                     "Holding \a and \a together - half speed", object_layout);
+      generate_hotkey_row({ font_noggit::k },                                                            "\a Decrease object transform sensitivity", object_layout);
+      generate_hotkey_row({ font_noggit::l },                                                            "\a Increase object transform sensitivity", object_layout);
+
 
       auto shader_widget (new QWidget (this));
       auto shader_layout (new QFormLayout (shader_widget));
