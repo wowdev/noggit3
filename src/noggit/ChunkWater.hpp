@@ -10,10 +10,17 @@
 
 #include <vector>
 #include <set>
+#include <optional>
 
 class MPQFile;
 class sExtendableArray;
 class MapChunk;
+
+namespace noggit {
+    namespace scripting {
+        class chunk;
+    }
+}
 
 class ChunkWater
 {
@@ -84,8 +91,9 @@ private:
 
   void copy_height_to_layer(liquid_layer& target, math::vector_3d const& pos, float radius);
 
-
-  MH2O_Render Render;
+  std::optional<MH2O_Render> Render;
 
   std::vector<liquid_layer> _layers;
+
+  friend class noggit::scripting::chunk;
 };

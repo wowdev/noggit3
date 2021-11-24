@@ -11,6 +11,7 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
+#include <noggit/ChunkWater.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
@@ -148,6 +149,73 @@ namespace noggit
       return vert(state(), _chunk, index);
     }
 
+    bool chunk::has_render_flags()
+    {
+        return _chunk->liquid_chunk()->Render.has_value();
+    }
+
+    MH2O_Render chunk::getRenderOrDefault()
+    {
+        std::optional<MH2O_Render>& render = _chunk->liquid_chunk()->Render;
+        if (render.has_value())
+        {
+            return render.value();
+        }
+        else
+        {
+            return { 0xFFFFFFFFFFFFFFFF,1 };
+        }
+    }
+
+    MH2O_Render & chunk::getOrCreateRender()
+    {
+        std::optional<MH2O_Render>& render = _chunk->liquid_chunk()->Render;
+        if (!render.has_value())
+        {
+            render.emplace();
+        }
+        return render.value();
+    }
+
+    void chunk::set_deep_flag(std::uint32_t low, std::uint32_t high)
+    {
+        getOrCreateRender().fatigue = std::uint64_t(low)|(std::uint64_t(high)<<32);
+    }
+
+    void chunk::set_deep_flag_1(std::uint32_t low)
+    {
+        set_deep_flag(low, 0);
+    }
+
+    std::uint32_t chunk::get_deep_flag()
+    {
+        return static_cast<std::uint32_t>(getRenderOrDefault().fatigue);
+    }
+
+    std::uint32_t chunk::get_deep_flag_high()
+    {
+        return static_cast<std::uint32_t>(getRenderOrDefault().fatigue>>32);
+    }
+
+    void chunk::set_fishable_flag(std::uint32_t low, std::uint32_t high)
+    {
+        getOrCreateRender().fishable = std::uint64_t(low) | (std::uint64_t(high) << 32);
+    }
+
+    void chunk::set_fishable_flag_1(std::uint32_t low)
+    {
+        set_fishable_flag(low, 0);
+    }
+
+    std::uint32_t chunk::get_fishable_flag()
+    {
+        return static_cast<std::uint32_t>(getRenderOrDefault().fishable);
+    }
+    std::uint32_t chunk::get_fishable_flag_high()
+    {
+        return static_cast<std::uint32_t>(getRenderOrDefault().fishable>>32);
+    }
+
     std::shared_ptr<selection> chunk::to_selection()
     {
       return std::make_shared<selection>(state(), "chunk#to_selection", _chunk->vmin,_chunk->vmax);
@@ -183,7 +251,19 @@ namespace noggit
         , "to_selection", &chunk::to_selection
         , "get_tex", &chunk::get_tex
         , "get_vert", &chunk::get_vert
-      ); 
+        , "set_deep_flag", sol::overload(
+            &chunk::set_deep_flag
+          , &chunk::set_deep_flag_1
+          )
+        , "get_deep_flag", &chunk::get_deep_flag
+        , "get_deep_flag_high", &chunk::get_deep_flag_high
+        , "set_fishable_flag", sol::overload(
+            &chunk::set_fishable_flag
+          , &chunk::set_fishable_flag_1
+        )
+        , "get_fishable_flag", &chunk::get_fishable_flag
+        , "get_fishable_flag_high", &chunk::get_fishable_flag_high
+        );
     }
   } // namespace scripting
 } // namespace noggit

@@ -19,14 +19,21 @@ Represents a chunk in the world
 - [clear\_colors](chunk.md#clear_colors)
 - [clear\_textures](chunk.md#clear_textures)
 - [get\_area\_id](chunk.md#get_area_id)
+- [get\_deep\_flag](chunk.md#get_deep_flag)
+- [get\_deep\_flag\_high](chunk.md#get_deep_flag_high)
 - [get\_effect](chunk.md#get_effect)
+- [get\_fishable\_flag](chunk.md#get_fishable_flag)
+- [get\_fishable\_flag\_high](chunk.md#get_fishable_flag_high)
 - [get\_tex](chunk.md#get_tex)
 - [get\_texture](chunk.md#get_texture)
 - [get\_texture\_count](chunk.md#get_texture_count)
 - [get\_vert](chunk.md#get_vert)
+- [has\_render\_flags](chunk.md#has_render_flags)
 - [remove\_texture](chunk.md#remove_texture)
 - [set\_area\_id](chunk.md#set_area_id)
+- [set\_deep\_flag](chunk.md#set_deep_flag)
 - [set\_effect](chunk.md#set_effect)
+- [set\_fishable\_flag](chunk.md#set_fishable_flag)
 - [set\_hole](chunk.md#set_hole)
 - [set\_impassable](chunk.md#set_impassable)
 - [to\_selection](chunk.md#to_selection)
@@ -142,6 +149,35 @@ Returns the area id of a chunk
 
 ___
 
+### get\_deep\_flag
+
+▸ **get_deep_flag**(): *number*
+
+Returns the lower bits of the deep flag
+for the water in this chunk.
+
+If chunk has no render data, 0 is returned
+
+**`note`** Only contains the lower 32 bits.
+      For the higher bits, use get_fishable_flag_high
+
+**Returns:** *number*
+
+___
+
+### get\_deep\_flag\_high
+
+▸ **get_deep_flag_high**(): *number*
+
+Returns the higher bits of the fishable flag
+for the water in this chunk.
+
+If chunk has no render data, 0 is returned
+
+**Returns:** *number*
+
+___
+
 ### get\_effect
 
 ▸ **get_effect**(`layer`: *number*): *number*
@@ -153,6 +189,35 @@ Returns the effect id at a texture layer
 Name | Type |
 :------ | :------ |
 `layer` | *number* |
+
+**Returns:** *number*
+
+___
+
+### get\_fishable\_flag
+
+▸ **get_fishable_flag**(): *number*
+
+Returns the lower bits of the fishable flag
+for the water in this chunk.
+
+If chunk has no render data, 0xffffffff is returned
+
+**`note`** Only contains the lower 32 bits.
+      For the higher bits, use get_fishable_flag_high
+
+**Returns:** *number*
+
+___
+
+### get\_fishable\_flag\_high
+
+▸ **get_fishable_flag_high**(): *number*
+
+Returns the higher bits of the fishable flag
+for the water in this chunk.
+
+If chunk has no render data, 0xffffffff is returned
 
 **Returns:** *number*
 
@@ -216,6 +281,16 @@ Name | Type | Description |
 
 ___
 
+### has\_render\_flags
+
+▸ **has_render_flags**(): *any*
+
+Returns true if the water in this chunk has deep/fishable flag data.
+
+**Returns:** *any*
+
+___
+
 ### remove\_texture
 
 ▸ **remove_texture**(`index`: *number*): *void*
@@ -249,6 +324,27 @@ Name | Type |
 
 ___
 
+### set\_deep\_flag
+
+▸ **set_deep_flag**(`low`: *number*, `high?`: *number*): *void*
+
+Sets the deep flags for the water in this chunk.
+If the first bit is set (it is for value=1), emulators typically interpret this
+to mean fatigue should be applied here.
+
+-high is 0 by default.
+
+#### Parameters:
+
+Name | Type |
+:------ | :------ |
+`low` | *number* |
+`high?` | *number* |
+
+**Returns:** *void*
+
+___
+
 ### set\_effect
 
 ▸ **set_effect**(`layer`: *number*, `effect`: *number*): *any*
@@ -263,6 +359,26 @@ Name | Type | Description |
 `effect` | *number* | effect id to set (-1 to remove effects)    |
 
 **Returns:** *any*
+
+___
+
+### set\_fishable\_flag
+
+▸ **set_fishable_flag**(`low`: *number*, `high?`: *number*): *void*
+
+Sets the fishable flag for the water in this chunk.
+If render flag data is not present, it is automatically created.
+
+- high is 0 by default
+
+#### Parameters:
+
+Name | Type |
+:------ | :------ |
+`low` | *number* |
+`high?` | *number* |
+
+**Returns:** *void*
 
 ___
 
