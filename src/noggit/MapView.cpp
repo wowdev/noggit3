@@ -2145,6 +2145,10 @@ void MapView::tick (float dt)
                       << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                       << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
                       << "\nscale: " << instance->scale
+		  
+                      << "\nServer-side   position  X:  " << (ZEROPOINT - instance->pos.z) << "     Y:  " << (ZEROPOINT - instance->pos.x) << "     Z:  " << instance->pos.y
+                      << "\nServer-side  orientation:  " << fabs(2 * pi - pi / 180.0 * (float(instance->dir.y) < 0 ? fabs(float(instance->dir.y)) + 180.0 : fabs(float(instance->dir.y) - 180.0)))
+		  
                       << "\ntextures Used: " << instance->model->header.nTextures
                       << "\nsize category: " << instance->size_cat;
 
@@ -2168,6 +2172,10 @@ void MapView::tick (float dt)
                       << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                       << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
                       << "\ndoodad set: " << instance->doodadset()
+		  
+                      << "\nServer-side   position  X:  " << (ZEROPOINT - instance->pos.z) << "     Y:  " << (ZEROPOINT - instance->pos.x) << "     Z:  " << instance->pos.y
+                      << "\nServer-side  orientation:  " << fabs(2 * pi - pi / 180.0 * (float(instance->dir.y) < 0 ? fabs(float(instance->dir.y)) + 180.0 : fabs(float(instance->dir.y) - 180.0)))
+		  
                       << "\ntextures used: " << instance->wmo->textures.size();
 
 
