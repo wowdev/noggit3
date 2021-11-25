@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/projection.hpp>
+#include <math/constants.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
@@ -66,7 +67,6 @@
 #include <regex>
 #include <string>
 #include <vector>
-
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -2147,7 +2147,7 @@ void MapView::tick (float dt)
                       << "\nscale: " << instance->scale
 		  
                       << "\nServer-side   position  X:  " << (ZEROPOINT - instance->pos.z) << "     Y:  " << (ZEROPOINT - instance->pos.x) << "     Z:  " << instance->pos.y
-                      << "\nServer-side  orientation:  " << fabs(2 * pi - pi / 180.0 * (float(instance->dir.y) < 0 ? fabs(float(instance->dir.y)) + 180.0 : fabs(float(instance->dir.y) - 180.0)))
+                      << "\nServer-side  orientation:  " << fabs(2 * math::constants::pi - math::constants::pi / 180.0 * (float(instance->dir.y) < 0 ? fabs(float(instance->dir.y)) + 180.0 : fabs(float(instance->dir.y) - 180.0)))
 		  
                       << "\ntextures Used: " << instance->model->header.nTextures
                       << "\nsize category: " << instance->size_cat;
@@ -2174,7 +2174,7 @@ void MapView::tick (float dt)
                       << "\ndoodad set: " << instance->doodadset()
 		  
                       << "\nServer-side   position  X:  " << (ZEROPOINT - instance->pos.z) << "     Y:  " << (ZEROPOINT - instance->pos.x) << "     Z:  " << instance->pos.y
-                      << "\nServer-side  orientation:  " << fabs(2 * pi - pi / 180.0 * (float(instance->dir.y) < 0 ? fabs(float(instance->dir.y)) + 180.0 : fabs(float(instance->dir.y) - 180.0)))
+                      << "\nServer-side  orientation:  " << fabs(2 * math::constants::pi - math::constants::pi / 180.0 * (float(instance->dir.y) < 0 ? fabs(float(instance->dir.y)) + 180.0 : fabs(float(instance->dir.y) - 180.0)))
 		  
                       << "\ntextures used: " << instance->wmo->textures.size();
 
