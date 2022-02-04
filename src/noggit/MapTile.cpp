@@ -856,7 +856,7 @@ void MapTile::saveTile(World* world)
   lCurrentPosition += 8 + lMODF_Size;
 
   //MH2O
-  Water.saveToFile(lADTFile, lMHDR_Position, lCurrentPosition);
+  // Water.saveToFile(lADTFile, lMHDR_Position, lCurrentPosition); // titi : temporarily disable saving mh2o
 
   // MCNK
   for (int y = 0; y < 16; ++y)
