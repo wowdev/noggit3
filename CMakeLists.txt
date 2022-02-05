@@ -293,6 +293,7 @@ endif()
 
 set ( util_sources
       src/util/exception_to_string.cpp
+      src/util/sExtendableArray.cpp
     )
 
 set ( noggit_root_headers

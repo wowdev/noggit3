@@ -179,9 +179,9 @@ namespace misc
   }
 }
 
-void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)
+void SetChunkHeader(util::sExtendableArray& pArray, int pPosition, int pMagix, int pSize)
 {
-  sChunkHeader* Header = pArray.GetPointer<sChunkHeader>(pPosition);
+  auto const Header = pArray.GetPointer<sChunkHeader>(pPosition);
   Header->mMagic = pMagix;
   Header->mSize = pSize;
 }

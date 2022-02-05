@@ -98,7 +98,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 }
 
 
-void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
+void ChunkWater::save(util::sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
 {
   MH2O_Header header;
 
@@ -134,7 +134,7 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
     }
   }
 
-  memcpy(adt.GetPointer<char>(header_pos), &header, sizeof(MH2O_Header));
+  memcpy(adt.GetPointer<char>(header_pos).get(), &header, sizeof(MH2O_Header));
   header_pos += sizeof(MH2O_Header);
 }
 

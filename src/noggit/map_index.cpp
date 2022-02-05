@@ -158,7 +158,7 @@ void MapIndex::save()
 
   //NOGGIT_LOG << "Saving WDT \"" << filename << "\"." << std::endl;
 
-  sExtendableArray wdtFile = sExtendableArray();
+  util::sExtendableArray wdtFile;
   int curPos = 0;
 
   // MVER
@@ -223,7 +223,7 @@ void MapIndex::save()
   }
 
   MPQFile f(filename.str());
-  f.setBuffer(wdtFile.data);
+  f.setBuffer(wdtFile.all_data());
   f.SaveFile();
   f.close();
 

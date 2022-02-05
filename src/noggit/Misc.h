@@ -7,6 +7,7 @@
 #include <math/vector_3d.hpp>
 #include <math/vector_4d.hpp>
 #include <noggit/Log.h>
+#include <util/sExtendableArray.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -108,51 +109,13 @@ namespace misc
 
 //! \todo collect all lose functions/classes/structs for now, sort them later
 
-class sExtendableArray
-{
-public:
-  std::vector<char> data;
-
-	void Allocate (unsigned long pSize)
-	{
-    data.resize (pSize);
-	}
-
-	void Extend (long pAddition)
-	{
-    data.resize (data.size() + pAddition);
-	}
-
-  void Insert (unsigned long pPosition, unsigned long pAddition)
-	{
-    std::vector<char> tmp (pAddition);
-    data.insert (data.begin() + pPosition, tmp.begin(), tmp.end());
-  }
-
-	void Insert (unsigned long pPosition, unsigned long pAddition, const char * pAdditionalData)
-	{
-    data.insert (data.begin() + pPosition, pAdditionalData, pAdditionalData + pAddition);
-	}
-
-	template<typename To>
-	To * GetPointer(unsigned long pPosition = 0)
-	{
-		return(reinterpret_cast<To*>(data.data() + pPosition));
-	}
-
-  sExtendableArray() = default;
-	sExtendableArray(unsigned long pSize, const char *pData)
-    : data (pData, pData + pSize)
-	{}
-};
-
 struct sChunkHeader
 {
   int mMagic;
   int mSize;
 };
 
-void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0);
+void SetChunkHeader(util::sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0);
 
 bool pointInside(math::vector_3d point, math::vector_3d extents[2]);
 void minmax(math::vector_3d* a, math::vector_3d* b);

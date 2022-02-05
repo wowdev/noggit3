@@ -14,6 +14,7 @@
 #include <noggit/texture_set.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <QtCore/QSettings>
 
@@ -645,7 +646,7 @@ void MapTile::saveTile(World* world)
     texture.second = lID++;
 
   // Now write the file.
-  sExtendableArray lADTFile;
+  util::sExtendableArray lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -721,7 +722,7 @@ void MapTile::saveTile(World* world)
 
   // MMID data
   // WMO model names
-  int * lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
+  auto const lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& model : lModels)
@@ -756,7 +757,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mwid = lCurrentPosition - 0x14;
 
   // MWID data
-  int * lMWID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
+  auto const lMWID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& object : lObjects)
@@ -771,7 +772,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mddf = lCurrentPosition - 0x14;
 
   // MDDF data
-  ENTRY_MDDF* lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
+  auto const lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
 
   if(world->mapIndex.sort_models_by_size_class())
   {
@@ -815,7 +816,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->modf = lCurrentPosition - 0x14;
 
   // MODF data
-  ENTRY_MODF *lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>(lCurrentPosition + 8);
+  auto const lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& object : lObjectInstances)
@@ -875,7 +876,7 @@ void MapTile::saveTile(World* world)
     SetChunkHeader(lADTFile, lCurrentPosition, 'MFBO', chunkSize);
     lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mfbo = lCurrentPosition - 0x14;
 
-    int16_t *lMFBO_Data = lADTFile.GetPointer<int16_t>(lCurrentPosition + 8);
+    auto const lMFBO_Data = lADTFile.GetPointer<int16_t>(lCurrentPosition + 8);
 
     lID = 0;
 
@@ -896,7 +897,7 @@ void MapTile::saveTile(World* world)
     SetChunkHeader(lADTFile, lCurrentPosition, 'MTFX', 4 * mTextureEffects.size());
     lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtfx = lCurrentPosition - 0x14;
 
-    uint32_t* lMTFX_Data = lADTFile.GetPointer<uint32_t>(lCurrentPosition + 8);
+    auto const lMTFX_Data = lADTFile.GetPointer<uint32_t>(lCurrentPosition + 8);
 
     lID = 0;
     //they should be in the correct order...
@@ -909,12 +910,11 @@ void MapTile::saveTile(World* world)
   }
 #endif
 
-  lADTFile.Extend(lCurrentPosition - lADTFile.data.size()); // cleaning unused nulls at the end of file
-
-
   {
     MPQFile f(filename);
-    f.setBuffer(lADTFile.data);
+    // \todo This sounds wrong. There shouldn't *be* unused nulls to
+    // begin with.
+    f.setBuffer(lADTFile.data_up_to (lCurrentPosition)); // cleaning unused nulls at the end of file
     f.SaveFile();
   }
 
