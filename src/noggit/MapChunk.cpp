@@ -1457,6 +1457,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
         bool _use_mclq_green_lava = false;
 
+        // TODO : Slime doesn't work on vanilla client. 
+        // It could be not supported, I couldn't find any evidence of a vanilla ADT using slime (felwood etc are water with green lightning)
+
         for (liquid_layer mh2oliquid : waterchunk->_layers) 
         {
             
@@ -1514,34 +1517,44 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
                 {
                     mclq_vertex v; 
 
-                    if (mclq_liquid_type == 6) // uv: only magma
+                    if (mclq_liquid_type == 6 || mclq_liquid_type == 3) // magma vert: magma and slime
                     {
+                        magma_vert magmavert;
+
+
                         // using the mh2o uv formula, check if it works
-                        v.magma.x = static_cast<std::uint16_t>(std::min(mh2oliquid._tex_coords[z * 9 + x].x * 255.f, 65535.f));
-                        v.magma.y = static_cast<std::uint16_t>(std::min(mh2oliquid._tex_coords[z * 9 + x].y * 255.f, 65535.f));
+                        magmavert.x = static_cast<std::uint16_t>(std::min(mh2oliquid._tex_coords[z * 9 + x].x * 255.f, 65535.f));
+                        magmavert.y = static_cast<std::uint16_t>(std::min(mh2oliquid._tex_coords[z * 9 + x].y * 255.f, 65535.f));
+
+                        v.magma = magmavert;
+
                     }
 
-                    if (mclq_liquid_type == 4 || mclq_liquid_type == 6) // height: magma and river
+                    if ( mclq_liquid_type == 4 || mclq_liquid_type == 1 ) // water vert: river and ocean
                     {
-                        v.height = mh2oliquid._vertices[z * 9 + x].y;
-                    }
-
-                    if (mclq_liquid_type == 4 || mclq_liquid_type == 1) // depth : water and ocean
-                    {
+                        water_vert watervert;
+                            
                         std::uint8_t depth = static_cast<std::uint8_t>(std::min(mh2oliquid._depth[z * 9 + x] * 255.0f, 255.f));
-                        
-                        v.water.depth = depth;
-                        v.water.filler = 0;
-                        v.water.flow_0_pct = 0;
-                        v.water.flow_1_pct = 0; // TODO : is ocean foam/wet water flow ?
+
+                        watervert.depth = depth;
+                        watervert.filler = 0;
+                        watervert.flow_0_pct = 0;
+                        watervert.flow_1_pct = 0; // TODO : is ocean foam/wet water flow ?
+
+                        v.water = watervert;
+
                     }
+
+                    // height, all liquid types
+
+                    v.height = mh2oliquid._vertices[z * 9 + x].y;
 
                     mclqliquid.vertices[z * 9 + x] = v;
                 }
             }
-
+            bool chunk_hasliquid = false;
             // mclq_tile tiles[8 * 8];
-            for (int z = 0; z < 8; ++z) // TODO : flags
+            for (int z = 0; z < 8; ++z)
             {
                 for (int x = 0; x < 8; ++x)
                 {
@@ -1553,29 +1566,35 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
                     mclqtile.flag_0x20 = 0;
                     mclqtile.liquid_type = 0;
 
+                    mclqtile.liquid_type = mclq_liquid_type;
+
+                    if ((render.fishable >> (z * 8 + x)) & 1)
+                        mclqtile.fishable = 1;
+                    
+                    if ((render.fatigue >> (z * 8 + x)) & 1)
+                        mclqtile.fatigue = 1;
+
                     if (mh2oliquid.hasSubchunk(x, z))
+                        chunk_hasliquid = true;
+
+                    if (!mclq_liquid_type || !mh2oliquid.hasSubchunk(x, z)) // don't render if no subchunk or liquid type
                     {
-                        mclqtile.liquid_type = mclq_liquid_type; // does this even work ?
-
-                        // todo : figure this weird mask
-                        if ((render.fishable >> (z * 8 + x)) & 1)
-                            mclqtile.fishable = 1;
-                        
-                        if ((render.fatigue >> (z * 8 + x)) & 1)
-                            mclqtile.fatigue = 1;
-
-                    }
-                    else // if no subchunk, add don't render flag
-                    {
-                        mclqtile.dont_render = 1; // bugged atm for some reason
-                    }
-
-                    if (!mclq_liquid_type) // if liquid type is 0, don't render
                         mclqtile.dont_render = 1;
+                        // mclqtile.liquid_type = 0;
+                    }
 
                     mclqliquid.tiles[z * 8 + x] = mclqtile;
                 }
             }
+            // if at no subchunk has liquid, attempt at removing liquid from unused tiles
+            // if (!chunk_hasliquid)
+            // {
+            //     header_flags.flags.lq_ocean = 0;
+            //     header_flags.flags.lq_slime = 0;
+            //     header_flags.flags.lq_river = 0;
+            //     header_flags.flags.lq_magma = 0;
+            // }
+
             mclqliquid.n_flowvs = 0; // always 0 apparently
 
             mclq_flowvs flowv;
