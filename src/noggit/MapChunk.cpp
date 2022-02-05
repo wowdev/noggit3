@@ -4,6 +4,7 @@
 #include <math/quaternion.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/Brush.h>
+#include <noggit/ChunkWater.hpp>
 #include <noggit/TileWater.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
@@ -1169,6 +1170,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
                                                                                                    // MCNK data
   lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
   MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
+  int headerPosition = lCurrentPosition + 8;
 
   header_flags.flags.do_not_fix_alpha_map = 1;
 
@@ -1431,10 +1433,193 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   lCurrentPosition += 8 + lMCAL_Size;
   lMCNK_Size += 8 + lMCAL_Size;
-  //        }
 
-  //! Don't write anything MCLQ related anymore...
 
+
+  if (mt->Water.hasData(0))
+  {
+    ChunkWater* waterchunk = liquid_chunk();
+    // MH2O_Render render = waterchunk->Render.value_or(MH2O_Render());
+    MH2O_Render render = waterchunk->Render.value_or(MH2O_Render{ 0xffffffffffffffff,0xffffffffffffffff });
+
+    if (waterchunk->hasData(0))
+    {
+        waterchunk->cleanup(); // cleanup layers
+        
+        uint32_t nLayers = waterchunk->_layers.size();
+
+        int MCLQ_Size = 804 * nLayers; // it is per layer
+        lADTFile.Extend(8 + MCLQ_Size);
+        SetChunkHeader(lADTFile, lCurrentPosition, 'MCLQ', 0);
+
+        lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLiquid = lCurrentPosition - lMCNK_Position;
+        lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->sizeLiquid = 8 + MCLQ_Size;
+
+        bool _use_mclq_green_lava = false;
+
+        // TODO : Slime doesn't work on vanilla client. 
+        // It could be not supported, I couldn't find any evidence of a vanilla ADT using slime (felwood etc are water with green lightning)
+
+        for (liquid_layer mh2oliquid : waterchunk->_layers) 
+        {
+            
+            std::uint32_t mclq_liquid_type = 0; // (1: ocean, 3: slime, 4: river, 6: magma)
+
+            mclq mclqliquid;
+
+            mclqliquid.max_height = mh2oliquid._maximum;
+            mclqliquid.min_height = mh2oliquid._minimum;
+
+            // set mclq liquid type
+            switch (mh2oliquid._liquid_id)
+            {
+                case 1:mclq_liquid_type = 4; break; // water
+                case 2:mclq_liquid_type = 1; break; // ocean
+                case 3:mclq_liquid_type = 6; break; // magma
+                case 4:mclq_liquid_type = 3; break; // slime
+                case 5:mclq_liquid_type = 4; break; // Slow Water
+                case 6:mclq_liquid_type = 1; break; // Slow Ocean
+                case 7:mclq_liquid_type = 6; break; // Slow Magma
+                case 8:mclq_liquid_type = 3; break; // Slow Slime
+                case 9:mclq_liquid_type = 4; break; // Fast Water
+                case 10:mclq_liquid_type = 1; break; // Fast Ocean
+                case 11:mclq_liquid_type = 6; break; // Fast Magma
+                case 12:mclq_liquid_type = 3; break; // Fast Slime
+                // 13..14 = wmo liquids
+                case 15: {mclq_liquid_type = 6; _use_mclq_green_lava = true; } break; // Green Lava
+                // ignoring wmo liquid types for now
+                case 61:mclq_liquid_type = 4; break; // Hyjal Past - Water
+                case 81:mclq_liquid_type = 4; break; // Lake Wintergrasp - Water
+                case 100:mclq_liquid_type = 4; break; // Basic Procedural Water
+                case 181:mclq_liquid_type = 4; break; // orange slime, is water ?
+                default:
+                    LogError << "Unhandled liquid type to convert to MCLQ" << std::endl;
+                    break;
+            }
+            
+            // set mclq header liquid type flag
+            switch (mclq_liquid_type)
+            {
+                case 1:header_flags.flags.lq_ocean = 1; break; // ocean
+                case 3:header_flags.flags.lq_slime = 1; break; // slime
+                case 4:header_flags.flags.lq_river = 1; break; // river
+                case 6:header_flags.flags.lq_magma = 1; break; // magme
+                default:
+                    LogError << "Invalid/unhandled MCLQ liquid type" << std::endl;
+                    break;
+            }
+
+            // mclq_vertex vertices[9 * 9];
+            // mh2o vertex formats : Case 0, Height and Depth data, Case 1, Height and Texture Coordinate data, Case 2, Depth only data
+            for (int z = 0; z < 9; ++z)
+            {
+                for (int x = 0; x < 9; ++x)
+                {
+                    mclq_vertex v; 
+
+                    if (mclq_liquid_type == 6 || mclq_liquid_type == 3) // magma vert: magma and slime
+                    {
+                        magma_vert magmavert;
+
+
+                        // using the mh2o uv formula, check if it works
+                        magmavert.x = static_cast<std::uint16_t>(std::min(mh2oliquid._tex_coords[z * 9 + x].x * 255.f, 65535.f));
+                        magmavert.y = static_cast<std::uint16_t>(std::min(mh2oliquid._tex_coords[z * 9 + x].y * 255.f, 65535.f));
+
+                        v.magma = magmavert;
+
+                    }
+
+                    if ( mclq_liquid_type == 4 || mclq_liquid_type == 1 ) // water vert: river and ocean
+                    {
+                        water_vert watervert;
+                            
+                        std::uint8_t depth = static_cast<std::uint8_t>(std::min(mh2oliquid._depth[z * 9 + x] * 255.0f, 255.f));
+
+                        watervert.depth = depth;
+                        watervert.filler = 0;
+                        watervert.flow_0_pct = 0;
+                        watervert.flow_1_pct = 0; // TODO : is ocean foam/wet water flow ?
+
+                        v.water = watervert;
+
+                    }
+
+                    // height, all liquid types
+
+                    v.height = mh2oliquid._vertices[z * 9 + x].y;
+
+                    mclqliquid.vertices[z * 9 + x] = v;
+                }
+            }
+            bool chunk_hasliquid = false;
+            // mclq_tile tiles[8 * 8];
+            for (int z = 0; z < 8; ++z)
+            {
+                for (int x = 0; x < 8; ++x)
+                {
+                    mclq_tile mclqtile;
+                    mclqtile.dont_render = 0;
+                    mclqtile.fatigue = 0;
+                    mclqtile.fishable = 0;
+                    mclqtile.flag_0x10 = 0;
+                    mclqtile.flag_0x20 = 0;
+                    mclqtile.liquid_type = 0;
+
+                    mclqtile.liquid_type = mclq_liquid_type;
+
+                    if ((render.fishable >> (z * 8 + x)) & 1)
+                        mclqtile.fishable = 1;
+                    
+                    if ((render.fatigue >> (z * 8 + x)) & 1)
+                        mclqtile.fatigue = 1;
+
+                    if (mh2oliquid.hasSubchunk(x, z))
+                        chunk_hasliquid = true;
+
+                    if (!mclq_liquid_type || !mh2oliquid.hasSubchunk(x, z)) // don't render if no subchunk or liquid type
+                    {
+                        mclqtile.dont_render = 1;
+                        // mclqtile.liquid_type = 0;
+                    }
+
+                    mclqliquid.tiles[z * 8 + x] = mclqtile;
+                }
+            }
+            // if at no subchunk has liquid, attempt at removing liquid from unused tiles
+            // if (!chunk_hasliquid)
+            // {
+            //     header_flags.flags.lq_ocean = 0;
+            //     header_flags.flags.lq_slime = 0;
+            //     header_flags.flags.lq_river = 0;
+            //     header_flags.flags.lq_magma = 0;
+            // }
+
+            mclqliquid.n_flowvs = 0; // always 0 apparently
+
+            mclq_flowvs flowv;
+            flowv.amplitude = 0.0f;
+            flowv.dir[0] = 0.0f;
+            flowv.dir[1] = 0.0f;
+            flowv.dir[2] = 0.0f;
+            flowv.frequency = 0.0f;
+            flowv.pos[0] = 0.0f,
+            flowv.pos[1] = 0.0f,
+            flowv.pos[2] = 0.0f,
+            flowv.radius = 0.0f;
+            flowv.velocity = 0.0f;
+
+            mclqliquid.flowvs[0] = flowv;
+            mclqliquid.flowvs[1] = flowv;
+
+            memcpy(lADTFile.GetPointer<char>(lCurrentPosition + 8), &mclqliquid, MCLQ_Size); // MCLQ_Size + 8 ?
+            lCurrentPosition += 8 + MCLQ_Size;
+            MCLQ_Size += 8 + MCLQ_Size;
+
+        }
+    }
+  }
+  lADTFile.GetPointer<MapChunkHeader>(headerPosition)->flags = header_flags.value;
 
   // MCSE
   int lMCSE_Size = 0;

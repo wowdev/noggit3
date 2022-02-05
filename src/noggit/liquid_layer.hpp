@@ -66,7 +66,7 @@ public:
 
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
-private:
+// private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
   int get_lod_level(math::vector_3d const& camera_pos) const;
