@@ -1570,6 +1570,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
                         mclqtile.dont_render = 1; // bugged atm for some reason
                     }
 
+                    if (!mclq_liquid_type) // if liquid type is 0, don't render
+                        mclqtile.dont_render = 1;
+
                     mclqliquid.tiles[z * 8 + x] = mclqtile;
                 }
             }
