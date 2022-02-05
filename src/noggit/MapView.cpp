@@ -2207,7 +2207,33 @@ void MapView::tick (float dt)
                       << (flags.flags.lq_ocean ? "ocean " : "")
                       << (flags.flags.lq_magma ? "lava" : "")
                       << (flags.flags.lq_slime ? "slime" : "")
+
                       << "\ntextures used: " << chunk->texture_set->num();
+
+          // liquid details if the chunk has liquid data
+          if (chunk->mt->Water.hasData(0))
+          {
+              ChunkWater* waterchunk = chunk->liquid_chunk();
+
+              MH2O_Render liquid_render = waterchunk->Render.value_or(MH2O_Render{ 0xffffffffffffffff,0xffffffffffffffff });
+
+              if (waterchunk->hasData(0))
+              {
+                  liquid_layer liquid = waterchunk->_layers[0]; // only getting data from layer 0, maybe loop them ?
+                  int liquid_flags = liquid._subchunks;
+
+                  select_info << "\nliquid type: " << liquid._liquid_id << " (\"" << gLiquidTypeDB.getLiquidName(liquid._liquid_id) << "\")"
+                              << "\nliquid flags: "
+                                // getting flags from the center tile
+                              << ((liquid_render.fishable >> (4 * 8 + 4)) & 1 ? "fishable " : "")
+                              << ((liquid_render.fatigue >> (4 * 8 + 4)) & 1 ? "fatigue" : "");
+
+              }
+          }
+          else
+          {
+              select_info << "\nno liquid data";
+          }
 
           //! \todo get a list of textures and their flags as well as detail doodads.
 
