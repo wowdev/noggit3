@@ -11,7 +11,16 @@ include(CMakeCheckCompilerFlagCommonPatterns)
 macro (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
   set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
   set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+## end copy ]]
 
+  # GCC only warns on unknown -Wno-, but errors on -W
+  string (SUBSTRING "${_FLAG}" 0 5 _flag_prefix)
+  if ("${_flag_prefix}" STREQUAL "-Wno-")
+    string (REPLACE "-Wno-" "-W" _flag "${_FLAG}")
+    set (CMAKE_REQUIRED_DEFINITIONS "${_flag}")
+  endif()
+
+## begin copy [[
   # Normalize locale during test compilation.
   set(_CheckCXXCompilerFlag_LOCALE_VARS LC_ALL LC_MESSAGES LANG)
   foreach(v ${_CheckCXXCompilerFlag_LOCALE_VARS})

@@ -26,7 +26,7 @@ protected:
   std::mutex _mutex;
   std::condition_variable _state_changed;
 
-  AsyncObject(std::string filename) : filename(filename) {}
+  AsyncObject(std::string filename_) : filename(filename_) {}
 
 public:
   std::string const filename;

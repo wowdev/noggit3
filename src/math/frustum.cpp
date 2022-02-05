@@ -23,9 +23,9 @@ namespace math
 
   bool frustum::contains (const vector_3d& point) const
   {
-    for (auto const& plane : _planes)
+    for (auto const& pl : _planes)
     {
-      if (plane.normal() * point <= -plane.distance())
+      if (pl.normal() * point <= -pl.distance())
       {
         return false;
       }
@@ -35,11 +35,11 @@ namespace math
 
   bool frustum::intersects (const std::vector<vector_3d>& intersect_points) const
   {
-    for (auto const& plane : _planes)
+    for (auto const& pl : _planes)
     {
       for (auto const& point : intersect_points)
       {
-        if (plane.normal() * point > -plane.distance())
+        if (pl.normal() * point > -pl.distance())
         {
           //! \note C does not know how to continue out of two loops otherwise.
           goto intersects_next_side;
@@ -76,10 +76,10 @@ namespace math
                                  , const float& radius
                                  ) const
   {
-    for (auto const& plane : _planes)
+    for (auto const& pl : _planes)
     {
-      const float distance ( plane.normal() * position
-                           + plane.distance()
+      const float distance ( pl.normal() * position
+                           + pl.distance()
                            );
       if (distance < -radius)
       {

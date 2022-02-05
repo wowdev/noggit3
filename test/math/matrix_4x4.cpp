@@ -14,10 +14,10 @@ namespace math
 
   BOOST_AUTO_TEST_CASE (scale)
   {
-    vector_3d const scale (10.0f, 20.0f, -2.0f);
+    vector_3d const scal (10.0f, 20.0f, -2.0f);
 
-    BOOST_REQUIRE_EQUAL (matrix_4x4 (matrix_4x4::scale, scale) * vector_3d(), vector_3d());
-    BOOST_REQUIRE_EQUAL (matrix_4x4 (matrix_4x4::scale, scale) * vector_3d (1.0f, 1.0f, 1.0f), scale);
+    BOOST_REQUIRE_EQUAL (matrix_4x4 (matrix_4x4::scale, scal) * vector_3d(), vector_3d());
+    BOOST_REQUIRE_EQUAL (matrix_4x4 (matrix_4x4::scale, scal) * vector_3d (1.0f, 1.0f, 1.0f), scal);
   }
 
   //! \todo CHECK_CLOSE to not fail

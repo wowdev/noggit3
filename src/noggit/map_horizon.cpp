@@ -211,7 +211,7 @@ map_horizon::map_horizon(const std::string& basename, const MapIndex * const ind
 
 map_horizon::minimap::minimap(const map_horizon& horizon)
 {
-  std::vector<uint32_t> texture(1024 * 1024);
+  std::vector<uint32_t> texture_data(1024 * 1024);
 
   for (size_t y (0); y < 64; ++y)
   {
@@ -230,14 +230,14 @@ map_horizon::minimap::minimap(const map_horizon& horizon)
       {
         for (size_t i (0); i < 16; ++i)
         {
-          texture[(y * 16 + j) * 1024 + x * 16 + i] = color_for_height (horizon._tiles[y][x]->height_17[j][i]);
+          texture_data[(y * 16 + j) * 1024 + x * 16 + i] = color_for_height (horizon._tiles[y][x]->height_17[j][i]);
         }
       }
     }
   }
 
   bind();
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, texture.data());
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, texture_data.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }

@@ -16,8 +16,8 @@
 #include <sstream>
 #include <string>
 
-Model::Model(const std::string& filename)
-  : AsyncObject(filename)
+Model::Model(const std::string& filename_)
+  : AsyncObject(filename_)
   , _finished_upload(false)
 {
   memset(&header, 0, sizeof(ModelHeader));

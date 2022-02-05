@@ -207,7 +207,7 @@ namespace math
   {
   public:
     using vector_3d_base<float>::vector_3d_base;
-    vector_3d (vector_3d_base<float> x) : vector_3d_base<float> (std::move (x)) {}
+    vector_3d (vector_3d_base<float> v) : vector_3d_base<float> (std::move (v)) {}
     vector_3d() : vector_3d_base<float>() {}
   };
 

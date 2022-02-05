@@ -35,11 +35,11 @@ namespace math
       , w (v.w)
     { }
 
-    vector_4d (const ::math::vector_3d& v, const float w)
+    vector_4d (const ::math::vector_3d& v, const float w_)
       : x (v.x)
       , y (v.y)
       , z (v.z)
-      , w (w)
+      , w (w_)
     { }
 
     vector_4d& operator= (const vector_4d &v)
