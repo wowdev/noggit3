@@ -195,7 +195,7 @@ elseif (WIN32)
   set(ResFiles media/res.rc)
 endif()
 
-option (NOGGIT_WITH_SCRIPTING "Enable scripting support?" ON)
+set(NOGGIT_WITH_SCRIPTING OFF CACHE BOOL "Enabling scripting support?")
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
