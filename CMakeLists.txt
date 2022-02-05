@@ -767,6 +767,8 @@ if (NOGGIT_WITH_SCRIPTING)
     PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_fastnoise2.cmake"
     UPDATE_DISCONNECTED true
   )
+
+  set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
   FetchContent_GetProperties (fastnoise2)
   if (NOT fastnoise2_POPULATED)
     message (STATUS "Installing FastNoise2... (big repo, large download)")
@@ -805,4 +807,5 @@ if (NOGGIT_WITH_SCRIPTING)
     nlohmann_json::nlohmann_json
     sol2::sane
   )
+
 endif()
