@@ -54,7 +54,7 @@ jobs:
     - name: "dependency: stormlib"
       run: |
         git clone "https://github.com/ladislav-zezula/StormLib" "${{ runner.workspace }}/stormlib"
-        cmake -B "${{ runner.workspace }}/stormlib/build" -S "${{ runner.workspace }}/stormlib" -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_INSTALL_PREFIX="${{ runner.workspace }}/stormlib/install" -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        cmake -B "${{ runner.workspace }}/stormlib/build" -S "${{ runner.workspace }}/stormlib" -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_C_COMPILER=${{ matrix.compiler_c }} -DCMAKE_INSTALL_PREFIX="${{ runner.workspace }}/stormlib/install" -DCMAKE_BUILD_TYPE=RelWithDebInfo
         cmake --build "${{ runner.workspace }}/stormlib/build" --config RelWithDebInfo
         cmake --install "${{ runner.workspace }}/stormlib/build" --config RelWithDebInfo
 
