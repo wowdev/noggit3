@@ -2220,7 +2220,6 @@ void MapView::tick (float dt)
               if (waterchunk->hasData(0))
               {
                   liquid_layer liquid = waterchunk->_layers[0]; // only getting data from layer 0, maybe loop them ?
-                  int liquid_flags = liquid._subchunks;
 
                   select_info << "\nliquid type: " << liquid._liquid_id << " (\"" << gLiquidTypeDB.getLiquidName(liquid._liquid_id) << "\")"
                               << "\nliquid flags: "
