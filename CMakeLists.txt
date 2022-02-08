@@ -104,7 +104,6 @@ add_global_compiler_flag_if_supported_config (/Ob2 Release RelWithDebInfo) # inl
 add_global_compiler_flag_if_supported_config (/Oi Release RelWithDebInfo)  # enable intrasic functions
 add_global_compiler_flag_if_supported_config (/Ot Release RelWithDebInfo)  # favor fast code
 add_global_compiler_flag_if_supported_config (/GL Release RelWithDebInfo)  # whole program optimization
-add_global_compiler_flag_if_supported_config (-flto Release RelWithDebInfo)
 add_global_compiler_flag_if_supported_config (-O3 Release RelWithDebInfo)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
