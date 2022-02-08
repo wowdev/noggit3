@@ -413,7 +413,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
         for (int n = 0; n < 4; ++n)
         {
-          total += alpha_values[n] = amaps[n][offset];
+          total += alpha_values[n] = amaps[n][i + 64 * j];
         }
 
         double current_alpha = alpha_values[tex_layer];
@@ -501,7 +501,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
           for (int n = 0; n < 4; ++n)
           {
-            amaps[n][offset] = static_cast<float>(alpha_values[n]);
+            amaps[n][i + 64 * j] = static_cast<float>(alpha_values[n]);
           }
 
           changed = true;
