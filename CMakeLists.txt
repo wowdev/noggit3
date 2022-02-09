@@ -16,8 +16,6 @@ option (VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" ON)
 
 include ("cmake/add_compiler_flag_if_supported.cmake")
 
-add_global_compiler_flag_if_supported (-fcolor-diagnostics)
-
 add_noggit_compiler_flag_if_supported (-Werror=reorder)
 add_noggit_compiler_flag_if_supported (-Werror=conditional-uninitialized)
 add_noggit_compiler_flag_if_supported (-Werror=unused)
@@ -66,8 +64,11 @@ add_noggit_compiler_flag_if_supported (-Wno-padded)
 
 # msvc++ mangles struct/class into name, thus symbols may be called differently
 # with a bad forward-decl. we want compilation to fail, not linking.
-add_global_compiler_flag_if_supported (/we4099)
-add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
+# todo: i assume this check should really be done inside "add_global_compiler_flag_if_supported"
+if (WIN32)
+  add_global_compiler_flag_if_supported (/we4099)
+  add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
+endif()
 
 # yes, we intend to use multi-character character constants
 add_global_compiler_flag_if_supported (-Wno-multichar)
@@ -104,7 +105,6 @@ add_global_compiler_flag_if_supported_config (/Ob2 Release RelWithDebInfo) # inl
 add_global_compiler_flag_if_supported_config (/Oi Release RelWithDebInfo)  # enable intrasic functions
 add_global_compiler_flag_if_supported_config (/Ot Release RelWithDebInfo)  # favor fast code
 add_global_compiler_flag_if_supported_config (/GL Release RelWithDebInfo)  # whole program optimization
-add_global_compiler_flag_if_supported_config (-flto Release RelWithDebInfo)
 add_global_compiler_flag_if_supported_config (-O3 Release RelWithDebInfo)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
@@ -195,7 +195,7 @@ elseif (WIN32)
   set(ResFiles media/res.rc)
 endif()
 
-option (NOGGIT_WITH_SCRIPTING "Enable scripting support?" ON)
+set(NOGGIT_WITH_SCRIPTING OFF CACHE BOOL "Enabling scripting support?")
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
@@ -767,6 +767,8 @@ if (NOGGIT_WITH_SCRIPTING)
     PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_fastnoise2.cmake"
     UPDATE_DISCONNECTED true
   )
+
+  set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
   FetchContent_GetProperties (fastnoise2)
   if (NOT fastnoise2_POPULATED)
     message (STATUS "Installing FastNoise2... (big repo, large download)")
@@ -805,4 +807,5 @@ if (NOGGIT_WITH_SCRIPTING)
     nlohmann_json::nlohmann_json
     sol2::sane
   )
+
 endif()

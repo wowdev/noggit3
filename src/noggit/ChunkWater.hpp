@@ -96,4 +96,5 @@ private:
   std::vector<liquid_layer> _layers;
 
   friend class noggit::scripting::chunk;
+  friend class MapView;
 };

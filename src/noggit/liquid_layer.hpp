@@ -104,4 +104,6 @@ private:
 
 private:
   math::vector_3d pos;
+
+  friend class MapView;
 };

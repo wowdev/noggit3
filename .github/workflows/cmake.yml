@@ -8,10 +8,13 @@ jobs:
         include:
           - platform: ubuntu-18.04
             compiler: g++-9
+            compiler_c: gcc-9
           - platform: ubuntu-18.04
             compiler: clang++-9
+            compiler_c: clang-9
           - platform: windows-2019
             compiler: msvc2019 ## == vs 16
+            compiler_c: msvc2019
     runs-on: ${{ matrix.platform }}
     name: ${{ matrix.platform }}-${{ matrix.compiler }}
     steps:
@@ -51,7 +54,7 @@ jobs:
     - name: "dependency: stormlib"
       run: |
         git clone "https://github.com/ladislav-zezula/StormLib" "${{ runner.workspace }}/stormlib"
-        cmake -B "${{ runner.workspace }}/stormlib/build" -S "${{ runner.workspace }}/stormlib" -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_INSTALL_PREFIX="${{ runner.workspace }}/stormlib/install" -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        cmake -B "${{ runner.workspace }}/stormlib/build" -S "${{ runner.workspace }}/stormlib" -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_C_COMPILER=${{ matrix.compiler_c }} -DCMAKE_INSTALL_PREFIX="${{ runner.workspace }}/stormlib/install" -DCMAKE_BUILD_TYPE=RelWithDebInfo
         cmake --build "${{ runner.workspace }}/stormlib/build" --config RelWithDebInfo
         cmake --install "${{ runner.workspace }}/stormlib/build" --config RelWithDebInfo
 
