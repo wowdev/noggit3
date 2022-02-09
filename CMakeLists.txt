@@ -64,8 +64,11 @@ add_noggit_compiler_flag_if_supported (-Wno-padded)
 
 # msvc++ mangles struct/class into name, thus symbols may be called differently
 # with a bad forward-decl. we want compilation to fail, not linking.
-add_global_compiler_flag_if_supported (/we4099)
-add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
+# todo: i assume this check should really be done inside "add_global_compiler_flag_if_supported"
+if (WIN32)
+  add_global_compiler_flag_if_supported (/we4099)
+  add_global_compiler_flag_if_supported (-Werror=mismatched-tags)
+endif()
 
 # yes, we intend to use multi-character character constants
 add_global_compiler_flag_if_supported (-Wno-multichar)
