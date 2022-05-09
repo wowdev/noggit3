@@ -38,13 +38,13 @@ remember which version you chose as later on you will have to pick
 corresponding versions for other dependencies.
 
 ### CMake ###
-Any recent CMake version >= 3.11 should work. Just take the latest.
+Any recent CMake version >= 3.18 should work. Just take the latest.
 
 ### Boost ###
 Install boost to `<boost-install>`. The easiest is to download a pre-built
 package from https://sourceforge.net/projects/boost/files/boost-binaries/.
 
-* Any version from the last years should work, 1.60 at least.
+* Any version from the last years should work, 1.71 is the minumum required version.
 * Be sure to pick the right compiler version!
 * CMake may not support the latest version yet, if you have bad timing, try picking the second newest if configuring fails.
 
@@ -71,7 +71,7 @@ _(Not necessary if disabling `NOGGIT_WITH_SCRIPTING`)_
 * open CMake GUI
 * set `CMAKE_PREFIX_PATH` (path) to `"<Qt-install>"`,
   e.g. `"C:/Qt/5.6/msvc2015"`
-* set `BOOST_ROOT` (path) to `<boost-install>`, e.g. `"C:/local/boost_1_60_0"`
+* set `BOOST_ROOT` (path) to `<boost-install>`, e.g. `"C:/local/boost_1_71_0"`
 * (**unlikely to be required:**) move the libraries of Boost from where
   they are into `BOOST_ROOT/lib` so that CMake finds them automatically or
   set `BOOST_LIBRARYDIR` to where your lib are (.dll and .lib). Again, this

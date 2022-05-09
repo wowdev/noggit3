@@ -135,7 +135,7 @@ if (WIN32)
 endif()
 
 FIND_PACKAGE( OpenGL REQUIRED )
-FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
+FIND_PACKAGE( Boost 1.71 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
 
 if (USE_SQL)
