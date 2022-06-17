@@ -49,8 +49,11 @@ package from https://sourceforge.net/projects/boost/files/boost-binaries/.
 * CMake may not support the latest version yet, if you have bad timing, try picking the second newest if configuring fails.
 
 ### Qt5 ###
-Install Qt5 to `<Qt-install>`, downloading a pre-built package from
-https://www.qt.io/download-open-source/#section-2.
+Install Qt5 to `<Qt-install>`
+
+The recommended Qt version for noggit is 5.9, which can be downloaded from https://download.qt.io/archive/qt/5.9/5.9.9/qt-opensource-windows-x86-5.9.9.exe.
+
+If you want to try a newer version, you can download the online installer from https://www.qt.io/download-open-source/#section-2.
 
 Note that during installation you only need **one** version of Qt and
 also only **one** compiler version. If download size is noticably large
