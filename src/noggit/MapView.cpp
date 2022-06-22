@@ -71,6 +71,10 @@
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
 
+static const float OBJ_TRANSFORM_SENSITIVITY_MIN  = 0.05f;
+static const float OBJ_TRANSFORM_SENSITIVITY_MAX  = 1.0f;
+static const float OBJ_TRANSFORM_SENSITIVITY_STEP = 0.2f;
+
 void MapView::set_editing_mode (editing_mode mode)
 {
   makeCurrent();
@@ -1000,6 +1004,32 @@ void MapView::createGUI()
            , [this] { return terrainMode == editing_mode::object; }
            );
 
+  addHotkey( Qt::Key_L
+           , MOD_none
+           , [this]
+           {
+             obj_transform_sens = std::min
+               (
+                 obj_transform_sens + OBJ_TRANSFORM_SENSITIVITY_STEP
+               , OBJ_TRANSFORM_SENSITIVITY_MAX
+               );
+           }
+           , [this] { return terrainMode == editing_mode::object; }
+           );
+
+  addHotkey( Qt::Key_K
+           , MOD_none
+           , [this]
+           {
+             obj_transform_sens = std::max
+               (
+                 obj_transform_sens - OBJ_TRANSFORM_SENSITIVITY_STEP
+               , OBJ_TRANSFORM_SENSITIVITY_MIN
+               );
+           }
+           , [this] { return terrainMode == editing_mode::object; }
+           );
+
   ADD_ACTION (view_menu, "Invert mouse", "I", [this] { mousedir *= -1.f; });
 
   ADD_ACTION (view_menu, "Decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
@@ -1714,11 +1744,15 @@ void MapView::tick (float dt)
       {
         if (_mod_alt_down)
         {
-          _world->scale_selected_models(std::pow(2.f, mv*4.f), World::m2_scaling_type::mult);
+          _world->scale_selected_models
+              (
+                std::pow(2.f, mv*4.f*obj_transform_sens)
+              , World::m2_scaling_type::mult
+              );
         }
         else if (_mod_shift_down)
         {
-          _world->move_selected_models(0.f, mv*80.f, 0.f);
+          _world->move_selected_models(0.f, mv*80.f*obj_transform_sens, 0.f);
         }
         else
         {
@@ -1737,7 +1771,10 @@ void MapView::tick (float dt)
           {
             if (!_move_model_to_cursor_position.get())
             {
-              _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
+              _world->move_selected_models
+                (
+                    (mv * dirUp - mh * dirRight)*80.f*obj_transform_sens
+                );
             }
             else
             {
@@ -1793,7 +1830,7 @@ void MapView::tick (float dt)
       {
         if (_mod_ctrl_down) // X
         {
-          _world->rotate_selected_models( math::degrees(rh + rv)
+          _world->rotate_selected_models( math::degrees((rh + rv)*obj_transform_sens)
                                         , math::degrees(0.f)
                                         , math::degrees(0.f)
                                         , _use_median_pivot_point.get()
@@ -1802,7 +1839,7 @@ void MapView::tick (float dt)
         if (_mod_shift_down) // Y
         {
           _world->rotate_selected_models( math::degrees(0.f)
-                                        , math::degrees(rh + rv)
+                                        , math::degrees((rh + rv)*obj_transform_sens)
                                         , math::degrees(0.f)
                                         , _use_median_pivot_point.get()
                                         );
@@ -1811,7 +1848,7 @@ void MapView::tick (float dt)
         {
           _world->rotate_selected_models( math::degrees(0.f)
                                         , math::degrees(0.f)
-                                        , math::degrees(rh + rv)
+                                        , math::degrees((rh + rv)*obj_transform_sens)
                                         , _use_median_pivot_point.get()
                                         );
         }
