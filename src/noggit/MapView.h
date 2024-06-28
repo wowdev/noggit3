@@ -155,6 +155,7 @@ private:
 
   bool MoveObj;
   float numpad_moveratio = 0.001f;
+  float obj_transform_sens = 1.0f;
 
   math::vector_3d objMove;
 
