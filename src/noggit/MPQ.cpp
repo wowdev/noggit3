@@ -338,24 +338,18 @@ namespace noggit
   {
     std::string normalized_filename (std::string filename)
     {
-      std::transform (filename.begin(), filename.end(), filename.begin(), [](unsigned char c) { return std::tolower(c); });
-      std::transform ( filename.begin(), filename.end(), filename.begin()
-                     , [] (char c)
-                       {
-                         return c == '\\' ? '/' : c;
-                       }
-                     );
+      for (char& c : filename)
+      {
+        c = (c == '\\') ? '/' : std::tolower(c);
+      }
       return filename;
     }
     std::string normalized_filename_insane (std::string filename)
     {
-      std::transform (filename.begin(), filename.end(), filename.begin(), [](unsigned char c) { return std::toupper(c); });
-      std::transform ( filename.begin(), filename.end(), filename.begin()
-                     , [] (char c)
-                       {
-                         return c == '/' ? '\\' : c;
-                       }
-                     );
+      for (char& c : filename)
+      {
+        c = (c == '/') ? '\\' : std::toupper(c);
+      }
       return filename;
     }
   }
