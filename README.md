@@ -3,7 +3,7 @@ This software is open source software licensed under GPL3, as found in
 the COPYING file.
 
 # DISCORD #
-You can follow Noggit's development and get the latest build here: https://discord.gg/UbdFHyM
+You can follow Noggit's development and get the latest build here: https://discord.com/invite/UbdFHyM
 
 # SCRIPTING #
 Noggit can be scripted using the Lua (5.1) programming language. See the [scripting documentation](scripts/docs/README.md).
