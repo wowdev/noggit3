@@ -1192,7 +1192,7 @@ void WMOGroup::fix_vertex_color_alpha()
     {
       r += ((r * a / 64.f) - wmo_ambient_color.x);
       g += ((g * a / 64.f) - wmo_ambient_color.y);
-      r += ((b * a / 64.f) - wmo_ambient_color.z);
+      b += ((b * a / 64.f) - wmo_ambient_color.z);
     }
     else
     {
