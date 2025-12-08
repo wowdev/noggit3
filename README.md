@@ -42,7 +42,7 @@ Any recent CMake version >= 3.18 should work. Just take the latest.
 ### Qt5 ###
 Install Qt5 to `<Qt-install>`
 
-The recommended Qt version for noggit is 5.9, which can be downloaded from https://download.qt.io/new_archive/qt/5.9/5.9.9//qt-opensource-windows-x86-5.9.9.exe.
+The recommended Qt version for noggit is 5.9, which can be downloaded from https://download.qt.io/new_archive/qt/5.9/5.9.9/qt-opensource-windows-x86-5.9.9.exe.
 
 If you want to try a newer version, you can download the online installer from https://www.qt.io/download-open-source/#section-2.
 
