@@ -95,12 +95,12 @@ namespace noggit
 #ifdef USE_MYSQL_UID_STORAGE
       bool use_mysql = NoggitSettings.value("project/mysql/enabled", false).toBool();
 
-      if ((use_myqsl && mysql::hasMaxUIDStoredDB(_world->getMapID()))
+      if ((use_mysql && mysql::hasMaxUIDStoredDB(_world->getMapID()))
         || uid_storage::hasMaxUIDStored(_world->getMapID())
          )
       {
         _world->mapIndex.loadMaxUID();
-        enterMapAt(pos, camera_pitch, camera_yaw, from_bookmark);
+        enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid, from_bookmark);
       }
 #else
       if (uid_storage::hasMaxUIDStored(_world->getMapID()))

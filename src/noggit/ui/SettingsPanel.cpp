@@ -93,7 +93,7 @@ namespace noggit
       auto mysql_layout (new QFormLayout (_mysql_box));
 
 #ifdef USE_MYSQL_UID_STORAGE
-      mysql_box->setCheckable (true);
+      _mysql_box->setCheckable (true);
 
       _mysql_server_field = new QLineEdit(NoggitSettings.value("project/mysql/server").toString(), this);
       _mysql_user_field = new QLineEdit(NoggitSettings.value("project/mysql/user").toString(), this);
