@@ -581,11 +581,6 @@ ADD_EXECUTABLE ( noggit
                 )
 target_compile_options (noggit PRIVATE ${NOGGIT_CXX_FLAGS})
 
-# noggit src for includes
-target_include_directories(noggit PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
-)
-
 if (NOGGIT_WITH_SCRIPTING)
   target_sources (noggit PRIVATE ${scripting_sources} ${scripting_headers})
   add_compile_definitions (NOGGIT_HAS_SCRIPTING)
