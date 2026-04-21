@@ -32,7 +32,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   _loading_radius = NoggitSettings.value("loading_radius", 1).toInt();
 
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+  filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + ".wdt");
 
   MPQFile theFile(filename.str());
 
@@ -87,7 +87,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
       theFile.seekRelative(4);
 
       std::stringstream adt_filename;
-      adt_filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
+      adt_filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + "_" + std::to_string(i) + "_" + std::to_string(j) + ".adt");
 
       mTiles[j][i].tile = nullptr;
       mTiles[j][i].onDisc = MPQFile::existsOnDisk(adt_filename.str());
@@ -149,7 +149,7 @@ void MapIndex::saveall (World* world)
 void MapIndex::save()
 {
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+  filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + ".wdt");
 
   //NOGGIT_LOG << "Saving WDT \"" << filename << "\"." << std::endl;
 
@@ -317,7 +317,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile, bool reloading)
   }
 
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
+  filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + "_" + std::to_string(tile.x) + "_" + std::to_string(tile.z) + ".adt");
 
   if (!MPQFile::exists(filename.str()))
   {
@@ -610,7 +610,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       }
 
       std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + "_" + std::to_string(x) + "_" + std::to_string(z) + ".adt");
 
       if (!MPQFile::exists(filename.str()))
       {
@@ -860,7 +860,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       // that shouldn't be there to avoid creating new duplicates
 
       std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + "_" + std::to_string(x) + "_" + std::to_string(z) + ".adt");
 
       // load the tile without the models
       MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), false, world, tile_mode::uid_fix_all);
@@ -900,7 +900,7 @@ void MapIndex::searchMaxUID()
       }
 
       std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + "_" + std::to_string(x) + "_" + std::to_string(z) + ".adt");
       highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
     }
   }

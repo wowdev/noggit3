@@ -107,5 +107,6 @@ namespace noggit
   {
     std::string normalized_filename (std::string filename);
     std::string normalized_filename_insane (std::string filename);
+    std::string uni_path (std::string filename);
   }
 }

@@ -58,7 +58,7 @@ bool World::IsEditableWorld(int pMapId)
   }
 
   std::stringstream ssfilename;
-  ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
+  ssfilename << noggit::mpq::uni_path("World/Maps/" + lMapName + "/" + lMapName + ".wdt");
 
   if (!MPQFile::exists(ssfilename.str()))
   {

@@ -92,7 +92,7 @@ namespace noggit
 map_horizon::map_horizon(const std::string& basename, const MapIndex * const index)
 {
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+  filename << noggit::mpq::uni_path("World/Maps/" + basename + "/" + basename + ".wdl");
   _filename = filename.str();
 
   if (!MPQFile::exists(_filename))
